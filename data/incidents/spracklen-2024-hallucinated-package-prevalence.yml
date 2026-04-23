@@ -39,7 +39,7 @@ documented_by:
 mitigated_by:
 - socket
 - snyk
-- pipelock
+- socket
 
 notes: >
   This entry models "measurement as incident" — a dataset-scale finding

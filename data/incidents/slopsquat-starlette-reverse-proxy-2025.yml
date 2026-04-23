@@ -33,7 +33,7 @@ documented_by:
 
 mitigated_by:
 - socket
-- pipelock
+- socket
 
 notes: >
   Date is approximate (publication month); Trend Micro did not provide a
