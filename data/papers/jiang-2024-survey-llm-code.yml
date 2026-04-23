@@ -1,0 +1,29 @@
+id: jiang-2024-survey-llm-code
+authors:
+  - Juyong Jiang
+  - Fan Wang
+  - Jiasi Shen
+  - Sungju Kim
+  - Sunghun Kim
+year: 2024
+title: "A Survey on Large Language Models for Code Generation"
+venue: "ACM Transactions on Software Engineering and Methodology (TOSEM)"
+url: https://arxiv.org/abs/2406.00515
+doi: "10.1145/3747588"
+arxiv_id: "2406.00515"
+semantic_scholar_id: "c8b18682965ff9dccc0130dab3d679f78cefa617"
+citation_count: 837
+tldr: >
+  Systematic literature review of LLMs for code generation, organizing the
+  field around data curation, advances, evaluation, ethics, environment, and
+  real-world applications. Introduces a taxonomy of Code LLM developments
+  and compares HumanEval/MBPP/BigCodeBench results across models.
+relevance_tags:
+  - survey
+  - code-generation
+  - landscape
+  - background-citation
+notes: >
+  Must-cite. Landscape anchor for SAICA-KG's background section — the
+  canonical "what is the state of LLMs for code" reference when framing
+  agentic-coding supervision as a downstream problem.

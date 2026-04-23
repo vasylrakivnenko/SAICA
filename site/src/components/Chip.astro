@@ -1,0 +1,15 @@
+---
+interface Props {
+  label: string;
+  href?: string;
+  accent?: boolean;
+  title?: string;
+}
+const { label, href, accent, title } = Astro.props;
+const cls = accent ? 'chip-accent' : 'chip';
+---
+{href ? (
+  <a class={cls} href={href} title={title}>{label}</a>
+) : (
+  <span class={cls} title={title}>{label}</span>
+)}

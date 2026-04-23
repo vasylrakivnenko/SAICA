@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { graph, counts } from '../lib/data.ts';
+
+const c = counts();
+
+// "Recent additions" = Tools by last_updated or first_released, then top 6.
+const recentTools = Object.values(graph.tools)
+  .slice()
+  .sort((a, b) => {
+    const ad = a.last_updated ?? a.first_released ?? '';
+    const bd = b.last_updated ?? b.first_released ?? '';
+    return bd.localeCompare(ad);
+  })
+  .slice(0, 6);
+---
+
+<BaseLayout title="SAICA-KG — Supervising AI Coding Agents">
+  <section class="max-w-3xl">
+    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+      Knowledge Graph &middot; v{graph.kgVersion}
+    </p>
+    <h1 class="mt-2 text-4xl leading-tight">
+      SAICA-KG — Supervising AI Coding Agents
+    </h1>
+    <p class="mt-4 text-lg text-ink-muted">
+      A faceted, queryable knowledge graph of supervision tools and techniques for AI
+      coding agents.
+    </p>
+    <p class="mt-5 leading-7">
+      SAICA-KG classifies supervision tools along three orthogonal strict partitions
+      (ControlParadigm &times; TemporalPhase &times; AutonomyLevel) plus multi-valued
+      FailureMode tags. It absorbs existing failure-mode taxonomies — OWASP Agentic
+      Top 10, MAST, DAPLab 9 Patterns, Microsoft AIRT — as first-class data with
+      explicit crosswalks into our facets.
+      <strong class="font-semibold">Navigational, not evaluative.</strong>
+    </p>
+  </section>
+
+  <section class="mt-10 grid grid-cols-2 sm:grid-cols-5 gap-3">
+    <a href="/tools" class="card no-underline hover:border-accent/50 text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.tools}</div>
+      <div class="text-sm text-ink-muted font-sans">Tools</div>
+    </a>
+    <a href="/failure-modes" class="card no-underline hover:border-accent/50 text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.failure_modes}</div>
+      <div class="text-sm text-ink-muted font-sans">Failure modes</div>
+    </a>
+    <a href="/taxonomies" class="card no-underline hover:border-accent/50 text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.taxonomies}</div>
+      <div class="text-sm text-ink-muted font-sans">Taxonomies</div>
+    </a>
+    <a href="/papers" class="card no-underline hover:border-accent/50 text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.papers}</div>
+      <div class="text-sm text-ink-muted font-sans">Papers</div>
+    </a>
+    <div class="card text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.crosswalks}</div>
+      <div class="text-sm text-ink-muted font-sans">Crosswalk edges</div>
+    </div>
+  </section>
+
+  <section class="mt-12">
+    <h2>Recent additions</h2>
+    <ul class="divide-y divide-ink/10 border-y border-ink/10">
+      {recentTools.map((t) => (
+        <li class="py-3 flex items-baseline justify-between gap-4">
+          <div>
+            <a href={`/tools/${t.id}`} class="font-sans font-semibold">{t.name}</a>
+            <span class="text-ink-muted"> — {t.tagline ?? t.description.slice(0, 120)}</span>
+          </div>
+          <div class="font-sans text-xs text-ink-faint whitespace-nowrap">
+            {t.last_updated ?? t.first_released}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="mt-12 max-w-3xl">
+    <h2>API</h2>
+    <p>
+      All nodes are available as JSON. See
+      <a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> for the
+      full graph, or <a href="/api/v1/tools.json"><code>/api/v1/tools.json</code></a>,
+      <a href="/api/v1/failure_modes.json"><code>/api/v1/failure_modes.json</code></a>,
+      <a href="/api/v1/taxonomies.json"><code>/api/v1/taxonomies.json</code></a>,
+      <a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a>.
+    </p>
+  </section>
+</BaseLayout>

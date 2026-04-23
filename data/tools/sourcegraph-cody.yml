@@ -1,0 +1,60 @@
+id: sourcegraph-cody
+name: Sourcegraph Cody
+tagline: Codebase-indexed coding assistant that grounds generation in repository context.
+description: >
+  AI coding assistant from Sourcegraph that builds a code graph over the
+  user's repositories (local and remote) and retrieves relevant symbols,
+  definitions, and usages into the prompt before generation. Backed by
+  Sourcegraph's code-search and precise-intelligence (SCIP) indexes.
+  Surfaces as IDE extensions (VS Code, JetBrains) and a CLI. Core value
+  is retrieval grounding — generation is anchored to the actual symbols
+  that exist in the target codebase, reducing fabrication.
+
+first_released: 2023-01-01
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: sourcegraph
+repository_url: https://github.com/sourcegraph/cody
+documentation_url: https://sourcegraph.com/docs/cody
+license: Apache-2.0
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - fabrication
+  - dependency_blindness
+  - obsolescence
+
+locus_of_control:
+  - context
+
+implements_techniques:
+  - codebase-retrieval
+  - scip-index-grounding
+  - symbol-graph-context
+  - repo-aware-rag
+
+security_notes: >
+  Dual license: client is Apache-2.0 open-source, but the hosted
+  Sourcegraph backend and enterprise code graph are proprietary SaaS.
+  Source code is shipped to Sourcegraph (or a self-hosted instance) for
+  indexing and to the configured LLM provider for completion — review
+  data-residency, tenancy, and provider posture for regulated code.
+  Enterprise self-hosted deployments keep indexing on-prem but still
+  route model calls to the configured provider.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × pre_generation targeting fabrication and
+  dependency_blindness via codebase-grounded retrieval. Graduated-HITL
+  because the IDE surface requires user acceptance of suggested edits
+  while chat/agentic modes run more autonomously. Distinct from
+  context-hub (external API docs) in that Cody grounds in the user's own
+  repositories rather than upstream library docs.

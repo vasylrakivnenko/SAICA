@@ -1,0 +1,30 @@
+id: yan-2025-fault-tolerant-sandboxing
+authors:
+  - B. Yan
+year: 2025
+title: "Fault-Tolerant Sandboxing for AI Coding Agents: A Transactional Approach to Safe Autonomous Execution"
+venue: arXiv
+url: https://arxiv.org/abs/2512.12806
+doi: "10.48550/arXiv.2512.12806"
+arxiv_id: "2512.12806"
+semantic_scholar_id: "73b22b88a7b2bb5b4246c6351e3f04303a2ecd52"
+citation_count: 1
+tldr: >
+  Fault-tolerant sandboxing framework wrapping agent actions in atomic
+  transactions over a policy-based interception layer plus a transactional
+  filesystem snapshot mechanism. Demonstrates 100% interception of high-risk
+  commands and 100% rollback of failed states at 14.5% overhead, contrasted
+  against Gemini-CLI's headless-incompatible auth model.
+relevance_tags:
+  - sandboxing
+  - recovery
+  - coding-agent
+  - destructive-action
+  - correction
+  - environment
+notes: >
+  Must-cite. Prototype evidence that recovery ControlParadigm can be made
+  cheap (~1.8s per transaction) for fully-autonomous agents. Directly
+  supports SAICA-KG Tool nodes in the recovery x environment x
+  fully_autonomous cell of the partition cube. Pairs with AgentForge
+  (Kumar 2026) for the sandbox tool cluster.

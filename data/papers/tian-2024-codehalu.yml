@@ -1,0 +1,34 @@
+id: tian-2024-codehalu
+authors:
+  - Yuchen Tian
+  - Weixiang Yan
+  - Qian Yang
+  - Xuandong Zhao
+  - Qian Chen
+  - Wen Wang
+  - Ziyang Luo
+  - Lei Ma
+year: 2024
+title: "CodeHalu: Investigating Code Hallucinations in LLMs via Execution-based Verification"
+venue: "AAAI Conference on Artificial Intelligence"
+url: https://arxiv.org/abs/2405.00253
+doi: "10.1609/aaai.v39i24.34717"
+arxiv_id: "2405.00253"
+semantic_scholar_id: "643e596ba6c95e9dfc3bc952f4dc874fc0e9e9fb"
+citation_count: 38
+tldr: >
+  Introduces the concept of code hallucinations and a four-class execution-
+  verification taxonomy (mapping, naming, resource, logic). Provides the
+  CodeHalu detection algorithm and the CodeHaluEval benchmark (8,883 samples
+  over 699 tasks) across 17 LLMs.
+relevance_tags:
+  - failure-mode-taxonomy
+  - hallucination
+  - code-generation
+  - benchmark
+  - execution-based-verification
+notes: >
+  Must-cite. The "mapping / naming / resource / logic" axis is a direct
+  predecessor to SAICA-KG's FailureMode partition (fabrication / logic_error
+  / dependency_blindness). Cite as prior art for the fabrication FailureMode
+  and for execution-based detection Tools.

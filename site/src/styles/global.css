@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    @apply bg-paper text-ink;
+    font-feature-settings: 'kern', 'liga', 'calt';
+  }
+
+  body {
+    @apply font-serif text-base leading-relaxed;
+  }
+
+  /* UI chrome uses sans. */
+  nav,
+  header,
+  footer,
+  .ui,
+  button,
+  input,
+  select,
+  label,
+  .chip,
+  .facet {
+    @apply font-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans tracking-tight text-ink;
+  }
+
+  h1 {
+    @apply text-3xl font-semibold;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold mt-8 mb-3;
+  }
+
+  h3 {
+    @apply text-lg font-semibold mt-6 mb-2;
+  }
+
+  a {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    @apply font-mono;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-accent outline-offset-2;
+    outline-style: solid;
+  }
+}
+
+@layer components {
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-ink/10 bg-paper-alt px-2.5 py-0.5 text-xs text-ink-muted;
+  }
+
+  .chip-accent {
+    @apply inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent-soft px-2.5 py-0.5 text-xs text-accent;
+  }
+
+  .card {
+    @apply rounded-md border border-ink/10 bg-white p-5 shadow-sm;
+  }
+
+  .kv {
+    @apply grid grid-cols-[10rem_1fr] gap-y-1.5 gap-x-4 text-sm;
+  }
+
+  .kv dt {
+    @apply font-sans text-ink-faint uppercase tracking-wide text-xs pt-1;
+  }
+
+  .kv dd {
+    @apply text-ink;
+  }
+}

@@ -1,0 +1,34 @@
+id: xu-2025-ckgfuzzer
+authors:
+  - Hanxiang Xu
+  - Wei Ma
+  - Ti Zhou
+  - Yanjie Zhao
+  - Kai Chen
+  - Qiang Hu
+  - Yang Liu
+  - Haoyu Wang
+year: 2025
+title: "CKGFuzzer: LLM-Based Fuzz Driver Generation Enhanced By Code Knowledge Graph"
+venue: "ICSE Companion 2025 (IEEE/ACM 47th ICSE-Companion)"
+url: https://arxiv.org/abs/2411.11532
+doi: "10.1109/ICSE-Companion66252.2025.00079"
+arxiv_id: "2411.11532"
+semantic_scholar_id: "23b41a14d8d3496f000bfe01a7f0fdee3fdbc7b4"
+citation_count: 16
+tldr: >
+  Automated fuzz-driver generation driven by an interprocedural code
+  knowledge graph of the target repository and an LLM agent. Achieves 8.73%
+  mean coverage improvement over SOTA, reduces crash-triage workload by
+  84.4%, and finds 11 real bugs (9 previously unreported).
+relevance_tags:
+  - code-knowledge-graph
+  - fuzzing
+  - security
+  - agent-tool
+  - execution-based-verification
+notes: >
+  Must-cite. Concrete precedent for "code knowledge graph" as a supervision
+  substrate — directly relevant to SAICA-KG's positioning as a KG over
+  supervision tools and to Tool nodes in the environment locus that use
+  CKG-style interprocedural context.

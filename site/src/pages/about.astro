@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { graph } from '../lib/data.ts';
+---
+
+<BaseLayout
+  title="About"
+  description="About SAICA-KG — a knowledge graph of supervision tools for AI coding agents."
+>
+  <h1>About SAICA-KG</h1>
+  <p class="mt-3 text-lg text-ink-muted max-w-3xl">
+    A living, faceted, queryable knowledge graph for the governance of agentic AI
+    coding tools.
+  </p>
+
+  <section class="mt-8 max-w-3xl leading-7">
+    <p>
+      SAICA-KG classifies supervision tools along three orthogonal strict partitions —
+      <strong>ControlParadigm</strong> (prevention / detection / correction / recovery),
+      <strong>TemporalPhase</strong> (pre_generation / in_generation / post_generation),
+      and <strong>AutonomyLevel</strong> (fully_autonomous / graduated_hitl / full_hitl) —
+      plus multi-valued <strong>FailureMode</strong> tags.
+    </p>
+    <p class="mt-4">
+      It absorbs existing failure-mode taxonomies (OWASP Agentic Top 10, MAST, DAPLab
+      9 Patterns, Microsoft AIRT) as first-class data with explicit crosswalks into our
+      facets. Queries like <em>"which supervisors cover OWASP ASI04 at post-generation
+      in graduated-HITL?"</em> resolve against the graph with explicit citations.
+    </p>
+    <p class="mt-4">
+      <strong>Navigational, not evaluative.</strong> SAICA-KG returns ranked sets with
+      explicit criteria, not endorsed winners.
+    </p>
+  </section>
+
+  <section class="mt-10 grid gap-6 md:grid-cols-2 max-w-3xl">
+    <div class="card">
+      <h3 class="!mt-0">Links</h3>
+      <ul class="mt-2 list-disc pl-5 text-sm">
+        <li><a href="https://github.com/saica-kg/saica-kg" rel="noopener">GitHub repository</a></li>
+        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/EDITORIAL_POLICY.md" rel="noopener">Editorial policy</a></li>
+        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a></li>
+        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/LICENSE" rel="noopener">License (code: Apache-2.0)</a></li>
+        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/LICENSE-DATA" rel="noopener">License (data: CC-BY-4.0)</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="!mt-0">Machine-readable</h3>
+      <ul class="mt-2 list-disc pl-5 text-sm">
+        <li><a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> — full graph</li>
+        <li><a href="/api/v1/tools.json"><code>/api/v1/tools.json</code></a></li>
+        <li><a href="/api/v1/failure_modes.json"><code>/api/v1/failure_modes.json</code></a></li>
+        <li><a href="/api/v1/taxonomies.json"><code>/api/v1/taxonomies.json</code></a></li>
+        <li><a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="mt-10 max-w-3xl">
+    <h2>Citation</h2>
+    <p>
+      When citing SAICA-KG in user-facing output, use the phrase
+      <em>"according to SAICA-KG (v{graph.kgVersion})"</em>. A full BibTeX block will ship
+      with v0.1.
+    </p>
+  </section>
+</BaseLayout>

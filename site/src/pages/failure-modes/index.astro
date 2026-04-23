@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { graph } from '../../lib/data.ts';
+
+const modes = Object.values(graph.failureModes)
+  .slice()
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<BaseLayout
+  title="Failure modes"
+  description="The canonical supervision-addressable failure modes SAICA-KG uses to tag tools, with crosswalks to external taxonomies."
+>
+  <h1>Failure modes</h1>
+  <p class="text-ink-muted mt-2 max-w-3xl">
+    Supervision-addressable failure classes. Multi-valued by design — a single tool
+    may address several, and a single real-world fault may exhibit multiple modes.
+  </p>
+
+  <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
+    {modes.map((fm) => {
+      const toolIds = graph.toolsByFailureMode[fm.id] ?? [];
+      return (
+        <li class="py-4">
+          <div class="flex items-baseline justify-between gap-4">
+            <h3 class="!mt-0">
+              <a href={`/failure-modes/${fm.id}`}>{fm.name}</a>
+            </h3>
+            <span class="font-sans text-xs text-ink-faint">
+              {toolIds.length} tool{toolIds.length === 1 ? '' : 's'}
+              {fm.crosswalks.length > 0 && ` · ${fm.crosswalks.length} crosswalk${fm.crosswalks.length === 1 ? '' : 's'}`}
+            </span>
+          </div>
+          {fm.tagline && <p class="mt-1 text-ink-muted">{fm.tagline}</p>}
+        </li>
+      );
+    })}
+  </ul>
+</BaseLayout>

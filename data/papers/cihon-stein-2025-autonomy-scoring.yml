@@ -1,0 +1,30 @@
+id: cihon-stein-2025-autonomy-scoring
+authors:
+  - Peter Cihon
+  - Merlin Stein
+  - Gagan Bansal
+  - Sam Manning
+  - Kevin Xu
+year: 2025
+title: "Measuring AI Agent Autonomy: Towards a Scalable Approach with Code Inspection"
+venue: arXiv
+url: https://arxiv.org/abs/2502.15212
+doi: "10.48550/arXiv.2502.15212"
+arxiv_id: "2502.15212"
+semantic_scholar_id: "783c566fc06acd6b10a6679c2363d5d0cc26f0c2"
+citation_count: 11
+tldr: >
+  Introduces a code-inspection-based assessment of AI-agent autonomy that
+  does not require running the agent. Orchestration code is scored on two
+  axes — impact and oversight — using a taxonomy demonstrated on AutoGen.
+relevance_tags:
+  - autonomy
+  - static-analysis
+  - supervision-vocabulary
+  - oversight
+  - impact
+notes: >
+  Must-cite. Direct external anchor for SAICA-KG's AutonomyLevel partition
+  — see enums.yml where AutonomyLevel values are explicitly aligned to
+  Cihon-Stein 2025 (high impact + low oversight -> fully_autonomous; etc.).
+  Cite to neutralize "your autonomy axis is arbitrary" critiques.

@@ -1,0 +1,54 @@
+id: modal
+name: Modal
+tagline: Serverless sandboxed runtime with gVisor-isolated containers for agent code execution.
+description: >
+  Serverless compute platform whose Sandbox API exposes per-call, gVisor-
+  isolated containers designed for executing AI-generated code. Supervision
+  primitives: ephemeral container lifecycle, fine-grained CPU/GPU/memory
+  limits, filesystem and network policy controls, and snapshot/restore for
+  state checkpointing. Tuned for fully_autonomous agent back-ends that need
+  to run untrusted code at low startup cost.
+
+first_released: 2022-10-01
+last_updated: 2026-04-12
+maturity_status: stable
+
+published_by: modal-labs
+documentation_url: https://modal.com/docs/guide/sandbox
+license: proprietary
+
+control_paradigm: recovery
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - supply_chain_attack
+  - security_vulnerability
+  - logic_error
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - sandboxed-execution
+  - gvisor-isolation
+  - resource-limiting
+  - snapshot-restore
+
+security_notes: >
+  Proprietary hosted platform. Sandboxes run on gVisor for kernel-surface
+  reduction; still evaluate tenancy, data-residency, and egress-control
+  guarantees for sensitive workloads. Agent-generated code should be
+  treated as untrusted — pin network policy and secret scopes explicitly
+  per sandbox.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies recovery × post_generation × fully_autonomous alongside E2B and
+  Daytona. Included because gVisor-based isolation and snapshot/restore
+  represent a distinct point in the sandbox-provider design space relevant
+  to autonomous coding-agent deployments.

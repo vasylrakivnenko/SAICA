@@ -1,0 +1,204 @@
+id: swiss-cheese-model
+name: "Swiss Cheese Model for AI Safety: Multi-Layered Runtime Guardrail Taxonomy"
+owner: Shamsujjoha, Lu, Zhao, Zhu (CSIRO Data61)
+version: "2025-01 (v3)"
+first_published: 2024-08-05
+last_updated: 2025-01-27
+url: https://arxiv.org/abs/2408.02205
+license: "arXiv preprint; CC-BY"
+paper_id: shamsujjoha-2024-swiss-cheese-model
+scope: >
+  A SLR-derived taxonomy of multi-layered runtime guardrails for
+  foundation-model-based agents. Organized along three architectural
+  dimensions (pipelines, artifacts, actions) plus quality attributes that
+  guardrails should satisfy. Evoked as a "Swiss Cheese" defense-in-depth
+  reference architecture for AI safety by design.
+
+categories:
+  # --- Quality Attributes (what a guardrail should possess) ---
+  - external_id: SC-QA-01
+    label: Accuracy
+    description: Mitigates hallucinations, misinformation, and disinformation to ensure factually correct outputs.
+    parent_id: SC-QA
+  - external_id: SC-QA-02
+    label: Efficiency
+    description: Prevents resource-intensive tasks and endless loops; manages cost through dynamic resource management.
+    parent_id: SC-QA
+  - external_id: SC-QA-03
+    label: Privacy
+    description: Protects against sensitive-data leakage via direct responses or statistical inference.
+    parent_id: SC-QA
+  - external_id: SC-QA-04
+    label: Security
+    description: Defends against malicious activities and adversarial attacks; preserves data confidentiality and integrity.
+    parent_id: SC-QA
+  - external_id: SC-QA-05
+    label: Safety
+    description: Prevents harmful or misleading outputs, especially in high-stakes domains.
+    parent_id: SC-QA
+  - external_id: SC-QA-06
+    label: Fairness
+    description: Addresses bias and discrimination from training data, algorithms, or deployment.
+    parent_id: SC-QA
+  - external_id: SC-QA-07
+    label: Compliance
+    description: Ensures adherence to legal, regulatory, and industry standards via continuous monitoring.
+    parent_id: SC-QA
+  - external_id: SC-QA-08
+    label: Generalizability
+    description: Functions effectively across multiple layers and diverse scenarios without per-case configuration.
+    parent_id: SC-QA
+  - external_id: SC-QA-09
+    label: Customizability
+    description: Tailored protection for specific requirements at different operational layers.
+    parent_id: SC-QA
+  - external_id: SC-QA-10
+    label: Adaptability
+    description: Adjusts dynamically to varying conditions and emerging threats without manual reconfiguration.
+    parent_id: SC-QA
+  - external_id: SC-QA-11
+    label: Traceability
+    description: Detailed logs of decision paths, inputs, outputs, and data sources for auditing.
+    parent_id: SC-QA
+  - external_id: SC-QA-12
+    label: Portability
+    description: Guardrail transfers across FM-based agents with minimal adjustment.
+    parent_id: SC-QA
+  - external_id: SC-QA-13
+    label: Interoperability
+    description: Functions seamlessly across heterogeneous agents, technologies, and interfaces.
+    parent_id: SC-QA
+  - external_id: SC-QA-14
+    label: Interpretability
+    description: Provides clarity on how a guardrail operates, enabling user understanding and trust.
+    parent_id: SC-QA
+
+  # --- Pipelines (where in the request/response flow the guardrail acts) ---
+  - external_id: SC-PIPE-01
+    label: Prompt Stage
+    description: Incoming user queries analyzed for harmful content and safety alignment before processing.
+    parent_id: SC-PIPE
+  - external_id: SC-PIPE-02
+    label: Intermediate Results Stage
+    description: Outputs at workflow stages verified for accuracy and safety before final generation.
+    parent_id: SC-PIPE
+  - external_id: SC-PIPE-03
+    label: Final Results Stage
+    description: Final agent outputs checked for goal alignment and governance compliance.
+    parent_id: SC-PIPE
+
+  # --- Artifacts (what the guardrail protects) ---
+  - external_id: SC-ART-01
+    label: Goals
+    description: Declared user or task objectives.
+    parent_id: SC-ART
+  - external_id: SC-ART-02
+    label: Context
+    description: Conversation and session context.
+    parent_id: SC-ART
+  - external_id: SC-ART-03
+    label: Memory
+    description: Long-term or episodic agent memory.
+    parent_id: SC-ART
+  - external_id: SC-ART-04
+    label: Reasoning
+    description: Chain-of-thought and intermediate reasoning traces.
+    parent_id: SC-ART
+  - external_id: SC-ART-05
+    label: Plans
+    description: Multi-step action plans produced by the agent.
+    parent_id: SC-ART
+  - external_id: SC-ART-06
+    label: Workflows
+    description: End-to-end orchestrated task flows.
+    parent_id: SC-ART
+  - external_id: SC-ART-07
+    label: Tools
+    description: External callable tools and APIs.
+    parent_id: SC-ART
+  - external_id: SC-ART-08
+    label: Knowledge Bases
+    description: Retrieval corpora and structured knowledge stores.
+    parent_id: SC-ART
+  - external_id: SC-ART-09
+    label: Other Agents
+    description: Peer or subordinate agents in a multi-agent system.
+    parent_id: SC-ART
+  - external_id: SC-ART-10
+    label: Foundation Models
+    description: The underlying LLM / FM itself.
+    parent_id: SC-ART
+
+  # --- Actions (what a guardrail can do upon triggering) ---
+  - external_id: SC-ACT-01
+    label: Block
+    description: Prevent the action from executing.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-02
+    label: Filter
+    description: Strip disallowed content before forwarding.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-03
+    label: Flag
+    description: Emit a warning for downstream review.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-04
+    label: Modify
+    description: Transform the action or output to a safer variant.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-05
+    label: Validate
+    description: Check against a spec or schema before proceeding.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-06
+    label: Parallel Calls
+    description: Run multiple checkers concurrently for consensus.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-07
+    label: Retry
+    description: Regenerate with adjusted parameters.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-08
+    label: Fall Back
+    description: Switch to a safer alternative pathway.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-09
+    label: Human Intervention
+    description: Escalate to a human-in-the-loop.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-10
+    label: Defer
+    description: Delay the action until conditions are met.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-11
+    label: Isolate
+    description: Run the action in a sandbox or quarantined environment.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-12
+    label: Redundancy
+    description: Duplicate critical checks for defense in depth.
+    parent_id: SC-ACT
+  - external_id: SC-ACT-13
+    label: Evaluate
+    description: Score against metrics before acting.
+    parent_id: SC-ACT
+
+notes: >
+  Category labels derived from the arXiv v3 HTML; quality-attribute and
+  action lists are canonical. Parent_id groupings (SC-QA, SC-PIPE, SC-ART,
+  SC-ACT) are synthetic grouping anchors used for hierarchy — the underlying
+  paper treats them as dimensions rather than named parents. Pending
+  full-text verification against the final ICSA 2025 version, including the
+  Rules, Sources, Modality, and Underlying-Models dimensions which are
+  deferred to v0.2 expansion.
+
+inclusion_rationale: >
+  The Swiss Cheese Model paper gives SAICA-KG's Tool ontology an external
+  architectural anchor for defense-in-depth reasoning: Tool nodes can be
+  mapped to (pipeline stage x artifact x action) triples and evaluated
+  against the 14 quality attributes. Strong crosswalks: SC-PIPE-01/02/03
+  aligns directly with SAICA-KG's TemporalPhase partition; SC-ART-* overlaps
+  with LocusOfControl; SC-ACT-* overlaps with ControlParadigm
+  (Block -> prevention, Flag -> detection, Modify/Retry -> correction,
+  Fall-back/Isolate -> recovery). This makes the Swiss Cheese paper a
+  first-class validation anchor for SAICA-KG's axis choices.

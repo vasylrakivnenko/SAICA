@@ -1,0 +1,58 @@
+id: nemo-guardrails
+name: NeMo Guardrails
+tagline: Colang-based programmable guardrails for LLM applications.
+description: >
+  NVIDIA's open-source toolkit for adding programmable rails around LLM
+  applications. Uses Colang, a DSL for specifying conversation flows,
+  topical rails, safety rails, fact-checking rails, and jailbreak
+  detection. Rails execute around the LLM call as input checks, dialog
+  flow control, and output checks. Integrates with LangChain and supports
+  pluggable policy models.
+
+first_released: 2023-04-25
+last_updated: 2026-02-10
+maturity_status: stable
+
+published_by: nvidia
+repository_url: https://github.com/NVIDIA/NeMo-Guardrails
+documentation_url: https://docs.nvidia.com/nemo/guardrails
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+  - context_pollution
+  - fabrication
+
+locus_of_control:
+  - prompt
+  - environment
+
+implements_techniques:
+  - colang-policy-dsl
+  - topical-rails
+  - fact-checking-rail
+  - jailbreak-detection
+  - output-moderation
+
+security_notes: >
+  Open-source (Apache-2.0) from NVIDIA. Colang rails can call external
+  moderation/classifier models — audit those endpoints for data-residency.
+  Rails themselves are code; treat rail bundles pulled from third parties
+  as supply-chain surface. NVIDIA vendor-maintained; tracks NeMo stack
+  versions.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous with a
+  policy-language approach distinct from Pydantic-schema validators. Acts
+  primarily as output/flow moderation, not constrained decoding — hence
+  post_generation rather than in_generation.

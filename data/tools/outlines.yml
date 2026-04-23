@@ -1,0 +1,55 @@
+id: outlines
+name: Outlines
+tagline: Constrained decoding via finite-state machines over regex, JSON Schema, and CFGs.
+description: >
+  Python library for structured generation that compiles regex, JSON
+  Schema, or a context-free grammar into a finite-state machine and masks
+  the LLM's logits at every decoding step so only tokens leading to valid
+  output can be sampled. Output is guaranteed to match the schema by
+  construction — no retry loop required. Backends include Transformers,
+  vLLM, llama.cpp, MLX, and a hosted service (.txt).
+
+first_released: 2023-06-01
+last_updated: 2026-03-01
+maturity_status: stable
+
+published_by: dottxt-ai
+repository_url: https://github.com/dottxt-ai/outlines
+documentation_url: https://dottxt-ai.github.io/outlines
+license: Apache-2.0
+
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+
+locus_of_control:
+  - model
+
+implements_techniques:
+  - constrained-decoding
+  - logit-masking
+  - fsm-guided-generation
+  - json-schema-decoding
+  - cfg-guided-generation
+
+security_notes: >
+  Open-source (Apache-2.0). Requires access to model logits, so it works
+  with open-weights backends (Transformers/vLLM/llama.cpp) but not with
+  closed APIs that don't expose logit bias. FSM compilation happens
+  locally; no data leaves the process. Hosted .txt service is a separate
+  SaaS with its own data-handling posture.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Canonical prevention × in_generation × fully_autonomous exemplar:
+  logit-masking during decoding prevents schema-invalid tokens from ever
+  being emitted. Distinct from post-generation validators — output is
+  correct-by-construction rather than checked-after-the-fact.

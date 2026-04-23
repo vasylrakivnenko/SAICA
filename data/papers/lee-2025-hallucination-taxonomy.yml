@@ -1,0 +1,29 @@
+id: lee-2025-hallucination-taxonomy
+authors:
+  - Yunseo Lee
+  - John Youngeun Song
+  - Dongsun Kim
+  - Jindae Kim
+  - Mijung Kim
+  - Jaechang Nam
+year: 2025
+title: "Hallucination by Code Generation LLMs: Taxonomy, Benchmarks, Mitigation, and Challenges"
+venue: arXiv
+url: https://arxiv.org/abs/2504.20799
+doi: "10.48550/arXiv.2504.20799"
+arxiv_id: "2504.20799"
+semantic_scholar_id: "ab90297f5a95b79d67620c32d2474c9a1dfef8c8"
+citation_count: 11
+tldr: >
+  Survey categorizing hallucination types in Code-LLM output, reviewing
+  existing benchmarks and mitigation strategies, and identifying open
+  challenges in detecting and removing hallucinated code.
+relevance_tags:
+  - failure-mode-taxonomy
+  - hallucination
+  - survey
+  - code-generation
+notes: >
+  Must-cite. Secondary taxonomy anchor for the FailureMode axis — pairs with
+  Tian 2024 (CodeHalu) and Zhang 2024 as the "prior taxonomies" set for the
+  honest-MECE comparison.

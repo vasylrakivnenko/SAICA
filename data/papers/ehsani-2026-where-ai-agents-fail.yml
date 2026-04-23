@@ -1,0 +1,33 @@
+id: ehsani-2026-where-ai-agents-fail
+authors:
+  - Ramtin Ehsani
+  - Sakshi Pathak
+  - Sarthak Rawal
+  - Abdullah Mujahid
+  - M. M. Imran
+  - Preetha Chatterjee
+year: 2026
+title: "Where Do AI Coding Agents Fail? An Empirical Study of Failed Agentic Pull Requests in GitHub"
+venue: arXiv
+url: https://arxiv.org/abs/2601.15195
+doi: "10.48550/arXiv.2601.15195"
+arxiv_id: "2601.15195"
+semantic_scholar_id: "fc9ea2db0899a017c9bd5fd9656a4c12b87ae288"
+citation_count: 2
+tldr: >
+  Large-scale study of 33k agent-authored PRs across five coding agents on
+  GitHub. Quantifies merge outcomes by task type, code-change size, CI, and
+  review dynamics; derives a hierarchical taxonomy of rejection patterns
+  from qualitative analysis of 600 PRs (duplicate PRs, unwanted features,
+  lack of reviewer engagement, agent misalignment).
+relevance_tags:
+  - failure-mode-taxonomy
+  - coding-agent
+  - github
+  - empirical
+  - agent-misalignment
+notes: >
+  Must-cite. Single best empirical study of *deployed* coding-agent failure
+  signatures. Grounds SAICA-KG's scope_creep and context_pollution
+  FailureModes with real PR-rejection data and validates the KG's
+  multi-agent-PR framing.

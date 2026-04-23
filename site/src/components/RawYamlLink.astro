@@ -1,0 +1,12 @@
+---
+import { rawYamlUrl } from '../lib/data.ts';
+interface Props {
+  kind: 'tools' | 'failure_modes' | 'papers' | 'taxonomies' | 'crosswalks';
+  id: string;
+}
+const { kind, id } = Astro.props;
+const url = rawYamlUrl(kind, id);
+---
+<p class="mt-6 text-xs font-sans text-ink-faint">
+  <a href={url} rel="noopener">View raw YAML on GitHub &rarr;</a>
+</p>

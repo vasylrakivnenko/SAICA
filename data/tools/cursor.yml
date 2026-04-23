@@ -1,0 +1,54 @@
+id: cursor
+name: Cursor
+tagline: Agentic code editor with Ask, Agent, and Composer modes plus project rules.
+description: >
+  IDE fork of VS Code with built-in LLM-driven coding modes (Ask, Agent,
+  Composer) and a .cursor/rules project-rule system for pre-generation
+  context injection. Supervision primitives: user-edited project rules,
+  per-action accept/reject diffs, agent-mode tool gating, and an explicit
+  YOLO allow-list for shell commands. Operates as a graduated-HITL coding
+  interface where the human stays in the loop via diff review.
+
+first_released: 2023-03-14
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: anysphere
+documentation_url: https://docs.cursor.com
+license: proprietary
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+  - fabrication
+
+locus_of_control:
+  - context
+  - human
+
+implements_techniques:
+  - project-rules
+  - diff-review-gate
+  - tool-allow-list
+  - agent-mode
+
+security_notes: >
+  Proprietary closed-source editor that ships code to vendor-selected model
+  providers. Review the privacy-mode and team data-retention settings for
+  sensitive repos. YOLO shell allow-list is opt-in but broad — audit the
+  allow-list rather than enabling blanket auto-run.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies the prevention × pre_generation × graduated_hitl cell for the
+  "agentic IDE" archetype. Project-rules pattern is a widely-copied
+  pre-generation context primitive; diff-review is the canonical
+  graduated-HITL gate at the interface layer.

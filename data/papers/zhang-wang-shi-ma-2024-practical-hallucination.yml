@@ -1,0 +1,35 @@
+id: zhang-wang-shi-ma-2024-practical-hallucination
+authors:
+  - Ziyao Zhang
+  - Chong Wang
+  - Yanlin Wang
+  - Ensheng Shi
+  - Yuchi Ma
+  - Wanjun Zhong
+  - Jiachi Chen
+  - Mingzhi Mao
+  - Zibin Zheng
+year: 2024
+title: "LLM Hallucinations in Practical Code Generation: Phenomena, Mechanism, and Mitigation"
+venue: "Proceedings of the ACM on Software Engineering (PACMSE / FSE)"
+url: https://arxiv.org/abs/2409.20550
+doi: "10.1145/3728894"
+arxiv_id: "2409.20550"
+semantic_scholar_id: "75bd806794649ba22d6e994c7ddbdbb169c620fd"
+citation_count: 130
+tldr: >
+  Empirical study of hallucinations in repository-level code generation across
+  six mainstream LLMs. Derives a hallucination taxonomy, distributes
+  phenomena by model, identifies four contributing factors, and proposes an
+  RAG-based mitigation that is effective across the studied models.
+relevance_tags:
+  - failure-mode-taxonomy
+  - hallucination
+  - repository-level
+  - code-generation
+  - mitigation
+notes: >
+  Must-cite. Repository-level framing is closer to SAICA-KG's agent-context
+  scope than function-level hallucination work. Cite as evidence that
+  context_pollution and fabrication both intensify at repo scale and for the
+  RAG mitigation that maps onto context-locus Tools.

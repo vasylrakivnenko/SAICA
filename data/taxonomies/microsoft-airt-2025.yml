@@ -1,0 +1,112 @@
+id: microsoft-airt-2025
+name: "Microsoft AI Red Team: Taxonomy of Failure Modes in Agentic AI Systems"
+owner: Microsoft AI Red Team (AIRT)
+version: "2025-04"
+first_published: 2025-04-24
+url: https://www.microsoft.com/en-us/security/blog/2025/04/24/new-whitepaper-outlines-the-taxonomy-of-failure-modes-in-ai-agents/
+license: "Microsoft whitepaper; attribution required"
+scope: >
+  Failure modes of agentic AI systems, split along two axes: safety vs.
+  security (impact) and novel vs. existing (whether the mode is unique to
+  agentic AI or inherited from prior generative AI). Single- vs. multi-agent
+  distinctions are surfaced in descriptions. Derived from Microsoft AI Red
+  Team's operational experience and a 30-page April 2025 whitepaper.
+
+categories:
+  # --- Novel Security (unique to agentic AI, security impact) ---
+  - external_id: MS-NS-01
+    label: Agent Compromise
+    description: >
+      Unauthorized control or manipulation of an agent; one corrupted node
+      can subvert entire multi-agent workflows.
+  - external_id: MS-NS-02
+    label: Agent Injection
+    description: Insertion of malicious instructions into agent prompts, plans, or tool-call arguments.
+  - external_id: MS-NS-03
+    label: Agent Impersonation
+    description: >
+      Threat actors register counterfeit agents that appear legitimate,
+      tricking other modules into leaking data or executing actions.
+  - external_id: MS-NS-04
+    label: Agent Flow Manipulation
+    description: >
+      Unauthorized alteration of agent workflow execution paths, e.g.,
+      injecting tokens like STOP to reroute workflows or bypass safety logic.
+  - external_id: MS-NS-05
+    label: Multi-Agent Jailbreaks
+    description: >
+      Jailbreak payload split across agent messages; recombination bypasses
+      single-prompt detectors. Specific to multi-agent topologies.
+
+  # --- Novel Safety (unique to agentic AI, RAI/harm impact) ---
+  - external_id: MS-NF-01
+    label: Intra-Agent Responsible AI Concerns
+    description: >
+      Toxic or RAI-violating content propagates through internal inter-agent
+      messages and reaches users or logs without filtering.
+  - external_id: MS-NF-02
+    label: Bias in Resource Allocation
+    description: Discriminatory distribution of resources across users when agents act as allocators.
+  - external_id: MS-NF-03
+    label: Organizational Knowledge Degradation
+    description: >
+      Heavy automation erodes human understanding of the underlying system;
+      recovery is difficult when agents fail.
+  - external_id: MS-NF-04
+    label: Prioritization Risks (Performance Over Safety)
+    description: >
+      Goal-driven agents skip safety checks to optimize KPIs, prioritizing
+      performance metrics over user safety.
+
+  # --- Existing Security (inherited from GenAI, re-scored for agentic) ---
+  - external_id: MS-ES-01
+    label: Memory Poisoning
+    description: >
+      Attackers embed malicious instructions into long-term memory; every
+      future recall re-executes the attack. Flagship case study in the paper.
+  - external_id: MS-ES-02
+    label: Cross-Domain Prompt Injection (XPIA)
+    description: >
+      External content (PDFs, calendar invites, web pages) contains hidden
+      commands that hijack agent decision logic.
+  - external_id: MS-ES-03
+    label: Human-in-the-Loop Bypass
+    description: Circumvention of human oversight and approval gates.
+  - external_id: MS-ES-04
+    label: Incorrect Permissions Management
+    description: >
+      Over-scoped agent permissions let agents access files or perform actions
+      beyond the user's intent.
+  - external_id: MS-ES-05
+    label: Insufficient Isolation
+    description: Inadequate separation between agent operational boundaries, enabling lateral compromise.
+
+  # --- Existing Safety (inherited from GenAI, RAI/harm impact) ---
+  - external_id: MS-EF-01
+    label: Bias Amplification
+    description: Magnification of existing prejudices in agent outputs across iterative loops.
+  - external_id: MS-EF-02
+    label: Hallucinations
+    description: Generation of false or fabricated information, including fabricated tool calls and references.
+  - external_id: MS-EF-03
+    label: Misinterpretation of Instructions
+    description: Incorrect understanding of user directives leading to unintended actions.
+  - external_id: MS-EF-04
+    label: Lack of Transparency
+    description: Insufficient clarity over agent behavior, preventing informed user consent and oversight.
+
+notes: >
+  Category labels paraphrased from the Microsoft Security Blog summary and
+  Adversa/MarkTechPost coverage; pending full-text verification against the
+  30-page whitepaper PDF. Full expansion (e.g., sub-modes under Memory
+  Poisoning) and any additional categories is a v0.2 task.
+
+inclusion_rationale: >
+  The Microsoft AIRT taxonomy is the most operationally-grounded agentic AI
+  failure taxonomy from a frontier vendor and is widely cited in industry
+  agentic-security discussions. Ingesting it as a first-class Taxonomy node
+  gives SAICA-KG crosswalks into: supply_chain_attack (MS-NS-02, MS-ES-02),
+  context_pollution (MS-ES-01 memory poisoning), scope_creep (MS-ES-04,
+  MS-NS-04), fabrication (MS-EF-02), and security_vulnerability (most of the
+  NS/ES axis). The novel-vs-existing axis also informs the
+  single-agent-vs-multi-agent framing in SAICA-KG's Tool nodes.

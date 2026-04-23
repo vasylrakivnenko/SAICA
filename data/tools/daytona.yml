@@ -1,0 +1,55 @@
+id: daytona
+name: Daytona
+tagline: Secure AI sandbox workspaces with sub-second start and stateful dev environments.
+description: >
+  Open-core sandbox platform providing secure, stateful workspaces for AI
+  agents. Supervision primitives: sub-second sandbox creation, per-workspace
+  filesystem and network isolation, snapshot/fork for branching trajectories,
+  and a declarative devcontainer-style workspace config. Positioned as
+  infrastructure for fully_autonomous coding agents that need reproducible,
+  disposable execution environments.
+
+first_released: 2024-02-15
+last_updated: 2026-04-08
+maturity_status: stable
+
+published_by: daytona-io
+repository_url: https://github.com/daytonaio/daytona
+documentation_url: https://www.daytona.io/docs
+license: AGPL-3.0
+
+control_paradigm: recovery
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - supply_chain_attack
+  - security_vulnerability
+  - logic_error
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - sandboxed-execution
+  - workspace-snapshot-fork
+  - ephemeral-filesystem
+  - resource-limiting
+
+security_notes: >
+  Open-core (AGPL core + hosted control plane). Self-hosted deployments
+  require hardening of the orchestration layer and careful review of
+  runtime-class settings for tenant isolation. Hosted tier inherits typical
+  SaaS tenancy and data-residency questions — review posture before running
+  sensitive code.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies recovery × post_generation × fully_autonomous. Distinctive
+  primitive is workspace snapshot/fork, which enables branching agent
+  trajectories and rollback — a supervision capability beyond pure
+  per-call sandbox isolation.

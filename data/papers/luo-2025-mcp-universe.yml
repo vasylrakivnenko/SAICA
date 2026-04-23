@@ -1,0 +1,35 @@
+id: luo-2025-mcp-universe
+authors:
+  - Ziyang Luo
+  - Zhiqi Shen
+  - Wenzhuo Yang
+  - Zirui Zhao
+  - Prathyusha Jwalapuram
+  - Amrita Saha
+  - Doyen Sahoo
+  - Silvio Savarese
+  - Caiming Xiong
+  - Junnan Li
+year: 2025
+title: "MCP-Universe: Benchmarking Large Language Models with Real-World Model Context Protocol Servers"
+venue: arXiv
+url: https://arxiv.org/abs/2508.14704
+doi: "10.48550/arXiv.2508.14704"
+arxiv_id: "2508.14704"
+semantic_scholar_id: "6935b713ca7e42dfa2ec93b0adacc16b291edc1d"
+citation_count: 63
+tldr: >
+  First comprehensive benchmark of LLM agents against real-world MCP servers
+  across 6 domains and 11 MCP servers. Uses execution-based evaluators
+  (format, static, dynamic). Even GPT-5 reaches only 43.72%; exposes the
+  long-context and unknown-tools challenges inherent to MCP.
+relevance_tags:
+  - benchmark
+  - MCP
+  - agent-tool
+  - real-world-evaluation
+  - supply-chain-adjacent
+notes: >
+  Must-cite. Canonical MCP benchmark as of 2025. Grounds SAICA-KG's
+  supply_chain_attack and dependency_blindness modes with measured failure
+  rates against real MCP servers; anchor for any MCP-keyed Tool nodes.

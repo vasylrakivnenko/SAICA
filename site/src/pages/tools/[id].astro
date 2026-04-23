@@ -1,0 +1,220 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RawYamlLink from '../../components/RawYamlLink.astro';
+import { graph, facetLabel, paperLabel } from '../../lib/data.ts';
+import type { Tool } from '../../lib/types.ts';
+
+export function getStaticPaths() {
+  // Re-import inside getStaticPaths for type safety.
+  // (Astro inlines the import-time `graph` across top-level and this fn.)
+  return Object.values(graph.tools).map((t) => ({
+    params: { id: t.id },
+    props: { tool: t },
+  }));
+}
+
+interface Props { tool: Tool }
+const { tool } = Astro.props;
+
+const composesWith = tool.composes_with.map((id) => graph.tools[id]).filter(Boolean);
+const feedsInto = tool.feeds_into.map((id) => graph.tools[id]).filter(Boolean);
+const supersedes = tool.supersedes.map((id) => graph.tools[id]).filter(Boolean);
+const citedIn = tool.cited_in.map((id) => graph.papers[id]).filter(Boolean);
+const documentedIn = tool.documented_in.map((id) => graph.papers[id]).filter(Boolean);
+const evaluatedOn = tool.evaluated_on.map((id) => graph.papers[id]).filter(Boolean);
+const desc = tool.tagline ?? tool.description.slice(0, 160);
+---
+
+<BaseLayout title={tool.name} description={desc}>
+  <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/tools" class="no-underline hover:underline">Tools</a>
+  </p>
+  <h1 class="mt-1">{tool.name}</h1>
+  {tool.tagline && <p class="mt-2 text-lg text-ink-muted">{tool.tagline}</p>}
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <span class="chip-accent">{facetLabel('control_paradigm', tool.control_paradigm)}</span>
+    <span class="chip-accent">{facetLabel('temporal_phase', tool.temporal_phase)}</span>
+    <span class="chip-accent">{facetLabel('autonomy_level', tool.autonomy_level)}</span>
+    <span class="chip">{facetLabel('maturity_status', tool.maturity_status)}</span>
+    {tool.locus_of_control.map((l) => (
+      <span class="chip" title="Locus of control">{facetLabel('locus_of_control', l)}</span>
+    ))}
+  </div>
+
+  <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div>
+      <h2 class="!mt-0">Description</h2>
+      <p class="whitespace-pre-line leading-7">{tool.description}</p>
+
+      {tool.inclusion_rationale && (
+        <>
+          <h2>Why it's included</h2>
+          <p class="whitespace-pre-line leading-7">{tool.inclusion_rationale}</p>
+        </>
+      )}
+
+      {tool.security_notes && (
+        <>
+          <h2>Security notes</h2>
+          <p class="whitespace-pre-line leading-7">{tool.security_notes}</p>
+        </>
+      )}
+
+      {tool.addresses_failure_modes.length > 0 && (
+        <>
+          <h2>Addresses failure modes</h2>
+          <ul class="mt-2 list-disc pl-5">
+            {tool.addresses_failure_modes.map((fm) => {
+              const node = graph.failureModes[fm];
+              return (
+                <li>
+                  {node ? (
+                    <a href={`/failure-modes/${fm}`}>{node.name}</a>
+                  ) : (
+                    <span>{fm}</span>
+                  )}
+                  {node?.tagline && <span class="text-ink-muted"> — {node.tagline}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+
+      {(composesWith.length > 0 || feedsInto.length > 0 || supersedes.length > 0) && (
+        <>
+          <h2>Related tools</h2>
+          {composesWith.length > 0 && (
+            <p class="mt-2">
+              <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Composes with:</span>{' '}
+              {composesWith.map((t, i) => (
+                <>
+                  <a href={`/tools/${t.id}`}>{t.name}</a>{i < composesWith.length - 1 ? ', ' : ''}
+                </>
+              ))}
+            </p>
+          )}
+          {feedsInto.length > 0 && (
+            <p class="mt-1">
+              <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Feeds into:</span>{' '}
+              {feedsInto.map((t, i) => (
+                <>
+                  <a href={`/tools/${t.id}`}>{t.name}</a>{i < feedsInto.length - 1 ? ', ' : ''}
+                </>
+              ))}
+            </p>
+          )}
+          {supersedes.length > 0 && (
+            <p class="mt-1">
+              <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Supersedes:</span>{' '}
+              {supersedes.map((t, i) => (
+                <>
+                  <a href={`/tools/${t.id}`}>{t.name}</a>{i < supersedes.length - 1 ? ', ' : ''}
+                </>
+              ))}
+            </p>
+          )}
+        </>
+      )}
+
+      {tool.implements_techniques.length > 0 && (
+        <>
+          <h2>Techniques</h2>
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            {tool.implements_techniques.map((tech) => (
+              <span class="chip">{tech}</span>
+            ))}
+          </div>
+        </>
+      )}
+
+      {(citedIn.length > 0 || documentedIn.length > 0 || evaluatedOn.length > 0) && (
+        <>
+          <h2>Citations</h2>
+          {citedIn.length > 0 && (
+            <>
+              <h3 class="!mt-3">Cited in</h3>
+              <ul class="list-disc pl-5">
+                {citedIn.map((p) => (
+                  <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+                ))}
+              </ul>
+            </>
+          )}
+          {documentedIn.length > 0 && (
+            <>
+              <h3 class="!mt-3">Documented in</h3>
+              <ul class="list-disc pl-5">
+                {documentedIn.map((p) => (
+                  <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+                ))}
+              </ul>
+            </>
+          )}
+          {evaluatedOn.length > 0 && (
+            <>
+              <h3 class="!mt-3">Evaluated on</h3>
+              <ul class="list-disc pl-5">
+                {evaluatedOn.map((p) => (
+                  <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+                ))}
+              </ul>
+            </>
+          )}
+        </>
+      )}
+
+      <RawYamlLink kind="tools" id={tool.id} />
+    </div>
+
+    <aside class="card h-max">
+      <dl class="kv">
+        <dt>ID</dt>
+        <dd><code>{tool.id}</code></dd>
+        <dt>First released</dt>
+        <dd>{tool.first_released}</dd>
+        {tool.last_updated && (
+          <>
+            <dt>Last updated</dt>
+            <dd>{tool.last_updated}</dd>
+          </>
+        )}
+        <dt>Maturity</dt>
+        <dd>{facetLabel('maturity_status', tool.maturity_status)}</dd>
+        <dt>License</dt>
+        <dd>{tool.license}</dd>
+        {tool.published_by && (
+          <>
+            <dt>Published by</dt>
+            <dd>{tool.published_by}</dd>
+          </>
+        )}
+        {tool.repository_url && (
+          <>
+            <dt>Repository</dt>
+            <dd><a href={tool.repository_url} rel="noopener">{tool.repository_url.replace(/^https?:\/\//, '')}</a></dd>
+          </>
+        )}
+        {tool.documentation_url && (
+          <>
+            <dt>Documentation</dt>
+            <dd><a href={tool.documentation_url} rel="noopener">{tool.documentation_url.replace(/^https?:\/\//, '')}</a></dd>
+          </>
+        )}
+        {typeof tool.signed_manifest === 'boolean' && (
+          <>
+            <dt>Signed manifest</dt>
+            <dd>{tool.signed_manifest ? 'Yes' : 'No'}</dd>
+          </>
+        )}
+        {typeof tool.openssf_scorecard_score === 'number' && (
+          <>
+            <dt>OpenSSF score</dt>
+            <dd>{tool.openssf_scorecard_score}</dd>
+          </>
+        )}
+      </dl>
+    </aside>
+  </section>
+</BaseLayout>

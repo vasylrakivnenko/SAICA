@@ -1,0 +1,32 @@
+id: kumar-2026-agentforge
+authors:
+  - Rajesh Kumar
+  - Waqar Ali
+  - Junaid Ahmed
+  - Najmah Ali
+  - Shaban Usman
+year: 2026
+title: "AgentForge: Execution-Grounded Multi-Agent LLM Framework for Autonomous Software Engineering"
+venue: arXiv
+url: https://arxiv.org/abs/2604.13120
+arxiv_id: "2604.13120"
+semantic_scholar_id: "f019c8a7e42aecaa96ef3c4cbd2ecd3aaaa1ac0c"
+citation_count: 0
+tldr: >
+  Introduces execution-grounded verification as a first-class principle:
+  every code change must survive sandboxed execution before propagation.
+  AGENTFORGE instantiates this with Planner/Coder/Tester/Debugger/Critic
+  agents sharing memory and a mandatory Docker sandbox, achieving 40.0% on
+  SWE-Bench Lite — 26-28 points above single-agent baselines.
+relevance_tags:
+  - multi-agent
+  - execution-grounded
+  - sandboxing
+  - coding-agent
+  - correction
+  - verification
+notes: >
+  Must-cite. Canonical example of "sandbox as first-class verification"
+  multi-agent architecture. Grounds SAICA-KG's correction ControlParadigm
+  tools and the environment LocusOfControl; pairs with Yan 2025 (fault-
+  tolerant sandboxing) for the sandbox Tool cluster.

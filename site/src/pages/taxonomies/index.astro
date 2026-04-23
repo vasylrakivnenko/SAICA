@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { graph } from '../../lib/data.ts';
+
+const taxonomies = Object.values(graph.taxonomies)
+  .slice()
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<BaseLayout
+  title="Taxonomies"
+  description="External failure-mode and risk taxonomies ingested by SAICA-KG, with crosswalks into the KG's own FailureMode facet."
+>
+  <h1>External taxonomies</h1>
+  <p class="text-ink-muted mt-2 max-w-3xl">
+    SAICA-KG absorbs existing failure-mode taxonomies as first-class data and publishes
+    explicit crosswalks from them into the KG's FailureMode facet.
+  </p>
+
+  <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
+    {taxonomies.map((t) => (
+      <li class="py-4">
+        <div class="flex items-baseline justify-between gap-4">
+          <h3 class="!mt-0">
+            <a href={`/taxonomies/${t.id}`}>{t.name}</a>
+          </h3>
+          <span class="font-sans text-xs text-ink-faint">
+            v{t.version} · {t.categories.length} categories
+          </span>
+        </div>
+        <p class="mt-1 text-sm text-ink-muted font-sans">{t.owner}</p>
+        {t.scope && <p class="mt-2 leading-7">{t.scope}</p>}
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

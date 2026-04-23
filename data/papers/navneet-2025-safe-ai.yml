@@ -1,0 +1,30 @@
+id: navneet-2025-safe-ai
+authors:
+  - Satyam Kumar Navneet
+  - Joydeep Chandra
+year: 2025
+title: "Rethinking Autonomy: Preventing Failures in AI-Driven Software Engineering"
+venue: arXiv
+url: https://arxiv.org/abs/2508.11824
+doi: "10.48550/arXiv.2508.11824"
+arxiv_id: "2508.11824"
+semantic_scholar_id: "79b937dcee3b2583e66df5c99d9f64734bf313c1"
+citation_count: 5
+tldr: >
+  Analyzes failure classes in LLM-assisted code generation (vulnerability
+  inheritance, overtrust, misinterpretation, absence of validation/rollback)
+  and proposes the SAFE-AI framework (Safety, Auditability, Feedback,
+  Explainability). Introduces a suggestive / generative / autonomous /
+  destructive taxonomy of AI behaviors to guide oversight.
+relevance_tags:
+  - autonomy
+  - supervision-vocabulary
+  - failure-mode-taxonomy
+  - governance
+  - destructive-action
+notes: >
+  Must-cite. The suggestive / generative / autonomous / destructive axis is
+  the canonical external alignment for SAICA-KG's AutonomyLevel enum — see
+  enums.yml. Cite for external validation of the AutonomyLevel partition
+  and for the destructive-action failure framing that grounds recovery
+  ControlParadigm Tools.

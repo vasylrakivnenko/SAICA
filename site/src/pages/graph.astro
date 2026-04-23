@@ -1,0 +1,344 @@
+---
+// /graph — Interactive Cytoscape.js knowledge-graph visualization for SAICA-KG.
+// Fetches /api/v1/snapshot.json at runtime; no data loaded at build time.
+// Attempts to use site's BaseLayout if present; otherwise falls back to a
+// minimal self-contained shell so the page builds independently.
+
+let Layout: any = null;
+try {
+  Layout = (await import("../layouts/BaseLayout.astro")).default;
+} catch {
+  try {
+    Layout = (await import("../layouts/Layout.astro")).default;
+  } catch {
+    Layout = null;
+  }
+}
+
+const title = "Knowledge Graph — SAICA-KG";
+---
+
+{Layout ? (
+  <Layout title={title}>
+    <section class="p-5 max-w-[1400px] mx-auto">
+      <h1 class="text-2xl font-bold mb-2">Knowledge Graph</h1>
+      <p class="text-sm text-gray-700 max-w-3xl mb-4">
+        An interactive view of the SAICA-KG. Nodes are <strong>tools</strong>,
+        <strong>failure modes</strong>, <strong>taxonomies</strong>, and
+        <strong>papers</strong>. Edges capture how tools address failure modes,
+        how tools compose, how failure modes crosswalk to external taxonomies,
+        and prior-work citations. Filters below let you narrow by node type or
+        tool facet; click a node for details.
+      </p>
+
+      <noscript>
+        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded mb-4 text-sm">
+          The interactive graph requires JavaScript. You can still view the raw
+          data at <a href="/api/v1/snapshot.json">/api/v1/snapshot.json</a>.
+        </div>
+      </noscript>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] gap-4">
+        <aside class="border border-gray-200 rounded p-3 text-sm bg-white">
+          <div class="mb-3">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Search</label>
+            <input id="kg-search" type="search" placeholder="name or id…"
+                   class="w-full border border-gray-300 rounded px-2 py-1" />
+          </div>
+
+          <div id="kg-filters">
+            <fieldset class="mb-3">
+              <legend class="text-xs font-semibold text-gray-600 mb-1">Node types</legend>
+              <label class="block"><input type="checkbox" name="type-tool" checked /> Tools</label>
+              <label class="block"><input type="checkbox" name="type-failure_mode" checked /> Failure modes</label>
+              <label class="block"><input type="checkbox" name="type-taxonomy" checked /> Taxonomies</label>
+              <label class="block"><input type="checkbox" name="type-paper" /> Papers</label>
+            </fieldset>
+
+            <fieldset class="mb-3">
+              <legend class="text-xs font-semibold text-gray-600 mb-1">Edge types</legend>
+              <label class="block"><input type="checkbox" name="edge-addresses" checked /> addresses</label>
+              <label class="block"><input type="checkbox" name="edge-composes_with" checked /> composes_with</label>
+              <label class="block"><input type="checkbox" name="edge-feeds_into" checked /> feeds_into</label>
+              <label class="block"><input type="checkbox" name="edge-supersedes" checked /> supersedes</label>
+              <label class="block"><input type="checkbox" name="edge-crosswalks" checked /> crosswalks</label>
+              <label class="block"><input type="checkbox" name="edge-prior_work" /> prior_work</label>
+              <label class="block"><input type="checkbox" name="edge-cited_in" /> cited_in</label>
+            </fieldset>
+
+            <fieldset class="mb-3">
+              <legend class="text-xs font-semibold text-gray-600 mb-1">Tool facets</legend>
+              <label class="block text-xs text-gray-600 mt-1">control_paradigm</label>
+              <select name="control_paradigm" class="w-full border border-gray-300 rounded px-2 py-1">
+                <option value="">any</option>
+                <option value="prevention">prevention</option>
+                <option value="detection">detection</option>
+                <option value="correction">correction</option>
+                <option value="observation">observation</option>
+              </select>
+
+              <label class="block text-xs text-gray-600 mt-2">temporal_phase</label>
+              <select name="temporal_phase" class="w-full border border-gray-300 rounded px-2 py-1">
+                <option value="">any</option>
+                <option value="pre_generation">pre_generation</option>
+                <option value="inline">inline</option>
+                <option value="post_generation">post_generation</option>
+                <option value="runtime">runtime</option>
+              </select>
+
+              <label class="block text-xs text-gray-600 mt-2">autonomy_level</label>
+              <select name="autonomy_level" class="w-full border border-gray-300 rounded px-2 py-1">
+                <option value="">any</option>
+                <option value="human_in_loop">human_in_loop</option>
+                <option value="graduated_hitl">graduated_hitl</option>
+                <option value="autonomous">autonomous</option>
+                <option value="supervised">supervised</option>
+              </select>
+            </fieldset>
+          </div>
+
+          <div class="mt-3 border-t pt-3">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Layout</label>
+            <select id="kg-layout" class="w-full border border-gray-300 rounded px-2 py-1">
+              <option value="cose" selected>cose (force-directed)</option>
+              <option value="grid">grid</option>
+              <option value="circle">circle</option>
+              <option value="breadthfirst">breadthfirst</option>
+            </select>
+            <button id="kg-reset"
+                    class="mt-2 w-full border border-gray-300 rounded px-2 py-1 hover:bg-gray-50 text-sm">
+              Reset view
+            </button>
+          </div>
+
+          <div class="mt-3 border-t pt-3 text-xs">
+            <div class="font-semibold text-gray-600 mb-1">Legend</div>
+            <div class="flex items-center gap-2 mb-1">
+              <span style="display:inline-block;width:14px;height:10px;background:#2563eb;border-radius:2px"></span> Tool (rounded)
+            </div>
+            <div class="flex items-center gap-2 mb-1">
+              <span style="display:inline-block;width:12px;height:12px;background:#dc2626;transform:rotate(45deg)"></span> Failure mode (diamond)
+            </div>
+            <div class="flex items-center gap-2 mb-1">
+              <span style="display:inline-block;width:12px;height:12px;background:#7c3aed;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)"></span> Taxonomy (hex)
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+              <span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:50%"></span> Paper
+            </div>
+            <div class="text-gray-600">Tool border = control_paradigm</div>
+            <div class="mt-2 text-gray-600">Edges:</div>
+            <div>— solid red: addresses</div>
+            <div>— dashed blue: composes_with</div>
+            <div>— solid blue: feeds_into</div>
+            <div>— dotted teal: supersedes</div>
+            <div>— purple: crosswalks</div>
+            <div>— dashed gray: prior_work</div>
+            <div>— dotted gray: cited_in</div>
+          </div>
+        </aside>
+
+        <div class="relative border border-gray-200 rounded bg-white overflow-hidden"
+             style="min-height:80vh">
+          <div id="cy" style="width:100%; height:80vh;"></div>
+          <div id="kg-fallback" class="hidden absolute inset-0 p-6 bg-white text-sm"></div>
+        </div>
+
+        <aside id="kg-sidebar" class="border border-gray-200 rounded bg-white min-h-[200px]"></aside>
+      </div>
+    </section>
+  </Layout>
+) : (
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>{title}</title>
+      <style is:global>
+        body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: #111827; background: #f9fafb; }
+        a { color: #2563eb; }
+        .kg-nav { padding: 12px 20px; border-bottom: 1px solid #e5e7eb; background: #fff; }
+        .kg-nav a { margin-right: 16px; text-decoration: none; }
+        .kg-wrap { padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .kg-grid { display: grid; grid-template-columns: 260px 1fr 300px; gap: 16px; }
+        @media (max-width: 900px) { .kg-grid { grid-template-columns: 1fr; } }
+        .kg-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-size: 14px; }
+        .kg-card fieldset { border: 0; padding: 0; margin: 0 0 12px 0; }
+        .kg-card legend { font-size: 11px; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
+        .kg-card label { display: block; }
+        .kg-card input[type="search"], .kg-card select {
+          width: 100%; border: 1px solid #d1d5db; border-radius: 4px; padding: 4px 6px;
+        }
+        .kg-card button {
+          width: 100%; border: 1px solid #d1d5db; border-radius: 4px; padding: 4px 8px;
+          background: #fff; cursor: pointer; margin-top: 8px;
+        }
+        .kg-card button:hover { background: #f3f4f6; }
+      </style>
+    </head>
+    <body>
+      <nav class="kg-nav">
+        <a href="/">SAICA-KG</a>
+        <a href="/tools">Tools</a>
+        <a href="/failure-modes">Failure modes</a>
+        <a href="/taxonomies">Taxonomies</a>
+        <a href="/graph"><strong>Graph</strong></a>
+      </nav>
+
+      <section class="kg-wrap">
+        <h1 style="font-size:1.5rem;font-weight:700;margin:0 0 8px 0">Knowledge Graph</h1>
+        <p style="font-size:14px;color:#374151;max-width:900px;margin-bottom:16px">
+          An interactive view of the SAICA-KG. Nodes are <strong>tools</strong>,
+          <strong>failure modes</strong>, <strong>taxonomies</strong>, and
+          <strong>papers</strong>. Edges capture how tools address failure
+          modes, how tools compose, how failure modes crosswalk to external
+          taxonomies, and prior-work citations. Filters below let you narrow by
+          node type or tool facet; click a node for details.
+        </p>
+
+        <noscript>
+          <div style="padding:16px;background:#fef9c3;border:1px solid #fde68a;border-radius:4px;margin-bottom:16px;font-size:14px">
+            The interactive graph requires JavaScript. You can still view the
+            raw data at <a href="/api/v1/snapshot.json">/api/v1/snapshot.json</a>.
+          </div>
+        </noscript>
+
+        <div class="kg-grid">
+          <aside class="kg-card">
+            <div style="margin-bottom:12px">
+              <label style="font-size:11px;font-weight:600;color:#4b5563">Search</label>
+              <input id="kg-search" type="search" placeholder="name or id…" />
+            </div>
+
+            <div id="kg-filters">
+              <fieldset>
+                <legend>Node types</legend>
+                <label><input type="checkbox" name="type-tool" checked /> Tools</label>
+                <label><input type="checkbox" name="type-failure_mode" checked /> Failure modes</label>
+                <label><input type="checkbox" name="type-taxonomy" checked /> Taxonomies</label>
+                <label><input type="checkbox" name="type-paper" /> Papers</label>
+              </fieldset>
+
+              <fieldset>
+                <legend>Edge types</legend>
+                <label><input type="checkbox" name="edge-addresses" checked /> addresses</label>
+                <label><input type="checkbox" name="edge-composes_with" checked /> composes_with</label>
+                <label><input type="checkbox" name="edge-feeds_into" checked /> feeds_into</label>
+                <label><input type="checkbox" name="edge-supersedes" checked /> supersedes</label>
+                <label><input type="checkbox" name="edge-crosswalks" checked /> crosswalks</label>
+                <label><input type="checkbox" name="edge-prior_work" /> prior_work</label>
+                <label><input type="checkbox" name="edge-cited_in" /> cited_in</label>
+              </fieldset>
+
+              <fieldset>
+                <legend>Tool facets</legend>
+                <label style="font-size:11px;color:#4b5563;margin-top:4px">control_paradigm</label>
+                <select name="control_paradigm">
+                  <option value="">any</option>
+                  <option value="prevention">prevention</option>
+                  <option value="detection">detection</option>
+                  <option value="correction">correction</option>
+                  <option value="observation">observation</option>
+                </select>
+
+                <label style="font-size:11px;color:#4b5563;margin-top:8px">temporal_phase</label>
+                <select name="temporal_phase">
+                  <option value="">any</option>
+                  <option value="pre_generation">pre_generation</option>
+                  <option value="inline">inline</option>
+                  <option value="post_generation">post_generation</option>
+                  <option value="runtime">runtime</option>
+                </select>
+
+                <label style="font-size:11px;color:#4b5563;margin-top:8px">autonomy_level</label>
+                <select name="autonomy_level">
+                  <option value="">any</option>
+                  <option value="human_in_loop">human_in_loop</option>
+                  <option value="graduated_hitl">graduated_hitl</option>
+                  <option value="autonomous">autonomous</option>
+                  <option value="supervised">supervised</option>
+                </select>
+              </fieldset>
+            </div>
+
+            <div style="border-top:1px solid #e5e7eb;padding-top:12px;margin-top:12px">
+              <label style="font-size:11px;font-weight:600;color:#4b5563">Layout</label>
+              <select id="kg-layout">
+                <option value="cose" selected>cose (force-directed)</option>
+                <option value="grid">grid</option>
+                <option value="circle">circle</option>
+                <option value="breadthfirst">breadthfirst</option>
+              </select>
+              <button id="kg-reset" type="button">Reset view</button>
+            </div>
+
+            <div style="border-top:1px solid #e5e7eb;padding-top:12px;margin-top:12px;font-size:12px">
+              <div style="font-weight:600;color:#4b5563;margin-bottom:4px">Legend</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="display:inline-block;width:14px;height:10px;background:#2563eb;border-radius:2px"></span> Tool (rounded)
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="display:inline-block;width:12px;height:12px;background:#dc2626;transform:rotate(45deg)"></span> Failure mode
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="display:inline-block;width:12px;height:12px;background:#7c3aed;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)"></span> Taxonomy
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:50%"></span> Paper
+              </div>
+              <div style="color:#4b5563">Tool border = control_paradigm</div>
+              <div style="margin-top:8px;color:#4b5563">Edges:</div>
+              <div>solid red: addresses</div>
+              <div>dashed blue: composes_with</div>
+              <div>solid blue: feeds_into</div>
+              <div>dotted teal: supersedes</div>
+              <div>purple: crosswalks</div>
+              <div>dashed gray: prior_work</div>
+              <div>dotted gray: cited_in</div>
+            </div>
+          </aside>
+
+          <div style="position:relative;border:1px solid #e5e7eb;border-radius:6px;background:#fff;overflow:hidden;min-height:80vh">
+            <div id="cy" style="width:100%;height:80vh"></div>
+            <div id="kg-fallback" class="hidden"
+                 style="position:absolute;inset:0;padding:24px;background:#fff;font-size:14px;display:none"></div>
+          </div>
+
+          <aside id="kg-sidebar" class="kg-card" style="min-height:200px"></aside>
+        </div>
+      </section>
+    </body>
+  </html>
+)}
+
+<script>
+  import { mountKGGraph } from "../components/KGGraph.ts";
+
+  const container = document.getElementById("cy") as HTMLElement | null;
+  const sidebar = document.getElementById("kg-sidebar") as HTMLElement | null;
+  const filters = document.getElementById("kg-filters") as HTMLElement | null;
+  const layoutSelect = document.getElementById("kg-layout") as HTMLSelectElement | null;
+  const resetBtn = document.getElementById("kg-reset") as HTMLButtonElement | null;
+  const search = document.getElementById("kg-search") as HTMLInputElement | null;
+
+  if (container && sidebar && filters && layoutSelect && resetBtn && search) {
+    const params = new URLSearchParams(window.location.search);
+    const focusNodeId = params.get("node");
+    mountKGGraph({
+      container,
+      sidebar,
+      filters,
+      layoutSelect,
+      resetBtn,
+      search,
+      focusNodeId,
+    }).catch((err) => {
+      const fb = document.getElementById("kg-fallback");
+      if (fb) {
+        (fb as HTMLElement).style.display = "block";
+        fb.innerHTML =
+          `<p>Failed to initialize graph: ${String(err).replace(/</g, "&lt;")}.</p>` +
+          `<p>See <a href="/api/v1/snapshot.json">/api/v1/snapshot.json</a>.</p>`;
+      }
+    });
+  }
+</script>

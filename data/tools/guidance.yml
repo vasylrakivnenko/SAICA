@@ -1,0 +1,54 @@
+id: guidance
+name: Guidance
+tagline: Programmable interleaving of prompt, control flow, and constrained generation.
+description: >
+  Python library for programming LLMs with interleaved text, control
+  flow, regex/CFG constraints, and tool calls in a single program.
+  Constraints (select, regex, grammar, JSON) are enforced at decoding
+  time via logit masking against open-weights backends, and via
+  token-healing to avoid tokenizer-boundary artifacts. Supports
+  Transformers, llama.cpp, and remote providers where feasible.
+
+first_released: 2023-04-15
+last_updated: 2026-01-20
+maturity_status: stable
+
+published_by: guidance-ai
+repository_url: https://github.com/guidance-ai/guidance
+documentation_url: https://github.com/guidance-ai/guidance
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+
+locus_of_control:
+  - model
+  - prompt
+
+implements_techniques:
+  - constrained-decoding
+  - grammar-guided-generation
+  - token-healing
+  - interleaved-prompt-program
+
+security_notes: >
+  Open-source (MIT), originally from Microsoft Research, now under the
+  guidance-ai org. Requires logit access for full constraint enforcement,
+  so closed-API backends degrade to weaker modes. Programs execute local
+  Python; treat third-party Guidance programs as untrusted code.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × in_generation × fully_autonomous alongside
+  Outlines, but with a program-first ergonomics layer (interleaved
+  prompting + constraints) rather than pure FSM compilation. Included to
+  mark that the in-generation cell has multiple distinct approaches.

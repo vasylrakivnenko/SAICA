@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RawYamlLink from '../../components/RawYamlLink.astro';
+import { graph } from '../../lib/data.ts';
+import type { Paper } from '../../lib/types.ts';
+
+export function getStaticPaths() {
+  return Object.values(graph.papers).map((p) => ({
+    params: { id: p.id },
+    props: { paper: p },
+  }));
+}
+
+interface Props { paper: Paper }
+const { paper } = Astro.props;
+
+// Reverse-lookup: which FailureModes cite this paper in prior_work?
+const citingFailureModes = Object.values(graph.failureModes).filter((fm) =>
+  fm.prior_work.includes(paper.id),
+);
+// Which Taxonomies point to this paper via paper_id?
+const citingTaxonomies = Object.values(graph.taxonomies).filter(
+  (t) => t.paper_id === paper.id,
+);
+// Which Tools point to this paper?
+const citingTools = Object.values(graph.tools).filter(
+  (t) =>
+    t.cited_in.includes(paper.id) ||
+    t.documented_in.includes(paper.id) ||
+    t.evaluated_on.includes(paper.id),
+);
+
+const desc = paper.tldr ?? paper.title;
+---
+
+<BaseLayout title={paper.title} description={desc.slice(0, 160)}>
+  <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/papers" class="no-underline hover:underline">Papers</a>
+  </p>
+  <h1 class="mt-1">{paper.title}</h1>
+  <p class="mt-2 text-ink-muted font-sans">
+    {paper.authors.join(', ')} · {paper.year}{paper.venue && ` · ${paper.venue}`}
+  </p>
+
+  <div class="mt-3 flex flex-wrap gap-3 text-sm font-sans">
+    {paper.url && <a class="chip" href={paper.url} rel="noopener">Source &rarr;</a>}
+    {paper.arxiv_id && (
+      <a class="chip" href={`https://arxiv.org/abs/${paper.arxiv_id}`} rel="noopener">
+        arXiv:{paper.arxiv_id}
+      </a>
+    )}
+    {paper.doi && (
+      <a class="chip" href={`https://doi.org/${paper.doi}`} rel="noopener">DOI: {paper.doi}</a>
+    )}
+    {typeof paper.citation_count === 'number' && (
+      <span class="chip">{paper.citation_count} citations</span>
+    )}
+  </div>
+
+  {paper.relevance_tags.length > 0 && (
+    <div class="mt-3 flex flex-wrap gap-1.5">
+      {paper.relevance_tags.map((t) => <span class="chip">{t}</span>)}
+    </div>
+  )}
+
+  {paper.tldr && (
+    <>
+      <h2>TL;DR</h2>
+      <p class="whitespace-pre-line leading-7">{paper.tldr}</p>
+    </>
+  )}
+
+  {paper.abstract && (
+    <>
+      <h2>Abstract</h2>
+      <p class="whitespace-pre-line leading-7">{paper.abstract}</p>
+    </>
+  )}
+
+  {paper.notes && (
+    <>
+      <h2>Editorial notes</h2>
+      <p class="whitespace-pre-line leading-7 text-ink-muted">{paper.notes}</p>
+    </>
+  )}
+
+  {(citingFailureModes.length > 0 || citingTaxonomies.length > 0 || citingTools.length > 0) && (
+    <>
+      <h2>Referenced from</h2>
+      {citingFailureModes.length > 0 && (
+        <>
+          <h3>Failure modes</h3>
+          <ul class="list-disc pl-5">
+            {citingFailureModes.map((fm) => (
+              <li><a href={`/failure-modes/${fm.id}`}>{fm.name}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+      {citingTaxonomies.length > 0 && (
+        <>
+          <h3>Taxonomies</h3>
+          <ul class="list-disc pl-5">
+            {citingTaxonomies.map((t) => (
+              <li><a href={`/taxonomies/${t.id}`}>{t.name}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+      {citingTools.length > 0 && (
+        <>
+          <h3>Tools</h3>
+          <ul class="list-disc pl-5">
+            {citingTools.map((t) => (
+              <li><a href={`/tools/${t.id}`}>{t.name}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+    </>
+  )}
+
+  <RawYamlLink kind="papers" id={paper.id} />
+</BaseLayout>

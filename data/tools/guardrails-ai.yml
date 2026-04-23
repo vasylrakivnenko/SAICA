@@ -1,0 +1,55 @@
+id: guardrails-ai
+name: Guardrails AI
+tagline: Output validation framework with a catalog of validators and reask-on-failure loops.
+description: >
+  Python framework that wraps LLM calls and validates outputs against a
+  declarative spec (Rail/XML or Pydantic). Ships a hub of reusable
+  validators for PII, toxicity, topic, schema, JSON shape, and custom
+  regexes. On validation failure, re-asks the model or raises. Primarily a
+  post-generation detect-and-retry layer, not a decoding-time constraint.
+
+first_released: 2023-02-01
+last_updated: 2026-03-20
+maturity_status: stable
+
+published_by: guardrails-ai
+repository_url: https://github.com/guardrails-ai/guardrails
+documentation_url: https://www.guardrailsai.com/docs
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - security_vulnerability
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - output-validation
+  - validator-retry-loop
+  - rail-spec
+  - validator-hub
+
+security_notes: >
+  Open-source (Apache-2.0). Validator Hub pulls third-party validator
+  packages at runtime — treat hub installs as supply-chain surface and pin
+  to audited versions. Some validators call external APIs (e.g., toxicity
+  classifiers) and exfiltrate model output to those endpoints; review each
+  validator's network posture before enabling.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Canonical detection × post_generation × fully_autonomous exemplar for
+  validator-retry on LLM output. Widely cited reference implementation of
+  the "validate-then-reask" pattern, distinct from in-generation constrained
+  decoding (Outlines/Guidance).

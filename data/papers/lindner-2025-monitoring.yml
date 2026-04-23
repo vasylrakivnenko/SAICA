@@ -1,0 +1,35 @@
+id: lindner-2025-monitoring
+authors:
+  - David Lindner
+  - Charlie Griffin
+  - Tomasz Korbak
+  - Roland S. Zimmermann
+  - Geoffrey Irving
+  - Sebastian Farquhar
+  - Alan Cooney
+year: 2025
+title: "Practical challenges of control monitoring in frontier AI deployments"
+venue: arXiv
+url: https://arxiv.org/abs/2512.22154
+doi: "10.48550/arXiv.2512.22154"
+arxiv_id: "2512.22154"
+semantic_scholar_id: "03885f500d3c8bb54443ac94df8a46110e5b68b9"
+citation_count: 2
+tldr: >
+  Analyzes three forms of automated control monitoring with different
+  latency-safety trade-offs: synchronous, semi-synchronous, and asynchronous.
+  Introduces a high-level safety-case sketch and identifies three core
+  challenges (oversight, latency, recovery) across four future-deployment
+  case studies.
+relevance_tags:
+  - monitoring
+  - temporal-phase
+  - control-paradigm
+  - supervision-vocabulary
+  - safety-case
+notes: >
+  Must-cite. The sync / semi-sync / async triple is the canonical external
+  alignment for SAICA-KG's TemporalPhase partition (pre_generation /
+  in_generation / post_generation) — see enums.yml. Cite for external
+  validation of the TemporalPhase axis and for the oversight/latency/
+  recovery vocabulary used across Tool nodes.

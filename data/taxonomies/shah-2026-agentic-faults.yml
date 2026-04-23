@@ -1,0 +1,164 @@
+id: shah-2026-agentic-faults
+name: "Characterizing Faults in Agentic AI: A Taxonomy of Types, Symptoms, and Root Causes"
+owner: Shah et al. (arXiv:2603.06847)
+version: "2026-03"
+first_published: 2026-03-06
+url: https://arxiv.org/abs/2603.06847
+license: "arXiv preprint; CC-BY"
+paper_id: shah-2026-agentic-faults
+scope: >
+  Grounded-theory taxonomy of faults in agentic AI systems, derived from
+  13,602 issues and PRs across 40 open-source agentic-AI repositories, with
+  stratified sampling to 385 faults and developer-study validation (n=145).
+  Three parallel taxonomies: fault types (5 dimensions, 13 major categories,
+  37 fault subcategories); 13 symptom classes; 12 root-cause categories.
+  This is the empirical corpus SAICA-KG uses for its v0.1 back-test.
+
+categories:
+  # --- High-level fault dimensions ---
+  - external_id: SHAH-DIM-01
+    label: Agent Cognition and Orchestration
+    description: >
+      Failures in cognitive architecture and control flows unique to agentic
+      systems (83 faults in the sample). Covers LLM integration and agent
+      lifecycle/state.
+  - external_id: SHAH-DIM-02
+    label: Tooling, Integration, and Actuation
+    description: >
+      Defects in tool invocation and external-system interaction (66 faults).
+      Covers API usage, external connectivity, resource manipulation,
+      coordination, and observability of tool calls.
+  - external_id: SHAH-DIM-03
+    label: Perception, Context, and Memory
+    description: >
+      Faults in information ingestion, context preservation, and input
+      interpretation (72 faults). Covers persistence and input-interpretation
+      logic.
+  - external_id: SHAH-DIM-04
+    label: Runtime and Environment Grounding
+    description: >
+      Execution environment, dependency stack, and platform-constraint
+      mismatches (87 faults). The single largest fault dimension by count,
+      dominated by dependency management.
+  - external_id: SHAH-DIM-05
+    label: System Reliability and Observability
+    description: >
+      Robustness deficiencies and diagnostic challenges in autonomous systems
+      (67 faults). Covers error recovery, UI/visualization, and documentation.
+
+  # --- 13 major fault categories ---
+  - external_id: SHAH-MAJ-01
+    label: LLM Integration Faults
+    description: Faults in how the agent integrates with its LLM (45 faults).
+    parent_id: SHAH-DIM-01
+  - external_id: SHAH-MAJ-02
+    label: Agent Lifecycle and State
+    description: Faults in agent startup, execution, termination, and state tracking (38 faults).
+    parent_id: SHAH-DIM-01
+  - external_id: SHAH-MAJ-03
+    label: Tool Execution and API Usage
+    description: Incorrect or malformed tool/API invocations (17 faults).
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-MAJ-04
+    label: External Connectivity and Access
+    description: Connection setup and authentication failures (19 faults).
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-MAJ-05
+    label: Resource Manipulation
+    description: Resource-handling and database-misconfiguration faults (16 faults).
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-MAJ-06
+    label: System Coordination
+    description: Synchronization errors across components or agents (6 faults).
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-MAJ-07
+    label: System Observability
+    description: Logging or telemetry defects (8 faults).
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-MAJ-08
+    label: Context and State Persistence
+    description: Memory-persistence and state-load/save failures (12 faults).
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-MAJ-09
+    label: Input Interpretation and Logic
+    description: Type handling, validation, encoding, and logic/constraint violations (60 faults).
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-MAJ-10
+    label: Dependency Management
+    description: >
+      Dependency specification, import resolution, installation, and package
+      resolver/manager failures (67 faults). The single largest major category.
+    parent_id: SHAH-DIM-04
+  - external_id: SHAH-MAJ-11
+    label: Platform Compatibility
+    description: Environment, platform, API, and integration compatibility mismatches (20 faults).
+    parent_id: SHAH-DIM-04
+  - external_id: SHAH-MAJ-12
+    label: Robustness and Error Recovery
+    description: Exception-handling and implementation defects (49 faults).
+    parent_id: SHAH-DIM-05
+  - external_id: SHAH-MAJ-13
+    label: UI, Visualization, and Documentation Defects
+    description: UI defects (13 faults) and documentation defects (5 faults).
+    parent_id: SHAH-DIM-05
+
+  # --- Root causes (12 dominant causes identified by Apriori mining) ---
+  - external_id: SHAH-RC-01
+    label: Dependency and Integration Failures
+    description: Contract violations between probabilistic artifacts and deterministic interfaces (19.5%).
+  - external_id: SHAH-RC-02
+    label: Data and Type Handling Failures
+    description: Type mismatches and validation gaps (17.6%).
+  - external_id: SHAH-RC-03
+    label: Incorrect Token Management
+    description: Tracking and counting errors affecting context windows.
+  - external_id: SHAH-RC-04
+    label: Authentication and Credential Issues
+    description: Fragile token refresh and credential-expiration handling.
+  - external_id: SHAH-RC-05
+    label: Datetime Conversion Errors
+    description: Inappropriate temporal-value transformations.
+  - external_id: SHAH-RC-06
+    label: State Management Defects
+    description: Inconsistent internal state across interactions.
+  - external_id: SHAH-RC-07
+    label: Configuration Inconsistencies
+    description: Wrong defaults and misconfiguration.
+  - external_id: SHAH-RC-08
+    label: API Evolution and Schema Drift
+    description: Incompatibilities from upstream API changes.
+  - external_id: SHAH-RC-09
+    label: Environment-Level Issues
+    description: Platform-specific constraints and virtual-environment problems.
+  - external_id: SHAH-RC-10
+    label: Documentation Gaps
+    description: Missing or incorrect configuration guidance.
+  - external_id: SHAH-RC-11
+    label: Exception Suppression
+    description: Swallowed errors reducing observability.
+  - external_id: SHAH-RC-12
+    label: Ecosystem Fragility
+    description: Rapid upstream evolution creating tight-coupling vulnerabilities.
+
+notes: >
+  Top-level structure (5 dimensions, 13 major categories, 12 root causes) is
+  canonical per the arXiv v1 HTML; the 37 fault subcategories are enumerated
+  in the paper and will be expanded into full category rows as a v0.2 task.
+  Symptom-class and full subcategory labels are pending full-text
+  verification. This taxonomy is the empirical back-test corpus: SAICA-KG's
+  FailureMode axis will be evaluated against whether SHAH-* faults map cleanly
+  into its eight-class FailureMode enum.
+
+inclusion_rationale: >
+  Shah et al. 2026 is the single most comprehensive empirical fault
+  characterization for agentic AI to date, with a 385-fault grounded-theory
+  sample across 40 real repos — exactly the scale SAICA-KG needs to argue
+  its FailureMode partition is honest-MECE. Intended crosswalks:
+  SHAH-MAJ-10 (Dependency Management) -> obsolescence + supply_chain_attack;
+  SHAH-MAJ-03 (Tool Execution/API Usage) -> logic_error + fabrication (API);
+  SHAH-MAJ-08 (Context/State Persistence) -> context_pollution;
+  SHAH-MAJ-09 (Input Interpretation/Logic) -> logic_error;
+  SHAH-RC-04 (Auth/Credential) -> security_vulnerability;
+  SHAH-RC-08 (API Schema Drift) -> obsolescence.
+  Coverage ratio against SAICA-KG's FailureMode enum is the v0.1 honest-MECE
+  evidence.

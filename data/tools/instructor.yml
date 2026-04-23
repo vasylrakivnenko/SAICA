@@ -1,0 +1,54 @@
+id: instructor
+name: Instructor
+tagline: Pydantic-typed structured output for LLM APIs with automatic retries.
+description: >
+  Thin Python library that patches LLM clients (OpenAI, Anthropic,
+  Gemini, Cohere, Mistral, etc.) to return Pydantic models. Requests a
+  tool/function-call response shape, parses, validates against the
+  Pydantic schema, and retries with the validation error fed back as
+  context on failure. Post-generation validation, not constrained
+  decoding — relies on the provider's own JSON/tool-call mode for the
+  initial shape.
+
+first_released: 2023-08-01
+last_updated: 2026-03-25
+maturity_status: stable
+
+published_by: jxnl
+repository_url: https://github.com/jxnl/instructor
+documentation_url: https://python.useinstructor.com
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - pydantic-schema-validation
+  - validator-retry-loop
+  - function-calling-coercion
+
+security_notes: >
+  Open-source (MIT). Ships as a thin client patch — supply-chain surface
+  is small but the library is broadly installed, so pin versions. Does
+  not itself transmit data anywhere; all traffic goes through the
+  underlying provider SDK whose posture applies.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Detection × post_generation × fully_autonomous exemplar for the
+  "Pydantic schema + reask on ValidationError" pattern. Useful contrast
+  to PydanticAI (full agent framework) and to Outlines (in-generation
+  constraints): Instructor is the minimal library expression of the
+  validate-and-retry paradigm.

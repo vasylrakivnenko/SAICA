@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { graph } from '../../lib/data.ts';
+
+const papers = Object.values(graph.papers)
+  .slice()
+  .sort((a, b) => {
+    if (b.year !== a.year) return b.year - a.year;
+    return (a.authors[0] ?? '').localeCompare(b.authors[0] ?? '');
+  });
+---
+
+<BaseLayout
+  title="Papers"
+  description="Academic and gray-literature references grounding SAICA-KG's tool, failure-mode, and taxonomy nodes."
+>
+  <h1>Papers</h1>
+  <p class="text-ink-muted mt-2 max-w-3xl">
+    Academic and gray-literature references grounding SAICA-KG nodes. Each Tool,
+    FailureMode, and Taxonomy that relies on a paper carries an explicit link.
+  </p>
+
+  <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
+    {papers.map((p) => (
+      <li class="py-4">
+        <h3 class="!mt-0">
+          <a href={`/papers/${p.id}`}>{p.title}</a>
+        </h3>
+        <p class="mt-1 text-sm font-sans text-ink-muted">
+          {p.authors.join(', ')} · {p.year}{p.venue && ` · ${p.venue}`}
+        </p>
+        {p.tldr && <p class="mt-2 leading-7">{p.tldr}</p>}
+        {p.relevance_tags.length > 0 && (
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            {p.relevance_tags.map((t) => <span class="chip">{t}</span>)}
+          </div>
+        )}
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
