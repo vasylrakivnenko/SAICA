@@ -35,7 +35,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from psycopg.rows import dict_row
 
@@ -50,6 +50,12 @@ except ImportError:
     sys.exit(2)
 
 from pipeline import db
+from pipeline.graduate.fallbacks import (
+    FALLBACK_ELIGIBLE_FIELDS,
+    FallbackResult,
+    apply_field_fallback,
+    make_raw_payload_fetcher,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -255,12 +261,40 @@ def _emit_review_required(doc: CommentedMap, yaml_key: str, decision: Decision, 
     )
 
 
+def _try_fallback(
+    field: str,
+    decision: Decision,
+    raw: Optional[dict],
+    *,
+    today: dt.date,
+    auto_threshold: float,
+) -> Optional[FallbackResult]:
+    """Ask the fallbacks module for a GitHub-sourced replacement.
+
+    Returns ``None`` when no fallback applies (caller proceeds with its
+    existing accepted-or-REVIEW_REQUIRED logic). Returns a
+    :class:`FallbackResult` when a usable value was recovered.
+    """
+    if field not in FALLBACK_ELIGIBLE_FIELDS:
+        return None
+    return apply_field_fallback(
+        field,
+        kimi_value=decision.value,
+        kimi_confidence=decision.confidence,
+        raw=raw,
+        today=today,
+        threshold=auto_threshold,
+    )
+
+
 def _build_tool_yaml(
     row: dict,
     payload: dict,
     decisions: dict[str, Decision],
     *,
     today: dt.date,
+    auto_threshold: float = DEFAULT_ACCEPT_THRESHOLD,
+    fetch_raw: Optional[Callable[[str], Optional[dict]]] = None,
 ) -> tuple[str, CommentedMap]:
     tool_id = (
         decisions["proposed_id"].value
@@ -277,13 +311,33 @@ def _build_tool_yaml(
             "id",
         )
 
+    # Pull raw GitHub payload once for this candidate. ``fetch_raw`` is the
+    # per-run cached fetcher set up in _graduate; tests can inject a fake.
+    source_url = row.get("source_url") or ""
+    raw_payload: Optional[dict] = None
+    if fetch_raw is not None and source_url:
+        try:
+            raw_payload = fetch_raw(source_url)
+        except Exception:  # noqa: BLE001 — fallback is best-effort
+            raw_payload = None
+
     for field, yaml_key, required, hint in TOOL_FIELDS:
         if yaml_key == "id":
             continue
         d = decisions[field]
         if d.accepted and d.value not in (None, "", []):
             doc[yaml_key] = d.value
-        elif required:
+            continue
+        # Attempt a GitHub-API fallback before emitting REVIEW_REQUIRED.
+        fb = _try_fallback(
+            field, d, raw_payload, today=today, auto_threshold=auto_threshold,
+        )
+        if fb is not None:
+            doc[yaml_key] = fb.value
+            if fb.comment:
+                doc.yaml_add_eol_comment(fb.comment, yaml_key)
+            continue
+        if required:
             _emit_review_required(doc, yaml_key, d, hint)
         else:
             if d.accepted and d.value in (None, "", []):
@@ -292,17 +346,60 @@ def _build_tool_yaml(
             _emit_review_required(doc, yaml_key, d, hint)
 
     # Mandatory scaffolding the schema requires but the LLM doesn't emit.
-    doc["first_released"] = today.isoformat()
-    doc.yaml_add_eol_comment(
-        "REVIEW REQUIRED: confirm first_released (defaulted to today)",
+    # Prefer GitHub-API dates when available, fall back to the existing
+    # "today + REVIEW REQUIRED" sentinel.
+    first_released_fb = apply_field_fallback(
         "first_released",
+        kimi_value=None,
+        kimi_confidence=0.0,
+        raw=raw_payload,
+        today=today,
+        threshold=auto_threshold,
     )
+    if first_released_fb is not None:
+        doc["first_released"] = first_released_fb.value
+        if first_released_fb.comment:
+            doc.yaml_add_eol_comment(first_released_fb.comment, "first_released")
+    else:
+        doc["first_released"] = today.isoformat()
+        doc.yaml_add_eol_comment(
+            "REVIEW REQUIRED: confirm first_released (defaulted to today)",
+            "first_released",
+        )
+
+    last_updated_fb = apply_field_fallback(
+        "last_updated",
+        kimi_value=None,
+        kimi_confidence=0.0,
+        raw=raw_payload,
+        today=today,
+        threshold=auto_threshold,
+    )
+    if last_updated_fb is not None:
+        doc["last_updated"] = last_updated_fb.value
+        if last_updated_fb.comment:
+            doc.yaml_add_eol_comment(last_updated_fb.comment, "last_updated")
+
     doc["maturity_status"] = "experimental"
     doc.yaml_add_eol_comment(
         "REVIEW REQUIRED: confirm maturity_status "
         "(one of experimental|stable|at_risk|deprecated|abandoned)",
         "maturity_status",
     )
+
+    stars_fb = apply_field_fallback(
+        "stars",
+        kimi_value=None,
+        kimi_confidence=0.0,
+        raw=raw_payload,
+        today=today,
+        threshold=auto_threshold,
+    )
+    if stars_fb is not None and isinstance(stars_fb.value, dict):
+        doc["stars"] = stars_fb.value["stars"]
+        doc["stars_updated_at"] = stars_fb.value["stars_updated_at"]
+        if stars_fb.comment:
+            doc.yaml_add_eol_comment(stars_fb.comment, "stars")
 
     header = (
         f" Graduated from candidate_tools id={row['id']} on {today.isoformat()}\n"
@@ -451,7 +548,16 @@ def _graduate(
 
     today = dt.date.today()
     if kind == "tool":
-        slug, doc = _build_tool_yaml(row, payload, decisions, today=today)
+        # Per-run cached GitHub-payload fetcher; used by the fallback ladder.
+        fetch_raw = make_raw_payload_fetcher()
+        slug, doc = _build_tool_yaml(
+            row,
+            payload,
+            decisions,
+            today=today,
+            auto_threshold=auto_accept_above,
+            fetch_raw=fetch_raw,
+        )
     else:
         slug, doc = _build_paper_yaml(row, payload, decisions, today=today)
 

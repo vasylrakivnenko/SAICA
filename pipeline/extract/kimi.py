@@ -51,6 +51,69 @@ _concurrency_sem = threading.BoundedSemaphore(MAX_CONCURRENCY)
 # System prompt
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Failure-mode reference block — hardcoded one-liners so prompt building
+# doesn't require a DB or filesystem round-trip. These mirror the
+# ``description`` fields in ``data/failure_modes/*.yml`` but compressed to a
+# single sentence plus synonym hints. If a new failure mode lands in
+# ``pipeline.models.FailureModeId``, update this dict in the same PR.
+# ---------------------------------------------------------------------------
+
+FAILURE_MODE_DEFINITIONS: dict[str, str] = {
+    "fabrication": (
+        "References to APIs/packages/symbols that do NOT exist anywhere — "
+        "syntactically plausible, factually false. Synonyms: api-hallucination, "
+        "package-hallucination, hallucinated imports."
+    ),
+    "obsolescence": (
+        "References to real APIs/packages that have been deprecated, removed, "
+        "or materially changed in their recommended version. Synonyms: "
+        "deprecated APIs, outdated library versions, retired endpoints."
+    ),
+    "dependency_blindness": (
+        "Reimplementing from scratch a function/class whose equivalent already "
+        "exists in declared dependencies, stdlib, or reachable internal modules. "
+        "Synonyms: NIH syndrome, reinvention, reinventing-the-wheel."
+    ),
+    "logic_error": (
+        "Uses real/current APIs correctly at the signature level but encodes "
+        "incorrect logic for the task — 'passes type-check, fails correctness'. "
+        "Synonyms: semantic bug, incorrect implementation, wrong algorithm."
+    ),
+    "security_vulnerability": (
+        "Introduces injection primitives, weak cryptography, leaked secrets, "
+        "insecure deserialization, or analogous security flaws. Synonyms: "
+        "insecure code, CWE patterns, SQLi/XSS/RCE, secret leakage."
+    ),
+    "scope_creep": (
+        "Actions outside the user-stated task scope — unrequested file edits, "
+        "unasked-for installs, config changes beyond the declared surface, "
+        "unprompted follow-on work. Synonyms: out-of-scope edits, over-reach."
+    ),
+    "context_pollution": (
+        "In-session context degrades — relevant prior info dropped, irrelevant "
+        "material accumulated, earlier hallucinations treated as ground truth. "
+        "Synonyms: trajectory drift, hallucination spiral, context-window overflow, "
+        "memory poisoning."
+    ),
+    "supply_chain_attack": (
+        "Induced (by hallucination, adversarial naming, or compromised upstream) "
+        "to install or invoke malicious code. Synonyms: slopsquatting, "
+        "typosquatting, compromised MCP server, malicious package."
+    ),
+}
+
+
+def _render_failure_mode_reference() -> str:
+    lines = [
+        "## FailureMode reference (the 8 canonical ids, verbatim)",
+        "",
+    ]
+    for fm_id, defn in FAILURE_MODE_DEFINITIONS.items():
+        lines.append(f"- `{fm_id}`: {defn}")
+    return "\n".join(lines)
+
+
 SYSTEM_PROMPT = """\
 You are an extraction assistant for SAICA-KG, a curated knowledge graph of
 software tools that supervise AI coding agents. Your job is to read one
@@ -67,6 +130,32 @@ STRUCTURED extraction matching the provided function schema.
   context_pollution, supply_chain_attack.
 - LocusOfControl (multi-valued, subset): model, prompt, context,
   environment, human.
+
+{failure_mode_reference}
+
+## Failure-mode mapping procedure (read BEFORE filling addresses_failure_modes)
+
+For every candidate tool, walk the 8 ids above and ask:
+**"Which of these 8 failure modes does this supervision tool credibly
+address?"** Only include ids the README/description supports with direct
+language — exact synonyms (e.g. "hallucination" → fabrication,
+"slopsquatting" → supply_chain_attack, "deprecated API" → obsolescence)
+count as direct evidence; vague marketing ("safer AI", "trustworthy code")
+does NOT.
+
+- If the tool is a general-purpose AI coding agent rather than a supervisor
+  of one, return an empty list. Do NOT guess.
+- For each id you DO include, the ``evidence`` list must contain at least
+  one direct quote that names the failure mode or a listed synonym.
+- Empty list with confidence ~0.5 is the correct answer when the tool is
+  clearly supervision-adjacent but doesn't target any of the 8 ids — this
+  is strictly preferred over a speculative assignment.
+- Confidence calibration:
+    * 0.85-0.95 — README uses the exact id or a canonical synonym
+      ("hallucination", "slopsquatting", "deprecated", "injection", etc.).
+    * 0.60-0.80 — strong paraphrase with unambiguous framing.
+    * 0.40-0.55 — inferred from adjacent language; prefer the empty-list path.
+    * <0.40     — return empty list with confidence 0.5.
 
 ## Honest MECE frame
 
@@ -94,7 +183,7 @@ guessing" is a hard rule. Humans will review anything below 0.7.
 
 You MUST call the function provided by the tool_choice parameter with the
 structured payload. Do not return free-form text.
-"""
+""".format(failure_mode_reference=_render_failure_mode_reference())
 
 
 # ---------------------------------------------------------------------------
@@ -330,6 +419,94 @@ def _parse_kimi_inline_tool_call(content: str, tool_name: str) -> dict | None:
 # ---------------------------------------------------------------------------
 
 
+def _github_license_spdx_from_row(candidate_row: dict) -> Optional[str]:
+    """Pull ``raw_json.license.spdx_id`` from a candidate row if present.
+
+    The caller may pass ``raw_json`` inline on the candidate dict (tests,
+    bulk ingest), OR we fall back to looking up the most recent
+    ``raw_search_results`` row with a matching ``source_url`` in Postgres.
+
+    Returns a non-empty SPDX id string, or ``None`` when no authoritative
+    license is available. ``NOASSERTION`` and ``other`` are treated as
+    no-signal (GitHub uses them when it can't classify) and return ``None``.
+    """
+    # Inline raw_json path (used by tests + any caller that denormalised
+    # the GitHub response onto the candidate dict).
+    raw = candidate_row.get("raw_json")
+    spdx = _spdx_from_raw_json(raw)
+    if spdx:
+        return spdx
+
+    # DB fallback: only attempt if we have a source_url to match on and
+    # pipeline.db is importable in this environment.
+    source_url = candidate_row.get("source_url")
+    if not source_url:
+        return None
+    try:
+        from pipeline import db as _db  # local import; keeps module load cheap
+    except Exception:  # noqa: BLE001
+        return None
+    sql = """
+        SELECT raw_json
+        FROM raw_search_results
+        WHERE url = %s
+        ORDER BY fetched_at DESC
+        LIMIT 1
+    """
+    try:
+        with _db.get_conn() as conn, conn.cursor() as cur:
+            cur.execute(sql, (source_url,))
+            row = cur.fetchone()
+    except Exception as exc:  # noqa: BLE001
+        log.debug("license pre-seed db lookup failed: %s", exc)
+        return None
+    if not row:
+        return None
+    return _spdx_from_raw_json(row[0])
+
+
+def _spdx_from_raw_json(raw: Any) -> Optional[str]:
+    """Navigate a GitHub-API-shaped blob and return a clean SPDX id or None."""
+    if not isinstance(raw, dict):
+        return None
+    lic = raw.get("license")
+    if not isinstance(lic, dict):
+        return None
+    spdx = lic.get("spdx_id")
+    if not isinstance(spdx, str):
+        return None
+    spdx = spdx.strip()
+    if not spdx:
+        return None
+    # GitHub returns these sentinels when it can't classify — treat as absent.
+    if spdx.upper() in {"NOASSERTION", "OTHER"}:
+        return None
+    return spdx
+
+
+def _build_system_prompt(candidate_row: Optional[dict] = None) -> str:
+    """Return the system prompt, optionally augmented with a license pre-seed.
+
+    When ``candidate_row`` carries (or its ``source_url`` resolves to) a
+    GitHub API response with a real SPDX id, append an authoritative block
+    that tells the model to use it verbatim with confidence ~0.95.
+    """
+    prompt = SYSTEM_PROMPT
+    if candidate_row is None:
+        return prompt
+    spdx = _github_license_spdx_from_row(candidate_row)
+    if not spdx:
+        return prompt
+    preseed = (
+        "\n## License pre-seed (authoritative)\n\n"
+        f"The repo's GitHub API license field is `{spdx}`. Use this "
+        "verbatim in the `license_spdx` output with confidence 0.95 unless "
+        "the README explicitly contradicts it (e.g. a LICENSE file names a "
+        "different SPDX id, or a sub-component carries a distinct license).\n"
+    )
+    return prompt + preseed
+
+
 def extract_tool(candidate_row: dict, *, client=None) -> ToolExtraction:
     """Extract a ToolExtraction from a candidate_tools row.
 
@@ -338,14 +515,34 @@ def extract_tool(candidate_row: dict, *, client=None) -> ToolExtraction:
     """
     client = client or get_client()
     schema = _json_schema_for(ToolExtraction)
+    system_prompt = _build_system_prompt(candidate_row)
+    preseed_spdx = _github_license_spdx_from_row(candidate_row)
     args = _call_kimi_function(
         client=client,
         tool_name="record_tool",
         tool_parameters=schema,
-        system=SYSTEM_PROMPT,
+        system=system_prompt,
         user=_candidate_user_prompt("tools", candidate_row),
     )
-    return ToolExtraction.model_validate(args)
+    extraction = ToolExtraction.model_validate(args)
+
+    # If Kimi returned a different license_spdx than the pre-seed, keep
+    # Kimi's value (it may have found a sub-license or fork) but log the
+    # discrepancy so a reviewer can look.
+    if preseed_spdx:
+        returned = (
+            extraction.license_spdx.value
+            if extraction.license_spdx and isinstance(extraction.license_spdx.value, str)
+            else None
+        )
+        if returned and returned.strip() and returned.strip() != preseed_spdx:
+            log.warning(
+                "license discrepancy for %s: github=%s kimi=%s — keeping kimi value",
+                candidate_row.get("source_url") or "<unknown>",
+                preseed_spdx,
+                returned,
+            )
+    return extraction
 
 
 def extract_paper(candidate_row: dict, *, client=None) -> PaperExtraction:
@@ -414,7 +611,10 @@ def _json_schema_for(model_cls) -> dict:
 
 
 __all__ = [
+    "FAILURE_MODE_DEFINITIONS",
     "SYSTEM_PROMPT",
+    "_build_system_prompt",
+    "_github_license_spdx_from_row",
     "extract_batch",
     "extract_paper",
     "extract_tool",

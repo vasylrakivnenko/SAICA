@@ -103,7 +103,15 @@ class ToolExtraction(BaseModel):
         description="Canonical repo URL (prefer github.com/owner/repo)."
     )
     license_spdx: ConfidenceField = Field(
-        description="SPDX license id (e.g. MIT, Apache-2.0) or 'proprietary'."
+        description=(
+            "SPDX license id (e.g. MIT, Apache-2.0, BSD-3-Clause, GPL-3.0-only)"
+            " or 'proprietary' for closed-source. If the system prompt"
+            " includes a ``License pre-seed (authoritative)`` block from the"
+            " GitHub API, reuse that SPDX id verbatim at confidence ~0.95"
+            " unless the README explicitly contradicts it. Do NOT downgrade"
+            " to ~0.2 confidence when the README is silent — the GitHub"
+            " license field is itself authoritative."
+        )
     )
     control_paradigm: ConfidenceField = Field(
         description="One of prevention|detection|correction|recovery, or null."
@@ -116,8 +124,19 @@ class ToolExtraction(BaseModel):
     )
     addresses_failure_modes: ConfidenceField = Field(
         description=(
-            "list of FailureModeId values from the closed SAICA-KG set."
-            " Multi-valued; may be empty if unclear."
+            "list[FailureModeId] — subset of the 8 canonical ids (fabrication,"
+            " obsolescence, dependency_blindness, logic_error,"
+            " security_vulnerability, scope_creep, context_pollution,"
+            " supply_chain_attack). Empty list is acceptable and STRICTLY"
+            " preferred over guessing when the README does not use our"
+            " exact vocabulary or a direct synonym. If the tool is a"
+            " general-purpose AI coding agent (not a supervisor), return []."
+            " Confidence calibration: 0.8+ when the README uses an exact"
+            " synonym (hallucination, slopsquatting, deprecated, injection,"
+            " etc.); 0.5-0.7 when the mapping is inferred from unambiguous"
+            " paraphrase; <0.5 means return an empty list with confidence 0.5."
+            " For every included id, ``evidence`` must contain at least one"
+            " quote naming the failure mode or a listed synonym."
         )
     )
     locus_of_control: ConfidenceField = Field(
