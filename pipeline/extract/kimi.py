@@ -254,10 +254,16 @@ def _call_kimi_function(
         choice = resp.choices[0]
         tool_calls = getattr(choice.message, "tool_calls", None) or []
         if not tool_calls:
-            content = getattr(choice.message, "content", None)
-            # This is the classic "max_tokens too low" symptom — raise loud.
+            # Kimi-K2.5 sometimes emits tool calls as text inside `content` using
+            # its own markup rather than the OpenAI `tool_calls` array. Parse that
+            # fallback format before giving up.
+            content = getattr(choice.message, "content", None) or ""
+            parsed = _parse_kimi_inline_tool_call(content, tool_name)
+            if parsed is not None:
+                return parsed
             raise RuntimeError(
-                f"Kimi returned no tool_calls (content={content!r}). "
+                f"Kimi returned no tool_calls (content={content[:200]!r}...). "
+                f"Neither standard tool_calls nor inline Kimi markup found. "
                 f"Likely max_tokens too low or model refused."
             )
         call = tool_calls[0]
@@ -273,6 +279,47 @@ def _call_kimi_function(
             return json.loads(args_json) if isinstance(args_json, str) else dict(args_json)
         except json.JSONDecodeError as exc:
             raise RuntimeError(f"Kimi returned malformed JSON args: {exc}") from exc
+
+
+def _parse_kimi_inline_tool_call(content: str, tool_name: str) -> dict | None:
+    """Parse Kimi's `<|tool_calls_section_begin|>` text markup.
+
+    Example payload (truncated):
+        <|tool_calls_section_begin|><|tool_call_begin|>functions.record_tool:0
+        <|tool_call_argument_begin|>{"name": {...}, ...}<|tool_call_end|>
+        <|tool_calls_section_end|>
+
+    Returns the parsed argument dict, or None if the markup is absent or
+    malformed. Tolerant of truncation at max_tokens: if JSON is incomplete
+    but at least the outer brace is present, attempt a best-effort close.
+    """
+    if "tool_calls_section_begin" not in content:
+        return None
+    # Pull text between the argument-begin marker and the next tool_call_end
+    # (or end of string if truncated).
+    start_marker = "<|tool_call_argument_begin|>"
+    start = content.find(start_marker)
+    if start < 0:
+        return None
+    start += len(start_marker)
+    end_marker = "<|tool_call_end|>"
+    end = content.find(end_marker, start)
+    payload = content[start:end] if end >= 0 else content[start:]
+    payload = payload.strip()
+    if not payload.startswith("{"):
+        return None
+    try:
+        return json.loads(payload)
+    except json.JSONDecodeError:
+        # Best-effort: balance braces for a truncated response.
+        opens = payload.count("{")
+        closes = payload.count("}")
+        if opens > closes:
+            try:
+                return json.loads(payload + "}" * (opens - closes))
+            except json.JSONDecodeError:
+                pass
+    return None
 
     # Should be unreachable due to the raise inside the loop.
     raise RuntimeError("Kimi call exhausted retries") from last_exc
