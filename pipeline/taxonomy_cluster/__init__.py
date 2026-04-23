@@ -17,4 +17,4 @@ No code here mutates any YAML under ``data/``. This is a paper-ready
 methodology artifact.
 """
 
-__all__ = ["collect", "cluster", "compare", "figures"]
+__all__ = ["collect", "cluster", "compare", "figures", "export_site_data"]

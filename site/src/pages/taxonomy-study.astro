@@ -1,0 +1,666 @@
+---
+// /taxonomy-study — Interactive visualization of the cluster-study results.
+// Loads /taxonomy_study.json at runtime. Shows the 121-category corpus as a
+// UMAP scatter colored four different ways so the user can see how text
+// clustering, tool-bipartite clustering, and SAICA's manual partition cut
+// the same set of points.
+import BaseLayout from "../layouts/BaseLayout.astro";
+const title = "Cluster Study";
+---
+
+<BaseLayout title={title}>
+  <section class="mb-6 max-w-3xl">
+    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+      Research Study
+    </p>
+    <h1 class="mt-2">Taxonomy cluster study</h1>
+    <p class="mt-4 leading-7">
+      If we let embeddings and HDBSCAN choose how many failure classes there
+      are across the 121 categories ingested from OWASP, MAST, DAPLab,
+      Microsoft AIRT, Swiss Cheese, and Shah 2026, do we converge on SAICA's
+      manual 11, or something different? Two algorithmic methods were tried.
+      <strong>Text clustering</strong> over MiniLM sentence embeddings of the
+      <code>label + description</code> prose fragments across the full
+      <code>min_cluster_size</code> sweep; the most stable setting landed on
+      <strong>K<sub>text</sub> = 26</strong> (bootstrap ARI 0.75) — finer than
+      SAICA and weakly agreeing with it (ARI 0.08, NMI 0.38).
+      <strong>Response clustering</strong> over the
+      (category &times; tool) bipartite reachability matrix — "which
+      supervision tools can mitigate this category" — landed on
+      <strong>K<sub>bipartite</sub> = 7</strong> (bootstrap ARI 0.80),
+      which is both <em>coarser</em> than SAICA's 11 and substantially more
+      aligned with it (<strong>ARI 0.52, NMI 0.74</strong>). Hover a point
+      to see its category, or click it for the full description plus every
+      other category in the same cluster.
+    </p>
+  </section>
+
+  <section class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl">
+    <div class="card">
+      <div class="text-3xl font-sans font-semibold" id="ts-k-text">26</div>
+      <div class="text-sm text-ink-muted font-sans">K<sub>text</sub> (HDBSCAN)</div>
+    </div>
+    <div class="card">
+      <div class="text-3xl font-sans font-semibold" id="ts-k-bipartite">7</div>
+      <div class="text-sm text-ink-muted font-sans">K<sub>bipartite</sub> (tool-based)</div>
+    </div>
+    <div class="card">
+      <div class="text-3xl font-sans font-semibold" id="ts-k-manual">11</div>
+      <div class="text-sm text-ink-muted font-sans">K<sub>manual</sub> (SAICA)</div>
+    </div>
+    <div class="card">
+      <div class="text-3xl font-sans font-semibold" id="ts-ari-bip">0.52</div>
+      <div class="text-sm text-ink-muted font-sans">ARI<sub>bipartite vs SAICA</sub></div>
+    </div>
+  </section>
+
+  <section class="mt-10">
+    <div class="grid grid-cols-[14rem_1fr] gap-4" id="ts-root">
+      <aside class="ui text-sm">
+        <div class="mb-4">
+          <div class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-2">Color by</div>
+          <label class="block mb-1">
+            <input type="radio" name="ts-color" value="taxonomy" checked />
+            source taxonomy
+          </label>
+          <label class="block mb-1">
+            <input type="radio" name="ts-color" value="bipartite" />
+            bipartite cluster (K=7)
+          </label>
+          <label class="block mb-1">
+            <input type="radio" name="ts-color" value="text" />
+            text cluster (K=26)
+          </label>
+          <label class="block mb-1">
+            <input type="radio" name="ts-color" value="saica" />
+            SAICA match (K=11)
+          </label>
+        </div>
+
+        <div class="mb-4">
+          <div class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-2">Legend</div>
+          <div id="ts-legend" class="space-y-1 text-xs"></div>
+        </div>
+
+        <div class="text-xs text-ink-faint" id="ts-count"></div>
+      </aside>
+
+      <div class="relative border border-ink/10 rounded bg-white" style="min-height: 500px; height: 70vh">
+        <noscript>
+          <div class="p-3 text-sm">
+            The cluster-study explorer requires JavaScript. You can still
+            read the raw data at
+            <a href="/taxonomy_study.json">/taxonomy_study.json</a>.
+          </div>
+        </noscript>
+        <svg id="ts-svg" viewBox="0 0 100 100" preserveAspectRatio="none"
+             style="width: 100%; height: 100%; display: block; min-width: 600px;"></svg>
+        <div class="absolute bottom-1 left-2 text-[10px] text-ink-faint font-sans pointer-events-none">
+          UMAP 1 &rarr;
+        </div>
+        <div class="absolute top-2 left-1 text-[10px] text-ink-faint font-sans pointer-events-none"
+             style="writing-mode: vertical-rl; transform: rotate(180deg);">
+          UMAP 2 &rarr;
+        </div>
+        <div id="ts-tooltip"
+             class="pointer-events-none absolute hidden bg-ink text-white text-xs rounded px-2 py-1 shadow max-w-xs"
+             style="transform: translate(-50%, -110%);"></div>
+        <div id="ts-fallback" class="hidden absolute inset-0 p-6 text-sm bg-white"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ts-panel" class="mt-6 hidden">
+    <div class="card">
+      <div class="flex items-baseline justify-between gap-4">
+        <div>
+          <div class="text-xs text-ink-faint font-sans uppercase tracking-wide" id="ts-panel-sub"></div>
+          <h2 class="mt-0 mb-1" id="ts-panel-title"></h2>
+        </div>
+        <button id="ts-panel-close" class="text-sm text-ink-faint hover:text-ink">close</button>
+      </div>
+      <p class="text-sm leading-6" id="ts-panel-desc"></p>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-xs" id="ts-panel-chips"></div>
+      <div class="mt-4" id="ts-panel-members-wrap" hidden>
+        <div class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-1">
+          Other members of this cluster
+        </div>
+        <ul class="text-sm space-y-0.5" id="ts-panel-members"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-10">
+    <h2>Clusters for the current coloring</h2>
+    <p class="text-sm text-ink-muted mb-2">
+      Rows correspond to the clusters of the currently-selected partition.
+      Noise points (HDBSCAN id = -1) are listed last.
+    </p>
+    <div class="overflow-x-auto border border-ink/10 rounded">
+      <table class="w-full text-sm font-sans">
+        <thead class="bg-paper-alt text-ink-faint text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left px-3 py-2">Cluster</th>
+            <th class="text-right px-3 py-2">Size</th>
+            <th class="text-left px-3 py-2">SAICA top match</th>
+            <th class="text-right px-3 py-2">Coverage</th>
+            <th class="text-left px-3 py-2">Top 3 members</th>
+          </tr>
+        </thead>
+        <tbody id="ts-table"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-10 max-w-3xl">
+    <h2>Further reading</h2>
+    <ul class="text-sm space-y-1">
+      <li>
+        Full narrative report:
+        <a
+          href="https://github.com/saica-kg/saica-kg/blob/main/research/TAXONOMY_CLUSTER_STUDY.md"
+          rel="noopener"
+        ><code>research/TAXONOMY_CLUSTER_STUDY.md</code></a>
+      </li>
+      <li>
+        Raw artifacts:
+        <a
+          href="https://github.com/saica-kg/saica-kg/tree/main/research/taxonomy_clustering"
+          rel="noopener"
+        ><code>research/taxonomy_clustering/</code></a>
+      </li>
+      <li>
+        Static figures:
+        <a
+          href="https://github.com/saica-kg/saica-kg/blob/main/research/taxonomy_clustering/umap_by_source_taxonomy.png"
+          rel="noopener"
+        >UMAP by source</a> ·
+        <a
+          href="https://github.com/saica-kg/saica-kg/blob/main/research/taxonomy_clustering/umap_by_hdbscan_cluster.png"
+          rel="noopener"
+        >UMAP by HDBSCAN cluster</a> ·
+        <a
+          href="https://github.com/saica-kg/saica-kg/blob/main/research/taxonomy_clustering/umap_by_saica_match.png"
+          rel="noopener"
+        >UMAP by SAICA match</a> ·
+        <a
+          href="https://github.com/saica-kg/saica-kg/blob/main/research/taxonomy_clustering/agreement_heatmap.png"
+          rel="noopener"
+        >Agreement heatmap</a>
+      </li>
+      <li>
+        Machine-readable input: <a href="/taxonomy_study.json"><code>/taxonomy_study.json</code></a>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<script>
+  interface Point {
+    id: string;
+    key: string;
+    source_tax_id: string;
+    label: string;
+    description: string;
+    x: number;
+    y: number;
+    text_cluster: number;
+    bipartite_cluster: number;
+    saica_match: string;
+  }
+  interface ClusterRow {
+    id: number;
+    name: string;
+    size: number;
+    saica_top: string;
+    saica_coverage: number;
+    saica_mode_spread: number;
+    disagreement: boolean;
+    member_ids: string[];
+  }
+  interface TaxonomyMeta { name: string; color: string }
+  interface Payload {
+    summary: {
+      corpus_size: number;
+      k_text: number;
+      k_bipartite: number;
+      k_manual_saica: number;
+      ari_text_saica: number;
+      nmi_text_saica: number;
+      ari_bipartite_saica: number;
+      nmi_bipartite_saica: number;
+      bootstrap_ari_text: number;
+      bootstrap_ari_bipartite: number;
+      chosen_text_mcs: number;
+      chosen_bipartite_mcs: number;
+    };
+    taxonomies: Record<string, TaxonomyMeta>;
+    saica_modes: string[];
+    points: Point[];
+    clusters: {
+      bipartite: ClusterRow[];
+      text: ClusterRow[];
+    };
+  }
+
+  type Mode = "taxonomy" | "bipartite" | "text" | "saica";
+
+  // Extended categorical palette. Indigo/rose/violet/slate match /explore;
+  // the remaining hues are evenly spaced around the wheel and consciously
+  // not over-saturated so 26 buckets still read cleanly.
+  const PALETTE: string[] = [
+    "#2563eb", "#e11d48", "#7c3aed", "#64748b",
+    "#f59e0b", "#0891b2", "#059669", "#db2777",
+    "#ea580c", "#4f46e5", "#16a34a", "#9333ea",
+    "#0284c7", "#b91c1c", "#ca8a04", "#6d28d9",
+    "#1d4ed8", "#be123c", "#15803d", "#a16207",
+    "#5b21b6", "#0369a1", "#991b1b", "#4d7c0f",
+    "#6b21a8", "#0e7490", "#166534", "#c2410c",
+  ];
+  const NOISE_FILL = "#d1d5db";
+  const NOISE_OPACITY = 0.3;
+
+  const svg = document.getElementById("ts-svg") as unknown as SVGSVGElement | null;
+  const tooltip = document.getElementById("ts-tooltip") as HTMLDivElement | null;
+  const fallback = document.getElementById("ts-fallback") as HTMLDivElement | null;
+  const legendEl = document.getElementById("ts-legend") as HTMLDivElement | null;
+  const countEl = document.getElementById("ts-count") as HTMLElement | null;
+  const tableEl = document.getElementById("ts-table") as HTMLTableSectionElement | null;
+  const panelEl = document.getElementById("ts-panel") as HTMLElement | null;
+  const panelSub = document.getElementById("ts-panel-sub") as HTMLElement | null;
+  const panelTitle = document.getElementById("ts-panel-title") as HTMLElement | null;
+  const panelDesc = document.getElementById("ts-panel-desc") as HTMLElement | null;
+  const panelChips = document.getElementById("ts-panel-chips") as HTMLElement | null;
+  const panelMembersWrap = document.getElementById("ts-panel-members-wrap") as HTMLElement | null;
+  const panelMembers = document.getElementById("ts-panel-members") as HTMLUListElement | null;
+  const panelClose = document.getElementById("ts-panel-close") as HTMLButtonElement | null;
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  let payload: Payload | null = null;
+  let mode: Mode = "taxonomy";
+
+  function allModeValues(p: Payload, m: Mode): string[] {
+    if (m === "taxonomy") return Object.keys(p.taxonomies).sort();
+    if (m === "saica") {
+      const modes = new Set<string>(p.saica_modes);
+      for (const pt of p.points) modes.add(pt.saica_match);
+      return Array.from(modes).sort();
+    }
+    // bipartite / text — numeric cluster ids, noise last.
+    const ids = new Set<number>();
+    for (const pt of p.points) {
+      ids.add(m === "bipartite" ? pt.bipartite_cluster : pt.text_cluster);
+    }
+    const arr = Array.from(ids).sort((a, b) => a - b);
+    // Move -1 to the end.
+    const noise = arr.filter((v) => v < 0);
+    const rest = arr.filter((v) => v >= 0);
+    return [...rest.map(String), ...noise.map(String)];
+  }
+
+  function valueForPoint(pt: Point, m: Mode): string {
+    if (m === "taxonomy") return pt.source_tax_id;
+    if (m === "bipartite") return String(pt.bipartite_cluster);
+    if (m === "text") return String(pt.text_cluster);
+    return pt.saica_match;
+  }
+
+  function isNoise(pt: Point, m: Mode): boolean {
+    if (m === "bipartite") return pt.bipartite_cluster < 0;
+    if (m === "text") return pt.text_cluster < 0;
+    if (m === "saica") return pt.saica_match === "__unmapped__";
+    return false;
+  }
+
+  function colorFor(value: string, values: string[], m: Mode): string {
+    if (m === "taxonomy") {
+      const meta = payload?.taxonomies[value];
+      return meta?.color ?? "#64748b";
+    }
+    if ((m === "bipartite" || m === "text") && value === "-1") return NOISE_FILL;
+    if (m === "saica" && value === "__unmapped__") return NOISE_FILL;
+    const idx = values.indexOf(value);
+    return PALETTE[idx % PALETTE.length];
+  }
+
+  function labelFor(value: string, m: Mode): string {
+    if (m === "taxonomy") {
+      return payload?.taxonomies[value]?.name ?? value;
+    }
+    if (m === "bipartite") {
+      const row = payload?.clusters.bipartite.find((c) => String(c.id) === value);
+      return value === "-1" ? "noise" : (row?.name ?? `cluster ${value}`);
+    }
+    if (m === "text") {
+      const row = payload?.clusters.text.find((c) => String(c.id) === value);
+      return value === "-1" ? "noise" : (row?.name ?? `cluster ${value}`);
+    }
+    return value;
+  }
+
+  function clusterRowsFor(m: Mode): ClusterRow[] {
+    if (!payload) return [];
+    if (m === "bipartite") return payload.clusters.bipartite;
+    if (m === "text") return payload.clusters.text;
+    if (m === "saica") {
+      // Synthesize cluster rows per SAICA mode from the points.
+      const byMode = new Map<string, string[]>();
+      for (const pt of payload.points) {
+        const arr = byMode.get(pt.saica_match) ?? [];
+        arr.push(pt.key);
+        byMode.set(pt.saica_match, arr);
+      }
+      const rows: ClusterRow[] = [];
+      for (const [modeName, members] of byMode) {
+        rows.push({
+          id: rows.length,
+          name: modeName,
+          size: members.length,
+          saica_top: modeName,
+          saica_coverage: 1.0,
+          saica_mode_spread: 1,
+          disagreement: modeName === "__unmapped__",
+          member_ids: members,
+        });
+      }
+      rows.sort((a, b) => b.size - a.size);
+      return rows;
+    }
+    // taxonomy
+    const byTax = new Map<string, string[]>();
+    for (const pt of payload.points) {
+      const arr = byTax.get(pt.source_tax_id) ?? [];
+      arr.push(pt.key);
+      byTax.set(pt.source_tax_id, arr);
+    }
+    const rows: ClusterRow[] = [];
+    for (const [tid, members] of byTax) {
+      rows.push({
+        id: rows.length,
+        name: payload.taxonomies[tid]?.name ?? tid,
+        size: members.length,
+        saica_top: "n/a",
+        saica_coverage: 0,
+        saica_mode_spread: 0,
+        disagreement: false,
+        member_ids: members,
+      });
+    }
+    rows.sort((a, b) => b.size - a.size);
+    return rows;
+  }
+
+  function renderScatter(): void {
+    if (!svg || !payload) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    const values = allModeValues(payload, mode);
+    const PAD = 4;
+
+    // Two-pass draw: noise first, colored second so colored dots sit on top.
+    const noisePoints: Point[] = [];
+    const livePoints: Point[] = [];
+    for (const pt of payload.points) {
+      (isNoise(pt, mode) ? noisePoints : livePoints).push(pt);
+    }
+
+    for (const pt of noisePoints) {
+      svg.appendChild(makeDot(pt, NOISE_FILL, NOISE_OPACITY, PAD));
+    }
+    for (const pt of livePoints) {
+      const v = valueForPoint(pt, mode);
+      const fill = colorFor(v, values, mode);
+      svg.appendChild(makeDot(pt, fill, 0.8, PAD));
+    }
+
+    if (countEl) {
+      countEl.textContent = `${payload.points.length} categories`;
+    }
+  }
+
+  function makeDot(pt: Point, fill: string, opacity: number, PAD: number): SVGCircleElement {
+    const cx = PAD + pt.x * (100 - 2 * PAD);
+    const cy = PAD + (1 - pt.y) * (100 - 2 * PAD);
+    const dot = document.createElementNS(svgNS, "circle");
+    dot.setAttribute("cx", cx.toFixed(3));
+    dot.setAttribute("cy", cy.toFixed(3));
+    dot.setAttribute("r", "0.8");
+    dot.setAttribute("fill", fill);
+    dot.setAttribute("fill-opacity", String(opacity));
+    dot.setAttribute("stroke", "white");
+    dot.setAttribute("stroke-width", "0.12");
+    dot.style.cursor = "pointer";
+    dot.dataset.key = pt.key;
+    return dot;
+  }
+
+  function renderLegend(): void {
+    if (!legendEl || !payload) return;
+    legendEl.innerHTML = "";
+    const values = allModeValues(payload, mode);
+    for (const v of values) {
+      const color = colorFor(v, values, mode);
+      const label = labelFor(v, mode);
+      const row = document.createElement("div");
+      row.className = "flex items-center gap-2";
+      const sw = document.createElement("span");
+      sw.className = "inline-block w-2.5 h-2.5 rounded-full shrink-0";
+      sw.style.background = color;
+      row.appendChild(sw);
+      const txt = document.createElement("span");
+      txt.className = "text-ink-muted truncate";
+      txt.textContent = label;
+      txt.title = label;
+      row.appendChild(txt);
+      legendEl.appendChild(row);
+    }
+  }
+
+  function renderTable(): void {
+    if (!tableEl) return;
+    tableEl.innerHTML = "";
+    const rows = clusterRowsFor(mode);
+    // Order: positive ids first, noise last (which the rows from bipartite/text
+    // summaries already satisfy; other modes sorted by size above).
+    for (const r of rows) {
+      const tr = document.createElement("tr");
+      tr.className = "border-t border-ink/10 hover:bg-paper-alt";
+      const nameCell = document.createElement("td");
+      nameCell.className = "px-3 py-2";
+      const idLabel = mode === "bipartite" || mode === "text"
+        ? (r.id === -1 ? "noise" : `#${r.id}`)
+        : "";
+      nameCell.innerHTML = idLabel
+        ? `<span class="font-mono text-xs text-ink-faint mr-1">${idLabel}</span>${escapeHtml(r.name)}`
+        : escapeHtml(r.name);
+      tr.appendChild(nameCell);
+
+      const sizeCell = document.createElement("td");
+      sizeCell.className = "px-3 py-2 text-right font-mono text-xs";
+      sizeCell.textContent = String(r.size);
+      tr.appendChild(sizeCell);
+
+      const saicaCell = document.createElement("td");
+      saicaCell.className = "px-3 py-2";
+      saicaCell.textContent = r.saica_top || "—";
+      tr.appendChild(saicaCell);
+
+      const covCell = document.createElement("td");
+      covCell.className = "px-3 py-2 text-right font-mono text-xs";
+      covCell.textContent = r.saica_top === "n/a"
+        ? "—"
+        : `${(r.saica_coverage * 100).toFixed(0)}%`;
+      tr.appendChild(covCell);
+
+      const memCell = document.createElement("td");
+      memCell.className = "px-3 py-2 text-ink-muted text-xs font-mono";
+      const top3 = r.member_ids.slice(0, 3).map((k) => k.split("::")[1] ?? k);
+      memCell.textContent = top3.join(", ") + (r.member_ids.length > 3 ? ` +${r.member_ids.length - 3}` : "");
+      tr.appendChild(memCell);
+
+      tableEl.appendChild(tr);
+    }
+  }
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function onMove(e: MouseEvent): void {
+    const target = e.target as Element | null;
+    if (!target || target.tagName !== "circle" || !tooltip || !svg || !payload) {
+      if (tooltip) tooltip.classList.add("hidden");
+      return;
+    }
+    const key = (target as SVGCircleElement).dataset.key;
+    if (!key) return;
+    const pt = payload.points.find((p) => p.key === key);
+    if (!pt) return;
+    const taxName = payload.taxonomies[pt.source_tax_id]?.name ?? pt.source_tax_id;
+    const clusterTxt = mode === "bipartite"
+      ? `bip #${pt.bipartite_cluster}`
+      : mode === "text"
+        ? `text #${pt.text_cluster}`
+        : mode === "saica"
+          ? pt.saica_match
+          : taxName;
+    tooltip.innerHTML = `<div class="font-semibold">${escapeHtml(pt.label)}</div>` +
+      `<div class="opacity-80">${escapeHtml(taxName)} · ${escapeHtml(pt.id)}</div>` +
+      `<div class="opacity-80">${escapeHtml(clusterTxt)} · SAICA: ${escapeHtml(pt.saica_match)}</div>`;
+    const rect = svg.getBoundingClientRect();
+    tooltip.style.left = `${e.clientX - rect.left}px`;
+    tooltip.style.top = `${e.clientY - rect.top}px`;
+    tooltip.classList.remove("hidden");
+  }
+
+  function onClick(e: MouseEvent): void {
+    const target = e.target as Element | null;
+    if (!target || target.tagName !== "circle" || !payload) return;
+    const key = (target as SVGCircleElement).dataset.key;
+    if (!key) return;
+    const pt = payload.points.find((p) => p.key === key);
+    if (!pt) return;
+    openPanel(pt);
+  }
+
+  function openPanel(pt: Point): void {
+    if (!panelEl || !panelTitle || !panelDesc || !panelSub || !panelChips) return;
+    const taxName = payload?.taxonomies[pt.source_tax_id]?.name ?? pt.source_tax_id;
+    panelSub.textContent = `${taxName} · ${pt.id}`;
+    panelTitle.textContent = pt.label;
+    panelDesc.textContent = pt.description || "(no description)";
+    panelChips.innerHTML = "";
+    pushChip(panelChips, `bipartite #${pt.bipartite_cluster}`,
+      bipName(pt.bipartite_cluster));
+    pushChip(panelChips, `text #${pt.text_cluster}`,
+      textName(pt.text_cluster));
+    pushChip(panelChips, "SAICA", pt.saica_match);
+
+    // List fellow cluster members of the currently-selected partition.
+    if (panelMembers && panelMembersWrap) {
+      panelMembers.innerHTML = "";
+      const peers = fellowMembers(pt);
+      if (peers.length > 0) {
+        panelMembersWrap.hidden = false;
+        for (const peer of peers) {
+          const li = document.createElement("li");
+          const tName = payload?.taxonomies[peer.source_tax_id]?.name ?? peer.source_tax_id;
+          li.innerHTML = `<span class="font-mono text-xs text-ink-faint">${escapeHtml(peer.id)}</span>`
+            + ` · <span>${escapeHtml(peer.label)}</span>`
+            + ` <span class="text-ink-faint">(${escapeHtml(tName)})</span>`;
+          panelMembers.appendChild(li);
+        }
+      } else {
+        panelMembersWrap.hidden = true;
+      }
+    }
+
+    panelEl.classList.remove("hidden");
+    panelEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function bipName(cid: number): string {
+    if (cid === -1) return "noise";
+    return payload?.clusters.bipartite.find((c) => c.id === cid)?.name ?? `cluster ${cid}`;
+  }
+  function textName(cid: number): string {
+    if (cid === -1) return "noise";
+    return payload?.clusters.text.find((c) => c.id === cid)?.name ?? `cluster ${cid}`;
+  }
+
+  function pushChip(parent: HTMLElement, key: string, value: string): void {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `<span class="text-ink-faint">${escapeHtml(key)}</span>` +
+      ` <span>${escapeHtml(value)}</span>`;
+    parent.appendChild(chip);
+  }
+
+  function fellowMembers(pt: Point): Point[] {
+    if (!payload) return [];
+    const same = (p: Point): boolean => {
+      if (p.key === pt.key) return false;
+      if (mode === "bipartite")
+        return p.bipartite_cluster === pt.bipartite_cluster && pt.bipartite_cluster >= 0;
+      if (mode === "text")
+        return p.text_cluster === pt.text_cluster && pt.text_cluster >= 0;
+      if (mode === "saica")
+        return p.saica_match === pt.saica_match && pt.saica_match !== "__unmapped__";
+      return p.source_tax_id === pt.source_tax_id;
+    };
+    return payload.points.filter(same).slice(0, 30);
+  }
+
+  function setMode(m: Mode): void {
+    mode = m;
+    renderScatter();
+    renderLegend();
+    renderTable();
+  }
+
+  function updateHeadline(): void {
+    if (!payload) return;
+    const s = payload.summary;
+    const ktext = document.getElementById("ts-k-text");
+    const kbip = document.getElementById("ts-k-bipartite");
+    const kman = document.getElementById("ts-k-manual");
+    const ari = document.getElementById("ts-ari-bip");
+    if (ktext) ktext.textContent = String(s.k_text);
+    if (kbip) kbip.textContent = String(s.k_bipartite);
+    if (kman) kman.textContent = String(s.k_manual_saica);
+    if (ari) ari.textContent = s.ari_bipartite_saica.toFixed(2);
+  }
+
+  async function init(): Promise<void> {
+    try {
+      const res = await fetch("/taxonomy_study.json");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      payload = (await res.json()) as Payload;
+    } catch (err) {
+      if (fallback) {
+        fallback.classList.remove("hidden");
+        fallback.textContent =
+          `Failed to load /taxonomy_study.json (${err}). ` +
+          "Run: .venv/bin/python -m pipeline.taxonomy_cluster.export_site_data";
+      }
+      return;
+    }
+    updateHeadline();
+    setMode("taxonomy");
+
+    svg?.addEventListener("mousemove", onMove);
+    svg?.addEventListener("mouseleave", () => tooltip?.classList.add("hidden"));
+    svg?.addEventListener("click", onClick);
+    document.querySelectorAll<HTMLInputElement>('input[name="ts-color"]').forEach((el) => {
+      el.addEventListener("change", () => {
+        if (el.checked) setMode(el.value as Mode);
+      });
+    });
+    panelClose?.addEventListener("click", () => panelEl?.classList.add("hidden"));
+  }
+
+  init();
+</script>

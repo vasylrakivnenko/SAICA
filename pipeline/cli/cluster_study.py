@@ -51,6 +51,7 @@ from pipeline.config import REPO_ROOT
 from pipeline.taxonomy_cluster import cluster as cluster_mod
 from pipeline.taxonomy_cluster import collect as collect_mod
 from pipeline.taxonomy_cluster import compare as compare_mod
+from pipeline.taxonomy_cluster import export_site_data as export_site_mod
 from pipeline.taxonomy_cluster import figures as figures_mod
 
 log = logging.getLogger("pipeline.cli.cluster_study")
@@ -536,6 +537,17 @@ def main(argv=None) -> int:
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(report, encoding="utf-8")
     log.info("Wrote narrative report -> %s", REPORT_PATH)
+
+    # 8. Refresh site-consumable JSON for /taxonomy-study. Best-effort:
+    # the study is the source of truth and must not fail if the site
+    # export hits an edge case (e.g. missing optional inputs).
+    try:
+        payload = export_site_mod.build_payload(research_dir=OUT_DIR)
+        site_path = export_site_mod.write_payload(payload)
+        log.info("Refreshed site JSON -> %s", site_path)
+    except Exception as exc:  # pragma: no cover - export is a best-effort sidecar
+        log.warning("Could not refresh site JSON (%s); /taxonomy-study will show stale data.", exc)
+
     log.info("Total runtime: %.2fs", time.perf_counter() - t0)
     return EXIT_OK
 
