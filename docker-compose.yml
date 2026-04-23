@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: saica_kg_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: saica
+      POSTGRES_PASSWORD: saica_local_dev
+      POSTGRES_DB: saica_kg
+    # Expose on 5433 on the host to avoid collision with a locally-installed
+    # Postgres on the default 5432. Inside the container Postgres still
+    # listens on 5432.
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./.postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saica -d saica_kg"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s

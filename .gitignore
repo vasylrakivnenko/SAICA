@@ -23,6 +23,11 @@ research/*.json
 research/raw/
 research/cache/
 
+# Postgres Docker volume
+.postgres-data/
+# Per-day API usage counters (Elicit budget, etc.)
+.pipeline/
+
 .DS_Store
 .idea/
 .vscode/

@@ -141,9 +141,30 @@ CREATE INDEX idx_candidate_papers_status ON candidate_papers (status, created_at
 - **Dedupe**: by canonical URL; also fuzzy-match titles using `rapidfuzz` (≥ 92 similarity).
 - **Relevance score** (0–1): weighted combination of keyword-hit count, entity presence, source reliability.
 
-## Azure LLM extraction
+## Azure Kimi-K2.5 extraction
 
-`pipeline/extract/azure_llm.py` uses `openai.AzureOpenAI` client with Pydantic schemas:
+Backend: **Azure AI Foundry** hosting Moonshot **Kimi-K2.5**, consumed via the **OpenAI-compatible client** (not `AzureOpenAI`).
+
+```python
+from openai import OpenAI
+client = OpenAI(
+    base_url=os.environ["AZURE_KIMI_ENDPOINT"],      # .../services.ai.azure.com/openai/v1/
+    api_key=os.environ["AZURE_KIMI_API_KEY"],
+)
+response = client.chat.completions.create(
+    model=os.environ["AZURE_KIMI_MODEL"],            # e.g. "Kimi-K2.5"
+    messages=[...],
+    max_tokens=2048,   # minimum — reasoning model eats budget on think-trace
+    tools=[...],       # for structured output use tools or response_format=json_schema
+)
+```
+
+Constraints:
+- `max_tokens >= 2048` — otherwise content returns None (think-trace eats budget).
+- 8 concurrent requests max; keep batch concurrency at **3–5**.
+- Endpoint format is `https://<resource>.services.ai.azure.com/openai/v1/`.
+
+`pipeline/extract/kimi.py` (module name reflecting the actual backend) uses Pydantic schemas:
 
 ```python
 class ToolExtraction(BaseModel):

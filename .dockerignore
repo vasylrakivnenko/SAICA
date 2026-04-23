@@ -1,0 +1,17 @@
+.venv/
+venv/
+node_modules/
+research/
+.postgres-data/
+.git/
+dist/
+build/
+.next/
+.astro/
+.svelte-kit/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
