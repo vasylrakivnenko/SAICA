@@ -4,35 +4,97 @@
   "title": "FailureMode",
   "description": "A supervision-addressable failure class.",
   "type": "object",
-  "required": ["id", "name", "description", "prior_work", "detection_signals"],
+  "required": [
+    "id",
+    "name",
+    "description",
+    "prior_work",
+    "detection_signals"
+  ],
   "properties": {
-    "id":          {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*[a-z0-9]$"},
-    "name":        {"type": "string"},
-    "tagline":     {"type": "string", "maxLength": 140},
-    "description": {"type": "string"},
-
-    "aliases":       {"type": "array", "items": {"type": "string"}, "description": "Alternative names used in the field."},
-    "related_modes": {"type": "array", "items": {"type": "string"}, "description": "Other FailureMode ids to disambiguate from."},
-
-    "prior_work":        {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "Paper ids grounding this class in the literature."},
-    "detection_signals": {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "How to recognize an instance."},
-
-    "canonical_definition_source": {"type": "string", "description": "Paper id that formalizes this definition, if any."},
-
-    "crosswalks": {
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9_]*[a-z0-9]$",
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "tagline": {
+      "maxLength": 140,
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
       "type": "array",
-      "description": "Explicit mappings from this SAICA-KG class into external taxonomies.",
+      "description": "Alternative names used in the field."
+    },
+    "related_modes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Other FailureMode ids to disambiguate from."
+    },
+    "prior_work": {
+      "description": "Paper ids grounding this class in the literature.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "detection_signals": {
+      "description": "How to recognize an instance.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "canonical_definition_source": {
+      "type": "string",
+      "description": "Paper id that formalizes this definition, if any."
+    },
+    "crosswalks": {
       "items": {
         "type": "object",
-        "required": ["taxonomy", "external_id", "confidence"],
+        "required": [
+          "taxonomy",
+          "external_id",
+          "confidence"
+        ],
         "properties": {
-          "taxonomy":     {"type": "string", "description": "Taxonomy node id."},
-          "external_id":  {"type": "string", "description": "Category id or label within that taxonomy."},
-          "confidence":   {"type": "string", "enum": ["exact", "partial", "broader", "narrower", "related"]},
-          "note":         {"type": "string"}
+          "taxonomy": {
+            "description": "Taxonomy node id.",
+            "type": "string"
+          },
+          "external_id": {
+            "description": "Category id or label within that taxonomy.",
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "exact",
+              "partial",
+              "broader",
+              "narrower",
+              "related"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
-      }
+      },
+      "type": "array",
+      "description": "Explicit mappings from this SAICA-KG class into external taxonomies."
     }
   },
   "additionalProperties": false

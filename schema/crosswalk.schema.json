@@ -4,29 +4,82 @@
   "title": "Crosswalk",
   "description": "A bulk mapping between a SAICA-KG axis and an external taxonomy's categories. Complements inline `crosswalks` declared on FailureMode nodes.",
   "type": "object",
-  "required": ["id", "saica_axis", "taxonomy", "mappings"],
+  "required": [
+    "id",
+    "saica_axis",
+    "taxonomy",
+    "mappings"
+  ],
   "properties": {
-    "id":          {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"},
-    "saica_axis":  {"type": "string", "enum": ["failure_mode", "control_paradigm", "temporal_phase", "autonomy_level", "locus_of_control"]},
-    "taxonomy":    {"type": "string", "description": "Taxonomy node id."},
-    "authored_by": {"type": "array", "items": {"type": "string"}},
-    "reviewed_by": {"type": "array", "items": {"type": "string"}},
-    "last_reviewed": {"type": "string", "format": "date"},
-
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "type": "string"
+    },
+    "saica_axis": {
+      "enum": [
+        "failure_mode",
+        "control_paradigm",
+        "temporal_phase",
+        "autonomy_level",
+        "locus_of_control"
+      ],
+      "type": "string"
+    },
+    "taxonomy": {
+      "description": "Taxonomy node id.",
+      "type": "string"
+    },
+    "authored_by": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reviewed_by": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "last_reviewed": {
+      "format": "date",
+      "type": "string"
+    },
     "mappings": {
-      "type": "array",
-      "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["saica_value", "external_id", "confidence"],
+        "required": [
+          "saica_value",
+          "external_id",
+          "confidence"
+        ],
         "properties": {
-          "saica_value": {"type": "string", "description": "Value on the SAICA axis (e.g., a FailureMode id)."},
-          "external_id": {"type": "string", "description": "Category id in the external taxonomy."},
-          "confidence":  {"type": "string", "enum": ["exact", "partial", "broader", "narrower", "related"]},
-          "note":        {"type": "string"}
+          "saica_value": {
+            "description": "Value on the SAICA axis (e.g., a FailureMode id).",
+            "type": "string"
+          },
+          "external_id": {
+            "description": "Category id in the external taxonomy.",
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "exact",
+              "partial",
+              "broader",
+              "narrower",
+              "related"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
-      }
+      },
+      "minItems": 1,
+      "type": "array"
     }
   },
   "additionalProperties": false

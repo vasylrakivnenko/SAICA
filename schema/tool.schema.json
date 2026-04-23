@@ -10,62 +10,213 @@
     "description",
     "first_released",
     "maturity_status",
+    "license",
     "control_paradigm",
     "temporal_phase",
     "autonomy_level",
-    "addresses_failure_modes",
-    "license"
+    "addresses_failure_modes"
   ],
   "properties": {
-    "id":          {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$", "description": "Stable kebab-case slug. Never changes."},
-    "name":        {"type": "string", "minLength": 1},
-    "tagline":     {"type": "string", "maxLength": 140},
-    "description": {"type": "string", "maxLength": 800},
-
-    "first_released": {"type": "string", "format": "date"},
-    "last_updated":   {"type": "string", "format": "date"},
-    "maturity_status": {"type": "string", "enum": ["experimental", "stable", "at_risk", "deprecated", "abandoned"]},
-
-    "published_by":      {"type": "string", "description": "Organization node id."},
-    "repository_url":    {"type": "string", "format": "uri"},
-    "documentation_url": {"type": "string", "format": "uri"},
-    "license":           {"type": "string", "description": "SPDX identifier or 'proprietary'."},
-
-    "control_paradigm": {"type": "string", "enum": ["prevention", "detection", "correction", "recovery"]},
-    "temporal_phase":   {"type": "string", "enum": ["pre_generation", "in_generation", "post_generation"]},
-    "autonomy_level":   {"type": "string", "enum": ["fully_autonomous", "graduated_hitl", "full_hitl"]},
-
+    "id": {
+      "description": "Stable kebab-case slug. Never changes.",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "type": "string"
+    },
+    "name": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tagline": {
+      "maxLength": 140,
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 800,
+      "type": "string"
+    },
+    "first_released": {
+      "format": "date",
+      "type": "string"
+    },
+    "last_updated": {
+      "format": "date",
+      "type": "string"
+    },
+    "maturity_status": {
+      "enum": [
+        "experimental",
+        "stable",
+        "at_risk",
+        "deprecated",
+        "abandoned"
+      ],
+      "type": "string"
+    },
+    "published_by": {
+      "type": "string",
+      "description": "Organization node id."
+    },
+    "repository_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "documentation_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "license": {
+      "description": "SPDX identifier or 'proprietary'.",
+      "type": "string"
+    },
+    "control_paradigm": {
+      "enum": [
+        "prevention",
+        "detection",
+        "correction",
+        "recovery"
+      ],
+      "type": "string"
+    },
+    "temporal_phase": {
+      "enum": [
+        "pre_generation",
+        "in_generation",
+        "post_generation"
+      ],
+      "type": "string"
+    },
+    "autonomy_level": {
+      "enum": [
+        "fully_autonomous",
+        "graduated_hitl",
+        "full_hitl"
+      ],
+      "type": "string"
+    },
     "addresses_failure_modes": {
-      "type": "array",
+      "items": {
+        "enum": [
+          "fabrication",
+          "obsolescence",
+          "dependency_blindness",
+          "logic_error",
+          "security_vulnerability",
+          "scope_creep",
+          "context_pollution",
+          "supply_chain_attack"
+        ],
+        "type": "string"
+      },
       "minItems": 1,
-      "items": {"type": "string", "enum": ["fabrication", "obsolescence", "dependency_blindness", "logic_error", "security_vulnerability", "scope_creep", "context_pollution", "supply_chain_attack"]}
+      "type": "array"
     },
     "locus_of_control": {
-      "type": "array",
-      "items": {"type": "string", "enum": ["model", "prompt", "context", "environment", "human"]}
+      "items": {
+        "enum": [
+          "model",
+          "prompt",
+          "context",
+          "environment",
+          "human"
+        ],
+        "type": "string"
+      },
+      "type": "array"
     },
-
-    "implements_techniques": {"type": "array", "items": {"type": "string"}},
-    "composes_with":         {"type": "array", "items": {"type": "string"}, "description": "Symmetric; both sides must declare."},
-    "feeds_into":            {"type": "array", "items": {"type": "string"}, "description": "Directed composition. A feeds_into B means A's output is consumed by B."},
-    "supersedes":            {"type": "array", "items": {"type": "string"}},
-    "runtime_requires":      {"type": "array", "items": {"type": "string"}, "description": "Libraries/runtimes the tool itself imports."},
-    "supervises_targets":    {"type": "array", "items": {"type": "string"}, "description": "Library / language / ecosystem the tool watches over."},
-
-    "cited_in":      {"type": "array", "items": {"type": "string"}},
-    "documented_in": {"type": "array", "items": {"type": "string"}},
-    "evaluated_on":  {"type": "array", "items": {"type": "string"}},
-
-    "security_notes":           {"type": "string"},
-    "signed_manifest":          {"type": "boolean"},
-    "openssf_scorecard_score":  {"type": ["number", "null"], "minimum": 0, "maximum": 10},
-
-    "stars":            {"type": "integer", "minimum": 0, "description": "GitHub stargazer count, refreshed periodically by validator/fetch_github_stars.py."},
-    "stars_updated_at": {"type": "string", "format": "date", "description": "Date the stars count was last fetched (YYYY-MM-DD)."},
-
-    "contributors":      {"type": "array", "items": {"type": "string"}},
-    "editorial_notes":   {"type": "string"},
-    "inclusion_rationale": {"type": "string"}
+    "implements_techniques": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "composes_with": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Symmetric; both sides must declare."
+    },
+    "feeds_into": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Directed composition. A feeds_into B means A's output is consumed by B."
+    },
+    "supersedes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "runtime_requires": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Libraries/runtimes the tool itself imports."
+    },
+    "supervises_targets": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Library / language / ecosystem the tool watches over."
+    },
+    "cited_in": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "documented_in": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "evaluated_on": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "security_notes": {
+      "type": "string"
+    },
+    "signed_manifest": {
+      "type": "boolean"
+    },
+    "openssf_scorecard_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "maximum": 10,
+      "minimum": 0
+    },
+    "stars": {
+      "minimum": 0,
+      "type": "integer",
+      "description": "GitHub stargazer count, refreshed periodically by validator/fetch_github_stars.py."
+    },
+    "stars_updated_at": {
+      "format": "date",
+      "type": "string",
+      "description": "Date the stars count was last fetched (YYYY-MM-DD)."
+    },
+    "contributors": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "editorial_notes": {
+      "type": "string"
+    },
+    "inclusion_rationale": {
+      "type": "string"
+    }
   },
   "additionalProperties": false
 }

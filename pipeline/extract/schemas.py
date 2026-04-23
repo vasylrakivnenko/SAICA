@@ -6,8 +6,9 @@ silently "pick" a value for us; it has to own a confidence score, and it has
 to quote supporting text. Anything below graduation threshold will be
 re-surfaced to a human reviewer as ``# REVIEW REQUIRED``.
 
-Enum literals mirror ``schema/enums.yml`` and ``schema/tool.schema.json``. If
-those move, this file must move with them.
+Enum literals are re-exported from the canonical :mod:`pipeline.models` so
+they cannot drift from ``schema/enums.yml`` / ``schema/*.json``. If a new
+value lands in the canonical models, it flows here automatically.
 """
 
 from __future__ import annotations
@@ -16,27 +17,29 @@ from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from pipeline import models as _canonical
 
-# --- Controlled vocabularies (mirror schema/enums.yml) ---------------------
 
-FailureModeId = Literal[
-    "fabrication",
-    "obsolescence",
-    "dependency_blindness",
-    "logic_error",
-    "security_vulnerability",
-    "scope_creep",
-    "context_pollution",
-    "supply_chain_attack",
-]
+def _literal_from_enum(enum_cls: type) -> object:
+    """Build a ``Literal[...]`` from an Enum's member values.
 
-ControlParadigm = Literal["prevention", "detection", "correction", "recovery"]
+    Pydantic's JSON-schema emitter renders ``Literal`` cleanly as an
+    ``enum`` array of strings, which is what Kimi's function-calling path
+    expects. We deliberately keep these as ``Literal`` rather than passing
+    the Enum itself so the Kimi schema doesn't carry Python-side metadata
+    the model can't reason about.
+    """
+    values = tuple(m.value for m in enum_cls)
+    return Literal[values]  # type: ignore[valid-type]
 
-TemporalPhase = Literal["pre_generation", "in_generation", "post_generation"]
 
-AutonomyLevel = Literal["fully_autonomous", "graduated_hitl", "full_hitl"]
+# --- Controlled vocabularies (re-export from pipeline.models) -------------
 
-LocusOfControl = Literal["model", "prompt", "context", "environment", "human"]
+FailureModeId = _literal_from_enum(_canonical.FailureModeId)
+ControlParadigm = _literal_from_enum(_canonical.ControlParadigm)
+TemporalPhase = _literal_from_enum(_canonical.TemporalPhase)
+AutonomyLevel = _literal_from_enum(_canonical.AutonomyLevel)
+LocusOfControl = _literal_from_enum(_canonical.LocusOfControl)
 
 
 # --- ConfidenceField -------------------------------------------------------
