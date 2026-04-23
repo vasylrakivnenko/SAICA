@@ -1,0 +1,17 @@
+SAICA-KG Data License
+=====================
+
+The contents of the `data/` directory in this repository — the knowledge graph
+itself, including tool descriptions, failure-mode classifications, crosswalks,
+recipes, and citations — are licensed under the
+Creative Commons Attribution 4.0 International License (CC-BY-4.0).
+
+https://creativecommons.org/licenses/by/4.0/
+
+Attribution requirement: any reuse must cite SAICA-KG and link to the project.
+Official citation format will be published with the v0.1 release.
+
+Code in this repository (schema/, validator/, mcp_server/, site/) is licensed
+separately under Apache-2.0. See LICENSE.
+
+Copyright 2026 SAICA-KG Contributors

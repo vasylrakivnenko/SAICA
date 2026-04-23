@@ -1,0 +1,31 @@
+id: supply_chain_attack
+name: Supply-chain attack
+tagline: Slopsquatting, typosquatting, compromised MCP servers.
+description: >
+  The agent is induced — by its own hallucination, by an adversarial package
+  name, or by a compromised upstream — to install or invoke malicious code.
+  Covers slopsquatting (hallucinated package names registered by an attacker),
+  typosquatting (near-miss names), and compromised MCP servers or tools.
+
+aliases:
+  - slopsquatting
+  - typosquatting
+
+related_modes:
+  - fabrication
+  - security_vulnerability
+
+prior_work:
+  - spracklen-2024-we-have-a-package
+
+detection_signals:
+  - Agent-proposed install resolves to a package registered within the last 30 days with no prior maintainer reputation.
+  - Package name is a near-miss (Levenshtein ≤ 2) of a well-known dependency.
+  - MCP server manifest is unsigned or from an unknown publisher.
+  - Post-install, the environment shows outbound connections to unexpected hosts.
+
+crosswalks:
+  - taxonomy: owasp-agentic-top-10-2026
+    external_id: ASI04
+    confidence: exact
+    note: OWASP ASI04 "Agentic Supply Chain Vulnerabilities" is the direct counterpart, including slopsquatting.

@@ -1,0 +1,24 @@
+id: spracklen-2024-we-have-a-package
+authors:
+  - Joseph Spracklen
+  - Raveen Wijewickrama
+  - Nazmus Sakib
+  - Anindya Maiti
+  - Bimal Viswanath
+year: 2024
+title: "We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs"
+venue: USENIX Security
+url: https://www.semanticscholar.org/paper/b76124ef53341af42d6d582ffe340cd0ddb49fc8
+citation_count: 55
+relevance_tags:
+  - supply-chain
+  - package-hallucination
+  - slopsquatting
+  - failure-mode-evidence
+tldr: >
+  Canonical empirical study of "slopsquatting" — package hallucinations by
+  code-generating LLMs. Defines the phenomenon and measures prevalence across
+  commercial and open-source models.
+notes: >
+  Must-cite. Grounds the supply_chain_attack FailureMode and supports SAICA-KG's
+  stance that supply-chain awareness must be built in from node 1.

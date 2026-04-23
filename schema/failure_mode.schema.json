@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saica-kg.dev/schema/failure_mode.schema.json",
+  "title": "FailureMode",
+  "description": "A supervision-addressable failure class.",
+  "type": "object",
+  "required": ["id", "name", "description", "prior_work", "detection_signals"],
+  "properties": {
+    "id":          {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*[a-z0-9]$"},
+    "name":        {"type": "string"},
+    "tagline":     {"type": "string", "maxLength": 140},
+    "description": {"type": "string"},
+
+    "aliases":       {"type": "array", "items": {"type": "string"}, "description": "Alternative names used in the field."},
+    "related_modes": {"type": "array", "items": {"type": "string"}, "description": "Other FailureMode ids to disambiguate from."},
+
+    "prior_work":        {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "Paper ids grounding this class in the literature."},
+    "detection_signals": {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "How to recognize an instance."},
+
+    "canonical_definition_source": {"type": "string", "description": "Paper id that formalizes this definition, if any."},
+
+    "crosswalks": {
+      "type": "array",
+      "description": "Explicit mappings from this SAICA-KG class into external taxonomies.",
+      "items": {
+        "type": "object",
+        "required": ["taxonomy", "external_id", "confidence"],
+        "properties": {
+          "taxonomy":     {"type": "string", "description": "Taxonomy node id."},
+          "external_id":  {"type": "string", "description": "Category id or label within that taxonomy."},
+          "confidence":   {"type": "string", "enum": ["exact", "partial", "broader", "narrower", "related"]},
+          "note":         {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,51 @@
+id: pydantic-ai
+name: PydanticAI
+tagline: Structured-output agent framework with Pydantic-typed tool and return schemas.
+description: >
+  Python agent framework that enforces Pydantic schemas on tool inputs and
+  model outputs, with automatic retries on validation failure. Provides a
+  dependency-injection system for testability and observability hooks for
+  integration with Logfire.
+
+first_released: 2024-10-01
+last_updated: 2026-03-15
+maturity_status: stable
+
+published_by: pydantic
+repository_url: https://github.com/pydantic/pydantic-ai
+documentation_url: https://ai.pydantic.dev
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - structured-output-validation
+  - validator-retry-loop
+
+composes_with:
+  - context-hub
+
+security_notes: >
+  Open-source, Pydantic-backed. Signed releases via PyPI. Pin to a known
+  version to avoid supply-chain drift. Review plugin ecosystem for any
+  custom validators you adopt.
+signed_manifest: true
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies the detection × post_generation × fully_autonomous cell with a
+  concrete implementation of validator-retry. Well-known, widely-adopted
+  reference point.

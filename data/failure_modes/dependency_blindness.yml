@@ -1,0 +1,29 @@
+id: dependency_blindness
+name: Dependency blindness
+tagline: Reimplementing functionality that already exists in reachable code.
+description: >
+  The agent reimplements from scratch a function, class, or utility whose
+  equivalent is already available in declared dependencies, the standard
+  library, or reachable internal modules. Silent quality regression — the
+  code may run correctly but increases surface area, duplicates effort, and
+  drifts from ecosystem conventions. Distinct from Liu 2025's "Code Copycat"
+  (intra-generation repetition): dependency_blindness is about
+  cross-codebase reinvention.
+
+aliases:
+  - reinvention
+  - ecosystem-duplication
+
+related_modes:
+  - fabrication
+  - logic_error
+
+prior_work:
+  - liu-2025-code-copycat
+  - usman-2017-taxonomy-construction
+
+detection_signals:
+  - Emitted function signature matches an importable symbol in the project's declared dependencies.
+  - Emitted function body substantially overlaps (≥70% AST similarity) with a known stdlib symbol.
+  - Agent emits code despite a language-server suggestion to use an existing symbol.
+  - Emitted module reimplements a utility already present in the repository.

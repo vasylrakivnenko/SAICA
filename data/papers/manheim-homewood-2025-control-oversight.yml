@@ -1,0 +1,21 @@
+id: manheim-homewood-2025-control-oversight
+authors:
+  - David Manheim
+  - James Homewood
+year: 2025
+title: "Distinguishing Control and Oversight in Agentic AI"
+venue: arXiv
+arxiv_id: "2507.03525"
+url: https://arxiv.org/abs/2507.03525
+relevance_tags:
+  - supervision-vocabulary
+  - control-paradigm
+  - temporal-phase
+tldr: >
+  Distinguishes control (ex-ante / operational) from oversight (ex-post /
+  governance). Provides vocabulary that converges with SAICA-KG's
+  TemporalPhase and ControlParadigm partitions.
+notes: >
+  Cite for external validation of the TemporalPhase partition and for the
+  ControlParadigm discussion. Useful anchor against "your partitions are
+  arbitrary" critiques.

@@ -1,0 +1,21 @@
+id: usman-2017-taxonomy-construction
+authors:
+  - Muhammad Usman
+  - Ricardo Britto
+  - Jürgen Börstler
+  - Emilia Mendes
+year: 2017
+title: "Taxonomies in Software Engineering: A Systematic Mapping Study and a Revised Taxonomy Development Method"
+venue: Information and Software Technology
+citation_count: 171
+url: https://www.sciencedirect.com/science/article/abs/pii/S0950584917300713
+relevance_tags:
+  - methodology
+  - taxonomy-construction
+  - faceted-classification
+tldr: >
+  Canonical mapping study on taxonomy construction methods in SE. Grounds
+  the methodological spine that SAICA-KG's honest-MECE approach inherits.
+notes: >
+  Cite as the methodology baseline for SAICA-KG's taxonomy-construction
+  justification. Neutralizes "your approach is ad hoc" reviewer critiques.

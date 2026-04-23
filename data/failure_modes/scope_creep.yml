@@ -1,0 +1,27 @@
+id: scope_creep
+name: Scope creep
+tagline: Actions outside declared task boundary.
+description: >
+  The agent performs actions beyond the user-stated task scope — edits files
+  not in the request, installs packages not asked for, modifies configs
+  outside the declared surface, or chains follow-on work unprompted.
+
+prior_work:
+  - cemri-2025-mast
+  - zhu-2025-agent-error-taxonomy
+
+detection_signals:
+  - Agent modifies files outside the declared task surface (e.g., paths in the user prompt).
+  - Agent installs dependencies not named in the prompt.
+  - Agent commits additional unrelated changes alongside the requested edit.
+  - Agent performs cleanup, refactoring, or "improvement" not explicitly requested.
+
+crosswalks:
+  - taxonomy: mast
+    external_id: MAST-FM-01
+    confidence: exact
+    note: MAST Role Violation is the direct counterpart at the multi-agent level.
+  - taxonomy: owasp-agentic-top-10-2026
+    external_id: ASI02
+    confidence: partial
+    note: OWASP "Tool Misuse" partially overlaps; scope_creep is narrower (task-boundary violation).

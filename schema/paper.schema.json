@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saica-kg.dev/schema/paper.schema.json",
+  "title": "Paper",
+  "description": "An academic or gray-literature reference used to ground nodes in SAICA-KG.",
+  "type": "object",
+  "required": ["id", "authors", "year", "title"],
+  "properties": {
+    "id":      {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"},
+    "authors": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "year":    {"type": "integer", "minimum": 1960, "maximum": 2100},
+    "title":   {"type": "string"},
+    "venue":   {"type": "string"},
+    "url":     {"type": "string", "format": "uri"},
+    "doi":     {"type": "string"},
+    "arxiv_id":{"type": "string"},
+    "semantic_scholar_id": {"type": "string"},
+
+    "abstract":      {"type": "string"},
+    "tldr":          {"type": "string"},
+    "citation_count":{"type": "integer", "minimum": 0},
+
+    "relevance_tags": {"type": "array", "items": {"type": "string"}, "description": "Free tags to help editorial grouping (e.g. 'failure-mode-taxonomy', 'MCP-benchmark')."},
+
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}

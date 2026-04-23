@@ -1,0 +1,19 @@
+id: wang-2024-llms-meet-library-evolution
+authors:
+  - Chong Wang
+  - Kaifeng Huang
+  - Jian Zhang
+  - "et al."
+year: 2024
+title: "LLMs Meet Library Evolution: Evaluating Deprecated API Usage in LLM-based Code Completion"
+venue: ICSE
+url: https://www.semanticscholar.org/paper/llms-meet-library-evolution
+citation_count: 30
+relevance_tags:
+  - obsolescence
+  - deprecated-api
+  - failure-mode-evidence
+tldr: >
+  Canonical study of deprecated-API usage in LLM-based code completion; shows
+  systematic tendency of LLMs to use retired API versions.
+notes: Must-cite. Grounds the obsolescence FailureMode.

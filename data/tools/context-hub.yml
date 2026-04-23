@@ -1,0 +1,52 @@
+id: context-hub
+name: Context Hub
+tagline: Up-to-date, curated API docs for coding agents.
+description: >
+  CLI and protocol that gives coding agents curated, versioned,
+  LLM-optimized API documentation. Primitives: docs, skills, annotations,
+  feedback. Addresses the training-data-staleness root cause of
+  fabrication and obsolescence at the pre-generation phase.
+
+first_released: 2026-03-09
+last_updated: 2026-04-15
+maturity_status: experimental
+
+published_by: deeplearning-ai
+repository_url: https://github.com/andrewyng/context-hub
+documentation_url: https://deeplearning.ai/context-hub
+license: Apache-2.0
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - obsolescence
+
+locus_of_control:
+  - context
+
+implements_techniques:
+  - doc-grounded-rag
+  - skill-library
+
+security_notes: >
+  Open-source, maintained by DeepLearning.AI. Docs delivered via CLI under
+  user control. Consider pinning the CLI version to avoid supply-chain drift.
+signed_manifest: false
+openssf_scorecard_score: null
+
+composes_with:
+  - pydantic-ai
+  - e2b
+  - claude-code
+
+inclusion_rationale: >
+  Occupies a previously unfilled cell in the grid (prevention ×
+  pre_generation × fully_autonomous, targeting obsolescence). Directly
+  validates the "prevention-first" positioning at the context facet.
+
+editorial_notes: >
+  Added 2026-03-10 (from user's v0.1 spec). Fast-moving; revisit
+  maturity_status at 90-day checkpoint.

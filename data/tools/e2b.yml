@@ -1,0 +1,48 @@
+id: e2b
+name: E2B
+tagline: Secure sandboxes for AI-generated code execution.
+description: >
+  Cloud-hosted sandboxed runtime for executing AI-generated code with
+  isolation, snapshotting, and fine-grained resource limits. Per-session
+  ephemeral environments with filesystem and network controls.
+
+first_released: 2023-07-01
+last_updated: 2026-04-01
+maturity_status: stable
+
+published_by: e2b
+repository_url: https://github.com/e2b-dev/e2b
+documentation_url: https://e2b.dev/docs
+license: Apache-2.0
+
+control_paradigm: recovery
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - supply_chain_attack
+  - security_vulnerability
+  - logic_error
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - sandboxed-execution
+  - resource-limiting
+  - ephemeral-filesystem
+
+composes_with:
+  - context-hub
+
+security_notes: >
+  Hosted sandbox provider. Review data-residency and tenancy isolation
+  posture for sensitive workloads. Local/on-prem alternatives (Daytona,
+  Modal, Firecracker) are worth evaluating for high-trust environments.
+signed_manifest: true
+openssf_scorecard_score: null
+
+inclusion_rationale: >
+  Canonical recovery × post_generation × fully_autonomous exemplar.
+  Sandboxed execution is a load-bearing supervision primitive for
+  autonomous coding agents.

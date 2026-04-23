@@ -1,0 +1,19 @@
+id: cemri-2025-mast
+authors:
+  - Melis Cemri
+  - "et al."
+year: 2025
+title: "Why Do Multi-Agent LLM Systems Fail? MAST: A Multi-Agent System Failure Taxonomy"
+venue: arXiv
+arxiv_id: "2503.13657"
+url: https://arxiv.org/abs/2503.13657
+relevance_tags:
+  - failure-mode-taxonomy
+  - multi-agent
+  - external-taxonomy-seed
+tldr: >
+  Grounded-theory taxonomy of 14 multi-agent failure modes across 3 clusters,
+  derived from 1,600 annotated traces over 7 MAS frameworks.
+notes: >
+  Must-cite. Seeds the MAST Taxonomy node in SAICA-KG and is a primary input
+  for the crosswalk-as-MCP-service contribution.

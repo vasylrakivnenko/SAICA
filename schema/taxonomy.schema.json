@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saica-kg.dev/schema/taxonomy.schema.json",
+  "title": "Taxonomy",
+  "description": "An external failure-mode or risk taxonomy that SAICA-KG cross-walks into its own facets.",
+  "type": "object",
+  "required": ["id", "name", "owner", "version", "categories"],
+  "properties": {
+    "id":      {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"},
+    "name":    {"type": "string"},
+    "owner":   {"type": "string", "description": "Owning organization or working group."},
+    "version": {"type": "string", "description": "Version or year identifier of the external taxonomy as of ingestion."},
+    "first_published": {"type": "string", "format": "date"},
+    "last_updated":    {"type": "string", "format": "date"},
+    "url":             {"type": "string", "format": "uri"},
+    "license":         {"type": "string"},
+    "paper_id":        {"type": "string", "description": "Paper node id if the taxonomy is published academically."},
+
+    "scope": {"type": "string", "description": "What the taxonomy covers (e.g., 'failure modes for multi-agent systems')."},
+
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["external_id", "label"],
+        "properties": {
+          "external_id": {"type": "string", "description": "The taxonomy's own identifier for this category (e.g., 'ASI04', 'MAS-FM-7')."},
+          "label":       {"type": "string"},
+          "description": {"type": "string"},
+          "parent_id":   {"type": "string", "description": "If the taxonomy is hierarchical."}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "notes":            {"type": "string"},
+    "inclusion_rationale": {"type": "string"}
+  },
+  "additionalProperties": false
+}

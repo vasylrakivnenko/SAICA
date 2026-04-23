@@ -1,0 +1,20 @@
+id: zhu-2025-agent-error-taxonomy
+authors:
+  - Zhu
+  - "et al."
+year: 2025
+title: "Where LLM Agents Fail: A Taxonomy of Errors and the AgentErrorBench Dataset"
+venue: arXiv
+arxiv_id: "2509.25370"
+url: https://arxiv.org/abs/2509.25370
+citation_count: 22
+relevance_tags:
+  - failure-mode-taxonomy
+  - agent-errors
+tldr: >
+  AgentErrorTaxonomy organizes LLM agent failures by module (memory,
+  reflection, planning, action, system). Paired with AgentErrorBench dataset.
+notes: >
+  Seed paper for multiple FailureMode prior_work lists. Module-based axis;
+  SAICA-KG absorbs these as multi-valued FailureMode tags rather than as
+  strict partition.

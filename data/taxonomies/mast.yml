@@ -1,0 +1,66 @@
+id: mast
+name: "MAST: Multi-Agent System Failure Taxonomy"
+owner: Cemri et al. (UC Berkeley + collaborators)
+version: "2025"
+first_published: 2025-03-17
+url: https://arxiv.org/abs/2503.13657
+license: "arXiv preprint; taxonomy content CC-BY"
+paper_id: cemri-2025-mast
+scope: >
+  Failure modes of multi-agent LLM systems, grounded-theory derived from
+  1,600 annotated traces across 7 multi-agent frameworks.
+
+categories:
+  - external_id: MAST-FM-01
+    label: Role Violation
+    description: Agent acts outside its declared role or scope.
+  - external_id: MAST-FM-02
+    label: Task Decomposition Failure
+    description: Agent fails to break a task into solvable subtasks.
+  - external_id: MAST-FM-03
+    label: Coordination Failure
+    description: Agents fail to coordinate on shared state or handoff.
+  - external_id: MAST-FM-04
+    label: Redundant Work
+    description: Multiple agents duplicate effort without coordination.
+  - external_id: MAST-FM-05
+    label: Communication Breakdown
+    description: Messages between agents are lost, misinterpreted, or ignored.
+  - external_id: MAST-FM-06
+    label: Stalling / Deadlock
+    description: Agents block waiting on each other with no progress.
+  - external_id: MAST-FM-07
+    label: Premature Termination
+    description: Agent ends a task before completion criteria are met.
+  - external_id: MAST-FM-08
+    label: Goal Drift
+    description: Agent's working goal diverges from the user's stated goal.
+  - external_id: MAST-FM-09
+    label: Tool Misuse
+    description: Agent invokes an available tool incorrectly or unnecessarily.
+  - external_id: MAST-FM-10
+    label: Fabrication in Inter-Agent Messages
+    description: Agent sends factually incorrect information to another agent.
+  - external_id: MAST-FM-11
+    label: Verification Failure
+    description: Agent accepts incorrect output without checking.
+  - external_id: MAST-FM-12
+    label: Escalation Failure
+    description: Agent does not escalate to a human when appropriate.
+  - external_id: MAST-FM-13
+    label: Context Loss
+    description: Relevant prior context is dropped or truncated.
+  - external_id: MAST-FM-14
+    label: Infinite Loop
+    description: Agent cycles over the same state or tool call indefinitely.
+
+notes: >
+  Category labels here are paraphrased for seed purposes and MUST be verified
+  against the MAST paper's Table 1 before v0.1 release. Full-text review is
+  a Week-1 task.
+
+inclusion_rationale: >
+  MAST is the most-cited 2025 multi-agent failure taxonomy and is a primary
+  ingestion target for SAICA-KG's crosswalk contribution. Its MAS focus
+  complements SAICA-KG's single-agent coding-agent scope — crosswalks to
+  FailureMode tags surface which modes generalize across agent topologies.

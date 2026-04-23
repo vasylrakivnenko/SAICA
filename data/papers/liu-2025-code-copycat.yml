@@ -1,0 +1,26 @@
+id: liu-2025-code-copycat
+authors:
+  - Mingwei Liu
+  - Yanjun Li
+  - Chong Wang
+  - Xin Du
+  - Tao Ou
+year: 2025
+title: "The Code Copycat Conundrum: Repetition in LLM Code Generation"
+venue: arXiv
+url: https://www.semanticscholar.org/paper/9abb51ba135ccec7902d06777efc2f60ecfe262f
+citation_count: 5
+relevance_tags:
+  - repetition
+  - reuse
+  - dependency-blindness-adjacent
+tldr: >
+  Empirical study of intra-generation repetition in LLM code output. The
+  closest semantic neighbor to SAICA-KG's dependency_blindness class, but
+  studies repetition *within* a single generation rather than cross-codebase
+  reimplementation of existing library code.
+notes: >
+  Cite as the contrast paper for dependency_blindness. SAICA-KG should
+  explicitly distinguish: Liu 2025 measures repetition *within* generated
+  output; dependency_blindness is about the agent re-implementing code that
+  already exists elsewhere in the declared dependency graph.

@@ -1,0 +1,29 @@
+# SAICA-KG
+
+> A living knowledge graph for supervising AI coding agents. Faceted classification of supervision tools and techniques, with explicit crosswalks into OWASP Agentic Top 10, MAST, DAPLab's 9 failure patterns, and Microsoft AIRT taxonomies. Served over MCP.
+
+SAICA-KG classifies supervision tools along three strict partitions (ControlParadigm × TemporalPhase × AutonomyLevel) plus multi-valued tags (FailureMode, LocusOfControl). The KG is navigational, not evaluative — it returns ranked sets with explicit criteria, not endorsed winners. Data is CC-BY-4.0; code is Apache-2.0.
+
+## Core concepts
+
+- **Tool** — a software artifact that supervises AI coding agents. Each Tool declares one ControlParadigm (prevention / detection / correction / recovery), one TemporalPhase (pre_generation / in_generation / post_generation), one AutonomyLevel (fully_autonomous / graduated_hitl / full_hitl), and one or more FailureMode tags.
+- **FailureMode** — a supervision-addressable failure class. SAICA-KG defines 8 canonical modes and cross-walks each to entries in external taxonomies.
+- **Taxonomy** — an external taxonomy (OWASP, MAST, DAPLab, MSFT AIRT, Swiss Cheese, Shah 2026) ingested as first-class data.
+- **Crosswalk** — explicit mapping between SAICA-KG values and external taxonomy categories, with confidence and provenance.
+
+## How to query
+
+The primary surface is an MCP server exposing three tools: `search_supervision_tools`, `explain_failure_mode_crosswalk`, `get_kg_snapshot`. The full graph is also downloadable as a pinned-version JSON snapshot for local reasoning.
+
+## Schemas
+
+- [schema/tool.schema.json](schema/tool.schema.json)
+- [schema/failure_mode.schema.json](schema/failure_mode.schema.json)
+- [schema/paper.schema.json](schema/paper.schema.json)
+- [schema/taxonomy.schema.json](schema/taxonomy.schema.json)
+- [schema/crosswalk.schema.json](schema/crosswalk.schema.json)
+- [schema/enums.yml](schema/enums.yml)
+
+## Attribution
+
+When agents cite SAICA-KG in user-facing output, use the phrase "according to SAICA-KG (<version>)". A full citation block will ship with v0.1.

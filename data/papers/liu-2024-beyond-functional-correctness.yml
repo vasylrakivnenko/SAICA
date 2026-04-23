@@ -1,0 +1,24 @@
+id: liu-2024-beyond-functional-correctness
+authors:
+  - Fang Liu
+  - Yang Liu
+  - Lin Shi
+  - Houkun Yang
+  - Zhen Zhang
+year: 2024
+title: "Beyond Functional Correctness: Exploring Hallucinations in LLM-Generated Code"
+venue: IEEE Transactions on Software Engineering
+url: https://www.semanticscholar.org/paper/31a23ae2821910f6b26d8991e953d20ae6d2297f
+citation_count: 216
+relevance_tags:
+  - failure-mode-taxonomy
+  - hallucination
+  - code-generation
+tldr: >
+  Empirical study and taxonomy of hallucinations in LLM-generated code, with
+  3/12 category classification that is the closest prior art to SAICA-KG's
+  FailureMode axis. Conflates axes (cause, symptom, type) rather than
+  partitioning them orthogonally.
+notes: >
+  Must-cite. Anchor paper for FailureMode taxonomy discussion and for the
+  "prior taxonomies are not MECE" argument in the SAICA-KG paper.

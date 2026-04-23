@@ -1,0 +1,28 @@
+id: obsolescence
+name: Obsolescence
+tagline: Using deprecated APIs, retired packages, or outdated library versions.
+description: >
+  The agent emits code that references real APIs or packages that have been
+  deprecated, removed, or materially changed in their recommended version.
+  Distinct from fabrication (non-existent) and from dependency_blindness
+  (real-and-current-but-ignored).
+
+related_modes:
+  - fabrication
+  - dependency_blindness
+
+prior_work:
+  - wang-2024-llms-meet-library-evolution
+  - liu-2024-beyond-functional-correctness
+
+detection_signals:
+  - Imported API is marked deprecated in the target library's current release notes.
+  - Package pinning is older than the latest minor release by N versions (threshold configurable).
+  - Language-server or linter emits a deprecation warning.
+  - Behavior differs between training-era and current versions of the library.
+
+crosswalks:
+  - taxonomy: daplab-9-patterns
+    external_id: DAP-03
+    confidence: exact
+    note: DAPLab "Stale API Usage" is the direct counterpart.

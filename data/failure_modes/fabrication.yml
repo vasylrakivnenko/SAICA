@@ -1,0 +1,27 @@
+id: fabrication
+name: Fabrication
+tagline: Generating reference to non-existent APIs, packages, or symbols.
+description: >
+  The agent emits code that references APIs, packages, functions, or symbols
+  that do not exist in any reachable dependency or runtime. Syntactically
+  plausible, factually false. Distinct from obsolescence (real-but-retired)
+  and from dependency blindness (real-and-present-but-ignored).
+
+aliases:
+  - api-hallucination
+  - package-hallucination
+
+related_modes:
+  - obsolescence
+  - dependency_blindness
+  - supply_chain_attack
+
+prior_work:
+  - liu-2024-beyond-functional-correctness
+  - spracklen-2024-we-have-a-package
+
+detection_signals:
+  - Agent emits an import or function call whose identifier is absent from all declared dependencies and stdlib.
+  - Static analyzer (e.g., pyflakes, tsc) flags the reference as undefined at pre-commit.
+  - Execution-grounded check (sandboxed run) raises ImportError, AttributeError, or analogous resolution failure.
+  - LSP-based symbol lookup returns no candidate.

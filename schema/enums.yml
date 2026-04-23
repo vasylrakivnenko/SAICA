@@ -1,0 +1,181 @@
+# SAICA-KG controlled vocabularies (v0.1)
+# Enum values are citation-stable. IDs here must not change across minor versions.
+
+ControlParadigm:
+  description: >
+    Strict partition over where in the failure lifecycle a supervision
+    intervention acts. Every Tool belongs to exactly one ControlParadigm.
+  partition: true
+  values:
+    prevention:
+      label: Prevention
+      description: Act before the failure has a chance to occur.
+    detection:
+      label: Detection
+      description: Observe that a failure has occurred or is occurring.
+    correction:
+      label: Correction
+      description: Fix the failure after detecting it.
+    recovery:
+      label: Recovery
+      description: Restore system state when in-place correction is not viable.
+
+TemporalPhase:
+  description: >
+    Strict partition over the temporal position of a supervision intervention
+    relative to the agent's action. Every Tool belongs to exactly one phase.
+  partition: true
+  values:
+    pre_generation:
+      label: Pre-generation
+      description: Before the agent emits the current action.
+      external_alignment:
+        - "Manheim-Homewood 2025: ex-ante"
+        - "Liu 2025: Phase 1 (planning)"
+        - "Lindner 2025: sync"
+    in_generation:
+      label: In-generation
+      description: During emission (constrained decoding, tool-call validation).
+      external_alignment:
+        - "Manheim-Homewood 2025: real-time"
+        - "Lindner 2025: semi-sync"
+    post_generation:
+      label: Post-generation
+      description: After emission, before or after execution.
+      external_alignment:
+        - "Manheim-Homewood 2025: ex-post"
+        - "Liu 2025: Phase 3 (validation)"
+        - "Lindner 2025: async"
+
+AutonomyLevel:
+  description: >
+    Strict partition over the operational autonomy at which a supervision tool
+    is designed to work. Every Tool has exactly one AutonomyLevel; tools that
+    span multiple modes should be modeled as separate Tool nodes or via
+    `operating_modes` secondary tags.
+  partition: true
+  values:
+    fully_autonomous:
+      label: Fully autonomous
+      description: Agent acts without per-step human approval.
+      external_alignment:
+        - "Navneet-Chandra 2025: autonomous / destructive"
+        - "Cihon-Stein 2025: high impact + low oversight"
+    graduated_hitl:
+      label: Graduated HITL
+      description: Autonomous for low-risk actions; escalates for high-risk.
+      external_alignment:
+        - "Navneet-Chandra 2025: generative"
+        - "Cihon-Stein 2025: medium impact + partial oversight"
+    full_hitl:
+      label: Full HITL
+      description: Every write/mutation requires human approval.
+      external_alignment:
+        - "Navneet-Chandra 2025: suggestive"
+        - "Cihon-Stein 2025: low impact + high oversight"
+
+FailureMode:
+  description: >
+    Open set of supervision-addressable failure classes. Multi-valued by
+    design; a single Tool may address several FailureModes, and a single
+    real-world fault may exhibit multiple modes.
+  partition: false
+  values:
+    fabrication:
+      label: Fabrication
+      description: Generating reference to non-existent APIs, packages, or symbols.
+    obsolescence:
+      label: Obsolescence
+      description: Using deprecated APIs, retired packages, or outdated library versions.
+    dependency_blindness:
+      label: Dependency blindness
+      description: >
+        Reimplementing functionality already available in declared dependencies,
+        the standard library, or reachable internal modules. Cross-codebase
+        reinvention. Distinct from intra-generation repetition (Liu 2025).
+      aliases:
+        - reinvention
+    logic_error:
+      label: Logic error
+      description: Correct API use, incorrect logic.
+    security_vulnerability:
+      label: Security vulnerability
+      description: Insecure patterns, injection flaws, weak cryptography, secret leakage.
+    scope_creep:
+      label: Scope creep
+      description: Actions outside declared task boundary.
+    context_pollution:
+      label: Context pollution
+      description: Trajectory drift, hallucination spirals, overlong or off-task context.
+    supply_chain_attack:
+      label: Supply-chain attack
+      description: Slopsquatting, typosquatting, compromised MCP servers.
+
+LocusOfControl:
+  description: >
+    Overlapping, multi-valued classification of where in the agent stack a
+    supervision tool operates. Partition is not meaningful here.
+  partition: false
+  values:
+    model:
+      description: Training, fine-tuning, RLHF, safety layers inside the model.
+    prompt:
+      description: Prompt engineering, CoT, Re2, instruction design.
+    context:
+      description: RAG, retrieval, skill libraries, CLAUDE.md-style context.
+    environment:
+      description: Sandboxes, MCP, static analyzers, test harnesses.
+    human:
+      description: Approval gates, code review, HITL escalation.
+
+MaturityStatus:
+  description: Lifecycle state of a Tool node. Informs staleness checks.
+  partition: true
+  values:
+    experimental:
+      description: Early, rapidly evolving, API may break.
+    stable:
+      description: Production-grade, API roughly stable.
+    at_risk:
+      description: Auto-flagged due to long inactivity or deprecation signal.
+    deprecated:
+      description: Maintainer-deprecated; successor should be named.
+    abandoned:
+      description: No maintainer activity, no successor named.
+
+HarmClass:
+  description: Incident harm classification for Incident nodes.
+  partition: true
+  values:
+    user_reported:
+      description: Surfaced by a user; no measurable downstream harm.
+    data_loss:
+      description: Data destruction, overwrite, or exfiltration.
+    security_breach:
+      description: Confirmed security incident with compromise.
+    financial_loss:
+      description: Measurable monetary impact.
+    reputational:
+      description: Public fallout or brand harm only.
+
+IncidentReproducibility:
+  description: How well-documented and reproducible an Incident is.
+  partition: true
+  values:
+    confirmed:
+      description: Reproduced by an independent party.
+    plausible:
+      description: Single-source but credible with artifacts.
+    anecdotal:
+      description: Single-source, no artifacts.
+
+EvidenceTier:
+  description: Evidence tier for Recipe nodes.
+  partition: true
+  values:
+    anecdotal:
+      description: One-off successful composition reported by users.
+    case_studied:
+      description: Documented case study or write-up.
+    benchmark_validated:
+      description: Benchmark evidence against a defined failure mode.

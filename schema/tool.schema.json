@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saica-kg.dev/schema/tool.schema.json",
+  "title": "Tool",
+  "description": "A software artifact that supervises AI coding agents.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "description",
+    "first_released",
+    "maturity_status",
+    "control_paradigm",
+    "temporal_phase",
+    "autonomy_level",
+    "addresses_failure_modes",
+    "license"
+  ],
+  "properties": {
+    "id":          {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$", "description": "Stable kebab-case slug. Never changes."},
+    "name":        {"type": "string", "minLength": 1},
+    "tagline":     {"type": "string", "maxLength": 140},
+    "description": {"type": "string", "maxLength": 800},
+
+    "first_released": {"type": "string", "format": "date"},
+    "last_updated":   {"type": "string", "format": "date"},
+    "maturity_status": {"type": "string", "enum": ["experimental", "stable", "at_risk", "deprecated", "abandoned"]},
+
+    "published_by":      {"type": "string", "description": "Organization node id."},
+    "repository_url":    {"type": "string", "format": "uri"},
+    "documentation_url": {"type": "string", "format": "uri"},
+    "license":           {"type": "string", "description": "SPDX identifier or 'proprietary'."},
+
+    "control_paradigm": {"type": "string", "enum": ["prevention", "detection", "correction", "recovery"]},
+    "temporal_phase":   {"type": "string", "enum": ["pre_generation", "in_generation", "post_generation"]},
+    "autonomy_level":   {"type": "string", "enum": ["fully_autonomous", "graduated_hitl", "full_hitl"]},
+
+    "addresses_failure_modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["fabrication", "obsolescence", "dependency_blindness", "logic_error", "security_vulnerability", "scope_creep", "context_pollution", "supply_chain_attack"]}
+    },
+    "locus_of_control": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["model", "prompt", "context", "environment", "human"]}
+    },
+
+    "implements_techniques": {"type": "array", "items": {"type": "string"}},
+    "composes_with":         {"type": "array", "items": {"type": "string"}, "description": "Symmetric; both sides must declare."},
+    "feeds_into":            {"type": "array", "items": {"type": "string"}, "description": "Directed composition. A feeds_into B means A's output is consumed by B."},
+    "supersedes":            {"type": "array", "items": {"type": "string"}},
+    "runtime_requires":      {"type": "array", "items": {"type": "string"}, "description": "Libraries/runtimes the tool itself imports."},
+    "supervises_targets":    {"type": "array", "items": {"type": "string"}, "description": "Library / language / ecosystem the tool watches over."},
+
+    "cited_in":      {"type": "array", "items": {"type": "string"}},
+    "documented_in": {"type": "array", "items": {"type": "string"}},
+    "evaluated_on":  {"type": "array", "items": {"type": "string"}},
+
+    "security_notes":           {"type": "string"},
+    "signed_manifest":          {"type": "boolean"},
+    "openssf_scorecard_score":  {"type": ["number", "null"], "minimum": 0, "maximum": 10},
+
+    "contributors":      {"type": "array", "items": {"type": "string"}},
+    "editorial_notes":   {"type": "string"},
+    "inclusion_rationale": {"type": "string"}
+  },
+  "additionalProperties": false
+}

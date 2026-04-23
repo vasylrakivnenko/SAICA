@@ -1,0 +1,24 @@
+id: logic_error
+name: Logic error
+tagline: Correct API use, incorrect logic.
+description: >
+  The agent uses real, current APIs correctly at the signature level but
+  encodes incorrect logic for the task. The canonical "passes type check,
+  fails correctness" class. Distinct from fabrication (API doesn't exist)
+  and obsolescence (wrong version).
+
+prior_work:
+  - liu-2024-beyond-functional-correctness
+  - zhu-2025-agent-error-taxonomy
+
+detection_signals:
+  - Unit tests fail with correctness assertions (not import or type errors).
+  - Execution in a sandbox produces outputs that contradict the task spec.
+  - Mutation testing reveals that substitution of logic primitives does not change test outcomes (test insensitivity is a different signal, but logic-error cases often co-occur).
+  - Symbolic or property-based tests find counterexamples.
+
+crosswalks:
+  - taxonomy: mast
+    external_id: MAST-FM-11
+    confidence: partial
+    note: MAST Verification Failure covers acceptance of incorrect output; logic_error is a cause upstream.

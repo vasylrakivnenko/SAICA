@@ -1,0 +1,56 @@
+id: owasp-agentic-top-10-2026
+name: "OWASP Top 10 for Agentic Applications 2026"
+owner: OWASP Gen AI Security Project
+version: "2026"
+first_published: 2025-12-09
+url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
+license: "Open (OWASP), CC-BY"
+scope: >
+  The ten most critical security risks facing autonomous and agentic AI
+  applications. Globally peer-reviewed, developed with 100+ industry experts
+  and researchers. The most visible formal taxonomy of agentic AI risk.
+
+categories:
+  - external_id: ASI01
+    label: Agent Goal Hijack
+    description: Attacker-induced diversion of an agent from its user-assigned goal.
+  - external_id: ASI02
+    label: Tool Misuse and Exploitation
+    description: Abuse of the agent's tool surface to exceed intended authority.
+  - external_id: ASI03
+    label: Identity and Privilege Abuse
+    description: Misuse of agent identities or escalation of privileges.
+  - external_id: ASI04
+    label: Agentic Supply Chain Vulnerabilities
+    description: >
+      Compromise via the agent's software, tool, model, or data supply chain,
+      including hallucinated-package-name typosquatting (slopsquatting).
+  - external_id: ASI05
+    label: Unexpected Code Execution (RCE)
+    description: Agent emits or runs code producing unintended remote execution.
+  - external_id: ASI06
+    label: Memory & Context Poisoning
+    description: Attacker manipulation of agent memory or long-context state.
+  - external_id: ASI07
+    label: Insecure Inter-Agent Communication
+    description: Weakly authenticated or validated messages between agents.
+  - external_id: ASI08
+    label: Cascading Failures
+    description: Errors that propagate across agent subsystems or the agent fleet.
+  - external_id: ASI09
+    label: Human-Agent Trust Exploitation
+    description: Social-engineering of humans by or via an agent.
+  - external_id: ASI10
+    label: Rogue Agents
+    description: Unsanctioned or self-modifying agents operating outside policy.
+
+inclusion_rationale: >
+  OWASP Agentic Top 10 is the single most visible formal taxonomy of
+  agentic AI risk. Ingesting it as a first-class Taxonomy node lets SAICA-KG
+  crosswalk OWASP categories to its FailureMode facets and serve OWASP-keyed
+  queries over MCP. This is the "OWASP/ATT&CK for AI coding agent supervision"
+  positioning operationalized.
+
+notes: >
+  Full ASI descriptions will be expanded during v0.1 seeding; the category
+  labels here are canonical from the OWASP Gen AI Security Project.
