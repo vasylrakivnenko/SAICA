@@ -146,6 +146,12 @@ export async function mountKGGraph(opts: {
         },
       },
       { selector: "edge:selected", style: { width: 2, opacity: 1 } },
+      // Focus pattern: when a node is selected (via click or search), its
+      // 1-hop neighborhood stays at normal visibility; everything else fades.
+      { selector: "node.kg-dim", style: { opacity: 0.12, "text-opacity": 0.12 } },
+      { selector: "edge.kg-dim", style: { opacity: 0.06, "text-opacity": 0.06 } },
+      { selector: "node.kg-neighbor", style: { "border-width": 2, "border-color": "#f59e0b", "border-opacity": 0.7 } },
+      { selector: "edge.kg-neighbor", style: { width: 1.6, opacity: 1 } },
       ...edgeStyleBlocks,
     ] as unknown as Stylesheet[],
     layout: layoutFor("cose"),
@@ -157,27 +163,70 @@ export async function mountKGGraph(opts: {
     if (ck) ck.checked = false;
   }
 
+  // ----- Focus / dim state -----
+  // One or more "focus" nodes (from click or search match) keep their
+  // 1-hop neighborhood at full visibility; everything else is dimmed.
+  let clickFocusId: string | null = null;
+
+  const computeFocusIds = (): Set<string> => {
+    const ids = new Set<string>();
+    if (clickFocusId) ids.add(clickFocusId);
+    const q = (search.value || "").trim().toLowerCase();
+    if (q && cy) {
+      cy.nodes().forEach((n) => {
+        if (n.style("display") === "none") return;
+        const hay = `${n.data("label") || ""} ${n.id()}`.toLowerCase();
+        if (hay.includes(q)) ids.add(n.id());
+      });
+    }
+    return ids;
+  };
+
+  const applyFocus = () => {
+    if (!cy) return;
+    cy.elements().removeClass("kg-dim").removeClass("kg-neighbor");
+    const ids = computeFocusIds();
+    if (ids.size === 0) return;
+    const focusNodes = cy.nodes().filter((n) => ids.has(n.id()));
+    // closedNeighborhood = focus nodes + direct neighbors + connecting edges.
+    const neighborhood = focusNodes.closedNeighborhood();
+    const others = cy.elements().difference(neighborhood);
+    others.addClass("kg-dim");
+    // Emphasize the edges + neighbor nodes that belong to the focus cluster
+    // (but not the focus nodes themselves — they already get node:selected).
+    const neighborOnly = neighborhood.difference(focusNodes);
+    neighborOnly.addClass("kg-neighbor");
+  };
+
   cy.on("tap", "node", (evt: EventObjectNode) => {
-    cy!.nodes().removeClass("kg-hl");
-    evt.target.addClass("kg-hl");
+    cy!.nodes().unselect();
+    evt.target.select();
+    clickFocusId = evt.target.id();
+    applyFocus();
     renderSidebar(sidebar, evt.target);
   });
   cy.on("tap", (evt) => {
     if (evt.target === cy) {
-      cy!.nodes().removeClass("kg-hl");
+      cy!.nodes().unselect();
+      clickFocusId = null;
+      applyFocus();
       renderSidebarEmpty(sidebar);
     }
   });
 
   layoutSelect.addEventListener("change", () => cy!.layout(layoutFor(layoutSelect.value)).run());
   resetBtn.addEventListener("click", () => {
+    clickFocusId = null;
+    search.value = "";
+    applyFilters(filters, "");
+    applyFocus();
     cy!.layout(layoutFor(layoutSelect.value)).run();
     cy!.fit(undefined, 30);
-    cy!.nodes().removeClass("kg-hl");
+    cy!.nodes().unselect();
     renderSidebarEmpty(sidebar);
   });
-  filters.addEventListener("change", () => applyFilters(filters, search.value));
-  search.addEventListener("input", () => applyFilters(filters, search.value));
+  filters.addEventListener("change", () => { applyFilters(filters, search.value); applyFocus(); });
+  search.addEventListener("input", () => { applyFilters(filters, search.value); applyFocus(); });
 
   if (focusNodeId) {
     const n = cy.getElementById(focusNodeId);
@@ -185,6 +234,8 @@ export async function mountKGGraph(opts: {
       cy.one("layoutstop", () => {
         cy!.animate({ center: { eles: n }, zoom: 1.4 }, { duration: 400 });
         n.select();
+        clickFocusId = n.id();
+        applyFocus();
         renderSidebar(sidebar, n as NodeSingular);
       });
     }
@@ -274,7 +325,11 @@ function layoutFor(name: string): LayoutOptions {
 }
 
 // ---------- Filters ----------
-function applyFilters(filters: HTMLElement, query: string): void {
+// Filters (type checkboxes, facet dropdowns, edge-type checkboxes) HIDE
+// nodes/edges entirely. Search is NOT a filter — it drives the focus/dim
+// system (see applyFocus in mountKGGraph) so that a matched node still
+// shows its neighborhood.
+function applyFilters(filters: HTMLElement, _query: string): void {
   if (!cy) return;
   const typeChecks: Record<string, boolean> = {};
   for (const t of ["tool", "failure_mode", "taxonomy", "paper"]) {
@@ -289,7 +344,6 @@ function applyFilters(filters: HTMLElement, query: string): void {
   const paradigm = (filters.querySelector<HTMLSelectElement>('select[name="control_paradigm"]')?.value || "").trim();
   const phase = (filters.querySelector<HTMLSelectElement>('select[name="temporal_phase"]')?.value || "").trim();
   const autonomy = (filters.querySelector<HTMLSelectElement>('select[name="autonomy_level"]')?.value || "").trim();
-  const q = (query || "").toLowerCase().trim();
 
   cy.batch(() => {
     cy!.nodes().forEach((n) => {
@@ -299,10 +353,6 @@ function applyFilters(filters: HTMLElement, query: string): void {
         if (paradigm && n.data("control_paradigm") !== paradigm) vis = false;
         if (vis && phase && n.data("temporal_phase") !== phase) vis = false;
         if (vis && autonomy && n.data("autonomy_level") !== autonomy) vis = false;
-      }
-      if (vis && q) {
-        const hay = `${n.data("label") || ""} ${n.id()}`.toLowerCase();
-        if (!hay.includes(q)) vis = false;
       }
       n.style("display", vis ? "element" : "none");
     });
