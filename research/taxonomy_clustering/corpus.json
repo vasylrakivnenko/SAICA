@@ -1,0 +1,849 @@
+[
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-01",
+    "label": "Incomplete Task Execution",
+    "description": "Agent claims completion while key subtasks remain undone.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-02",
+    "label": "Fabricated References",
+    "description": "Agent emits code referencing non-existent functions or packages.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-03",
+    "label": "Stale API Usage",
+    "description": "Agent uses deprecated or removed APIs.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-04",
+    "label": "Cascading Error Recovery",
+    "description": "Agent's fix attempts introduce new errors that compound.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-05",
+    "label": "Context Window Overflow",
+    "description": "Important context is truncated; agent drifts.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-06",
+    "label": "Tool Misinvocation",
+    "description": "Correct tool, wrong arguments or wrong sequence.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-07",
+    "label": "Silent Test-Passing Workaround",
+    "description": "Agent modifies tests or test harness to mask failure.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-08",
+    "label": "Destructive Action",
+    "description": "Agent executes rm/force-push/commit bypass without human approval.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "daplab-9-patterns",
+    "external_id": "DAP-09",
+    "label": "Goal Drift",
+    "description": "Agent's working goal diverges from the user's stated goal.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-01",
+    "label": "Role Violation",
+    "description": "Agent acts outside its declared role or scope.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-02",
+    "label": "Task Decomposition Failure",
+    "description": "Agent fails to break a task into solvable subtasks.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-03",
+    "label": "Coordination Failure",
+    "description": "Agents fail to coordinate on shared state or handoff.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-04",
+    "label": "Redundant Work",
+    "description": "Multiple agents duplicate effort without coordination.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-05",
+    "label": "Communication Breakdown",
+    "description": "Messages between agents are lost, misinterpreted, or ignored.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-06",
+    "label": "Stalling / Deadlock",
+    "description": "Agents block waiting on each other with no progress.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-07",
+    "label": "Premature Termination",
+    "description": "Agent ends a task before completion criteria are met.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-08",
+    "label": "Goal Drift",
+    "description": "Agent's working goal diverges from the user's stated goal.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-09",
+    "label": "Tool Misuse",
+    "description": "Agent invokes an available tool incorrectly or unnecessarily.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-10",
+    "label": "Fabrication in Inter-Agent Messages",
+    "description": "Agent sends factually incorrect information to another agent.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-11",
+    "label": "Verification Failure",
+    "description": "Agent accepts incorrect output without checking.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-12",
+    "label": "Escalation Failure",
+    "description": "Agent does not escalate to a human when appropriate.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-13",
+    "label": "Context Loss",
+    "description": "Relevant prior context is dropped or truncated.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "mast",
+    "external_id": "MAST-FM-14",
+    "label": "Infinite Loop",
+    "description": "Agent cycles over the same state or tool call indefinitely.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NS-01",
+    "label": "Agent Compromise",
+    "description": "Unauthorized control or manipulation of an agent; one corrupted node can subvert entire multi-agent workflows.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NS-02",
+    "label": "Agent Injection",
+    "description": "Insertion of malicious instructions into agent prompts, plans, or tool-call arguments.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NS-03",
+    "label": "Agent Impersonation",
+    "description": "Threat actors register counterfeit agents that appear legitimate, tricking other modules into leaking data or executing actions.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NS-04",
+    "label": "Agent Flow Manipulation",
+    "description": "Unauthorized alteration of agent workflow execution paths, e.g., injecting tokens like STOP to reroute workflows or bypass safety logic.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NS-05",
+    "label": "Multi-Agent Jailbreaks",
+    "description": "Jailbreak payload split across agent messages; recombination bypasses single-prompt detectors. Specific to multi-agent topologies.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NF-01",
+    "label": "Intra-Agent Responsible AI Concerns",
+    "description": "Toxic or RAI-violating content propagates through internal inter-agent messages and reaches users or logs without filtering.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NF-02",
+    "label": "Bias in Resource Allocation",
+    "description": "Discriminatory distribution of resources across users when agents act as allocators.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NF-03",
+    "label": "Organizational Knowledge Degradation",
+    "description": "Heavy automation erodes human understanding of the underlying system; recovery is difficult when agents fail.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-NF-04",
+    "label": "Prioritization Risks (Performance Over Safety)",
+    "description": "Goal-driven agents skip safety checks to optimize KPIs, prioritizing performance metrics over user safety.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-ES-01",
+    "label": "Memory Poisoning",
+    "description": "Attackers embed malicious instructions into long-term memory; every future recall re-executes the attack. Flagship case study in the paper.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-ES-02",
+    "label": "Cross-Domain Prompt Injection (XPIA)",
+    "description": "External content (PDFs, calendar invites, web pages) contains hidden commands that hijack agent decision logic.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-ES-03",
+    "label": "Human-in-the-Loop Bypass",
+    "description": "Circumvention of human oversight and approval gates.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-ES-04",
+    "label": "Incorrect Permissions Management",
+    "description": "Over-scoped agent permissions let agents access files or perform actions beyond the user's intent.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-ES-05",
+    "label": "Insufficient Isolation",
+    "description": "Inadequate separation between agent operational boundaries, enabling lateral compromise.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-EF-01",
+    "label": "Bias Amplification",
+    "description": "Magnification of existing prejudices in agent outputs across iterative loops.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-EF-02",
+    "label": "Hallucinations",
+    "description": "Generation of false or fabricated information, including fabricated tool calls and references.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-EF-03",
+    "label": "Misinterpretation of Instructions",
+    "description": "Incorrect understanding of user directives leading to unintended actions.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "microsoft-airt-2025",
+    "external_id": "MS-EF-04",
+    "label": "Lack of Transparency",
+    "description": "Insufficient clarity over agent behavior, preventing informed user consent and oversight.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI01",
+    "label": "Agent Goal Hijack",
+    "description": "Attacker-induced diversion of an agent from its user-assigned goal.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI02",
+    "label": "Tool Misuse and Exploitation",
+    "description": "Abuse of the agent's tool surface to exceed intended authority.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI03",
+    "label": "Identity and Privilege Abuse",
+    "description": "Misuse of agent identities or escalation of privileges.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI04",
+    "label": "Agentic Supply Chain Vulnerabilities",
+    "description": "Compromise via the agent's software, tool, model, or data supply chain, including hallucinated-package-name typosquatting (slopsquatting).",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI05",
+    "label": "Unexpected Code Execution (RCE)",
+    "description": "Agent emits or runs code producing unintended remote execution.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI06",
+    "label": "Memory & Context Poisoning",
+    "description": "Attacker manipulation of agent memory or long-context state.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI07",
+    "label": "Insecure Inter-Agent Communication",
+    "description": "Weakly authenticated or validated messages between agents.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI08",
+    "label": "Cascading Failures",
+    "description": "Errors that propagate across agent subsystems or the agent fleet.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI09",
+    "label": "Human-Agent Trust Exploitation",
+    "description": "Social-engineering of humans by or via an agent.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "owasp-agentic-top-10-2026",
+    "external_id": "ASI10",
+    "label": "Rogue Agents",
+    "description": "Unsanctioned or self-modifying agents operating outside policy.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-DIM-01",
+    "label": "Agent Cognition and Orchestration",
+    "description": "Failures in cognitive architecture and control flows unique to agentic systems (83 faults in the sample). Covers LLM integration and agent lifecycle/state.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-DIM-02",
+    "label": "Tooling, Integration, and Actuation",
+    "description": "Defects in tool invocation and external-system interaction (66 faults). Covers API usage, external connectivity, resource manipulation, coordination, and observability of tool calls.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-DIM-03",
+    "label": "Perception, Context, and Memory",
+    "description": "Faults in information ingestion, context preservation, and input interpretation (72 faults). Covers persistence and input-interpretation logic.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-DIM-04",
+    "label": "Runtime and Environment Grounding",
+    "description": "Execution environment, dependency stack, and platform-constraint mismatches (87 faults). The single largest fault dimension by count, dominated by dependency management.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-DIM-05",
+    "label": "System Reliability and Observability",
+    "description": "Robustness deficiencies and diagnostic challenges in autonomous systems (67 faults). Covers error recovery, UI/visualization, and documentation.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-01",
+    "label": "LLM Integration Faults",
+    "description": "Faults in how the agent integrates with its LLM (45 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-02",
+    "label": "Agent Lifecycle and State",
+    "description": "Faults in agent startup, execution, termination, and state tracking (38 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-03",
+    "label": "Tool Execution and API Usage",
+    "description": "Incorrect or malformed tool/API invocations (17 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-04",
+    "label": "External Connectivity and Access",
+    "description": "Connection setup and authentication failures (19 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-05",
+    "label": "Resource Manipulation",
+    "description": "Resource-handling and database-misconfiguration faults (16 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-06",
+    "label": "System Coordination",
+    "description": "Synchronization errors across components or agents (6 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-07",
+    "label": "System Observability",
+    "description": "Logging or telemetry defects (8 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-08",
+    "label": "Context and State Persistence",
+    "description": "Memory-persistence and state-load/save failures (12 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-09",
+    "label": "Input Interpretation and Logic",
+    "description": "Type handling, validation, encoding, and logic/constraint violations (60 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-10",
+    "label": "Dependency Management",
+    "description": "Dependency specification, import resolution, installation, and package resolver/manager failures (67 faults). The single largest major category.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-11",
+    "label": "Platform Compatibility",
+    "description": "Environment, platform, API, and integration compatibility mismatches (20 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-12",
+    "label": "Robustness and Error Recovery",
+    "description": "Exception-handling and implementation defects (49 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-MAJ-13",
+    "label": "UI, Visualization, and Documentation Defects",
+    "description": "UI defects (13 faults) and documentation defects (5 faults).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-01",
+    "label": "Dependency and Integration Failures",
+    "description": "Contract violations between probabilistic artifacts and deterministic interfaces (19.5%).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-02",
+    "label": "Data and Type Handling Failures",
+    "description": "Type mismatches and validation gaps (17.6%).",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-03",
+    "label": "Incorrect Token Management",
+    "description": "Tracking and counting errors affecting context windows.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-04",
+    "label": "Authentication and Credential Issues",
+    "description": "Fragile token refresh and credential-expiration handling.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-05",
+    "label": "Datetime Conversion Errors",
+    "description": "Inappropriate temporal-value transformations.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-06",
+    "label": "State Management Defects",
+    "description": "Inconsistent internal state across interactions.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-07",
+    "label": "Configuration Inconsistencies",
+    "description": "Wrong defaults and misconfiguration.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-08",
+    "label": "API Evolution and Schema Drift",
+    "description": "Incompatibilities from upstream API changes.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-09",
+    "label": "Environment-Level Issues",
+    "description": "Platform-specific constraints and virtual-environment problems.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-10",
+    "label": "Documentation Gaps",
+    "description": "Missing or incorrect configuration guidance.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-11",
+    "label": "Exception Suppression",
+    "description": "Swallowed errors reducing observability.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "shah-2026-agentic-faults",
+    "external_id": "SHAH-RC-12",
+    "label": "Ecosystem Fragility",
+    "description": "Rapid upstream evolution creating tight-coupling vulnerabilities.",
+    "citation_count_of_parent_taxonomy": 1
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-01",
+    "label": "Accuracy",
+    "description": "Mitigates hallucinations, misinformation, and disinformation to ensure factually correct outputs.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-02",
+    "label": "Efficiency",
+    "description": "Prevents resource-intensive tasks and endless loops; manages cost through dynamic resource management.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-03",
+    "label": "Privacy",
+    "description": "Protects against sensitive-data leakage via direct responses or statistical inference.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-04",
+    "label": "Security",
+    "description": "Defends against malicious activities and adversarial attacks; preserves data confidentiality and integrity.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-05",
+    "label": "Safety",
+    "description": "Prevents harmful or misleading outputs, especially in high-stakes domains.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-06",
+    "label": "Fairness",
+    "description": "Addresses bias and discrimination from training data, algorithms, or deployment.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-07",
+    "label": "Compliance",
+    "description": "Ensures adherence to legal, regulatory, and industry standards via continuous monitoring.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-08",
+    "label": "Generalizability",
+    "description": "Functions effectively across multiple layers and diverse scenarios without per-case configuration.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-09",
+    "label": "Customizability",
+    "description": "Tailored protection for specific requirements at different operational layers.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-10",
+    "label": "Adaptability",
+    "description": "Adjusts dynamically to varying conditions and emerging threats without manual reconfiguration.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-11",
+    "label": "Traceability",
+    "description": "Detailed logs of decision paths, inputs, outputs, and data sources for auditing.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-12",
+    "label": "Portability",
+    "description": "Guardrail transfers across FM-based agents with minimal adjustment.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-13",
+    "label": "Interoperability",
+    "description": "Functions seamlessly across heterogeneous agents, technologies, and interfaces.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-QA-14",
+    "label": "Interpretability",
+    "description": "Provides clarity on how a guardrail operates, enabling user understanding and trust.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-PIPE-01",
+    "label": "Prompt Stage",
+    "description": "Incoming user queries analyzed for harmful content and safety alignment before processing.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-PIPE-02",
+    "label": "Intermediate Results Stage",
+    "description": "Outputs at workflow stages verified for accuracy and safety before final generation.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-PIPE-03",
+    "label": "Final Results Stage",
+    "description": "Final agent outputs checked for goal alignment and governance compliance.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-01",
+    "label": "Goals",
+    "description": "Declared user or task objectives.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-02",
+    "label": "Context",
+    "description": "Conversation and session context.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-03",
+    "label": "Memory",
+    "description": "Long-term or episodic agent memory.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-04",
+    "label": "Reasoning",
+    "description": "Chain-of-thought and intermediate reasoning traces.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-05",
+    "label": "Plans",
+    "description": "Multi-step action plans produced by the agent.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-06",
+    "label": "Workflows",
+    "description": "End-to-end orchestrated task flows.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-07",
+    "label": "Tools",
+    "description": "External callable tools and APIs.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-08",
+    "label": "Knowledge Bases",
+    "description": "Retrieval corpora and structured knowledge stores.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-09",
+    "label": "Other Agents",
+    "description": "Peer or subordinate agents in a multi-agent system.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ART-10",
+    "label": "Foundation Models",
+    "description": "The underlying LLM / FM itself.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-01",
+    "label": "Block",
+    "description": "Prevent the action from executing.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-02",
+    "label": "Filter",
+    "description": "Strip disallowed content before forwarding.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-03",
+    "label": "Flag",
+    "description": "Emit a warning for downstream review.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-04",
+    "label": "Modify",
+    "description": "Transform the action or output to a safer variant.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-05",
+    "label": "Validate",
+    "description": "Check against a spec or schema before proceeding.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-06",
+    "label": "Parallel Calls",
+    "description": "Run multiple checkers concurrently for consensus.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-07",
+    "label": "Retry",
+    "description": "Regenerate with adjusted parameters.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-08",
+    "label": "Fall Back",
+    "description": "Switch to a safer alternative pathway.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-09",
+    "label": "Human Intervention",
+    "description": "Escalate to a human-in-the-loop.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-10",
+    "label": "Defer",
+    "description": "Delay the action until conditions are met.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-11",
+    "label": "Isolate",
+    "description": "Run the action in a sandbox or quarantined environment.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-12",
+    "label": "Redundancy",
+    "description": "Duplicate critical checks for defense in depth.",
+    "citation_count_of_parent_taxonomy": 0
+  },
+  {
+    "source_tax_id": "swiss-cheese-model",
+    "external_id": "SC-ACT-13",
+    "label": "Evaluate",
+    "description": "Score against metrics before acting.",
+    "citation_count_of_parent_taxonomy": 0
+  }
+]
