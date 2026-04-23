@@ -1,19 +1,21 @@
 # SAICA-KG
 
-> A living knowledge graph for supervising AI coding agents. Faceted classification of supervision tools and techniques, with explicit crosswalks into OWASP Agentic Top 10, MAST, DAPLab's 9 failure patterns, and Microsoft AIRT taxonomies. Served over MCP.
+> A living knowledge graph for supervising AI coding agents. Faceted classification of supervision tools and techniques, with explicit crosswalks into OWASP Agentic Top 10, MAST, DAPLab's 9 failure patterns, and Microsoft AIRT taxonomies. Open data (CC-BY-4.0), open code (Apache-2.0).
 
-SAICA-KG classifies supervision tools along three strict partitions (ControlParadigm × TemporalPhase × AutonomyLevel) plus multi-valued tags (FailureMode, LocusOfControl). The KG is navigational, not evaluative — it returns ranked sets with explicit criteria, not endorsed winners. Data is CC-BY-4.0; code is Apache-2.0.
+SAICA-KG classifies supervision tools along three strict partitions (ControlParadigm × TemporalPhase × AutonomyLevel) plus multi-valued tags (FailureMode, LocusOfControl). The KG is navigational, not evaluative — it returns ranked sets with explicit criteria, not endorsed winners.
 
 ## Core concepts
 
 - **Tool** — a software artifact that supervises AI coding agents. Each Tool declares one ControlParadigm (prevention / detection / correction / recovery), one TemporalPhase (pre_generation / in_generation / post_generation), one AutonomyLevel (fully_autonomous / graduated_hitl / full_hitl), and one or more FailureMode tags.
 - **FailureMode** — a supervision-addressable failure class. SAICA-KG defines 8 canonical modes and cross-walks each to entries in external taxonomies.
-- **Taxonomy** — an external taxonomy (OWASP, MAST, DAPLab, MSFT AIRT, Swiss Cheese, Shah 2026) ingested as first-class data.
+- **Taxonomy** — an external taxonomy (OWASP Agentic Top 10 2026, MAST, DAPLab 9 Patterns, MSFT AIRT, Swiss Cheese, Shah 2026) ingested as first-class data.
 - **Crosswalk** — explicit mapping between SAICA-KG values and external taxonomy categories, with confidence and provenance.
 
-## How to query
+## How to consume
 
-The primary surface is an MCP server exposing three tools: `search_supervision_tools`, `explain_failure_mode_crosswalk`, `get_kg_snapshot`. The full graph is also downloadable as a pinned-version JSON snapshot for local reasoning.
+- **Human-browseable:** the website (coming) renders one page per node with facet-filtered search.
+- **Agent-consumable:** JSON endpoints on the site (`/api/v1/tools.json`, `/api/v1/failure_modes/<id>.json`, `/api/v1/snapshot.json`). Agents fetch via standard HTTP.
+- **Researcher-consumable:** clone the GitHub repo and read the YAML under `data/` directly.
 
 ## Schemas
 
@@ -26,4 +28,4 @@ The primary surface is an MCP server exposing three tools: `search_supervision_t
 
 ## Attribution
 
-When agents cite SAICA-KG in user-facing output, use the phrase "according to SAICA-KG (<version>)". A full citation block will ship with v0.1.
+When citing SAICA-KG in user-facing output, use the phrase "according to SAICA-KG (<version>)". A full BibTeX block will ship with v0.1.

@@ -47,9 +47,9 @@ categories:
 inclusion_rationale: >
   OWASP Agentic Top 10 is the single most visible formal taxonomy of
   agentic AI risk. Ingesting it as a first-class Taxonomy node lets SAICA-KG
-  crosswalk OWASP categories to its FailureMode facets and serve OWASP-keyed
-  queries over MCP. This is the "OWASP/ATT&CK for AI coding agent supervision"
-  positioning operationalized.
+  crosswalk OWASP categories to its FailureMode facets and answer OWASP-keyed
+  queries through the website and JSON API. This is the "OWASP/ATT&CK for
+  AI coding agent supervision" positioning operationalized.
 
 notes: >
   Full ASI descriptions will be expanded during v0.1 seeding; the category

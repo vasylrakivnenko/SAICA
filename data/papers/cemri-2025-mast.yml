@@ -16,4 +16,4 @@ tldr: >
   derived from 1,600 annotated traces over 7 MAS frameworks.
 notes: >
   Must-cite. Seeds the MAST Taxonomy node in SAICA-KG and is a primary input
-  for the crosswalk-as-MCP-service contribution.
+  for the cross-taxonomy absorption contribution.
