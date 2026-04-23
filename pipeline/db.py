@@ -41,7 +41,35 @@ _CANDIDATE_KIND_TO_TABLE = {
 }
 
 
+_ENV_LOADED = False
+
+
+def _load_env_local_once() -> None:
+    """Read .env.local at repo root into os.environ (first call only).
+
+    Keeps db.py standalone — any CLI entry point gets env without having to
+    remember to call sources._http.load_env() first.
+    """
+    global _ENV_LOADED
+    if _ENV_LOADED:
+        return
+    _ENV_LOADED = True
+    env_path = Path(__file__).resolve().parent.parent / ".env.local"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
 def _dsn() -> str:
+    _load_env_local_once()
     return os.environ.get("POSTGRES_URL", _DEFAULT_DSN)
 
 
