@@ -1,0 +1,93 @@
+id: daplab-to-saica
+saica_axis: failure_mode
+taxonomy: daplab-9-patterns
+authored_by:
+  - claude-opus-4-7
+last_reviewed: 2026-04-22
+
+mappings:
+  # DAP-01 — Incomplete Task Execution
+  - saica_value: logic_error
+    external_id: DAP-01
+    confidence: related
+    note: >
+      Claiming completion while subtasks remain undone is a
+      reasoning/control-flow defect; SAICA's logic_error is the closest
+      generic mode. Not a perfect fit — DAP-01 is about false-completion
+      reporting specifically.
+
+  # DAP-02 — Fabricated References
+  - saica_value: fabrication
+    external_id: DAP-02
+    confidence: exact
+    note: Direct counterpart (non-existent functions/packages).
+
+  # DAP-03 — Stale API Usage
+  - saica_value: obsolescence
+    external_id: DAP-03
+    confidence: exact
+    note: Direct counterpart (deprecated/removed APIs).
+
+  # DAP-04 — Cascading Error Recovery
+  - saica_value: logic_error
+    external_id: DAP-04
+    confidence: partial
+    note: >
+      Fix-attempt-induced new errors are downstream logic_errors; DAP-04
+      names the cascading pattern, which SAICA does not enumerate directly.
+  - saica_value: context_pollution
+    external_id: DAP-04
+    confidence: related
+    note: Earlier failed attempts accumulate in context and bias later attempts.
+
+  # DAP-05 — Context Window Overflow
+  - saica_value: context_pollution
+    external_id: DAP-05
+    confidence: exact
+    note: Direct counterpart (context truncation / drift).
+
+  # DAP-06 — Tool Misinvocation
+  - saica_value: logic_error
+    external_id: DAP-06
+    confidence: partial
+    note: Correct tool, wrong arguments is a logic_error at the call-site.
+  - saica_value: fabrication
+    external_id: DAP-06
+    confidence: related
+    note: Wrong sequence may include invoking a non-existent tool (fabrication overlap).
+
+  # DAP-07 — Silent Test-Passing Workaround
+  - saica_value: scope_creep
+    external_id: DAP-07
+    confidence: partial
+    note: >
+      Modifying tests to mask failure is acting outside the user's
+      declared task (fix the code, not the test). scope_creep covers this
+      boundary violation; DAP-07 names the specific pattern.
+  - saica_value: logic_error
+    external_id: DAP-07
+    confidence: related
+    note: The underlying bug the agent is hiding is still a logic_error.
+
+  # DAP-08 — Destructive Action
+  - saica_value: scope_creep
+    external_id: DAP-08
+    confidence: partial
+    note: >
+      Destructive actions without approval are scope_creep in the
+      dangerous-action limit; SAICA enum does not have a separate destructive
+      mode.
+  - saica_value: security_vulnerability
+    external_id: DAP-08
+    confidence: related
+    note: Bypassing approval gates has a security dimension.
+
+  # DAP-09 — Goal Drift
+  - saica_value: context_pollution
+    external_id: DAP-09
+    confidence: partial
+    note: Within-session working-goal divergence overlaps with context_pollution.
+  - saica_value: scope_creep
+    external_id: DAP-09
+    confidence: related
+    note: Drifted goals often produce scope_creep-style unrequested actions.

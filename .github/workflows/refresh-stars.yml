@@ -1,0 +1,68 @@
+# Weekly GitHub star-count refresh for Tool nodes.
+#
+# Scaffold only — deliberately not activated. To turn this on:
+#   1. Uncomment the `schedule` trigger below.
+#   2. Confirm the repo's Actions settings allow workflows to create pull
+#      requests (Settings → Actions → General → "Allow GitHub Actions to
+#      create and approve pull requests").
+#   3. Optionally set a `GITHUB_TOKEN` with larger quota if anonymous rate
+#      limits become a problem (the default GITHUB_TOKEN is usually enough).
+#
+# What it does:
+#   - Runs `validator/fetch_github_stars.py`, which updates `stars` and
+#     `stars_updated_at` on every Tool YAML whose repository_url points at
+#     github.com.
+#   - If any YAML changed, opens a pull request titled "chore: refresh
+#     GitHub stars".
+#   - If nothing changed, exits cleanly (no PR).
+
+name: refresh-stars
+
+on:
+  workflow_dispatch: {}
+  # Uncomment to activate weekly refresh (Mondays 07:00 UTC).
+  # schedule:
+  #   - cron: "0 7 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r validator/requirements.txt
+
+      - name: Fetch star counts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python validator/fetch_github_stars.py
+
+      - name: Run validator
+        run: python validator/cli.py
+
+      - name: Open pull request if stars changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: refresh GitHub stars"
+          title: "chore: refresh GitHub stars"
+          branch: chore/refresh-stars
+          delete-branch: true
+          body: |
+            Automated refresh of `stars` and `stars_updated_at` on Tool
+            nodes. See `validator/fetch_github_stars.py` for details.
+          labels: |
+            automation
+            data-refresh

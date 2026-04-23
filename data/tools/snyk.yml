@@ -1,0 +1,68 @@
+id: snyk
+name: Snyk
+tagline: Vulnerability scanning for code, dependencies, containers, and IaC.
+description: >
+  Commercial developer-security platform with four product lines: Snyk
+  Code (SAST via DeepCode-derived analysis), Snyk Open Source
+  (dependency CVE scanning and SBOM), Snyk Container, and Snyk IaC.
+  Integrates via CLI, IDE plugins, Git-provider apps, and CI
+  gates. Supervision locus is the committed artifact: scans run against
+  the repo or build and report known vulnerabilities with fix advice.
+  Includes a proprietary vulnerability DB that complements public
+  advisory feeds.
+
+first_released: 2015-04-01
+last_updated: 2026-04-12
+maturity_status: stable
+
+published_by: snyk
+repository_url: https://github.com/snyk/snyk
+documentation_url: https://docs.snyk.io
+license: proprietary
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - security_vulnerability
+  - supply_chain_attack
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - static-analysis
+  - dependency-cve-scan
+  - sbom-generation
+  - container-scan
+  - iac-policy-scan
+
+security_notes: >
+  Proprietary hosted platform with a free tier; scan results and
+  dependency graphs are sent to Snyk's backend. Self-hosted broker is
+  available for higher-trust environments. The Snyk CLI is distributed
+  via npm and native installers; pin to a vetted release. Known-CVE
+  scanning is inherently backward-looking — it does not catch novel
+  malicious packages the way manifest-capability analysis does.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - npm
+  - pypi
+  - maven
+  - go-modules
+  - container-images
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for the
+  security-vulnerability failure mode. Pairs naturally with Socket in
+  the taxonomy: Socket screens adoption (pre_generation manifest
+  gating), Snyk scans what already landed (post_generation artifact
+  analysis). Both are supply-chain-relevant but at different moments.
+stars: 5506
+stars_updated_at: '2026-04-22'

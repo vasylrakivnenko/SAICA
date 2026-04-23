@@ -1,0 +1,119 @@
+id: mast-to-saica
+saica_axis: failure_mode
+taxonomy: mast
+authored_by:
+  - claude-opus-4-7
+last_reviewed: 2026-04-22
+
+mappings:
+  # MAST-FM-01 — Role Violation
+  - saica_value: scope_creep
+    external_id: MAST-FM-01
+    confidence: exact
+    note: >
+      Role violation in MAS is the direct multi-agent expression of
+      scope_creep (acting outside declared task/role boundary).
+
+  # MAST-FM-02 — Task Decomposition Failure
+  - saica_value: logic_error
+    external_id: MAST-FM-02
+    confidence: partial
+    note: >
+      Decomposition failures are reasoning errors; logic_error covers the
+      single-agent analog.
+
+  # MAST-FM-03 — Coordination Failure
+  # Primarily multi-agent; no strong single-agent counterpart. Omitted.
+
+  # MAST-FM-04 — Redundant Work
+  - saica_value: dependency_blindness
+    external_id: MAST-FM-04
+    confidence: related
+    note: >
+      dependency_blindness is cross-codebase reinvention; MAST-FM-04 is
+      cross-agent duplication. Spiritual analog, not a strict mapping.
+
+  # MAST-FM-05 — Communication Breakdown
+  # Multi-agent specific; omitted.
+
+  # MAST-FM-06 — Stalling / Deadlock
+  # Multi-agent specific; omitted (no single-agent counterpart in SAICA enum).
+
+  # MAST-FM-07 — Premature Termination
+  - saica_value: logic_error
+    external_id: MAST-FM-07
+    confidence: related
+    note: >
+      Premature termination is a control-flow / reasoning defect; logic_error
+      is the closest SAICA mode, though the SAICA enum does not name early
+      termination specifically.
+
+  # MAST-FM-08 — Goal Drift
+  - saica_value: context_pollution
+    external_id: MAST-FM-08
+    confidence: partial
+    note: >
+      context_pollution captures within-session drift; MAST goal drift is
+      broader (may be adversarially induced) but overlaps substantially.
+  - saica_value: scope_creep
+    external_id: MAST-FM-08
+    confidence: related
+    note: >
+      Drift may manifest as unrequested actions, overlapping with
+      scope_creep.
+
+  # MAST-FM-09 — Tool Misuse
+  - saica_value: logic_error
+    external_id: MAST-FM-09
+    confidence: partial
+    note: >
+      Incorrect tool invocation with real APIs is a logic_error; MAST-FM-09
+      also includes unnecessary invocations (scope_creep-adjacent).
+  - saica_value: fabrication
+    external_id: MAST-FM-09
+    confidence: related
+    note: Invoking a non-existent tool overlaps with fabrication.
+  - saica_value: scope_creep
+    external_id: MAST-FM-09
+    confidence: related
+    note: Unnecessary tool calls beyond task scope overlap with scope_creep.
+
+  # MAST-FM-10 — Fabrication in Inter-Agent Messages
+  - saica_value: fabrication
+    external_id: MAST-FM-10
+    confidence: partial
+    note: >
+      SAICA fabrication is about non-existent code references; MAST-FM-10 is
+      about factually incorrect assertions between agents. Same family,
+      different medium.
+
+  # MAST-FM-11 — Verification Failure
+  - saica_value: logic_error
+    external_id: MAST-FM-11
+    confidence: partial
+    note: >
+      Accepting incorrect output without checking is downstream of a
+      logic_error; overlap is on cause, not on symptom.
+
+  # MAST-FM-12 — Escalation Failure
+  # SAICA enum has no human-escalation failure mode; omitted.
+
+  # MAST-FM-13 — Context Loss
+  - saica_value: context_pollution
+    external_id: MAST-FM-13
+    confidence: exact
+    note: >
+      Context loss (dropping still-relevant prior context) is the direct
+      counterpart of context_pollution (session-state hygiene failure).
+
+  # MAST-FM-14 — Infinite Loop
+  - saica_value: context_pollution
+    external_id: MAST-FM-14
+    confidence: related
+    note: >
+      Repeated identical tool calls are a context_pollution detection
+      signal; infinite loop is the MAS-level pattern.
+  - saica_value: logic_error
+    external_id: MAST-FM-14
+    confidence: related
+    note: Infinite loops often originate in a control-flow logic_error.

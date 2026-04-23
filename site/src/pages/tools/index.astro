@@ -2,9 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph, facetLabel, FACET_LABELS } from '../../lib/data.ts';
 
-const tools = Object.values(graph.tools).slice().sort((a, b) =>
-  a.name.localeCompare(b.name),
-);
+// Default render order: by stars desc (tools without stars last), then by name.
+const tools = Object.values(graph.tools).slice().sort((a, b) => {
+  const as = typeof a.stars === 'number' ? a.stars : -1;
+  const bs = typeof b.stars === 'number' ? b.stars : -1;
+  if (bs !== as) return bs - as;
+  return a.name.localeCompare(b.name);
+});
 
 // Build facet option lists from the data.
 const failureModeOptions = Object.values(graph.failureModes)
@@ -14,6 +18,11 @@ const failureModeOptions = Object.values(graph.failureModes)
 const cpValues = Object.keys(FACET_LABELS.control_paradigm);
 const tpValues = Object.keys(FACET_LABELS.temporal_phase);
 const alValues = Object.keys(FACET_LABELS.autonomy_level);
+
+function formatStars(n: number | undefined): string {
+  if (typeof n !== 'number') return '';
+  return n.toLocaleString('en-US');
+}
 ---
 
 <BaseLayout
@@ -24,7 +33,7 @@ const alValues = Object.keys(FACET_LABELS.autonomy_level);
   <p class="text-ink-muted mt-2 max-w-3xl">
     {tools.length} supervision tools, classified along three strict partitions
     (ControlParadigm &times; TemporalPhase &times; AutonomyLevel) plus multi-valued
-    FailureMode tags. Filters are keyboard-accessible; filtering is client-side.
+    FailureMode tags. Filters and sorting are keyboard-accessible and client-side.
   </p>
 
   <form
@@ -69,6 +78,31 @@ const alValues = Object.keys(FACET_LABELS.autonomy_level);
         {failureModeOptions.map((fm) => <option value={fm.id}>{fm.name}</option>)}
       </select>
     </div>
+    <div>
+      <label for="f-sort" class="block text-xs font-sans font-semibold uppercase tracking-wide text-ink-faint">
+        Sort by
+      </label>
+      <select id="f-sort" name="sort" class="mt-1 w-full rounded border border-ink/15 bg-white px-2 py-1 text-sm">
+        <option value="stars">Stars (desc)</option>
+        <option value="name">Name (A–Z)</option>
+        <option value="recency">Recency (last updated)</option>
+      </select>
+    </div>
+    <div>
+      <label for="f-min-stars" class="block text-xs font-sans font-semibold uppercase tracking-wide text-ink-faint">
+        Min stars
+      </label>
+      <input
+        id="f-min-stars"
+        name="min_stars"
+        type="number"
+        min="0"
+        step="1"
+        inputmode="numeric"
+        placeholder="(none)"
+        class="mt-1 w-full rounded border border-ink/15 bg-white px-2 py-1 text-sm"
+      />
+    </div>
     <div class="md:col-span-4 flex items-center gap-3">
       <button
         type="reset"
@@ -90,12 +124,22 @@ const alValues = Object.keys(FACET_LABELS.autonomy_level);
         data-tp={t.temporal_phase}
         data-al={t.autonomy_level}
         data-fm={t.addresses_failure_modes.join(' ')}
+        data-name={t.name.toLowerCase()}
+        data-stars={typeof t.stars === 'number' ? String(t.stars) : ''}
+        data-last-updated={t.last_updated ?? ''}
       >
         <div class="flex items-baseline justify-between gap-2">
           <h3 class="m-0">
             <a href={`/tools/${t.id}`}>{t.name}</a>
           </h3>
-          <span class="text-xs font-sans text-ink-faint">{t.maturity_status}</span>
+          <span class="text-xs font-sans text-ink-faint flex items-center gap-2">
+            {typeof t.stars === 'number' && (
+              <span title={t.stars_updated_at ? `GitHub stars (refreshed ${t.stars_updated_at})` : 'GitHub stars'}>
+                <span aria-hidden="true">★</span> {formatStars(t.stars)}
+              </span>
+            )}
+            <span>{t.maturity_status}</span>
+          </span>
         </div>
         <p class="mt-1 text-sm text-ink-muted">{t.tagline ?? t.description.slice(0, 160)}</p>
         <div class="mt-3 flex flex-wrap gap-1.5">
@@ -118,7 +162,7 @@ const alValues = Object.keys(FACET_LABELS.autonomy_level);
 </BaseLayout>
 
 <script>
-  // Client-side filter. Pure DOM, no framework.
+  // Client-side filter + sort. Pure DOM, no framework.
   const form = document.getElementById('tool-filters') as HTMLFormElement | null;
   const grid = document.getElementById('tool-grid');
   const countEl = document.getElementById('match-count');
@@ -126,11 +170,24 @@ const alValues = Object.keys(FACET_LABELS.autonomy_level);
   if (form && grid) {
     const cards = Array.from(grid.querySelectorAll<HTMLElement>('.tool-card'));
 
+    const starsOf = (card: HTMLElement): number | null => {
+      const raw = card.dataset.stars ?? '';
+      if (raw === '') return null;
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : null;
+    };
+
     const apply = () => {
       const cp = (form.elements.namedItem('cp') as HTMLSelectElement).value;
       const tp = (form.elements.namedItem('tp') as HTMLSelectElement).value;
       const al = (form.elements.namedItem('al') as HTMLSelectElement).value;
       const fm = (form.elements.namedItem('fm') as HTMLSelectElement).value;
+      const sort = (form.elements.namedItem('sort') as HTMLSelectElement).value || 'stars';
+      const minStarsRaw = (form.elements.namedItem('min_stars') as HTMLInputElement).value.trim();
+      const minStars = minStarsRaw === '' ? null : Number(minStarsRaw);
+      const minStarsActive = minStars !== null && Number.isFinite(minStars);
+
+      // Filter
       let matched = 0;
       for (const card of cards) {
         const okCp = !cp || card.dataset.cp === cp;
@@ -138,15 +195,57 @@ const alValues = Object.keys(FACET_LABELS.autonomy_level);
         const okAl = !al || card.dataset.al === al;
         const fmList = (card.dataset.fm ?? '').split(' ').filter(Boolean);
         const okFm = !fm || fmList.includes(fm);
-        const show = okCp && okTp && okAl && okFm;
+        const s = starsOf(card);
+        // Tools without stars pass when min_stars is inactive; fail when it's set.
+        const okStars = !minStarsActive || (s !== null && s >= (minStars as number));
+        const show = okCp && okTp && okAl && okFm && okStars;
         card.style.display = show ? '' : 'none';
         if (show) matched++;
       }
+
+      // Sort visible cards by the chosen key. We reorder all cards for stable
+      // behavior — hidden ones are also sorted so that toggling filters keeps
+      // positions consistent.
+      const cmp = (a: HTMLElement, b: HTMLElement): number => {
+        if (sort === 'name') {
+          return (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '');
+        }
+        if (sort === 'recency') {
+          const au = a.dataset.lastUpdated ?? '';
+          const bu = b.dataset.lastUpdated ?? '';
+          if (au === bu) return (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '');
+          // Empty strings sort last; otherwise ISO date strings compare lexically desc.
+          if (au === '') return 1;
+          if (bu === '') return -1;
+          return bu.localeCompare(au);
+        }
+        // stars desc; tools without stars go last.
+        const as = starsOf(a);
+        const bs = starsOf(b);
+        if (as === null && bs === null) {
+          return (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '');
+        }
+        if (as === null) return 1;
+        if (bs === null) return -1;
+        if (bs !== as) return bs - as;
+        return (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '');
+      };
+      cards.slice().sort(cmp).forEach((card) => grid.appendChild(card));
+
       if (countEl) countEl.textContent = `${matched} tool${matched === 1 ? '' : 's'}`;
       if (emptyEl) emptyEl.classList.toggle('hidden', matched !== 0);
     };
 
     form.addEventListener('change', apply);
+    form.addEventListener('input', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.id === 'f-min-stars') apply();
+    });
     form.addEventListener('reset', () => setTimeout(apply, 0));
+
+    // Initial apply: defaults are "sort by stars desc" + no filters, which
+    // matches the server-rendered order — but run once so counts stay accurate
+    // if the user navigates back with form state restored by the browser.
+    apply();
   }
 </script>

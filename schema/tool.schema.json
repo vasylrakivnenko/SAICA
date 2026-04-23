@@ -60,6 +60,9 @@
     "signed_manifest":          {"type": "boolean"},
     "openssf_scorecard_score":  {"type": ["number", "null"], "minimum": 0, "maximum": 10},
 
+    "stars":            {"type": "integer", "minimum": 0, "description": "GitHub stargazer count, refreshed periodically by validator/fetch_github_stars.py."},
+    "stars_updated_at": {"type": "string", "format": "date", "description": "Date the stars count was last fetched (YYYY-MM-DD)."},
+
     "contributors":      {"type": "array", "items": {"type": "string"}},
     "editorial_notes":   {"type": "string"},
     "inclusion_rationale": {"type": "string"}

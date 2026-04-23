@@ -1,0 +1,46 @@
+id: qi-2026-rift
+authors:
+  - Zhengyang Qi
+  - Charles Dickens
+  - Derek Pham
+  - A. Dsouza
+  - Armin Parchami
+  - Frederic Sala
+  - P. Varma
+year: 2026
+title: "RIFT: A RubrIc Failure Mode Taxonomy and Automated Diagnostics"
+venue: arXiv
+arxiv_id: "2604.01375"
+url: https://arxiv.org/abs/2604.01375
+semantic_scholar_id: "5e99dc492a86cc1df499e9b8ca62cc9e3af16c1e"
+citation_count: 0
+abstract: >
+  Rubric-based evaluation is widely used in LLM benchmarks and training
+  pipelines for open-ended, less verifiable tasks. We introduce RIFT:
+  RubrIc Failure mode Taxonomy, a taxonomy for systematically characterizing
+  failure modes in rubric composition and design. RIFT consists of eight
+  failure modes organized into three high-level categories: Reliability
+  Failures, Content Validity Failures, and Consequential Validity Failures.
+  RIFT is developed using grounded theory by iteratively annotating rubrics
+  drawn from five diverse data sources spanning general instruction
+  following, code generation, creative writing, and expert-level deep
+  research, until no new failure modes are identified. We evaluate the
+  consistency of the taxonomy by measuring agreement among independent human
+  annotators (87% pairwise agreement, 0.64 average Cohen's kappa) and
+  propose automated rubric quality metrics aligned with human annotations,
+  achieving up to 0.925 F1.
+tldr: >
+  Grounded-theory taxonomy of 8 rubric-evaluation failure modes across 3
+  categories (reliability, content validity, consequential validity),
+  developed from rubrics in instruction following, code generation, creative
+  writing, and deep research; paired with automated diagnostic metrics.
+relevance_tags:
+  - failure-mode-taxonomy
+  - evaluation
+  - rubric
+  - grounded-theory
+  - multi-domain
+notes: >
+  Complements SAICA-KG's FailureMode axis from the evaluation/rubric angle
+  rather than the agent-trace angle. Informs how FailureMode tags interact
+  with evaluator quality (meta-evaluation).

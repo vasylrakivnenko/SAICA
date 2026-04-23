@@ -1,0 +1,61 @@
+id: autogen
+name: AutoGen
+tagline: Multi-agent conversation framework with programmable group chats.
+description: >
+  Microsoft Research open-source framework for building LLM applications
+  as conversations between configurable agents (AssistantAgent,
+  UserProxyAgent, GroupChat). Supervision primitives: per-agent system
+  message scoping, conversable-agent turn control, code-execution config
+  that gates whether an agent may run tools or code and in what
+  environment, and GroupChatManager for bounded multi-agent discussion.
+  v0.4 rewrote the core as an actor-model runtime (AgentChat on top of
+  autogen-core).
+
+first_released: 2023-09-25
+last_updated: 2026-03-30
+maturity_status: stable
+
+published_by: microsoft
+repository_url: https://github.com/microsoft/autogen
+documentation_url: https://microsoft.github.io/autogen/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+
+locus_of_control:
+  - prompt
+  - environment
+
+implements_techniques:
+  - conversable-agents
+  - group-chat-manager
+  - code-execution-config
+  - actor-runtime
+  - system-message-scoping
+
+security_notes: >
+  Open-source (MIT) from Microsoft Research. UserProxyAgent can execute
+  code — configure code_execution_config to run inside a container
+  (Docker) rather than on the host, or disable execution entirely for
+  untrusted prompts. Check compatibility across the 0.2 → 0.4 rewrite
+  when auditing existing integrations; the APIs are not identical.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × pre_generation × fully_autonomous for the
+  conversation-centric multi-agent archetype. Distinct locus from
+  CrewAI: AutoGen scopes behavior via per-agent system messages and
+  turn protocols rather than explicit role/task contracts, which is
+  worth separating in the taxonomy.
+stars: 57343
+stars_updated_at: '2026-04-22'

@@ -1,0 +1,59 @@
+id: swe-agent
+name: SWE-agent
+tagline: Agent-Computer Interface for autonomous repo-level software engineering.
+description: >
+  Open-source research agent from Princeton NLP that introduced the
+  Agent-Computer Interface (ACI) abstraction: a curated set of commands
+  (open/edit/search/submit) designed to be model-friendly for iterative
+  repo-level bug fixing. Runs inside a container, iteratively inspects
+  the repository, edits files, re-runs tests, and submits a patch. Default
+  posture is fully autonomous long-horizon fix-loop on a SWE-bench-style
+  task; human review happens only on the final patch.
+
+first_released: 2024-04-02
+last_updated: 2026-03-15
+maturity_status: stable
+
+published_by: princeton-nlp
+repository_url: https://github.com/princeton-nlp/SWE-agent
+documentation_url: https://swe-agent.com
+license: MIT
+
+control_paradigm: recovery
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+
+locus_of_control:
+  - environment
+  - prompt
+
+implements_techniques:
+  - agent-computer-interface
+  - iterative-fix-loop
+  - sandboxed-runtime
+  - trajectory-logging
+
+security_notes: >
+  Open-source (MIT) research agent. Runs inside a Docker container by
+  default; host-mount and direct-host modes bypass isolation and should
+  be avoided. Consumes user-supplied API keys. The ACI command set grants
+  broad shell-equivalent access inside the container — treat sandbox
+  escape and credential exposure as the primary threat model.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+evaluated_on:
+  - swe-bench
+
+inclusion_rationale: >
+  Canonical recovery × post_generation × fully_autonomous exemplar for
+  repo-level fix-loop agents. The ACI abstraction is the load-bearing
+  supervision primitive: constraining the action set to a small set of
+  audited commands is itself a supervisory design choice.
+stars: 19039
+stars_updated_at: '2026-04-22'

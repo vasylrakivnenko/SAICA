@@ -1,0 +1,75 @@
+id: swiss-to-saica
+saica_axis: failure_mode
+taxonomy: swiss-cheese-model
+authored_by:
+  - claude-opus-4-7
+last_reviewed: 2026-04-22
+
+# NOTE on scope: The Swiss Cheese Model's categories are primarily guardrail
+# facets (quality attributes, pipeline stages, protected artifacts, guardrail
+# actions), not failure classes. Per the taxonomy's own inclusion_rationale,
+# its strongest crosswalks into SAICA-KG land on axes other than
+# failure_mode: SC-PIPE-* aligns with temporal_phase, SC-ART-* with
+# locus_of_control, and SC-ACT-* with control_paradigm. This crosswalk is
+# therefore intentionally sparse and limited to the SC-QA categories that
+# directly name concrete failure classes (hallucinations, endless loops,
+# data leakage, adversarial attacks, bias). Bulk crosswalks on the other
+# three SAICA axes are the natural companions to this file.
+
+mappings:
+  # SC-QA-01 — Accuracy (mitigates hallucinations, misinformation)
+  - saica_value: fabrication
+    external_id: SC-QA-01
+    confidence: partial
+    note: >
+      "Hallucinations" in SC-QA-01 corresponds most directly to SAICA's
+      fabrication (non-existent code references) at the agent-code interface.
+  - saica_value: logic_error
+    external_id: SC-QA-01
+    confidence: related
+    note: Factually wrong outputs that are not code-reference errors map to logic_error.
+
+  # SC-QA-02 — Efficiency (prevents endless loops, resource-intensive tasks)
+  - saica_value: context_pollution
+    external_id: SC-QA-02
+    confidence: related
+    note: >
+      Endless loops are a context_pollution detection signal (repeated
+      identical tool calls); SC-QA-02 names the guardrail side.
+
+  # SC-QA-03 — Privacy (prevents sensitive-data leakage)
+  - saica_value: security_vulnerability
+    external_id: SC-QA-03
+    confidence: partial
+    note: >
+      Sensitive-data leakage is a security_vulnerability subclass; SC-QA-03
+      names the guardrail property.
+
+  # SC-QA-04 — Security (defends against adversarial attacks, data integrity)
+  - saica_value: security_vulnerability
+    external_id: SC-QA-04
+    confidence: partial
+    note: Direct guardrail-side counterpart of security_vulnerability.
+  - saica_value: supply_chain_attack
+    external_id: SC-QA-04
+    confidence: related
+    note: >
+      Adversarial-attack coverage includes the supply-chain vector in
+      practice, though SC-QA-04 does not name it specifically.
+
+  # SC-QA-05 — Safety (prevents harmful / misleading outputs)
+  - saica_value: fabrication
+    external_id: SC-QA-05
+    confidence: related
+    note: Misleading outputs include fabricated references in the code domain.
+
+  # SC-QA-06..14 — Fairness, compliance, generalizability, customizability,
+  # adaptability, traceability, portability, interoperability,
+  # interpretability: guardrail properties, not failure classes. Intentionally
+  # unmapped on the failure_mode axis — these describe what a guardrail
+  # should do, not what an agent fails at.
+
+  # SC-PIPE-* — pipeline stages: belong on the temporal_phase axis.
+  # SC-ART-* — protected artifacts: belong on the locus_of_control axis.
+  # SC-ACT-* — guardrail actions: belong on the control_paradigm axis.
+  # Intentionally unmapped on failure_mode.

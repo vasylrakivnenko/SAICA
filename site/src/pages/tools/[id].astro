@@ -23,13 +23,28 @@ const citedIn = tool.cited_in.map((id) => graph.papers[id]).filter(Boolean);
 const documentedIn = tool.documented_in.map((id) => graph.papers[id]).filter(Boolean);
 const evaluatedOn = tool.evaluated_on.map((id) => graph.papers[id]).filter(Boolean);
 const desc = tool.tagline ?? tool.description.slice(0, 160);
+const starsLabel = typeof tool.stars === 'number'
+  ? tool.stars.toLocaleString('en-US')
+  : null;
 ---
 
 <BaseLayout title={tool.name} description={desc}>
   <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
     <a href="/tools" class="no-underline hover:underline">Tools</a>
   </p>
-  <h1 class="mt-1">{tool.name}</h1>
+  <div class="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <h1 class="!mb-0">{tool.name}</h1>
+    {starsLabel && (
+      <a
+        href={tool.repository_url}
+        rel="noopener"
+        title={tool.stars_updated_at ? `GitHub stars (refreshed ${tool.stars_updated_at})` : 'GitHub stars'}
+        class="font-sans text-base text-ink-muted no-underline hover:underline"
+      >
+        <span aria-hidden="true">★</span> <span>{starsLabel}</span>
+      </a>
+    )}
+  </div>
   {tool.tagline && <p class="mt-2 text-lg text-ink-muted">{tool.tagline}</p>}
 
   <div class="mt-4 flex flex-wrap gap-2">
@@ -212,6 +227,17 @@ const desc = tool.tagline ?? tool.description.slice(0, 160);
           <>
             <dt>OpenSSF score</dt>
             <dd>{tool.openssf_scorecard_score}</dd>
+          </>
+        )}
+        {starsLabel && (
+          <>
+            <dt>GitHub stars</dt>
+            <dd>
+              {starsLabel}
+              {tool.stars_updated_at && (
+                <span class="text-ink-faint"> (as of {tool.stars_updated_at})</span>
+              )}
+            </dd>
           </>
         )}
       </dl>

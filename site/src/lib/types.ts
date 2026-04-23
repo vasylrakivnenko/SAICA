@@ -38,6 +38,8 @@ export interface Tool {
   security_notes?: string;
   signed_manifest?: boolean;
   openssf_scorecard_score?: number | null;
+  stars?: number;
+  stars_updated_at?: string;
   contributors: string[];
   editorial_notes?: string;
   inclusion_rationale?: string;

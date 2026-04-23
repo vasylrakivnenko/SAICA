@@ -48,6 +48,25 @@ Three ways to consume SAICA-KG:
 2. **Programmatic** — the site exposes JSON endpoints (`/api/v1/tools.json`, `/api/v1/failure_modes/<id>.json`, `/api/v1/snapshot.json`) for agents and analysis scripts.
 3. **Source** — clone the repo and read the YAML directly. Data under `data/` is CC-BY-4.0.
 
+## Data freshness
+
+Some fields on Tool nodes drift with the outside world. GitHub stargazer counts
+are refreshed in-place by a small script:
+
+```
+python validator/fetch_github_stars.py
+```
+
+It walks every `data/tools/*.yml`, resolves `repository_url` values that
+point at `github.com/<owner>/<repo>`, calls the GitHub REST API, and writes
+`stars` and `stars_updated_at` back to each YAML with round-trip-safe
+formatting (requires `ruamel.yaml` — see `validator/requirements.txt`).
+Set `GITHUB_TOKEN` to use an authenticated quota (5000 req/hour) instead of
+the 60 req/hour anonymous quota. Run it locally before a data release, or
+let the scheduled workflow in `.github/workflows/refresh-stars.yml` do it
+weekly (the scaffold is committed but not activated — enable it by uncommenting
+the `schedule` trigger and configuring the PR-authoring permissions).
+
 ## License
 
 - Code: Apache-2.0

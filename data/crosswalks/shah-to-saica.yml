@@ -1,0 +1,194 @@
+id: shah-to-saica
+saica_axis: failure_mode
+taxonomy: shah-2026-agentic-faults
+authored_by:
+  - claude-opus-4-7
+last_reviewed: 2026-04-22
+
+mappings:
+  # --- Major fault categories (primary crosswalk surface) ---
+
+  # SHAH-MAJ-01 — LLM Integration Faults
+  - saica_value: fabrication
+    external_id: SHAH-MAJ-01
+    confidence: related
+    note: LLM-integration defects often surface as fabricated calls or outputs.
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-01
+    confidence: related
+    note: Integration-layer logic defects affecting LLM invocation.
+
+  # SHAH-MAJ-02 — Agent Lifecycle and State
+  - saica_value: context_pollution
+    external_id: SHAH-MAJ-02
+    confidence: partial
+    note: State-tracking defects produce context_pollution within a session.
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-02
+    confidence: related
+    note: Lifecycle control-flow defects are logic_errors.
+
+  # SHAH-MAJ-03 — Tool Execution and API Usage
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-03
+    confidence: partial
+    note: Malformed tool/API invocations are logic_errors at the call-site.
+  - saica_value: fabrication
+    external_id: SHAH-MAJ-03
+    confidence: related
+    note: Incorrect invocations may reference non-existent APIs.
+
+  # SHAH-MAJ-04 — External Connectivity and Access
+  - saica_value: security_vulnerability
+    external_id: SHAH-MAJ-04
+    confidence: related
+    note: Authentication failures overlap with security_vulnerability (credential handling).
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-04
+    confidence: related
+    note: Connection-setup logic defects.
+
+  # SHAH-MAJ-05 — Resource Manipulation
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-05
+    confidence: related
+    note: Resource-handling defects.
+  - saica_value: security_vulnerability
+    external_id: SHAH-MAJ-05
+    confidence: related
+    note: Database misconfiguration often has a security dimension.
+
+  # SHAH-MAJ-06 — System Coordination
+  # Multi-component coordination; no strong single-agent SAICA counterpart. Omitted.
+
+  # SHAH-MAJ-07 — System Observability
+  # Logging/telemetry defects are not a SAICA FailureMode. Omitted.
+
+  # SHAH-MAJ-08 — Context and State Persistence
+  - saica_value: context_pollution
+    external_id: SHAH-MAJ-08
+    confidence: exact
+    note: Memory/state persistence failures are the direct counterpart of context_pollution.
+
+  # SHAH-MAJ-09 — Input Interpretation and Logic
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-09
+    confidence: exact
+    note: >
+      Type-handling, validation, encoding, and logic/constraint violations
+      are the direct counterpart of logic_error (passes type-check, fails
+      correctness).
+
+  # SHAH-MAJ-10 — Dependency Management
+  - saica_value: obsolescence
+    external_id: SHAH-MAJ-10
+    confidence: partial
+    note: >
+      Installation/resolver failures often surface as obsolete or mismatched
+      package versions; obsolescence is narrower (deprecated APIs).
+  - saica_value: supply_chain_attack
+    external_id: SHAH-MAJ-10
+    confidence: related
+    note: >
+      Dependency-resolution defects are the attack surface for slopsquatting
+      and typosquatting.
+  - saica_value: fabrication
+    external_id: SHAH-MAJ-10
+    confidence: related
+    note: Import-resolution failures often trace to fabricated package names.
+  - saica_value: dependency_blindness
+    external_id: SHAH-MAJ-10
+    confidence: related
+    note: >
+      Over-broad dependency declarations / unused deps are dependency_blindness
+      symptoms; different facet of the same fault class.
+
+  # SHAH-MAJ-11 — Platform Compatibility
+  - saica_value: obsolescence
+    external_id: SHAH-MAJ-11
+    confidence: partial
+    note: Environment/API/integration compatibility mismatches overlap with obsolescence.
+
+  # SHAH-MAJ-12 — Robustness and Error Recovery
+  - saica_value: logic_error
+    external_id: SHAH-MAJ-12
+    confidence: partial
+    note: Exception-handling/implementation defects are logic_errors.
+
+  # SHAH-MAJ-13 — UI, Visualization, and Documentation Defects
+  # Primarily UI/doc-layer; not a SAICA FailureMode. Omitted.
+
+  # --- Root causes (secondary surface; link where they directly name a SAICA mode) ---
+
+  # SHAH-RC-01 — Dependency and Integration Failures
+  - saica_value: obsolescence
+    external_id: SHAH-RC-01
+    confidence: related
+    note: Probabilistic-to-deterministic contract violations include version/schema drift.
+
+  # SHAH-RC-02 — Data and Type Handling Failures
+  - saica_value: logic_error
+    external_id: SHAH-RC-02
+    confidence: partial
+    note: Type/validation gaps are a core logic_error subclass.
+
+  # SHAH-RC-03 — Incorrect Token Management
+  - saica_value: context_pollution
+    external_id: SHAH-RC-03
+    confidence: partial
+    note: Token-budget miscounting produces context-window hygiene failures.
+
+  # SHAH-RC-04 — Authentication and Credential Issues
+  - saica_value: security_vulnerability
+    external_id: SHAH-RC-04
+    confidence: partial
+    note: Credential expiration / refresh fragility is a security_vulnerability class.
+
+  # SHAH-RC-05 — Datetime Conversion Errors
+  - saica_value: logic_error
+    external_id: SHAH-RC-05
+    confidence: related
+    note: Temporal-value transformations are a logic_error subclass.
+
+  # SHAH-RC-06 — State Management Defects
+  - saica_value: context_pollution
+    external_id: SHAH-RC-06
+    confidence: partial
+    note: Inconsistent internal state across interactions is context_pollution.
+
+  # SHAH-RC-07 — Configuration Inconsistencies
+  - saica_value: logic_error
+    external_id: SHAH-RC-07
+    confidence: related
+    note: Misconfiguration / wrong defaults often surface as correctness failures.
+
+  # SHAH-RC-08 — API Evolution and Schema Drift
+  - saica_value: obsolescence
+    external_id: SHAH-RC-08
+    confidence: exact
+    note: Upstream API changes yielding incompatibility is the direct counterpart.
+
+  # SHAH-RC-09 — Environment-Level Issues
+  - saica_value: obsolescence
+    external_id: SHAH-RC-09
+    confidence: related
+    note: Virtual-environment / platform-constraint mismatches overlap with obsolescence.
+
+  # SHAH-RC-10 — Documentation Gaps
+  # Process gap; not a SAICA FailureMode. Omitted.
+
+  # SHAH-RC-11 — Exception Suppression
+  - saica_value: logic_error
+    external_id: SHAH-RC-11
+    confidence: related
+    note: Silently-swallowed errors are a robustness logic_error class.
+
+  # SHAH-RC-12 — Ecosystem Fragility
+  - saica_value: obsolescence
+    external_id: SHAH-RC-12
+    confidence: related
+    note: Rapid upstream evolution produces obsolescence churn.
+  - saica_value: supply_chain_attack
+    external_id: SHAH-RC-12
+    confidence: related
+    note: Tight ecosystem coupling is the attack surface for supply-chain compromise.

@@ -1,0 +1,110 @@
+id: owasp-to-saica
+saica_axis: failure_mode
+taxonomy: owasp-agentic-top-10-2026
+authored_by:
+  - claude-opus-4-7
+last_reviewed: 2026-04-22
+
+mappings:
+  # ASI01 — Agent Goal Hijack
+  - saica_value: scope_creep
+    external_id: ASI01
+    confidence: partial
+    note: >
+      Goal hijack is adversarial diversion; scope_creep captures the
+      resulting behavior surface (acting outside stated task), whether
+      adversarial or benign.
+  - saica_value: context_pollution
+    external_id: ASI01
+    confidence: related
+    note: >
+      Memory/context manipulation is one mechanism by which goal hijack is
+      achieved.
+
+  # ASI02 — Tool Misuse and Exploitation
+  - saica_value: scope_creep
+    external_id: ASI02
+    confidence: partial
+    note: >
+      Tool misuse that exceeds the user-stated task boundary corresponds to
+      scope_creep; ASI02 is broader (also covers tool-surface exploitation
+      for RCE).
+  - saica_value: security_vulnerability
+    external_id: ASI02
+    confidence: partial
+    note: Tool abuse for exploitation overlaps with security_vulnerability.
+  - saica_value: logic_error
+    external_id: ASI02
+    confidence: related
+    note: >
+      Incorrect tool argument construction (non-malicious) is logic_error;
+      ASI02 focuses on the exploitation surface.
+
+  # ASI03 — Identity and Privilege Abuse
+  - saica_value: security_vulnerability
+    external_id: ASI03
+    confidence: partial
+    note: >
+      Credential / privilege abuse is a classic security_vulnerability
+      subclass in the agent setting.
+  - saica_value: scope_creep
+    external_id: ASI03
+    confidence: related
+    note: Privilege escalation is a special case of acting beyond declared scope.
+
+  # ASI04 — Agentic Supply Chain Vulnerabilities
+  - saica_value: supply_chain_attack
+    external_id: ASI04
+    confidence: exact
+    note: Direct counterpart; includes slopsquatting per both taxonomies.
+  - saica_value: fabrication
+    external_id: ASI04
+    confidence: related
+    note: >
+      Slopsquatting chains fabrication (hallucinated package name) to
+      supply_chain_attack (attacker registers it).
+
+  # ASI05 — Unexpected Code Execution (RCE)
+  - saica_value: security_vulnerability
+    external_id: ASI05
+    confidence: partial
+    note: >
+      RCE is one security-vulnerability class; security_vulnerability is
+      broader (injection, weak crypto, secret leakage).
+
+  # ASI06 — Memory & Context Poisoning
+  - saica_value: context_pollution
+    external_id: ASI06
+    confidence: partial
+    note: >
+      OWASP covers adversarial manipulation; context_pollution also covers
+      accidental drift. Partial on the adversarial subset.
+
+  # ASI07 — Insecure Inter-Agent Communication
+  - saica_value: security_vulnerability
+    external_id: ASI07
+    confidence: partial
+    note: Weakly authenticated inter-agent messages are a security-vulnerability class.
+
+  # ASI08 — Cascading Failures
+  - saica_value: context_pollution
+    external_id: ASI08
+    confidence: related
+    note: >
+      Context drift compounds across turns, producing cascading effects
+      within a single agent.
+  - saica_value: logic_error
+    external_id: ASI08
+    confidence: related
+    note: A local logic_error can cascade into broader failure when the agent acts on it.
+
+  # ASI09 — Human-Agent Trust Exploitation
+  # No SAICA FailureMode aligns cleanly; omitted rather than forced.
+
+  # ASI10 — Rogue Agents
+  - saica_value: scope_creep
+    external_id: ASI10
+    confidence: related
+    note: >
+      Self-initiated unsanctioned behavior extends scope_creep beyond a
+      single task into persistent policy violation.

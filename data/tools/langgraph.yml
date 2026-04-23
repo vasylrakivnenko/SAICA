@@ -1,0 +1,61 @@
+id: langgraph
+name: LangGraph
+tagline: Graph-structured state machines for stateful multi-agent orchestration.
+description: >
+  Open-source orchestration library from LangChain for building stateful
+  agent workflows as directed graphs with typed shared state, explicit
+  nodes, and conditional edges. Supervision primitives: graph-state
+  schema enforcement that scopes what each node can read/write,
+  checkpointing for time-travel and replay, interrupt points for
+  human-in-the-loop approval, and persistence for durable long-running
+  runs. Positions itself as the disciplined alternative to unstructured
+  agent loops.
+
+first_released: 2024-01-08
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: langchain-ai
+repository_url: https://github.com/langchain-ai/langgraph
+documentation_url: https://langchain-ai.github.io/langgraph/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+
+locus_of_control:
+  - prompt
+  - context
+
+implements_techniques:
+  - graph-state-machine
+  - typed-shared-state
+  - checkpointing
+  - interrupt-points
+  - conditional-edges
+
+security_notes: >
+  Open-source (MIT). Library code runs in-process with agent credentials;
+  no hosted dependency required for core use, though LangGraph Cloud and
+  LangSmith integration are opt-in hosted surfaces. Audit node
+  implementations for tool-call and exfiltration surface — graph
+  structure constrains control flow but not what individual nodes do.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × pre_generation × fully_autonomous for the
+  "structured agent orchestration" archetype. Graph-state schemas are a
+  pre-generation contract: each node sees only declared state slices,
+  which bounds context pollution and scope creep before generation
+  rather than filtering outputs after.
+stars: 30082
+stars_updated_at: '2026-04-22'

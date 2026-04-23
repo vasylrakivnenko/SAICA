@@ -1,0 +1,42 @@
+id: shah-2026-characterizing-faults
+authors:
+  - Mehil B. Shah
+  - Mohammad Mehdi Morovati
+  - Mohammad Masudur Rahman
+  - Foutse Khomh
+year: 2026
+title: "Characterizing Faults in Agentic AI: A Taxonomy of Types, Symptoms, and Root Causes"
+venue: arXiv
+arxiv_id: "2603.06847"
+url: https://arxiv.org/abs/2603.06847
+semantic_scholar_id: "a82a683a61862e69ac7f3b14924d631a6fbd5165"
+citation_count: 1
+abstract: >
+  Agentic AI systems combine large language model (LLM) reasoning with
+  external tool invocation and long-horizon task execution. We conduct a
+  large-scale empirical study of faults in agentic AI systems, collecting
+  13,602 issues and pull requests from 40 open-source agentic-AI
+  repositories and applying stratified sampling to select 385 faults for
+  in-depth qualitative analysis. Using grounded theory, we derive taxonomies
+  of fault types, observable symptoms, and root causes. We further apply
+  Apriori-based association rule mining to identify statistically significant
+  relationships among faults, symptoms, and root causes, revealing common
+  fault propagation patterns. We validate the taxonomy through a developer
+  study with 145 practitioners. Our analysis identifies 37 distinct fault
+  types grouped into 13 higher-level fault categories, along with 13 classes
+  of observable symptoms and 12 categories of root causes.
+tldr: >
+  385-fault grounded-theory study over 40 agentic-AI repos yields 37 fault
+  types in 13 categories, 13 symptom classes, and 12 root-cause categories,
+  validated by a 145-practitioner developer study.
+relevance_tags:
+  - failure-mode-taxonomy
+  - agentic-ai
+  - empirical
+  - external-taxonomy-seed
+  - grounded-theory
+notes: >
+  Primary source for the shah-2026-agentic-faults Taxonomy node in SAICA-KG.
+  Largest single empirical fault characterization of agentic AI to date
+  (385-fault stratified sample, 40 repos, n=145 practitioner validation).
+  Back-test corpus for SAICA-KG's FailureMode MECE claim.

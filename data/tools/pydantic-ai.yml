@@ -49,3 +49,5 @@ inclusion_rationale: >
   Occupies the detection × post_generation × fully_autonomous cell with a
   concrete implementation of validator-retry. Well-known, widely-adopted
   reference point.
+stars: 16560
+stars_updated_at: '2026-04-22'

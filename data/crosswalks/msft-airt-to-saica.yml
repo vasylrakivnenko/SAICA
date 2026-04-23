@@ -1,0 +1,154 @@
+id: msft-airt-to-saica
+saica_axis: failure_mode
+taxonomy: microsoft-airt-2025
+authored_by:
+  - claude-opus-4-7
+last_reviewed: 2026-04-22
+
+mappings:
+  # --- Novel Security ---
+
+  # MS-NS-01 — Agent Compromise
+  - saica_value: security_vulnerability
+    external_id: MS-NS-01
+    confidence: partial
+    note: Unauthorized agent control is the agentic special case of security_vulnerability.
+  - saica_value: supply_chain_attack
+    external_id: MS-NS-01
+    confidence: related
+    note: One compromise vector is a malicious upstream component.
+
+  # MS-NS-02 — Agent Injection
+  - saica_value: security_vulnerability
+    external_id: MS-NS-02
+    confidence: partial
+    note: Malicious instruction injection is a security_vulnerability class in the agent setting.
+  - saica_value: context_pollution
+    external_id: MS-NS-02
+    confidence: related
+    note: Injection pollutes the working context with adversarial content.
+  - saica_value: supply_chain_attack
+    external_id: MS-NS-02
+    confidence: related
+    note: Injection via compromised tool manifests is supply-chain-adjacent.
+
+  # MS-NS-03 — Agent Impersonation
+  - saica_value: supply_chain_attack
+    external_id: MS-NS-03
+    confidence: partial
+    note: >
+      Counterfeit agents parallel typosquatted/compromised tools in the
+      supply_chain_attack class.
+  - saica_value: security_vulnerability
+    external_id: MS-NS-03
+    confidence: related
+    note: Authentication/identity weakness is a security_vulnerability.
+
+  # MS-NS-04 — Agent Flow Manipulation
+  - saica_value: scope_creep
+    external_id: MS-NS-04
+    confidence: related
+    note: >
+      Rerouting workflows to bypass safety logic is acting outside declared
+      scope; SAICA has no explicit control-flow-manipulation mode.
+  - saica_value: security_vulnerability
+    external_id: MS-NS-04
+    confidence: partial
+    note: Bypassing safety logic via injected tokens is a security_vulnerability class.
+
+  # MS-NS-05 — Multi-Agent Jailbreaks
+  # Multi-agent specific; no clean single-agent counterpart in SAICA's enum.
+
+  # --- Novel Safety ---
+
+  # MS-NF-01 — Intra-Agent RAI Concerns
+  # No SAICA FailureMode covers RAI / content-safety. Omitted.
+
+  # MS-NF-02 — Bias in Resource Allocation
+  # No SAICA FailureMode covers fairness/bias. Omitted.
+
+  # MS-NF-03 — Organizational Knowledge Degradation
+  # Systemic / org-level; outside SAICA FailureMode scope. Omitted.
+
+  # MS-NF-04 — Prioritization Risks (Performance over Safety)
+  - saica_value: scope_creep
+    external_id: MS-NF-04
+    confidence: related
+    note: >
+      Skipping safety checks to hit KPIs is acting outside declared safety
+      scope; SAICA has no dedicated KPI-overriding-safety mode.
+
+  # --- Existing Security ---
+
+  # MS-ES-01 — Memory Poisoning
+  - saica_value: context_pollution
+    external_id: MS-ES-01
+    confidence: partial
+    note: >
+      Memory poisoning is the adversarial long-term-memory form of
+      context_pollution; context_pollution also covers accidental drift.
+
+  # MS-ES-02 — Cross-Domain Prompt Injection (XPIA)
+  - saica_value: context_pollution
+    external_id: MS-ES-02
+    confidence: partial
+    note: External content hijacking decision logic is a context_pollution vector.
+  - saica_value: security_vulnerability
+    external_id: MS-ES-02
+    confidence: partial
+    note: XPIA is also a security_vulnerability class.
+
+  # MS-ES-03 — Human-in-the-Loop Bypass
+  - saica_value: scope_creep
+    external_id: MS-ES-03
+    confidence: partial
+    note: Bypassing approval gates is acting beyond sanctioned scope.
+
+  # MS-ES-04 — Incorrect Permissions Management
+  - saica_value: scope_creep
+    external_id: MS-ES-04
+    confidence: partial
+    note: Over-scoped agent permissions let scope_creep become possible.
+  - saica_value: security_vulnerability
+    external_id: MS-ES-04
+    confidence: partial
+    note: Permission-management defects are a security_vulnerability class.
+
+  # MS-ES-05 — Insufficient Isolation
+  - saica_value: security_vulnerability
+    external_id: MS-ES-05
+    confidence: partial
+    note: Inadequate boundaries enabling lateral compromise is a security_vulnerability.
+
+  # --- Existing Safety ---
+
+  # MS-EF-01 — Bias Amplification
+  # No SAICA FailureMode covers fairness/bias. Omitted.
+
+  # MS-EF-02 — Hallucinations
+  - saica_value: fabrication
+    external_id: MS-EF-02
+    confidence: partial
+    note: >
+      Fabricated tool calls and references are the agent-relevant
+      intersection; MS-EF-02 also covers broader factual hallucination
+      outside SAICA's code-scoped fabrication.
+  - saica_value: logic_error
+    external_id: MS-EF-02
+    confidence: related
+    note: Factual hallucinations often manifest as downstream logic_errors.
+
+  # MS-EF-03 — Misinterpretation of Instructions
+  - saica_value: logic_error
+    external_id: MS-EF-03
+    confidence: partial
+    note: >
+      Misinterpretation yielding wrong logic is logic_error; SAICA has no
+      dedicated "misunderstood instructions" mode.
+  - saica_value: scope_creep
+    external_id: MS-EF-03
+    confidence: related
+    note: Misinterpretation can also yield out-of-scope actions.
+
+  # MS-EF-04 — Lack of Transparency
+  # Process / governance property, not a behavioral failure mode. Omitted.

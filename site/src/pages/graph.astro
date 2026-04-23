@@ -20,33 +20,66 @@ const title = "Knowledge Graph — SAICA-KG";
 
 {Layout ? (
   <Layout title={title}>
-    <section class="p-5 max-w-[1400px] mx-auto">
-      <h1 class="text-2xl font-bold mb-2">Knowledge Graph</h1>
-      <p class="text-sm text-gray-700 max-w-3xl mb-4">
-        An interactive view of the SAICA-KG. Nodes are <strong>tools</strong>,
-        <strong>failure modes</strong>, <strong>taxonomies</strong>, and
-        <strong>papers</strong>. Edges capture how tools address failure modes,
-        how tools compose, how failure modes crosswalk to external taxonomies,
-        and prior-work citations. Filters below let you narrow by node type or
-        tool facet; click a node for details.
-      </p>
-
+    <section class="px-3 py-2">
       <noscript>
-        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded mb-4 text-sm">
+        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded mb-2 text-sm">
           The interactive graph requires JavaScript. You can still view the raw
           data at <a href="/api/v1/snapshot.json">/api/v1/snapshot.json</a>.
         </div>
       </noscript>
 
-      <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr_300px] gap-4">
-        <aside class="border border-gray-200 rounded p-3 text-sm bg-white">
-          <div class="mb-3">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Search</label>
-            <input id="kg-search" type="search" placeholder="name or id…"
-                   class="w-full border border-gray-300 rounded px-2 py-1" />
-          </div>
+      {/* Toolbar: thin horizontal bar above the canvas */}
+      <div class="flex flex-wrap items-center gap-2 mb-2 p-2 bg-white border border-gray-200 rounded">
+        <h1 class="text-base font-semibold text-gray-800 mr-2">Knowledge Graph</h1>
 
-          <div id="kg-filters">
+        <input id="kg-search" type="search" placeholder="Search name or id…"
+               class="flex-1 min-w-[180px] max-w-xs border border-gray-300 rounded px-2 py-1 text-sm"
+               aria-label="Search nodes" />
+
+        <label for="kg-layout" class="sr-only">Layout</label>
+        <select id="kg-layout"
+                class="border border-gray-300 rounded px-2 py-1 text-sm"
+                aria-label="Layout algorithm">
+          <option value="cose" selected>cose (force-directed)</option>
+          <option value="grid">grid</option>
+          <option value="circle">circle</option>
+          <option value="breadthfirst">breadthfirst</option>
+        </select>
+
+        <button id="kg-reset" type="button"
+                class="border border-gray-300 rounded px-2 py-1 text-sm hover:bg-gray-50">
+          Reset view
+        </button>
+
+        <button id="kg-filters-toggle" type="button"
+                aria-expanded="false" aria-controls="kg-filters-drawer"
+                class="border border-gray-300 rounded px-2 py-1 text-sm hover:bg-gray-50">
+          Filters
+        </button>
+
+        <button id="kg-legend-toggle" type="button"
+                aria-expanded="false" aria-controls="kg-legend-popover"
+                class="border border-gray-300 rounded px-2 py-1 text-sm hover:bg-gray-50">
+          Legend
+        </button>
+      </div>
+
+      {/* Canvas region: full width, ~88vh tall */}
+      <div class="relative border border-gray-200 rounded bg-white overflow-hidden"
+           style="height:88vh">
+        <div id="cy" style="width:100%; height:100%;"></div>
+        <div id="kg-fallback" class="hidden absolute inset-0 p-6 bg-white text-sm"></div>
+
+        {/* Filters drawer — overlay from left, starts hidden */}
+        <aside id="kg-filters-drawer"
+               class="hidden absolute top-0 left-0 h-full w-72 bg-white border-r border-gray-200 shadow-lg overflow-y-auto z-20"
+               aria-hidden="true" aria-label="Graph filters" role="dialog" aria-modal="false">
+          <div class="flex items-center justify-between p-3 border-b border-gray-200 sticky top-0 bg-white">
+            <div class="text-sm font-semibold text-gray-700">Filters</div>
+            <button id="kg-filters-close" type="button" aria-label="Close filters"
+                    class="text-gray-500 hover:text-gray-800 text-lg leading-none px-2">×</button>
+          </div>
+          <div id="kg-filters" class="p-3 text-sm">
             <fieldset class="mb-3">
               <legend class="text-xs font-semibold text-gray-600 mb-1">Node types</legend>
               <label class="block"><input type="checkbox" name="type-tool" checked /> Tools</label>
@@ -96,54 +129,51 @@ const title = "Knowledge Graph — SAICA-KG";
               </select>
             </fieldset>
           </div>
-
-          <div class="mt-3 border-t pt-3">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Layout</label>
-            <select id="kg-layout" class="w-full border border-gray-300 rounded px-2 py-1">
-              <option value="cose" selected>cose (force-directed)</option>
-              <option value="grid">grid</option>
-              <option value="circle">circle</option>
-              <option value="breadthfirst">breadthfirst</option>
-            </select>
-            <button id="kg-reset"
-                    class="mt-2 w-full border border-gray-300 rounded px-2 py-1 hover:bg-gray-50 text-sm">
-              Reset view
-            </button>
-          </div>
-
-          <div class="mt-3 border-t pt-3 text-xs">
-            <div class="font-semibold text-gray-600 mb-1">Legend</div>
-            <div class="flex items-center gap-2 mb-1">
-              <span style="display:inline-block;width:14px;height:10px;background:#2563eb;border-radius:2px"></span> Tool (rounded)
-            </div>
-            <div class="flex items-center gap-2 mb-1">
-              <span style="display:inline-block;width:12px;height:12px;background:#dc2626;transform:rotate(45deg)"></span> Failure mode (diamond)
-            </div>
-            <div class="flex items-center gap-2 mb-1">
-              <span style="display:inline-block;width:12px;height:12px;background:#7c3aed;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)"></span> Taxonomy (hex)
-            </div>
-            <div class="flex items-center gap-2 mb-2">
-              <span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:50%"></span> Paper
-            </div>
-            <div class="text-gray-600">Tool border = control_paradigm</div>
-            <div class="mt-2 text-gray-600">Edges:</div>
-            <div>— solid red: addresses</div>
-            <div>— dashed blue: composes_with</div>
-            <div>— solid blue: feeds_into</div>
-            <div>— dotted teal: supersedes</div>
-            <div>— purple: crosswalks</div>
-            <div>— dashed gray: prior_work</div>
-            <div>— dotted gray: cited_in</div>
-          </div>
         </aside>
 
-        <div class="relative border border-gray-200 rounded bg-white overflow-hidden"
-             style="min-height:80vh">
-          <div id="cy" style="width:100%; height:80vh;"></div>
-          <div id="kg-fallback" class="hidden absolute inset-0 p-6 bg-white text-sm"></div>
+        {/* Legend popover — floats near the Legend button, starts hidden */}
+        <div id="kg-legend-popover"
+             class="hidden absolute top-2 right-2 w-64 bg-white/95 backdrop-blur border border-gray-200 rounded shadow-lg p-3 text-xs z-20"
+             aria-hidden="true" role="dialog" aria-label="Graph legend">
+          <div class="flex items-center justify-between mb-2">
+            <div class="font-semibold text-gray-700">Legend</div>
+            <button id="kg-legend-close" type="button" aria-label="Close legend"
+                    class="text-gray-500 hover:text-gray-800 text-base leading-none px-1">×</button>
+          </div>
+          <div class="flex items-center gap-2 mb-1">
+            <span style="display:inline-block;width:14px;height:10px;background:#2563eb;border-radius:2px"></span> Tool (rounded)
+          </div>
+          <div class="flex items-center gap-2 mb-1">
+            <span style="display:inline-block;width:12px;height:12px;background:#dc2626;transform:rotate(45deg)"></span> Failure mode (diamond)
+          </div>
+          <div class="flex items-center gap-2 mb-1">
+            <span style="display:inline-block;width:12px;height:12px;background:#7c3aed;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)"></span> Taxonomy (hex)
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:50%"></span> Paper
+          </div>
+          <div class="text-gray-600">Tool border = control_paradigm</div>
+          <div class="mt-2 text-gray-600">Edges:</div>
+          <div>— solid red: addresses</div>
+          <div>— dashed blue: composes_with</div>
+          <div>— solid blue: feeds_into</div>
+          <div>— dotted teal: supersedes</div>
+          <div>— purple: crosswalks</div>
+          <div>— dashed gray: prior_work</div>
+          <div>— dotted gray: cited_in</div>
         </div>
 
-        <aside id="kg-sidebar" class="border border-gray-200 rounded bg-white min-h-[200px]"></aside>
+        {/* Node-detail floating card — shown when a node is clicked */}
+        <aside id="kg-sidebar-card"
+               class="hidden absolute top-2 right-2 w-80 max-h-[calc(88vh-1rem)] overflow-y-auto bg-white border border-gray-200 rounded shadow-lg z-10"
+               aria-hidden="true" aria-label="Node details">
+          <div class="flex items-center justify-between p-2 border-b border-gray-200 sticky top-0 bg-white">
+            <div class="text-xs font-semibold text-gray-600">Details</div>
+            <button id="kg-sidebar-close" type="button" aria-label="Close details"
+                    class="text-gray-500 hover:text-gray-800 text-lg leading-none px-2">×</button>
+          </div>
+          <div id="kg-sidebar"></div>
+        </aside>
       </div>
     </section>
   </Layout>
@@ -156,23 +186,51 @@ const title = "Knowledge Graph — SAICA-KG";
       <style is:global>
         body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: #111827; background: #f9fafb; }
         a { color: #2563eb; }
-        .kg-nav { padding: 12px 20px; border-bottom: 1px solid #e5e7eb; background: #fff; }
+        .kg-nav { padding: 10px 16px; border-bottom: 1px solid #e5e7eb; background: #fff; }
         .kg-nav a { margin-right: 16px; text-decoration: none; }
-        .kg-wrap { padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .kg-grid { display: grid; grid-template-columns: 260px 1fr 300px; gap: 16px; }
-        @media (max-width: 900px) { .kg-grid { grid-template-columns: 1fr; } }
-        .kg-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-size: 14px; }
-        .kg-card fieldset { border: 0; padding: 0; margin: 0 0 12px 0; }
-        .kg-card legend { font-size: 11px; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
-        .kg-card label { display: block; }
-        .kg-card input[type="search"], .kg-card select {
+        .kg-wrap { padding: 8px 12px; }
+        .kg-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 8px; }
+        .kg-toolbar h1 { font-size: 15px; font-weight: 600; margin: 0 8px 0 0; }
+        .kg-toolbar input, .kg-toolbar select, .kg-toolbar button {
+          border: 1px solid #d1d5db; border-radius: 4px; padding: 4px 8px; font-size: 14px; background: #fff;
+        }
+        .kg-toolbar button { cursor: pointer; }
+        .kg-toolbar button:hover { background: #f3f4f6; }
+        .kg-canvas { position: relative; height: 88vh; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; overflow: hidden; }
+        .kg-drawer {
+          position: absolute; top: 0; left: 0; height: 100%; width: 288px;
+          background: #fff; border-right: 1px solid #e5e7eb;
+          box-shadow: 2px 0 8px rgba(0,0,0,0.08); overflow-y: auto; z-index: 20;
+        }
+        .kg-drawer-head { display: flex; align-items: center; justify-content: space-between;
+          padding: 10px 12px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: #fff; }
+        .kg-drawer-head .title { font-size: 14px; font-weight: 600; color: #374151; }
+        .kg-close { background: none; border: 0; font-size: 18px; line-height: 1; color: #6b7280; cursor: pointer; padding: 0 6px; }
+        .kg-close:hover { color: #111827; }
+        .kg-drawer-body { padding: 12px; font-size: 14px; }
+        .kg-drawer-body fieldset { border: 0; padding: 0; margin: 0 0 12px 0; }
+        .kg-drawer-body legend { font-size: 11px; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
+        .kg-drawer-body label { display: block; }
+        .kg-drawer-body select, .kg-drawer-body input[type="search"] {
           width: 100%; border: 1px solid #d1d5db; border-radius: 4px; padding: 4px 6px;
         }
-        .kg-card button {
-          width: 100%; border: 1px solid #d1d5db; border-radius: 4px; padding: 4px 8px;
-          background: #fff; cursor: pointer; margin-top: 8px;
+        .kg-legend {
+          position: absolute; top: 8px; right: 8px; width: 256px;
+          background: rgba(255,255,255,0.95); border: 1px solid #e5e7eb; border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 12px; font-size: 12px; z-index: 20;
         }
-        .kg-card button:hover { background: #f3f4f6; }
+        .kg-legend-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .kg-legend-head .title { font-weight: 600; color: #374151; }
+        .kg-card-float {
+          position: absolute; top: 8px; right: 8px; width: 320px;
+          max-height: calc(88vh - 16px); overflow-y: auto;
+          background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 10;
+        }
+        .kg-card-head { display: flex; align-items: center; justify-content: space-between;
+          padding: 8px 10px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: #fff; }
+        .kg-card-head .title { font-size: 11px; font-weight: 600; color: #4b5563; }
+        .hidden { display: none !important; }
       </style>
     </head>
     <body>
@@ -185,31 +243,38 @@ const title = "Knowledge Graph — SAICA-KG";
       </nav>
 
       <section class="kg-wrap">
-        <h1 style="font-size:1.5rem;font-weight:700;margin:0 0 8px 0">Knowledge Graph</h1>
-        <p style="font-size:14px;color:#374151;max-width:900px;margin-bottom:16px">
-          An interactive view of the SAICA-KG. Nodes are <strong>tools</strong>,
-          <strong>failure modes</strong>, <strong>taxonomies</strong>, and
-          <strong>papers</strong>. Edges capture how tools address failure
-          modes, how tools compose, how failure modes crosswalk to external
-          taxonomies, and prior-work citations. Filters below let you narrow by
-          node type or tool facet; click a node for details.
-        </p>
-
         <noscript>
-          <div style="padding:16px;background:#fef9c3;border:1px solid #fde68a;border-radius:4px;margin-bottom:16px;font-size:14px">
+          <div style="padding:12px;background:#fef9c3;border:1px solid #fde68a;border-radius:4px;margin-bottom:8px;font-size:14px">
             The interactive graph requires JavaScript. You can still view the
             raw data at <a href="/api/v1/snapshot.json">/api/v1/snapshot.json</a>.
           </div>
         </noscript>
 
-        <div class="kg-grid">
-          <aside class="kg-card">
-            <div style="margin-bottom:12px">
-              <label style="font-size:11px;font-weight:600;color:#4b5563">Search</label>
-              <input id="kg-search" type="search" placeholder="name or id…" />
-            </div>
+        <div class="kg-toolbar">
+          <h1>Knowledge Graph</h1>
+          <input id="kg-search" type="search" placeholder="Search name or id…" style="flex:1;min-width:180px;max-width:320px" aria-label="Search nodes" />
+          <select id="kg-layout" aria-label="Layout algorithm">
+            <option value="cose" selected>cose (force-directed)</option>
+            <option value="grid">grid</option>
+            <option value="circle">circle</option>
+            <option value="breadthfirst">breadthfirst</option>
+          </select>
+          <button id="kg-reset" type="button">Reset view</button>
+          <button id="kg-filters-toggle" type="button" aria-expanded="false" aria-controls="kg-filters-drawer">Filters</button>
+          <button id="kg-legend-toggle" type="button" aria-expanded="false" aria-controls="kg-legend-popover">Legend</button>
+        </div>
 
-            <div id="kg-filters">
+        <div class="kg-canvas">
+          <div id="cy" style="width:100%;height:100%"></div>
+          <div id="kg-fallback" class="hidden"
+               style="position:absolute;inset:0;padding:24px;background:#fff;font-size:14px"></div>
+
+          <aside id="kg-filters-drawer" class="kg-drawer hidden" aria-hidden="true" aria-label="Graph filters" role="dialog" aria-modal="false">
+            <div class="kg-drawer-head">
+              <span class="title">Filters</span>
+              <button id="kg-filters-close" class="kg-close" type="button" aria-label="Close filters">×</button>
+            </div>
+            <div id="kg-filters" class="kg-drawer-body">
               <fieldset>
                 <legend>Node types</legend>
                 <label><input type="checkbox" name="type-tool" checked /> Tools</label>
@@ -217,7 +282,6 @@ const title = "Knowledge Graph — SAICA-KG";
                 <label><input type="checkbox" name="type-taxonomy" checked /> Taxonomies</label>
                 <label><input type="checkbox" name="type-paper" /> Papers</label>
               </fieldset>
-
               <fieldset>
                 <legend>Edge types</legend>
                 <label><input type="checkbox" name="edge-addresses" checked /> addresses</label>
@@ -228,7 +292,6 @@ const title = "Knowledge Graph — SAICA-KG";
                 <label><input type="checkbox" name="edge-prior_work" /> prior_work</label>
                 <label><input type="checkbox" name="edge-cited_in" /> cited_in</label>
               </fieldset>
-
               <fieldset>
                 <legend>Tool facets</legend>
                 <label style="font-size:11px;color:#4b5563;margin-top:4px">control_paradigm</label>
@@ -239,7 +302,6 @@ const title = "Knowledge Graph — SAICA-KG";
                   <option value="correction">correction</option>
                   <option value="observation">observation</option>
                 </select>
-
                 <label style="font-size:11px;color:#4b5563;margin-top:8px">temporal_phase</label>
                 <select name="temporal_phase">
                   <option value="">any</option>
@@ -248,7 +310,6 @@ const title = "Knowledge Graph — SAICA-KG";
                   <option value="post_generation">post_generation</option>
                   <option value="runtime">runtime</option>
                 </select>
-
                 <label style="font-size:11px;color:#4b5563;margin-top:8px">autonomy_level</label>
                 <select name="autonomy_level">
                   <option value="">any</option>
@@ -259,51 +320,43 @@ const title = "Knowledge Graph — SAICA-KG";
                 </select>
               </fieldset>
             </div>
-
-            <div style="border-top:1px solid #e5e7eb;padding-top:12px;margin-top:12px">
-              <label style="font-size:11px;font-weight:600;color:#4b5563">Layout</label>
-              <select id="kg-layout">
-                <option value="cose" selected>cose (force-directed)</option>
-                <option value="grid">grid</option>
-                <option value="circle">circle</option>
-                <option value="breadthfirst">breadthfirst</option>
-              </select>
-              <button id="kg-reset" type="button">Reset view</button>
-            </div>
-
-            <div style="border-top:1px solid #e5e7eb;padding-top:12px;margin-top:12px;font-size:12px">
-              <div style="font-weight:600;color:#4b5563;margin-bottom:4px">Legend</div>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                <span style="display:inline-block;width:14px;height:10px;background:#2563eb;border-radius:2px"></span> Tool (rounded)
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                <span style="display:inline-block;width:12px;height:12px;background:#dc2626;transform:rotate(45deg)"></span> Failure mode
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                <span style="display:inline-block;width:12px;height:12px;background:#7c3aed;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)"></span> Taxonomy
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                <span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:50%"></span> Paper
-              </div>
-              <div style="color:#4b5563">Tool border = control_paradigm</div>
-              <div style="margin-top:8px;color:#4b5563">Edges:</div>
-              <div>solid red: addresses</div>
-              <div>dashed blue: composes_with</div>
-              <div>solid blue: feeds_into</div>
-              <div>dotted teal: supersedes</div>
-              <div>purple: crosswalks</div>
-              <div>dashed gray: prior_work</div>
-              <div>dotted gray: cited_in</div>
-            </div>
           </aside>
 
-          <div style="position:relative;border:1px solid #e5e7eb;border-radius:6px;background:#fff;overflow:hidden;min-height:80vh">
-            <div id="cy" style="width:100%;height:80vh"></div>
-            <div id="kg-fallback" class="hidden"
-                 style="position:absolute;inset:0;padding:24px;background:#fff;font-size:14px;display:none"></div>
+          <div id="kg-legend-popover" class="kg-legend hidden" aria-hidden="true" role="dialog" aria-label="Graph legend">
+            <div class="kg-legend-head">
+              <span class="title">Legend</span>
+              <button id="kg-legend-close" class="kg-close" type="button" aria-label="Close legend">×</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="display:inline-block;width:14px;height:10px;background:#2563eb;border-radius:2px"></span> Tool (rounded)
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="display:inline-block;width:12px;height:12px;background:#dc2626;transform:rotate(45deg)"></span> Failure mode
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="display:inline-block;width:12px;height:12px;background:#7c3aed;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)"></span> Taxonomy
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="display:inline-block;width:10px;height:10px;background:#6b7280;border-radius:50%"></span> Paper
+            </div>
+            <div style="color:#4b5563">Tool border = control_paradigm</div>
+            <div style="margin-top:8px;color:#4b5563">Edges:</div>
+            <div>solid red: addresses</div>
+            <div>dashed blue: composes_with</div>
+            <div>solid blue: feeds_into</div>
+            <div>dotted teal: supersedes</div>
+            <div>purple: crosswalks</div>
+            <div>dashed gray: prior_work</div>
+            <div>dotted gray: cited_in</div>
           </div>
 
-          <aside id="kg-sidebar" class="kg-card" style="min-height:200px"></aside>
+          <aside id="kg-sidebar-card" class="kg-card-float hidden" aria-hidden="true" aria-label="Node details">
+            <div class="kg-card-head">
+              <span class="title">Details</span>
+              <button id="kg-sidebar-close" class="kg-close" type="button" aria-label="Close details">×</button>
+            </div>
+            <div id="kg-sidebar"></div>
+          </aside>
         </div>
       </section>
     </body>
@@ -315,10 +368,117 @@ const title = "Knowledge Graph — SAICA-KG";
 
   const container = document.getElementById("cy") as HTMLElement | null;
   const sidebar = document.getElementById("kg-sidebar") as HTMLElement | null;
+  const sidebarCard = document.getElementById("kg-sidebar-card") as HTMLElement | null;
+  const sidebarClose = document.getElementById("kg-sidebar-close") as HTMLButtonElement | null;
   const filters = document.getElementById("kg-filters") as HTMLElement | null;
+  const filtersDrawer = document.getElementById("kg-filters-drawer") as HTMLElement | null;
+  const filtersToggle = document.getElementById("kg-filters-toggle") as HTMLButtonElement | null;
+  const filtersClose = document.getElementById("kg-filters-close") as HTMLButtonElement | null;
+  const legendPopover = document.getElementById("kg-legend-popover") as HTMLElement | null;
+  const legendToggle = document.getElementById("kg-legend-toggle") as HTMLButtonElement | null;
+  const legendClose = document.getElementById("kg-legend-close") as HTMLButtonElement | null;
   const layoutSelect = document.getElementById("kg-layout") as HTMLSelectElement | null;
   const resetBtn = document.getElementById("kg-reset") as HTMLButtonElement | null;
   const search = document.getElementById("kg-search") as HTMLInputElement | null;
+
+  // ----- UI: drawer + popover toggles -----
+  const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  let lastFocus: HTMLElement | null = null;
+  let trapHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  function trapFocus(root: HTMLElement): void {
+    const focusables = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE))
+      .filter((el) => el.offsetParent !== null);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    trapHandler = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
+    root.addEventListener("keydown", trapHandler as EventListener);
+  }
+  function releaseFocus(root: HTMLElement): void {
+    if (trapHandler) {
+      root.removeEventListener("keydown", trapHandler as EventListener);
+      trapHandler = null;
+    }
+  }
+
+  function setFiltersOpen(open: boolean): void {
+    if (!filtersDrawer || !filtersToggle) return;
+    filtersDrawer.classList.toggle("hidden", !open);
+    filtersDrawer.setAttribute("aria-hidden", open ? "false" : "true");
+    filtersToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    document.body.setAttribute("data-panel-open", open ? "filters" : "");
+    if (open) {
+      lastFocus = document.activeElement as HTMLElement | null;
+      const firstInput = filtersDrawer.querySelector<HTMLElement>(FOCUSABLE);
+      firstInput?.focus();
+      trapFocus(filtersDrawer);
+    } else {
+      releaseFocus(filtersDrawer);
+      lastFocus?.focus?.();
+    }
+  }
+
+  function setLegendOpen(open: boolean): void {
+    if (!legendPopover || !legendToggle) return;
+    legendPopover.classList.toggle("hidden", !open);
+    legendPopover.setAttribute("aria-hidden", open ? "false" : "true");
+    legendToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      legendClose?.focus();
+    }
+  }
+
+  function setSidebarOpen(open: boolean): void {
+    if (!sidebarCard) return;
+    sidebarCard.classList.toggle("hidden", !open);
+    sidebarCard.setAttribute("aria-hidden", open ? "false" : "true");
+  }
+
+  filtersToggle?.addEventListener("click", () => {
+    const open = filtersDrawer?.classList.contains("hidden");
+    setFiltersOpen(!!open);
+  });
+  filtersClose?.addEventListener("click", () => setFiltersOpen(false));
+
+  legendToggle?.addEventListener("click", () => {
+    const open = legendPopover?.classList.contains("hidden");
+    setLegendOpen(!!open);
+  });
+  legendClose?.addEventListener("click", () => setLegendOpen(false));
+
+  sidebarClose?.addEventListener("click", () => setSidebarOpen(false));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (filtersDrawer && !filtersDrawer.classList.contains("hidden")) {
+      setFiltersOpen(false);
+    } else if (legendPopover && !legendPopover.classList.contains("hidden")) {
+      setLegendOpen(false);
+    } else if (sidebarCard && !sidebarCard.classList.contains("hidden")) {
+      setSidebarOpen(false);
+    }
+  });
+
+  // When KGGraph.ts writes into #kg-sidebar (on node click), auto-open the
+  // floating details card. Empty state (initial/deselect) keeps it hidden.
+  if (sidebar && sidebarCard) {
+    const mo = new MutationObserver(() => {
+      const hasContent = sidebar.querySelector("a, div > strong, [style*='font-size:18px']") !== null
+        || (sidebar.textContent?.trim().length ?? 0) > 0;
+      const isEmptyHint = sidebar.textContent?.includes("Click a node to see details");
+      setSidebarOpen(!!hasContent && !isEmptyHint);
+    });
+    mo.observe(sidebar, { childList: true, subtree: true, characterData: true });
+  }
 
   if (container && sidebar && filters && layoutSelect && resetBtn && search) {
     const params = new URLSearchParams(window.location.search);
@@ -335,6 +495,7 @@ const title = "Knowledge Graph — SAICA-KG";
       const fb = document.getElementById("kg-fallback");
       if (fb) {
         (fb as HTMLElement).style.display = "block";
+        fb.classList.remove("hidden");
         fb.innerHTML =
           `<p>Failed to initialize graph: ${String(err).replace(/</g, "&lt;")}.</p>` +
           `<p>See <a href="/api/v1/snapshot.json">/api/v1/snapshot.json</a>.</p>`;

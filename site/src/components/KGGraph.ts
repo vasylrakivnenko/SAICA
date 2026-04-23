@@ -9,6 +9,7 @@ interface Tool {
   control_paradigm?: string; temporal_phase?: string; autonomy_level?: string;
   addresses_failure_modes?: string[]; composes_with?: string[]; feeds_into?: string[];
   supersedes?: string[]; cited_in?: string[]; documented_in?: string[];
+  stars?: number | null; stars_updated_at?: string | null;
 }
 interface Crosswalk { taxonomy: string; external_id: string; confidence?: string; }
 interface FailureMode {
@@ -103,7 +104,23 @@ export async function mountKGGraph(opts: {
           width: 28, height: 28,
         },
       },
-      { selector: 'node[type = "tool"]', style: { shape: "round-rectangle", width: 36, height: 28 } },
+      {
+        selector: 'node[type = "tool"]',
+        style: {
+          shape: "round-rectangle",
+          // Size Tool nodes by GitHub stars (pre-computed in buildElements).
+          // Width is stretched slightly for the rounded-rectangle aesthetic.
+          width: (n: NodeSingular) => {
+            const s = Number(n.data("toolSize"));
+            const base = Number.isFinite(s) && s > 0 ? s : 24;
+            return base * 1.3;
+          },
+          height: (n: NodeSingular) => {
+            const s = Number(n.data("toolSize"));
+            return Number.isFinite(s) && s > 0 ? s : 24;
+          },
+        },
+      },
       { selector: 'node[type = "failure_mode"]', style: { shape: "diamond" } },
       { selector: 'node[type = "taxonomy"]', style: { shape: "hexagon" } },
       { selector: 'node[type = "paper"]', style: { shape: "ellipse", width: 22, height: 22 } },
@@ -180,11 +197,16 @@ function buildElements(s: Snapshot): { elements: ElementDefinition[]; nodeCount:
   for (const fm of Object.values(fms)) for (const p of fm.prior_work ?? []) usedPaperIds.add(p);
 
   for (const t of Object.values(tools)) {
+    const stars = typeof t.stars === "number" ? t.stars : null;
     elements.push({ data: {
       id: t.id, type: "tool", label: t.name || t.id,
       control_paradigm: t.control_paradigm ?? null,
       temporal_phase: t.temporal_phase ?? null,
       autonomy_level: t.autonomy_level ?? null,
+      stars,
+      // Pre-computed Tool node size: sqrt(max(stars, 0) + 1) * 8, clamped to
+      // [24, 80]. Tools without a stars count get the minimum size.
+      toolSize: toolSizeFromStars(stars),
     }});
   }
   for (const fm of Object.values(fms)) elements.push({ data: { id: fm.id, type: "failure_mode", label: fm.name || fm.id } });
@@ -292,11 +314,17 @@ function renderSidebar(sidebar: HTMLElement, n: NodeSingular): void {
   let body = "";
   if (snap && type === "tool") {
     const t = snap.nodes.tools?.[id];
-    if (t) body = `
-      <div><strong>Control paradigm:</strong> ${escapeHtml(t.control_paradigm ?? "—")}</div>
-      <div><strong>Temporal phase:</strong> ${escapeHtml(t.temporal_phase ?? "—")}</div>
-      <div><strong>Autonomy:</strong> ${escapeHtml(t.autonomy_level ?? "—")}</div>
-      <div><strong>Addresses:</strong> ${(t.addresses_failure_modes ?? []).map(escapeHtml).join(", ") || "—"}</div>`;
+    if (t) {
+      const starsLine = typeof t.stars === "number"
+        ? `<div><strong>GitHub stars:</strong> ★ ${t.stars.toLocaleString("en-US")}${t.stars_updated_at ? ` <span style="color:#9ca3af">(as of ${escapeHtml(String(t.stars_updated_at))})</span>` : ""}</div>`
+        : "";
+      body = `
+        <div><strong>Control paradigm:</strong> ${escapeHtml(t.control_paradigm ?? "—")}</div>
+        <div><strong>Temporal phase:</strong> ${escapeHtml(t.temporal_phase ?? "—")}</div>
+        <div><strong>Autonomy:</strong> ${escapeHtml(t.autonomy_level ?? "—")}</div>
+        <div><strong>Addresses:</strong> ${(t.addresses_failure_modes ?? []).map(escapeHtml).join(", ") || "—"}</div>
+        ${starsLine}`;
+    }
   } else if (snap && type === "failure_mode") {
     const fm = snap.nodes.failure_modes?.[id];
     if (fm) body = `<p>${escapeHtml(fm.description ?? "")}</p>
@@ -325,6 +353,14 @@ function renderSidebar(sidebar: HTMLElement, n: NodeSingular): void {
 }
 
 // ---------- Utils ----------
+// Node size for Tool nodes: sqrt(max(stars, 0) + 1) * 8, clamped to [24, 80].
+// Tools without a star count get the minimum size (24) so they stay visible.
+function toolSizeFromStars(stars: number | null | undefined): number {
+  const s = typeof stars === "number" && Number.isFinite(stars) ? Math.max(stars, 0) : 0;
+  const raw = Math.sqrt(s + 1) * 8;
+  return Math.max(24, Math.min(80, raw));
+}
+
 function shortPaperLabel(p: Paper): string {
   const a = formatAuthors(p.authors).split(",")[0] || p.id;
   return `${a}${p.year ? ` ${p.year}` : ""}`;

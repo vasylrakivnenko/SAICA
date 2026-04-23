@@ -53,3 +53,5 @@ inclusion_rationale: >
   logit-masking during decoding prevents schema-invalid tokens from ever
   being emitted. Distinct from post-generation validators — output is
   correct-by-construction rather than checked-after-the-fact.
+stars: 13718
+stars_updated_at: '2026-04-22'

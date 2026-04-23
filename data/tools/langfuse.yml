@@ -1,0 +1,62 @@
+id: langfuse
+name: Langfuse
+tagline: Open-source LLM engineering platform for tracing, evals, and prompt management.
+description: >
+  Open-source observability and evaluation platform for LLM
+  applications. Captures nested traces (trace → span → generation),
+  stores prompts with versioning, runs dataset-driven and LLM-as-judge
+  evaluations, and exposes a scoring API for human and programmatic
+  feedback. Framework-agnostic Python/JS SDKs plus integrations with
+  LangChain, LlamaIndex, and OpenTelemetry. Self-hostable via Docker
+  compose or a managed cloud offering.
+
+first_released: 2023-07-01
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: langfuse
+repository_url: https://github.com/langfuse/langfuse
+documentation_url: https://langfuse.com/docs
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - context_pollution
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - trace-capture
+  - llm-as-judge-eval
+  - dataset-regression-eval
+  - prompt-versioning
+  - scoring-api
+  - opentelemetry-integration
+
+security_notes: >
+  Core project is open-source (MIT) and self-hostable, which makes it
+  the canonical data-residency-friendly alternative to hosted
+  observability. The managed cloud offering shares the same data model;
+  audit retention and regional-hosting posture before routing
+  production traffic. Prompts and completions are the primary payload
+  — redact secrets and PII via the SDK hooks before capture.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous, paralleling
+  LangSmith but with an open-source self-hostable core. Worth modeling
+  as a distinct node because the license and deployment posture change
+  the threat model materially for regulated or IP-sensitive
+  deployments.
+stars: 25739
+stars_updated_at: '2026-04-22'

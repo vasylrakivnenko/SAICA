@@ -1,0 +1,61 @@
+id: crewai
+name: CrewAI
+tagline: Role-based multi-agent framework with task contracts and process flows.
+description: >
+  Open-source Python framework for building multi-agent systems by
+  declaring Agents (role, goal, backstory), Tasks (description, expected
+  output, assigned agent), and a Process (sequential or hierarchical
+  execution). Supervision primitives: role/goal contracts that scope
+  each agent's remit, structured task outputs, a manager-agent
+  hierarchical process for delegation control, and explicit tool
+  allow-lists per agent. Distinct from conversation-centric frameworks
+  in that roles and task boundaries are first-class.
+
+first_released: 2023-12-28
+last_updated: 2026-04-05
+maturity_status: stable
+
+published_by: crewai-inc
+repository_url: https://github.com/crewAIInc/crewAI
+documentation_url: https://docs.crewai.com
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+
+locus_of_control:
+  - prompt
+  - context
+
+implements_techniques:
+  - role-goal-contract
+  - task-specification
+  - hierarchical-process
+  - tool-allow-list
+  - manager-agent-delegation
+
+security_notes: >
+  Open-source (MIT) Python library. Agent tools are plain Python
+  callables with whatever capabilities the integrator grants — tool
+  allow-lists scope which agent can invoke which tool but do not sandbox
+  execution. CrewAI Enterprise is a separate hosted product with its
+  own data-handling posture; audit that separately before sending
+  proprietary code to it.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × pre_generation × fully_autonomous for the
+  role-based multi-agent archetype. Role and task contracts are
+  pre-generation scoping primitives: they constrain what each agent
+  can legitimately attempt before any token is emitted.
+stars: 49600
+stars_updated_at: '2026-04-22'

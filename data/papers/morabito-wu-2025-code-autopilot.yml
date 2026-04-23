@@ -1,0 +1,41 @@
+id: morabito-wu-2025-code-autopilot
+authors:
+  - Roberto Morabito
+  - Guanghan Wu
+year: 2025
+title: "When the Code Autopilot Breaks: Why LLMs Falter in Embedded Machine Learning"
+venue: arXiv
+arxiv_id: "2509.10946"
+doi: "10.48550/arXiv.2509.10946"
+url: https://arxiv.org/abs/2509.10946
+semantic_scholar_id: "6a8e86bed0464f16e7604a43c7bd277e89467f23"
+citation_count: 0
+abstract: >
+  Large Language Models (LLMs) are increasingly used to automate software
+  generation in embedded machine learning workflows, yet their outputs often
+  fail silently or behave unpredictably. This article presents an empirical
+  investigation of failure modes in LLM-powered ML pipelines, based on an
+  autopilot framework that orchestrates data preprocessing, model conversion,
+  and on-device inference code generation. We show how prompt format, model
+  behavior, and structural assumptions influence both success rates and
+  failure characteristics, often in ways that standard validation pipelines
+  fail to detect. Our analysis reveals a diverse set of error-prone
+  behaviors, including format-induced misinterpretations and
+  runtime-disruptive code that compiles but breaks downstream. We derive a
+  taxonomy of failure categories and analyze errors across multiple LLMs,
+  highlighting common root causes and systemic fragilities.
+tldr: >
+  Empirical study of LLM code-generation failure modes in embedded ML
+  pipelines; derives a failure-category taxonomy emphasizing
+  format-induced misinterpretations and runtime-disruptive-but-compiling
+  code.
+relevance_tags:
+  - failure-mode-taxonomy
+  - coding-agent
+  - embedded-ml
+  - empirical
+notes: >
+  Domain-specific failure taxonomy (embedded ML) that exposes
+  compiles-but-breaks-downstream patterns relevant to SAICA-KG's logic_error
+  and obsolescence modes. Narrower than the general-agent taxonomies but
+  useful for triangulating silent-failure signals.

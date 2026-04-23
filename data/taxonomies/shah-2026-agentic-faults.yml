@@ -5,7 +5,7 @@ version: "2026-03"
 first_published: 2026-03-06
 url: https://arxiv.org/abs/2603.06847
 license: "arXiv preprint; CC-BY"
-paper_id: shah-2026-agentic-faults
+paper_id: shah-2026-characterizing-faults
 scope: >
   Grounded-theory taxonomy of faults in agentic AI systems, derived from
   13,602 issues and PRs across 40 open-source agentic-AI repositories, with

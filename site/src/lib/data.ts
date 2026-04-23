@@ -94,6 +94,8 @@ function hydrateTool(raw: Record<string, any>): Tool {
     security_notes: raw.security_notes,
     signed_manifest: raw.signed_manifest,
     openssf_scorecard_score: raw.openssf_scorecard_score ?? null,
+    stars: typeof raw.stars === 'number' ? raw.stars : undefined,
+    stars_updated_at: raw.stars_updated_at,
     contributors: Array.isArray(raw.contributors) ? raw.contributors : [],
     editorial_notes: raw.editorial_notes,
     inclusion_rationale: raw.inclusion_rationale,

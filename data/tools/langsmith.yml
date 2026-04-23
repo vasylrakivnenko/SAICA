@@ -1,0 +1,59 @@
+id: langsmith
+name: LangSmith
+tagline: Hosted LLM observability, tracing, and evaluation platform.
+description: >
+  LangChain's commercial observability platform for LLM and agent
+  applications. Captures structured traces of chains, tool calls, and
+  agent trajectories; supports dataset-driven offline evaluation with
+  custom and LLM-as-judge evaluators; provides prompt versioning and a
+  feedback API for production quality tracking. Runs against any
+  framework via the tracing SDK, not only LangChain. Supervision locus
+  is post-hoc: traces and evals surface regressions rather than
+  preventing them at emission.
+
+first_released: 2023-07-18
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: langchain-ai
+documentation_url: https://docs.smith.langchain.com
+license: proprietary
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - context_pollution
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - trace-capture
+  - llm-as-judge-eval
+  - dataset-regression-eval
+  - prompt-versioning
+  - feedback-api
+
+security_notes: >
+  Proprietary hosted SaaS; prompts, completions, and intermediate
+  payloads are sent to LangSmith's backend by default. A self-hosted
+  deployment is available on enterprise plans for teams with data
+  residency or IP-sensitivity constraints. Audit what payload fields
+  are captured and consider redaction hooks before enabling on
+  production traffic containing secrets or customer data.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for the
+  observability-and-evals archetype. Traces are the audit substrate for
+  post-hoc detection of logic errors, drift, and scope creep in agent
+  trajectories — a supervision role that is analytically distinct from
+  output validators that act on a single call.

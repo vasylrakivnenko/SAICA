@@ -1,2 +1,6 @@
 pyyaml>=6.0
 jsonschema>=4.17
+# Optional, used by validator/fetch_github_stars.py for round-trip YAML editing.
+# The script falls back to pyyaml if ruamel.yaml is not installed.
+ruamel.yaml>=0.18
+requests>=2.31

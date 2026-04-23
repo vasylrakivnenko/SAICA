@@ -1,0 +1,52 @@
+id: williams-2025-sscs
+authors:
+  - Laurie Williams
+  - Giacomo Benedetti
+  - Sivana Hamer
+  - Ranindya Paramitha
+  - Imranur Rahman
+  - Mahzabin Tamanna
+  - Greg Tystahl
+  - Nusrat Zahan
+  - Patrick Morrison
+  - Yasemin Acar
+  - Michel Cukier
+  - Christian Kastner
+  - Alexandros Kapravelos
+  - Dominik Wermke
+  - William Enck
+year: 2025
+title: "Research Directions in Software Supply Chain Security"
+venue: "ACM Transactions on Software Engineering and Methodology"
+doi: "10.1145/3714464"
+url: https://doi.org/10.1145/3714464
+semantic_scholar_id: "461e00ecb0bb5b24b4cb65078a96d0677919f5f3"
+citation_count: 54
+abstract: >
+  Reusable software libraries, frameworks, and components, such as those
+  provided by open source ecosystems and third-party suppliers, accelerate
+  digital innovation. However, recent years have shown almost exponential
+  growth in attackers leveraging these software artifacts to launch software
+  supply chain attacks. Past well-known software supply chain attacks include
+  the SolarWinds, log4j, and xz utils incidents. Supply chain attacks are
+  considered to have three major attack vectors: through vulnerabilities and
+  malware accidentally or intentionally injected into open source and
+  third-party dependencies/components/containers; by infiltrating the build
+  infrastructure during the build and deployment processes; and through
+  targeted techniques aimed at the humans involved in software development.
+  This article provides an overview of current research efforts to secure
+  the software supply chain and proposes a future research agenda to close
+  software supply chain attack vectors.
+tldr: >
+  TOSEM roadmap paper on software supply-chain security: organizes attack
+  vectors across dependencies, build infrastructure, and human factors;
+  proposes a future research agenda. 54 citations.
+relevance_tags:
+  - supply-chain-security
+  - software-engineering
+  - roadmap
+  - failure-mode-seed
+notes: >
+  Anchors SAICA-KG's supply_chain_attack FailureMode in the SE-research
+  mainstream. Useful citation backbone for slopsquatting/typosquatting claims
+  and for positioning SAICA-KG against the broader SSC-security literature.

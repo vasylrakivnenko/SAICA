@@ -1,0 +1,61 @@
+id: continue-dev
+name: Continue
+tagline: Open-source IDE assistant with configurable providers, rules, and context.
+description: >
+  Open-source IDE extension for VS Code and JetBrains that provides
+  chat, autocomplete, edit, and agent modes backed by user-configured
+  model providers (local or hosted). Supervision primitives:
+  config.yaml / config.json-declared context providers, rules blocks
+  that inject project-specific guidance, custom slash commands, an
+  MCP-server integration layer, and per-edit diff review. Positions as
+  the configurable open alternative to closed IDE agents.
+
+first_released: 2023-07-01
+last_updated: 2026-04-05
+maturity_status: stable
+
+published_by: continuedev
+repository_url: https://github.com/continuedev/continue
+documentation_url: https://docs.continue.dev
+license: Apache-2.0
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - fabrication
+  - dependency_blindness
+
+locus_of_control:
+  - context
+  - human
+
+implements_techniques:
+  - context-providers
+  - project-rules
+  - mcp-integration
+  - diff-review-gate
+  - custom-slash-commands
+
+security_notes: >
+  Open-source (Apache-2.0) IDE extension. Code and context are sent to
+  whichever model provider the user configures — local via Ollama/LM
+  Studio or hosted via OpenAI/Anthropic/etc. MCP integration pulls
+  third-party servers into the trust boundary; audit each server's
+  capabilities. The Continue Hub is a separate content-distribution
+  surface — pin asset versions to avoid supply-chain drift.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × pre_generation × graduated_hitl for the
+  open-source IDE-agent archetype. Complements closed IDE agents
+  (Cursor, Copilot) by offering user-owned model routing and
+  configurable context providers — the supervision locus shifts to
+  the integrator, which is a meaningfully different posture.
+stars: 32731
+stars_updated_at: '2026-04-22'

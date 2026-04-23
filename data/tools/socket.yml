@@ -1,0 +1,63 @@
+id: socket
+name: Socket
+tagline: Dependency supply-chain scanner that inspects packages before install.
+description: >
+  Commercial dependency-security platform that analyzes packages in
+  real time for supply-chain risks (typosquats, install-time scripts,
+  network/file/shell capability changes, obfuscation, sudden maintainer
+  churn, known malware). Integrates as a GitHub App, CLI, and
+  package-manager wrapper (socket-npm/pip) that evaluates dependencies
+  before install lands. Supervision locus is the manifest
+  (package.json, requirements.txt, go.mod): risks are flagged
+  pre-install rather than relying on known-CVE databases alone.
+
+first_released: 2022-06-01
+last_updated: 2026-04-08
+maturity_status: stable
+
+published_by: socket-dev
+repository_url: https://github.com/SocketDev
+documentation_url: https://docs.socket.dev
+license: proprietary
+
+control_paradigm: detection
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - supply_chain_attack
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - dependency-manifest-scan
+  - capability-diff
+  - typosquat-detection
+  - install-script-analysis
+  - pull-request-gating
+
+security_notes: >
+  Proprietary hosted platform. Dependency metadata — and, for some
+  analyses, source — is sent to Socket's backend for scanning; review
+  data-handling terms before enabling on private code. The GitHub App
+  requires repo read permissions. CLI and wrappers are distributed via
+  npm/pip; pin versions to audited releases.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in:
+  - spracklen-2024-we-have-a-package
+
+supervises_targets:
+  - npm
+  - pypi
+  - go-modules
+
+inclusion_rationale: >
+  Occupies detection × pre_generation × fully_autonomous for the
+  supply-chain-attack failure mode. Scanning manifests before install
+  is the specific supervision primitive that separates Socket from
+  post-install vulnerability scanners — it catches slopsquatted and
+  typosquatted packages at the moment of adoption, which is when
+  coding agents are most likely to introduce them.

@@ -53,3 +53,5 @@ inclusion_rationale: >
   validator-retry on LLM output. Widely cited reference implementation of
   the "validate-then-reask" pattern, distinct from in-generation constrained
   decoding (Outlines/Guidance).
+stars: 6717
+stars_updated_at: '2026-04-22'

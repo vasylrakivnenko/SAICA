@@ -1,0 +1,59 @@
+id: smolagents
+name: Smolagents
+tagline: Minimalist code-agent library that expresses actions as executed Python.
+description: >
+  Hugging Face's minimalist agent framework (≈thousand lines of code)
+  built around CodeAgent, which has the LLM emit Python snippets that
+  are executed against a controlled tool namespace rather than producing
+  JSON tool-call objects. Supervision primitives: a sandboxed Python
+  executor (local or E2B/Docker), an explicit authorized-imports list,
+  planning-step hooks, and trajectory inspection. Action-as-code gives
+  richer composition but shifts the surface from JSON-schema validation
+  to Python-sandbox integrity.
+
+first_released: 2024-12-31
+last_updated: 2026-03-25
+maturity_status: stable
+
+published_by: huggingface
+repository_url: https://github.com/huggingface/smolagents
+documentation_url: https://huggingface.co/docs/smolagents
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - fabrication
+
+locus_of_control:
+  - environment
+  - prompt
+
+implements_techniques:
+  - code-as-action
+  - authorized-imports-list
+  - python-sandbox
+  - planning-step-hook
+
+security_notes: >
+  Open-source (Apache-2.0). CodeAgent executes model-emitted Python —
+  the default local executor only whitelists imports and is not a hard
+  sandbox; for untrusted prompts use the E2B or Docker executor. Review
+  the authorized-imports list per deployment; a broad list effectively
+  grants the model arbitrary local-Python capability.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for the
+  "code-as-action" agent archetype. Distinct enough from JSON-tool-call
+  frameworks that its supervision primitives (authorized-imports,
+  Python sandbox) are worth modeling separately.
+stars: 26827
+stars_updated_at: '2026-04-22'
