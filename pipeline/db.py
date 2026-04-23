@@ -308,13 +308,25 @@ def upsert_candidate_paper(
 
 
 def get_pending(kind: str, limit: int = 100) -> list[dict]:
-    """Return ``status='pending'`` rows for one of ``tools|papers|incidents``."""
+    """Return ``status='pending'`` rows for one of ``tools|papers|incidents``.
+
+    Ordering: rerank_score (from Cohere rerank) DESC if present, else
+    nlp_tags.relevance DESC, else created_at ASC (insertion order). This
+    keeps extraction runs targeting the most-likely-supervision rows first
+    when a rerank pass has been run; falls back gracefully when it hasn't.
+    """
     table = _table_for(kind)
+    # nlp_tags keys:
+    #   rerank_score      — Cohere rerank max over query set (added after preprocess)
+    #   relevance         — keyword+entity relevance from preprocess
     sql = f"""
         SELECT *
         FROM {table}
         WHERE status = 'pending'
-        ORDER BY created_at ASC
+        ORDER BY
+          COALESCE((nlp_tags->>'rerank_score')::float, -1) DESC,
+          COALESCE((nlp_tags->>'relevance')::float, -1) DESC,
+          created_at ASC
         LIMIT %s
     """
     with get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
