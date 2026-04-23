@@ -1,11 +1,20 @@
 id: obsolescence
 name: Obsolescence
-tagline: Using deprecated APIs, retired packages, or outdated library versions.
+tagline: Using deprecated APIs, retired packages, or outdated library versions — often because the model's training data pre-dates current releases.
 description: >
   The agent emits code that references real APIs or packages that have been
   deprecated, removed, or materially changed in their recommended version.
-  Distinct from fabrication (non-existent) and from dependency_blindness
-  (real-and-current-but-ignored).
+  The root cause is frequently training-data staleness: the model saw a
+  library version that has since been superseded, and it confidently emits
+  the older form. Distinct from fabrication (non-existent) and from
+  dependency_blindness (real-and-current-but-ignored).
+
+aliases:
+  - stale-training-knowledge
+  - training-cutoff-drift
+  - version-drift
+  - deprecated-api-usage
+  - library-evolution-lag
 
 related_modes:
   - fabrication

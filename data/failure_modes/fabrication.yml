@@ -8,8 +8,10 @@ description: >
   and from dependency blindness (real-and-present-but-ignored).
 
 aliases:
+  - hallucination
   - api-hallucination
   - package-hallucination
+  - confabulation
 
 related_modes:
   - obsolescence

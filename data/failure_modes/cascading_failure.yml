@@ -1,0 +1,40 @@
+id: cascading_failure
+name: Cascading failure
+tagline: Recovery attempts that compound the original error — each fix makes it worse.
+description: >
+  The agent detects an error and attempts a fix that introduces NEW errors;
+  repeated iterations spiral further from the working state. A simple failure
+  becomes an irrecoverable tangle after N recovery attempts. Distinct from
+  logic_error (which is about the initial bug itself) and from
+  context_pollution (which is about session-level state drift rather than
+  error-recovery compounding).
+
+aliases:
+  - recovery-spiral
+  - compound-error
+  - error-cascade
+  - fix-regression
+
+related_modes:
+  - logic_error
+  - context_pollution
+
+prior_work:
+  - shah-2026-characterizing-faults
+  - cemri-2025-mast
+
+detection_signals:
+  - Number of files modified grows per recovery iteration.
+  - Error messages change category across attempts (e.g., ImportError -> TypeError -> AttributeError).
+  - Same file is touched N times in rapid succession with diverging diffs.
+  - Test pass count decreases monotonically after iteration 2.
+
+crosswalks:
+  - taxonomy: daplab-9-patterns
+    external_id: DAP-04
+    confidence: exact
+    note: DAPLab "Cascading Error Recovery" is the direct counterpart.
+  - taxonomy: mast
+    external_id: MAST-FM-14
+    confidence: partial
+    note: MAST "Infinite Loop" is one manifestation of a recovery-spiral pattern.

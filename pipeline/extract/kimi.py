@@ -103,12 +103,32 @@ FAILURE_MODE_DEFINITIONS: dict[str, str] = {
         "to install or invoke malicious code. Synonyms: slopsquatting, "
         "typosquatting, compromised MCP server, malicious package."
     ),
+    "cascading_failure": (
+        "Recovery attempts that compound the original error — each fix "
+        "introduces NEW errors and repeated iterations spiral further from the "
+        "working state. Synonyms: recovery-spiral, compound-error, "
+        "error-cascade, fix-regression."
+    ),
+    "incomplete_execution": (
+        "Agent claims completion while subtasks are skipped, stubbed, or "
+        "silently dropped — TODOs / `pass` / `NotImplementedError` left behind, "
+        "partial implementations declared done, premature termination. "
+        "Synonyms: premature-completion, false-completion, partial-completion, "
+        "stub-left-behind."
+    ),
+    "test_manipulation": (
+        "Agent games its own evaluation — edits tests or the test harness so "
+        "failures disappear without fixing the underlying bug (weakened "
+        "asserts, commented-out tests, `pytest.mark.skip`, disabled CI). "
+        "Synonyms: silent-workaround, evaluation-gaming, reward-hacking, "
+        "test-gaming, spec-gaming."
+    ),
 }
 
 
 def _render_failure_mode_reference() -> str:
     lines = [
-        "## FailureMode reference (the 8 canonical ids, verbatim)",
+        "## FailureMode reference (the 11 canonical ids, verbatim)",
         "",
     ]
     for fm_id, defn in FAILURE_MODE_DEFINITIONS.items():
@@ -129,7 +149,8 @@ STRUCTURED extraction matching the provided function schema.
 - AutonomyLevel (exactly one, or null): fully_autonomous, graduated_hitl, full_hitl.
 - FailureModeId (multi-valued, subset): fabrication, obsolescence,
   dependency_blindness, logic_error, security_vulnerability, scope_creep,
-  context_pollution, supply_chain_attack.
+  context_pollution, supply_chain_attack, cascading_failure,
+  incomplete_execution, test_manipulation.
 - LocusOfControl (multi-valued, subset): model, prompt, context,
   environment, human.
 
@@ -137,20 +158,22 @@ STRUCTURED extraction matching the provided function schema.
 
 ## Failure-mode mapping procedure (read BEFORE filling addresses_failure_modes)
 
-For every candidate tool, walk the 8 ids above and ask:
-**"Which of these 8 failure modes does this supervision tool credibly
+For every candidate tool, walk the 11 ids above and ask:
+**"Which of these 11 failure modes does this supervision tool credibly
 address?"** Only include ids the README/description supports with direct
 language — exact synonyms (e.g. "hallucination" → fabrication,
-"slopsquatting" → supply_chain_attack, "deprecated API" → obsolescence)
-count as direct evidence; vague marketing ("safer AI", "trustworthy code")
-does NOT.
+"slopsquatting" → supply_chain_attack, "deprecated API" → obsolescence,
+"reward hacking" → test_manipulation, "premature completion" →
+incomplete_execution, "recovery spiral" → cascading_failure) count as
+direct evidence; vague marketing ("safer AI", "trustworthy code") does
+NOT.
 
 - If the tool is a general-purpose AI coding agent rather than a supervisor
   of one, return an empty list. Do NOT guess.
 - For each id you DO include, the ``evidence`` list must contain at least
   one direct quote that names the failure mode or a listed synonym.
 - Empty list with confidence ~0.5 is the correct answer when the tool is
-  clearly supervision-adjacent but doesn't target any of the 8 ids — this
+  clearly supervision-adjacent but doesn't target any of the 11 ids — this
   is strictly preferred over a speculative assignment.
 - Confidence calibration:
     * 0.85-0.95 — README uses the exact id or a canonical synonym

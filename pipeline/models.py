@@ -60,6 +60,9 @@ class FailureModeId(str, Enum):
     SCOPE_CREEP = "scope_creep"
     CONTEXT_POLLUTION = "context_pollution"
     SUPPLY_CHAIN_ATTACK = "supply_chain_attack"
+    CASCADING_FAILURE = "cascading_failure"
+    INCOMPLETE_EXECUTION = "incomplete_execution"
+    TEST_MANIPULATION = "test_manipulation"
 
 
 class LocusOfControl(str, Enum):

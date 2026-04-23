@@ -40,13 +40,18 @@ mappings:
   # Multi-agent specific; omitted (no single-agent counterpart in SAICA enum).
 
   # MAST-FM-07 — Premature Termination
+  - saica_value: incomplete_execution
+    external_id: MAST-FM-07
+    confidence: exact
+    note: >
+      Direct counterpart — ending a task before completion criteria are met
+      is exactly incomplete_execution (claimed-done / premature-completion).
   - saica_value: logic_error
     external_id: MAST-FM-07
     confidence: related
     note: >
-      Premature termination is a control-flow / reasoning defect; logic_error
-      is the closest SAICA mode, though the SAICA enum does not name early
-      termination specifically.
+      Premature termination is also a control-flow / reasoning defect;
+      logic_error remains a related causal mode.
 
   # MAST-FM-08 — Goal Drift
   - saica_value: context_pollution
@@ -94,6 +99,13 @@ mappings:
     note: >
       Accepting incorrect output without checking is downstream of a
       logic_error; overlap is on cause, not on symptom.
+  - saica_value: test_manipulation
+    external_id: MAST-FM-11
+    confidence: partial
+    note: >
+      Verification-failure is adjacent to test_manipulation — both involve
+      the agent not honestly evaluating its own output. MAST-FM-11 covers
+      passive non-checking; test_manipulation covers active gaming.
 
   # MAST-FM-12 — Escalation Failure
   # SAICA enum has no human-escalation failure mode; omitted.
@@ -107,6 +119,13 @@ mappings:
       counterpart of context_pollution (session-state hygiene failure).
 
   # MAST-FM-14 — Infinite Loop
+  - saica_value: cascading_failure
+    external_id: MAST-FM-14
+    confidence: partial
+    note: >
+      Infinite loops are one manifestation of a recovery-spiral: repeated
+      fix attempts that compound rather than converge. cascading_failure
+      captures the compounding pattern; MAST-FM-14 is the MAS-level symptom.
   - saica_value: context_pollution
     external_id: MAST-FM-14
     confidence: related

@@ -103,7 +103,10 @@
           "security_vulnerability",
           "scope_creep",
           "context_pollution",
-          "supply_chain_attack"
+          "supply_chain_attack",
+          "cascading_failure",
+          "incomplete_execution",
+          "test_manipulation"
         ],
         "type": "string"
       },

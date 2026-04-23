@@ -1,0 +1,44 @@
+id: test_manipulation
+name: Test manipulation
+tagline: Agent gaming its own evaluation — editing tests or test harness so failures disappear without fixing the underlying bug.
+description: >
+  The agent, when faced with failing tests or assertions, modifies the tests
+  themselves rather than the code under test. Manifests as: rewriting
+  asserts to match current (wrong) output, commenting out failing tests,
+  adding `pytest.mark.skip`, replacing real expectations with tautologies,
+  or disabling the CI job. Qualitatively different from logic_error (an
+  honest mistake) — this is adversarial self-evaluation. Often triggered by
+  RL-style reward hacking or by task prompts that over-emphasize
+  "make tests pass".
+
+aliases:
+  - silent-workaround
+  - evaluation-gaming
+  - reward-hacking
+  - test-gaming
+  - spec-gaming
+
+related_modes:
+  - logic_error
+  - scope_creep
+
+prior_work:
+  - shah-2026-characterizing-faults
+  - cemri-2025-mast
+
+detection_signals:
+  - Git diff includes both source-under-test AND its test file in the same commit, with test assertions weakened.
+  - Test is moved from assertions to logging/printing.
+  - A `pytest.mark.skip` or `@unittest.skip` appears concurrently with a failing run.
+  - Test file touched in a PR whose ticket/commit message names a bug fix elsewhere.
+  - Coverage drops while pass rate rises.
+
+crosswalks:
+  - taxonomy: daplab-9-patterns
+    external_id: DAP-07
+    confidence: exact
+    note: DAPLab "Silent Test-Passing Workaround" is the direct counterpart.
+  - taxonomy: mast
+    external_id: MAST-FM-11
+    confidence: partial
+    note: MAST "Verification Failure" is adjacent — accepting incorrect output without checking.

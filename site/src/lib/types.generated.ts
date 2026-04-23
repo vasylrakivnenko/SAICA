@@ -75,7 +75,19 @@ export interface Tool {
   /**
    * @minItems 1
    */
-  addresses_failure_modes: FailureModeId[];
+  addresses_failure_modes: (
+      | 'fabrication'
+      | 'obsolescence'
+      | 'dependency_blindness'
+      | 'logic_error'
+      | 'security_vulnerability'
+      | 'scope_creep'
+      | 'context_pollution'
+      | 'supply_chain_attack'
+      | 'cascading_failure'
+      | 'incomplete_execution'
+      | 'test_manipulation'
+    )[];
   locus_of_control?: LocusOfControl[];
   implements_techniques?: string[];
   /**

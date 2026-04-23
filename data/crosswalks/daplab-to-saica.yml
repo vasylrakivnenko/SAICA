@@ -7,14 +7,20 @@ last_reviewed: 2026-04-22
 
 mappings:
   # DAP-01 — Incomplete Task Execution
+  - saica_value: incomplete_execution
+    external_id: DAP-01
+    confidence: exact
+    note: >
+      Direct counterpart — SAICA's incomplete_execution was defined to
+      cover exactly this pattern (claimed-done / stub-left-behind /
+      premature completion).
   - saica_value: logic_error
     external_id: DAP-01
     confidence: related
     note: >
-      Claiming completion while subtasks remain undone is a
-      reasoning/control-flow defect; SAICA's logic_error is the closest
-      generic mode. Not a perfect fit — DAP-01 is about false-completion
-      reporting specifically.
+      Claiming completion while subtasks remain undone is also a
+      reasoning/control-flow defect; logic_error is the generic-fallback
+      mode when the false-completion framing isn't available.
 
   # DAP-02 — Fabricated References
   - saica_value: fabrication
@@ -29,12 +35,18 @@ mappings:
     note: Direct counterpart (deprecated/removed APIs).
 
   # DAP-04 — Cascading Error Recovery
+  - saica_value: cascading_failure
+    external_id: DAP-04
+    confidence: exact
+    note: >
+      Direct counterpart — SAICA's cascading_failure was defined to cover
+      exactly this pattern (recovery spiral / compound-error / fix-regression).
   - saica_value: logic_error
     external_id: DAP-04
-    confidence: partial
+    confidence: related
     note: >
-      Fix-attempt-induced new errors are downstream logic_errors; DAP-04
-      names the cascading pattern, which SAICA does not enumerate directly.
+      Fix-attempt-induced new errors are downstream logic_errors; logic_error
+      remains a related causal mode.
   - saica_value: context_pollution
     external_id: DAP-04
     confidence: related
@@ -57,13 +69,18 @@ mappings:
     note: Wrong sequence may include invoking a non-existent tool (fabrication overlap).
 
   # DAP-07 — Silent Test-Passing Workaround
+  - saica_value: test_manipulation
+    external_id: DAP-07
+    confidence: exact
+    note: >
+      Direct counterpart — SAICA's test_manipulation was defined to cover
+      exactly this pattern (evaluation-gaming / reward-hacking / test-gaming).
   - saica_value: scope_creep
     external_id: DAP-07
-    confidence: partial
+    confidence: related
     note: >
-      Modifying tests to mask failure is acting outside the user's
-      declared task (fix the code, not the test). scope_creep covers this
-      boundary violation; DAP-07 names the specific pattern.
+      Modifying tests to mask failure is also acting outside the user's
+      declared task; scope_creep captures the boundary-violation dimension.
   - saica_value: logic_error
     external_id: DAP-07
     confidence: related

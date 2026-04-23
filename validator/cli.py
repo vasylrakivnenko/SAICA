@@ -63,14 +63,17 @@ STALE_AT_RISK_DAYS = 365  # force at_risk below this threshold (see §7 invarian
 # Closed-set FailureMode ids permitted on Tool.addresses_failure_modes. Must
 # mirror pipeline.models.FailureModeId.
 KNOWN_FAILURE_MODE_IDS = {
-    "fabrication",
-    "obsolescence",
-    "dependency_blindness",
-    "logic_error",
-    "security_vulnerability",
-    "scope_creep",
+    "cascading_failure",
     "context_pollution",
+    "dependency_blindness",
+    "fabrication",
+    "incomplete_execution",
+    "logic_error",
+    "obsolescence",
+    "scope_creep",
+    "security_vulnerability",
     "supply_chain_attack",
+    "test_manipulation",
 }
 
 

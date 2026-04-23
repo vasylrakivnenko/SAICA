@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-23T08:51:51Z",
+  "generated_at": "2026-04-23T09:14:24Z",
   "kg_version": "2026.04",
   "counts": {
     "tools": 52,
-    "failure_modes": 8,
+    "failure_modes": 11,
     "papers": 25,
     "taxonomies": 6,
     "crosswalks": 6
@@ -64,14 +64,17 @@
       "zed-agent": "https://github.com/zed-industries/zed"
     },
     "failure_modes": [
+      "cascading_failure",
       "context_pollution",
       "dependency_blindness",
       "fabrication",
+      "incomplete_execution",
       "logic_error",
       "obsolescence",
       "scope_creep",
       "security_vulnerability",
-      "supply_chain_attack"
+      "supply_chain_attack",
+      "test_manipulation"
     ],
     "papers": [
       "cemri-2025-mast",

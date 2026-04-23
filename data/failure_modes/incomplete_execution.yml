@@ -1,0 +1,42 @@
+id: incomplete_execution
+name: Incomplete execution
+tagline: Agent claims completion while subtasks are skipped, stubbed, or silently dropped.
+description: >
+  The agent reports success but has not actually done the work. Common forms:
+  "TODO" comments left in generated code, function bodies replaced with
+  `pass` or `...`, partial feature implementation while declaring "done",
+  skipping error paths, or terminating before all user-specified items are
+  addressed. Overconfidence paired with under-delivery. Distinct from
+  scope_creep (which over-reaches beyond the request) — this is the opposite
+  failure of under-delivering inside the requested surface.
+
+aliases:
+  - premature-completion
+  - false-completion
+  - claimed-done
+  - partial-completion
+  - stub-left-behind
+
+related_modes:
+  - scope_creep
+  - logic_error
+
+prior_work:
+  - shah-2026-characterizing-faults
+  - cemri-2025-mast
+
+detection_signals:
+  - Grep for `TODO`, `FIXME`, `XXX`, `NotImplementedError`, or bare `pass`/`...` in the generated diff.
+  - Tests for features the user explicitly named don't exist.
+  - Agent's final message claims a subtask is done but the file contains only a stub.
+  - Function docstrings describe a behavior not implemented by the body.
+
+crosswalks:
+  - taxonomy: daplab-9-patterns
+    external_id: DAP-01
+    confidence: exact
+    note: DAPLab "Incomplete Task Execution" is the direct counterpart.
+  - taxonomy: mast
+    external_id: MAST-FM-07
+    confidence: exact
+    note: MAST "Premature Termination" is the direct counterpart at the multi-agent level.

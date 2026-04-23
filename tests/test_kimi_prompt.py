@@ -93,7 +93,7 @@ def test_failure_mode_definitions_included_in_prompt() -> None:
     # Alias stems from data/failure_modes/*.yml
     assert "hallucinat" in lower, "expected 'hallucinat' stem (fabrication alias) in prompt"
     assert "slopsquat" in lower, "expected 'slopsquat' stem (supply_chain_attack alias) in prompt"
-    # All 8 canonical ids appear verbatim
+    # All 11 canonical ids appear verbatim
     for fm_id in (
         "fabrication",
         "obsolescence",
@@ -103,6 +103,9 @@ def test_failure_mode_definitions_included_in_prompt() -> None:
         "scope_creep",
         "context_pollution",
         "supply_chain_attack",
+        "cascading_failure",
+        "incomplete_execution",
+        "test_manipulation",
     ):
         assert fm_id in prompt, f"expected canonical id {fm_id!r} in prompt"
 
@@ -117,11 +120,12 @@ def test_failure_modes_explicit_empty_encouragement() -> None:
     assert "general-purpose" in prompt
 
 
-def test_failure_mode_reference_enumerates_all_eight_ids() -> None:
+def test_failure_mode_reference_enumerates_all_eleven_ids() -> None:
     """The hardcoded FAILURE_MODE_DEFINITIONS must cover the canonical enum exactly."""
     from pipeline.models import FailureModeId
 
     enum_ids = {m.value for m in FailureModeId}
+    assert len(enum_ids) == 11, f"expected 11 canonical FailureModeIds, got {len(enum_ids)}"
     assert set(kimi.FAILURE_MODE_DEFINITIONS) == enum_ids, (
         "FAILURE_MODE_DEFINITIONS drifted from pipeline.models.FailureModeId"
     )

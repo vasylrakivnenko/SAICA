@@ -27,6 +27,12 @@ mappings:
     external_id: SHAH-MAJ-02
     confidence: related
     note: Lifecycle control-flow defects are logic_errors.
+  - saica_value: incomplete_execution
+    external_id: SHAH-MAJ-02
+    confidence: related
+    note: >
+      Faults in agent termination / lifecycle exit frequently surface as
+      premature-completion / claimed-done patterns (incomplete_execution).
 
   # SHAH-MAJ-03 — Tool Execution and API Usage
   - saica_value: logic_error
@@ -114,6 +120,12 @@ mappings:
     external_id: SHAH-MAJ-12
     confidence: partial
     note: Exception-handling/implementation defects are logic_errors.
+  - saica_value: cascading_failure
+    external_id: SHAH-MAJ-12
+    confidence: partial
+    note: >
+      Error-recovery defects are the direct substrate of cascading_failure —
+      recovery attempts that introduce new errors instead of converging.
 
   # SHAH-MAJ-13 — UI, Visualization, and Documentation Defects
   # Primarily UI/doc-layer; not a SAICA FailureMode. Omitted.
