@@ -1,0 +1,41 @@
+id: mlflow
+name: mlflow
+tagline: Open-source platform for the machine learning lifecycle — experiments, tracking, models, and LLM evaluation.
+description: >
+  MLflow is the open-source ML lifecycle platform stewarded by Databricks.
+  Recent LLM-focused additions (MLflow 2.x) bring LLM tracing (OpenTelemetry),
+  LLM evaluation, and a deployments registry — making it usable as an
+  observability + eval backbone for LLM applications alongside classic ML.
+first_released: '2018-06-05'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: databricks
+repository_url: https://github.com/mlflow/mlflow
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - llm-tracing
+  - experiments
+  - model-registry
+  - llm-evaluation
+stars: 25505
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Represents the 'classical-MLOps-extended-to-LLMs' point: teams with MLflow
+  infrastructure can adopt LLM evaluation without a greenfield tool.
+  Differentiated from langfuse/phoenix by its ML lifecycle lineage and
+  Databricks ecosystem integration.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

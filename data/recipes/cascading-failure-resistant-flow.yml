@@ -1,0 +1,35 @@
+id: cascading-failure-resistant-flow
+name: Cascading-failure-resistant flow
+tagline: >
+  aider (commit-per-change) → claude-code plan-mode → circuit-breaker
+  after N failing patches. Interrupts the DAPLab DAP-04 recovery spiral.
+description: >
+  Composition for the `cascading_failure` FailureMode, anchored in the
+  DAPLab cascading-recovery observation, the Gemini CLI file-deletion
+  incident, and the Replit agent's panic-driven database destruction.
+
+  Stage 1: aider commits each fix attempt as a discrete commit.
+  Coupled with a circuit-breaker (configuration, not a tool) that
+  halts the agent after N consecutive failing tests and reverts to
+  the last green commit.
+
+  Stage 2: claude-code plan-mode is invoked to produce a new plan
+  from the reverted state, rather than continuing to iterate. The
+  re-plan breaks the state-accumulation pattern that drives
+  cascades.
+
+targets_failure_modes:
+  - cascading_failure
+
+stack:
+  - aider
+  - claude-code
+
+evidence_tier: case_studied
+language: polyglot
+
+notes: >
+  Circuit-breaker is project configuration, not a KG node. Evidence
+  tier `case_studied` because the pattern is documented in DAPLab
+  and in Replit's post-SaaStr remediation writeup, but has not been
+  formally benchmarked.

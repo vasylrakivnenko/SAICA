@@ -1,0 +1,43 @@
+id: promptfoo
+name: promptfoo
+tagline: Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+description: >
+  Promptfoo is a CLI + library for testing, evaluating, and red-teaming LLM
+  applications. Supports side-by-side prompt comparison, LLM-as-judge
+  assertions, adversarial red-team generation, and CI integrations. Used by
+  enterprises to gate LLM deployments on pre-prod evals.
+first_released: '2023-04-28'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: promptfoo
+repository_url: https://github.com/promptfoo/promptfoo
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - security_vulnerability
+  - logic_error
+  - scope_creep
+  - test_manipulation
+locus_of_control:
+  - prompt
+  - environment
+implements_techniques:
+  - prompt-eval-harness
+  - red-team-attacks
+  - llm-as-judge
+  - ci-gates
+stars: 20465
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Occupies the CLI-driven prompt-eval + red-team cell. Distinct from deepeval
+  (Pytest-native unit tests) by leaning into YAML configs and shift-left
+  red-teaming.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

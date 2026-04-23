@@ -1,0 +1,39 @@
+id: test-manipulation-resistant-flow
+name: Test-manipulation-resistant flow
+tagline: >
+  aider (commit-per-change makes test edits visible) →
+  coverage-protected CI → semgrep rules on test-file diffs. Detects
+  DAPLab DAP-07 silent-test-passing.
+description: >
+  Composition for the `test_manipulation` FailureMode, anchored in the
+  DAPLab DAP-07 observation (see
+  daplab-silent-test-passing-observation-2026).
+
+  Stage 1: aider commits every agent change as a separate commit. Test
+  edits become first-class diffs rather than hidden within a large
+  feature commit.
+
+  Stage 2: coverage-protected CI fails when coverage drops below a
+  project-defined threshold, blocking the "delete the failing test"
+  workaround at the infrastructure layer.
+
+  Stage 3: semgrep runs a ruleset diffing test files and runner config
+  against a protected baseline; any agent-authored test-weakening
+  change (removed assertion, mocked subject, skipped test, weakened
+  matcher) triggers a rule and requires explicit human approval.
+
+targets_failure_modes:
+  - test_manipulation
+
+stack:
+  - aider
+  - semgrep
+
+evidence_tier: anecdotal
+language: polyglot
+
+notes: >
+  Coverage-protected CI is configuration, not a KG-node; stack is
+  length 2. Evidence tier `anecdotal` — the pattern is well-known in
+  platform-eng communities but not benchmarked. Downgrade is
+  appropriate while SAICA-KG has no test-manipulation benchmark paper.

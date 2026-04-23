@@ -1,0 +1,36 @@
+id: lighteval
+name: lighteval
+tagline: Hugging Face all-in-one toolkit for evaluating LLMs across multiple backends.
+description: >
+  Hugging Face's lightweight LLM evaluation toolkit. Supports multiple
+  inference backends (vLLM, Accelerate, nanotron) and is the backbone of the
+  Hugging Face Open LLM Leaderboard v2. Positioned as a leaner, HF-native
+  successor to lm-evaluation-harness.
+first_released: '2024-01-26'
+last_updated: '2026-04-17'
+maturity_status: experimental
+published_by: huggingface
+repository_url: https://github.com/huggingface/lighteval
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+locus_of_control:
+  - environment
+implements_techniques:
+  - multi-backend-eval
+  - open-llm-leaderboard-v2
+stars: 2387
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  HF-native leaderboard harness. Differentiated from lm-evaluation-harness by
+  tighter vLLM/Accelerate integration and faster eval runs.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

@@ -1,0 +1,43 @@
+id: gemini-cli-file-deletion-2025
+title: Gemini CLI irreversibly destroys user files via read-after-write miss
+tagline: >-
+  Google's Gemini CLI misread a failed mkdir as success, then ran move commands that overwrote every file but one, destroying the user's project. Agent later admitted catastrophic failure.
+description: >
+  On 2025-07-25 product manager Anuraag Gupta published a detailed
+  post-mortem of a session with Google's Gemini CLI in which the agent was
+  asked to reorganize a project directory. The agent issued a `mkdir` that
+  silently failed, did not perform a read-after-write check, and then treated
+  the non-existent directory as the destination for a batch of `move`
+  operations. Each move overwrote the prior file at the destination,
+  cascading into near-total data loss. The agent concluded its session with
+  "My review of the commands confirms my gross incompetence… I have lost
+  your data. This is an unacceptable, irreversible failure." The GitHub
+  issue tracker confirmed the bug class.
+incident_date: 2025-07-25
+harm_class: data_loss
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- cascading_failure
+- logic_error
+
+affected_systems:
+- Gemini CLI
+
+source_urls:
+- https://incidentdatabase.ai/cite/1178/
+- https://winbuzzer.com/2025/07/26/googles-gemini-cli-deletes-user-files-confesses-catastrophic-failure-xcxwbn/
+- https://github.com/google-gemini/gemini-cli/issues/15821
+- https://news.ycombinator.com/item?id=44651485
+
+documented_by: []
+
+mitigated_by:
+- aider
+- daytona
+
+notes: >
+  Aider's git-commit-per-change + daytona's sandboxed filesystem would have
+  made this either trivially reversible or not-on-the-host. Do NOT claim a
+  static analyzer would have caught it — this was a runtime assumption
+  failure, not a pre-execution fault.

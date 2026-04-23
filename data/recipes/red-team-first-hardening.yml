@@ -1,0 +1,39 @@
+id: red-team-first-hardening
+name: Red-team-first hardening
+tagline: >
+  confident-ai-deepteam (adversarial scenarios) → guardrails-ai
+  (runtime validators) → human review gate. Red-team scenarios double
+  as runtime rules.
+description: >
+  Composition for security- and safety-sensitive coding-agent products.
+  The motivating observation: prompt-injection incidents
+  (copilot-prompt-injection-github-comments-2025,
+  msft-airt-prompt-injection-summary-email-2025) show that failures
+  reach production because teams treat red-teaming as a pre-launch
+  event rather than a continuous discipline.
+
+  Stage 1: confident-ai-deepteam generates adversarial scenarios
+  (injection, jailbreak, exfiltration) against the agent. Failing
+  scenarios are both fixed and encoded as structured rules.
+
+  Stage 2: guardrails-ai enforces those rules at runtime as
+  input/output validators on every agent invocation.
+
+  Stage 3: a human review gate covers the residual — novel attack
+  classes that neither the scenario suite nor the guardrails predict.
+
+targets_failure_modes:
+  - security_vulnerability
+  - context_pollution
+
+stack:
+  - confident-ai-deepteam
+  - guardrails-ai
+
+evidence_tier: case_studied
+language: polyglot
+
+notes: >
+  Human review is not a KG-node; stack is length 2. `case_studied`
+  because confident-ai and guardrails-ai each publish case studies of
+  this pattern in isolation; no joint benchmark yet.

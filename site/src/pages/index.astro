@@ -36,7 +36,7 @@ const recentTools = Object.values(graph.tools)
     </p>
   </section>
 
-  <section class="mt-10 grid grid-cols-2 sm:grid-cols-5 gap-3">
+  <section class="mt-10 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
     <a href="/tools" class="card no-underline hover:border-accent/50 text-ink">
       <div class="text-3xl font-sans font-semibold">{c.tools}</div>
       <div class="text-sm text-ink-muted font-sans">Tools</div>
@@ -52,6 +52,14 @@ const recentTools = Object.values(graph.tools)
     <a href="/papers" class="card no-underline hover:border-accent/50 text-ink">
       <div class="text-3xl font-sans font-semibold">{c.papers}</div>
       <div class="text-sm text-ink-muted font-sans">Papers</div>
+    </a>
+    <a href="/incidents" class="card no-underline hover:border-accent/50 text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.incidents}</div>
+      <div class="text-sm text-ink-muted font-sans">Incidents</div>
+    </a>
+    <a href="/recipes" class="card no-underline hover:border-accent/50 text-ink">
+      <div class="text-3xl font-sans font-semibold">{c.recipes}</div>
+      <div class="text-sm text-ink-muted font-sans">Recipes</div>
     </a>
     <div class="card text-ink">
       <div class="text-3xl font-sans font-semibold">{c.crosswalks}</div>
@@ -83,6 +91,8 @@ const recentTools = Object.values(graph.tools)
       <li><a href="/failure-modes">Failure modes &rarr;</a> {c.failure_modes} canonical modes</li>
       <li><a href="/taxonomies">Taxonomies &rarr;</a> OWASP, MAST, DAPLab, MSFT AIRT, +2</li>
       <li><a href="/papers">Papers &rarr;</a> {c.papers} cited papers</li>
+      <li><a href="/incidents">Incidents &rarr;</a> {c.incidents} ground-truth failure events</li>
+      <li><a href="/recipes">Recipes &rarr;</a> {c.recipes} composed supervision stacks</li>
       <li><a href="/graph">Graph &rarr;</a> interactive Cytoscape view</li>
       <li><a href="/pipeline">Pipeline &rarr;</a> how tools enter the KG</li>
       <li><a href="/about">About &rarr;</a> design principles, licensing</li>
@@ -97,7 +107,9 @@ const recentTools = Object.values(graph.tools)
       full graph, or <a href="/api/v1/tools.json"><code>/api/v1/tools.json</code></a>,
       <a href="/api/v1/failure_modes.json"><code>/api/v1/failure_modes.json</code></a>,
       <a href="/api/v1/taxonomies.json"><code>/api/v1/taxonomies.json</code></a>,
-      <a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a>.
+      <a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a>,
+      <a href="/api/v1/incidents.json"><code>/api/v1/incidents.json</code></a>,
+      <a href="/api/v1/recipes.json"><code>/api/v1/recipes.json</code></a>.
     </p>
   </section>
 

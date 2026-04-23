@@ -1,0 +1,38 @@
+id: copilotkit
+name: CopilotKit
+tagline: The frontend stack for agents and generative UI — React and Angular.
+description: >
+  CopilotKit is a React/Angular framework for embedding AI agents into web
+  UIs. Exposes typed actions, generative UI components, and HITL approval UI
+  primitives. Positions the frontend as a first-class supervision layer where
+  humans confirm or adjust agent-proposed actions.
+first_released: '2023-06-19'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: copilotkit
+repository_url: https://github.com/CopilotKit/CopilotKit
+license: MIT
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - environment
+  - human
+implements_techniques:
+  - generative-ui
+  - hitl-approval
+  - typed-actions
+stars: 30389
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Frontend-HITL cell: materializes the human-in-the-loop pattern as reusable
+  React components, complementing backend guardrails.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

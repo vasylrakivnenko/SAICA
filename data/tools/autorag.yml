@@ -1,0 +1,37 @@
+id: autorag
+name: AutoRAG
+tagline: Open-source framework for retrieval-augmented generation (RAG) evaluation and optimization.
+description: >
+  AutoRAG is an open-source framework that searches for the best RAG pipeline
+  for a given dataset — grid-searches over retriever × reranker × generator
+  combinations and scores each against ground-truth evals. Complements RAG
+  observability tools by focusing on offline pipeline selection.
+first_released: '2024-01-10'
+last_updated: '2026-04-21'
+maturity_status: experimental
+published_by: marker-inc
+repository_url: https://github.com/Marker-Inc-Korea/AutoRAG
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - context_pollution
+locus_of_control:
+  - environment
+implements_techniques:
+  - rag-grid-search
+  - retrieval-metrics
+  - answer-metrics
+stars: 4722
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  RAG-specific evaluation cell: distinct from generic eval harnesses by
+  treating the retriever+generator as the unit of optimization.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

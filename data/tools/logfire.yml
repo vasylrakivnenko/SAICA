@@ -1,0 +1,40 @@
+id: logfire
+name: logfire
+tagline: Pydantic Logfire — observability for AI agents, LLMs, and Python apps built on OpenTelemetry.
+description: >
+  Pydantic Logfire is a Python-first observability platform from the Pydantic
+  team, built on OpenTelemetry. First-class integration with Pydantic AI,
+  LangChain, OpenAI, and FastAPI, making it a natural fit for Python-centric
+  agent stacks. Captures LLM prompts/completions, tool calls, and general
+  application traces.
+first_released: '2024-04-23'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: pydantic
+repository_url: https://github.com/pydantic/logfire
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - environment
+implements_techniques:
+  - opentelemetry-tracing
+  - llm-instrumentation
+  - pydantic-ai-integration
+stars: 4191
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Represents the Python-native + Pydantic-ecosystem observability path.
+  Complements pydantic-ai as the canonical Pydantic-stack tracing backend.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

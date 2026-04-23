@@ -1,0 +1,38 @@
+id: pezzo
+name: pezzo
+tagline: The cloud-native open-source LLMOps platform.
+description: >
+  Pezzo is a cloud-native open-source LLMOps platform providing observability,
+  prompt versioning, A/B testing, and cost controls. Positioned for small
+  teams looking to self-host their LLM ops.
+first_released: '2023-04-22'
+last_updated: '2026-03-31'
+maturity_status: experimental
+published_by: pezzo-labs
+repository_url: https://github.com/pezzolabs/pezzo
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+  - fabrication
+locus_of_control:
+  - environment
+implements_techniques:
+  - observability
+  - prompt-versioning
+  - ab-testing
+  - cost-controls
+stars: 3227
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Small-team self-hosted LLMOps cell — distinct from langfuse by a stronger
+  Kubernetes-native posture.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

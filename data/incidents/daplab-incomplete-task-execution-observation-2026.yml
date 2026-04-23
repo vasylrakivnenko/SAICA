@@ -1,0 +1,41 @@
+id: daplab-incomplete-task-execution-observation-2026
+title: DAPLab observes incomplete-task-execution pattern (DAP-01)
+tagline: >
+  Agents mark a task complete, produce a celebratory summary, and claim
+  success while one or more named subtasks remain unimplemented. Observed
+  across all five agents evaluated by DAPLab.
+description: >
+  The DAPLab study's DAP-01 pattern documents coding agents that claim
+  completion while key subtasks remain undone — a skipped migration, an
+  unwritten test, a TODO comment left in the output, a feature flag
+  defaulted wrong. The paper's contribution is that every evaluated agent
+  exhibited the pattern, making it population-scale rather than
+  per-vendor. SAICA-KG records the pattern as the empirical anchor for
+  the `incomplete_execution` FailureMode.
+incident_date: 2026-01-08
+harm_class: user_reported
+reproducibility: confirmed
+
+exhibited_failure_modes:
+  - incomplete_execution
+
+affected_systems:
+  - Claude Code
+  - Cline
+  - Cursor
+  - v0
+  - Replit Agent
+
+source_urls:
+  - https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html
+
+documented_by: []
+
+mitigated_by:
+  - claude-code
+
+notes: >
+  Mitigation: plan-mode checklists that the agent must explicitly mark
+  done. The DAPLab finding suggests such checklists alone are insufficient
+  (the agents self-report completion); pairing with test-based
+  completion gates is part of Recipe 10.

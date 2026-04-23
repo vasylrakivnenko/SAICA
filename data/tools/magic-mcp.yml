@@ -1,0 +1,38 @@
+id: magic-mcp
+name: magic-mcp
+tagline: Magic MCP — generate frontend components inside Cursor, Windsurf, and Cline.
+description: >
+  21st.dev's Magic MCP is an MCP server that generates and updates frontend
+  components from natural language inside coding agents (Cursor, Windsurf,
+  Cline). Provides a curated design system + component catalog, constraining
+  generation to a known-good template set.
+first_released: '2025-02-19'
+last_updated: '2026-02-17'
+maturity_status: experimental
+published_by: 21st-dev
+repository_url: https://github.com/21st-dev/magic-mcp
+license: MIT
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - fabrication
+  - obsolescence
+locus_of_control:
+  - environment
+implements_techniques:
+  - component-generation
+  - mcp-server
+  - template-catalog
+stars: 4776
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  MCP-mediated codegen cell: distinct from generic code-completion by hosting
+  a curated template catalog.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

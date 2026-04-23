@@ -1,0 +1,34 @@
+id: comfyui
+name: ComfyUI
+tagline: The most powerful and modular diffusion model GUI, API, and backend.
+description: >
+  ComfyUI is the node-based GUI/backend for diffusion models. Its node-graph
+  execution model enables reproducible pipelines and is a reference for how
+  generative workflows can be structured and supervised end-to-end.
+first_released: '2023-01-17'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: comfy
+repository_url: https://github.com/comfyanonymous/ComfyUI
+license: GPL-3.0
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - node-graph-execution
+  - reproducible-workflows
+stars: 109742
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Included as the canonical node-graph-generative-pipeline — relevant as a
+  reference for supervising multimodal/diffusion agent stacks.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

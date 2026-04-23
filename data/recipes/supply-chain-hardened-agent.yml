@@ -1,0 +1,42 @@
+id: supply-chain-hardened-agent
+name: Supply-chain-hardened agent
+tagline: >
+  socket (package-risk telemetry) → snyk (CVE scan) → daytona
+  (sandboxed execution with signed MCP manifest). Intercepts
+  hallucinated / malicious packages before they reach the dev machine.
+description: >
+  Composition for the `supply_chain_attack` FailureMode, targeting both
+  the Spracklen/Lanyado slopsquatting class and classical CVE-poisoned
+  dependency attacks.
+
+  Stage 1: socket inspects every `install` candidate for risk signals
+  (newly registered, typosquat distance to popular packages, suspicious
+  maintainer patterns, install-time shell hooks). Blocks before
+  download.
+
+  Stage 2: snyk performs vulnerability scanning on packages that pass
+  the socket gate, using both public CVE feeds and its own research
+  database.
+
+  Stage 3: daytona executes the agent's workflow inside a sandboxed dev
+  environment so that even a slipped-through package cannot touch the
+  host filesystem or credentials. Daytona's signed-manifest model
+  ensures that the MCP servers the agent can reach are the ones the
+  human approved.
+
+targets_failure_modes:
+  - supply_chain_attack
+
+stack:
+  - socket
+  - snyk
+  - daytona
+
+evidence_tier: case_studied
+language: polyglot
+
+notes: >
+  This is the Lanyado-style slopsquatting defense. Evidence tier
+  `case_studied` because Socket and Snyk both publish case studies on
+  their own mitigations; no independent benchmark against the Spracklen
+  dataset yet exists.

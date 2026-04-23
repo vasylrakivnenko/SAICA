@@ -1,0 +1,47 @@
+id: huggingface-cli-slopsquat-lanyado-2024
+title: LLM-hallucinated "huggingface-cli" package receives 30k downloads after proof-of-concept squat
+tagline: >-
+  Bar Lanyado (Lasso Security) found LLMs repeatedly hallucinated a `huggingface-cli` package; he registered it empty on PyPI and got 30K+ downloads in three months — first slopsquat PoC.
+description: >
+  In December 2023 Bar Lanyado of Lasso Security noticed that multiple
+  generative-AI coding tools repeatedly recommended a nonexistent Python
+  package `huggingface-cli` instead of the real `huggingface[cli]` extra. He
+  registered the name as an empty, harmless package on PyPI. Over the
+  subsequent three months it recorded 30,000+ real downloads, and by
+  February 2024 Alibaba's GraphTranslator project had inadvertently
+  instructed users to install it via its README. Lanyado published the
+  experiment to demonstrate the viability of "slopsquatting" — the
+  deliberate registration of LLM-hallucinated package names as a
+  supply-chain attack vector. The experiment is cited in Spracklen 2024 as
+  a seed observation for the formal slopsquatting study.
+
+incident_date: 2024-03-28
+harm_class: security_breach
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- fabrication
+- supply_chain_attack
+
+affected_systems:
+- GPT-3.5
+- GPT-4
+- Gemini Pro
+- Alibaba GraphTranslator README
+
+source_urls:
+- https://www.theregister.com/2024/03/28/ai_bots_hallucinate_software_packages/
+- https://simonwillison.net/2024/Apr/1/diving-deeper-into-ai-package-hallucinations/
+
+documented_by:
+- spracklen-2024-we-have-a-package
+
+mitigated_by:
+- socket
+- snyk
+
+notes: >
+  The poisoned-payload scenario was not executed (Lanyado's package was
+  empty on purpose) but the 30k download count is an independently verified
+  measure of the blast radius. Canonical grounding incident for
+  `supply_chain_attack` + `fabrication`.

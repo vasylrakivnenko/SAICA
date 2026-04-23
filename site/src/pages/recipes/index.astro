@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { graph, failureModeLabel } from '../../lib/data.ts';
+
+const recipes = Object.values(graph.recipes)
+  .slice()
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<BaseLayout
+  title="Recipes"
+  description="Prescriptive compositions of supervision tools that target specific FailureModes — the flip-side of Incidents."
+>
+  <h1>Recipes</h1>
+  <p class="text-ink-muted mt-2 max-w-3xl">
+    {recipes.length} ordered compositions of Tools that address one or more
+    FailureModes. Recipes are the prescriptive flip-side of Incidents: patterns
+    that have worked, or plausibly could, in practice.
+  </p>
+
+  <ul class="mt-6 grid gap-4 md:grid-cols-2">
+    {recipes.map((r) => (
+      <li class="card">
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="!mt-0">
+            <a href={`/recipes/${r.id}`}>{r.name}</a>
+          </h3>
+          <span class="font-sans text-xs text-ink-faint">
+            {r.stack.length} tool{r.stack.length === 1 ? '' : 's'}
+          </span>
+        </div>
+        {r.tagline && <p class="mt-1 text-sm text-ink-muted">{r.tagline}</p>}
+        <div class="mt-3 flex flex-wrap gap-1.5">
+          <span class="chip-accent" title="Evidence tier">{r.evidence_tier.replace(/_/g, ' ')}</span>
+          {r.language && <span class="chip-accent" title="Language">{r.language}</span>}
+        </div>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          {r.targets_failure_modes.map((fm) => (
+            <span class="chip" title="Targets failure mode">{failureModeLabel(fm)}</span>
+          ))}
+        </div>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

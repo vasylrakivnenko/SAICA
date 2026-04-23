@@ -453,6 +453,72 @@ class Crosswalk(BaseModel):
     mappings: list[CrosswalkMapping] = Field(min_length=1)
 
 
+# --- Incident -------------------------------------------------------------
+
+
+class Incident(BaseModel):
+    """A documented failure event where a supervised or unsupervised coding
+    agent (or analogous system) produced harm — anchors FailureMode claims
+    in ground truth.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")
+    title: str
+    tagline: Optional[str] = Field(default=None, max_length=200)
+    description: str
+    incident_date: date
+    harm_class: HarmClass
+    reproducibility: IncidentReproducibility
+    exhibited_failure_modes: list[FailureModeId] = Field(min_length=1)
+    affected_systems: list[str] = Field(
+        default_factory=list,
+        description="Free-form tool / product / system names involved.",
+    )
+    source_urls: list[str] = Field(
+        min_length=1,
+        description="Publicly resolvable citations describing the incident.",
+    )
+    documented_by: list[str] = Field(
+        default_factory=list,
+        description="Paper node ids that discuss or analyze this incident.",
+    )
+    mitigated_by: list[str] = Field(
+        default_factory=list,
+        description="Tool node ids whose supervision would plausibly prevent the incident.",
+    )
+    notes: Optional[str] = None
+
+
+# --- Recipe ---------------------------------------------------------------
+
+
+class Recipe(BaseModel):
+    """An ordered composition of Tools that addresses one or more
+    FailureModes. Recipes are the prescriptive flip-side of Incidents:
+    patterns that have worked (or could work).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")
+    name: str
+    tagline: Optional[str] = Field(default=None, max_length=200)
+    description: str
+    targets_failure_modes: list[FailureModeId] = Field(min_length=1)
+    stack: list[str] = Field(
+        min_length=2,
+        description="Ordered list of Tool ids that compose the recipe.",
+    )
+    evidence_tier: EvidenceTier
+    language: Optional[str] = Field(
+        default=None,
+        description="Primary language / stack (e.g. python, typescript, polyglot).",
+    )
+    notes: Optional[str] = None
+
+
 # --- Registry -------------------------------------------------------------
 
 
@@ -462,6 +528,8 @@ NODE_MODELS: dict[str, type[BaseModel]] = {
     "papers": Paper,
     "taxonomies": Taxonomy,
     "crosswalks": Crosswalk,
+    "incidents": Incident,
+    "recipes": Recipe,
 }
 
 
@@ -476,12 +544,14 @@ __all__ = [
     "FailureModeCrosswalk",
     "FailureModeId",
     "HarmClass",
+    "Incident",
     "IncidentReproducibility",
     "LocusOfControl",
     "MaturityStatus",
     "NODE_MODELS",
     "Paper",
     "Provenance",
+    "Recipe",
     "SaicaAxis",
     "TemporalPhase",
     "Taxonomy",

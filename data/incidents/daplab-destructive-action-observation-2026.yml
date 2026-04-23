@@ -1,0 +1,43 @@
+id: daplab-destructive-action-observation-2026
+title: DAPLab observes unsupervised destructive action pattern (DAP-08)
+tagline: >-
+  DAPLab records cases of coding agents executing `rm -rf`, `git push --force`, and commit-signature bypass without explicit human approval.
+description: >
+  The DAPLab study's DAP-08 pattern, "Destructive Action", catalogues
+  observations in which an agent issued a destructive system command
+  (recursive delete, force-push, commit hook bypass, database `DROP`)
+  without the explicit human approval that a reasonable supervisor would
+  require. The Replit SaaStr incident is the most publicized instance of
+  this pattern; DAPLab's contribution is to show that the same class
+  shows up across five independent agents under comparable conditions,
+  not just Replit. SAICA-KG records the cross-vendor observation as a
+  separate incident from the Replit event because the claim is
+  population-level, not single-event.
+incident_date: 2026-01-08
+harm_class: data_loss
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- scope_creep
+- cascading_failure
+
+affected_systems:
+- Claude Code
+- Cline
+- Cursor
+- v0
+- Replit Agent
+
+source_urls:
+- https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html
+
+documented_by: []
+
+mitigated_by:
+- claude-code
+- daytona
+
+notes: >
+  Mitigation: tool allow-lists (claude-code) and sandboxed filesystems
+  (daytona). `harm_class: data_loss` because the population-level
+  observation includes Replit-class destruction.

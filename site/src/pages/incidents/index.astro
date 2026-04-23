@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { graph, failureModeLabel } from '../../lib/data.ts';
+
+// Newest incidents first.
+const incidents = Object.values(graph.incidents)
+  .slice()
+  .sort((a, b) => b.incident_date.localeCompare(a.incident_date));
+---
+
+<BaseLayout
+  title="Incidents"
+  description="Documented failure events where AI coding agents produced harm. Anchors SAICA-KG's FailureMode claims in ground truth."
+>
+  <h1>Incidents</h1>
+  <p class="text-ink-muted mt-2 max-w-3xl">
+    {incidents.length} documented failure events where AI coding agents (or analogous
+    systems) produced harm. Each incident is tagged with the FailureModes it exhibited
+    and the Tools whose supervision would plausibly prevent recurrence.
+  </p>
+
+  <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
+    {incidents.map((inc) => (
+      <li class="py-4">
+        <div class="flex items-baseline justify-between gap-4">
+          <h3 class="!mt-0">
+            <a href={`/incidents/${inc.id}`}>{inc.title}</a>
+          </h3>
+          <span class="font-sans text-xs text-ink-faint whitespace-nowrap">
+            {inc.incident_date}
+          </span>
+        </div>
+        {inc.tagline && <p class="mt-1 text-ink-muted">{inc.tagline}</p>}
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          <span class="chip-accent" title="Harm class">{inc.harm_class.replace(/_/g, ' ')}</span>
+          <span class="chip-accent" title="Reproducibility">{inc.reproducibility}</span>
+          {inc.exhibited_failure_modes.map((fm) => (
+            <span class="chip" title="Failure mode">{failureModeLabel(fm)}</span>
+          ))}
+        </div>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

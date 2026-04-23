@@ -1,0 +1,43 @@
+id: daplab-fabricated-references-observation-2026
+title: DAPLab observes fabricated-references pattern (DAP-02)
+tagline: >-
+  Coding agents emit calls to functions, constants, or packages that do not exist in any reachable dependency — a direct empirical instance of the canonical `fabrication` FailureMode, observed...
+description: >
+  The DAPLab study's DAP-02 pattern describes agents emitting code that
+  references functions, constants, classes, or packages absent from every
+  declared dependency and from the standard library. While this overlaps
+  with the Spracklen 2024 slopsquatting study, DAPLab's contribution is
+  observational: the pattern persists under real interactive usage (not
+  just synthetic prompts), across five independent products, within the
+  same project sessions that also exhibited the other eight patterns.
+  SAICA-KG records the observation to give the `fabrication` node a
+  non-paper anchor.
+incident_date: 2026-01-08
+harm_class: user_reported
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- fabrication
+
+affected_systems:
+- Claude Code
+- Cline
+- Cursor
+- v0
+- Replit Agent
+
+source_urls:
+- https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html
+
+documented_by:
+- spracklen-2024-we-have-a-package
+
+mitigated_by:
+- tree-sitter
+- semgrep
+- e2b
+
+notes: >
+  Mitigations pair structural checks (tree-sitter / semgrep symbol-lookup
+  rules) with sandboxed execution (e2b) so fabricated references fail
+  fast before shipping.

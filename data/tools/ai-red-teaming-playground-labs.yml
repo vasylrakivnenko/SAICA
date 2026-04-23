@@ -1,0 +1,38 @@
+id: ai-red-teaming-playground-labs
+name: AI-Red-Teaming-Playground-Labs
+tagline: "AI red-teaming labs: turnkey training environments for attacking AI systems."
+description: >
+  Microsoft's AI Red Teaming Playground Labs is a curated set of reproducible
+  training environments for hands-on AI red-teaming education — covers prompt
+  injection, data exfiltration, and agent-exploit scenarios. Used for
+  workforce training and capability benchmarking.
+first_released: '2025-05-07'
+last_updated: '2026-02-13'
+maturity_status: experimental
+published_by: microsoft
+repository_url: https://github.com/microsoft/AI-Red-Teaming-Playground-Labs
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - red-team-labs
+  - training-environments
+  - capture-the-flag
+stars: 1915
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Training-focused rather than probe-focused: fills the 'red-team curriculum'
+  niche, valuable as a skills development complement to runtime scanners.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

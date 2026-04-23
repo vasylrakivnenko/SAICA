@@ -1,0 +1,41 @@
+id: agenta
+name: agenta
+tagline: "Open-source LLMOps platform: prompt playground, prompt management, LLM evaluation, and observability."
+description: >
+  Agenta is an open-source LLMOps platform combining a collaborative prompt
+  playground, prompt versioning, LLM evaluation harness, and observability.
+  Positions non-engineer domain experts as first-class prompt editors
+  alongside developers.
+first_released: '2023-04-26'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: agenta-ai
+repository_url: https://github.com/Agenta-AI/agenta
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+locus_of_control:
+  - environment
+  - human
+implements_techniques:
+  - prompt-playground
+  - prompt-versioning
+  - evals
+  - observability
+stars: 4050
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Occupies the collaborative-playground cell: distinguishes itself from
+  langfuse/phoenix by centring non-developer prompt iteration and versioning
+  as the entry point to evaluation.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

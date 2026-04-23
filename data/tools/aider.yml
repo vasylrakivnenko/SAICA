@@ -53,5 +53,5 @@ inclusion_rationale: >
   is the canonical recovery-via-VCS pattern for coding agents — reversal is
   cheap because every change is a separate commit, which converts logic
   errors from production incidents into trivial reverts.
-stars: 43780
+stars: 43788
 stars_updated_at: '2026-04-23'

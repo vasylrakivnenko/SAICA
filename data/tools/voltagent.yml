@@ -1,0 +1,38 @@
+id: voltagent
+name: voltagent
+tagline: TypeScript-native AI agent engineering platform with built-in observability.
+description: >
+  VoltAgent is a TypeScript-native AI agent framework with tightly integrated
+  observability (VoltOps console). Provides workflow primitives and a UI for
+  inspecting agent runs. Positions itself as the TS alternative to
+  LangChain/agents with observability built in.
+first_released: '2025-04-16'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: voltagent
+repository_url: https://github.com/VoltAgent/voltagent
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+  - incomplete_execution
+locus_of_control:
+  - environment
+implements_techniques:
+  - ts-agent-framework
+  - builtin-observability
+  - workflow-primitives
+stars: 8416
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Occupies the TypeScript-agent-framework-with-builtin-observability point.
+  Complements mastra by leaning more into run-time inspection tooling.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

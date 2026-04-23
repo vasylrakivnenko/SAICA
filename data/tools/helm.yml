@@ -1,0 +1,40 @@
+id: helm
+name: helm
+tagline: Holistic Evaluation of Language Models (HELM).
+description: >
+  Stanford CRFM's HELM is a benchmark suite covering accuracy, calibration,
+  robustness, fairness, bias, toxicity, and efficiency across a scenario ×
+  metric matrix. Establishes the 'holistic evaluation' template that many
+  later LLM evaluation efforts cite.
+first_released: '2021-11-29'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: stanford-crfm
+repository_url: https://github.com/stanford-crfm/helm
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - scenario-metric-matrix
+  - holistic-eval
+  - robustness-scenarios
+stars: 2758
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Canonical holistic-eval suite — represents the research branch of LLM
+  evaluation that keeps safety / bias / robustness as first-class metrics
+  alongside accuracy.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

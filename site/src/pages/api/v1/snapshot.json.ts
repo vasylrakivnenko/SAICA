@@ -14,6 +14,8 @@ export const GET: APIRoute = () => {
       papers: graph.papers,
       taxonomies: graph.taxonomies,
       crosswalks: graph.crosswalks,
+      incidents: graph.incidents,
+      recipes: graph.recipes,
     },
   };
   return new Response(JSON.stringify(body, null, 2), {

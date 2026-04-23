@@ -1,0 +1,43 @@
+id: msft-airt-memory-poisoning-case-study-2025
+title: Microsoft AIRT memory-poisoning case study on agentic AI memory corruption
+tagline: >-
+  Microsoft's AI Red Team taxonomy whitepaper walks through a worked example in which an attacker corrupts an agent's persistent memory, then uses that corrupted memory as a pivot to exfiltrate data...
+description: >
+  Microsoft's AI Red Team (AIRT) 2025 "Taxonomy of Failure Mode in Agentic
+  AI Systems" whitepaper includes an extended worked example of memory
+  poisoning. In the scenario, an attacker injects malicious content into
+  an agent's persistent memory store via an ordinary interaction. The
+  poisoned memory is later recalled in an unrelated session, where it
+  steers the agent into exfiltrating sensitive data to an
+  attacker-controlled endpoint. AIRT uses the example to illustrate how
+  their taxonomy classifies the failure (security + agentic + persistence)
+  and to argue that memory requires the same semantic-validation
+  discipline applied to untrusted input. Although the specific incident is
+  hypothetical, it is authored by a team that red-teams 100+ production
+  GenAI systems, and it maps directly to the msft-airt-2025 taxonomy node
+  that SAICA-KG already ingests.
+incident_date: 2025-04-24
+harm_class: security_breach
+reproducibility: plausible
+
+exhibited_failure_modes:
+- security_vulnerability
+- context_pollution
+
+affected_systems:
+- generic agentic AI with persistent memory
+
+source_urls:
+- https://www.microsoft.com/en-us/security/blog/2025/04/24/new-whitepaper-outlines-the-taxonomy-of-failure-modes-in-ai-agents/
+- https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/Taxonomy-of-Failure-Mode-in-Agentic-AI-Systems-Whitepaper.pdf
+
+documented_by: []
+
+mitigated_by:
+- rebuff
+- guardrails-ai
+
+notes: >
+  `reproducibility: plausible` (not confirmed) — AIRT's example is a
+  worked scenario, not a reported breach. Included to anchor the
+  msft-airt-2025 taxonomy node in an incident-shaped entry.

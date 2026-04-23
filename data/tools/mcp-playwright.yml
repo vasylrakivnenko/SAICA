@@ -1,0 +1,37 @@
+id: mcp-playwright
+name: mcp-playwright
+tagline: Community Playwright MCP server for Claude Desktop, Cursor, Cline, and others.
+description: >
+  ExecuteAutomation's community Playwright MCP wraps Playwright as an MCP
+  server compatible with Claude Desktop, Cursor, Cline, and similar LLM
+  clients. Differs from microsoft/playwright-mcp by supporting broader action
+  surface (API testing) and by being community-maintained.
+first_released: '2024-12-03'
+last_updated: '2025-12-13'
+maturity_status: stable
+published_by: execute-automation
+repository_url: https://github.com/executeautomation/mcp-playwright
+license: MIT
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - mcp-server
+  - playwright-wrapper
+  - api-testing
+stars: 5461
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Community counterpart to Microsoft's official Playwright MCP — diverges on
+  feature set and release cadence.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

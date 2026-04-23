@@ -1,0 +1,37 @@
+id: observability-first-prototyping
+name: Observability-first prototyping
+tagline: >-
+  cursor (IDE) → langfuse (trace / eval / dataset capture) → confident-ai-deepteam (scenario eval playground). Every prototype run emits structured traces the team reviews before promoting to...
+description: >
+  Composition targeting `context_pollution` and `logic_error` in early
+  prototyping. The motivating pattern: teams ship vibe-coded features
+  with no trace history, then cannot diagnose regressions.
+
+  Stage 1: cursor remains the primary IDE / agent interface.
+
+  Stage 2: langfuse captures every LLM call, tool invocation, prompt,
+  and output as a structured trace. Traces double as dataset rows for
+  downstream evaluation.
+
+  Stage 3: confident-ai-deepteam replays captured traces against a
+  scenario suite (adversarial prompts, edge-case inputs) as an
+  evaluation gate before a change is promoted from prototype to
+  production.
+
+targets_failure_modes:
+- context_pollution
+- logic_error
+
+stack:
+- cursor
+- langfuse
+- confident-ai-deepteam
+
+evidence_tier: anecdotal
+language: polyglot
+
+notes: >
+  "Evaluation playground" from the v0.1 spec maps to
+  confident-ai-deepteam (scenario replay). `anecdotal` because while
+  all three tools publish individual case studies, the composition is
+  convention-based, not benchmarked end-to-end.

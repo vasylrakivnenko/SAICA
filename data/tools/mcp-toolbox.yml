@@ -1,0 +1,37 @@
+id: mcp-toolbox
+name: genai-toolbox
+tagline: MCP Toolbox for Databases — open-source MCP server for databases.
+description: >
+  Google's genai-toolbox (MCP Toolbox) is an open-source MCP server that
+  safely exposes database access to LLM agents. Provides per-tool allow-lists,
+  schema-aware query generation, and auditable execution logs — turning direct
+  DB access into a supervised interface.
+first_released: '2024-06-07'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: google
+repository_url: https://github.com/googleapis/genai-toolbox
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - mcp-db-server
+  - schema-aware-sql
+  - audit-log
+stars: 14769
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Database-access MCP cell. Differentiated from generic SQL MCPs by
+  schema-aware generation and an opinionated safety posture.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

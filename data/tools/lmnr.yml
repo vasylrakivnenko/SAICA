@@ -1,0 +1,41 @@
+id: lmnr
+name: lmnr
+tagline: Laminar — open-source observability platform purpose-built for AI agents.
+description: >
+  Laminar is an open-source observability platform purpose-built for agents.
+  Captures long-running agent trajectories, browser sessions, and tool calls,
+  and pairs trace capture with online evals and prompt/tool versioning. YC S24
+  batch.
+first_released: '2024-08-29'
+last_updated: '2026-04-22'
+maturity_status: experimental
+published_by: lmnr-ai
+repository_url: https://github.com/lmnr-ai/lmnr
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+  - incomplete_execution
+  - cascading_failure
+locus_of_control:
+  - environment
+implements_techniques:
+  - agent-trajectory-capture
+  - browser-session-replay
+  - online-evals
+stars: 2798
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Purpose-built for the agent-trajectory + browser-session case rather than
+  generic LLM call traces. Useful point in the observability cell where the
+  unit of observation is the agent run, not a single LLM invocation.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

@@ -313,12 +313,100 @@ export interface Crosswalk {
     }[];
 }
 
+/**
+ * A documented failure event where an AI coding agent (or analogous system) produced harm. Anchors FailureMode claims in ground truth.
+ */
+export interface Incident {
+  id: string;
+  title: string;
+  tagline?: string;
+  description: string;
+  incident_date: string;
+  harm_class: 'user_reported' | 'data_loss' | 'security_breach' | 'financial_loss' | 'reputational';
+  reproducibility: 'confirmed' | 'plausible' | 'anecdotal';
+  /**
+   * @minItems 1
+   */
+  exhibited_failure_modes: (
+      | 'fabrication'
+      | 'obsolescence'
+      | 'dependency_blindness'
+      | 'logic_error'
+      | 'security_vulnerability'
+      | 'scope_creep'
+      | 'context_pollution'
+      | 'supply_chain_attack'
+      | 'cascading_failure'
+      | 'incomplete_execution'
+      | 'test_manipulation'
+    )[];
+  /**
+   * Free-form tool / product / system names involved.
+   */
+  affected_systems?: string[];
+  /**
+   * Publicly resolvable citations describing the incident.
+   *
+   * @minItems 1
+   */
+  source_urls: string[];
+  /**
+   * Paper node ids that discuss or analyze this incident.
+   */
+  documented_by?: string[];
+  /**
+   * Tool node ids whose supervision would plausibly prevent the incident.
+   */
+  mitigated_by?: string[];
+  notes?: string;
+}
+
+/**
+ * An ordered composition of Tools that addresses one or more FailureModes. Recipes are the prescriptive flip-side of Incidents.
+ */
+export interface Recipe {
+  id: string;
+  name: string;
+  tagline?: string;
+  description: string;
+  /**
+   * @minItems 1
+   */
+  targets_failure_modes: (
+      | 'fabrication'
+      | 'obsolescence'
+      | 'dependency_blindness'
+      | 'logic_error'
+      | 'security_vulnerability'
+      | 'scope_creep'
+      | 'context_pollution'
+      | 'supply_chain_attack'
+      | 'cascading_failure'
+      | 'incomplete_execution'
+      | 'test_manipulation'
+    )[];
+  /**
+   * Ordered list of Tool ids that compose the recipe.
+   *
+   * @minItems 2
+   */
+  stack: [string, string, ...string[]];
+  evidence_tier: 'anecdotal' | 'case_studied' | 'benchmark_validated';
+  /**
+   * Primary language / stack (e.g. python, typescript, polyglot).
+   */
+  language?: string;
+  notes?: string;
+}
+
 export interface Graph {
   tools: Record<string, Tool>;
   failureModes: Record<string, FailureMode>;
   taxonomies: Record<string, Taxonomy>;
   papers: Record<string, Paper>;
   crosswalks: Record<string, Crosswalk>;
+  incidents: Record<string, Incident>;
+  recipes: Record<string, Recipe>;
   // Derived indexes:
   toolsByFailureMode: Record<string, string[]>;
   failureModesByTaxonomyCategory: Record<string, Record<string, string[]>>;

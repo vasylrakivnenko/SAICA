@@ -1,0 +1,43 @@
+id: copilot-obsolete-api-java8-2024
+title: Code-generation LLMs emit obsolete Java 8 collection APIs despite modern project target
+tagline: >-
+  Wang 2024 ("Practical Evaluation of LLMs on Library-Evolution-Sensitive Code") finds that GitHub Copilot, CodeWhisperer, and GPT-3.5 reliably emit calls to retired or deprecated APIs (e.g.
+description: >
+  Wang, Zhang et al. 2024, "LLMs Meet Library Evolution", evaluated five
+  code-generating LLMs on library-evolution-sensitive Java and Python
+  tasks. In ~30% of evaluated completions the generated code used APIs
+  that had been deprecated or removed in the library version specified by
+  the project's build metadata. Representative Java examples included
+  `Vector`, `Hashtable`, and older `Collections.synchronized*` patterns
+  that modern `java.util.concurrent` APIs have superseded. The paper
+  established that obsolescence is not random: LLMs overweight older API
+  surface because training corpora skew toward older, more-copied code.
+  SAICA-KG records the study as the empirical anchor for the
+  `obsolescence` FailureMode.
+incident_date: 2024-06-01
+harm_class: user_reported
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- obsolescence
+
+affected_systems:
+- GitHub Copilot
+- Amazon CodeWhisperer
+- GPT-3.5
+- CodeLlama
+
+source_urls:
+- https://arxiv.org/abs/2406.08291
+
+documented_by:
+- wang-2024-llms-meet-library-evolution
+
+mitigated_by:
+- sourcegraph-cody
+- semgrep
+
+notes: >
+  Date approximated to arxiv v1 month. Mitigations cite sourcegraph-cody
+  (graph-aware retrieval of the current API surface) and semgrep
+  (deprecation rules at commit time).

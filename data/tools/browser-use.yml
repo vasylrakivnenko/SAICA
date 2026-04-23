@@ -1,0 +1,37 @@
+id: browser-use
+name: browser-use
+tagline: Make websites accessible for AI agents.
+description: >
+  Browser-use is the widely-adopted Python library that wraps Playwright with
+  an LLM-ready DOM abstraction. Canonical pattern for constraining LLM action
+  space to parseable/interactive DOM elements. Heavily used as a building
+  block in browser-agent stacks.
+first_released: '2024-10-31'
+last_updated: '2026-04-21'
+maturity_status: stable
+published_by: browser-use
+repository_url: https://github.com/browser-use/browser-use
+license: MIT
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - dom-abstraction
+  - playwright-wrapper
+  - llm-actionable-elements
+stars: 89651
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Canonical 'DOM-only' browser-use cell — most other browser agents build on
+  top of or differentiate from it.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

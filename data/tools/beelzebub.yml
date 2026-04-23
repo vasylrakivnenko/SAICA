@@ -1,0 +1,37 @@
+id: beelzebub
+name: beelzebub
+tagline: Secure low-code honeypot framework with LLM-backed system virtualization.
+description: >
+  Beelzebub is a low-code honeypot framework that leverages LLMs to simulate
+  realistic responses for deception engineering. Used by security teams to
+  detect attacker interaction with agent-adjacent infrastructure and capture
+  attack traces.
+first_released: '2022-05-08'
+last_updated: '2026-04-22'
+maturity_status: experimental
+published_by: beelzebub-labs
+repository_url: https://github.com/beelzebub-labs/beelzebub
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - supply_chain_attack
+locus_of_control:
+  - environment
+implements_techniques:
+  - llm-honeypots
+  - deception
+  - attack-trace-capture
+stars: 1966
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  LLM-honeypot cell: relevant for detecting adversarial activity against agent
+  deployments, complementing vuln scanners (garak, fuzzyai).
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

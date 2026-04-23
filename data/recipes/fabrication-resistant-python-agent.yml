@@ -1,0 +1,45 @@
+id: fabrication-resistant-python-agent
+name: Fabrication-resistant Python agent
+tagline: >
+  context-hub (RAG grounding) → pydantic-ai (schema-validated outputs) →
+  e2b (sandboxed execution) → pytest post-check. Fails fast on
+  hallucinated symbols before any change leaves the sandbox.
+description: >
+  A four-stage Python-agent composition whose ordering is designed to push
+  every failure class the `fabrication` and `logic_error` FailureModes
+  cover into a different observable signal.
+
+  Stage 1 (pre-generation): context-hub retrieves relevant in-repo and
+  standard-library context so the model generates against real symbols.
+
+  Stage 2 (in-generation): pydantic-ai enforces Pydantic schemas on every
+  tool call and return value, rejecting malformed outputs at parse time.
+
+  Stage 3 (post-generation): e2b runs the generated code inside a fresh
+  sandboxed container. `ImportError` / `AttributeError` on a fabricated
+  symbol surfaces here, not in the user's repo.
+
+  Stage 4 (post-execution): a pytest run over the generated module — the
+  test suite is the final correctness gate and also catches logic errors
+  that parsed and imported successfully.
+
+  This is the canonical v0.1 reference composition for
+  `python` + `graduated_hitl` workflows.
+
+targets_failure_modes:
+  - fabrication
+  - logic_error
+
+stack:
+  - context-hub
+  - pydantic-ai
+  - e2b
+
+evidence_tier: case_studied
+language: python
+
+notes: >
+  Pytest is the post-check but not a separate node in the KG. Evidence tier
+  `case_studied` reflects that the composition appears in Andrew Ng's
+  context-hub reference materials and PydanticAI docs but has not been
+  formally benchmarked.

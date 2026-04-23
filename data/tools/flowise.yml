@@ -1,0 +1,36 @@
+id: flowise
+name: Flowise
+tagline: Build AI agents, visually.
+description: >
+  FlowiseAI is a low-code builder for LLM agent workflows with a drag-and-drop
+  UI. Built on LangChain primitives and packaged as a self-hostable service
+  for non-coders to compose agent pipelines.
+first_released: '2023-03-31'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: flowise-ai
+repository_url: https://github.com/FlowiseAI/Flowise
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - environment
+implements_techniques:
+  - drag-and-drop-builder
+  - self-hosted
+  - langchain-primitives
+stars: 52185
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Low-code agent builder cell. Distinguished from langflow by being
+  TypeScript/Node-first.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

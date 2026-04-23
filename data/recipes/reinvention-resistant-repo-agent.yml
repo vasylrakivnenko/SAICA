@@ -1,0 +1,39 @@
+id: reinvention-resistant-repo-agent
+name: Reinvention-resistant repo agent
+tagline: >-
+  sourcegraph-cody (codebase graph) → tree-sitter (AST-level grep-before-write prompt rule) → semgrep (symbol-reuse rules). Forces the agent to discover and reuse existing functions rather than...
+description: >
+  Composition for the `dependency_blindness` FailureMode (reinvention of
+  functionality already present in dependencies or internal modules).
+
+  Stage 1: sourcegraph-cody indexes the full monorepo; its retrieval
+  ranks existing symbols higher than freely-generated definitions.
+
+  Stage 2: tree-sitter + a "grep before write" prompt rule requires the
+  agent to search the codebase for an existing implementation before
+  defining any new function. The rule is enforced via a pre-commit gate
+  that runs tree-sitter queries against the diff.
+
+  Stage 3: semgrep runs a ruleset that flags new function definitions
+  whose signatures overlap with existing public symbols.
+
+  Recipe is explicitly opinionated: it treats "the agent wrote a new
+  function" as the default-suspect case, requiring explicit
+  justification.
+
+targets_failure_modes:
+- dependency_blindness
+
+stack:
+- sourcegraph-cody
+- tree-sitter
+- semgrep
+
+evidence_tier: anecdotal
+language: polyglot
+
+notes: >
+  Evidence tier is `anecdotal` because the "grep before write" prompt
+  discipline is common in internal tool-building guides but not yet
+  benchmarked. Downgrade to `case_studied` when a public evaluation
+  appears.

@@ -61,6 +61,13 @@ const c = counts();
         <a href="/graph">/graph</a>.
       </li>
       <li>
+        <strong>Ask</strong> — natural-language Q&amp;A at
+        <a href="/ask">/ask</a>. Type a question, get a synthesized answer
+        with inline citations to the KG nodes that support it. Retrieval is
+        semantic-embedding-based; answer synthesis runs through Kimi-K2.5
+        with a strict "cite node ids or say you don't know" system prompt.
+      </li>
+      <li>
         <strong>JSON API</strong> — machine-readable endpoints at
         <a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> and
         per-collection / per-node JSON. Fetched over standard HTTP, no auth.

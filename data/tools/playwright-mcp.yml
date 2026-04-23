@@ -1,0 +1,37 @@
+id: playwright-mcp
+name: playwright-mcp
+tagline: Playwright Model Context Protocol server from Microsoft.
+description: >
+  Microsoft Playwright MCP is the official MCP server wrapping Playwright.
+  Exposes a controlled set of browser actions to LLM agents (click, type,
+  navigate, screenshot) through MCP, so agent access to the browser is
+  channelled through an auditable tool interface.
+first_released: '2025-03-21'
+last_updated: '2026-04-22'
+maturity_status: stable
+published_by: microsoft
+repository_url: https://github.com/microsoft/playwright-mcp
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - mcp-server
+  - playwright-wrapper
+  - browser-actions
+stars: 31275
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Environment-gate for browser-using agents: MCP-mediated access rather than
+  direct CDP, enabling per-tool allow-lists + auditing.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

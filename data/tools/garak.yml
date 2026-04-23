@@ -1,0 +1,38 @@
+id: garak
+name: garak
+tagline: The LLM vulnerability scanner.
+description: >
+  NVIDIA garak is an open-source LLM vulnerability scanner: applies a library
+  of probes (jailbreaks, prompt injection, data leakage, malware generation,
+  misinformation) against any LLM endpoint and reports per-probe attack
+  success rates. Models the NVIDIA NeMo Guardrails adversarial test plane.
+first_released: '2023-05-10'
+last_updated: '2026-04-21'
+maturity_status: stable
+published_by: nvidia
+repository_url: https://github.com/NVIDIA/garak
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - llm-probes
+  - attack-success-rate-metrics
+  - detect-generators
+stars: 7614
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Canonical LLM-vuln-scanner: complements llm-guard/rebuff by running at
+  assessment time rather than at request time.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

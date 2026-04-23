@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saica-kg.dev/schema/recipe.schema.json",
+  "title": "Recipe",
+  "description": "An ordered composition of Tools that addresses one or more FailureModes. Recipes are the prescriptive flip-side of Incidents.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "description",
+    "targets_failure_modes",
+    "stack",
+    "evidence_tier"
+  ],
+  "properties": {
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "tagline": {
+      "maxLength": 200,
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "targets_failure_modes": {
+      "items": {
+        "enum": [
+          "fabrication",
+          "obsolescence",
+          "dependency_blindness",
+          "logic_error",
+          "security_vulnerability",
+          "scope_creep",
+          "context_pollution",
+          "supply_chain_attack",
+          "cascading_failure",
+          "incomplete_execution",
+          "test_manipulation"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "stack": {
+      "description": "Ordered list of Tool ids that compose the recipe.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 2,
+      "type": "array"
+    },
+    "evidence_tier": {
+      "enum": [
+        "anecdotal",
+        "case_studied",
+        "benchmark_validated"
+      ],
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "description": "Primary language / stack (e.g. python, typescript, polyglot)."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

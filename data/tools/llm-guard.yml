@@ -1,0 +1,42 @@
+id: llm-guard
+name: llm-guard
+tagline: The Security Toolkit for LLM Interactions.
+description: >
+  ProtectAI's LLM Guard is a runtime security layer for LLM interactions.
+  Pluggable input/output scanners (PII, secrets, prompt injection, jailbreak
+  detection, profanity, toxicity, competitor detection) can be composed as a
+  gate in front of LLM calls, with configurable allow/deny policies.
+first_released: '2023-07-27'
+last_updated: '2025-12-15'
+maturity_status: experimental
+published_by: protectai
+repository_url: https://github.com/protectai/llm-guard
+license: MIT
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - prompt
+  - environment
+implements_techniques:
+  - input-scanners
+  - output-scanners
+  - pii-detection
+  - prompt-injection-detection
+stars: 2855
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Canonical runtime-guard toolkit: covers both directions (user→LLM and
+  LLM→user). Differentiated from rebuff by a wider scanner catalogue and from
+  nemo-guardrails by being library-first (no DSL).
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

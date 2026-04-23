@@ -1,0 +1,32 @@
+# κ summary (N=85)
+
+Kimi calls made: 0  tokens≈0
+
+control_paradigm: κ=0.000  labels=['__null__', 'correction', 'detection', 'prevention', 'recovery']  n=85
+                            __null__        correction         detection        prevention          recovery
+          __null__                43                15                 9                16                 2
+        correction                 0                 0                 0                 0                 0
+         detection                 0                 0                 0                 0                 0
+        prevention                 0                 0                 0                 0                 0
+          recovery                 0                 0                 0                 0                 0
+
+temporal_phase: κ=0.000  labels=['__null__', 'in_generation', 'post_generation', 'pre_generation']  n=85
+                            __null__     in_generation   post_generation    pre_generation
+          __null__                13                17                30                25
+     in_generation                 0                 0                 0                 0
+   post_generation                 0                 0                 0                 0
+    pre_generation                 0                 0                 0                 0
+
+failure_mode: κ_mean=0.000  jaccard_mean=0.353  n=85
+Per-mode breakdown:
+  fabrication                  κ=+0.000  A=0  B=6  both=0
+  obsolescence                 κ=+0.000  A=0  B=3  both=0
+  dependency_blindness         κ=--   (support A=0 B=0)
+  logic_error                  κ=+0.000  A=0  B=42  both=0
+  security_vulnerability       κ=+0.000  A=0  B=9  both=0
+  scope_creep                  κ=+0.000  A=0  B=2  both=0
+  context_pollution            κ=+0.000  A=0  B=6  both=0
+  supply_chain_attack          κ=--   (support A=0 B=0)
+  cascading_failure            κ=+0.000  A=0  B=7  both=0
+  incomplete_execution         κ=+0.000  A=0  B=6  both=0
+  test_manipulation            κ=--   (support A=0 B=0)

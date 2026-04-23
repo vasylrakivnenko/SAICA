@@ -1,0 +1,37 @@
+id: skyvern
+name: skyvern
+tagline: Automate browser-based workflows with LLMs and computer vision.
+description: >
+  Skyvern automates browser workflows using LLMs plus computer vision.
+  Browser-use supervision primitives include selector-robust DOM grounding,
+  screenshot reasoning, and structured action plans. Positioned as a
+  business-process-automation layer on top of browser agents.
+first_released: '2024-02-28'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: skyvern-ai
+repository_url: https://github.com/Skyvern-AI/skyvern
+license: AGPL-3.0
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - cv-grounded-actions
+  - structured-plans
+  - selector-robustness
+stars: 21342
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Browser-agent w/ CV-grounding cell. Differentiated from browser-use
+  (DOM-only) by treating screenshots as primary.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

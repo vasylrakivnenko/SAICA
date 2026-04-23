@@ -1,0 +1,47 @@
+id: spracklen-2024-hallucinated-package-prevalence
+title: Spracklen et al. find ~20% of AI-generated code samples import nonexistent packages
+tagline: >-
+  USENIX Security 2024 study of 16 LLMs across 576K prompts: 19.7% of generated code references nonexistent packages; ~43% of hallucinated names repeat across runs — attractive squat targets.
+description: >
+  The Spracklen et al. paper "We Have a Package for You!" (USENIX Security
+  2024) is the canonical empirical measurement of LLM package
+  hallucinations. Across 16 LLMs and 576,000 code samples, 19.7% of
+  samples reference at least one nonexistent package. 43% of the
+  hallucinated package names re-appear across multiple runs with similar
+  prompts, making them predictable to adversaries. The paper formalizes
+  "package hallucination" as the failure class underlying slopsquatting. It
+  is the academic ground-truth for the `fabrication` × `supply_chain_attack`
+  intersection that SAICA-KG models.
+
+incident_date: 2024-08-14
+harm_class: security_breach
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- fabrication
+- supply_chain_attack
+
+affected_systems:
+- GPT-4
+- GPT-3.5
+- CodeLlama
+- DeepSeekCoder
+- Mistral
+- 11 others evaluated in the paper
+
+source_urls:
+- https://www.usenix.org/conference/usenixsecurity24/presentation/spracklen
+- https://www.semanticscholar.org/paper/b76124ef53341af42d6d582ffe340cd0ddb49fc8
+
+documented_by:
+- spracklen-2024-we-have-a-package
+
+mitigated_by:
+- socket
+- snyk
+- pipelock
+
+notes: >
+  This entry models "measurement as incident" — a dataset-scale finding
+  rather than a single event. `reproducibility: confirmed` because the
+  methodology was peer-reviewed at USENIX Security.

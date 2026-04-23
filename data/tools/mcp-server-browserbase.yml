@@ -1,0 +1,36 @@
+id: mcp-server-browserbase
+name: mcp-server-browserbase
+tagline: MCP server to control a browser via Browserbase and Stagehand.
+description: >
+  Browserbase's official MCP server exposes Browserbase-hosted headless
+  browsers to MCP clients. Pairs with Stagehand (typed browser-agent SDK) to
+  provide a managed sandboxed browser backend for agent computer-use.
+first_released: '2024-12-05'
+last_updated: '2026-03-31'
+maturity_status: experimental
+published_by: browserbase
+repository_url: https://github.com/browserbase/mcp-server-browserbase
+license: MIT
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - mcp-server
+  - browserbase-backend
+  - stagehand-integration
+stars: 3280
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Cloud-sandbox-browser MCP cell — distinct from playwright-mcp (local
+  headless) and browser-mcp (user's live browser).
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

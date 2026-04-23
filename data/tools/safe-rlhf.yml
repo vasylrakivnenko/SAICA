@@ -1,0 +1,39 @@
+id: safe-rlhf
+name: safe-rlhf
+tagline: "Safe RLHF: constrained value alignment via safe reinforcement learning from human feedback."
+description: >
+  PKU Alignment's Safe-RLHF is a reference implementation of Safe RLHF —
+  reinforcement learning from human feedback with explicit safety constraints
+  (constrained optimization). Used to train helpful-and-harmless LLMs with
+  measurable safety bounds.
+first_released: '2023-05-15'
+last_updated: '2025-11-24'
+maturity_status: experimental
+published_by: pku-alignment
+repository_url: https://github.com/PKU-Alignment/safe-rlhf
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - model
+implements_techniques:
+  - constrained-rlhf
+  - helpful-harmless-training
+  - safety-preference-modeling
+stars: 1598
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Training-time supervision: the safety-constrained RLHF branch of model
+  alignment. Complements detection-time tools by preventing unsafe behaviour
+  at the model layer rather than the runtime layer.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

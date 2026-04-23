@@ -1,0 +1,38 @@
+id: letta
+name: letta
+tagline: Stateful agents framework with memory, reasoning, and context management (formerly MemGPT).
+description: >
+  Letta (formerly MemGPT) introduces 'MemGPT-style' long-term memory for LLM
+  agents: tiered context buffers, summarization, and explicit memory tools
+  that let agents write to and retrieve from long-term storage. Addresses
+  runaway context pollution.
+first_released: '2023-10-11'
+last_updated: '2026-04-12'
+maturity_status: stable
+published_by: letta-ai
+repository_url: https://github.com/letta-ai/letta
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - context_pollution
+  - scope_creep
+locus_of_control:
+  - context
+  - environment
+implements_techniques:
+  - tiered-memory
+  - summarization
+  - memory-tools
+stars: 22238
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Memory/context-management cell — supervision as bounded-context discipline
+  rather than runtime gating.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

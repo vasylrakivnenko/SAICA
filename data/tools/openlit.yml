@@ -1,0 +1,41 @@
+id: openlit
+name: openlit
+tagline: "Open-source AI engineering platform: OpenTelemetry-native LLM observability, guardrails, evaluations, prompt management."
+description: >
+  OpenLIT is a single open-source AI engineering platform that layers
+  OpenTelemetry-native LLM observability, guardrails, evaluations, and prompt
+  management on top of existing OTel collectors. Designed for teams that
+  already have OTel infrastructure and want to extend it to LLM workloads
+  without a separate control plane.
+first_released: '2024-01-23'
+last_updated: '2026-04-20'
+maturity_status: experimental
+published_by: openlit
+repository_url: https://github.com/openlit/openlit
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - environment
+implements_techniques:
+  - opentelemetry
+  - guardrails
+  - evals
+  - prompt-management
+stars: 2388
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Occupies the 'OTel-collector-native' point in observability — distinct from
+  langfuse/phoenix by being designed to plug into existing OpenTelemetry
+  backends rather than operate a standalone control plane.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

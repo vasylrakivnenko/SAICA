@@ -1,0 +1,35 @@
+id: docetl
+name: docetl
+tagline: LLM-powered data processing with automatic pipeline optimization.
+description: >
+  DocETL (UC Berkeley EPIC Lab) is an LLM-powered data-processing system.
+  Automatically optimizes extraction pipelines with cost-quality trade-offs,
+  with a focus on reliability on complex document extraction tasks.
+first_released: '2024-07-09'
+last_updated: '2026-03-27'
+maturity_status: experimental
+published_by: ucb-epic
+repository_url: https://github.com/ucbepic/docetl
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+locus_of_control:
+  - environment
+implements_techniques:
+  - pipeline-optimizer
+  - llm-etl
+stars: 3711
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  LLM-pipeline-optimization cell — complements autorag (RAG pipeline search)
+  for the general ETL case.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

@@ -1,0 +1,41 @@
+id: agent-governance-toolkit
+name: agent-governance-toolkit
+tagline: AI Agent Governance Toolkit — policy enforcement, zero-trust identity, and execution oversight.
+description: >
+  Microsoft's AI Agent Governance Toolkit is a reference implementation of
+  zero-trust governance for enterprise AI agents. Provides identity binding,
+  policy engine, execution audit, and approval workflows. Designed as a
+  template for enterprise deployments rather than a drop-in library.
+first_released: '2026-03-02'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: microsoft
+repository_url: https://github.com/microsoft/agent-governance-toolkit
+license: MIT
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - scope_creep
+  - supply_chain_attack
+locus_of_control:
+  - environment
+  - human
+implements_techniques:
+  - zero-trust-identity
+  - policy-engine
+  - execution-audit
+  - approval-workflows
+stars: 1177
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Enterprise governance cell: layers zero-trust identity and policy-engine
+  primitives onto agent deployments, complementing runtime guardrails with
+  organizational controls.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

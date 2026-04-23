@@ -1,0 +1,26 @@
+id: reins
+name: Reins
+tagline: Stop AI agents from doing things you didn't ask for
+description: A supervision framework that prevents AI coding agents from executing actions outside their authorized scope, implementing guardrails to block unauthorized file edits, installs, or other out-of-scope behaviors before they occur.
+first_released: '2023-04-13'
+last_updated: '2026-04-21'
+maturity_status: experimental
+repository_url: https://github.com/pegasi-ai/reins
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - scope_creep
+stars: 383
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=83 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=None). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  candidate_id: 83

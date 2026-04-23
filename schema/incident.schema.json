@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saica-kg.dev/schema/incident.schema.json",
+  "title": "Incident",
+  "description": "A documented failure event where an AI coding agent (or analogous system) produced harm. Anchors FailureMode claims in ground truth.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "description",
+    "incident_date",
+    "harm_class",
+    "reproducibility",
+    "exhibited_failure_modes",
+    "source_urls"
+  ],
+  "properties": {
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "tagline": {
+      "maxLength": 200,
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "incident_date": {
+      "format": "date",
+      "type": "string"
+    },
+    "harm_class": {
+      "enum": [
+        "user_reported",
+        "data_loss",
+        "security_breach",
+        "financial_loss",
+        "reputational"
+      ],
+      "type": "string"
+    },
+    "reproducibility": {
+      "enum": [
+        "confirmed",
+        "plausible",
+        "anecdotal"
+      ],
+      "type": "string"
+    },
+    "exhibited_failure_modes": {
+      "items": {
+        "enum": [
+          "fabrication",
+          "obsolescence",
+          "dependency_blindness",
+          "logic_error",
+          "security_vulnerability",
+          "scope_creep",
+          "context_pollution",
+          "supply_chain_attack",
+          "cascading_failure",
+          "incomplete_execution",
+          "test_manipulation"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "affected_systems": {
+      "description": "Free-form tool / product / system names involved.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "source_urls": {
+      "description": "Publicly resolvable citations describing the incident.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "documented_by": {
+      "description": "Paper node ids that discuss or analyze this incident.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mitigated_by": {
+      "description": "Tool node ids whose supervision would plausibly prevent the incident.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

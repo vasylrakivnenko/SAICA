@@ -13,6 +13,8 @@ import type {
   Taxonomy,
   Paper,
   Crosswalk,
+  Incident,
+  Recipe,
   Graph,
 } from './types.ts';
 
@@ -166,6 +168,45 @@ function hydrateCrosswalk(raw: Record<string, any>): Crosswalk {
   };
 }
 
+function hydrateIncident(raw: Record<string, any>): Incident {
+  return {
+    id: String(raw.id),
+    title: String(raw.title ?? raw.id),
+    tagline: raw.tagline,
+    description: String(raw.description ?? ''),
+    incident_date: String(raw.incident_date ?? ''),
+    harm_class: raw.harm_class,
+    reproducibility: raw.reproducibility,
+    exhibited_failure_modes: Array.isArray(raw.exhibited_failure_modes)
+      ? raw.exhibited_failure_modes
+      : [],
+    affected_systems: Array.isArray(raw.affected_systems) ? raw.affected_systems : [],
+    source_urls: Array.isArray(raw.source_urls) ? raw.source_urls : [],
+    documented_by: Array.isArray(raw.documented_by) ? raw.documented_by : [],
+    mitigated_by: Array.isArray(raw.mitigated_by) ? raw.mitigated_by : [],
+    notes: raw.notes,
+  };
+}
+
+function hydrateRecipe(raw: Record<string, any>): Recipe {
+  const stackRaw = Array.isArray(raw.stack) ? raw.stack.map(String) : [];
+  // Recipe.stack is typed as [string, string, ...string[]] (minItems:2).
+  // Validation guarantees length >= 2 at ingest time, so this cast is safe.
+  return {
+    id: String(raw.id),
+    name: String(raw.name ?? raw.id),
+    tagline: raw.tagline,
+    description: String(raw.description ?? ''),
+    targets_failure_modes: Array.isArray(raw.targets_failure_modes)
+      ? raw.targets_failure_modes
+      : [],
+    stack: stackRaw as [string, string, ...string[]],
+    evidence_tier: raw.evidence_tier,
+    language: raw.language,
+    notes: raw.notes,
+  };
+}
+
 function keyBy<T extends { id: string }>(items: T[]): Record<string, T> {
   const out: Record<string, T> = {};
   for (const it of items) out[it.id] = it;
@@ -178,6 +219,8 @@ function buildGraph(): Graph {
   const taxonomies = readYamlDir('taxonomies').map(hydrateTaxonomy);
   const papers = readYamlDir('papers').map(hydratePaper);
   const crosswalks = readYamlDir('crosswalks').map(hydrateCrosswalk);
+  const incidents = readYamlDir('incidents').map(hydrateIncident);
+  const recipes = readYamlDir('recipes').map(hydrateRecipe);
 
   // Derived index: failure_mode_id -> tool_ids[]
   const toolsByFailureMode: Record<string, string[]> = {};
@@ -235,6 +278,8 @@ function buildGraph(): Graph {
     taxonomies: keyBy(taxonomies),
     papers: keyBy(papers),
     crosswalks: keyBy(crosswalks),
+    incidents: keyBy(incidents),
+    recipes: keyBy(recipes),
     toolsByFailureMode,
     failureModesByTaxonomyCategory,
     kgVersion: DATA_VERSION,
@@ -250,6 +295,7 @@ export const DISCLAIMER =
 
 export function rawYamlUrl(kind: string, id: string): string {
   // kind: "tools" | "failure_modes" | "papers" | "taxonomies" | "crosswalks"
+  //       | "incidents" | "recipes"
   return `https://github.com/saica-kg/saica-kg/blob/main/data/${kind}/${id}.yml`;
 }
 
@@ -259,6 +305,8 @@ export function counts(): {
   papers: number;
   taxonomies: number;
   crosswalks: number;
+  incidents: number;
+  recipes: number;
 } {
   // Crosswalks count: number of inline crosswalk edges across all FailureModes
   // plus individual mappings within Crosswalk nodes.
@@ -276,6 +324,8 @@ export function counts(): {
     papers: Object.keys(graph.papers).length,
     taxonomies: Object.keys(graph.taxonomies).length,
     crosswalks: inlineCount + bulkCount,
+    incidents: Object.keys(graph.incidents).length,
+    recipes: Object.keys(graph.recipes).length,
   };
 }
 

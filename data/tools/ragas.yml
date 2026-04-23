@@ -1,0 +1,40 @@
+id: ragas
+name: ragas
+tagline: Supercharge your LLM application evaluations — RAG- and agent-centric metrics.
+description: >
+  Ragas is an open-source evaluation framework for LLM applications with
+  specialized metrics for RAG systems (faithfulness, context precision/recall,
+  answer relevancy) and agent trajectories. Pytest-compatible, widely adopted
+  in the RAG community, and frequently paired with tracing backends.
+first_released: '2023-05-08'
+last_updated: '2026-02-24'
+maturity_status: stable
+published_by: exploding-gradients
+repository_url: https://github.com/explodinggradients/ragas
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - context_pollution
+locus_of_control:
+  - environment
+implements_techniques:
+  - rag-metrics
+  - faithfulness
+  - context-recall
+  - context-precision
+stars: 13605
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Canonical RAG-eval library. Complements deepeval (broad LLM eval) and
+  autorag (pipeline search) by owning the faithfulness / context-precision
+  metric family.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

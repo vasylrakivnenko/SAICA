@@ -1,0 +1,41 @@
+id: opik
+name: opik
+tagline: Debug, evaluate, and monitor LLM applications, RAG systems, and agentic workflows.
+description: >
+  Opik is Comet ML's open-source platform for debugging, evaluating, and
+  monitoring LLM applications, RAG pipelines, and multi-agent workflows.
+  Provides trace capture, LLM-as-judge graders, test dataset management, and
+  production monitoring dashboards. Self-hostable alongside a SaaS offering.
+first_released: '2023-05-10'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: comet-ml
+repository_url: https://github.com/comet-ml/opik
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+  - incomplete_execution
+locus_of_control:
+  - environment
+implements_techniques:
+  - llm-tracing
+  - llm-as-judge
+  - test-datasets
+  - production-monitoring
+stars: 18988
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Occupies detection × post_generation × full_hitl. Differentiated from
+  langfuse by being Comet-ecosystem-integrated (shared ML experiment-tracking
+  backbone) and from phoenix by its agent-focused trace model.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

@@ -1,0 +1,49 @@
+id: copilot-prompt-injection-github-comments-2025
+title: Claude Code, Gemini CLI, and GitHub Copilot Agent all hijacked via malicious GitHub-issue prompts
+tagline: >-
+  Johns Hopkins researchers showed Claude Code Security Review, Gemini CLI Action, and GitHub Copilot Agent all treat untrusted issue/comment content as instructions, allowing hidden directives.
+description: >
+  A July 2025 security study led by Aonan Guan (Johns Hopkins) and Orca
+  Security found that at least three production AI-coding workflows —
+  Claude Code's Security Review action, Google's Gemini CLI action, and
+  GitHub's Copilot Agent — accept GitHub issue bodies, comments, and
+  workflow inputs as trusted instruction context. A crafted hidden
+  instruction in an issue body was sufficient to hijack each agent's
+  execution: exfiltrate repository contents, alter pull-request metadata,
+  or trigger actions against the repo. The RoguePilot write-up by Orca
+  demonstrated a full repo-takeover primitive via GitHub Codespaces. The
+  failure class (processing untrusted input as trusted instructions) is a
+  classic prompt-injection pattern, but its instantiation across three
+  independent production agents established it as a cross-vendor design
+  flaw.
+incident_date: 2025-07-15
+harm_class: security_breach
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- security_vulnerability
+- context_pollution
+
+affected_systems:
+- Claude Code Security Review action
+- Google Gemini CLI action
+- GitHub Copilot Agent
+- GitHub Codespaces
+
+source_urls:
+- https://www.securityweek.com/claude-code-gemini-cli-github-copilot-agents-vulnerable-to-prompt-injection-via-comments/
+- https://orca.security/resources/blog/roguepilot-github-copilot-vulnerability/
+- https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents
+
+documented_by: []
+
+mitigated_by:
+- rebuff
+- guardrails-ai
+- nemo-guardrails
+
+notes: >
+  Date approximates the first public disclosure. Mitigations are
+  conservative — prompt-injection defense is partial across the
+  ecosystem, and none of the listed tools would have "fully prevented"
+  the cross-vendor pattern. They would have reduced blast radius.

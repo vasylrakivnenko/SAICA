@@ -1,0 +1,159 @@
+{
+  "control_paradigm": {
+    "kappa": 0.0,
+    "labels": [
+      "__null__",
+      "correction",
+      "detection",
+      "prevention",
+      "recovery"
+    ],
+    "confusion_matrix": [
+      [
+        43,
+        15,
+        9,
+        16,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "n": 85
+  },
+  "temporal_phase": {
+    "kappa": 0.0,
+    "labels": [
+      "__null__",
+      "in_generation",
+      "post_generation",
+      "pre_generation"
+    ],
+    "confusion_matrix": [
+      [
+        13,
+        17,
+        30,
+        25
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "n": 85
+  },
+  "failure_mode": {
+    "per_mode": {
+      "fabrication": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 6,
+        "both": 0
+      },
+      "obsolescence": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 3,
+        "both": 0
+      },
+      "dependency_blindness": {
+        "kappa": null,
+        "note": "neither rater assigned",
+        "support_a": 0,
+        "support_b": 0
+      },
+      "logic_error": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 42,
+        "both": 0
+      },
+      "security_vulnerability": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 9,
+        "both": 0
+      },
+      "scope_creep": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 2,
+        "both": 0
+      },
+      "context_pollution": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 6,
+        "both": 0
+      },
+      "supply_chain_attack": {
+        "kappa": null,
+        "note": "neither rater assigned",
+        "support_a": 0,
+        "support_b": 0
+      },
+      "cascading_failure": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 7,
+        "both": 0
+      },
+      "incomplete_execution": {
+        "kappa": 0.0,
+        "support_a": 0,
+        "support_b": 6,
+        "both": 0
+      },
+      "test_manipulation": {
+        "kappa": null,
+        "note": "neither rater assigned",
+        "support_a": 0,
+        "support_b": 0
+      }
+    },
+    "kappa_mean": 0.0,
+    "jaccard_mean": 0.35294117647058826,
+    "n": 85
+  }
+}

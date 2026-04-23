@@ -1,0 +1,43 @@
+id: cursor-support-bot-fabricated-policy-2025
+title: Cursor AI support bot fabricates nonexistent single-device policy
+tagline: >-
+  Cursor's unlabeled AI support bot invented a single-device subscription policy that didn't exist, triggering cancellations, HN/Reddit backlash, and a public apology from the Cursor team.
+description: >
+  In April 2025, users noticed that switching between devices was silently
+  invalidating Cursor sessions. Contacting support by email, one user
+  received a confident reply from an "agent" (unlabeled as AI) stating the
+  logouts were "expected behaviour" under a new policy limiting each
+  subscription to a single device. No such policy existed. The fabrication
+  spread on Hacker News and Reddit within hours; users publicly cancelled
+  subscriptions. Co-founder Michael Truell apologized, clarified that Cursor
+  has no single-device policy, refunded the affected user, and committed to
+  labelling AI-assisted email replies as AI in future.
+
+incident_date: 2025-04-18
+harm_class: reputational
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- fabrication
+- context_pollution
+
+affected_systems:
+- Cursor AI support bot
+
+source_urls:
+- https://www.theregister.com/2025/04/18/cursor_ai_support_bot_lies/
+- https://news.ycombinator.com/item?id=43683012
+- https://fortune.com/article/customer-support-ai-cursor-went-rogue/
+
+documented_by: []
+
+mitigated_by:
+- guardrails-ai
+- rebuff
+
+notes: >
+  Not strictly a coding-agent incident, but the supplier is a coding-agent
+  vendor and the failure mode (confident fabrication of policy) is the same
+  class the SAICA-KG `fabrication` node describes. Useful datapoint for the
+  "supervision applies to the whole product surface, not just the editor"
+  argument.

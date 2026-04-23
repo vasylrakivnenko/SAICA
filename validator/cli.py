@@ -172,6 +172,8 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
     papers = {n["id"]: n for _, n in iter_nodes("papers")}
     taxonomies = {n["id"]: n for _, n in iter_nodes("taxonomies")}
     crosswalks = {n["id"]: n for _, n in iter_nodes("crosswalks")}
+    incidents = {n["id"]: n for _, n in iter_nodes("incidents")}
+    recipes = {n["id"]: n for _, n in iter_nodes("recipes")}
 
     for mode_id, mode in modes.items():
         for pid in mode.get("prior_work", []):
@@ -290,10 +292,46 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
                 f" (under-covered)"
             )
 
+    # Incident invariants: exhibited failure modes must be known; cited paper
+    # and tool ids must exist. This keeps Incident nodes from drifting into
+    # dangling references over time.
+    for inc_id, inc in incidents.items():
+        for fm in inc.get("exhibited_failure_modes", []) or []:
+            if fm not in known_modes:
+                err.append(
+                    f"[incidents] {inc_id} exhibited unknown FailureMode '{fm}'"
+                )
+        for pid in inc.get("documented_by", []) or []:
+            if pid not in papers:
+                err.append(
+                    f"[incidents] {inc_id} documented_by missing paper '{pid}'"
+                )
+        for tid in inc.get("mitigated_by", []) or []:
+            if tid not in tools:
+                err.append(
+                    f"[incidents] {inc_id} mitigated_by missing tool '{tid}'"
+                )
+
+    # Recipe invariants: every tool in `stack` must be a known Tool id;
+    # targets_failure_modes must be known.
+    for rec_id, rec in recipes.items():
+        for tid in rec.get("stack", []) or []:
+            if tid not in tools:
+                err.append(
+                    f"[recipes] {rec_id} stack references missing tool '{tid}'"
+                )
+        for fm in rec.get("targets_failure_modes", []) or []:
+            if fm not in known_modes:
+                err.append(
+                    f"[recipes] {rec_id} targets unknown FailureMode '{fm}'"
+                )
+
     # ID-immutability lock: every id in the committed MANIFEST.json must
     # still exist in the YAML corpus. A missing id means someone renamed
     # or deleted a node, breaking external citations.
-    _check_manifest_lock(err, tools, modes, papers, taxonomies, crosswalks)
+    _check_manifest_lock(
+        err, tools, modes, papers, taxonomies, crosswalks, incidents, recipes
+    )
 
 
 def _check_manifest_lock(
@@ -303,6 +341,8 @@ def _check_manifest_lock(
     papers: dict[str, Any],
     taxonomies: dict[str, Any],
     crosswalks: dict[str, Any],
+    incidents: dict[str, Any] | None = None,
+    recipes: dict[str, Any] | None = None,
 ) -> None:
     """If ``data/MANIFEST.json`` exists, every id it declares must still be
     present in the current corpus. This is the "external citations stay
@@ -327,6 +367,8 @@ def _check_manifest_lock(
         "papers": set(papers.keys()),
         "taxonomies": set(taxonomies.keys()),
         "crosswalks": set(crosswalks.keys()),
+        "incidents": set((incidents or {}).keys()),
+        "recipes": set((recipes or {}).keys()),
     }
     for kind, live_ids in current.items():
         entry = declared.get(kind)

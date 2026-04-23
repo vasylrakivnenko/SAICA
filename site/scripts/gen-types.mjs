@@ -38,6 +38,8 @@ const SCHEMAS = [
   ['paper.schema.json', 'Paper'],
   ['taxonomy.schema.json', 'Taxonomy'],
   ['crosswalk.schema.json', 'Crosswalk'],
+  ['incident.schema.json', 'Incident'],
+  ['recipe.schema.json', 'Recipe'],
 ];
 
 // Hand-written shared enums. json-schema-to-typescript inlines enums per
@@ -96,6 +98,8 @@ export interface Graph {
   taxonomies: Record<string, Taxonomy>;
   papers: Record<string, Paper>;
   crosswalks: Record<string, Crosswalk>;
+  incidents: Record<string, Incident>;
+  recipes: Record<string, Recipe>;
   // Derived indexes:
   toolsByFailureMode: Record<string, string[]>;
   failureModesByTaxonomyCategory: Record<string, Record<string, string[]>>;

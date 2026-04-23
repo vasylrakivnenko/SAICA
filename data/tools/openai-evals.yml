@@ -1,0 +1,38 @@
+id: openai-evals
+name: evals
+tagline: Framework for evaluating LLMs and LLM systems, plus an open registry of benchmarks.
+description: >
+  OpenAI Evals is a framework for evaluating LLMs and LLM systems and a
+  community registry of benchmarks. Supports both traditional reference
+  graders and model-graded evals. Distinct from lm-evaluation-harness by
+  emphasizing user-contributed evals over a fixed benchmark suite.
+first_released: '2023-01-23'
+last_updated: '2026-04-14'
+maturity_status: stable
+published_by: openai
+repository_url: https://github.com/openai/evals
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - model-graded-evals
+  - eval-registry
+  - reference-graders
+stars: 18262
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Canonical 'bring-your-own-eval' registry: central artifact for OpenAI-model
+  comparisons.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

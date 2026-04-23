@@ -1,0 +1,39 @@
+id: promptmap
+name: promptmap
+tagline: Security scanner for custom LLM applications.
+description: >
+  Promptmap is a CLI security scanner for custom LLM apps. Discovers system
+  prompt leakage, prompt injection, and jailbreaks across user-provided
+  endpoints. Designed for app-sec teams who want a quick adversarial sweep of
+  their production LLM feature.
+first_released: '2023-07-15'
+last_updated: '2025-12-01'
+maturity_status: experimental
+published_by: utkusen
+repository_url: https://github.com/utkusen/promptmap
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - system-prompt-leak-probe
+  - prompt-injection-probe
+  - jailbreak-probe
+stars: 1181
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Fills the 'nmap-for-LLM-apps' niche: fast, single-purpose external scanner —
+  complements broader scanners like garak which target the model rather than
+  the deployed app.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

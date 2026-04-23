@@ -1,0 +1,276 @@
+---
+// /ask — Retrieval-augmented Q&A over SAICA-KG.
+//
+// Page is fully static. Submit-time retrieval + Kimi synthesis happens in
+// the FastAPI backend at `pipeline/ask/server.py` (localhost:4322 by
+// default; override at build time with PUBLIC_ASK_API). If the backend is
+// down the page still renders — only submit fails.
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// PUBLIC_ prefix is Astro's convention for env vars that may be exposed to
+// the client bundle. Default keeps dev working without extra config.
+const ASK_API =
+  (import.meta.env.PUBLIC_ASK_API as string | undefined) ??
+  'http://localhost:4322/ask';
+
+const examples: string[] = [
+  'What tools prevent package hallucination in Python coding agents?',
+  'Which tools help with deprecated API detection?',
+  'Show me guardrails that work during generation, not after.',
+  'Compare Guardrails AI and NeMo Guardrails.',
+  'What taxonomies map to fabrication?',
+  'Which recipes defend against test manipulation?',
+];
+---
+
+<BaseLayout
+  title="Ask"
+  description="Ask SAICA-KG a natural-language question and get a cited answer synthesized from the knowledge graph."
+>
+  <h1>Ask SAICA-KG</h1>
+  <p class="mt-3 text-lg text-ink-muted max-w-3xl">
+    Ask a question in plain English. We retrieve the most relevant KG nodes
+    by semantic similarity and synthesize an answer with inline citations.
+  </p>
+  <p class="mt-2 text-sm text-ink-muted max-w-3xl">
+    Answers cite node ids in brackets like <code>[guardrails-ai]</code> — each
+    becomes a clickable link to that node's page. If the KG doesn't cover the
+    topic, the answer says so rather than fabricating.
+  </p>
+
+  <section class="mt-6 max-w-3xl">
+    <form id="ask-form" class="font-sans" novalidate>
+      <label for="ask-question" class="block text-sm font-semibold mb-2">
+        Your question
+      </label>
+      <textarea
+        id="ask-question"
+        name="question"
+        rows="4"
+        required
+        minlength="3"
+        maxlength="2000"
+        placeholder="e.g. What tools prevent package hallucination in Python coding agents?"
+        class="w-full border border-ink/20 rounded p-3 text-base bg-white focus:border-accent focus:outline-none"
+      ></textarea>
+
+      <div class="mt-2 flex flex-wrap items-center gap-3">
+        <button
+          id="ask-submit"
+          type="submit"
+          class="chip-accent !px-4 !py-1.5 !text-sm cursor-pointer border border-accent/40 hover:bg-accent hover:text-white"
+        >
+          Ask
+        </button>
+        <span id="ask-status" class="text-sm text-ink-muted" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+
+    <div class="mt-5">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint mb-2">
+        Example questions
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {examples.map((q) => (
+          <button
+            type="button"
+            class="example-q chip hover:bg-paper hover:border-accent/40 cursor-pointer text-left"
+            data-question={q}
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="ask-answer-wrap" class="mt-10 max-w-3xl hidden">
+    <h2>Answer</h2>
+    <div
+      id="ask-answer"
+      class="mt-3 leading-relaxed border border-ink/10 rounded bg-paper-alt p-4"
+    ></div>
+
+    <div class="mt-4">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint mb-2">
+        Citations
+      </div>
+      <div id="ask-citations" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <details id="ask-raw-wrap" class="mt-6 font-sans text-sm">
+      <summary class="cursor-pointer text-ink-muted hover:text-ink">
+        Raw matches (top retrieval hits)
+      </summary>
+      <ol id="ask-raw" class="mt-3 space-y-2 list-decimal pl-6"></ol>
+    </details>
+
+    <div id="ask-meta" class="mt-4 text-xs text-ink-faint font-sans"></div>
+  </section>
+
+  <section id="ask-error" class="mt-10 max-w-3xl hidden" role="alert">
+    <div class="border border-red-300 bg-red-50 text-red-900 p-4 rounded">
+      <div class="font-sans font-semibold mb-1">Couldn't reach the /ask backend</div>
+      <div id="ask-error-detail" class="text-sm"></div>
+      <div class="text-sm mt-2">
+        The backend is a separate FastAPI service. Start it with
+        <code>.venv/bin/python -m pipeline.ask.server</code> and try again.
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ ASK_API }}>
+  const form = document.getElementById('ask-form');
+  const questionEl = document.getElementById('ask-question');
+  const submitBtn = document.getElementById('ask-submit');
+  const statusEl = document.getElementById('ask-status');
+  const answerWrap = document.getElementById('ask-answer-wrap');
+  const answerEl = document.getElementById('ask-answer');
+  const citationsEl = document.getElementById('ask-citations');
+  const rawEl = document.getElementById('ask-raw');
+  const metaEl = document.getElementById('ask-meta');
+  const errorWrap = document.getElementById('ask-error');
+  const errorDetail = document.getElementById('ask-error-detail');
+
+  // ---- URL builders: citation type -> site route -----------------------
+  const TYPE_ROUTES = {
+    tool: '/tools',
+    failure_mode: '/failure-modes',
+    taxonomy: '/taxonomies',
+    paper: '/papers',
+    incident: '/incidents',
+    recipe: '/recipes',
+  };
+
+  // Map each citation id -> (type, url, name) once, so the answer renderer
+  // can turn "[guardrails-ai]" into a link without hitting the backend twice.
+  function buildCitationIndex(citations) {
+    const idx = new Map();
+    for (const c of citations || []) {
+      const url = c.url || (TYPE_ROUTES[c.type] ? `${TYPE_ROUTES[c.type]}/${c.id}` : null);
+      idx.set(c.id, { ...c, url });
+    }
+    return idx;
+  }
+
+  // ---- Answer renderer: [node-id] -> clickable chip ---------------------
+  // The regex is deliberately permissive on the id character class (kebab
+  // case with digits). We only link ids the backend actually returned,
+  // so a hallucinated bracketed phrase is rendered as literal text.
+  const CITE_RE = /\[([a-zA-Z0-9][a-zA-Z0-9_-]*)\]/g;
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderAnswer(text, citationIndex) {
+    let out = '';
+    let last = 0;
+    for (const m of text.matchAll(CITE_RE)) {
+      const id = m[1];
+      out += escapeHtml(text.slice(last, m.index));
+      const cite = citationIndex.get(id);
+      if (cite && cite.url) {
+        out += ` <a href="${escapeHtml(cite.url)}" class="chip-accent !text-xs no-underline hover:underline" title="${escapeHtml(cite.name || id)}">[${escapeHtml(id)}]</a>`;
+      } else {
+        out += escapeHtml(m[0]);
+      }
+      last = m.index + m[0].length;
+    }
+    out += escapeHtml(text.slice(last));
+    // Preserve paragraph breaks in the answer.
+    return out.replace(/\n\n+/g, '</p><p class="mt-3">').replace(/\n/g, '<br />');
+  }
+
+  function renderCitations(citations) {
+    citationsEl.innerHTML = '';
+    for (const c of citations) {
+      const url = c.url || (TYPE_ROUTES[c.type] ? `${TYPE_ROUTES[c.type]}/${c.id}` : null);
+      const a = document.createElement('a');
+      a.className = 'chip hover:border-accent/40';
+      a.href = url || '#';
+      a.title = c.snippet || '';
+      a.innerHTML = `<span class="text-ink-faint">${escapeHtml(c.type)}</span> ${escapeHtml(c.id)}`;
+      citationsEl.appendChild(a);
+    }
+  }
+
+  function renderRaw(citations) {
+    rawEl.innerHTML = '';
+    for (const c of citations) {
+      const li = document.createElement('li');
+      const url = c.url || (TYPE_ROUTES[c.type] ? `${TYPE_ROUTES[c.type]}/${c.id}` : null);
+      const sim = typeof c.similarity === 'number' ? c.similarity.toFixed(3) : '—';
+      li.innerHTML =
+        `<a href="${escapeHtml(url || '#')}" class="font-semibold">${escapeHtml(c.name || c.id)}</a> ` +
+        `<span class="text-ink-faint">(${escapeHtml(c.type)}, sim ${sim})</span>` +
+        (c.snippet ? `<div class="text-ink-muted mt-1">${escapeHtml(c.snippet)}</div>` : '');
+      rawEl.appendChild(li);
+    }
+  }
+
+  // ---- Submit handler ---------------------------------------------------
+  async function ask(question) {
+    errorWrap.classList.add('hidden');
+    answerWrap.classList.add('hidden');
+    statusEl.textContent = 'Thinking…';
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-60');
+
+    try {
+      const resp = await fetch(ASK_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+      if (!resp.ok) {
+        const text = await resp.text().catch(() => '');
+        throw new Error(`backend returned ${resp.status}: ${text || resp.statusText}`);
+      }
+      const data = await resp.json();
+
+      const citationIndex = buildCitationIndex(data.citations);
+      answerEl.innerHTML = `<p>${renderAnswer(data.answer || '', citationIndex)}</p>`;
+      renderCitations(data.citations || []);
+      renderRaw(data.citations || []);
+      metaEl.textContent =
+        `model: ${data.model || 'Kimi-K2.5'} · ` +
+        `tokens: ${data.kimi_tokens_used ?? '—'} · ` +
+        `${(data.citations || []).length} hits`;
+      answerWrap.classList.remove('hidden');
+      statusEl.textContent = '';
+    } catch (err) {
+      errorDetail.textContent = String(err && err.message ? err.message : err);
+      errorWrap.classList.remove('hidden');
+      statusEl.textContent = '';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-60');
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = (questionEl.value || '').trim();
+    if (q.length < 3) {
+      statusEl.textContent = 'Please enter a question (3+ chars).';
+      return;
+    }
+    ask(q);
+  });
+
+  // Example-question chips populate the textarea and submit immediately.
+  for (const btn of document.querySelectorAll('.example-q')) {
+    btn.addEventListener('click', () => {
+      const q = btn.getAttribute('data-question') || '';
+      questionEl.value = q;
+      questionEl.focus();
+      ask(q);
+    });
+  }
+</script>

@@ -1,0 +1,37 @@
+id: lm-evaluation-harness
+name: lm-evaluation-harness
+tagline: A framework for few-shot evaluation of language models.
+description: >
+  EleutherAI's canonical few-shot LLM evaluation framework. Implements 200+
+  standard benchmarks (MMLU, HellaSwag, ARC, TruthfulQA, HumanEval, GSM8K,
+  BBH) in a unified harness. Backbone of Hugging Face's Open LLM Leaderboard.
+first_released: '2020-08-28'
+last_updated: '2026-04-22'
+maturity_status: stable
+published_by: eleutherai
+repository_url: https://github.com/EleutherAI/lm-evaluation-harness
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+locus_of_control:
+  - environment
+implements_techniques:
+  - few-shot-eval
+  - standard-benchmarks
+  - reference-harness
+stars: 12298
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Foundational LLM eval harness: cited as 'the harness' in leaderboard and
+  model-release contexts. Differentiated from lighteval by a larger task
+  catalog and older, broader adoption.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

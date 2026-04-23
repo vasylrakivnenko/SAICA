@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RawYamlLink from '../../components/RawYamlLink.astro';
+import { graph, paperLabel } from '../../lib/data.ts';
+import type { Incident } from '../../lib/types.ts';
+
+export function getStaticPaths() {
+  return Object.values(graph.incidents).map((inc) => ({
+    params: { id: inc.id },
+    props: { incident: inc },
+  }));
+}
+
+interface Props { incident: Incident }
+const { incident } = Astro.props;
+
+const documentedByPapers = (incident.documented_by ?? [])
+  .map((id) => graph.papers[id])
+  .filter(Boolean);
+const mitigatedByTools = (incident.mitigated_by ?? [])
+  .map((id) => graph.tools[id])
+  .filter(Boolean);
+const affected = incident.affected_systems ?? [];
+const desc = incident.tagline ?? incident.description.slice(0, 160);
+
+function prettyDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+---
+
+<BaseLayout title={incident.title} description={desc}>
+  <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/incidents" class="no-underline hover:underline">Incidents</a>
+  </p>
+  <h1 class="mt-1">{incident.title}</h1>
+  {incident.tagline && <p class="mt-2 text-lg text-ink-muted">{incident.tagline}</p>}
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <span class="chip-accent" title="Incident date">{incident.incident_date}</span>
+    <span class="chip-accent" title="Harm class">{incident.harm_class.replace(/_/g, ' ')}</span>
+    <span class="chip-accent" title="Reproducibility">{incident.reproducibility}</span>
+  </div>
+
+  <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div>
+      <h2 class="!mt-0">Description</h2>
+      <p class="whitespace-pre-line leading-7">{incident.description}</p>
+
+      {incident.exhibited_failure_modes.length > 0 && (
+        <>
+          <h2>Exhibited failure modes</h2>
+          <ul class="mt-2 list-disc pl-5">
+            {incident.exhibited_failure_modes.map((fm) => {
+              const node = graph.failureModes[fm];
+              return (
+                <li>
+                  {node ? (
+                    <a href={`/failure-modes/${fm}`}>{node.name}</a>
+                  ) : (
+                    <span>{fm}</span>
+                  )}
+                  {node?.tagline && <span class="text-ink-muted"> — {node.tagline}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+
+      {affected.length > 0 && (
+        <>
+          <h2>Affected systems</h2>
+          <ul class="mt-2 flex flex-wrap gap-1.5 list-none pl-0">
+            {affected.map((s) => <li class="chip">{s}</li>)}
+          </ul>
+        </>
+      )}
+
+      <h2>Mitigated by</h2>
+      {mitigatedByTools.length === 0 ? (
+        <p class="text-ink-muted">No mitigating tools indexed for this incident yet.</p>
+      ) : (
+        <ul class="list-disc pl-5">
+          {mitigatedByTools.map((t) => (
+            <li>
+              <a href={`/tools/${t.id}`}>{t.name}</a>
+              {t.tagline && <span class="text-ink-muted"> — {t.tagline}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {documentedByPapers.length > 0 && (
+        <>
+          <h2>Documented by</h2>
+          <ul class="list-disc pl-5">
+            {documentedByPapers.map((p) => (
+              <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {incident.source_urls.length > 0 && (
+        <>
+          <h2>Sources</h2>
+          <ul class="list-disc pl-5 break-words">
+            {incident.source_urls.map((url) => (
+              <li><a href={url} rel="noopener">{prettyDomain(url)}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {incident.notes && (
+        <>
+          <h2>Notes</h2>
+          <p class="whitespace-pre-line leading-7">{incident.notes}</p>
+        </>
+      )}
+
+      <RawYamlLink kind="incidents" id={incident.id} />
+    </div>
+
+    <aside class="card h-max">
+      <dl class="kv">
+        <dt>ID</dt>
+        <dd><code>{incident.id}</code></dd>
+        <dt>Date</dt>
+        <dd>{incident.incident_date}</dd>
+        <dt>Harm class</dt>
+        <dd>{incident.harm_class.replace(/_/g, ' ')}</dd>
+        <dt>Reproducibility</dt>
+        <dd>{incident.reproducibility}</dd>
+        <dt>Failure modes</dt>
+        <dd>{incident.exhibited_failure_modes.length}</dd>
+        <dt>Sources</dt>
+        <dd>{incident.source_urls.length}</dd>
+      </dl>
+    </aside>
+  </section>
+</BaseLayout>

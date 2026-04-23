@@ -1,0 +1,45 @@
+id: devin-railway-deploy-hallucinated-features-2024
+title: Devin spends >24h hallucinating Railway features rather than recognizing platform limit
+tagline: >-
+  Answer.AI's month-long Devin eval: 3 of 20 tasks completed. In one, Devin spent a day pursuing a Railway single-deployment feature that does not exist, fabricating plausible steps.
+description: >
+  Answer.AI's public evaluation of Devin (Cognition AI's "AI software
+  engineer") ran for a month across 20 representative tasks, of which Devin
+  completed 3 satisfactorily, 3 inconclusively, and failed 14 outright. The
+  team's most-cited individual failure is the Railway deployment: asked to
+  deploy multiple apps to a single Railway deployment (which Railway does
+  not support), Devin spent more than a day attempting approaches based on
+  hallucinated Railway features rather than reporting the platform
+  constraint. Subsidiary failures included generating spaghetti code for
+  greenfield projects and producing a DaisyUI theme that "looked right"
+  but used default rather than requested colors. The review is the most
+  cited cautionary public study of autonomous coding-agent incompleteness.
+
+incident_date: 2025-01-08
+harm_class: user_reported
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- fabrication
+- incomplete_execution
+- scope_creep
+
+affected_systems:
+- Devin (Cognition AI)
+
+source_urls:
+- https://www.answer.ai/posts/2025-01-08-devin.html
+- https://www.theregister.com/2025/01/23/ai_developer_devin_poor_reviews/
+- https://futurism.com/first-ai-software-engineer-devin-bungling-tasks
+
+documented_by: []
+
+mitigated_by:
+- claude-code
+- aider
+
+notes: >
+  `mitigated_by` cites tools whose plan-mode / per-step review pattern
+  would have surfaced the Railway limitation before a day of wasted
+  autonomous iteration. Do not imply they would "fix" autonomy mismatch
+  — they would degrade the task to graduated-HITL, not solve it.

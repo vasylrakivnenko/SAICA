@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RawYamlLink from '../../components/RawYamlLink.astro';
+import { graph } from '../../lib/data.ts';
+import type { Recipe } from '../../lib/types.ts';
+
+export function getStaticPaths() {
+  return Object.values(graph.recipes).map((r) => ({
+    params: { id: r.id },
+    props: { recipe: r },
+  }));
+}
+
+interface Props { recipe: Recipe }
+const { recipe } = Astro.props;
+
+// Resolve stack ids to tool nodes; keep placeholders for unresolved ids so
+// the flowchart order stays intact even if a stack references a tool not
+// yet in the KG.
+const stack = recipe.stack.map((id) => ({
+  id,
+  tool: graph.tools[id],
+}));
+
+const desc = recipe.tagline ?? recipe.description.slice(0, 160);
+---
+
+<BaseLayout title={recipe.name} description={desc}>
+  <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/recipes" class="no-underline hover:underline">Recipes</a>
+  </p>
+  <h1 class="mt-1">{recipe.name}</h1>
+  {recipe.tagline && <p class="mt-2 text-lg text-ink-muted">{recipe.tagline}</p>}
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <span class="chip-accent" title="Evidence tier">{recipe.evidence_tier.replace(/_/g, ' ')}</span>
+    {recipe.language && <span class="chip-accent" title="Language">{recipe.language}</span>}
+  </div>
+
+  <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div>
+      <h2 class="!mt-0">Description</h2>
+      <p class="whitespace-pre-line leading-7">{recipe.description}</p>
+
+      <h2>Stack</h2>
+      <p class="text-ink-muted text-sm">
+        Ordered composition. Each stage consumes the output of the one before it.
+      </p>
+      <ol class="mt-3 flex flex-wrap items-stretch gap-2 list-none pl-0">
+        {stack.map((stage, idx) => (
+          <li class="flex items-center gap-2">
+            <div class="rounded border border-ink/15 bg-paper-alt px-3 py-2 min-w-[8rem]">
+              <div class="font-sans text-[10px] uppercase tracking-wide text-ink-faint">
+                Stage {idx + 1}
+              </div>
+              {stage.tool ? (
+                <a href={`/tools/${stage.tool.id}`} class="font-sans font-semibold no-underline hover:underline">
+                  {stage.tool.name}
+                </a>
+              ) : (
+                <span class="font-sans font-semibold text-ink-muted" title="Tool not yet in KG">
+                  <code>{stage.id}</code>
+                </span>
+              )}
+              {stage.tool?.tagline && (
+                <p class="mt-1 text-xs text-ink-muted line-clamp-2">{stage.tool.tagline}</p>
+              )}
+            </div>
+            {idx < stack.length - 1 && (
+              <span aria-hidden="true" class="font-sans text-ink-faint text-lg">&rarr;</span>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      <h2>Targets failure modes</h2>
+      <ul class="mt-2 list-disc pl-5">
+        {recipe.targets_failure_modes.map((fm) => {
+          const node = graph.failureModes[fm];
+          return (
+            <li>
+              {node ? (
+                <a href={`/failure-modes/${fm}`}>{node.name}</a>
+              ) : (
+                <span>{fm}</span>
+              )}
+              {node?.tagline && <span class="text-ink-muted"> — {node.tagline}</span>}
+            </li>
+          );
+        })}
+      </ul>
+
+      {recipe.notes && (
+        <>
+          <h2>Notes</h2>
+          <p class="whitespace-pre-line leading-7">{recipe.notes}</p>
+        </>
+      )}
+
+      <RawYamlLink kind="recipes" id={recipe.id} />
+    </div>
+
+    <aside class="card h-max">
+      <dl class="kv">
+        <dt>ID</dt>
+        <dd><code>{recipe.id}</code></dd>
+        <dt>Evidence tier</dt>
+        <dd>{recipe.evidence_tier.replace(/_/g, ' ')}</dd>
+        {recipe.language && (
+          <>
+            <dt>Language</dt>
+            <dd>{recipe.language}</dd>
+          </>
+        )}
+        <dt>Stack size</dt>
+        <dd>{recipe.stack.length}</dd>
+        <dt>Targets</dt>
+        <dd>{recipe.targets_failure_modes.length} failure mode{recipe.targets_failure_modes.length === 1 ? '' : 's'}</dd>
+      </dl>
+    </aside>
+  </section>
+</BaseLayout>

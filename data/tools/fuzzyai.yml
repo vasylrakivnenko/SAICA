@@ -1,0 +1,37 @@
+id: fuzzyai
+name: FuzzyAI
+tagline: A powerful tool for automated LLM fuzzing from CyberArk.
+description: >
+  CyberArk FuzzyAI is an automated LLM fuzzer: evolves adversarial prompts
+  over many generations to find vulnerabilities in deployed LLM applications.
+  Integrates with popular model providers and produces reproducible attack
+  traces.
+first_released: '2024-12-03'
+last_updated: '2026-02-06'
+maturity_status: experimental
+published_by: cyberark
+repository_url: https://github.com/cyberark/FuzzyAI
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+locus_of_control:
+  - environment
+implements_techniques:
+  - evolutionary-prompt-fuzzing
+  - jailbreak-search
+  - reproducible-traces
+stars: 1337
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Fuzz-based branch of LLM vulnerability scanning — adds evolutionary prompt
+  search alongside the fixed-probe scanners like garak.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

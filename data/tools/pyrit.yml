@@ -1,0 +1,38 @@
+id: pyrit
+name: PyRIT
+tagline: The Python Risk Identification Tool for generative AI (PyRIT).
+description: >
+  Microsoft PyRIT is an open-source framework for AI red-teaming. Automates
+  probing of generative AI systems for risks (prompt injection, harmful
+  content, jailbreaks) via a plug-in orchestrator with configurable attack and
+  scoring strategies.
+first_released: '2023-12-12'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: microsoft
+repository_url: https://github.com/microsoft/PyRIT
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - red-team-orchestrator
+  - attack-strategies
+  - scoring-engines
+stars: 3740
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Microsoft-ecosystem red-team framework — complements garak/fuzzyai with an
+  orchestration pattern that maps well onto azure-hosted workloads.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

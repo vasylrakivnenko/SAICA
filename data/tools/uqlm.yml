@@ -1,0 +1,39 @@
+id: uqlm
+name: uqlm
+tagline: Uncertainty Quantification for Language Models.
+description: >
+  UQLM (by CVS Health) is a Python package for uncertainty quantification of
+  LLM outputs. Implements black-box, white-box, and semantic-similarity-based
+  uncertainty estimators so downstream code can abstain, escalate to human
+  review, or request clarification when confidence is low.
+first_released: '2025-04-17'
+last_updated: '2026-04-16'
+maturity_status: experimental
+published_by: cvs-health
+repository_url: https://github.com/cvs-health/uqlm
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+locus_of_control:
+  - model
+  - environment
+implements_techniques:
+  - black-box-uq
+  - white-box-uq
+  - semantic-uq
+  - abstain-routing
+stars: 1146
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Uncertainty-first branch of detection — enables explicit abstain/escalate
+  routing, valuable for high-stakes medical/finance LLM deployments.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

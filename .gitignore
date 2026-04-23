@@ -27,6 +27,8 @@ research/cache/
 .postgres-data/
 # Per-day API usage counters (Elicit budget, etc.)
 .pipeline/
+# Sentence-transformer weights + encoded vectors
+.cache/
 # Local DB snapshots
 research/backups/
 

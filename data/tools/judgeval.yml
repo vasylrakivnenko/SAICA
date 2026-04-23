@@ -1,0 +1,40 @@
+id: judgeval
+name: judgeval
+tagline: "The open source post-building layer for agents: evals, traces, and regressions."
+description: >
+  Judgeval is an open-source 'post-building' evaluation layer for agents from
+  Judgment Labs. Pairs trace capture with regression testing,
+  environment-as-data, and LLM-as-judge graders. Designed to be added after an
+  agent is built to monitor quality and catch regressions in CI.
+first_released: '2024-10-25'
+last_updated: '2026-04-21'
+maturity_status: experimental
+published_by: judgment-labs
+repository_url: https://github.com/JudgmentLabs/judgeval
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - scope_creep
+  - logic_error
+  - test_manipulation
+locus_of_control:
+  - environment
+implements_techniques:
+  - agent-regression-tests
+  - llm-as-judge
+  - environment-as-data
+stars: 1024
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Fills the 'CI regression harness for agents' niche. Distinct from promptfoo
+  (prompt-level regression) by operating on full agent runs and environment
+  data.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

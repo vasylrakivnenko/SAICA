@@ -1,0 +1,38 @@
+id: promptbench
+name: promptbench
+tagline: Unified evaluation framework for large language models with adversarial perturbations.
+description: >
+  Microsoft PromptBench is a framework to benchmark LLM robustness under
+  adversarial prompt perturbations. Evaluates stability, robustness, and
+  reliability with defined attack taxonomies and measures prompt sensitivity
+  of outputs.
+first_released: '2023-06-13'
+last_updated: '2026-02-20'
+maturity_status: experimental
+published_by: microsoft
+repository_url: https://github.com/microsoft/promptbench
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - security_vulnerability
+  - logic_error
+locus_of_control:
+  - prompt
+  - environment
+implements_techniques:
+  - adversarial-perturbations
+  - prompt-sensitivity-metrics
+stars: 2801
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Robustness-under-perturbation cell of LLM evaluation — pairs well with
+  garak/promptmap (security) and helm (holistic).
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

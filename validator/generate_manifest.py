@@ -42,7 +42,14 @@ from pipeline.dedup import canonical_github_url  # noqa: E402
 
 # Node kinds in the order they should appear in the manifest. Tools are a
 # mapping (id -> url); everything else is a sorted list of ids.
-NODE_KINDS_LIST = ("failure_modes", "papers", "taxonomies", "crosswalks")
+NODE_KINDS_LIST = (
+    "failure_modes",
+    "papers",
+    "taxonomies",
+    "crosswalks",
+    "incidents",
+    "recipes",
+)
 ALL_KINDS = ("tools",) + NODE_KINDS_LIST
 
 

@@ -1,0 +1,38 @@
+id: litellm
+name: litellm
+tagline: Call any LLM using the OpenAI API format — proxy server and Python SDK.
+description: >
+  LiteLLM is an LLM proxy + Python SDK that exposes 100+ model providers
+  behind the OpenAI API. Functions as an enterprise gateway with virtual keys,
+  spend tracking, failover, and rate limits. De-facto standard for
+  provider-agnostic LLM access.
+first_released: '2023-07-27'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: berri-ai
+repository_url: https://github.com/BerriAI/litellm
+license: MIT
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+locus_of_control:
+  - environment
+implements_techniques:
+  - provider-shim
+  - virtual-keys
+  - spend-tracking
+  - failover
+stars: 44383
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Multi-provider gateway cell — canonical point of comparison for bifrost and
+  manifest.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

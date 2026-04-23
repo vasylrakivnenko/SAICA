@@ -1,0 +1,37 @@
+id: obsolescence-resistant-typescript-agent
+name: Obsolescence-resistant TypeScript agent
+tagline: >-
+  sourcegraph-cody (graph-indexed retrieval of the current API surface) → cursor (IDE generation) → tsc + eslint (post-generation).
+description: >
+  TypeScript / JavaScript composition designed to counter the
+  `obsolescence` FailureMode. Training corpora skew toward older,
+  more-copied API patterns (Wang 2024); the recipe pushes the agent to
+  current surface area via retrieval grounding and fails closed on
+  deprecated calls at compile time.
+
+  Stage 1: sourcegraph-cody indexes the repository's node_modules and
+  declared dependencies. Its SCIP index surfaces only symbols that exist
+  at the project's pinned versions, displacing training-data priors.
+
+  Stage 2: cursor performs interactive generation with cody's retrieval
+  context in-prompt.
+
+  Stage 3: `tsc` + eslint run as the post-check. Deprecated APIs flagged
+  with `@deprecated` JSDoc or eslint deprecation rules fail the build.
+
+targets_failure_modes:
+- obsolescence
+
+stack:
+- sourcegraph-cody
+- cursor
+- semgrep
+
+evidence_tier: case_studied
+language: typescript
+
+notes: >
+  semgrep substitutes for "tsc + eslint" at the node level; both do
+  post-generation rule-based checks and semgrep has deprecation rulesets
+  for mainstream JS/TS frameworks. tsc/eslint are project-level and not
+  KG nodes.

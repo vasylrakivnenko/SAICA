@@ -1,0 +1,41 @@
+id: activepieces
+name: activepieces
+tagline: AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
+description: >
+  Activepieces is an open-source workflow automation platform (Zapier
+  alternative) with native support for AI agents and ~400 MCP servers.
+  Workflows are explicit, reviewable, and versioned, making them a natural
+  supervision substrate for production agent deployments that need
+  human-auditable steps.
+first_released: '2022-12-03'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: activepieces
+repository_url: https://github.com/activepieces/activepieces
+license: MIT
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+  - supply_chain_attack
+locus_of_control:
+  - environment
+  - human
+implements_techniques:
+  - mcp-workflow
+  - step-audit
+  - branching
+  - version-control
+stars: 21825
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Workflow-automation supervision cell: constrains agent autonomy through
+  explicit, human-editable pipelines rather than free-form agent loops.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

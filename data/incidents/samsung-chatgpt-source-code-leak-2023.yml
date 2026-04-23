@@ -1,0 +1,48 @@
+id: samsung-chatgpt-source-code-leak-2023
+title: Samsung engineers leak proprietary source code and meeting minutes into ChatGPT
+tagline: >-
+  In three separate March 2023 sessions, Samsung DS engineers pasted proprietary semiconductor source code and internal meeting recordings into ChatGPT to debug or summarize.
+description: >
+  In March 2023 Samsung Semiconductor (DS division) approved employee use
+  of ChatGPT. Within 20 days three separate incidents were discovered:
+  (1) an engineer pasted source code from a semiconductor equipment
+  measurement-database program into ChatGPT to ask for a fix; (2)
+  another pasted code for a program identifying defective equipment to
+  request optimization; (3) a third uploaded a full internal meeting
+  recording and asked ChatGPT to produce minutes. Per OpenAI's terms at
+  the time, the pasted content was stored on OpenAI servers and
+  effectively unrecoverable. Samsung imposed a company-wide ban on
+  generative-AI use on 2023-05-02. The incident is the canonical public
+  demonstration of context-leakage via AI coding assistants; although the
+  "agent" here is ChatGPT proper rather than a dedicated coding agent,
+  the interaction pattern is identical to pasting code into Copilot Chat
+  / Cursor Chat / Claude Code prompts.
+incident_date: 2023-03-30
+harm_class: data_loss
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- context_pollution
+- security_vulnerability
+
+affected_systems:
+- OpenAI ChatGPT
+- Samsung Electronics DS division
+
+source_urls:
+- https://www.bloomberg.com/news/articles/2023-05-02/samsung-bans-chatgpt-and-other-generative-ai-use-by-staff-after-leak
+- https://fortune.com/2023/05/02/samsung-bans-employee-use-chatgpt-data-leak/
+- https://www.techradar.com/news/samsung-workers-leaked-company-secrets-by-using-chatgpt
+- https://incidentdatabase.ai/cite/768/
+
+documented_by: []
+
+mitigated_by:
+- context-hub
+
+notes: >
+  Included as a boundary case: the interaction pattern (pasting code into
+  an LLM prompt) is identical to coding-agent workflows, and
+  `context-hub` is the right class of tool (enterprise-side context
+  gating) to prevent it. Excluding it would omit the most cited public
+  corporate-policy AI-coding harm of the pre-Devin era.

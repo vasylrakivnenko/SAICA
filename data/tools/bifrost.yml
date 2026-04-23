@@ -1,0 +1,41 @@
+id: bifrost
+name: bifrost
+tagline: Fastest enterprise AI gateway with adaptive load balancing, failover, and guardrails.
+description: >
+  Maxim's Bifrost is an enterprise AI gateway written in Go. Performs LLM
+  request routing, failover, rate limiting, spend caps, and guardrail
+  enforcement across providers. Benchmarked as significantly faster than
+  LiteLLM for high-throughput deployments.
+first_released: '2025-03-19'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: maxim-hq
+repository_url: https://github.com/maximhq/bifrost
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+  - scope_creep
+  - supply_chain_attack
+  - cascading_failure
+locus_of_control:
+  - environment
+implements_techniques:
+  - llm-proxy
+  - load-balancing
+  - rate-limits
+  - guardrails
+  - spend-caps
+stars: 4209
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Gateway cell of prevention: enforces runtime policy (rate limit, PII filter,
+  provider failover) as a reverse proxy in front of LLM providers.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

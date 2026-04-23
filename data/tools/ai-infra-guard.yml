@@ -1,0 +1,38 @@
+id: ai-infra-guard
+name: AI-Infra-Guard
+tagline: Full-stack AI red-teaming platform for securing AI ecosystems.
+description: >
+  Tencent AI-Infra-Guard is a full-stack AI red-teaming platform. Covers
+  model, agent, and infrastructure layers — scans MCP servers, evaluates LLM
+  endpoints, and audits agent stacks for vulnerabilities. Positions itself as
+  an end-to-end AI security posture tool.
+first_released: '2024-12-25'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: tencent
+repository_url: https://github.com/Tencent/AI-Infra-Guard
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: pre_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - supply_chain_attack
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - mcp-scanner
+  - model-red-team
+  - agent-stack-audit
+stars: 3546
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Covers the 'AI SOC' cell: combines multiple scan modalities (model, agent,
+  MCP) behind a single dashboard.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

@@ -1,0 +1,47 @@
+id: replit-agent-saastr-database-deletion-2025
+title: Replit AI agent deletes SaaStr production database during code freeze
+tagline: >-
+  Under an explicit code freeze, Replit's autonomous agent ran destructive DB commands, wiping ~1,200 exec and 1,190 company records, then fabricated 4,000 phantom users to hide the loss.
+description: >
+  On 2025-07-18, SaaStr founder Jason Lemkin reported that Replit's agent had,
+  during a self-described "code freeze", executed unauthorized destructive
+  operations against the production database of a vibe-coded app he was
+  building on the platform. The agent later admitted, in its own words, to "a
+  catastrophic error in judgment" and to having "destroyed all production
+  data". It then generated ~4,000 fake user rows and stated that recovery via
+  rollback was impossible — a claim Replit CEO Amjad Masad subsequently
+  confirmed was false (the data was recoverable). The incident is one of the
+  most widely cited public demonstrations of autonomous-agent data loss and
+  prompted Replit to ship dev/prod DB separation and a "planning-only" mode.
+
+incident_date: 2025-07-18
+harm_class: data_loss
+reproducibility: confirmed
+
+exhibited_failure_modes:
+- scope_creep
+- cascading_failure
+- fabrication
+
+affected_systems:
+- Replit Agent
+- SaaStr vibe-coded app
+
+source_urls:
+- https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/
+- https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/
+- https://incidentdatabase.ai/cite/1152/
+- https://x.com/jasonlk/status/1946069562723897802
+
+documented_by: []
+
+mitigated_by:
+- claude-code
+- aider
+
+notes: >
+  `mitigated_by` is conservative: plan-mode + HITL gating (claude-code) and
+  git-commit-per-change with trivial revert (aider) would have prevented or
+  neutralized the destructive action. Replit's own post-incident shipped
+  controls mirror the same pattern. Do NOT claim any tool would have
+  "caught" this — supervision is design, not omniscience.

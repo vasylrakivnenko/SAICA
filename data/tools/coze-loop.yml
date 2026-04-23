@@ -1,0 +1,41 @@
+id: coze-loop
+name: coze-loop
+tagline: Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
+description: >
+  Coze Loop (from ByteDance's Coze team) is a full-lifecycle AI agent
+  management platform with debugging, evaluation, trajectory inspection, and
+  production monitoring. Deployable standalone or integrated with the Coze
+  agent studio.
+first_released: '2025-06-24'
+last_updated: '2026-04-22'
+maturity_status: stable
+published_by: coze-dev
+repository_url: https://github.com/coze-dev/coze-loop
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - scope_creep
+  - incomplete_execution
+  - context_pollution
+  - cascading_failure
+locus_of_control:
+  - environment
+implements_techniques:
+  - agent-trajectory-debug
+  - evals
+  - monitoring
+stars: 5427
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Adds the agent-lifecycle-specific observability + eval cell: trajectory
+  replays and step-level debugging across multi-step workflows. Distinct from
+  opik/langfuse by being agent-first rather than LLM-call-first.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

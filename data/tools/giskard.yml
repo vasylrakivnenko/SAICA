@@ -1,0 +1,41 @@
+id: giskard
+name: giskard-oss
+tagline: Open-source evaluation and testing library for LLM agents and ML models.
+description: >
+  Giskard is an open-source testing library originally for tabular ML,
+  extended to cover LLM apps and agents. Runs pre-defined robustness, bias,
+  and hallucination tests and generates regression reports. Used in CI to gate
+  ML/LLM deployments.
+first_released: '2022-03-06'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: giskard
+repository_url: https://github.com/Giskard-AI/giskard-oss
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - security_vulnerability
+  - fabrication
+  - logic_error
+  - scope_creep
+  - test_manipulation
+locus_of_control:
+  - environment
+implements_techniques:
+  - robustness-tests
+  - bias-tests
+  - hallucination-tests
+  - ci-gates
+stars: 5295
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  ML-lineage evaluation cell: extends classical ML testing primitives to LLMs,
+  differentiating from LLM-native tools like deepeval.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

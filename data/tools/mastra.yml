@@ -1,0 +1,38 @@
+id: mastra
+name: mastra
+tagline: The TypeScript AI agent framework — assistants, RAG, observability; supports any LLM.
+description: >
+  Mastra is a TypeScript agent framework with first-class support for
+  workflows, RAG, evals, and observability. Positions itself as a lightweight
+  alternative to LangChain-js for TS/Node ecosystems.
+first_released: '2024-08-06'
+last_updated: '2026-04-23'
+maturity_status: stable
+published_by: mastra-ai
+repository_url: https://github.com/mastra-ai/mastra
+license: Elastic-2.0
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+  - context_pollution
+locus_of_control:
+  - environment
+implements_techniques:
+  - ts-agents
+  - workflow-authoring
+  - rag-integration
+  - builtin-evals
+stars: 23247
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  TypeScript-agent-framework cell. Complements voltagent
+  (runtime-observability focus) by centring workflow authoring + RAG
+  integration.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

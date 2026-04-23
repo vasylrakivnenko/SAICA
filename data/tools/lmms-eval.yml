@@ -1,0 +1,35 @@
+id: lmms-eval
+name: lmms-eval
+tagline: One-for-all multimodal evaluation toolkit across text, image, video, and audio tasks.
+description: >
+  LMMs-Eval is the EvolvingLMMs-Lab's multimodal evaluation harness — a
+  multimodal counterpart to lm-evaluation-harness. Implements 100+ benchmarks
+  across text, image, video, and audio tasks in a consistent interface.
+first_released: '2024-03-07'
+last_updated: '2026-04-23'
+maturity_status: experimental
+published_by: evolvinglmms-lab
+repository_url: https://github.com/EvolvingLMMs-Lab/lmms-eval
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+locus_of_control:
+  - environment
+implements_techniques:
+  - multimodal-benchmarks
+  - unified-harness
+stars: 4052
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Fills the multimodal-eval cell. Differentiated from lm-evaluation-harness
+  (text-only) and lighteval by its native multimodal scope.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

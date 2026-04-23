@@ -1,0 +1,38 @@
+id: promptflow
+name: promptflow
+tagline: Build high-quality LLM apps — from prototyping, testing to production deployment and monitoring.
+description: >
+  Microsoft Prompt flow is an SDK + VS Code extension + Azure service for
+  building, evaluating, and deploying LLM apps. Graph-based authoring, batch
+  eval with built-in metrics, and Azure ML integration.
+first_released: '2023-06-30'
+last_updated: '2026-04-21'
+maturity_status: stable
+published_by: microsoft
+repository_url: https://github.com/microsoft/promptflow
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+  - scope_creep
+locus_of_control:
+  - environment
+implements_techniques:
+  - graph-authoring
+  - batch-eval
+  - azure-ml-integration
+stars: 11106
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Azure-integrated LLM dev-to-prod platform cell. Distinguished from
+  semantic-kernel by centring evaluation and batch runs rather than runtime
+  orchestration.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'

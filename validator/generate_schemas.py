@@ -35,7 +35,9 @@ from typing import Any
 from pipeline.models import (
     Crosswalk,
     FailureMode,
+    Incident,
     Paper,
+    Recipe,
     Taxonomy,
     Tool,
 )
@@ -75,6 +77,18 @@ MODEL_OUTPUTS: list[tuple[type, str, str, str]] = [
         "crosswalk.schema.json",
         "https://saica-kg.dev/schema/crosswalk.schema.json",
         "A bulk mapping between a SAICA-KG axis and an external taxonomy's categories. Complements inline `crosswalks` declared on FailureMode nodes.",
+    ),
+    (
+        Incident,
+        "incident.schema.json",
+        "https://saica-kg.dev/schema/incident.schema.json",
+        "A documented failure event where an AI coding agent (or analogous system) produced harm. Anchors FailureMode claims in ground truth.",
+    ),
+    (
+        Recipe,
+        "recipe.schema.json",
+        "https://saica-kg.dev/schema/recipe.schema.json",
+        "An ordered composition of Tools that addresses one or more FailureModes. Recipes are the prescriptive flip-side of Incidents.",
     ),
 ]
 

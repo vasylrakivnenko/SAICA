@@ -1,0 +1,38 @@
+id: pathway-llm-app
+name: llm-app
+tagline: Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.
+description: >
+  Pathway's llm-app provides production-ready templates for RAG and AI
+  pipelines over live data streams. Emphasizes streaming ingestion and
+  incremental re-indexing, addressing the obsolescence failure mode where RAG
+  answers drift as underlying data changes.
+first_released: '2023-07-19'
+last_updated: '2026-01-07'
+maturity_status: stable
+published_by: pathway
+repository_url: https://github.com/pathwaycom/llm-app
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - fabrication
+  - context_pollution
+  - obsolescence
+locus_of_control:
+  - environment
+implements_techniques:
+  - streaming-rag
+  - incremental-indexing
+  - pipeline-templates
+stars: 59931
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Live-data RAG cell — addresses obsolescence/freshness in RAG pipelines by
+  incremental indexing, a concern that most batch-RAG tools understate.
+provenance:
+  source: bulk-curation-20260423
+  ingested_at: '2026-04-23'
+  extractor_model: curator
+  reviewer: vasyl
+  review_date: '2026-04-23'
