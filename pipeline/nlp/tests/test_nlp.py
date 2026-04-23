@@ -5,14 +5,17 @@ from __future__ import annotations
 import pytest
 
 from pipeline.nlp.preprocess import (
+    LOW_RELEVANCE_THRESHOLD,
+    PROMOTION_THRESHOLD,
     canonical_url,
+    classify_kind,
     extract_arxiv_ids,
     extract_dois,
     extract_github_urls,
     fuzzy_title_matches,
     keyword_hits,
     relevance_score,
-    classify_kind,
+    tool_shape_hits,
 )
 
 
@@ -108,14 +111,16 @@ def test_relevance_score_low_for_empty_row():
 
 
 def test_relevance_score_cap_on_keywords():
-    # Force many failure modes hit so the 0.5 cap applies.
+    # Force many failure modes hit so the 0.4 failure-mode cap applies.
     snippet = (
         "hallucination, slopsquatting, deprecated, reinvent, "
         "sql injection, scope creep, context drift, silent fail"
     )
     score = relevance_score({"title": "t", "snippet": snippet, "url": ""})
-    # 8 failure modes → would be 1.2, capped at 0.5.
-    assert score == pytest.approx(0.5, abs=1e-6)
+    # 8 failure modes → would be 0.8, capped at 0.4.
+    # Length of title+snippet >= 80 chars → +0.05.
+    # No tool-shape / github / arxiv / github-source contributions.
+    assert score == pytest.approx(0.45, abs=1e-6)
 
 
 def test_relevance_score_github_and_keyword():
@@ -126,33 +131,133 @@ def test_relevance_score_github_and_keyword():
         "source": "github",
     }
     score = relevance_score(row)
-    # 2 failure modes (fabrication, supply_chain_attack) → 0.3, +0.2 github = 0.5
+    # 2 failure modes → 0.2, +0.25 github entity, +0.05 github source,
+    # +0.05 length ≥ 80. Tool-shape: none. Expect ~0.55.
     assert score >= 0.45
 
 
 def test_relevance_score_academic_source_with_arxiv():
     row = {
-        "title": "On Library Evolution in LLM Code",
-        "snippet": "We study deprecated apis. arXiv:2403.12345",
+        "title": "On Library Evolution in LLM Code: a comprehensive study",
+        "snippet": "We study deprecated apis across ecosystems. arXiv:2403.12345",
         "url": "https://arxiv.org/abs/2403.12345",
         "source": "elicit",
     }
     score = relevance_score(row)
-    # 1 fm (obsolescence) 0.15 + arxiv 0.2 + elicit 0.1 = 0.45
-    assert 0.4 <= score <= 0.6
+    # 1 fm (obsolescence) 0.1 + arxiv/doi 0.1 + length 0.05 = 0.25
+    assert 0.2 <= score <= 0.4
 
 
-def test_relevance_score_high_signal_org_bonus():
+def test_relevance_score_paper_signal_without_github():
     row = {
-        "title": "Anthropic publishes slopsquatting analysis",
-        "snippet": "hallucination in package names",
+        "title": "Anthropic publishes slopsquatting analysis on hallucinated imports",
+        "snippet": "hallucination in package names leads to typosquatting attacks",
         "url": "",
         "source": "perplexity",
     }
-    # 2 fms (fabrication, supply_chain_attack) = 0.3 + anthropic = 0.1 -> 0.4
+    # 2 fms (fabrication, supply_chain_attack) = 0.2 + length 0.05 = 0.25
     score = relevance_score(row)
-    assert score >= 0.35
+    assert score >= 0.2
     assert score <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# Listicle rescue / drop behavior (borderline-candidate policy)
+# ---------------------------------------------------------------------------
+
+def test_relevance_score_listicle_without_github_is_dropped():
+    """A Perplexity listicle with no entity signal must fall below the
+    promotion threshold so we don't Kimi-extract it."""
+    row = {
+        "title": "Top 10 AI Coding Agents 2026",
+        "snippet": "A ranked list of popular AI coding agents for 2026.",
+        "url": "https://example.com/blog/top-10-ai-coding-agents-2026",
+        "source": "perplexity",
+    }
+    score = relevance_score(row)
+    assert score < PROMOTION_THRESHOLD
+
+
+def test_relevance_score_listicle_with_github_url_is_rescued():
+    """Same listicle title but with a github repo URL present clears the
+    promotion threshold thanks to the entity signal."""
+    row = {
+        "title": "Top 10 AI Coding Agents 2026",
+        "snippet": (
+            "A ranked list of AI coding agents. Source: "
+            "https://github.com/owner/repo"
+        ),
+        "url": "https://github.com/owner/repo",
+        "source": "perplexity",
+    }
+    score = relevance_score(row)
+    assert score >= PROMOTION_THRESHOLD
+
+
+def test_relevance_score_outlines_tool_with_github_clears_high_bar():
+    """A domain-relevant tool page with a github URL should score well above
+    the low bar — ~0.4 or more."""
+    row = {
+        "title": "Outlines: constrained decoding framework for LLMs",
+        "snippet": (
+            "Outlines is a structured output library with tool calling and "
+            "guardrails for safer LLM generation. https://github.com/outlines-dev/outlines"
+        ),
+        "url": "https://github.com/outlines-dev/outlines",
+        "source": "github",
+    }
+    score = relevance_score(row)
+    assert score >= 0.4
+
+
+# ---------------------------------------------------------------------------
+# tool_shape_hits + keyword coverage spot checks
+# ---------------------------------------------------------------------------
+
+def test_tool_shape_hits_distinct_phrases():
+    text = (
+        "An MCP server providing guardrails, sandboxed execution, and "
+        "observability via tracing and telemetry for agent orchestration."
+    )
+    hits = tool_shape_hits(text)
+    # Distinct TOOL_SHAPE_SIGNALS phrases that should match this text.
+    for expected in (
+        "mcp server", "guardrails", "sandboxed",
+        "observability", "tracing", "telemetry", "agent orchestration",
+    ):
+        assert expected in hits, f"expected {expected!r} in tool_shape_hits"
+
+
+def test_tool_shape_hits_empty_when_absent():
+    assert tool_shape_hits("") == []
+    assert tool_shape_hits("unrelated text about kittens") == []
+
+
+def test_keyword_hits_slopsquatting_supply_chain():
+    """Per brief: 'slopsquatting' must still hit supply_chain_attack."""
+    hits = keyword_hits("the slopsquatting risk is elevated in 2026")
+    assert "supply_chain_attack" in hits
+    assert "slopsquatting" in hits["supply_chain_attack"]
+
+
+def test_keyword_hits_hallucination_fabrication():
+    """Per brief: 'hallucination' must still hit fabrication."""
+    hits = keyword_hits("this agent exhibits persistent hallucination")
+    assert "fabrication" in hits
+    assert "hallucination" in hits["fabrication"]
+
+
+def test_keyword_hits_reinvent_dependency_blindness():
+    """Per brief: 'reinvent' must still hit dependency_blindness."""
+    hits = keyword_hits("LLMs tend to reinvent existing utilities")
+    assert "dependency_blindness" in hits
+    assert "reinvent" in hits["dependency_blindness"]
+
+
+def test_promotion_and_low_relevance_thresholds_are_sane():
+    """Thresholds must form a valid band so borderline rows have a home."""
+    assert 0.0 < LOW_RELEVANCE_THRESHOLD < PROMOTION_THRESHOLD <= 1.0
+    assert PROMOTION_THRESHOLD == pytest.approx(0.15, abs=1e-9)
 
 
 # ---------------------------------------------------------------------------

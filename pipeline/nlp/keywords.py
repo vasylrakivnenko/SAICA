@@ -53,9 +53,42 @@ HIGH_SIGNAL_ORGS: list[str] = [
 ]
 
 # Tool-shape signals (heuristic: is this a Tool or a Paper?)
+#
+# Kept for back-compat with ``classify_kind``: coarse category words that steer
+# the tool-vs-paper decision. Don't use for relevance boosting — use
+# ``TOOL_SHAPE_SIGNALS`` below for that, which is a richer domain-weighted set.
 TOOL_SIGNALS: list[str] = [
     "cli", "framework", "sdk", "agent", "guardrails", "sandbox",
     "registry", "platform", "extension",
+]
+
+# Tool-shape signals used by relevance scoring. Each is a distinct phrase that
+# indicates "this source is about a real supervision/agent-safety tool or
+# platform" — even when no failure-mode keyword matches. Each hit contributes
+# a small bump to relevance (see ``pipeline.nlp.preprocess.relevance_score``),
+# capped so no one signal dominates. Phrases are matched case-insensitively
+# with word boundaries.
+TOOL_SHAPE_SIGNALS: list[str] = [
+    # MCP / model-context-protocol ecosystem
+    "mcp-server", "mcp server", "model context protocol", "mcp tool",
+    # guardrails
+    "guardrail", "guardrails", "guardrail framework",
+    # supervision / oversight
+    "supervisor", "supervise", "supervision", "oversight",
+    # sandboxing / isolated execution
+    "sandbox", "sandboxed", "isolated execution",
+    # evaluation harnesses
+    "evaluator", "eval framework", "llm-as-judge",
+    # observability
+    "observability", "tracing", "tracer", "telemetry",
+    # red-teaming / adversarial
+    "red team", "red-team", "red-teaming", "adversarial test",
+    # structured output / constrained decoding
+    "structured output", "constrained decoding", "tool calling",
+    # agent frameworks / runtimes
+    "agent framework", "agent orchestration", "agent runtime",
+    # policy enforcement
+    "policy enforcement", "policy engine", "allow-list", "deny-list",
 ]
 
 PAPER_SIGNALS: list[str] = [

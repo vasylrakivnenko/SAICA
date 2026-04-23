@@ -15,8 +15,19 @@ from pipeline.nlp.keywords import (
     FAILURE_MODE_KEYWORDS,
     HIGH_SIGNAL_ORGS,
     TOOL_SIGNALS,
+    TOOL_SHAPE_SIGNALS,
     PAPER_SIGNALS,
 )
+
+
+# Relevance thresholds. Rows with ``score >= PROMOTION_THRESHOLD`` are routed
+# to extraction as normal ``status='pending'`` candidates. Rows in
+# ``[LOW_RELEVANCE_THRESHOLD, PROMOTION_THRESHOLD)`` are written to
+# candidate_tools with ``status='low_relevance'`` so human reviewers can see
+# the borderline pool without the pipeline Kimi-extracting them. Rows below
+# ``LOW_RELEVANCE_THRESHOLD`` are dropped.
+PROMOTION_THRESHOLD: float = 0.15
+LOW_RELEVANCE_THRESHOLD: float = 0.10
 
 
 # ---------------------------------------------------------------------------
@@ -188,33 +199,86 @@ def _row_text(raw_row: dict) -> str:
     return "\n".join(parts)
 
 
+def _compile_phrase_list(phrases: Iterable[str]) -> list[tuple[str, re.Pattern[str]]]:
+    """Compile phrase list into (phrase, pattern) pairs with the same
+    word-boundary / whitespace-run semantics as ``keyword_hits``."""
+    out: list[tuple[str, re.Pattern[str]]] = []
+    for phrase in phrases:
+        escaped = re.escape(phrase)
+        escaped = re.sub(r"\\\s+", r"\\s+", escaped)
+        pat = re.compile(rf"(?<!\w){escaped}(?!\w)", re.IGNORECASE)
+        out.append((phrase, pat))
+    return out
+
+
+_TOOL_SHAPE_PATTERNS = _compile_phrase_list(TOOL_SHAPE_SIGNALS)
+
+
+def tool_shape_hits(text: str) -> list[str]:
+    """Return the distinct TOOL_SHAPE_SIGNALS phrases present in ``text``.
+
+    Case-insensitive, word-boundary-aware. Empty list if no hits or empty
+    input. Used by ``relevance_score`` to reward sources that look like
+    real supervision/agent-safety tools even when no failure-mode keyword
+    hits.
+    """
+    if not text:
+        return []
+    matched: list[str] = []
+    for phrase, pat in _TOOL_SHAPE_PATTERNS:
+        if pat.search(text):
+            matched.append(phrase)
+    return matched
+
+
 def relevance_score(raw_row: dict) -> float:
-    """0..1 relevance. See module docstring for weights."""
+    """Compute a 0..1 relevance score for a raw_search_results row.
+
+    Pure function of the row's (title, snippet, url, source, raw_json).
+    Weights (clamped to [0, 1]):
+
+    - ``+0.1`` per distinct FailureMode keyword hit, capped at ``0.4`` total
+    - ``+0.05`` per distinct TOOL_SHAPE_SIGNALS hit, capped at ``0.25`` total
+    - ``+0.25`` if a GitHub ``owner/repo`` URL is extractable anywhere
+      (title/snippet/url/raw_json) — strong entity signal
+    - ``+0.1``  if an arXiv id or DOI is extractable (paper signal)
+    - ``+0.05`` if the source field is ``github`` (highest-prior source
+      reliability)
+    - ``+0.05`` if the combined title + snippet is at least 80 chars
+      (substantive content, not a one-liner)
+    """
     text = _row_text(raw_row)
     score = 0.0
 
-    # Keyword hits: +0.15 per distinct failure_mode, capped at 0.5.
+    # Failure-mode keyword hits: +0.1 per distinct FailureMode, cap 0.4.
     hits = keyword_hits(text)
     if hits:
-        score += min(0.5, 0.15 * len(hits))
+        score += min(0.4, 0.1 * len(hits))
 
-    # GitHub URL present: +0.2.
+    # Tool-shape signal hits: +0.05 per distinct phrase, cap 0.25.
+    ts_hits = tool_shape_hits(text)
+    if ts_hits:
+        score += min(0.25, 0.05 * len(ts_hits))
+
+    # GitHub repo URL present anywhere: +0.25 (entity signal).
     if extract_github_urls(text):
-        score += 0.2
+        score += 0.25
 
-    # arXiv or DOI present: +0.2.
+    # arXiv id or DOI present: +0.1 (paper signal — routes to candidate_papers).
     if extract_arxiv_ids(text) or extract_dois(text):
-        score += 0.2
-
-    # High-signal org mention: +0.1.
-    low = text.lower()
-    if any(org in low for org in _HIGH_SIGNAL_ORGS_LOWER):
         score += 0.1
 
-    # Academic source baseline: +0.1.
+    # GitHub source: +0.05 (highest-prior source reliability).
     source = (raw_row.get("source") or "").lower()
-    if source in {"elicit", "semantic_scholar", "s2"}:
-        score += 0.1
+    if source == "github":
+        score += 0.05
+
+    # Substantive content: +0.05 if title + snippet >= 80 chars.
+    title_snippet = (
+        f"{raw_row.get('title') or ''} {raw_row.get('snippet') or ''}".strip()
+    )
+    if len(title_snippet) >= 80:
+        score += 0.05
 
     return max(0.0, min(1.0, score))
 

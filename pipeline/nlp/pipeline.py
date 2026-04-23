@@ -17,6 +17,8 @@ from datetime import datetime
 from typing import Any, Iterable, Iterator, Optional
 
 from pipeline.nlp.preprocess import (
+    LOW_RELEVANCE_THRESHOLD,
+    PROMOTION_THRESHOLD,
     canonical_url,
     classify_kind,
     extract_arxiv_ids,
@@ -27,7 +29,9 @@ from pipeline.nlp.preprocess import (
 )
 
 
-MIN_RELEVANCE = 0.25
+# Retained for back-compat with external callers; points at the new promotion
+# threshold defined in ``pipeline.nlp.preprocess``.
+MIN_RELEVANCE = PROMOTION_THRESHOLD
 
 
 @dataclass
@@ -35,6 +39,7 @@ class RunSummary:
     rows_processed: int = 0
     candidates_created: int = 0
     candidates_updated: int = 0
+    candidates_low_relevance: int = 0
     skipped_low_relevance: int = 0
     skipped_unclassified: int = 0
     skipped_no_source_url: int = 0
@@ -45,6 +50,7 @@ class RunSummary:
             f"rows_processed={self.rows_processed} "
             f"candidates_created={self.candidates_created} "
             f"candidates_updated={self.candidates_updated} "
+            f"candidates_low_relevance={self.candidates_low_relevance} "
             f"skipped_low_relevance={self.skipped_low_relevance} "
             f"skipped_unclassified={self.skipped_unclassified} "
             f"skipped_no_source_url={self.skipped_no_source_url} "
@@ -118,18 +124,41 @@ def _source_url_exists(conn, table: str, source_url: str) -> bool:
         return cur.fetchone() is not None
 
 
+def _mark_low_relevance(conn, table: str, source_url: str) -> None:
+    """Set ``status='low_relevance'`` on a newly-written candidate row, but
+    only if it's still ``pending`` (never downgrade a row a reviewer has
+    already acted on)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            f"UPDATE {table} SET status = 'low_relevance' "
+            f"WHERE source_url = %s AND status = 'pending'",
+            (source_url,),
+        )
+        conn.commit()
+
+
 def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db) -> None:
     """Classify + upsert one raw row."""
     summary.rows_processed += 1
 
     score = relevance_score(raw_row)
-    if score < MIN_RELEVANCE:
+    if score < LOW_RELEVANCE_THRESHOLD:
         summary.skipped_low_relevance += 1
         return
+
+    is_low_relevance = score < PROMOTION_THRESHOLD
 
     kind = classify_kind(raw_row)
     if kind not in ("tool", "paper"):
         summary.skipped_unclassified += 1
+        return
+
+    # Borderline rows are only written for tool candidates (reviewers see them
+    # as a separate ``status='low_relevance'`` pool). Papers below the
+    # promotion threshold are dropped — papers' entity signals (arxiv/doi) are
+    # already strong enough that the few we'd rescue aren't worth the noise.
+    if is_low_relevance and kind != "tool":
+        summary.skipped_low_relevance += 1
         return
 
     text = _row_text(raw_row)
@@ -140,6 +169,8 @@ def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db) -> None:
         "source": raw_row.get("source"),
         "query": raw_row.get("query"),
     }
+    if is_low_relevance:
+        nlp_tags["low_relevance"] = True
 
     if kind == "tool":
         github_urls = extract_github_urls(text)
@@ -147,11 +178,19 @@ def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db) -> None:
             url = raw_row.get("url") or ""
             if "github.com" in url.lower():
                 github_urls = extract_github_urls(url)
-        if not github_urls:
+        if github_urls:
+            source_url = canonical_url(github_urls[0])
+            proposed_id = _proposed_tool_id(github_urls[0], raw_row.get("title"))
+        elif is_low_relevance and raw_row.get("url"):
+            # Borderline tool with no github entity — write it at the page URL
+            # so reviewers can see the borderline pool. Only for low_relevance
+            # rows so we never extract a listicle blog URL as if it were a
+            # real repo.
+            source_url = canonical_url(raw_row["url"])
+            proposed_id = _proposed_tool_id(source_url, raw_row.get("title"))
+        else:
             summary.skipped_no_source_url += 1
             return
-        source_url = canonical_url(github_urls[0])
-        proposed_id = _proposed_tool_id(github_urls[0], raw_row.get("title"))
         name = (raw_row.get("title") or proposed_id).strip()
         summary_text = (raw_row.get("snippet") or "").strip() or None
         existed = _source_url_exists(conn, "candidate_tools", source_url)
@@ -162,7 +201,12 @@ def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db) -> None:
             summary=summary_text,
             nlp_tags=nlp_tags,
         )
-        if existed:
+        if is_low_relevance and not existed:
+            # Only stamp the status on fresh rows — don't override a row that
+            # already matured past 'pending'.
+            _mark_low_relevance(conn, "candidate_tools", source_url)
+            summary.candidates_low_relevance += 1
+        elif existed:
             summary.candidates_updated += 1
         else:
             summary.candidates_created += 1
