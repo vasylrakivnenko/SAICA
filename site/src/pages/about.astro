@@ -1,16 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { graph } from '../lib/data.ts';
+import { graph, counts } from '../lib/data.ts';
+
+const c = counts();
 ---
 
 <BaseLayout
   title="About"
-  description="About SAICA-KG — a knowledge graph of supervision tools for AI coding agents."
+  description="About SAICA-KG — a faceted knowledge graph of supervision tools for AI coding agents."
 >
   <h1>About SAICA-KG</h1>
   <p class="mt-3 text-lg text-ink-muted max-w-3xl">
-    A living, faceted, queryable knowledge graph for the governance of agentic AI
-    coding tools.
+    A faceted knowledge graph of supervision tools for AI coding agents.
   </p>
 
   <section class="mt-8 max-w-3xl leading-7">
@@ -33,9 +34,70 @@ import { graph } from '../lib/data.ts';
     </p>
   </section>
 
+  <section class="mt-10 max-w-3xl leading-7">
+    <h2>Design principle: honest MECE</h2>
+    <p class="mt-2">
+      The partitions are strict — every Tool fits exactly one cell on each of
+      ControlParadigm, TemporalPhase, and AutonomyLevel. Tools that legitimately
+      span cells are <em>split</em> into multiple Tool nodes rather than dual-tagged,
+      so facet counts stay truthful. MECE cells with no tools are visible as gaps
+      rather than silently hidden — the coverage report flags under-filled cells
+      instead of papering over them. Multi-valued tags (FailureMode, LocusOfControl)
+      live alongside the strict partitions for the many-to-many relations that
+      don't fit a clean taxonomy. See
+      <a href="https://github.com/saica-kg/saica-kg/blob/main/EDITORIAL_POLICY.md" rel="noopener">EDITORIAL_POLICY.md</a>
+      for the full inclusion criteria and RFC process.
+    </p>
+  </section>
+
+  <section class="mt-10 max-w-3xl leading-7">
+    <h2>Five ways to consume the KG</h2>
+    <ol class="mt-2 list-decimal pl-6 space-y-2">
+      <li>
+        <strong>Browse</strong> — this website renders one page per node with
+        facet-filtered search at <a href="/tools">/tools</a>,
+        <a href="/failure-modes">/failure-modes</a>, <a href="/taxonomies">/taxonomies</a>,
+        <a href="/papers">/papers</a>, plus an interactive Cytoscape graph at
+        <a href="/graph">/graph</a>.
+      </li>
+      <li>
+        <strong>JSON API</strong> — machine-readable endpoints at
+        <a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> and
+        per-collection / per-node JSON. Fetched over standard HTTP, no auth.
+      </li>
+      <li>
+        <strong>GitHub YAML</strong> — clone the repo and read
+        <code>data/**/*.yml</code> directly. One file per node, CC-BY-4.0.
+      </li>
+      <li>
+        <strong>Ingestion pipeline</strong> — the <code>pipeline/</code> tree drives
+        automated discovery (Perplexity / Elicit / Semantic Scholar / GitHub /
+        awesome-lists), Postgres staging, NLP preprocess, Cohere Rerank semantic
+        filtering, and Azure Kimi-K2.5 structured extraction. See
+        <a href="/pipeline">/pipeline</a> for the flow.
+      </li>
+      <li>
+        <strong>CI / validator</strong> — <code>validator/cli.py</code> enforces
+        cross-node invariants and is the gate between human-reviewed YAML and the
+        canonical corpus. Every change passes through it.
+      </li>
+    </ol>
+  </section>
+
+  <section class="mt-10 max-w-3xl">
+    <h2>Current corpus (v{graph.kgVersion})</h2>
+    <div class="mt-2 grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div class="card"><div class="text-2xl font-sans font-semibold">{c.tools}</div><div class="text-sm text-ink-muted font-sans">Tools</div></div>
+      <div class="card"><div class="text-2xl font-sans font-semibold">{c.failure_modes}</div><div class="text-sm text-ink-muted font-sans">Failure modes</div></div>
+      <div class="card"><div class="text-2xl font-sans font-semibold">{c.taxonomies}</div><div class="text-sm text-ink-muted font-sans">Taxonomies</div></div>
+      <div class="card"><div class="text-2xl font-sans font-semibold">{c.papers}</div><div class="text-sm text-ink-muted font-sans">Papers</div></div>
+      <div class="card"><div class="text-2xl font-sans font-semibold">{c.crosswalks}</div><div class="text-sm text-ink-muted font-sans">Crosswalk edges</div></div>
+    </div>
+  </section>
+
   <section class="mt-10 grid gap-6 md:grid-cols-2 max-w-3xl">
     <div class="card">
-      <h3 class="!mt-0">Links</h3>
+      <h3 class="!mt-0">Project</h3>
       <ul class="mt-2 list-disc pl-5 text-sm">
         <li><a href="https://github.com/saica-kg/saica-kg" rel="noopener">GitHub repository</a></li>
         <li><a href="https://github.com/saica-kg/saica-kg/blob/main/EDITORIAL_POLICY.md" rel="noopener">Editorial policy</a></li>

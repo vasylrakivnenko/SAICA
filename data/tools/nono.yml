@@ -13,13 +13,18 @@ autonomy_level: fully_autonomous
 addresses_failure_modes:
   - security_vulnerability
   - scope_creep
-stars: 2080
+locus_of_control:
+  - environment
+stars: 2085
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=229 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.890713). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies prevention × in_generation × fully_autonomous as a capability-based
+  sandbox that mediates an agent's syscalls while it is still acting, rather
+  than isolating a whole job at the container boundary (contrast modal, e2b,
+  daytona, which sit in recovery × post_generation). The novel primitive is
+  zero-setup multiplexed capability enforcement so a single host can safely
+  run many concurrent agent sessions without per-agent VM provisioning, useful
+  as the local-dev-mode exemplar of in-generation environment control.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

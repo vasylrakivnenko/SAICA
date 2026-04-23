@@ -1,0 +1,174 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { graph } from '../lib/data.ts';
+
+type Step = {
+  title: string;
+  subtitle?: string;
+  detail: string;
+  tone?: 'input' | 'staging' | 'process' | 'review' | 'canonical';
+};
+
+const steps: Step[] = [
+  {
+    title: 'Discovery sources',
+    subtitle: 'Perplexity Sonar Pro / Elicit / Semantic Scholar / GitHub / awesome-lists',
+    detail:
+      'Each source is queried on its own cadence with its own rate budget. Perplexity for fresh frontier-agent news, Elicit + S2 for the academic corpus, GitHub for code-level discovery, awesome-lists as a cheap prior.',
+    tone: 'input',
+  },
+  {
+    title: 'Postgres: raw_search_results',
+    subtitle: 'landing zone, dedup on (source, content_hash)',
+    detail:
+      'Raw JSON is preserved verbatim for audit. Duplicate rows across re-runs collapse on a deterministic content hash of URL + title. No LLM has touched the data yet at this stage.',
+    tone: 'staging',
+  },
+  {
+    title: 'NLP preprocess',
+    subtitle: 'keyword match + entity extraction + fuzzy dedup',
+    detail:
+      'Regex-first entity extraction (github.com/owner/repo, arXiv ids, DOIs). Keyword dictionary maps query terms into SAICA-KG FailureMode ids. Dedupe by canonical URL and by rapidfuzz title similarity ≥ 92.',
+    tone: 'process',
+  },
+  {
+    title: 'candidate_tools (pending)',
+    subtitle: 'status: pending → reviewed → accepted → graduated',
+    detail:
+      'One candidate per proposed tool. nlp_tags column carries keyword hits and relevance score; extracted column is empty until the next stage runs.',
+    tone: 'staging',
+  },
+  {
+    title: 'Cohere Rerank v4.0 Pro',
+    subtitle: 'semantic relevance filter',
+    detail:
+      'Re-ranks a pool of pending candidates against a SAICA-KG domain query. Low-relevance rows are auto-rejected before any expensive LLM call burns budget.',
+    tone: 'process',
+  },
+  {
+    title: 'Azure Kimi-K2.5 extraction',
+    subtitle: 'structured output via OpenAI-compatible client',
+    detail:
+      'Pydantic schema pins the output shape: id, name, tagline, description, repository_url, supervised failure modes, control_paradigm, temporal_phase, autonomy_level, evidence quotes, per-field confidence. Responses are cached on (prompt_version, kind, candidate_id, source_url).',
+    tone: 'process',
+  },
+  {
+    title: 'Human-review graduation CLI',
+    subtitle: 'pipeline/graduate.py <candidate_id>',
+    detail:
+      'Pops an accepted candidate from Postgres, writes a YAML stub into data/ with # REVIEW REQUIRED tags on every low-confidence field, and opens it for manual completion. No LLM output is ever committed without human review.',
+    tone: 'review',
+  },
+  {
+    title: 'data/tools/*.yml (canonical)',
+    subtitle: 'Git-diffable, PR-reviewable, CI-validated',
+    detail:
+      'Canonical YAML is the only thing the paper cites and the website renders. Postgres is staging, not the source of truth. validator/cli.py enforces cross-node invariants on every PR.',
+    tone: 'canonical',
+  },
+];
+
+const TONE_BORDERS: Record<NonNullable<Step['tone']>, string> = {
+  input: 'border-l-4 border-l-sky-500',
+  staging: 'border-l-4 border-l-amber-500',
+  process: 'border-l-4 border-l-violet-500',
+  review: 'border-l-4 border-l-rose-500',
+  canonical: 'border-l-4 border-l-emerald-600',
+};
+---
+
+<BaseLayout
+  title="Pipeline"
+  description="How supervision tools enter SAICA-KG: discovery, Postgres staging, NLP preprocess, Cohere rerank, Azure Kimi extraction, and human-review graduation."
+>
+  <h1>Ingestion pipeline</h1>
+  <p class="mt-3 text-lg text-ink-muted max-w-3xl">
+    How a supervision tool goes from a noisy search result to a canonical YAML
+    node in <code>data/tools/</code>.
+  </p>
+
+  <section class="mt-6 max-w-3xl leading-7">
+    <p>
+      The canonical source of truth is YAML under <code>data/</code>. Postgres is
+      staging only &mdash; it is not served to end-users and is not cited by the
+      paper. The editorial-governance story (PRs, maintainer review, stability
+      commitments) stays intact while automation handles the noise upstream.
+    </p>
+    <p class="mt-3">
+      <strong>No LLM output is ever committed without human review.</strong> The
+      graduation gate is load-bearing; fields with confidence &lt; 0.7 are
+      tagged <code># REVIEW REQUIRED</code> in the YAML stub and a human fills
+      them in.
+    </p>
+  </section>
+
+  <section class="mt-10 max-w-3xl">
+    <ol class="space-y-2" aria-label="Pipeline steps">
+      {steps.map((step, i) => (
+        <>
+          <li class={`card ${TONE_BORDERS[step.tone ?? 'process']}`}>
+            <div class="flex items-baseline justify-between gap-3">
+              <div class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+                Step {i + 1}
+              </div>
+            </div>
+            <div class="mt-1 font-sans font-semibold">{step.title}</div>
+            {step.subtitle && (
+              <div class="mt-0.5 text-sm text-ink-muted"><code>{step.subtitle}</code></div>
+            )}
+            <p class="mt-2 text-sm leading-6">{step.detail}</p>
+          </li>
+          {i < steps.length - 1 && (
+            <li aria-hidden="true" class="flex justify-center py-1">
+              <span class="font-sans text-ink-faint">&darr;</span>
+            </li>
+          )}
+        </>
+      ))}
+    </ol>
+  </section>
+
+  <section class="mt-12 max-w-3xl leading-7">
+    <h2>What stays out of scope</h2>
+    <ul class="mt-2 list-disc pl-5 text-sm space-y-1">
+      <li>Postgres does NOT serve end-users. The website + JSON API read from YAML.</li>
+      <li>Postgres is NOT replicated for v0.1 &mdash; local dev only. Managed DB is a v0.2 deployment concern.</li>
+      <li>
+        LLM outputs are NEVER committed without human review. The schema
+        <code>REVIEW REQUIRED</code> tripwire on low-confidence facets is
+        load-bearing.
+      </li>
+    </ul>
+  </section>
+
+  <section class="mt-10 max-w-3xl leading-7">
+    <h2>Read more</h2>
+    <ul class="mt-2 list-disc pl-5 text-sm space-y-1">
+      <li>
+        <a href="https://github.com/saica-kg/saica-kg/blob/main/research/PIPELINE_ARCHITECTURE.md" rel="noopener">
+          research/PIPELINE_ARCHITECTURE.md
+        </a> &mdash; full architecture, Postgres schema, rate-limit table, and extraction constraints.
+      </li>
+      <li>
+        <a href="https://github.com/saica-kg/saica-kg/blob/main/research/ARCH_REVIEW_SYSTEM_DESIGN.md" rel="noopener">
+          ARCH_REVIEW_SYSTEM_DESIGN.md
+        </a>,
+        <a href="https://github.com/saica-kg/saica-kg/blob/main/research/ARCH_REVIEW_RELIABILITY.md" rel="noopener">
+          ARCH_REVIEW_RELIABILITY.md
+        </a>,
+        <a href="https://github.com/saica-kg/saica-kg/blob/main/research/ARCH_REVIEW_GOVERNANCE.md" rel="noopener">
+          ARCH_REVIEW_GOVERNANCE.md
+        </a>.
+      </li>
+      <li>
+        <a href="https://github.com/saica-kg/saica-kg/blob/main/EDITORIAL_POLICY.md" rel="noopener">
+          EDITORIAL_POLICY.md
+        </a> &mdash; scope, inclusion criteria, RFC process.
+      </li>
+    </ul>
+  </section>
+
+  <p class="mt-10 text-xs text-ink-faint font-sans">
+    Pipeline diagram reflects SAICA-KG v{graph.kgVersion}.
+  </p>
+</BaseLayout>

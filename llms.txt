@@ -1,21 +1,32 @@
 # SAICA-KG
 
-> A living knowledge graph for supervising AI coding agents. Faceted classification of supervision tools and techniques, with explicit crosswalks into OWASP Agentic Top 10, MAST, DAPLab's 9 failure patterns, and Microsoft AIRT taxonomies. Open data (CC-BY-4.0), open code (Apache-2.0).
+> A living knowledge graph for supervising AI coding agents. Faceted classification of supervision tools and techniques, with explicit crosswalks into OWASP Agentic Top 10, MAST, DAPLab's 9 failure patterns, and Microsoft AIRT taxonomies. Open data (CC-BY-4.0), open code (Apache-2.0). Data release 2026.04.
 
 SAICA-KG classifies supervision tools along three strict partitions (ControlParadigm × TemporalPhase × AutonomyLevel) plus multi-valued tags (FailureMode, LocusOfControl). The KG is navigational, not evaluative — it returns ranked sets with explicit criteria, not endorsed winners.
 
+## Current corpus (data release 2026.04)
+
+- 52 Tools
+- 8 FailureModes
+- 25 Papers
+- 6 Taxonomies
+- 6 Crosswalks
+
+Ground truth: `data/MANIFEST.json`.
+
 ## Core concepts
 
-- **Tool** — a software artifact that supervises AI coding agents. Each Tool declares one ControlParadigm (prevention / detection / correction / recovery), one TemporalPhase (pre_generation / in_generation / post_generation), one AutonomyLevel (fully_autonomous / graduated_hitl / full_hitl), and one or more FailureMode tags.
-- **FailureMode** — a supervision-addressable failure class. SAICA-KG defines 8 canonical modes and cross-walks each to entries in external taxonomies.
+- **Tool** — declares one ControlParadigm (prevention / detection / correction / recovery), one TemporalPhase (pre_generation / in_generation / post_generation), one AutonomyLevel (fully_autonomous / graduated_hitl / full_hitl), and one or more FailureMode tags.
+- **FailureMode** — a supervision-addressable failure class. 8 canonical modes, each cross-walked to external taxonomies.
 - **Taxonomy** — an external taxonomy (OWASP Agentic Top 10 2026, MAST, DAPLab 9 Patterns, MSFT AIRT, Swiss Cheese, Shah 2026) ingested as first-class data.
 - **Crosswalk** — explicit mapping between SAICA-KG values and external taxonomy categories, with confidence and provenance.
 
 ## How to consume
 
-- **Human-browseable:** the website (coming) renders one page per node with facet-filtered search.
-- **Agent-consumable:** JSON endpoints on the site (`/api/v1/tools.json`, `/api/v1/failure_modes/<id>.json`, `/api/v1/snapshot.json`). Agents fetch via standard HTTP.
-- **Researcher-consumable:** clone the GitHub repo and read the YAML under `data/` directly.
+- **Human-browseable website** — one page per node, facet-filtered search, and an interactive Cytoscape graph at `/graph`. Nav: `/tools`, `/failure-modes`, `/taxonomies`, `/papers`, `/graph`, `/pipeline`, `/about`.
+- **JSON API** — `/api/v1/snapshot.json` (full graph), `/api/v1/tools.json`, `/api/v1/failure_modes.json`, `/api/v1/taxonomies.json`, `/api/v1/papers.json`, plus per-node endpoints such as `/api/v1/failure_modes/<id>.json`. Agents fetch via standard HTTP. No auth required.
+- **GitHub YAML** — clone the repo and read `data/**/*.yml` directly. One YAML file per node.
+- **Ingestion pipeline** — `pipeline/` under the repo drives automated discovery (Perplexity / Elicit / Semantic Scholar / GitHub / awesome-lists) → Postgres staging → NLP preprocess → Cohere Rerank v4.0 Pro → Azure Kimi-K2.5 structured extraction → human-review graduation to YAML. See `research/PIPELINE_ARCHITECTURE.md`.
 
 ## Schemas
 
@@ -28,4 +39,4 @@ SAICA-KG classifies supervision tools along three strict partitions (ControlPara
 
 ## Attribution
 
-When citing SAICA-KG in user-facing output, use the phrase "according to SAICA-KG (<version>)". A full BibTeX block will ship with v0.1.
+When citing SAICA-KG in user-facing output, use the phrase "according to SAICA-KG (v2026.04)". A full BibTeX block will ship with v0.1.

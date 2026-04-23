@@ -54,5 +54,5 @@ inclusion_rationale: >
   posture that makes it the GPL-licensed counterweight to Cursor and
   Windsurf. Worth modeling as a distinct node because the editor is
   open-source, changing the supply-chain and data-egress threat model.
-stars: 79577
-stars_updated_at: '2026-04-22'
+stars: 79584
+stars_updated_at: '2026-04-23'

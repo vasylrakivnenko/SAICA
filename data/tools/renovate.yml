@@ -1,0 +1,75 @@
+id: renovate
+name: Renovate
+tagline: Highly configurable multi-platform dependency update bot.
+description: >
+  Open-source dependency-update bot from Mend (formerly WhiteSource) that
+  scans repositories across GitHub, GitLab, Bitbucket, Azure DevOps, and
+  Gitea, then opens PRs/MRs to bump outdated packages. Supports 90+
+  package managers and offers fine-grained config for grouping,
+  scheduling, automerge rules, and vulnerability-only alerts via a
+  JSON/JSON5 renovate.json file. Self-hostable as a CLI or Docker image;
+  a hosted Mend Renovate App is also available for GitHub.
+
+first_released: 2017-03-01
+last_updated: 2026-04-18
+maturity_status: stable
+
+published_by: mend
+repository_url: https://github.com/renovatebot/renovate
+documentation_url: https://docs.renovatebot.com
+license: AGPL-3.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - obsolescence
+  - supply_chain_attack
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - dependency-version-diff
+  - cve-advisory-matching
+  - automated-pull-request
+  - config-driven-grouping
+  - scheduled-update-batches
+
+security_notes: >
+  AGPL-3.0 core; the Mend-hosted app adds proprietary enrichment. Bot
+  runs with repo write scope to open PRs; self-hosted deployments keep
+  manifest data on-prem. Automerge configurations must be scoped (e.g.,
+  devDependencies patch only) so that compromised upstream releases are
+  not merged without human review - the same supply-chain caveat applies
+  as with any auto-updater.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - npm
+  - pypi
+  - maven
+  - go-modules
+  - cargo
+  - bundler
+  - composer
+  - nuget
+  - docker
+  - github-actions
+  - terraform
+
+inclusion_rationale: >
+  Occupies detection x post_generation x graduated_hitl alongside Dependabot
+  but with config-first ergonomics and cross-forge reach (GitLab, Bitbucket,
+  Azure DevOps), filling the same MECE cell for teams that are not on GitHub
+  or need update-grouping that Dependabot does not express. Its broader
+  manager coverage (Terraform, Helm, GitHub Actions digests) extends
+  obsolescence mitigation into infrastructure-as-code manifests that pure
+  application-package tools miss.
+stars: 21353
+stars_updated_at: '2026-04-23'

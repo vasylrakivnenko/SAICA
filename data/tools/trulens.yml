@@ -13,13 +13,19 @@ autonomy_level: graduated_hitl
 addresses_failure_modes:
   - fabrication
   - context_pollution
+locus_of_control:
+  - environment
 stars: 3266
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=107 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.918801). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies detection × post_generation × graduated_hitl with the RAG Triad —
+  context relevance, groundedness, and answer relevance — as programmable
+  feedback functions over instrumented traces. Distinguished from general
+  LLM-observability platforms (langfuse, langsmith, arize-phoenix) by
+  centering RAG-specific groundedness metrics and from deepeval by exposing
+  those metrics as live feedback functions rather than Pytest assertions.
+  Useful as the canonical RAG-evaluation exemplar in the post-generation
+  detection cell.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

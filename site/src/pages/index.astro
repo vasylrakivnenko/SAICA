@@ -24,8 +24,7 @@ const recentTools = Object.values(graph.tools)
       SAICA-KG — Supervising AI Coding Agents
     </h1>
     <p class="mt-4 text-lg text-ink-muted">
-      A faceted, queryable knowledge graph of supervision tools and techniques for AI
-      coding agents.
+      A faceted knowledge graph of supervision tools for AI coding agents.
     </p>
     <p class="mt-5 leading-7">
       SAICA-KG classifies supervision tools along three orthogonal strict partitions
@@ -78,6 +77,19 @@ const recentTools = Object.values(graph.tools)
   </section>
 
   <section class="mt-12 max-w-3xl">
+    <h2>Explore</h2>
+    <ul class="mt-2 grid gap-2 sm:grid-cols-2 text-sm font-sans">
+      <li><a href="/tools">Tools &rarr;</a> {c.tools} supervision tools with facet filters</li>
+      <li><a href="/failure-modes">Failure modes &rarr;</a> {c.failure_modes} canonical modes</li>
+      <li><a href="/taxonomies">Taxonomies &rarr;</a> OWASP, MAST, DAPLab, MSFT AIRT, +2</li>
+      <li><a href="/papers">Papers &rarr;</a> {c.papers} cited papers</li>
+      <li><a href="/graph">Graph &rarr;</a> interactive Cytoscape view</li>
+      <li><a href="/pipeline">Pipeline &rarr;</a> how tools enter the KG</li>
+      <li><a href="/about">About &rarr;</a> design principles, licensing</li>
+    </ul>
+  </section>
+
+  <section class="mt-12 max-w-3xl">
     <h2>API</h2>
     <p>
       All nodes are available as JSON. See
@@ -87,5 +99,21 @@ const recentTools = Object.values(graph.tools)
       <a href="/api/v1/taxonomies.json"><code>/api/v1/taxonomies.json</code></a>,
       <a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a>.
     </p>
+  </section>
+
+  <section class="mt-12 max-w-3xl">
+    <h2>How to cite</h2>
+    <p class="text-sm">
+      When citing SAICA-KG in user-facing output, use the phrase
+      <em>"according to SAICA-KG (v{graph.kgVersion})"</em>. A full BibTeX block
+      ships with v0.1; placeholder:
+    </p>
+    <pre class="mt-2 overflow-x-auto rounded border border-ink/10 bg-paper-alt p-3 text-xs"><code>{`@misc{saica-kg-2026,
+  title        = {{SAICA-KG: A Faceted Knowledge Graph for Supervising AI Coding Agents}},
+  author       = {Paskevych, Vasyl and SAICA-KG contributors},
+  year         = {2026},
+  howpublished = {\\url{https://github.com/saica-kg/saica-kg}},
+  note         = {v0.1, data release ${graph.kgVersion}}
+}`}</code></pre>
   </section>
 </BaseLayout>

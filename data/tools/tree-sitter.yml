@@ -1,0 +1,71 @@
+id: tree-sitter
+name: tree-sitter
+tagline: Incremental parser toolkit that powers structural code analysis and symbol discovery.
+description: >
+  Parser generator and incremental parsing library that produces concrete
+  syntax trees for 100+ languages fast enough to reparse on every
+  keystroke. Used as the structural-analysis substrate inside editors
+  (Neovim, Helix, Zed), language servers, and code-intelligence pipelines
+  - including duplicate-function detection, symbol extraction for RAG, and
+  dead-code/unused-import linters. Ships as a C core plus language-specific
+  grammar crates and bindings for Rust, Python, Node, Go, and Swift.
+
+first_released: 2018-10-01
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: tree-sitter
+repository_url: https://github.com/tree-sitter/tree-sitter
+documentation_url: https://tree-sitter.github.io/tree-sitter/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - dependency_blindness
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - incremental-parsing
+  - concrete-syntax-tree
+  - query-based-symbol-extraction
+  - structural-code-search
+
+security_notes: >
+  MIT-licensed C library; grammars are community-maintained and compiled
+  at build time. Running grammars on untrusted source is safe (pure
+  parsing, no execution), but grammar-generation from .grammar.js uses
+  node-gyp and should be pinned to audited grammar revisions to avoid
+  supply-chain drift. No network access.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - javascript
+  - typescript
+  - python
+  - go
+  - rust
+  - java
+  - c
+  - cpp
+  - ruby
+
+inclusion_rationale: >
+  Occupies prevention x pre_generation x fully_autonomous for the
+  dependency_blindness failure mode by providing the structural index
+  that surfaces existing symbols, functions, and module exports before
+  an agent reinvents them. Distinctive because it is the substrate many
+  higher-level tools (LSPs, Sourcegraph SCIP emitters, grep-plus-AST
+  linters) build on, which makes it the lowest-level entry point in the
+  MECE grid for structural prevention - complementary to Semgrep
+  (detection via custom rules) and sourcegraph-cody (retrieval grounding).
+stars: 24948
+stars_updated_at: '2026-04-23'

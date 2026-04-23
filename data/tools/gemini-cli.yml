@@ -49,7 +49,8 @@ security_notes: >
 signed_manifest: false
 openssf_scorecard_score: null
 
-cited_in: []
+cited_in:
+  - yan-2025-fault-tolerant-sandboxing
 documented_in: []
 
 inclusion_rationale: >
@@ -58,5 +59,5 @@ inclusion_rationale: >
   separately because the tool ecosystem, defaults, and sandbox
   posture are materially different, and because it is the canonical
   Gemini-family terminal agent.
-stars: 102172
-stars_updated_at: '2026-04-22'
+stars: 102183
+stars_updated_at: '2026-04-23'

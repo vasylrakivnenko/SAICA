@@ -57,4 +57,4 @@ inclusion_rationale: >
   primarily as output/flow moderation, not constrained decoding — hence
   post_generation rather than in_generation.
 stars: 6028
-stars_updated_at: '2026-04-22'
+stars_updated_at: '2026-04-23'

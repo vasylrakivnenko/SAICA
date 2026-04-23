@@ -12,13 +12,19 @@ temporal_phase: pre_generation
 autonomy_level: fully_autonomous
 addresses_failure_modes:
   - security_vulnerability
+locus_of_control:
+  - prompt
+  - environment
 stars: 126
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=73 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.645656). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies detection × pre_generation × fully_autonomous against prompt
+  injection and jailbreak inputs. Distinguished from rebuff by emphasizing
+  ultra-low-latency inline classification (no heuristic-LLM ensemble, no
+  canary-token DB round-trip), making it suitable for the fast-path filter
+  slot in front of coding agents that cannot tolerate a second model call per
+  request. Useful as the lightweight-detector exemplar on the pre-generation
+  input surface.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

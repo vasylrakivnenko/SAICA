@@ -54,5 +54,5 @@ inclusion_rationale: >
   open-source autonomous coding agents. The container-sandboxed runtime
   converts arbitrary agent missteps from host-level incidents into
   disposable-container recovery events.
-stars: 71835
-stars_updated_at: '2026-04-22'
+stars: 71851
+stars_updated_at: '2026-04-23'

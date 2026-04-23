@@ -12,13 +12,20 @@ temporal_phase: pre_generation
 autonomy_level: fully_autonomous
 addresses_failure_modes:
   - security_vulnerability
+locus_of_control:
+  - prompt
+  - environment
 stars: 1464
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=241 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.84827). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies detection × pre_generation × fully_autonomous with a four-stage
+  ensemble for prompt-injection defense: heuristics, a dedicated classifier
+  LLM, a vector store of prior attacks, and canary-token leak detection on
+  the outbound side. Distinguished from last-layer (pure low-latency
+  classifier) by trading latency for richer defense-in-depth, and from
+  llm-guard by being injection-specialist rather than a general PII/toxicity
+  suite. Useful anchor for the ensemble-detector style of pre-generation
+  defense.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

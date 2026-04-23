@@ -48,7 +48,8 @@ security_notes: >
 signed_manifest: false
 openssf_scorecard_score: null
 
-cited_in: []
+cited_in:
+  - cihon-stein-2025-autonomy-scoring
 documented_in: []
 
 inclusion_rationale: >
@@ -57,5 +58,5 @@ inclusion_rationale: >
   CrewAI: AutoGen scopes behavior via per-agent system messages and
   turn protocols rather than explicit role/task contracts, which is
   worth separating in the taxonomy.
-stars: 57349
-stars_updated_at: '2026-04-22'
+stars: 57354
+stars_updated_at: '2026-04-23'

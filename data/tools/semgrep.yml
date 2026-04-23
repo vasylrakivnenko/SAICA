@@ -1,0 +1,77 @@
+id: semgrep
+name: Semgrep
+tagline: Fast, rule-based static analysis with a pattern syntax that mirrors source code.
+description: >
+  Open-source static-analysis engine that matches syntactic and
+  lightweight-dataflow patterns written in a source-code-like DSL,
+  spanning 30+ languages. Ships a large community rule registry
+  (OWASP Top 10, secrets, framework anti-patterns) and supports
+  custom rules that can flag reinvented-wheel patterns - e.g.,
+  hand-rolled retry loops, ad-hoc string-escaping, or reimplemented
+  stdlib utilities - surfacing places where an agent wrote code that
+  an existing library call would have covered. Runs in CLI, pre-commit,
+  and CI; Semgrep AppSec Platform adds hosted findings triage.
+
+first_released: 2020-03-17
+last_updated: 2026-04-17
+maturity_status: stable
+
+published_by: semgrep
+repository_url: https://github.com/semgrep/semgrep
+documentation_url: https://semgrep.dev/docs/
+license: LGPL-2.1
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - dependency_blindness
+  - security_vulnerability
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - pattern-based-static-analysis
+  - taint-analysis
+  - custom-rule-authoring
+  - ci-gating
+  - secret-scanning
+
+security_notes: >
+  Core engine is LGPL-2.1 and runs fully offline; the default rule
+  registry is pulled from semgrep.dev and should be pinned by commit or
+  vendored for regulated builds. The hosted AppSec Platform is SaaS and
+  sends findings (not raw source by default) upstream; self-hosted
+  deployments keep everything on-prem. Rules execute as pattern matching,
+  not arbitrary code, so registry compromise is bounded to
+  false-positive/negative impact rather than RCE.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+  - javascript
+  - typescript
+  - go
+  - java
+  - ruby
+  - c
+  - cpp
+  - terraform
+
+inclusion_rationale: >
+  Occupies detection x post_generation x fully_autonomous for
+  dependency_blindness: custom rules catch patterns such as "string built
+  with manual concatenation where shlex.quote exists" or "home-rolled
+  HTTP retry where tenacity is on the requirements", pointing reviewers
+  at library-duplicating code after the fact. Distinct from tree-sitter
+  (structural substrate, prevention) and sourcegraph-cody (retrieval
+  grounding) because Semgrep is rule-based diagnosis on the finished
+  diff, making it the classic CI-gate node in the MECE grid.
+stars: 14901
+stars_updated_at: '2026-04-23'

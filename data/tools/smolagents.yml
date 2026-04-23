@@ -55,5 +55,5 @@ inclusion_rationale: >
   "code-as-action" agent archetype. Distinct enough from JSON-tool-call
   frameworks that its supervision primitives (authorized-imports,
   Python sandbox) are worth modeling separately.
-stars: 26830
-stars_updated_at: '2026-04-22'
+stars: 26835
+stars_updated_at: '2026-04-23'

@@ -13,13 +13,19 @@ autonomy_level: fully_autonomous
 addresses_failure_modes:
   - security_vulnerability
   - supply_chain_attack
+locus_of_control:
+  - environment
 stars: 340
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=237 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.823669). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies prevention × in_generation × fully_autonomous as a network-plane
+  firewall specifically for AI-agent traffic: DLP and SSRF inspection plus
+  bidirectional MCP scanning and tool-poisoning detection. Distinguished from
+  prompt-oriented detectors (rebuff, last-layer) by sitting between the agent
+  and the outside world rather than in front of the prompt, and distinct from
+  socket (which scans package manifests at adoption time) by operating at the
+  live request layer. Surfaces tool-poisoning through MCP as a first-class
+  vector worth its own supervision node.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

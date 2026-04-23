@@ -1,0 +1,73 @@
+id: dependabot
+name: Dependabot
+tagline: Automated dependency-update PRs that flag outdated and vulnerable packages.
+description: >
+  Automated dependency maintenance service integrated into GitHub. Monitors
+  manifests (package.json, requirements.txt, go.mod, Cargo.toml, etc.) for
+  outdated or CVE-affected versions and opens pull requests that bump to
+  safe releases, with release notes and compatibility scores attached. Runs
+  as a scheduled GitHub-hosted bot plus the open-source dependabot-core
+  engine; PRs are reviewed and merged by humans, so mitigation is
+  graduated-HITL even though scanning itself is autonomous.
+
+first_released: 2015-05-26
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: github
+repository_url: https://github.com/dependabot/dependabot-core
+documentation_url: https://docs.github.com/en/code-security/dependabot
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - obsolescence
+  - supply_chain_attack
+  - security_vulnerability
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - dependency-version-diff
+  - cve-advisory-matching
+  - automated-pull-request
+  - compatibility-score
+
+security_notes: >
+  Free for public and private GitHub repos; the hosted service runs in
+  GitHub's infrastructure with repo read/write scopes. Dependabot-core
+  itself is MIT-licensed and can be self-hosted. Fix PRs are signed by
+  the Dependabot bot; review auto-merge policies carefully to avoid
+  rubber-stamping malicious upstream releases masquerading as patch
+  bumps.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - npm
+  - pypi
+  - maven
+  - go-modules
+  - cargo
+  - bundler
+  - composer
+  - nuget
+  - docker
+
+inclusion_rationale: >
+  Occupies detection x post_generation x graduated_hitl for the obsolescence
+  failure mode: once code has shipped with a given pinned version, Dependabot
+  watches the advisory feed and proposes upgrades for a human to merge.
+  Distinctive for being the default, no-configuration-required option on
+  GitHub, which makes it the most-deployed mitigation for stale dependencies
+  in practice. Complements Renovate (same cell, more configurable) and
+  context-hub (pre_generation prevention via fresh docs).
+stars: 5546
+stars_updated_at: '2026-04-23'

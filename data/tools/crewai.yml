@@ -57,5 +57,5 @@ inclusion_rationale: >
   role-based multi-agent archetype. Role and task contracts are
   pre-generation scoping primitives: they constrain what each agent
   can legitimately attempt before any token is emitted.
-stars: 49611
-stars_updated_at: '2026-04-22'
+stars: 49633
+stars_updated_at: '2026-04-23'

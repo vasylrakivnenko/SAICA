@@ -65,4 +65,4 @@ inclusion_rationale: >
   gating), Snyk scans what already landed (post_generation artifact
   analysis). Both are supply-chain-relevant but at different moments.
 stars: 5506
-stars_updated_at: '2026-04-22'
+stars_updated_at: '2026-04-23'

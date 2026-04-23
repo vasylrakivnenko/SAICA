@@ -58,5 +58,5 @@ inclusion_rationale: >
   as a distinct node because the license and deployment posture change
   the threat model materially for regulated or IP-sensitive
   deployments.
-stars: 25777
-stars_updated_at: '2026-04-22'
+stars: 25839
+stars_updated_at: '2026-04-23'

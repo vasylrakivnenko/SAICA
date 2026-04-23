@@ -52,5 +52,5 @@ inclusion_rationale: >
   to PydanticAI (full agent framework) and to Outlines (in-generation
   constraints): Instructor is the minimal library expression of the
   validate-and-retry paradigm.
-stars: 12814
-stars_updated_at: '2026-04-22'
+stars: 12816
+stars_updated_at: '2026-04-23'

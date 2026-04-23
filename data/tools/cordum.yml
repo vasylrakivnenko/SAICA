@@ -12,13 +12,18 @@ temporal_phase: pre_generation
 autonomy_level: graduated_hitl
 addresses_failure_modes:
   - scope_creep
+locus_of_control:
+  - environment
+  - human
 stars: 465
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=81 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.95608). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies prevention × pre_generation × graduated_hitl as a framework-agnostic
+  control plane: policies, approval gates, and audit trails are enforced before
+  agent actions execute, across LangChain, CrewAI, and MCP. Distinct from
+  in-agent supervisors like claude-code or cursor because Cordum is a separate
+  governance layer that wraps third-party frameworks; useful as the reference
+  point for cross-framework scope_creep prevention at the orchestration seam.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

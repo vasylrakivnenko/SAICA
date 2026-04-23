@@ -55,5 +55,5 @@ inclusion_rationale: >
   repo-level fix-loop agents. The ACI abstraction is the load-bearing
   supervision primitive: constraining the action set to a small set of
   audited commands is itself a supervisory design choice.
-stars: 19041
-stars_updated_at: '2026-04-22'
+stars: 19043
+stars_updated_at: '2026-04-23'

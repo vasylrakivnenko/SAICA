@@ -13,13 +13,19 @@ autonomy_level: full_hitl
 addresses_failure_modes:
   - fabrication
   - logic_error
-stars: 14937
+locus_of_control:
+  - environment
+stars: 14938
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=97 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.845739). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies detection × post_generation × full_hitl as a unit-testing harness
+  for LLM applications: developers write pytest-style assertions over 20+
+  research-backed metrics (faithfulness, contextual recall/precision,
+  hallucination, G-Eval chain-of-thought) and gate CI on them. Distinguished
+  from observability-first peers (langfuse, langsmith) by centering test-case
+  authoring rather than trace capture, and from braintrust by being
+  open-source and Pytest-native. Useful as the canonical CI-gate exemplar for
+  the post-generation evaluation cell.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

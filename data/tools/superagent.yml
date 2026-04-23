@@ -12,13 +12,19 @@ temporal_phase: in_generation
 autonomy_level: fully_autonomous
 addresses_failure_modes:
   - security_vulnerability
+locus_of_control:
+  - prompt
+  - environment
 stars: 6553
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >
-  Graduated from pipeline candidate id=239 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.791563). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies prevention × in_generation × fully_autonomous as an embedded
+  security wrapper: developers link the library directly into the application
+  so policy enforcement runs inline with the LLM call rather than behind a
+  network proxy (contrast pipelock) or as a post-hoc validator (contrast
+  guardrails-ai). Emphasizes compliance-ready runtime enforcement,
+  distinguishing it from the detector-only posture of rebuff and last-layer,
+  and making it a useful exemplar of in-process guardrail deployment.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

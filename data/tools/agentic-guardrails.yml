@@ -12,14 +12,22 @@ autonomy_level: fully_autonomous
 addresses_failure_modes:
   - fabrication
   - security_vulnerability
+locus_of_control:
+  - prompt
+  - environment
 inclusion_rationale: >
-  Graduated from pipeline candidate id=273 (Kimi-K2.5 extraction,
-  overall_confidence=None, rerank_score=0.825927). Pending human
-  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
-  Kimi declined to assign.
+  Occupies the prevention × post_generation × fully_autonomous cell with a
+  pipeline orientation: guardrails are chained into RAG/agent flows rather than
+  attached as a single validator wrapper (contrast guardrails-ai) or a DSL of
+  conversation rails (contrast nemo-guardrails). Novel framing is the
+  explicit pipeline-of-guardrails composition pattern for agentic and
+  retrieval-augmented stacks, useful as an exemplar of emerging
+  modular-guardrail architectures.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'
   extractor_model: Kimi-K2.5
   rerank_score: 0.826
   candidate_id: 273
+stars: 37
+stars_updated_at: '2026-04-23'
