@@ -43,6 +43,7 @@ class RunSummary:
     skipped_low_relevance: int = 0
     skipped_unclassified: int = 0
     skipped_no_source_url: int = 0
+    skipped_dedup_yaml: int = 0
     errors: list[str] = field(default_factory=list)
 
     def as_text(self) -> str:
@@ -137,7 +138,7 @@ def _mark_low_relevance(conn, table: str, source_url: str) -> None:
         conn.commit()
 
 
-def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db) -> None:
+def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db, dup_checker=None) -> None:
     """Classify + upsert one raw row."""
     summary.rows_processed += 1
 
@@ -181,6 +182,12 @@ def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db) -> None:
         if github_urls:
             source_url = canonical_url(github_urls[0])
             proposed_id = _proposed_tool_id(github_urls[0], raw_row.get("title"))
+            # Skip if the URL already matches a canonical KG Tool (YAML-side dup).
+            if dup_checker is not None:
+                hit = dup_checker.check_url(source_url)
+                if hit is not None and hit.kind == "yaml":
+                    summary.skipped_dedup_yaml += 1
+                    return
         elif is_low_relevance and raw_row.get("url"):
             # Borderline tool with no github entity — write it at the page URL
             # so reviewers can see the borderline pool. Only for low_relevance
@@ -251,12 +258,16 @@ def run(since: Optional[datetime] = None) -> RunSummary:
     Returns a :class:`RunSummary`. Prints a summary line to stdout.
     """
     from pipeline import db  # local import: keeps CLI --help usable without psycopg.
+    from pipeline.dedup import DupChecker
 
     summary = RunSummary()
+    # Build KG dedup index once per run; candidate table is re-queried per row
+    # via _source_url_exists, so we only need YAML-side dedup here.
+    dup_checker = DupChecker(include_candidates=False)
     with db.get_conn() as conn:
         for raw_row in _iter_raw_results(conn, since):
             try:
-                _process_row(raw_row, summary, conn=conn, _db=db)
+                _process_row(raw_row, summary, conn=conn, _db=db, dup_checker=dup_checker)
             except Exception as exc:  # pragma: no cover (defensive)
                 summary.errors.append(f"row {raw_row.get('id')!r}: {exc!r}")
 
