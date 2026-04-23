@@ -33,19 +33,19 @@ type EdgeType = "addresses" | "composes_with" | "feeds_into" | "supersedes" | "c
 
 // ---------- Style tokens ----------
 const TYPE_COLOR: Record<NodeType, string> = {
-  tool: "#2563eb", failure_mode: "#dc2626", taxonomy: "#7c3aed", paper: "#6b7280",
+  tool: "#4f46e5", failure_mode: "#f43f5e", taxonomy: "#a855f7", paper: "#94a3b8",
 };
 const PARADIGM_BORDER: Record<string, string> = {
-  prevention: "#059669", detection: "#d97706", correction: "#db2777", observation: "#0891b2",
+  prevention: "#10b981", detection: "#f59e0b", correction: "#ec4899", recovery: "#06b6d4",
 };
 const EDGE_STYLE: Record<EdgeType, { color: string; line?: "solid" | "dashed" | "dotted" }> = {
-  addresses:     { color: "#dc2626" },
-  composes_with: { color: "#2563eb", line: "dashed" },
-  feeds_into:    { color: "#2563eb" },
-  supersedes:    { color: "#0891b2", line: "dotted" },
-  crosswalks:    { color: "#7c3aed" },
-  prior_work:    { color: "#6b7280", line: "dashed" },
-  cited_in:      { color: "#9ca3af", line: "dotted" },
+  addresses:     { color: "#fb7185" },
+  composes_with: { color: "#818cf8", line: "dashed" },
+  feeds_into:    { color: "#818cf8" },
+  supersedes:    { color: "#22d3ee", line: "dotted" },
+  crosswalks:    { color: "#c084fc" },
+  prior_work:    { color: "#cbd5e1", line: "dashed" },
+  cited_in:      { color: "#e2e8f0", line: "dotted" },
 };
 
 let cy: Core | null = null;
@@ -92,48 +92,60 @@ export async function mountKGGraph(opts: {
       {
         selector: "node",
         style: {
-          label: "data(label)", "font-size": 10,
-          "text-valign": "bottom", "text-halign": "center", "text-margin-y": 4,
-          "text-wrap": "ellipsis", "text-max-width": "120px", color: "#1f2937",
-          "background-color": (n: NodeSingular) => TYPE_COLOR[n.data("type") as NodeType] || "#9ca3af",
-          "border-width": 2,
+          label: "data(label)",
+          "font-size": 11, "font-weight": 500,
+          "text-valign": "bottom", "text-halign": "center", "text-margin-y": 6,
+          "text-wrap": "ellipsis", "text-max-width": "140px",
+          color: "#334155",
+          "background-color": (n: NodeSingular) => TYPE_COLOR[n.data("type") as NodeType] || "#94a3b8",
+          "background-opacity": 0.92,
+          "border-width": 1.5,
           "border-color": (n: NodeSingular) => {
             const p = n.data("control_paradigm");
-            return (p && PARADIGM_BORDER[p]) || "#111827";
+            return (p && PARADIGM_BORDER[p]) || "#64748b";
           },
-          width: 28, height: 28,
+          "border-opacity": 0.9,
+          width: 22, height: 22,
         },
       },
       {
         selector: 'node[type = "tool"]',
         style: {
           shape: "round-rectangle",
-          // Size Tool nodes by GitHub stars (pre-computed in buildElements).
-          // Width is stretched slightly for the rounded-rectangle aesthetic.
-          width: (n: NodeSingular) => {
-            const s = Number(n.data("toolSize"));
-            const base = Number.isFinite(s) && s > 0 ? s : 24;
-            return base * 1.3;
-          },
-          height: (n: NodeSingular) => {
-            const s = Number(n.data("toolSize"));
-            return Number.isFinite(s) && s > 0 ? s : 24;
-          },
+          // Log-scaled by GitHub stars; square aspect. Pre-computed in buildElements.
+          width: (n: NodeSingular) => Number(n.data("toolSize")) || 18,
+          height: (n: NodeSingular) => Number(n.data("toolSize")) || 18,
         },
       },
-      { selector: 'node[type = "failure_mode"]', style: { shape: "diamond" } },
-      { selector: 'node[type = "taxonomy"]', style: { shape: "hexagon" } },
-      { selector: 'node[type = "paper"]', style: { shape: "ellipse", width: 22, height: 22 } },
-      { selector: "node:selected", style: { "border-color": "#f59e0b", "border-width": 4 } },
+      { selector: 'node[type = "failure_mode"]', style: { shape: "diamond", width: 28, height: 28 } },
+      { selector: 'node[type = "taxonomy"]', style: { shape: "hexagon", width: 30, height: 30 } },
+      {
+        selector: 'node[type = "paper"]',
+        style: {
+          shape: "ellipse", width: 12, height: 12,
+          "font-size": 9, color: "#94a3b8",
+          "text-max-width": "110px",
+        },
+      },
+      {
+        selector: "node:selected",
+        style: {
+          "border-color": "#f59e0b", "border-width": 3, "border-opacity": 1,
+          "background-opacity": 1,
+        },
+      },
       {
         selector: "edge",
         style: {
-          width: 1.2, "line-color": "#9ca3af", "target-arrow-color": "#9ca3af",
-          "target-arrow-shape": "triangle", "curve-style": "bezier",
-          "font-size": 8, color: "#6b7280", "text-rotation": "autorotate",
-          "text-background-color": "#ffffff", "text-background-opacity": 0.8, "text-background-padding": "1px",
+          width: 1, "line-color": "#cbd5e1", "target-arrow-color": "#cbd5e1",
+          "target-arrow-shape": "triangle", "arrow-scale": 0.75,
+          "curve-style": "bezier", opacity: 0.75,
+          "font-size": 8, color: "#94a3b8", "text-rotation": "autorotate",
+          "text-background-color": "#ffffff", "text-background-opacity": 0.9,
+          "text-background-padding": "2px", "text-background-shape": "round-rectangle",
         },
       },
+      { selector: "edge:selected", style: { width: 2, opacity: 1 } },
       ...edgeStyleBlocks,
     ] as unknown as Stylesheet[],
     layout: layoutFor("cose"),
@@ -252,9 +264,11 @@ function layoutFor(name: string): LayoutOptions {
     case "cose":
     default:
       return {
-        name: "cose", animate: false, padding: 40,
-        nodeRepulsion: () => 8000, idealEdgeLength: () => 90,
-        gravity: 0.6, numIter: 800, randomize: true,
+        name: "cose", animate: false, padding: 60,
+        nodeRepulsion: () => 18000, idealEdgeLength: () => 140,
+        edgeElasticity: () => 120,
+        gravity: 0.35, numIter: 1400, randomize: true,
+        componentSpacing: 90,
       } as unknown as LayoutOptions;
   }
 }
@@ -353,12 +367,17 @@ function renderSidebar(sidebar: HTMLElement, n: NodeSingular): void {
 }
 
 // ---------- Utils ----------
-// Node size for Tool nodes: sqrt(max(stars, 0) + 1) * 8, clamped to [24, 80].
-// Tools without a star count get the minimum size (24) so they stay visible.
+// Node size for Tool nodes. Log-scaled so a gradient is visible without
+// popular tools overwhelming the canvas. Range [18, 36] px.
+//   0 stars      → 18   (no signal, tool still visible)
+//   100 stars    → ~22
+//   1,000 stars  → ~26
+//   10,000 stars → ~30
+//   72,000 stars → ~34
 function toolSizeFromStars(stars: number | null | undefined): number {
   const s = typeof stars === "number" && Number.isFinite(stars) ? Math.max(stars, 0) : 0;
-  const raw = Math.sqrt(s + 1) * 8;
-  return Math.max(24, Math.min(80, raw));
+  const raw = 18 + Math.log10(s + 1) * 4;
+  return Math.max(18, Math.min(36, raw));
 }
 
 function shortPaperLabel(p: Paper): string {
