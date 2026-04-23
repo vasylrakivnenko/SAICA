@@ -55,5 +55,5 @@ inclusion_rationale: >
   sibling to Claude Code. Distinctive primitive is the per-tool auto-approve
   matrix, which exposes the graduated-HITL dial explicitly rather than
   hiding it behind a single auto-mode toggle.
-stars: 60628
+stars: 60635
 stars_updated_at: '2026-04-22'

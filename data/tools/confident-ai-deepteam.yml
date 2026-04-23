@@ -1,0 +1,63 @@
+id: confident-ai-deepteam
+name: DeepTeam
+tagline: Open-source LLM red-teaming framework from Confident AI with 40+ attack vulnerabilities.
+description: >
+  Open-source red-teaming framework for LLM applications, from the
+  authors of DeepEval. Ships a library of vulnerabilities (prompt
+  injection, jailbreak, PII leakage, bias, toxicity, misinformation,
+  excessive agency, unauthorized actions) and attack enhancement
+  strategies (multi-turn, roleplay, encoding, linguistic obfuscation)
+  that stress-test an LLM under test via programmatic attack agents.
+  Findings are emitted as scored reports suitable for pre-deployment
+  gating and continuous-evaluation harnesses.
+
+first_released: 2024-11-01
+last_updated: 2026-04-01
+maturity_status: stable
+
+published_by: confident-ai
+repository_url: https://github.com/confident-ai/deepteam
+documentation_url: https://trydeepteam.com
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - security_vulnerability
+  - supply_chain_attack
+  - fabrication
+
+locus_of_control:
+  - environment
+  - prompt
+
+implements_techniques:
+  - red-team-attacks
+  - vulnerability-scoring
+  - multi-turn-attack-strategies
+  - llm-as-judge-eval
+
+security_notes: >
+  Open-source (Apache-2.0). The framework generates adversarial
+  prompts at scale — intended strictly for systems under test. Calls
+  the model-under-test plus a judge model; budget token spend
+  accordingly. Attack corpora evolve with upstream releases; pin
+  versions for reproducible audit evidence.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous with a
+  red-team-specialist locus that no other modeled node covers.
+  Adversarial pre-deployment scanning is analytically distinct from
+  trace-capture observability — it proactively synthesizes attack
+  inputs rather than sampling production traffic — and maps cleanly
+  onto the security_vulnerability and supply_chain_attack failure
+  modes.
+stars: 1566
+stars_updated_at: '2026-04-22'

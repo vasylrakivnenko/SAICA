@@ -1,0 +1,61 @@
+id: helicone
+name: Helicone
+tagline: Open-source LLM observability proxy with one-line integration and caching.
+description: >
+  Open-source LLM observability platform that sits as a proxy in front
+  of provider APIs. Integration is a one-line base-URL swap, after
+  which every request and response is logged, cost-accounted, and made
+  available for dataset creation, prompt experimentation, and custom
+  evaluation. Also offers async logging via SDK for users who prefer
+  not to proxy. Self-hostable core plus a managed cloud tier sharing
+  the same data model.
+
+first_released: 2023-07-07
+last_updated: 2026-04-05
+maturity_status: stable
+
+published_by: helicone
+repository_url: https://github.com/Helicone/helicone
+documentation_url: https://docs.helicone.ai
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - context_pollution
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - proxy-logging
+  - async-sdk-logging
+  - cost-accounting
+  - dataset-capture
+  - prompt-experimentation
+
+security_notes: >
+  Core project is open-source (Apache-2.0) and self-hostable, which
+  avoids egressing prompts to a third party for IP-sensitive
+  workloads. In proxy mode, API keys and full request bodies transit
+  Helicone — self-host or use async SDK mode for high-sensitivity
+  deployments. Standard redaction hooks apply; audit what payload
+  fields are captured before enabling on production traffic.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous with a
+  proxy-first architecture that distinguishes it from SDK-first peers
+  (Langfuse, LangSmith, Phoenix). The proxy posture is load-bearing
+  because it captures traffic with zero instrumentation, which is a
+  materially different supervision surface even though the facet cell
+  is shared.
+stars: 5541
+stars_updated_at: '2026-04-22'

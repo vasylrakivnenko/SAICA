@@ -1,0 +1,57 @@
+id: v0
+name: v0
+tagline: Vercel's generative-UI coding agent for React and Next.js web interfaces.
+description: >
+  Vercel's chat-driven generative-UI product. Takes natural-language
+  prompts and emits React + Tailwind + shadcn/ui component code,
+  rendered live in a sandboxed preview. Supervision primitives: a
+  curated component library (shadcn/ui) that constrains what the model
+  can import, per-iteration preview diffs, fork-and-branch history,
+  and a locked dependency manifest. Graduated-HITL at the preview-gate
+  layer — the user reviews the rendered output and accepts into a
+  project.
+
+first_released: 2023-10-03
+last_updated: 2026-04-01
+maturity_status: stable
+
+published_by: vercel
+documentation_url: https://v0.app
+license: proprietary
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - fabrication
+  - scope_creep
+
+locus_of_control:
+  - context
+  - human
+
+implements_techniques:
+  - curated-component-library
+  - preview-diff-gate
+  - fork-and-branch-history
+  - locked-dependency-manifest
+
+security_notes: >
+  Proprietary hosted service. Prompts and generated code are sent to
+  Vercel's backend; enterprise plans offer data-retention controls.
+  Generated code ships with a constrained shadcn/ui + Tailwind surface
+  which narrows the import-fabrication surface, but downstream
+  deployment still carries the normal web-app supply-chain exposure.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies prevention × pre_generation × graduated_hitl as the canonical
+  "generative UI" coding agent. Worth modeling separately from general
+  IDE agents because the curated-component-library pattern is a distinct
+  pre-generation fabrication mitigation — the model can only reach for
+  symbols on a vetted allow-list.

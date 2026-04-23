@@ -14,6 +14,7 @@ interface Tool {
 interface Crosswalk { taxonomy: string; external_id: string; confidence?: string; }
 interface FailureMode {
   id: string; name: string; description?: string;
+  aliases?: string[];
   prior_work?: string[]; crosswalks?: Crosswalk[];
 }
 interface Paper { id: string; title?: string; authors?: string | string[]; year?: number | string; venue?: string; }
@@ -175,7 +176,8 @@ export async function mountKGGraph(opts: {
     if (q && cy) {
       cy.nodes().forEach((n) => {
         if (n.style("display") === "none") return;
-        const hay = `${n.data("label") || ""} ${n.id()}`.toLowerCase();
+        const aliases = (n.data("aliases") as string[] | undefined) ?? [];
+        const hay = [n.data("label") || "", n.id(), ...aliases].join(" ").toLowerCase();
         if (hay.includes(q)) ids.add(n.id());
       });
     }
@@ -272,7 +274,10 @@ function buildElements(s: Snapshot): { elements: ElementDefinition[]; nodeCount:
       toolSize: toolSizeFromStars(stars),
     }});
   }
-  for (const fm of Object.values(fms)) elements.push({ data: { id: fm.id, type: "failure_mode", label: fm.name || fm.id } });
+  for (const fm of Object.values(fms)) elements.push({ data: {
+    id: fm.id, type: "failure_mode", label: fm.name || fm.id,
+    aliases: fm.aliases ?? [],
+  }});
   for (const tx of Object.values(taxos)) elements.push({ data: { id: tx.id, type: "taxonomy", label: tx.name || tx.id } });
   for (const pid of usedPaperIds) {
     const p = papers[pid];

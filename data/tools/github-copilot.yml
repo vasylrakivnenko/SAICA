@@ -1,0 +1,63 @@
+id: github-copilot
+name: GitHub Copilot
+tagline: Microsoft's market-incumbent coding assistant across inline, chat, workspace, and agent modes.
+description: >
+  GitHub's coding assistant family covering inline ghost-text
+  completion, Copilot Chat, Copilot Workspace (task-to-PR flow), and
+  the Copilot coding agent that runs tasks asynchronously in a GitHub
+  Actions sandbox. Supervision posture varies by mode: inline and chat
+  are graduated-HITL suggestion surfaces (detection via user
+  recognition of wrong suggestions); Workspace adds a plan-gate; the
+  coding agent runs autonomously and emits PRs for review. Integrated
+  content exclusions and enterprise policy controls gate what code and
+  context the model can see.
+
+first_released: 2021-06-29
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: github
+documentation_url: https://docs.github.com/copilot
+license: proprietary
+
+control_paradigm: detection
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - fabrication
+  - scope_creep
+
+locus_of_control:
+  - context
+  - human
+
+implements_techniques:
+  - ghost-text-completion
+  - chat-interface
+  - workspace-plan-gate
+  - content-exclusions
+  - pull-request-gate
+
+security_notes: >
+  Proprietary product from Microsoft/GitHub. Source code context is
+  sent to Azure-hosted OpenAI endpoints by default; enterprise plans
+  offer content exclusions, repository access scoping, and an IP-
+  indemnification duplicate-detection filter. The asynchronous coding
+  agent runs inside GitHub Actions runners — scope repository
+  permissions and secrets narrowly, since the agent inherits the
+  runner's token surface.
+signed_manifest: true
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  The market-incumbent coding assistant; no SAICA-KG is coherent
+  without it. Modeled as a single node at its dominant mode
+  (detection × pre_generation × graduated_hitl for inline/chat
+  ghost-text, the modality that shipped first and still carries most
+  usage). Copilot is deliberately multi-mode — Workspace and the
+  coding agent occupy adjacent cells, and follow-on nodes may split
+  them out if separate analysis becomes warranted.

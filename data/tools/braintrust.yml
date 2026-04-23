@@ -1,0 +1,59 @@
+id: braintrust
+name: Braintrust
+tagline: Commercial eval-first platform for LLM applications with prompt playground and online scoring.
+description: >
+  Hosted eval and observability platform for LLM applications.
+  Combines offline dataset-driven evals, an interactive prompt-and-
+  model comparison playground, online scoring on production traces,
+  and a TypeScript/Python SDK for trace capture. Differentiates from
+  observability-first peers by centering the experiment-and-eval
+  workflow: every prompt or model change is scored against datasets
+  before deployment, and regressions are surfaced at diff time.
+
+first_released: 2023-09-01
+last_updated: 2026-04-05
+maturity_status: stable
+
+published_by: braintrust-data
+documentation_url: https://www.braintrust.dev/docs
+license: proprietary
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - context_pollution
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - dataset-regression-eval
+  - llm-as-judge-eval
+  - prompt-playground
+  - online-scoring
+  - trace-capture
+
+security_notes: >
+  Proprietary hosted SaaS; prompts, completions, and datasets are sent
+  to Braintrust's backend by default. Enterprise plans offer on-prem
+  proxy and VPC-peered deployment options. Dataset storage contains
+  the training data used for evals — classify accordingly if
+  production traffic is ingested. Audit redaction hooks before
+  enabling capture on traffic containing secrets or customer data.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous as the
+  eval-first commercial platform. Worth modeling as a distinct node
+  because its center of gravity is the offline eval + prompt-
+  playground workflow rather than observability traces, which
+  represents a different supervision posture from LangSmith/Langfuse/
+  Phoenix even though the facet cell is shared.

@@ -57,5 +57,5 @@ inclusion_rationale: >
   CrewAI: AutoGen scopes behavior via per-agent system messages and
   turn protocols rather than explicit role/task contracts, which is
   worth separating in the taxonomy.
-stars: 57343
+stars: 57349
 stars_updated_at: '2026-04-22'

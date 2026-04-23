@@ -1,0 +1,56 @@
+id: replit-agent
+name: Replit Agent
+tagline: In-browser autonomous coding agent that builds and deploys apps end-to-end.
+description: >
+  Replit's built-in coding agent, which takes a natural-language brief,
+  scaffolds a project in a Replit workspace, writes files, installs
+  dependencies, and runs the app in Replit's cloud sandbox. Supervision
+  primitives: the Replit Nix-backed sandbox as recovery substrate, a
+  checkpoint-and-rollback history, a per-step approval toggle for
+  high-risk actions, and tight coupling to Replit's hosted deploy
+  pipeline. Default posture is fully_autonomous inside the sandbox with
+  post-hoc rollback rather than per-action gating.
+
+first_released: 2024-09-05
+last_updated: 2026-04-10
+maturity_status: stable
+
+published_by: replit
+documentation_url: https://docs.replit.com/replitai/agent
+license: proprietary
+
+control_paradigm: recovery
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - scope_creep
+
+locus_of_control:
+  - environment
+  - human
+
+implements_techniques:
+  - sandboxed-runtime
+  - checkpoint-rollback
+  - trajectory-logging
+  - hosted-deploy-gate
+
+security_notes: >
+  Proprietary hosted service. Code, prompts, and runtime outputs execute
+  on Replit's infrastructure. Broad shell and package-install access
+  inside the sandbox — treat dependency-install slopsquatting and
+  credential exposure as primary threats. Deployed apps inherit the
+  normal public-hosting threat model; scope secrets narrowly.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies recovery × post_generation × fully_autonomous, distinguished
+  from Devin and OpenHands by tight coupling to an in-browser IDE and a
+  hosted deploy target. Checkpoint-rollback inside a disposable sandbox
+  is the load-bearing recovery primitive.

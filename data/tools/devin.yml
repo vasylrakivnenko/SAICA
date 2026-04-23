@@ -1,0 +1,59 @@
+id: devin
+name: Devin
+tagline: Autonomous software-engineer agent with long-horizon task execution in a cloud sandbox.
+description: >
+  Closed-commercial autonomous coding agent from Cognition Labs. Runs in a
+  hosted cloud VM with shell, browser, and editor access, and is marketed
+  as an end-to-end software engineer that takes a ticket and returns a
+  pull request. Supervision posture is fully autonomous long-horizon
+  execution with post-hoc human review on the emitted PR; users can pause
+  and steer sessions but Devin does not ask per-action approval by
+  default. Session snapshotting and sandbox disposability provide the
+  recovery substrate.
+
+first_released: 2024-03-12
+last_updated: 2026-04-01
+maturity_status: stable
+
+published_by: cognition-labs
+documentation_url: https://docs.devin.ai
+license: proprietary
+
+control_paradigm: recovery
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+  - logic_error
+
+locus_of_control:
+  - environment
+  - human
+
+implements_techniques:
+  - sandboxed-runtime
+  - trajectory-logging
+  - pull-request-gate
+  - session-snapshotting
+
+security_notes: >
+  Proprietary hosted SaaS. Source code, credentials, and intermediate
+  artifacts are executed and stored on Cognition-operated cloud VMs;
+  enterprise deployments offer VPC isolation. Granting Devin access to
+  source repositories and CI secrets is the primary threat surface —
+  scope credentials narrowly and audit session logs. Agent runs broad
+  shell and browser actions inside its sandbox; treat sandbox escape and
+  credential exfiltration as the primary concerns.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Canonical fully_autonomous × recovery × post_generation exemplar for
+  the "autonomous software engineer" product category. Useful as the
+  commercial reference point against open-source counterparts
+  (OpenHands, SWE-agent) and for modeling long-horizon PR-gated
+  autonomy.

@@ -57,5 +57,5 @@ inclusion_rationale: >
   pre-generation contract: each node sees only declared state slices,
   which bounds context pollution and scope creep before generation
   rather than filtering outputs after.
-stars: 30082
+stars: 30095
 stars_updated_at: '2026-04-22'

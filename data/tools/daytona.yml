@@ -53,5 +53,5 @@ inclusion_rationale: >
   primitive is workspace snapshot/fork, which enables branching agent
   trajectories and rollback — a supervision capability beyond pure
   per-call sandbox isolation.
-stars: 72368
+stars: 72369
 stars_updated_at: '2026-04-22'

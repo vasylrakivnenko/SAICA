@@ -1,0 +1,63 @@
+id: arize-phoenix
+name: Arize Phoenix
+tagline: Open-source LLM tracing and evaluation platform built on OpenTelemetry.
+description: >
+  Open-source LLM and agent observability platform from Arize. Ingests
+  OpenInference/OpenTelemetry traces from any framework, provides a
+  local notebook-friendly UI for span-level inspection, and ships
+  built-in LLM-as-judge evaluators (hallucination, relevance, QA
+  correctness, toxicity, agent-tool-call correctness). Integrates with
+  LangChain, LlamaIndex, CrewAI, AutoGen, and the OpenAI/Anthropic
+  SDKs. Self-hostable container plus an Arize AX managed offering
+  sharing the same data model.
+
+first_released: 2023-04-17
+last_updated: 2026-04-05
+maturity_status: stable
+
+published_by: arize-ai
+repository_url: https://github.com/Arize-ai/phoenix
+documentation_url: https://arize.com/docs/phoenix
+license: Elastic-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - context_pollution
+  - fabrication
+
+locus_of_control:
+  - environment
+
+implements_techniques:
+  - trace-capture
+  - openinference-instrumentation
+  - llm-as-judge-eval
+  - dataset-regression-eval
+  - span-annotation
+
+security_notes: >
+  Core project is source-available under Elastic-2.0 and self-hostable
+  via Docker, which makes it a data-residency-friendly observability
+  option. Prompts and completions are the primary payload — redact
+  secrets and PII via the SDK hooks before ingest. OpenInference
+  instrumentation is framework-agnostic; audit auto-instrumentation
+  patches for any that wrap sensitive call sites.
+signed_manifest: false
+openssf_scorecard_score: null
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous alongside
+  Langfuse and LangSmith but with a tighter OpenTelemetry/
+  OpenInference standardization posture and a notebook-friendly local
+  mode. Worth modeling as a distinct node because it is the de-facto
+  reference implementation of OpenInference semantic conventions for
+  LLM traces.
+stars: 9392
+stars_updated_at: '2026-04-22'
