@@ -124,6 +124,58 @@ SnakeId = Annotated[
 ]
 
 
+# --- Provenance -----------------------------------------------------------
+
+
+class Provenance(BaseModel):
+    """How a node entered the KG — traceability back to the ingestion pipeline.
+
+    Attached to :class:`Tool` (and in future, other node types) at graduation
+    time. ``reviewer`` / ``review_date`` are populated post-merge; everything
+    else is filled in by the graduation CLI from the Postgres candidate row.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    source: str = Field(
+        description=(
+            "Where this node came from (e.g. 'manual', 'pipeline-v0.1',"
+            " 'import-from-awesome-list')."
+        ),
+    )
+    ingested_at: date = Field(
+        description="Date the node entered data/ (YYYY-MM-DD).",
+    )
+    extractor_model: Optional[str] = Field(
+        default=None,
+        description="LLM identifier that produced the structured draft (e.g. 'Kimi-K2.5').",
+    )
+    extractor_confidence: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Overall LLM confidence attached to the extraction payload (0-1).",
+    )
+    rerank_score: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Cohere rerank score used to prioritize this candidate (0-1).",
+    )
+    candidate_id: Optional[int] = Field(
+        default=None,
+        description="Link back to candidate_tools.id (or equivalent) in Postgres.",
+    )
+    reviewer: Optional[str] = Field(
+        default=None,
+        description="GitHub handle of the person who merged the node.",
+    )
+    review_date: Optional[date] = Field(
+        default=None,
+        description="Date the merge was accepted.",
+    )
+
+
 # --- Tool -----------------------------------------------------------------
 
 
@@ -211,6 +263,14 @@ class Tool(BaseModel):
     contributors: Optional[list[str]] = None
     editorial_notes: Optional[str] = None
     inclusion_rationale: Optional[str] = None
+
+    provenance: Optional[Provenance] = Field(
+        default=None,
+        description=(
+            "How this tool entered the KG. Optional on pre-existing nodes;"
+            " newly-graduated tools must populate this."
+        ),
+    )
 
 
 # --- FailureMode ----------------------------------------------------------
@@ -418,6 +478,7 @@ __all__ = [
     "MaturityStatus",
     "NODE_MODELS",
     "Paper",
+    "Provenance",
     "SaicaAxis",
     "TemporalPhase",
     "Taxonomy",

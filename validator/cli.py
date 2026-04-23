@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -48,6 +49,7 @@ except ImportError:
 
 REPO = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO / "data"
+MANIFEST_PATH = DATA_DIR / "MANIFEST.json"
 
 # Ensure the repo root is importable whether this script is invoked directly
 # (``python validator/cli.py``) or as a module (``python -m validator.cli``).
@@ -166,16 +168,58 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
     modes = {n["id"]: n for _, n in iter_nodes("failure_modes")}
     papers = {n["id"]: n for _, n in iter_nodes("papers")}
     taxonomies = {n["id"]: n for _, n in iter_nodes("taxonomies")}
+    crosswalks = {n["id"]: n for _, n in iter_nodes("crosswalks")}
 
     for mode_id, mode in modes.items():
         for pid in mode.get("prior_work", []):
             if pid not in papers:
                 err.append(f"[failure_modes] {mode_id} cites missing paper '{pid}'")
         for cw in mode.get("crosswalks", []) or []:
-            if cw["taxonomy"] not in taxonomies:
+            tax_id = cw.get("taxonomy")
+            if tax_id not in taxonomies:
                 err.append(
                     f"[failure_modes] {mode_id} crosswalk references missing taxonomy"
-                    f" '{cw['taxonomy']}'"
+                    f" '{tax_id}'"
+                )
+                continue
+            # Inline FailureMode crosswalks: external_id must be a category of
+            # the referenced taxonomy.
+            known_ext_ids = {
+                c["external_id"]
+                for c in taxonomies[tax_id].get("categories", []) or []
+                if isinstance(c, dict) and "external_id" in c
+            }
+            ext = cw.get("external_id")
+            if ext is not None and ext not in known_ext_ids:
+                err.append(
+                    f"[failure_modes] {mode_id} crosswalk external_id '{ext}' "
+                    f"is not a category of taxonomy '{tax_id}'"
+                )
+
+    # Standalone Crosswalk nodes: each mapping's external_id must exist in
+    # the target taxonomy's categories.
+    for cw_id, cw in crosswalks.items():
+        tax_id = cw.get("taxonomy")
+        if tax_id not in taxonomies:
+            err.append(
+                f"[crosswalks] {cw_id} references missing taxonomy '{tax_id}'"
+            )
+            continue
+        known_ext_ids = {
+            c["external_id"]
+            for c in taxonomies[tax_id].get("categories", []) or []
+            if isinstance(c, dict) and "external_id" in c
+        }
+        for m in cw.get("mappings", []) or []:
+            if not isinstance(m, dict):
+                continue
+            ext = m.get("external_id")
+            if ext is None:
+                continue
+            if ext not in known_ext_ids:
+                err.append(
+                    f"[crosswalks] {cw_id} mapping saica={m.get('saica_value')} -> "
+                    f"external={ext} not a category of taxonomy '{tax_id}'"
                 )
 
     known_modes = set(modes) | KNOWN_FAILURE_MODE_IDS
@@ -241,6 +285,62 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
             warn.append(
                 f"[failure_modes] {mode_id}: only {len(mitigated[mode_id])} mitigating tools"
                 f" (under-covered)"
+            )
+
+    # ID-immutability lock: every id in the committed MANIFEST.json must
+    # still exist in the YAML corpus. A missing id means someone renamed
+    # or deleted a node, breaking external citations.
+    _check_manifest_lock(err, tools, modes, papers, taxonomies, crosswalks)
+
+
+def _check_manifest_lock(
+    err: list[str],
+    tools: dict[str, Any],
+    modes: dict[str, Any],
+    papers: dict[str, Any],
+    taxonomies: dict[str, Any],
+    crosswalks: dict[str, Any],
+) -> None:
+    """If ``data/MANIFEST.json`` exists, every id it declares must still be
+    present in the current corpus. This is the "external citations stay
+    honest" guarantee — a rename shows up as ``old_id`` missing even if
+    ``new_id`` has been added. The deeper contents of the manifest (count
+    totals, URLs) are enforced by ``validator/generate_manifest.py --check``
+    in CI; here we only check id membership so local ``validator/cli.py``
+    runs stay useful even when the manifest is one commit behind.
+    """
+    if not MANIFEST_PATH.exists():
+        return
+    try:
+        manifest = json.loads(MANIFEST_PATH.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        err.append(f"[manifest] data/MANIFEST.json is unreadable: {exc}")
+        return
+
+    declared = manifest.get("ids", {})
+    current = {
+        "tools": set(tools.keys()),
+        "failure_modes": set(modes.keys()),
+        "papers": set(papers.keys()),
+        "taxonomies": set(taxonomies.keys()),
+        "crosswalks": set(crosswalks.keys()),
+    }
+    for kind, live_ids in current.items():
+        entry = declared.get(kind)
+        if isinstance(entry, dict):
+            declared_ids = set(entry.keys())
+        elif isinstance(entry, list):
+            declared_ids = set(entry)
+        else:
+            declared_ids = set()
+        missing = declared_ids - live_ids
+        for mid in sorted(missing):
+            err.append(
+                f"[manifest] {kind} id '{mid}' is in MANIFEST.json but no longer "
+                f"present in data/{kind}/ — renames and deletions break external "
+                f"citations. Restore the id or run "
+                f"`python -m validator.generate_manifest` after confirming the "
+                f"change is intentional."
             )
 
 

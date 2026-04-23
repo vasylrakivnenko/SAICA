@@ -1,0 +1,28 @@
+id: nono
+name: nono
+tagline: Capability-based sandbox for securely running AI agents with zero setup
+description: nono is a capability-based, multiplexing sandbox tool designed for developers to securely run AI agents. It provides zero-setup security isolation enabling a seamless path from development to production without additional infrastructure or latency overhead.
+first_released: '2026-01-31'
+last_updated: '2026-04-23'
+maturity_status: experimental
+repository_url: https://github.com/always-further/nono
+license: Apache-2.0
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+  - scope_creep
+stars: 2080
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=229 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.890713). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.891
+  candidate_id: 229

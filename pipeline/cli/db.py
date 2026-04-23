@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from pipeline import db
+from pipeline.logging_config import configure_logging
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
@@ -41,6 +42,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    configure_logging()
     parser = _build_parser()
     args = parser.parse_args(argv)
     return args.func(args)

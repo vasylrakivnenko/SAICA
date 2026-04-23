@@ -1,0 +1,27 @@
+id: cordum
+name: Cordum
+tagline: An open agent control plane that governs autonomous AI agents with pre-execution policy enforcement, approval gates, and audit trails.
+description: An open agent control plane that governs autonomous AI agents with pre-execution policy enforcement, approval gates, and audit trails. It integrates with LangChain, CrewAI, MCP, and other frameworks to provide oversight and governance.
+first_released: '2026-01-11'
+last_updated: '2026-04-22'
+maturity_status: experimental
+repository_url: https://github.com/cordum-io/cordum
+license: NOASSERTION
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - scope_creep
+stars: 465
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=81 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.95608). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.956
+  candidate_id: 81

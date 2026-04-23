@@ -27,16 +27,31 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Json
 
 from pipeline import db
+from pipeline.cost_caps import CallBudget, CostCapExceeded
 from pipeline.rerank.cohere import (
     CohereRerankClient,
     DocScore,
     compose_document,
     rerank_candidates,
+    rerank_provenance,
 )
-from pipeline.rerank.queries import SUPERVISION_QUERIES, RerankQuery
+from pipeline.rerank.queries import (
+    QUERY_SET_VERSION,
+    SUPERVISION_QUERIES,
+    RerankQuery,
+    queries_content_hash,
+)
 
 
 log = logging.getLogger("pipeline.cli.rerank")
+
+# Conservative default: 100 Cohere rerank calls. Each bundles many docs so
+# the useful-work ceiling is large; 100 is still well under any plausible
+# runaway. Users can override with --max-calls.
+DEFAULT_MAX_CALLS = 100
+
+# Exit code reserved pipeline-wide for "budget hit".
+EXIT_BUDGET_HIT = 3
 
 
 # ---------------------------------------------------------------------------
@@ -44,14 +59,20 @@ log = logging.getLogger("pipeline.cli.rerank")
 # ---------------------------------------------------------------------------
 
 
-def _fetch_rows(limit: Optional[int], ids: Optional[list[int]]) -> list[dict]:
+def _fetch_rows(
+    limit: Optional[int],
+    ids: Optional[list[int]],
+    *,
+    rescore_stale: bool = False,
+) -> list[dict]:
     """Pull candidate_tools rows from Postgres.
 
     If ``ids`` is provided, fetch exactly those (regardless of status);
     otherwise fall back to pending rows ordered oldest-first (same contract
-    as ``db.get_pending``). We do our own query so we can keep
-    ``source_url``, ``summary`` etc on the row without patching the public
-    ``db`` helper.
+    as ``db.get_pending``). When ``rescore_stale`` is True, the pending
+    selection is post-filtered in Python to only rows whose stored
+    ``rerank_query_set_hash`` doesn't match the current
+    ``queries_content_hash()`` (rows never scored also qualify).
     """
     if ids:
         sql = (
@@ -72,7 +93,15 @@ def _fetch_rows(limit: Optional[int], ids: Optional[list[int]]) -> list[dict]:
         params = (limit,)
     with db.get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
         cur.execute(sql, params)
-        return list(cur.fetchall())
+        rows = list(cur.fetchall())
+
+    if rescore_stale:
+        current_hash = queries_content_hash()
+        rows = [
+            r for r in rows
+            if (r.get("nlp_tags") or {}).get("rerank_query_set_hash") != current_hash
+        ]
+    return rows
 
 
 def _readme_lookup(url: str) -> Optional[str]:
@@ -100,15 +129,23 @@ def _write_scores(rows_by_id: dict[int, dict], scores: list[DocScore]) -> int:
     """Merge rerank scores into ``candidate_tools.nlp_tags``. Returns row count.
 
     Fields written to ``nlp_tags``:
-        rerank_score        -- max across queries (primary ranking signal)
-        rerank_score_mean   -- mean across queries
-        rerank_best_query   -- query_id that produced score_max
-        rerank_per_query    -- {query_id: float}
-        rerank_updated_at   -- ISO8601 string (UTC)
+        rerank_score              -- max across queries (primary ranking signal)
+        rerank_score_mean         -- mean across queries
+        rerank_best_query         -- query_id that produced score_max
+        rerank_per_query          -- {query_id: float}
+        rerank_updated_at         -- ISO8601 string (UTC)
+        rerank_query_set_version  -- ``QUERY_SET_VERSION`` at write time
+        rerank_query_set_hash     -- short hash of the live SUPERVISION_QUERIES
+        rerank_scored_at          -- ISO timestamp (pairs with hash)
+
+    Storing the version + hash lets a later process detect stale scores
+    (``rerank_query_set_hash`` differs from ``queries_content_hash()``) and
+    re-score just those rows with ``--rescore-stale``.
     """
     from datetime import datetime, timezone
 
     now = datetime.now(timezone.utc).isoformat()
+    provenance = rerank_provenance()
     sql = (
         "UPDATE candidate_tools SET nlp_tags = "
         "COALESCE(nlp_tags, '{}'::jsonb) || %s::jsonb WHERE id = %s"
@@ -126,6 +163,7 @@ def _write_scores(rows_by_id: dict[int, dict], scores: list[DocScore]) -> int:
                     k: round(v, 6) for k, v in score.per_query.items()
                 },
                 "rerank_updated_at": now,
+                **provenance,
             }
             cur.execute(sql, (Json(patch), score.candidate_id))
             updated += 1
@@ -207,9 +245,15 @@ def _select_queries(query_id: Optional[str]) -> list[RerankQuery]:
 
 def _cmd_tools(args: argparse.Namespace) -> int:
     ids = _parse_ids(args.ids)
-    rows = _fetch_rows(args.limit, ids)
+    rows = _fetch_rows(args.limit, ids, rescore_stale=args.rescore_stale)
     if not rows:
-        print("no candidates to score")
+        if args.rescore_stale:
+            print(
+                f"no stale candidates to rescore "
+                f"(current hash={queries_content_hash()}, version={QUERY_SET_VERSION})"
+            )
+        else:
+            print("no candidates to score")
         return 0
     queries = _select_queries(args.query_id)
 
@@ -217,14 +261,26 @@ def _cmd_tools(args: argparse.Namespace) -> int:
         _dry_run(rows, queries)
         return 0
 
+    budget = CallBudget(
+        max_calls=args.max_calls,
+        max_tokens_estimate=args.max_cost_tokens,
+    )
     t0 = time.time()
     client = CohereRerankClient()
-    scores = rerank_candidates(
-        rows,
-        queries,
-        readme_lookup=_readme_lookup,
-        client=client,
-    )
+    try:
+        scores = rerank_candidates(
+            rows,
+            queries,
+            readme_lookup=_readme_lookup,
+            client=client,
+            budget=budget,
+        )
+    except CostCapExceeded as exc:
+        print(
+            f"[budget] cost cap hit: {exc}; {budget.summary()}",
+            file=sys.stderr,
+        )
+        return EXIT_BUDGET_HIT
     elapsed = time.time() - t0
 
     rows_by_id = {int(r["id"]): r for r in rows}
@@ -307,15 +363,39 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="skip writing scores back to Postgres",
     )
+    sp.add_argument(
+        "--rescore-stale",
+        action="store_true",
+        help=(
+            "only score pending rows whose stored rerank_query_set_hash "
+            "differs from the current live hash (i.e. the query set has "
+            "been edited since they were last scored)"
+        ),
+    )
+    sp.add_argument(
+        "--max-calls",
+        type=int,
+        default=DEFAULT_MAX_CALLS,
+        help=(
+            f"hard cap on Cohere rerank HTTP calls for this run "
+            f"(default {DEFAULT_MAX_CALLS}). "
+            f"Exits with code {EXIT_BUDGET_HIT} when exceeded."
+        ),
+    )
+    sp.add_argument(
+        "--max-cost-tokens",
+        type=int,
+        default=None,
+        help="optional soft cap on total tokens across the run",
+    )
     sp.set_defaults(func=_cmd_tools)
     return p
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(levelname)s %(name)s: %(message)s",
-    )
+    from pipeline.logging_config import configure_logging
+
+    configure_logging()
     parser = _build_parser()
     args = parser.parse_args(argv)
     return args.func(args)

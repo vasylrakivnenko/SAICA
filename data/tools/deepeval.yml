@@ -1,0 +1,28 @@
+id: deepeval
+name: DeepEval
+tagline: The open-source LLM evaluation framework for testing and evaluating LLM applications across 20+ custom and researched metrics.
+description: DeepEval is an open-source framework for unit testing and evaluating LLM applications. It provides 20+ research-backed evaluation metrics including hallucination detection, correctness, answer relevancy, faithfulness, contextual recall/precision, and prompt injection detection. Developers can integrate it into CI/CD pipelines for continuous evaluation of LLM outputs. Supports custom metrics, chain-of-thought evaluation, and synthetic data generation for test cases.
+first_released: '2023-08-10'
+last_updated: '2026-04-22'
+maturity_status: experimental
+repository_url: https://github.com/confident-ai/deepeval
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: full_hitl
+addresses_failure_modes:
+  - fabrication
+  - logic_error
+stars: 14937
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=97 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.845739). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.846
+  candidate_id: 97

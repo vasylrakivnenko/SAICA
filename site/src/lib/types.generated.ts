@@ -112,6 +112,43 @@ export interface Tool {
   contributors?: string[];
   editorial_notes?: string;
   inclusion_rationale?: string;
+  /**
+   * How this tool entered the KG. Optional on pre-existing nodes; newly-graduated tools must populate this.
+   */
+  provenance?: {
+    /**
+     * Where this node came from (e.g. 'manual', 'pipeline-v0.1', 'import-from-awesome-list').
+     */
+    source: string;
+    /**
+     * Date the node entered data/ (YYYY-MM-DD).
+     */
+    ingested_at: string;
+    /**
+     * LLM identifier that produced the structured draft (e.g. 'Kimi-K2.5').
+     */
+    extractor_model?: string;
+    /**
+     * Overall LLM confidence attached to the extraction payload (0-1).
+     */
+    extractor_confidence?: number;
+    /**
+     * Cohere rerank score used to prioritize this candidate (0-1).
+     */
+    rerank_score?: number;
+    /**
+     * Link back to candidate_tools.id (or equivalent) in Postgres.
+     */
+    candidate_id?: number;
+    /**
+     * GitHub handle of the person who merged the node.
+     */
+    reviewer?: string;
+    /**
+     * Date the merge was accepted.
+     */
+    review_date?: string;
+  };
 }
 
 /**

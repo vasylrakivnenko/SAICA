@@ -6,12 +6,20 @@ failure_mode / control_paradigm facet. Kept deliberately small (<=10) so
 every candidate is scored in ~N_queries HTTP calls, capping cost + latency.
 
 Exports:
-    RerankQuery          -- pydantic model with id / text / facet / weight
-    SUPERVISION_QUERIES  -- the canonical list, used as the CLI default
+    RerankQuery            -- pydantic model with id / text / facet / weight
+    SUPERVISION_QUERIES    -- the canonical list, used as the CLI default
+    QUERY_SET_VERSION      -- bump manually when the list is edited
+    queries_content_hash() -- short SHA1 fingerprint of the live list
+
+Stored rerank scores are only comparable across candidates when they were
+produced against the *same* query set. ``rerank_candidates`` writes both
+``QUERY_SET_VERSION`` and ``queries_content_hash()`` alongside each score;
+a later reviewer/CLI uses the hash to detect stale scores and re-rerank.
 """
 
 from __future__ import annotations
 
+from hashlib import sha1
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -107,4 +115,30 @@ SUPERVISION_QUERIES: list[RerankQuery] = [
 ]
 
 
-__all__ = ["RerankQuery", "SUPERVISION_QUERIES"]
+# ---------------------------------------------------------------------------
+# Versioning
+# ---------------------------------------------------------------------------
+#
+# Re-bump ``QUERY_SET_VERSION`` *in the same commit* that edits
+# ``SUPERVISION_QUERIES`` (text, ids, order, or list membership). The version
+# string is opaque to consumers; it just needs to be monotonically unique.
+#
+# ``queries_content_hash()`` is derived from the live list; it detects edits
+# that forgot to bump the version too. Readers typically treat a mismatch
+# against the stored hash as "this score is stale".
+
+QUERY_SET_VERSION = "2026-04-23.v1"
+
+
+def queries_content_hash() -> str:
+    """Short SHA1 fingerprint of (id, text) pairs for the live query set."""
+    blob = "|".join(q.id + ":" + q.text for q in SUPERVISION_QUERIES).encode()
+    return sha1(blob).hexdigest()[:12]
+
+
+__all__ = [
+    "QUERY_SET_VERSION",
+    "RerankQuery",
+    "SUPERVISION_QUERIES",
+    "queries_content_hash",
+]

@@ -27,6 +27,8 @@ research/cache/
 .postgres-data/
 # Per-day API usage counters (Elicit budget, etc.)
 .pipeline/
+# Local DB snapshots
+research/backups/
 
 .DS_Store
 .idea/

@@ -1,0 +1,25 @@
+id: agentic-guardrails
+name: Agentic Guardrails
+tagline: Guardrails-based pipelines for agentic and RAG solutions addressing security risks and hallucinations.
+description: A guardrails-based pipeline framework designed for agentic and RAG (Retrieval-Augmented Generation) solutions. The tool provides protective mechanisms to address security risks and prevent hallucinations in AI-generated outputs.
+first_released: '2026-04-23'
+maturity_status: experimental
+repository_url: https://github.com/FareedKhan-dev/agentic-guardrails
+license: NOASSERTION
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - fabrication
+  - security_vulnerability
+inclusion_rationale: >
+  Graduated from pipeline candidate id=273 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.825927). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.826
+  candidate_id: 273

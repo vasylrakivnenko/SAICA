@@ -1,0 +1,28 @@
+id: trulens
+name: TruLens
+tagline: Evaluation and Tracking for LLM Experiments and AI Agents
+description: TruLens provides open-source tools for evaluating and tracking LLM experiments with programmable feedback functions. It enables developers to instrument, evaluate, and iterate on LLM applications using feedback functions for quality assessment, including coverage of context relevance, groundedness, and answer relevance.
+first_released: '2020-11-02'
+last_updated: '2026-04-22'
+maturity_status: experimental
+repository_url: https://github.com/truera/trulens
+license: MIT
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+addresses_failure_modes:
+  - fabrication
+  - context_pollution
+stars: 3266
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=107 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.918801). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.919
+  candidate_id: 107

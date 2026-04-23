@@ -28,6 +28,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Optional
 
+from pipeline.cost_caps import CallBudget
 from pipeline.extract.schemas import PaperExtraction, ToolExtraction
 
 log = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ MAX_CONCURRENCY = 3          # leave 5 vendor-headroom
 MAX_TOKENS_DEFAULT = 4096    # must be >= 2048 for this model
 MAX_RETRIES = 3              # attempts on 429 / transient network errors
 BASE_BACKOFF_SECONDS = 2.0   # 2, 4, 8 ... plus jitter
+MAX_RETRY_AFTER_SECONDS = 120.0  # cap for server-specified Retry-After
 
 _concurrency_sem = threading.BoundedSemaphore(MAX_CONCURRENCY)
 
@@ -280,6 +282,52 @@ def _candidate_user_prompt(kind: str, row: dict) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _http_status_from_exc(exc: BaseException) -> Optional[int]:
+    """Best-effort extraction of an HTTP status code from an OpenAI SDK exc.
+
+    Checks ``exc.status_code`` (set on ``openai.APIStatusError`` + subclasses)
+    then ``exc.response.status_code``. Returns None when the exception is not
+    HTTP-shaped — callers treat that as "transient" and use exp-backoff.
+    """
+    status = getattr(exc, "status_code", None)
+    if isinstance(status, int):
+        return status
+    response = getattr(exc, "response", None)
+    if response is not None:
+        rc = getattr(response, "status_code", None)
+        if isinstance(rc, int):
+            return rc
+    return None
+
+
+def _retry_after_seconds(exc: BaseException) -> Optional[float]:
+    """Parse ``Retry-After`` from an OpenAI SDK exception's response headers.
+
+    Returns the number of seconds to sleep, clamped to
+    :data:`MAX_RETRY_AFTER_SECONDS`, or ``None`` when no header is present
+    (or it's unparseable).
+    """
+    response = getattr(exc, "response", None)
+    if response is None:
+        return None
+    headers = getattr(response, "headers", None)
+    if headers is None:
+        return None
+    try:
+        raw = headers.get("Retry-After") or headers.get("retry-after")
+    except Exception:  # noqa: BLE001 - defensive against weird header mappings
+        return None
+    if not raw:
+        return None
+    try:
+        seconds = float(raw)
+    except (TypeError, ValueError):
+        return None
+    if seconds < 0:
+        return None
+    return min(seconds, MAX_RETRY_AFTER_SECONDS)
+
+
 def _call_kimi_function(
     *,
     client,
@@ -288,11 +336,16 @@ def _call_kimi_function(
     system: str,
     user: str,
     max_tokens: int = MAX_TOKENS_DEFAULT,
+    budget: Optional[CallBudget] = None,
 ) -> dict:
     """Invoke Kimi with function-calling structured output.
 
     Returns the JSON dict that the model passed as the function arguments.
     Raises on repeated failure or malformed output.
+
+    When ``budget`` is non-None, one :meth:`CallBudget.consume` is recorded
+    per HTTP call actually made (including failed attempts — they still cost
+    the vendor). Passing the cap raises ``CostCapExceeded``.
     """
     if max_tokens < 2048:
         raise ValueError("max_tokens must be >= 2048 for Kimi-K2.5 (reasoning model).")
@@ -311,6 +364,7 @@ def _call_kimi_function(
 
     last_exc: Optional[BaseException] = None
     for attempt in range(1, MAX_RETRIES + 1):
+        resp = None
         try:
             with _concurrency_sem:
                 resp = client.chat.completions.create(
@@ -325,20 +379,43 @@ def _call_kimi_function(
                 )
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
-            # Heuristically classify: anything with 429 in the message is a
-            # rate-limit; otherwise treat as transient and retry-with-backoff
-            # up to MAX_RETRIES.
-            is_429 = "429" in str(exc) or "rate" in str(exc).lower()
-            if attempt >= MAX_RETRIES:
+            # Use the real HTTP status (from openai.APIStatusError /
+            # RateLimitError) rather than string-matching "429". Treat
+            # 429 + 5xx as retryable; everything else propagates.
+            status = _http_status_from_exc(exc)
+            is_rate_limit = status == 429
+            is_server_err = status is not None and 500 <= status < 600
+            retryable = is_rate_limit or is_server_err or status is None
+
+            # The request hit the wire even if we got an error back, so the
+            # call still counts against the budget. This is a no-op when
+            # budget is None.
+            if budget is not None:
+                budget.consume(call=True, tokens=0)
+
+            if not retryable or attempt >= MAX_RETRIES:
                 raise
-            backoff = BASE_BACKOFF_SECONDS * (2 ** (attempt - 1))
-            backoff += random.uniform(0, 0.5)
+
+            retry_after = _retry_after_seconds(exc) if is_rate_limit or is_server_err else None
+            if retry_after is not None:
+                backoff = retry_after
+                backoff_source = f"Retry-After={retry_after:.1f}s"
+            else:
+                backoff = BASE_BACKOFF_SECONDS * (2 ** (attempt - 1))
+                backoff += random.uniform(0, 0.5)
+                backoff_source = "exp-backoff"
             log.warning(
-                "kimi call failed (attempt %d/%d, 429=%s): %s — backing off %.1fs",
-                attempt, MAX_RETRIES, is_429, exc, backoff,
+                "kimi call failed (attempt %d/%d, status=%s, %s): %s — backing off %.1fs",
+                attempt, MAX_RETRIES, status, backoff_source, exc, backoff,
             )
             time.sleep(backoff)
             continue
+
+        # Successful HTTP; record the call + usage tokens before parsing.
+        if budget is not None:
+            usage = getattr(resp, "usage", None)
+            tokens = int(getattr(usage, "total_tokens", 0) or 0)
+            budget.consume(call=True, tokens=tokens)
 
         choice = resp.choices[0]
         tool_calls = getattr(choice.message, "tool_calls", None) or []
@@ -507,11 +584,17 @@ def _build_system_prompt(candidate_row: Optional[dict] = None) -> str:
     return prompt + preseed
 
 
-def extract_tool(candidate_row: dict, *, client=None) -> ToolExtraction:
+def extract_tool(
+    candidate_row: dict,
+    *,
+    client=None,
+    budget: Optional[CallBudget] = None,
+) -> ToolExtraction:
     """Extract a ToolExtraction from a candidate_tools row.
 
     The client is instantiated on demand if not provided. Caller handles
-    caching (see ``pipeline/extract/cache.py``).
+    caching (see ``pipeline/extract/cache.py``). Pass a :class:`CallBudget`
+    to cap calls/tokens across a batch; default ``None`` means no cap.
     """
     client = client or get_client()
     schema = _json_schema_for(ToolExtraction)
@@ -523,6 +606,7 @@ def extract_tool(candidate_row: dict, *, client=None) -> ToolExtraction:
         tool_parameters=schema,
         system=system_prompt,
         user=_candidate_user_prompt("tools", candidate_row),
+        budget=budget,
     )
     extraction = ToolExtraction.model_validate(args)
 
@@ -545,7 +629,12 @@ def extract_tool(candidate_row: dict, *, client=None) -> ToolExtraction:
     return extraction
 
 
-def extract_paper(candidate_row: dict, *, client=None) -> PaperExtraction:
+def extract_paper(
+    candidate_row: dict,
+    *,
+    client=None,
+    budget: Optional[CallBudget] = None,
+) -> PaperExtraction:
     """Extract a PaperExtraction from a candidate_papers row."""
     client = client or get_client()
     schema = _json_schema_for(PaperExtraction)
@@ -555,6 +644,7 @@ def extract_paper(candidate_row: dict, *, client=None) -> PaperExtraction:
         tool_parameters=schema,
         system=SYSTEM_PROMPT,
         user=_candidate_user_prompt("papers", candidate_row),
+        budget=budget,
     )
     return PaperExtraction.model_validate(args)
 
@@ -564,12 +654,14 @@ def extract_batch(
     kind: str,
     *,
     client=None,
+    budget: Optional[CallBudget] = None,
 ) -> list[ToolExtraction | PaperExtraction]:
     """Parallelised batch extraction. Honours the global concurrency cap.
 
     Exceptions per-candidate are swallowed into a placeholder ``None`` entry
     in the result list; the caller decides how to log / retry. Index order
-    matches ``candidates``.
+    matches ``candidates``. If a shared ``budget`` trips mid-batch the
+    underlying :class:`CostCapExceeded` is stored as the row's result.
     """
     if kind not in ("tools", "papers"):
         raise ValueError(f"Unknown kind {kind!r}")
@@ -579,7 +671,7 @@ def extract_batch(
 
     with ThreadPoolExecutor(max_workers=MAX_CONCURRENCY) as pool:
         fut_to_idx = {
-            pool.submit(fn, row, client=client): idx
+            pool.submit(fn, row, client=client, budget=budget): idx
             for idx, row in enumerate(candidates)
         }
         for fut in as_completed(fut_to_idx):

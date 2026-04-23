@@ -9,18 +9,18 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from datetime import date
 from pathlib import Path
 from typing import Any, Optional
 
-from pipeline.sources._http import USER_AGENT, load_env, rate_limited_session
+from pipeline.config import PIPELINE_STATE_DIR, optional_env
+from pipeline.sources._http import USER_AGENT, rate_limited_session
 
 log = logging.getLogger(__name__)
 
 ENDPOINT = "https://elicit.com/api/v1/search"
 DAILY_BUDGET = 100
-_USAGE_DIR = Path("/Users/vasyl/saicakg/.pipeline")
+_USAGE_DIR = PIPELINE_STATE_DIR
 
 # Elicit has no strict published limit beyond the daily budget; be polite.
 _SESSION = rate_limited_session(min_interval_s=1.0, user_agent=USER_AGENT)
@@ -104,8 +104,7 @@ def search(query: str, *, limit: int = 10) -> list[dict[str, Any]]:
     incremented BEFORE the HTTP call — a failed call still counts toward the
     quota, which matches how the upstream provider bills.
     """
-    load_env()
-    api_key = os.environ.get("ELICIT_API_KEY")
+    api_key = optional_env("ELICIT_API_KEY")
     if not api_key:
         log.error("ELICIT_API_KEY not set; skipping elicit.search")
         return []

@@ -76,6 +76,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    from pipeline.logging_config import configure_logging
+
+    configure_logging()
     parser = build_parser()
     args = parser.parse_args(argv)
     return args.func(args)

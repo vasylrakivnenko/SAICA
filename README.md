@@ -67,6 +67,22 @@ let the scheduled workflow in `.github/workflows/refresh-stars.yml` do it
 weekly (the scaffold is committed but not activated — enable it by uncommenting
 the `schedule` trigger and configuring the PR-authoring permissions).
 
+### Local secrets (`.env.local`)
+
+Pipeline scripts read API keys and DB settings from `.env.local` at the repo
+root. Copy `.env.example` to get started, then lock down permissions so only
+your user can read it:
+
+```
+cp .env.example .env.local
+chmod 600 .env.local
+$EDITOR .env.local
+```
+
+`.env.local` is gitignored — never commit it. `pipeline.config.load_env_once`
+loads it once per process and never overrides variables already set in the
+process environment, so CI can still override via real env vars.
+
 ## License
 
 - Code: Apache-2.0

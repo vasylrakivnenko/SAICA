@@ -216,6 +216,55 @@
     },
     "inclusion_rationale": {
       "type": "string"
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source",
+        "ingested_at"
+      ],
+      "properties": {
+        "source": {
+          "description": "Where this node came from (e.g. 'manual', 'pipeline-v0.1', 'import-from-awesome-list').",
+          "type": "string"
+        },
+        "ingested_at": {
+          "description": "Date the node entered data/ (YYYY-MM-DD).",
+          "format": "date",
+          "type": "string"
+        },
+        "extractor_model": {
+          "type": "string",
+          "description": "LLM identifier that produced the structured draft (e.g. 'Kimi-K2.5')."
+        },
+        "extractor_confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number",
+          "description": "Overall LLM confidence attached to the extraction payload (0-1)."
+        },
+        "rerank_score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number",
+          "description": "Cohere rerank score used to prioritize this candidate (0-1)."
+        },
+        "candidate_id": {
+          "type": "integer",
+          "description": "Link back to candidate_tools.id (or equivalent) in Postgres."
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "GitHub handle of the person who merged the node."
+        },
+        "review_date": {
+          "format": "date",
+          "type": "string",
+          "description": "Date the merge was accepted."
+        }
+      },
+      "additionalProperties": false,
+      "description": "How this tool entered the KG. Optional on pre-existing nodes; newly-graduated tools must populate this."
     }
   },
   "additionalProperties": false

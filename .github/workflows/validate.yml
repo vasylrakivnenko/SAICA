@@ -1,0 +1,41 @@
+# SAICA-KG data-integrity gate.
+#
+# Runs on every PR and every push to main. Blocks merges when:
+#   * a YAML node fails Pydantic validation or a cross-node invariant
+#   * a committed JSON Schema is stale vs the Pydantic source of truth
+#   * data/MANIFEST.json is out of date (id renames, deletions, new nodes)
+#
+# This is intentionally separate from tests.yml so schema/manifest drift is
+# distinguishable from a pytest failure in the PR checks list.
+
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install -r validator/requirements.txt
+          pip install -r pipeline/requirements.txt
+
+      - name: Validate YAML nodes
+        run: python validator/cli.py
+
+      - name: Check generated schemas are up to date
+        run: python -m validator.generate_schemas --check
+
+      - name: Check manifest is up to date
+        run: python -m validator.generate_manifest --check

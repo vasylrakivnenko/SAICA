@@ -374,6 +374,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[Iterable[str]] = None) -> int:
+    from pipeline.logging_config import configure_logging
+
+    configure_logging()
     args = _build_parser().parse_args(list(argv) if argv is not None else None)
 
     # Deferred import so tests can run without psycopg installed.

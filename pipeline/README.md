@@ -83,3 +83,25 @@ generated columns, and `TIMESTAMPTZ`. Use real Postgres.
 - `update_candidate_status(kind, candidate_id, status, reviewer=None, graduated_to=None)`.
 - `raw_results_by_query(source, query)` — list rows for an exact query.
 - `table_counts()` — `[(table, count), ...]` across all pipeline tables.
+
+## Backup & restore
+
+Local-only Postgres snapshots via `pg_dump` + gzip (plain SQL, not `-F c`,
+so a reviewer can `zless` them).
+
+```bash
+# snapshot -> research/backups/saica_kg_<ISO>.sql.gz
+.venv/bin/python -m pipeline.cli.backup
+
+# custom destination
+.venv/bin/python -m pipeline.cli.backup --out /tmp/kg.sql.gz
+
+# list known snapshots (newest first)
+.venv/bin/python -m pipeline.cli.backup --list
+
+# restore (interactive confirmation required; --yes to skip)
+.venv/bin/python -m pipeline.cli.backup --restore research/backups/saica_kg_<ISO>.sql.gz
+```
+
+DSN comes from `POSTGRES_URL`. Snapshots live under `research/backups/`
+which is git-ignored.

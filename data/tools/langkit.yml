@@ -1,0 +1,27 @@
+id: langkit
+name: LangKit
+tagline: Open-source toolkit for monitoring LLMs, extracting safety and quality signals from prompts and responses.
+description: LangKit is an open-source text metrics toolkit for extracting features from LLM prompts and responses to enable monitoring, observability, and security analytics. It provides metrics for text quality, relevance, sentiment analysis, and safety signals to support LLM observability workflows.
+first_released: '2023-04-26'
+last_updated: '2024-11-22'
+maturity_status: experimental
+repository_url: https://github.com/whylabs/langkit
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+stars: 984
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=242 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.946912). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.947
+  candidate_id: 242

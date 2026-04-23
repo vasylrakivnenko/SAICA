@@ -107,13 +107,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    from pipeline.logging_config import configure_logging
+
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    logging.basicConfig(
-        level=logging.INFO if args.verbose else logging.WARNING,
-        format="%(levelname)s %(name)s: %(message)s",
-    )
+    configure_logging("INFO" if args.verbose else "WARNING")
 
     input_file = Path(args.from_file) if args.from_file else DEFAULT_CANDIDATE_FILE
     if not input_file.exists():

@@ -65,6 +65,12 @@ VALIDATOR_SCRIPT = REPO_ROOT / "validator" / "cli.py"
 DEFAULT_ACCEPT_THRESHOLD = 0.85  # used by field-level accept check
 AUTO_MODE_DEFAULT = 0.85         # used by --auto-accept-above default
 
+# Value stamped into provenance.source for every newly-graduated tool.
+# Reviewers can override on post-merge hooks; the graduation CLI is the
+# canonical origin marker.
+PROVENANCE_SOURCE = "pipeline-v0.1"
+PROVENANCE_EXTRACTOR_MODEL = "Kimi-K2.5"
+
 _KIND_TABLE = {"tool": "candidate_tools", "paper": "candidate_papers"}
 _KIND_DATA_DIR = {"tool": "tools", "paper": "papers"}
 
@@ -401,6 +407,11 @@ def _build_tool_yaml(
         if stars_fb.comment:
             doc.yaml_add_eol_comment(stars_fb.comment, "stars")
 
+    # Provenance — traces this tool back to the ingestion pipeline. reviewer
+    # and review_date are intentionally left off; a post-merge hook fills
+    # them in once the PR lands.
+    doc["provenance"] = _build_provenance_block(row, payload, today=today)
+
     header = (
         f" Graduated from candidate_tools id={row['id']} on {today.isoformat()}\n"
         f" Source: {row.get('source_url') or '(unknown)'}\n"
@@ -409,6 +420,42 @@ def _build_tool_yaml(
     )
     doc.yaml_set_start_comment(header)
     return tool_id, doc
+
+
+def _build_provenance_block(
+    row: dict,
+    payload: dict,
+    *,
+    today: dt.date,
+) -> CommentedMap:
+    """Compose the ``provenance:`` block for a newly-graduated tool.
+
+    All optional fields are populated best-effort from the candidate row
+    (``nlp_tags.rerank_score``, ``extracted.payload.overall_confidence``);
+    anything we can't recover is simply omitted so the field stays
+    schema-valid.
+    """
+    prov: CommentedMap = CommentedMap()
+    prov["source"] = PROVENANCE_SOURCE
+    prov["ingested_at"] = today.isoformat()
+    prov["extractor_model"] = PROVENANCE_EXTRACTOR_MODEL
+
+    overall_conf = payload.get("overall_confidence") if isinstance(payload, dict) else None
+    if isinstance(overall_conf, (int, float)):
+        # Clamp to the schema's [0,1] range defensively.
+        prov["extractor_confidence"] = float(max(0.0, min(1.0, overall_conf)))
+
+    nlp_tags = row.get("nlp_tags") if isinstance(row, dict) else None
+    if isinstance(nlp_tags, dict):
+        rerank = nlp_tags.get("rerank_score")
+        if isinstance(rerank, (int, float)):
+            prov["rerank_score"] = float(max(0.0, min(1.0, rerank)))
+
+    cand_id = row.get("id") if isinstance(row, dict) else None
+    if isinstance(cand_id, int):
+        prov["candidate_id"] = cand_id
+
+    return prov
 
 
 def _build_paper_yaml(
@@ -650,6 +697,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from pipeline.logging_config import configure_logging
+
+    configure_logging()
     parser = _build_parser()
     args = parser.parse_args(argv)
     return _graduate(

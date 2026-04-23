@@ -15,9 +15,17 @@ import logging
 import sys
 from typing import Optional
 
-from pipeline.sources._http import load_env
+from pipeline.cost_caps import CallBudget, CostCapExceeded
 
 log = logging.getLogger("pipeline.cli.discover")
+
+# Conservative default for the paid discovery source (Perplexity). 10 calls
+# at current Sonar-Pro pricing is well under a dollar. Free sources (GitHub,
+# Semantic Scholar, Elicit) don't get a budget gate — they self-throttle.
+DEFAULT_PERPLEXITY_MAX_CALLS = 10
+
+# Exit code reserved pipeline-wide for "budget hit".
+EXIT_BUDGET_HIT = 3
 
 
 # --------------------------------------------------------------------------- #
@@ -57,10 +65,19 @@ RUNBOOK_GITHUB = [
 # --------------------------------------------------------------------------- #
 
 
-def _run_perplexity(query: str, model: str, recency: Optional[str], limit: Optional[int]) -> int:
+def _run_perplexity(
+    query: str,
+    model: str,
+    recency: Optional[str],
+    limit: Optional[int],
+    *,
+    budget: Optional[CallBudget] = None,
+) -> int:
     from pipeline.sources import perplexity
 
-    inserted = perplexity.search(query, model=model, recency_filter=recency, limit=limit)
+    inserted = perplexity.search(
+        query, model=model, recency_filter=recency, limit=limit, budget=budget
+    )
     print(f"[perplexity] {query!r} -> {len(inserted)} rows")
     return len(inserted)
 
@@ -154,6 +171,22 @@ def build_parser() -> argparse.ArgumentParser:
     pp.add_argument("--model", default="sonar-pro")
     pp.add_argument("--recency", default=None, help="month|week|day|hour")
     pp.add_argument("--limit", type=int, default=None)
+    pp.add_argument(
+        "--max-calls",
+        type=int,
+        default=DEFAULT_PERPLEXITY_MAX_CALLS,
+        help=(
+            f"hard cap on Perplexity HTTP calls for this run "
+            f"(default {DEFAULT_PERPLEXITY_MAX_CALLS}). "
+            f"Exits with code {EXIT_BUDGET_HIT} when exceeded."
+        ),
+    )
+    pp.add_argument(
+        "--max-cost-tokens",
+        type=int,
+        default=None,
+        help="optional soft cap on total tokens across the run",
+    )
 
     ps = sub.add_parser("semantic_scholar", help="Semantic Scholar paper search")
     ps.add_argument("--query", required=True)
@@ -178,17 +211,30 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-    )
-    load_env()
+    from pipeline.config import load_env_once
+    from pipeline.logging_config import configure_logging
+
+    configure_logging()
+    load_env_once()
 
     args = build_parser().parse_args(argv)
     cmd = args.command
 
     if cmd == "perplexity":
-        _run_perplexity(args.query, args.model, args.recency, args.limit)
+        budget = CallBudget(
+            max_calls=args.max_calls,
+            max_tokens_estimate=args.max_cost_tokens,
+        )
+        try:
+            _run_perplexity(
+                args.query, args.model, args.recency, args.limit, budget=budget
+            )
+        except CostCapExceeded as exc:
+            print(
+                f"[budget] cost cap hit: {exc}; {budget.summary()}",
+                file=sys.stderr,
+            )
+            return EXIT_BUDGET_HIT
     elif cmd == "semantic_scholar":
         _run_semantic_scholar(args.query, args.limit, args.year)
     elif cmd == "elicit":

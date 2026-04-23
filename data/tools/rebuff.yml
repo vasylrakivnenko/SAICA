@@ -1,0 +1,27 @@
+id: rebuff
+name: Rebuff
+tagline: LLM Prompt Injection Detector
+description: Rebuff is a prompt injection detection system designed to identify and filter malicious injection attempts in LLM prompts before processing. It analyzes incoming prompts to detect adversarial patterns that could compromise application security or manipulate model behavior.
+first_released: '2023-04-24'
+last_updated: '2024-08-07'
+maturity_status: experimental
+repository_url: https://github.com/protectai/rebuff
+license: Apache-2.0
+control_paradigm: detection
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+stars: 1464
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=241 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.84827). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.848
+  candidate_id: 241

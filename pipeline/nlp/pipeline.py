@@ -11,10 +11,13 @@ existing ``source_url`` rows before calling ``upsert_candidate_*``.
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Iterable, Iterator, Optional
+
+log = logging.getLogger(__name__)
 
 from pipeline.nlp.preprocess import (
     LOW_RELEVANCE_THRESHOLD,
@@ -271,5 +274,5 @@ def run(since: Optional[datetime] = None) -> RunSummary:
             except Exception as exc:  # pragma: no cover (defensive)
                 summary.errors.append(f"row {raw_row.get('id')!r}: {exc!r}")
 
-    print(f"[preprocess.run] {summary.as_text()}")
+    log.info("[preprocess.run] %s", summary.as_text())
     return summary

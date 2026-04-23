@@ -1,0 +1,27 @@
+id: last-layer
+name: last_layer
+tagline: Ultra-fast, low latency LLM prompt injection/jailbreak detection
+description: A low-latency detection system for LLM prompt injection and jailbreak attempts. The tool analyzes incoming prompts to identify adversarial inputs designed to bypass safety filters, manipulate model behavior, or extract sensitive information through injection-based attacks.
+first_released: '2024-03-29'
+last_updated: '2024-07-26'
+maturity_status: experimental
+repository_url: https://github.com/arekusandr/last_layer
+license: MIT
+control_paradigm: detection
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+stars: 126
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=73 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.645656). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.646
+  candidate_id: 73

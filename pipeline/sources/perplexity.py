@@ -11,6 +11,7 @@ import logging
 import os
 from typing import Any, Optional
 
+from pipeline.cost_caps import CallBudget
 from pipeline.sources._http import USER_AGENT, load_env, rate_limited_session
 
 log = logging.getLogger(__name__)
@@ -93,11 +94,17 @@ def search(
     model: str = "sonar-pro",
     recency_filter: Optional[str] = None,
     limit: Optional[int] = None,
+    budget: Optional[CallBudget] = None,
+    session: Optional[Any] = None,
 ) -> list[dict[str, Any]]:
     """Run a Perplexity web search and insert normalized citations.
 
     Returns the list of inserted records (those where insert_raw_result did
     not return None due to dedupe). Callers typically just len() it.
+
+    When ``budget`` is non-None, one ``budget.consume`` is recorded for the
+    HTTP call; a ``CostCapExceeded`` is propagated to the caller (the CLI
+    catches it and exits with code 3). ``session`` is injectable for tests.
     """
     load_env()
     api_key = os.environ.get("PERPLEXITY_API_KEY")
@@ -129,8 +136,14 @@ def search(
         "Content-Type": "application/json",
     }
 
+    # Consume BEFORE dispatching so a tripped budget never puts a request on
+    # the wire. The CostCapExceeded propagates to the caller (CLI exit 3).
+    if budget is not None:
+        budget.consume(call=True, tokens=0)
+
+    http = session if session is not None else _SESSION
     try:
-        resp = _SESSION.post(ENDPOINT, json=body, headers=headers, timeout=60)
+        resp = http.post(ENDPOINT, json=body, headers=headers, timeout=60)
         resp.raise_for_status()
         payload = resp.json()
     except Exception as exc:  # noqa: BLE001

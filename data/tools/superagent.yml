@@ -1,0 +1,27 @@
+id: superagent
+name: Superagent
+tagline: Security layer protecting AI apps from prompt injection, data leaks, and harmful outputs.
+description: A security wrapper that protects AI applications against prompt injections, data leaks, and harmful outputs. Developers embed this safety layer directly into their applications to enforce runtime security policies and demonstrate compliance.
+first_released: '2023-05-10'
+last_updated: '2026-04-11'
+maturity_status: experimental
+repository_url: https://github.com/superagent-ai/superagent
+license: MIT
+control_paradigm: prevention
+temporal_phase: in_generation
+autonomy_level: fully_autonomous
+addresses_failure_modes:
+  - security_vulnerability
+stars: 6553
+stars_updated_at: '2026-04-23'
+inclusion_rationale: >
+  Graduated from pipeline candidate id=239 (Kimi-K2.5 extraction,
+  overall_confidence=None, rerank_score=0.791563). Pending human
+  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if
+  Kimi declined to assign.
+provenance:
+  source: pipeline-v0.1
+  ingested_at: '2026-04-23'
+  extractor_model: Kimi-K2.5
+  rerank_score: 0.792
+  candidate_id: 239
