@@ -128,6 +128,36 @@ LocusOfControl:
     human:
       description: Approval gates, code review, HITL escalation.
 
+IntegrationSurface:
+  description: >
+    How a Tool is deployed / consumed. Multi-valued and orthogonal to
+    ControlParadigm / TemporalPhase / AutonomyLevel — those describe what
+    the tool does; this describes how a caller wires it in. Crucial for
+    "can I integrate this into a headless pipeline?" queries: ide_plugin /
+    desktop_app / web_app require a human in an interactive UI, whereas
+    cli / library / http_service / mcp_server / ci_app / proxy_gateway
+    are pipeline-integratable.
+  partition: false
+  values:
+    ide_plugin:
+      description: Editor extension (VS Code, JetBrains, Neovim). Requires a human in the IDE.
+    desktop_app:
+      description: Standalone desktop GUI; forked or purpose-built code editor.
+    web_app:
+      description: Hosted browser-based workspace / cloud IDE / generative-UI product.
+    cli:
+      description: Invocable from the terminal / CI shell step.
+    library:
+      description: Python or TypeScript package imported programmatically.
+    http_service:
+      description: Self-hosted or managed HTTP API / observability backend.
+    mcp_server:
+      description: Model-Context-Protocol endpoint consumable by any MCP client.
+    ci_app:
+      description: GitHub / GitLab action, pre-commit hook, or PR-review bot.
+    proxy_gateway:
+      description: LLM gateway / proxy that sits between caller and model provider.
+
 MaturityStatus:
   description: Lifecycle state of a Tool node. Informs staleness checks.
   partition: true

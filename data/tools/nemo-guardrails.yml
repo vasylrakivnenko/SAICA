@@ -32,6 +32,8 @@ locus_of_control:
   - prompt
   - environment
 
+integration_surfaces:
+  - library
 implements_techniques:
   - colang-policy-dsl
   - topical-rails
@@ -46,7 +48,7 @@ security_notes: >
   as supply-chain surface. NVIDIA vendor-maintained; tracks NeMo stack
   versions.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

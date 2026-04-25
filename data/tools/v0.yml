@@ -31,6 +31,8 @@ locus_of_control:
   - context
   - human
 
+integration_surfaces:
+  - web_app
 implements_techniques:
   - curated-component-library
   - preview-diff-gate
@@ -44,7 +46,7 @@ security_notes: >
   which narrows the import-fabrication surface, but downstream
   deployment still carries the normal web-app supply-chain exposure.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

@@ -1,0 +1,261 @@
+---
+// /tool-coverage — Tool × Failure-Mode evidence heatmap.
+// Loads /tool_fm_heatmap.json (produced by research/plot_tool_fm_heatmap.py).
+// Cells are tiered 0..3; color encodes *per-mapping* evidence, never popularity.
+// Rendered as an HTML table (accessible, SEO-visible, no chart library).
+import BaseLayout from "../layouts/BaseLayout.astro";
+const title = "Tool × Failure-Mode Coverage";
+---
+
+<BaseLayout title={title}>
+  <section class="mb-6 max-w-3xl">
+    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+      Coverage Matrix
+    </p>
+    <h1 class="mt-2">Tool × Failure-Mode evidence</h1>
+    <p class="mt-4 leading-7">
+      Which of the supervision tools in the KG address which failure modes,
+      and how strong is the evidence for each mapping? Cell color encodes an
+      <strong>evidence tier for that specific (tool, failure-mode) pair</strong>
+      — not tool popularity. GitHub stars, a crude popularity proxy, are
+      relegated to the row labels; letting them drive color would paint a
+      popular tool's whole row the same shade regardless of fit, which is the
+      opposite of what this figure should surface.
+    </p>
+  </section>
+
+  <section class="mb-8 max-w-3xl">
+    <h2 class="!mt-0 text-lg">Tiers</h2>
+    <ul class="text-sm leading-7 space-y-1">
+      <li><span class="inline-block w-4 h-4 align-middle rounded-sm border border-ink/15" style="background:#f5f5f5"></span>
+        <strong>0</strong> — tool does not list this failure mode in <code>addresses_failure_modes</code>.</li>
+      <li><span class="inline-block w-4 h-4 align-middle rounded-sm" style="background:#d8e7f5"></span>
+        <strong>1 — declared mapping</strong>: the tool's YAML asserts it addresses this FM, but nothing more.</li>
+      <li><span class="inline-block w-4 h-4 align-middle rounded-sm" style="background:#6aa3d3"></span>
+        <strong>2 — rationale mentions it</strong>: the tool's <code>inclusion_rationale</code> actually discusses this FM
+        (id, synonym, or phrase match). A per-mapping signal, not a per-tool one.</li>
+      <li><span class="inline-block w-4 h-4 align-middle rounded-sm" style="background:#1f4e79"></span>
+        <strong>3 — external citation</strong>: tier 2 plus the tool has a paper / dataset / documentation reference
+        in <code>cited_in</code>, <code>documented_in</code>, or <code>evaluated_on</code>.</li>
+    </ul>
+  </section>
+
+  <section class="mb-4 flex flex-wrap items-center gap-4 text-sm font-sans">
+    <div>
+      <label class="text-xs font-semibold text-ink-faint uppercase tracking-wide mr-2">Show</label>
+      <select id="tc-scope" class="border border-ink/15 rounded px-2 py-1 bg-white">
+        <option value="covering" selected>11 tools, every failure mode covered</option>
+        <option value="top">Top 11 by coverage breadth</option>
+        <option value="all">All tools with ≥1 mapping</option>
+      </select>
+    </div>
+    <div class="text-xs text-ink-faint" id="tc-count"></div>
+  </section>
+
+  <section class="mb-8">
+    <div class="overflow-x-auto border border-ink/10 rounded bg-white">
+      <table class="text-sm font-sans w-full" id="tc-table">
+        <thead class="bg-paper-alt text-ink-faint text-xs uppercase tracking-wide">
+          <tr id="tc-head">
+            <th class="text-left px-3 py-2 sticky left-0 bg-paper-alt">Tool</th>
+            <th class="text-right px-3 py-2">Stars</th>
+            <th class="text-right px-3 py-2">Breadth</th>
+          </tr>
+        </thead>
+        <tbody id="tc-body">
+          <tr><td colspan="3" class="px-3 py-6 text-center text-ink-faint">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <noscript>
+      <p class="mt-2 text-sm text-ink-faint">
+        Raw data: <a href="/tool_fm_heatmap.json"><code>/tool_fm_heatmap.json</code></a>
+      </p>
+    </noscript>
+  </section>
+
+  <section class="mt-8 max-w-3xl">
+    <h2>Three views, different questions</h2>
+    <ul class="list-disc pl-6 text-sm leading-7 space-y-1">
+      <li><strong>"Every failure mode covered"</strong> (default) — greedy set cover picks the smallest set
+        of tools whose combined declared coverage fills every column, then pads to 11 rows with the highest
+        evidence-tier remaining tools. A dashed divider separates the specialists (above) from the depth pad
+        (below). Answers: <em>"can the KG claim coverage of every failure mode at all?"</em></li>
+      <li><strong>"Top by coverage breadth"</strong> — rank tools by how many FMs each declares. Dominated by
+        evaluation harnesses (promptfoo, giskard, opik, phoenix, Guardrails, NeMo, logfire). Leaves
+        specialist columns (obsolescence, dependency blindness) empty because narrow-but-deep tools get ranked
+        out. Answers: <em>"what does the busy part of the map look like?"</em></li>
+      <li><strong>"All tools with ≥1 mapping"</strong> — every tool that declares any FM. Useful when you're
+        hunting for a specific tool (e.g. Context Hub, Semgrep, Renovate) that doesn't appear in the top
+        views because its breadth is low.</li>
+    </ul>
+    <p class="text-sm leading-7 mt-3">
+      <strong>Almost every filled cell is tier 1 right now.</strong> Only a handful of tier-2 cells
+      (rationales that explicitly name the FM they address), no tier-3 cells. This is the KG honestly
+      admitting that it holds declarations more than evidence today — closing that gap is exactly what
+      the citation / crosswalk pipeline is built to do.
+    </p>
+  </section>
+
+  <section class="mt-10 max-w-3xl">
+    <h2>Methodology notes</h2>
+    <p class="text-sm leading-7">
+      Tools are ranked by <code>breadth</code> (count of failure modes declared), ties broken by
+      <code>tier_sum</code> (row evidence total) and then by stars. Columns are ordered by how many of the
+      top-N tools address each failure mode, so "most-covered" failure modes sit on the left.
+      The per-mapping <strong>rationale match</strong> (tier 2) uses a conservative keyword set per failure mode,
+      kept intentionally narrow because false positives here silently inflate evidence.
+    </p>
+    <p class="text-sm leading-7 mt-3">
+      Reproduce with <code>.venv/bin/python research/plot_tool_fm_heatmap.py</code>.
+      Outputs live under <code>research/figures/</code> (static PNG/PDF for the paper) and
+      <code>site/public/tool_fm_heatmap.json</code> (data for this page).
+    </p>
+  </section>
+</BaseLayout>
+
+<script>
+  type Tier = 0 | 1 | 2 | 3;
+
+  interface ToolRow {
+    id: string;
+    name: string;
+    stars: number;
+    breadth: number;
+    tier_sum: number;
+    tiers: Record<string, number>;
+  }
+
+  interface Payload {
+    top_n: number;
+    failure_modes: string[];
+    failure_mode_display: Record<string, string>;
+    tools_top: ToolRow[];
+    tools_covering: ToolRow[];
+    tools_all: ToolRow[];
+    covering_divider?: number;
+    legend: Record<string, string>;
+    selections?: Record<string, string>;
+  }
+
+  const TIER_BG: Record<number, string> = {
+    0: "#f5f5f5",
+    1: "#d8e7f5",
+    2: "#6aa3d3",
+    3: "#1f4e79",
+  };
+  const TIER_FG: Record<number, string> = {
+    0: "#9ca3af",
+    1: "#1f4e79",
+    2: "#ffffff",
+    3: "#ffffff",
+  };
+  const TIER_LABEL: Record<number, string> = {
+    0: "not addressed",
+    1: "declared mapping",
+    2: "rationale discusses FM",
+    3: "rationale + external citation",
+  };
+
+  const TABLE = document.getElementById("tc-table") as HTMLTableElement | null;
+  const HEAD = document.getElementById("tc-head") as HTMLTableRowElement | null;
+  const BODY = document.getElementById("tc-body") as HTMLTableSectionElement | null;
+  const COUNT = document.getElementById("tc-count") as HTMLElement | null;
+  const SCOPE = document.getElementById("tc-scope") as HTMLSelectElement | null;
+
+  let payload: Payload | null = null;
+
+  function escapeHtml(s: string): string {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function fmtStars(n: number): string {
+    if (!n) return "—";
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+    return String(n);
+  }
+
+  function render(): void {
+    if (!payload || !HEAD || !BODY || !COUNT || !SCOPE) return;
+    const scopeKey = SCOPE.value;
+    const scopeToField: Record<string, keyof Payload> = {
+      covering: "tools_covering",
+      top: "tools_top",
+      all: "tools_all",
+    };
+    const field = scopeToField[scopeKey] ?? "tools_covering";
+    const rowsRaw = (payload[field] as unknown as ToolRow[]) ?? [];
+    const rows = scopeKey === "all"
+      ? rowsRaw.filter((r) => r.breadth > 0)
+      : rowsRaw;
+    const divider = scopeKey === "covering" ? (payload.covering_divider ?? 0) : 0;
+
+    // head
+    HEAD.innerHTML =
+      `<th class="text-left px-3 py-2 sticky left-0 bg-paper-alt z-10">Tool</th>`
+      + `<th class="text-right px-3 py-2">Stars</th>`
+      + `<th class="text-right px-3 py-2">Breadth</th>`
+      + payload.failure_modes.map((fm) => {
+        const disp = payload!.failure_mode_display[fm] ?? fm;
+        return `<th class="px-2 py-2 align-bottom" style="min-width:3rem">`
+          + `<a href="/failure-modes/${encodeURIComponent(fm)}" class="block text-ink hover:text-accent"`
+          + ` title="${escapeHtml(disp)}">`
+          + `<div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;"`
+          + ` class="text-xs normal-case tracking-normal">${escapeHtml(disp)}</div></a></th>`;
+      }).join("");
+
+    // body
+    BODY.innerHTML = rows.map((r, rowIdx) => {
+      const isLastSpecialist = divider > 0 && rowIdx === divider - 1;
+      const dividerCls = isLastSpecialist ? " border-b-2 border-dashed border-[#1f4e79]" : "";
+      const cells = payload!.failure_modes.map((fm) => {
+        const t = (r.tiers[fm] ?? 0) as Tier;
+        const bg = TIER_BG[t];
+        const fg = TIER_FG[t];
+        const tip = `${r.name} × ${payload!.failure_mode_display[fm]}: tier ${t} — ${TIER_LABEL[t]}`;
+        const content = t === 0 ? "" : String(t);
+        const clickable = t > 0
+          ? `<a href="/tools/${encodeURIComponent(r.id)}" title="${escapeHtml(tip)}"`
+            + ` class="block w-full h-full no-underline leading-none"`
+            + ` style="color:${fg}">${content}</a>`
+          : `<span title="${escapeHtml(tip)}" class="block w-full h-full">&nbsp;</span>`;
+        return `<td class="text-center align-middle p-0" style="background:${bg}; height:2.25rem; min-width:2.25rem">`
+          + clickable + `</td>`;
+      }).join("");
+      return `<tr class="border-t border-ink/10${dividerCls}">`
+        + `<td class="px-3 py-1.5 sticky left-0 bg-white z-10 border-r border-ink/10">`
+        + `<a href="/tools/${encodeURIComponent(r.id)}" class="text-ink hover:text-accent">${escapeHtml(r.name)}</a>`
+        + `</td>`
+        + `<td class="px-3 py-1.5 text-right font-mono text-xs text-ink-muted">${fmtStars(r.stars)}</td>`
+        + `<td class="px-3 py-1.5 text-right font-mono text-xs">${r.breadth}</td>`
+        + cells + `</tr>`;
+    }).join("");
+
+    let countText = `${rows.length} tool${rows.length === 1 ? "" : "s"} shown`
+      + ` · ${payload.failure_modes.length} failure modes`;
+    if (scopeKey === "covering" && divider > 0) {
+      countText += ` · ${divider} specialist${divider === 1 ? "" : "s"} cover every FM; rows below pad for depth`;
+    }
+    COUNT.textContent = countText;
+  }
+
+  async function init(): Promise<void> {
+    try {
+      const res = await fetch("/tool_fm_heatmap.json");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      payload = (await res.json()) as Payload;
+    } catch (err) {
+      if (BODY) {
+        BODY.innerHTML = `<tr><td colspan="3" class="px-3 py-6 text-center text-ink-faint">`
+          + `Failed to load /tool_fm_heatmap.json (${escapeHtml(String(err))}). `
+          + `Run: .venv/bin/python research/plot_tool_fm_heatmap.py</td></tr>`;
+      }
+      return;
+    }
+    render();
+    SCOPE?.addEventListener("change", render);
+  }
+
+  init();
+</script>

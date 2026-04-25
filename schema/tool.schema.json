@@ -126,6 +126,25 @@
       },
       "type": "array"
     },
+    "integration_surfaces": {
+      "items": {
+        "description": "How a Tool is deployed / consumed.\n\nMulti-valued: a tool can ship as several surfaces (e.g. Semgrep is\ncli + ci_app + library). Orthogonal to ControlParadigm /\nTemporalPhase / AutonomyLevel — those describe what the tool does;\nthis describes how a caller wires it in.",
+        "enum": [
+          "ide_plugin",
+          "desktop_app",
+          "web_app",
+          "cli",
+          "library",
+          "http_service",
+          "mcp_server",
+          "ci_app",
+          "proxy_gateway"
+        ],
+        "type": "string"
+      },
+      "type": "array",
+      "description": "How this tool is deployed / consumed. Multi-valued — a tool can ship as several surfaces (e.g. cli + ci_app + library)."
+    },
     "implements_techniques": {
       "items": {
         "type": "string"

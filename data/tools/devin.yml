@@ -31,6 +31,8 @@ locus_of_control:
   - environment
   - human
 
+integration_surfaces:
+  - web_app
 implements_techniques:
   - sandboxed-runtime
   - trajectory-logging
@@ -46,7 +48,7 @@ security_notes: >
   shell and browser actions inside its sandbox; treat sandbox escape and
   credential exfiltration as the primary concerns.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

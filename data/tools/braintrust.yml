@@ -30,6 +30,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - dataset-regression-eval
   - llm-as-judge-eval
@@ -45,7 +48,7 @@ security_notes: >
   production traffic is ingested. Audit redaction hooks before
   enabling capture on traffic containing secrets or customer data.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

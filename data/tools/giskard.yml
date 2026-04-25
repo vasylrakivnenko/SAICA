@@ -23,6 +23,10 @@ addresses_failure_modes:
   - test_manipulation
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
+  - cli
+  - ci_app
 implements_techniques:
   - robustness-tests
   - bias-tests

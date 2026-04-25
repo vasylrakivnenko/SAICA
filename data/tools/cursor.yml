@@ -30,6 +30,8 @@ locus_of_control:
   - context
   - human
 
+integration_surfaces:
+  - desktop_app
 implements_techniques:
   - project-rules
   - diff-review-gate
@@ -42,7 +44,7 @@ security_notes: >
   sensitive repos. YOLO shell allow-list is opt-in but broad — audit the
   allow-list rather than enabling blanket auto-run.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

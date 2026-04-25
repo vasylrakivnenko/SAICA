@@ -30,6 +30,8 @@ locus_of_control:
   - model
   - prompt
 
+integration_surfaces:
+  - library
 implements_techniques:
   - constrained-decoding
   - grammar-guided-generation
@@ -42,7 +44,7 @@ security_notes: >
   so closed-API backends degrade to weaker modes. Programs execute local
   Python; treat third-party Guidance programs as untrusted code.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

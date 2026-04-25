@@ -22,6 +22,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
   - human
+integration_surfaces:
+  - library
+  - cli
 implements_techniques:
   - zero-trust-identity
   - policy-engine

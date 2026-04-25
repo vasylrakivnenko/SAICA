@@ -29,6 +29,8 @@ addresses_failure_modes:
 locus_of_control:
   - model
 
+integration_surfaces:
+  - library
 implements_techniques:
   - constrained-decoding
   - logit-masking
@@ -43,7 +45,7 @@ security_notes: >
   locally; no data leaves the process. Hosted .txt service is a separate
   SaaS with its own data-handling posture.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

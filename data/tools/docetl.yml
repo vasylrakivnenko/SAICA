@@ -19,6 +19,9 @@ addresses_failure_modes:
   - logic_error
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
+  - cli
 implements_techniques:
   - pipeline-optimizer
   - llm-etl

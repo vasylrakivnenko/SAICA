@@ -32,6 +32,8 @@ locus_of_control:
   - environment
   - human
 
+integration_surfaces:
+  - ide_plugin
 implements_techniques:
   - plan-act-mode
   - auto-approve-allow-list
@@ -45,7 +47,7 @@ security_notes: >
   should only be used inside a sandbox. MCP-server support inherits
   upstream supply-chain risk — audit installed servers.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

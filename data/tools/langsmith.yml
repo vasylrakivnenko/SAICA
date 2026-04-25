@@ -31,6 +31,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - trace-capture
   - llm-as-judge-eval
@@ -46,7 +49,7 @@ security_notes: >
   are captured and consider redaction hooks before enabling on
   production traffic containing secrets or customer data.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

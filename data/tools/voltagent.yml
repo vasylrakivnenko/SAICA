@@ -21,6 +21,8 @@ addresses_failure_modes:
   - incomplete_execution
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
 implements_techniques:
   - ts-agent-framework
   - builtin-observability

@@ -19,6 +19,8 @@ addresses_failure_modes:
   - context_pollution
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
 implements_techniques:
   - ts-agents
   - workflow-authoring

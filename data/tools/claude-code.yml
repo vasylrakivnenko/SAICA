@@ -29,6 +29,9 @@ locus_of_control:
   - environment
   - human
 
+integration_surfaces:
+  - cli
+  - ide_plugin
 implements_techniques:
   - plan-mode
   - tool-allow-list
@@ -43,7 +46,7 @@ security_notes: >
   implications — audit any skill or MCP server added to the installation.
   Opus 4.7 added cybersecurity auto-safeguards (2026-04-21 release).
 signed_manifest: true
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 inclusion_rationale: >
   Archetype of graduated-HITL coding agent. Useful as the reference point

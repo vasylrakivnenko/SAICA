@@ -21,6 +21,9 @@ addresses_failure_modes:
 locus_of_control:
   - context
   - environment
+integration_surfaces:
+  - library
+  - http_service
 implements_techniques:
   - tiered-memory
   - summarization

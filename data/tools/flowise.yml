@@ -19,6 +19,9 @@ addresses_failure_modes:
   - context_pollution
 locus_of_control:
   - environment
+integration_surfaces:
+  - web_app
+  - http_service
 implements_techniques:
   - drag-and-drop-builder
   - self-hosted

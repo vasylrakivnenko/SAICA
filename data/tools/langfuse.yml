@@ -31,6 +31,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - trace-capture
   - llm-as-judge-eval
@@ -47,7 +50,7 @@ security_notes: >
   production traffic. Prompts and completions are the primary payload
   — redact secrets and PII via the SDK hooks before capture.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

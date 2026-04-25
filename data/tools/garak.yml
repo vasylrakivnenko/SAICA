@@ -21,6 +21,9 @@ addresses_failure_modes:
   - scope_creep
 locus_of_control:
   - environment
+integration_surfaces:
+  - cli
+  - library
 implements_techniques:
   - llm-probes
   - attack-success-rate-metrics

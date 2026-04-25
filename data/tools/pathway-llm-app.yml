@@ -21,6 +21,9 @@ addresses_failure_modes:
   - obsolescence
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
+  - http_service
 implements_techniques:
   - streaming-rag
   - incremental-indexing

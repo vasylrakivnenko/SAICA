@@ -22,6 +22,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
   - human
+integration_surfaces:
+  - ci_app
+  - cli
 implements_techniques:
   - pr-review
   - security-hints

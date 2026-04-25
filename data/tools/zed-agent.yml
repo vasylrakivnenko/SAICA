@@ -31,6 +31,8 @@ locus_of_control:
   - context
   - human
 
+integration_surfaces:
+  - desktop_app
 implements_techniques:
   - project-rules
   - diff-review-gate
@@ -44,7 +46,7 @@ security_notes: >
   IP-sensitive repos. Tool-invocation gate is on by default; review
   custom slash-commands and MCP servers before installing.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

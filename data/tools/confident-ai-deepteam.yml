@@ -33,6 +33,9 @@ locus_of_control:
   - environment
   - prompt
 
+integration_surfaces:
+  - library
+  - cli
 implements_techniques:
   - red-team-attacks
   - vulnerability-scoring
@@ -46,7 +49,7 @@ security_notes: >
   accordingly. Attack corpora evolve with upstream releases; pin
   versions for reproducible audit evidence.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

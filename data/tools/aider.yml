@@ -31,6 +31,8 @@ locus_of_control:
   - environment
   - human
 
+integration_surfaces:
+  - cli
 implements_techniques:
   - git-commit-per-change
   - repo-map
@@ -43,7 +45,7 @@ security_notes: >
   --yes-always disables the gate and should only be used inside a sandbox.
   Review pinned model and tokenizer deps for supply-chain drift.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

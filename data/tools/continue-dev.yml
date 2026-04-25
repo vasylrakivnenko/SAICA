@@ -31,6 +31,9 @@ locus_of_control:
   - context
   - human
 
+integration_surfaces:
+  - ide_plugin
+  - library
 implements_techniques:
   - context-providers
   - project-rules
@@ -46,7 +49,7 @@ security_notes: >
   capabilities. The Continue Hub is a separate content-distribution
   surface — pin asset versions to avoid supply-chain drift.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

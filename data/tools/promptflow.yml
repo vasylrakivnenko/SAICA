@@ -20,6 +20,9 @@ addresses_failure_modes:
   - scope_creep
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
+  - ide_plugin
 implements_techniques:
   - graph-authoring
   - batch-eval

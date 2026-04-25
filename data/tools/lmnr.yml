@@ -23,6 +23,9 @@ addresses_failure_modes:
   - cascading_failure
 locus_of_control:
   - environment
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - agent-trajectory-capture
   - browser-session-replay

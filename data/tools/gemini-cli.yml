@@ -33,6 +33,8 @@ locus_of_control:
   - context
   - human
 
+integration_surfaces:
+  - cli
 implements_techniques:
   - tool-allow-list
   - hitl-approval-gates
@@ -47,7 +49,7 @@ security_notes: >
   MCP server installation expands the tool surface — audit any
   installed server for supply-chain exposure.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in:
   - yan-2025-fault-tolerant-sandboxing

@@ -22,6 +22,9 @@ addresses_failure_modes:
   - incomplete_execution
 locus_of_control:
   - environment
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - llm-tracing
   - llm-as-judge

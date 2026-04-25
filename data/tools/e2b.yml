@@ -27,6 +27,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - library
+  - http_service
 implements_techniques:
   - sandboxed-execution
   - resource-limiting
@@ -40,7 +43,7 @@ security_notes: >
   posture for sensitive workloads. Local/on-prem alternatives (Daytona,
   Modal, Firecracker) are worth evaluating for high-trust environments.
 signed_manifest: true
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 inclusion_rationale: >
   Canonical recovery × post_generation × fully_autonomous exemplar.

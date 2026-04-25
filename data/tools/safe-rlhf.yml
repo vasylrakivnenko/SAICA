@@ -21,6 +21,8 @@ addresses_failure_modes:
   - context_pollution
 locus_of_control:
   - model
+integration_surfaces:
+  - library
 implements_techniques:
   - constrained-rlhf
   - helpful-harmless-training

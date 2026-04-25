@@ -22,7 +22,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from pipeline.ask.context import NodeContext, build_prompt, hydrate
+from pipeline.ask.context import NodeContext, build_prompt, hybrid_retrieve, hydrate
 from pipeline.config import load_env_once
 from pipeline.cost_caps import CallBudget, CostCapExceeded
 
@@ -37,17 +37,19 @@ log = logging.getLogger(__name__)
 # them on different ports avoids hijacking the site's CORS story.
 DEFAULT_PORT = 4322
 
-# Default retrieval fan-out. 12 is comfortably over the ~5-7 nodes a
-# Kimi answer actually cites; the extra headroom lets us render a "Raw
-# matches" panel without a second retrieval call.
-DEFAULT_K = 12
+# Default retrieval fan-out. K=20 gives the coverage-guard rule enough
+# candidates to find tools that actually declare coverage for the
+# inferred failure mode with a surface fit — at K=12, questions phrased
+# in agent-behavior vocabulary ("agent changed X") pulled back mostly
+# IDE/hosted agents and squeezed out pipeline-friendly libraries.
+DEFAULT_K = 20
 
-# Kimi-K2.5 is a reasoning model: below max_tokens=2048 the think-trace
-# eats the whole budget and `content` comes back empty. 3072 leaves a
-# ~1k-token answer budget on top of the reasoning trace — well inside the
-# "~1024-token answer" cap the /ask design calls for, just accounting for
-# the hidden reasoning preamble the model always emits.
-KIMI_MAX_TOKENS = 3072
+# Kimi-K2.5 is a reasoning model: the think-trace silently consumes part of
+# max_tokens before any visible content is emitted. With the richer prompt
+# that enforces coverage/paradigm/surface rules, the trace routinely hits
+# ~3.5k tokens on ambiguous questions; anything below ~5k leaves content
+# empty. 6144 gives headroom for a full multi-tool recommendation.
+KIMI_MAX_TOKENS = 6144
 KIMI_TEMPERATURE = 0.2
 
 
@@ -92,16 +94,20 @@ def _default_budget() -> CallBudget:
     return CallBudget(max_calls=cap)
 
 
-def _default_find_similar(question: str, k: int) -> list[tuple[str, float]]:
+def _default_find_similar(
+    question: str, k: int, *, node_type: str | None = None,
+) -> list[tuple[str, float]]:
     """Thin wrapper around ``pipeline.embeddings.query.find_similar``.
 
     Imported lazily so the server module imports even before the
     embeddings agent has landed its module. At runtime the call path is:
-    HTTP -> ``ask()`` -> ``_find_similar`` -> ``embeddings.query.find_similar``.
+    HTTP -> ``ask()`` -> ``hybrid_retrieve`` -> this wrapper ->
+    ``embeddings.query.find_similar``. ``node_type`` lets the hybrid
+    retriever narrow the second pass to tool-only results.
     """
     from pipeline.embeddings.query import find_similar  # local import
 
-    return list(find_similar(question, k=k))
+    return list(find_similar(question, k=k, node_type=node_type))
 
 
 def _default_kimi_call(prompt: str) -> tuple[str, Any]:
@@ -161,7 +167,7 @@ def create_app(
             raise HTTPException(status_code=400, detail="question must not be blank")
 
         try:
-            hits = find_similar(question, k)
+            hits = hybrid_retrieve(question, k, find_similar=find_similar)
         except Exception as exc:  # noqa: BLE001
             log.exception("retrieval failed")
             raise HTTPException(status_code=500, detail=f"retrieval failed: {exc}") from exc

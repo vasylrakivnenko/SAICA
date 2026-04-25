@@ -20,6 +20,9 @@ addresses_failure_modes:
   - supply_chain_attack
 locus_of_control:
   - environment
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - llm-honeypots
   - deception

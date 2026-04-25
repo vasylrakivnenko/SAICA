@@ -15,6 +15,9 @@ addresses_failure_modes:
   - scope_creep
 locus_of_control:
   - environment
+integration_surfaces:
+  - cli
+  - library
 stars: 2085
 stars_updated_at: '2026-04-23'
 inclusion_rationale: >

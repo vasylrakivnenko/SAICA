@@ -18,6 +18,9 @@ addresses_failure_modes:
   - scope_creep
 locus_of_control:
   - environment
+integration_surfaces:
+  - web_app
+  - desktop_app
 implements_techniques:
   - node-graph-execution
   - reproducible-workflows

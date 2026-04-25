@@ -22,6 +22,9 @@ addresses_failure_modes:
   - security_vulnerability
 locus_of_control:
   - environment
+integration_surfaces:
+  - cli
+  - library
 implements_techniques:
   - scenario-metric-matrix
   - holistic-eval

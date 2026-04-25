@@ -30,6 +30,9 @@ locus_of_control:
   - environment
   - prompt
 
+integration_surfaces:
+  - cli
+  - library
 implements_techniques:
   - agent-computer-interface
   - iterative-fix-loop
@@ -43,7 +46,7 @@ security_notes: >
   broad shell-equivalent access inside the container — treat sandbox
   escape and credential exposure as the primary threat model.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

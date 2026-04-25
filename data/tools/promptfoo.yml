@@ -24,6 +24,10 @@ addresses_failure_modes:
 locus_of_control:
   - prompt
   - environment
+integration_surfaces:
+  - cli
+  - library
+  - ci_app
 implements_techniques:
   - prompt-eval-harness
   - red-team-attacks

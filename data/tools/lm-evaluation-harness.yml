@@ -19,6 +19,9 @@ addresses_failure_modes:
   - logic_error
 locus_of_control:
   - environment
+integration_surfaces:
+  - cli
+  - library
 implements_techniques:
   - few-shot-eval
   - standard-benchmarks

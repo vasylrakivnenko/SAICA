@@ -1,0 +1,2567 @@
+{
+  "top_n": 11,
+  "failure_modes": [
+    "scope_creep",
+    "fabrication",
+    "logic_error",
+    "security_vulnerability",
+    "context_pollution",
+    "cascading_failure",
+    "incomplete_execution",
+    "supply_chain_attack",
+    "test_manipulation",
+    "dependency_blindness",
+    "obsolescence"
+  ],
+  "failure_mode_display": {
+    "scope_creep": "Scope Creep",
+    "fabrication": "Fabrication",
+    "logic_error": "Logic Error",
+    "security_vulnerability": "Security Vulnerability",
+    "context_pollution": "Context Pollution",
+    "cascading_failure": "Cascading Failure",
+    "incomplete_execution": "Incomplete Execution",
+    "supply_chain_attack": "Supply-Chain Attack",
+    "test_manipulation": "Test Manipulation",
+    "dependency_blindness": "Dependency Blindness",
+    "obsolescence": "Obsolescence"
+  },
+  "tools_top": [
+    {
+      "id": "promptfoo",
+      "name": "promptfoo",
+      "stars": 20465,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "coze-loop",
+      "name": "coze-loop",
+      "stars": 5427,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 1,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "giskard",
+      "name": "giskard-oss",
+      "stars": 5295,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "lmnr",
+      "name": "lmnr",
+      "stars": 2798,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 1,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "stars": 71851,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "opik",
+      "name": "opik",
+      "stars": 18988,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "phoenix",
+      "name": "phoenix",
+      "stars": 9393,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "guardrails-ai",
+      "name": "Guardrails AI",
+      "stars": 6718,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "nemo-guardrails",
+      "name": "NeMo Guardrails",
+      "stars": 6028,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "bifrost",
+      "name": "bifrost",
+      "stars": 4209,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 1,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "logfire",
+      "name": "logfire",
+      "stars": 4191,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    }
+  ],
+  "tools_covering": [
+    {
+      "id": "promptfoo",
+      "name": "promptfoo",
+      "stars": 20465,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "coze-loop",
+      "name": "coze-loop",
+      "stars": 5427,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 1,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "sourcegraph-cody",
+      "name": "Sourcegraph Cody",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 2,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 2,
+        "obsolescence": 1
+      }
+    },
+    {
+      "id": "confident-ai-deepteam",
+      "name": "DeepTeam",
+      "stars": 1566,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 2,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 2,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "giskard",
+      "name": "giskard-oss",
+      "stars": 5295,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "lmnr",
+      "name": "lmnr",
+      "stars": 2798,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 1,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "langsmith",
+      "name": "LangSmith",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 2,
+        "fabrication": 0,
+        "logic_error": 2,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "stars": 71851,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "opik",
+      "name": "opik",
+      "stars": 18988,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "phoenix",
+      "name": "phoenix",
+      "stars": 9393,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "guardrails-ai",
+      "name": "Guardrails AI",
+      "stars": 6718,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    }
+  ],
+  "covering_divider": 4,
+  "tools_all": [
+    {
+      "id": "promptfoo",
+      "name": "promptfoo",
+      "stars": 20465,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "coze-loop",
+      "name": "coze-loop",
+      "stars": 5427,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 1,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "giskard",
+      "name": "giskard-oss",
+      "stars": 5295,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "lmnr",
+      "name": "lmnr",
+      "stars": 2798,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 1,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "stars": 71851,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "opik",
+      "name": "opik",
+      "stars": 18988,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "phoenix",
+      "name": "phoenix",
+      "stars": 9393,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "guardrails-ai",
+      "name": "Guardrails AI",
+      "stars": 6718,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "nemo-guardrails",
+      "name": "NeMo Guardrails",
+      "stars": 6028,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "bifrost",
+      "name": "bifrost",
+      "stars": 4209,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 1,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "logfire",
+      "name": "logfire",
+      "stars": 4191,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "llm-guard",
+      "name": "llm-guard",
+      "stars": 2855,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "helm",
+      "name": "helm",
+      "stars": 2758,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "judgeval",
+      "name": "judgeval",
+      "stars": 1024,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "confident-ai-deepteam",
+      "name": "DeepTeam",
+      "stars": 1566,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 2,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 2,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "langsmith",
+      "name": "LangSmith",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 2,
+        "fabrication": 0,
+        "logic_error": 2,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "sourcegraph-cody",
+      "name": "Sourcegraph Cody",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 2,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 2,
+        "obsolescence": 1
+      }
+    },
+    {
+      "id": "pathway-llm-app",
+      "name": "llm-app",
+      "stars": 59931,
+      "breadth": 3,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 2
+      }
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "stars": 43788,
+      "breadth": 3,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 2,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "dependabot",
+      "name": "Dependabot",
+      "stars": 5546,
+      "breadth": 3,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 2
+      }
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "stars": 102183,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "daytona",
+      "name": "Daytona",
+      "stars": 72378,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "stars": 60646,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "langfuse",
+      "name": "Langfuse",
+      "stars": 25839,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "mlflow",
+      "name": "mlflow",
+      "stars": 25505,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "activepieces",
+      "name": "activepieces",
+      "stars": 21825,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "openai-evals",
+      "name": "evals",
+      "stars": 18262,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "pydantic-ai",
+      "name": "PydanticAI",
+      "stars": 16567,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "ragas",
+      "name": "ragas",
+      "stars": 13605,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "e2b",
+      "name": "E2B",
+      "stars": 11878,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "promptflow",
+      "name": "promptflow",
+      "stars": 11106,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "pr-agent",
+      "name": "pr-agent",
+      "stars": 10968,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "arize-phoenix",
+      "name": "Arize Phoenix",
+      "stars": 9394,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "voltagent",
+      "name": "voltagent",
+      "stars": 8416,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "garak",
+      "name": "garak",
+      "stars": 7614,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "manifest",
+      "name": "manifest",
+      "stars": 5555,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 1,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "magic-mcp",
+      "name": "magic-mcp",
+      "stars": 4776,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 1
+      }
+    },
+    {
+      "id": "agenta",
+      "name": "agenta",
+      "stars": 4050,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "pyrit",
+      "name": "PyRIT",
+      "stars": 3740,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "ai-infra-guard",
+      "name": "AI-Infra-Guard",
+      "stars": 3546,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "pezzo",
+      "name": "pezzo",
+      "stars": 3227,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "promptbench",
+      "name": "promptbench",
+      "stars": 2801,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "openlit",
+      "name": "openlit",
+      "stars": 2388,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "ai-red-teaming-playground-labs",
+      "name": "AI-Red-Teaming-Playground-Labs",
+      "stars": 1915,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "agentic-security",
+      "name": "agentic-security",
+      "stars": 1848,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "safe-rlhf",
+      "name": "safe-rlhf",
+      "stars": 1598,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "deepteam",
+      "name": "deepteam",
+      "stars": 1566,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "promptmap",
+      "name": "promptmap",
+      "stars": 1181,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "agent-governance-toolkit",
+      "name": "agent-governance-toolkit",
+      "stars": 1177,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "braintrust",
+      "name": "Braintrust",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "modal",
+      "name": "Modal",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "stars": 0,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "langgraph",
+      "name": "LangGraph",
+      "stars": 30108,
+      "breadth": 2,
+      "tier_sum": 4,
+      "tiers": {
+        "scope_creep": 2,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 2,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "renovate",
+      "name": "Renovate",
+      "stars": 21353,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 2
+      }
+    },
+    {
+      "id": "deepeval",
+      "name": "DeepEval",
+      "stars": 14938,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 2,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "semgrep",
+      "name": "Semgrep",
+      "stars": 14901,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 2,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "context-hub",
+      "name": "Context Hub",
+      "stars": 13025,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 2
+      }
+    },
+    {
+      "id": "snyk",
+      "name": "Snyk",
+      "stars": 5506,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 2,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "fuzzyai",
+      "name": "FuzzyAI",
+      "stars": 1337,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 2,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "v0",
+      "name": "v0",
+      "stars": 0,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 2,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "browser-use",
+      "name": "browser-use",
+      "stars": 89651,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "zed-agent",
+      "name": "Zed Agent",
+      "stars": 79584,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "ragflow",
+      "name": "ragflow",
+      "stars": 78820,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "codex-cli",
+      "name": "Codex CLI",
+      "stars": 77172,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "autogen",
+      "name": "AutoGen",
+      "stars": 57354,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "flowise",
+      "name": "Flowise",
+      "stars": 52185,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "crewai",
+      "name": "CrewAI",
+      "stars": 49633,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "litellm",
+      "name": "litellm",
+      "stars": 44383,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "agno",
+      "name": "agno",
+      "stars": 39620,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "continue-dev",
+      "name": "Continue",
+      "stars": 32739,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 1,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "playwright-mcp",
+      "name": "playwright-mcp",
+      "stars": 31275,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "copilotkit",
+      "name": "CopilotKit",
+      "stars": 30389,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "smolagents",
+      "name": "Smolagents",
+      "stars": 26835,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "mastra",
+      "name": "mastra",
+      "stars": 23247,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "letta",
+      "name": "letta",
+      "stars": 22238,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "guidance",
+      "name": "Guidance",
+      "stars": 21402,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "skyvern",
+      "name": "skyvern",
+      "stars": 21342,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "mcp-toolbox",
+      "name": "genai-toolbox",
+      "stars": 14769,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "outlines",
+      "name": "Outlines",
+      "stars": 13718,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "instructor",
+      "name": "Instructor",
+      "stars": 12816,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "lm-evaluation-harness",
+      "name": "lm-evaluation-harness",
+      "stars": 12298,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "browser-mcp",
+      "name": "mcp",
+      "stars": 6384,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "helicone",
+      "name": "Helicone",
+      "stars": 5541,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "mcp-playwright",
+      "name": "mcp-playwright",
+      "stars": 5461,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "autorag",
+      "name": "AutoRAG",
+      "stars": 4722,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "lmms-eval",
+      "name": "lmms-eval",
+      "stars": 4052,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "docetl",
+      "name": "docetl",
+      "stars": 3711,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "mcp-server-browserbase",
+      "name": "mcp-server-browserbase",
+      "stars": 3280,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "trulens",
+      "name": "TruLens",
+      "stars": 3266,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 1,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "lighteval",
+      "name": "lighteval",
+      "stars": 2387,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "nono",
+      "name": "nono",
+      "stars": 2085,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "beelzebub",
+      "name": "beelzebub",
+      "stars": 1966,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "uqlm",
+      "name": "uqlm",
+      "stars": 1146,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 1,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "devin",
+      "name": "Devin",
+      "stars": 0,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "github-copilot",
+      "name": "GitHub Copilot",
+      "stars": 0,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 1,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "replit-agent",
+      "name": "Replit Agent",
+      "stars": 0,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "socket",
+      "name": "Socket",
+      "stars": 0,
+      "breadth": 1,
+      "tier_sum": 3,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 3,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "tree-sitter",
+      "name": "tree-sitter",
+      "stars": 24948,
+      "breadth": 1,
+      "tier_sum": 2,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 2,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI",
+      "stars": 109742,
+      "breadth": 1,
+      "tier_sum": 1,
+      "tiers": {
+        "scope_creep": 1,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "swe-agent",
+      "name": "SWE-agent",
+      "stars": 19043,
+      "breadth": 1,
+      "tier_sum": 1,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 1,
+        "security_vulnerability": 0,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "superagent",
+      "name": "Superagent",
+      "stars": 6553,
+      "breadth": 1,
+      "tier_sum": 1,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    },
+    {
+      "id": "rebuff",
+      "name": "Rebuff",
+      "stars": 1464,
+      "breadth": 1,
+      "tier_sum": 1,
+      "tiers": {
+        "scope_creep": 0,
+        "fabrication": 0,
+        "logic_error": 0,
+        "security_vulnerability": 1,
+        "context_pollution": 0,
+        "cascading_failure": 0,
+        "incomplete_execution": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0,
+        "dependency_blindness": 0,
+        "obsolescence": 0
+      }
+    }
+  ],
+  "legend": {
+    "0": "not addressed",
+    "1": "declared mapping (addresses_failure_modes)",
+    "2": "declared + inclusion_rationale discusses the FM",
+    "3": "declared + rationale + external citation evidence"
+  },
+  "selections": {
+    "top": "breadth desc, tier_sum desc, stars desc; top 11",
+    "covering": "greedy set-cover (max new FMs, tiebreak tier_sum/stars) then pad by tier_sum/breadth/stars to 11",
+    "all": "every tool with \u22651 declared mapping"
+  }
+}

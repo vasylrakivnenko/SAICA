@@ -21,6 +21,10 @@ addresses_failure_modes:
   - scope_creep
 locus_of_control:
   - environment
+integration_surfaces:
+  - http_service
+  - library
+  - cli
 implements_techniques:
   - llm-tracing
   - experiments

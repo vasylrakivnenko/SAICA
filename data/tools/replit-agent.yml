@@ -31,6 +31,8 @@ locus_of_control:
   - environment
   - human
 
+integration_surfaces:
+  - web_app
 implements_techniques:
   - sandboxed-runtime
   - checkpoint-rollback
@@ -44,7 +46,7 @@ security_notes: >
   credential exposure as primary threats. Deployed apps inherit the
   normal public-hosting threat model; scope secrets narrowly.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

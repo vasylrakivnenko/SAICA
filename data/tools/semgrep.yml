@@ -32,6 +32,10 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - cli
+  - ci_app
+  - library
 implements_techniques:
   - pattern-based-static-analysis
   - taint-analysis
@@ -48,7 +52,7 @@ security_notes: >
   not arbitrary code, so registry compromise is bounded to
   false-positive/negative impact rather than RCE.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

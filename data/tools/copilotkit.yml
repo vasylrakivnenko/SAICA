@@ -21,6 +21,8 @@ addresses_failure_modes:
 locus_of_control:
   - environment
   - human
+integration_surfaces:
+  - web_app
 implements_techniques:
   - generative-ui
   - hitl-approval

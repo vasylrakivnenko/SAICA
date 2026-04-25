@@ -32,6 +32,8 @@ locus_of_control:
   - prompt
   - environment
 
+integration_surfaces:
+  - library
 implements_techniques:
   - conversable-agents
   - group-chat-manager
@@ -46,7 +48,7 @@ security_notes: >
   untrusted prompts. Check compatibility across the 0.2 → 0.4 rewrite
   when auditing existing integrations; the APIs are not identical.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in:
   - cihon-stein-2025-autonomy-scoring

@@ -19,6 +19,9 @@ addresses_failure_modes:
   - security_vulnerability
 locus_of_control:
   - environment
+integration_surfaces:
+  - mcp_server
+  - library
 implements_techniques:
   - mcp-server
   - browserbase-backend

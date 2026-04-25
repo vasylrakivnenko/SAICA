@@ -24,6 +24,9 @@ addresses_failure_modes:
   - context_pollution
 locus_of_control:
   - environment
+integration_surfaces:
+  - http_service
+  - library
 implements_techniques:
   - opentelemetry-tracing
   - openinference-instrumentation

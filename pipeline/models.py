@@ -73,6 +73,26 @@ class LocusOfControl(str, Enum):
     HUMAN = "human"
 
 
+class IntegrationSurface(str, Enum):
+    """How a Tool is deployed / consumed.
+
+    Multi-valued: a tool can ship as several surfaces (e.g. Semgrep is
+    cli + ci_app + library). Orthogonal to ControlParadigm /
+    TemporalPhase / AutonomyLevel — those describe what the tool does;
+    this describes how a caller wires it in.
+    """
+
+    IDE_PLUGIN = "ide_plugin"
+    DESKTOP_APP = "desktop_app"
+    WEB_APP = "web_app"
+    CLI = "cli"
+    LIBRARY = "library"
+    HTTP_SERVICE = "http_service"
+    MCP_SERVER = "mcp_server"
+    CI_APP = "ci_app"
+    PROXY_GATEWAY = "proxy_gateway"
+
+
 class MaturityStatus(str, Enum):
     EXPERIMENTAL = "experimental"
     STABLE = "stable"
@@ -212,6 +232,13 @@ class Tool(BaseModel):
 
     addresses_failure_modes: list[FailureModeId] = Field(min_length=1)
     locus_of_control: Optional[list[LocusOfControl]] = None
+    integration_surfaces: Optional[list[IntegrationSurface]] = Field(
+        default=None,
+        description=(
+            "How this tool is deployed / consumed. Multi-valued — a tool"
+            " can ship as several surfaces (e.g. cli + ci_app + library)."
+        ),
+    )
 
     implements_techniques: Optional[list[str]] = None
     composes_with: Optional[list[str]] = Field(

@@ -31,6 +31,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - cli
+  - ci_app
 implements_techniques:
   - static-analysis
   - dependency-cve-scan
@@ -46,7 +49,7 @@ security_notes: >
   scanning is inherently backward-looking — it does not catch novel
   malicious packages the way manifest-capability analysis does.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

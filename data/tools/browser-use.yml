@@ -20,6 +20,9 @@ addresses_failure_modes:
   - security_vulnerability
 locus_of_control:
   - environment
+integration_surfaces:
+  - library
+  - web_app
 implements_techniques:
   - dom-abstraction
   - playwright-wrapper

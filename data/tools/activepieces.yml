@@ -23,6 +23,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
   - human
+integration_surfaces:
+  - web_app
+  - http_service
 implements_techniques:
   - mcp-workflow
   - step-audit

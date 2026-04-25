@@ -21,6 +21,8 @@ addresses_failure_modes:
 locus_of_control:
   - model
   - environment
+integration_surfaces:
+  - library
 implements_techniques:
   - black-box-uq
   - white-box-uq

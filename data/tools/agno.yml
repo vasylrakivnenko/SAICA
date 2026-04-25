@@ -20,6 +20,8 @@ addresses_failure_modes:
 locus_of_control:
   - prompt
   - environment
+integration_surfaces:
+  - library
 implements_techniques:
   - multi-agent
   - memory-modules

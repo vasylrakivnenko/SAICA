@@ -31,6 +31,8 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - cli
 implements_techniques:
   - sandboxed-runtime
   - iterative-fix-loop
@@ -45,7 +47,7 @@ security_notes: >
   should only be paired with the sandbox; approval-policy "untrusted"
   is the shipped default. Audit any MCP servers added to the config.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

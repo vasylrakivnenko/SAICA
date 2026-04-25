@@ -21,6 +21,8 @@ addresses_failure_modes:
   - obsolescence
 locus_of_control:
   - environment
+integration_surfaces:
+  - mcp_server
 implements_techniques:
   - component-generation
   - mcp-server

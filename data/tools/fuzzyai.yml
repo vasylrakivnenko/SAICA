@@ -20,6 +20,9 @@ addresses_failure_modes:
   - fabrication
 locus_of_control:
   - environment
+integration_surfaces:
+  - cli
+  - library
 implements_techniques:
   - evolutionary-prompt-fuzzing
   - jailbreak-search

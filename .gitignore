@@ -23,6 +23,10 @@ research/*.json
 research/raw/
 research/cache/
 
+# Per-developer Claude Code overrides (machine-specific)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
 # Postgres Docker volume
 .postgres-data/
 # Per-day API usage counters (Elicit budget, etc.)

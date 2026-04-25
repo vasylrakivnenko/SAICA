@@ -30,6 +30,8 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - library
 implements_techniques:
   - pydantic-schema-validation
   - validator-retry-loop
@@ -41,7 +43,7 @@ security_notes: >
   not itself transmit data anywhere; all traffic goes through the
   underlying provider SDK whose posture applies.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []

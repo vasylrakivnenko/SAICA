@@ -22,6 +22,9 @@ addresses_failure_modes:
   - cascading_failure
 locus_of_control:
   - environment
+integration_surfaces:
+  - proxy_gateway
+  - http_service
 implements_techniques:
   - llm-proxy
   - load-balancing

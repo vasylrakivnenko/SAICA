@@ -31,6 +31,9 @@ addresses_failure_modes:
 locus_of_control:
   - environment
 
+integration_surfaces:
+  - cli
+  - library
 implements_techniques:
   - sandboxed-runtime
   - trajectory-logging
@@ -44,7 +47,7 @@ security_notes: >
   shell access inside the sandbox — treat sandbox escape and credential
   leakage as the primary threat model.
 signed_manifest: false
-openssf_scorecard_score: null
+openssf_scorecard_score:
 
 cited_in: []
 documented_in: []
