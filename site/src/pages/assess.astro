@@ -1,0 +1,628 @@
+---
+// /assess — Audit a public GitHub repo against SAICA-KG.
+//
+// Pure client-side fetch against `pipeline/ask/server.py`'s POST /assess.
+// The page builds statically; only submit needs the backend. If the backend
+// is down the page still renders — only the audit run fails with a friendly
+// error block (mirrors the /ask page pattern).
+//
+// Contract: `AuditReport` from `pipeline/audit/schemas.py`. JSON keys are
+// read directly here; changing field names there will break the renderer.
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Override at build time with PUBLIC_ASSESS_API. Default keeps dev working
+// without extra config (Astro on :4323, FastAPI on :4322).
+const ASSESS_API =
+  (import.meta.env.PUBLIC_ASSESS_API as string | undefined) ??
+  'http://localhost:4322/assess';
+
+const examples: { label: string; slug: string }[] = [
+  { label: 'BerriAI/litellm', slug: 'BerriAI/litellm' },
+  { label: 'langfuse/langfuse', slug: 'langfuse/langfuse' },
+  { label: 'microsoft/autogen', slug: 'microsoft/autogen' },
+];
+---
+
+<BaseLayout
+  title="Assess"
+  description="Paste a public GitHub repo URL and SAICA-KG returns a coverage report — what supervision tools you have, which failure modes you're missing, and ranked recommendations."
+>
+  <h1>Audit a repo</h1>
+  <p class="mt-3 text-lg text-ink-muted max-w-3xl">
+    Paste a public GitHub URL. SAICA-KG inspects the repo, identifies the
+    supervision tools already in your stack, scores coverage across the 11
+    failure modes, and recommends concrete tools to close the gaps.
+  </p>
+  <p class="mt-2 text-sm text-ink-muted max-w-3xl">
+    Public repositories only (MVP). Audit is read-only — no fork, no PR, no
+    OAuth. The full report is also downloadable as Markdown so you can paste
+    it into your team's docs.
+  </p>
+
+  <section class="mt-6 max-w-3xl">
+    <form id="assess-form" class="font-sans" novalidate>
+      <label for="assess-url" class="block text-sm font-semibold mb-2">
+        GitHub repository
+      </label>
+      <input
+        id="assess-url"
+        name="repo_url"
+        type="text"
+        required
+        minlength="3"
+        maxlength="500"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="owner/repo  or  https://github.com/owner/repo"
+        class="w-full border border-ink/20 rounded p-3 text-base bg-white focus:border-accent focus:outline-none"
+      />
+
+      <div class="mt-2 flex flex-wrap items-center gap-3">
+        <button
+          id="assess-submit"
+          type="submit"
+          class="chip-accent !px-4 !py-1.5 !text-sm cursor-pointer border border-accent/40 hover:bg-accent hover:text-white"
+        >
+          Audit
+        </button>
+        <span
+          id="assess-status"
+          class="text-sm text-ink-muted"
+          role="status"
+          aria-live="polite"
+        ></span>
+      </div>
+    </form>
+
+    <div class="mt-5">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint mb-2">
+        Try a well-known repo
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {examples.map((ex) => (
+          <button
+            type="button"
+            class="example-repo chip hover:bg-paper hover:border-accent/40 cursor-pointer"
+            data-repo={ex.slug}
+          >
+            {ex.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Error: backend down, 4xx, 5xx ------------------------------------- -->
+  <section id="assess-error" class="mt-10 max-w-3xl hidden" role="alert">
+    <div class="border border-red-300 bg-red-50 text-red-900 p-4 rounded">
+      <div class="font-sans font-semibold mb-1">Couldn't run the audit</div>
+      <div id="assess-error-detail" class="text-sm"></div>
+      <div class="text-sm mt-2">
+        The backend is a separate FastAPI service. Start it with
+        <code>.venv/bin/python -m pipeline.ask.server</code> and try again.
+      </div>
+    </div>
+  </section>
+
+  <!-- Loaded report ----------------------------------------------------- -->
+  <section id="assess-report" class="mt-10 hidden">
+    <!-- Executive summary + download -->
+    <div class="card max-w-3xl">
+      <div class="flex flex-wrap items-baseline justify-between gap-3 mb-3">
+        <div>
+          <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
+            Audit summary
+          </div>
+          <h2 class="!mt-1 !mb-0 text-xl">
+            <a id="report-repo-link" href="#" rel="noopener" class="text-ink hover:text-accent"></a>
+          </h2>
+          <div id="report-audited-at" class="text-xs text-ink-faint font-sans mt-1"></div>
+        </div>
+        <button
+          id="download-md"
+          type="button"
+          class="chip-accent !px-3 !py-1.5 !text-sm cursor-pointer border border-accent/40 hover:bg-accent hover:text-white"
+        >
+          Download as Markdown
+        </button>
+      </div>
+      <p id="report-summary" class="leading-relaxed"></p>
+    </div>
+
+    <!-- Detected stack -->
+    <section class="mt-8 max-w-3xl">
+      <h2>Detected stack</h2>
+      <div class="card">
+        <dl class="kv">
+          <dt>Languages</dt>
+          <dd id="stack-langs" class="flex flex-wrap gap-1.5"></dd>
+          <dt>Package mgrs</dt>
+          <dd id="stack-pkg" class="flex flex-wrap gap-1.5"></dd>
+          <dt>CI providers</dt>
+          <dd id="stack-ci" class="flex flex-wrap gap-1.5"></dd>
+          <dt>Runtime hints</dt>
+          <dd id="stack-runtime" class="flex flex-wrap gap-1.5"></dd>
+          <dt>Coding agents</dt>
+          <dd id="stack-agents" class="flex flex-wrap gap-1.5"></dd>
+        </dl>
+
+        <div class="mt-5">
+          <div class="text-xs font-sans uppercase tracking-widest text-ink-faint mb-2">
+            Supervision tools detected
+          </div>
+          <ul id="stack-tools" class="text-sm space-y-2"></ul>
+        </div>
+
+        <div id="stack-unresolved-wrap" class="mt-5 hidden">
+          <div class="text-xs font-sans uppercase tracking-widest text-ink-faint mb-2">
+            Detected but not in the KG
+          </div>
+          <ul id="stack-unresolved" class="text-sm space-y-2"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Coverage heatmap ---------------------------------------------- -->
+    <section class="mt-8">
+      <div class="max-w-3xl">
+        <h2>Coverage heatmap</h2>
+        <p class="text-sm leading-7 text-ink-muted">
+          Rows are the supervision tools we detected in your repo. Columns are
+          the 11 failure modes from SAICA-KG. Cell color uses the same
+          per-mapping evidence tier as
+          <a href="/tool-coverage">/tool-coverage</a>: 0 (not addressed),
+          1 (declared), 2 (rationale discusses FM), 3 (external citation).
+        </p>
+      </div>
+
+      <div id="heatmap-empty" class="mt-4 max-w-3xl text-sm text-ink-muted hidden">
+        No supervision tools detected in this repo. Every column will appear
+        in the gap list below.
+      </div>
+
+      <div id="heatmap-wrap" class="mt-4 overflow-x-auto border border-ink/10 rounded bg-white hidden">
+        <table class="text-sm font-sans w-full" id="heatmap-table">
+          <thead class="bg-paper-alt text-ink-faint text-xs uppercase tracking-wide">
+            <tr id="heatmap-head">
+              <th class="text-left px-3 py-2 sticky left-0 bg-paper-alt">Tool</th>
+              <th class="text-left px-3 py-2">Source</th>
+            </tr>
+          </thead>
+          <tbody id="heatmap-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Gap list ------------------------------------------------------- -->
+    <section class="mt-8">
+      <div class="max-w-3xl">
+        <h2>Ranked gaps</h2>
+        <p class="text-sm leading-7 text-ink-muted">
+          Failure modes your stack does not yet cover, ranked by severity.
+          Each card lists 2&ndash;3 recommended supervision tools that fit
+          your detected language, CI, and agent context.
+        </p>
+      </div>
+      <div id="gaps-empty" class="mt-4 max-w-3xl text-sm text-ink-muted hidden">
+        No gaps found &mdash; your stack already covers every failure mode
+        in the SAICA-KG taxonomy. (Worth double-checking: review the heatmap
+        above for thin paradigm coverage.)
+      </div>
+      <div id="gaps-list" class="mt-4 grid gap-4 grid-cols-1 lg:grid-cols-2"></div>
+    </section>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ ASSESS_API }}>
+  // ---- DOM refs -----------------------------------------------------------
+  const form = document.getElementById('assess-form');
+  const urlEl = document.getElementById('assess-url');
+  const submitBtn = document.getElementById('assess-submit');
+  const statusEl = document.getElementById('assess-status');
+  const errorWrap = document.getElementById('assess-error');
+  const errorDetail = document.getElementById('assess-error-detail');
+  const reportWrap = document.getElementById('assess-report');
+
+  // ---- Constants (mirror /tool-coverage) ----------------------------------
+  const TIER_BG = {
+    0: '#f5f5f5',
+    1: '#d8e7f5',
+    2: '#6aa3d3',
+    3: '#1f4e79',
+  };
+  const TIER_FG = {
+    0: '#9ca3af',
+    1: '#1f4e79',
+    2: '#ffffff',
+    3: '#ffffff',
+  };
+  const TIER_LABEL = {
+    0: 'not addressed',
+    1: 'declared mapping',
+    2: 'rationale discusses FM',
+    3: 'rationale + external citation',
+  };
+  const SEVERITY_CLASS = {
+    high: 'bg-red-100 text-red-900 border-red-300',
+    medium: 'bg-amber-100 text-amber-900 border-amber-300',
+    low: 'bg-slate-100 text-slate-800 border-slate-300',
+  };
+
+  // ---- Helpers ------------------------------------------------------------
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function fmtDisplay(s) {
+    // 'scope_creep' -> 'Scope creep'
+    if (!s) return '';
+    const t = String(s).replace(/_/g, ' ');
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function fmtStars(n) {
+    if (n == null || n === 0) return '';
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}k★`;
+    return `${n}★`;
+  }
+
+  // ---- GitHub URL normalization ------------------------------------------
+  // Accepts: 'owner/repo', 'github.com/owner/repo', 'https://github.com/owner/repo',
+  // optionally with a trailing '.git' or extra path. Returns canonical form
+  // 'https://github.com/owner/repo' or null if it can't be parsed.
+  const SLUG_RE = /^([A-Za-z0-9](?:[A-Za-z0-9._-]{0,37}[A-Za-z0-9])?)\/([A-Za-z0-9._-]+?)(?:\.git)?$/;
+
+  function normalizeRepoUrl(raw) {
+    if (!raw) return null;
+    let s = String(raw).trim();
+    if (!s) return null;
+    // strip protocol
+    s = s.replace(/^https?:\/\//i, '');
+    // strip github.com prefix
+    s = s.replace(/^(www\.)?github\.com\//i, '');
+    // strip trailing slash + anything after the second path segment
+    const parts = s.split('/').filter(Boolean);
+    if (parts.length < 2) return null;
+    const owner = parts[0];
+    let repo = parts[1].replace(/\.git$/i, '');
+    const candidate = `${owner}/${repo}`;
+    if (!SLUG_RE.test(candidate)) return null;
+    return `https://github.com/${owner}/${repo}`;
+  }
+
+  // ---- Stack rendering ---------------------------------------------------
+  function renderChipList(host, items, opts) {
+    host.innerHTML = '';
+    const accent = opts && opts.accent;
+    if (!items || !items.length) {
+      const span = document.createElement('span');
+      span.className = 'text-xs text-ink-faint';
+      span.textContent = '—';
+      host.appendChild(span);
+      return;
+    }
+    for (const it of items) {
+      const span = document.createElement('span');
+      span.className = accent ? 'chip-accent' : 'chip';
+      span.textContent = it;
+      host.appendChild(span);
+    }
+  }
+
+  function renderAgents(host, agents) {
+    host.innerHTML = '';
+    if (!agents || !agents.length) {
+      const span = document.createElement('span');
+      span.className = 'text-xs text-ink-faint';
+      span.textContent = 'none detected';
+      host.appendChild(span);
+      return;
+    }
+    for (const a of agents) {
+      const span = document.createElement('span');
+      span.className = 'chip-accent';
+      span.title = (a.detection_paths || []).join(', ');
+      const conf = a.confidence != null ? ` (${Math.round(a.confidence * 100)}%)` : '';
+      span.textContent = `${a.name || a.id}${conf}`;
+      host.appendChild(span);
+    }
+  }
+
+  function renderTools(host, tools) {
+    host.innerHTML = '';
+    if (!tools || !tools.length) {
+      const li = document.createElement('li');
+      li.className = 'text-ink-faint';
+      li.textContent = 'No supervision tools detected.';
+      host.appendChild(li);
+      return;
+    }
+    for (const t of tools) {
+      const li = document.createElement('li');
+      const conf = t.confidence != null ? Math.round(t.confidence * 100) : null;
+      const paths = (t.detection_paths || []).slice(0, 3).join(', ');
+      const moreCount = (t.detection_paths || []).length - 3;
+      const morePath = moreCount > 0 ? ` (+${moreCount} more)` : '';
+      const link = t.in_kg && t.id
+        ? `<a href="/tools/${encodeURIComponent(t.id)}" class="font-semibold">${escapeHtml(t.name || t.id)}</a>`
+        : `<span class="font-semibold">${escapeHtml(t.name || t.id || '?')}</span>`;
+      li.innerHTML =
+        link
+        + ` <span class="chip ml-1">${escapeHtml(t.detection_source || 'other')}</span>`
+        + (conf != null ? ` <span class="text-xs text-ink-faint">${conf}%</span>` : '')
+        + (paths ? `<div class="text-xs text-ink-faint mt-0.5">${escapeHtml(paths)}${escapeHtml(morePath)}</div>` : '')
+        + (t.note ? `<div class="text-xs text-ink-muted mt-0.5">${escapeHtml(t.note)}</div>` : '');
+      host.appendChild(li);
+    }
+  }
+
+  // ---- Heatmap rendering -------------------------------------------------
+  // Build a per-tool tier per-FM map by walking CoverageGrid.cells, taking
+  // the max tier across paradigms for each (tool, FM) pair.
+  function buildToolFmTiers(report) {
+    const tools = report.stack && report.stack.supervision_tools || [];
+    const cells = (report.coverage && report.coverage.cells) || [];
+    const fmsCovered = (report.coverage && report.coverage.failure_modes_covered) || [];
+    const fmsMissing = (report.coverage && report.coverage.failure_modes_missing) || [];
+    // Stable column order: covered first (sorted), then missing (sorted)
+    const covered = [...fmsCovered].sort();
+    const missing = [...fmsMissing].sort();
+    const fms = [...covered, ...missing];
+
+    // tool_id -> fm -> max tier
+    const grid = new Map();
+    for (const t of tools) {
+      grid.set(t.id || t.name, new Map());
+    }
+    for (const cell of cells) {
+      const tier = Number(cell.tier) || 0;
+      for (const tid of (cell.contributing_tools || [])) {
+        if (!grid.has(tid)) grid.set(tid, new Map());
+        const row = grid.get(tid);
+        const prev = row.get(cell.failure_mode) || 0;
+        if (tier > prev) row.set(cell.failure_mode, tier);
+      }
+    }
+    return { tools, fms, grid };
+  }
+
+  function renderHeatmap(report) {
+    const wrap = document.getElementById('heatmap-wrap');
+    const empty = document.getElementById('heatmap-empty');
+    const head = document.getElementById('heatmap-head');
+    const body = document.getElementById('heatmap-body');
+    const { tools, fms, grid } = buildToolFmTiers(report);
+
+    if (!tools.length) {
+      wrap.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden');
+
+    head.innerHTML =
+      `<th class="text-left px-3 py-2 sticky left-0 bg-paper-alt z-10">Tool</th>`
+      + `<th class="text-left px-3 py-2">Source</th>`
+      + fms.map((fm) => {
+        const disp = fmtDisplay(fm);
+        return `<th class="px-2 py-2 align-bottom" style="min-width:3rem">`
+          + `<a href="/failure-modes/${encodeURIComponent(fm)}" class="block text-ink hover:text-accent" title="${escapeHtml(disp)}">`
+          + `<div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;" class="text-xs normal-case tracking-normal">${escapeHtml(disp)}</div>`
+          + `</a></th>`;
+      }).join('');
+
+    body.innerHTML = tools.map((t) => {
+      const tid = t.id || t.name;
+      const row = grid.get(tid) || new Map();
+      const cells = fms.map((fm) => {
+        const tier = row.get(fm) || 0;
+        const bg = TIER_BG[tier];
+        const fg = TIER_FG[tier];
+        const tip = `${escapeHtml(t.name || tid)} × ${escapeHtml(fmtDisplay(fm))}: tier ${tier} — ${TIER_LABEL[tier]}`;
+        const content = tier === 0 ? '' : String(tier);
+        const inner = tier > 0 && t.in_kg && t.id
+          ? `<a href="/tools/${encodeURIComponent(t.id)}" title="${tip}" class="block w-full h-full no-underline leading-none" style="color:${fg}">${content}</a>`
+          : `<span title="${tip}" class="block w-full h-full" style="color:${fg}">${content || '&nbsp;'}</span>`;
+        return `<td class="text-center align-middle p-0" style="background:${bg}; height:2.25rem; min-width:2.25rem">${inner}</td>`;
+      }).join('');
+      const labelCell = t.in_kg && t.id
+        ? `<a href="/tools/${encodeURIComponent(t.id)}" class="text-ink hover:text-accent">${escapeHtml(t.name || tid)}</a>`
+        : `<span class="text-ink">${escapeHtml(t.name || tid)}</span>`;
+      return `<tr class="border-t border-ink/10">`
+        + `<td class="px-3 py-1.5 sticky left-0 bg-white z-10 border-r border-ink/10">${labelCell}</td>`
+        + `<td class="px-3 py-1.5 text-xs text-ink-muted">${escapeHtml(t.detection_source || '')}</td>`
+        + cells
+        + `</tr>`;
+    }).join('');
+  }
+
+  // ---- Gap list rendering ------------------------------------------------
+  function renderGaps(report) {
+    const list = document.getElementById('gaps-list');
+    const empty = document.getElementById('gaps-empty');
+    const gaps = report.gaps || [];
+    list.innerHTML = '';
+    if (!gaps.length) {
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    for (const g of gaps) {
+      const sev = (g.severity || 'low').toLowerCase();
+      const sevCls = SEVERITY_CLASS[sev] || SEVERITY_CLASS.low;
+      const fmDisp = fmtDisplay(g.failure_mode);
+      const para = g.paradigm
+        ? ` <span class="chip">${escapeHtml(g.paradigm)} missing</span>`
+        : '';
+      const recsHtml = (g.recommendations || []).map((r) => {
+        const stars = fmtStars(r.stars);
+        const surfaces = (r.integration_surfaces || []).slice(0, 3).map((s) =>
+          `<span class="chip text-[10px]">${escapeHtml(s)}</span>`).join(' ');
+        const url = r.url || `/tools/${encodeURIComponent(r.tool_id)}`;
+        return `<div class="border border-ink/10 rounded p-3 bg-paper-alt">`
+          + `<div class="flex flex-wrap items-baseline justify-between gap-2 mb-1">`
+          + `<a href="${escapeHtml(url)}" class="font-semibold text-ink hover:text-accent">${escapeHtml(r.tool_name || r.tool_id)}</a>`
+          + (stars ? `<span class="text-xs text-ink-faint font-mono">${stars}</span>` : '')
+          + `</div>`
+          + `<div class="flex flex-wrap gap-1.5 mb-2">`
+          + `<span class="chip-accent">${escapeHtml(r.paradigm || '')}</span>`
+          + (r.temporal_phase ? `<span class="chip">${escapeHtml(r.temporal_phase)}</span>` : '')
+          + (r.autonomy_level ? `<span class="chip">${escapeHtml(r.autonomy_level)}</span>` : '')
+          + surfaces
+          + `</div>`
+          + `<p class="text-sm text-ink-muted leading-snug">${escapeHtml(r.why || '')}</p>`
+          + `</div>`;
+      }).join('');
+      const card = document.createElement('article');
+      card.className = 'card flex flex-col gap-3';
+      card.innerHTML =
+        `<header class="flex flex-wrap items-baseline justify-between gap-2">`
+        + `<h3 class="!mt-0 !mb-0 text-base">`
+        + `<a href="/failure-modes/${encodeURIComponent(g.failure_mode)}" class="text-ink hover:text-accent">${escapeHtml(fmDisp)}</a>`
+        + `</h3>`
+        + `<span class="inline-block text-xs font-sans uppercase tracking-wide rounded-full border px-2 py-0.5 ${sevCls}">${escapeHtml(sev)}</span>`
+        + `</header>`
+        + `<div class="flex flex-wrap gap-1.5 -mt-1">${para}</div>`
+        + `<p class="text-sm leading-relaxed text-ink-muted">${escapeHtml(g.rationale || '')}</p>`
+        + (recsHtml ? `<div class="grid gap-2">${recsHtml}</div>` : '');
+      list.appendChild(card);
+    }
+  }
+
+  // ---- Summary + download ------------------------------------------------
+  let currentReport = null;
+
+  function renderSummary(report) {
+    const link = document.getElementById('report-repo-link');
+    const audited = document.getElementById('report-audited-at');
+    const summary = document.getElementById('report-summary');
+    link.href = report.repo_url;
+    link.textContent = report.repo_url.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
+    audited.textContent = `Audited ${report.audited_at || ''}`;
+    summary.textContent = report.summary || '';
+  }
+
+  function repoSlug(url) {
+    const m = String(url || '').match(/github\.com\/([^/]+)\/([^/?#]+)/i);
+    if (!m) return 'repo';
+    return `${m[1]}-${m[2].replace(/\.git$/i, '')}`;
+  }
+
+  function downloadMarkdown() {
+    if (!currentReport || !currentReport.markdown) return;
+    const blob = new Blob([currentReport.markdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${repoSlug(currentReport.repo_url)}-saica-audit.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  // ---- Render entry ------------------------------------------------------
+  function renderReport(report) {
+    currentReport = report;
+    renderSummary(report);
+    const stack = report.stack || {};
+    renderChipList(document.getElementById('stack-langs'), stack.languages);
+    renderChipList(document.getElementById('stack-pkg'), stack.package_managers);
+    renderChipList(document.getElementById('stack-ci'), stack.ci_providers);
+    renderChipList(document.getElementById('stack-runtime'), stack.runtime_hints);
+    renderAgents(document.getElementById('stack-agents'), stack.agents);
+    renderTools(document.getElementById('stack-tools'), stack.supervision_tools);
+
+    // Unresolved tools (in repo but not in KG)
+    const unresWrap = document.getElementById('stack-unresolved-wrap');
+    const unresList = document.getElementById('stack-unresolved');
+    const unres = stack.unresolved_tools || [];
+    if (unres.length) {
+      renderTools(unresList, unres);
+      unresWrap.classList.remove('hidden');
+    } else {
+      unresWrap.classList.add('hidden');
+    }
+
+    renderHeatmap(report);
+    renderGaps(report);
+    reportWrap.classList.remove('hidden');
+  }
+
+  // ---- Submit handler ---------------------------------------------------
+  async function runAudit(rawUrl) {
+    const repoUrl = normalizeRepoUrl(rawUrl);
+    if (!repoUrl) {
+      statusEl.textContent = '';
+      errorDetail.textContent =
+        `Couldn't parse "${rawUrl}" as a GitHub repo. Try owner/repo or https://github.com/owner/repo.`;
+      errorWrap.classList.remove('hidden');
+      reportWrap.classList.add('hidden');
+      return;
+    }
+    errorWrap.classList.add('hidden');
+    reportWrap.classList.add('hidden');
+    statusEl.textContent = `Auditing ${repoUrl.replace(/^https?:\/\/github\.com\//, '')}…`;
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-60');
+
+    try {
+      const resp = await fetch(ASSESS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo_url: repoUrl }),
+      });
+      if (!resp.ok) {
+        let detail = '';
+        try {
+          const body = await resp.json();
+          detail = body && body.detail ? body.detail : JSON.stringify(body);
+        } catch {
+          detail = await resp.text().catch(() => '');
+        }
+        throw new Error(`backend returned ${resp.status}: ${detail || resp.statusText}`);
+      }
+      const data = await resp.json();
+      renderReport(data);
+      statusEl.textContent = '';
+      // Move focus to the report region for keyboard / screen-reader users.
+      reportWrap.setAttribute('tabindex', '-1');
+      reportWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      errorDetail.textContent = String(err && err.message ? err.message : err);
+      errorWrap.classList.remove('hidden');
+      statusEl.textContent = '';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-60');
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = (urlEl.value || '').trim();
+    if (v.length < 3) {
+      statusEl.textContent = 'Please enter a GitHub repo (e.g. owner/repo).';
+      return;
+    }
+    runAudit(v);
+  });
+
+  for (const btn of document.querySelectorAll('.example-repo')) {
+    btn.addEventListener('click', () => {
+      const slug = btn.getAttribute('data-repo') || '';
+      urlEl.value = slug;
+      urlEl.focus();
+      runAudit(slug);
+    });
+  }
+
+  document.getElementById('download-md').addEventListener('click', downloadMarkdown);
+</script>
+</content>
+</invoke>

@@ -62,6 +62,12 @@ class Question(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
 
 
+class AssessRequest(BaseModel):
+    """Input for the /assess endpoint — a public GitHub repo URL."""
+
+    repo_url: str = Field(..., min_length=1, max_length=500)
+
+
 class Citation(BaseModel):
     id: str
     type: str
@@ -198,6 +204,44 @@ def create_app(
             kimi_tokens_used=tokens,
             model=_raw_model_name(raw),
         )
+
+    @app.post("/assess")
+    def assess(req: AssessRequest) -> Any:  # noqa: D401 — HTTP endpoint
+        """Audit a public GitHub repo and return an :class:`AuditReport`.
+
+        The audit analyzer (`pipeline.audit.analyzer`) is built in parallel
+        and may not be importable yet. We try-import inside the handler so
+        the server starts cleanly and only `/assess` itself returns 503
+        when the analyzer module is missing.
+        """
+        try:
+            from pipeline.audit.analyzer import audit_repo  # local import
+        except ImportError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail=f"audit analyzer not available yet: {exc}",
+            ) from exc
+
+        repo_url = req.repo_url.strip()
+        if not repo_url:
+            raise HTTPException(status_code=400, detail="repo_url must not be blank")
+
+        try:
+            report = audit_repo(repo_url)
+        except ValueError as exc:
+            # Bad URL / unsupported host / not a public repo — user-facing.
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            log.exception("audit failed for %s", repo_url)
+            raise HTTPException(status_code=500, detail=f"audit failed: {exc}") from exc
+
+        # Returning the Pydantic instance directly lets FastAPI serialize
+        # via model_dump(mode="json"). We deliberately avoid a static
+        # `response_model=AuditReport` annotation so the server still
+        # imports when `pipeline.audit.analyzer` isn't present.
+        return report
 
     return app
 
