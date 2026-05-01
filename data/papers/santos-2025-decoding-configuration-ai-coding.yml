@@ -37,7 +37,12 @@ relevance_tags:
   - agentic-ai
   - empirical
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:supervising-ai-coding-agents.
+  Empirical study of 328 configuration files from public Claude Code projects,
+  analyzing the software-engineering concerns they encode (architectural
+  constraints, coding practices, tool usage policies) and how those concerns
+  co-occur. Provides concrete evidence that agent configuration files are a
+  primary supervision substrate in current practice — they are where humans
+  pre-emptively constrain agent behavior. Relates to SAICA-KG failure modes:
+  scope_creep, context_pollution. Useful as a primary cite for the
+  pre_generation TemporalPhase axis (configuration as ex-ante supervision) and
+  as evidence for why a Claude Code-specific Tool node is warranted.

@@ -94,6 +94,15 @@ relevance_tags:
   - benchmark
   - guardrails
 notes: >
-  Relates to SAICA-KG failure modes: fabrication, logic_error.
-  Auto-graduated from candidate pool; review the editorial framing before
-  promoting to a primary cite. Source: s2:sandboxed-execution-ai-code-agent.
+  Introduces PRBench, a benchmark of 30 expert-curated end-to-end physics
+  paper-reproduction tasks across 11 subfields, where the agent must
+  comprehend a paper, implement its algorithms from scratch, and produce
+  quantitative results matching the original publication. The best-performing
+  agent (OpenAI Codex powered by GPT-5.3-Codex) achieves only 34% mean overall
+  score, with a zero end-to-end callback success rate. Authors identify
+  systematic failure modes including errors in formula implementation,
+  inability to debug numerical simulations, and fabrication of output data —
+  all directly on-model for SAICA-KG. Relates to SAICA-KG failure modes:
+  fabrication, logic_error, incomplete_execution. Cite when arguing that
+  long-horizon reproducibility is currently the hardest stress test for coding
+  agents.

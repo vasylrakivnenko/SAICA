@@ -40,7 +40,14 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:mcp-evaluation.
+  Introduces MCPGAUGE, the first comprehensive evaluation framework for
+  LLM-MCP interactions along four dimensions: proactivity (self-initiated tool
+  use), compliance (adherence to tool-use instructions), effectiveness (task
+  performance post-integration), and overhead (computational cost). 160-
+  prompt suite across 25 datasets covering knowledge comprehension, general
+  reasoning, and code generation; evaluated on six commercial LLMs and 30 MCP
+  tool suites with ~20,000 API calls. Findings challenge the prevailing
+  assumption that MCP integration unambiguously helps. Relates to SAICA-KG
+  failure modes: scope_creep, context_pollution, incomplete_execution. Cite as
+  evidence that 'tool use' itself is a supervisable behavior, not just a
+  capability.

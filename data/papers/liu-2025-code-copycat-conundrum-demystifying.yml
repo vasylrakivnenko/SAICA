@@ -52,7 +52,13 @@ relevance_tags:
   - benchmark
   - empirical
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:llm-code-failure-taxonomy.
+  First empirical study of code repetition across 19 SOTA code LLMs on three
+  benchmarks; produces a 20-pattern taxonomy of repetition at character,
+  statement, and block granularity. Proposes DeRep, a rule-based
+  detect-and-mitigate technique that delivers large repetition reductions and
+  a 208.3% Pass@1 uplift over greedy search. Repetition is a concrete
+  signature of context_pollution (the model echoing its own context) and of
+  degraded logic_error patterns (e.g. duplicated branches hiding bugs).
+  Relates to SAICA-KG failure modes: context_pollution, logic_error. Cite when
+  arguing that syntactic-quality detectors complement semantic ones in the
+  supervision stack.

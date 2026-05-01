@@ -17,6 +17,7 @@ tldr: >
   Introduces a code-inspection-based assessment of AI-agent autonomy that
   does not require running the agent. Orchestration code is scored on two
   axes — impact and oversight — using a taxonomy demonstrated on AutoGen.
+abstract: 'AI agents are AI systems that can achieve complex goals autonomously. Assessing the level of agent autonomy is crucial for understanding both their potential benefits and risks. Current assessments of autonomy often focus on specific risks and rely on run-time evaluations -- observations of agent actions during operation. We introduce a code-based assessment of autonomy that eliminates the need to run an AI agent to perform specific tasks, thereby reducing the costs and risks associated with run-time evaluations. Using this code-based framework, the orchestration code used to run an AI agent can be scored according to a taxonomy that assesses attributes of autonomy: impact and oversight. We demonstrate this approach with the AutoGen framework and select applications.'
 relevance_tags:
   - autonomy
   - static-analysis

@@ -48,6 +48,17 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG failure modes: security_vulnerability. Auto-graduated
-  from candidate pool; review the editorial framing before promoting to a
-  primary cite. Source: s2:mcp-evaluation.
+  Introduces MSB (MCP Security Benchmark), the first end-to-end evaluation
+  suite that measures LLM-agent resistance to MCP-specific attacks across the
+  full tool-use pipeline (task planning, tool invocation, response handling).
+  Contributes a 12-attack taxonomy (name-collision, preference manipulation,
+  prompt injections in tool descriptions, out-of-scope parameter requests,
+  user-impersonating responses, false-error escalation, tool-transfer,
+  retrieval injection, mixed attacks), an evaluation harness that runs real
+  benign and malicious tools via MCP rather than simulation, and the Net
+  Resilient Performance (NRP) robustness metric. Evaluates nine popular LLM
+  agents across 10 domains and 405 tools (2,000 attack instances); finds that
+  stronger models are more vulnerable due to better instruction following.
+  Relates to SAICA-KG failure modes: security_vulnerability,
+  supply_chain_attack, scope_creep. Strong primary cite for the MCP-security
+  FailureMode cluster. Code at github.com/dongsenzhang/MSB.

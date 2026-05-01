@@ -44,6 +44,12 @@ relevance_tags:
   - MCP
   - survey
 notes: >
-  Relates to SAICA-KG failure modes: logic_error, security_vulnerability.
-  Auto-graduated from candidate pool; review the editorial framing before
-  promoting to a primary cite. Source: s2:sandboxed-execution-ai-code-agent.
+  Critical analysis of integrating Google's Agent-to-Agent (A2A) protocol with
+  Anthropic's Model Context Protocol (MCP). Names the emergent risk surfaces
+  at the A2A+MCP intersection: semantic interoperability between agent tasks
+  and tool capabilities, compounded security risks from combined discovery and
+  execution, debugging difficulties across protocols, and governance gaps for
+  the 'Agent Economy'. Relates to SAICA-KG failure modes:
+  security_vulnerability, cascading_failure, scope_creep. Cite as
+  supervision-vocabulary anchor when discussing inter-agent vs. agent-tool
+  boundaries in the ControlParadigm axis.

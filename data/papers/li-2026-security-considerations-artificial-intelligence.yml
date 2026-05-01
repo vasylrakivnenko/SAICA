@@ -41,7 +41,13 @@ relevance_tags:
   - benchmark
   - guardrails
 notes: >
-  Relates to SAICA-KG failure modes: security_vulnerability,
-  cascading_failure. Auto-graduated from candidate pool; review the
-  editorial framing before promoting to a primary cite. Source:
-  s2:sandboxed-execution-ai-code-agent.
+  Lightly-adapted version of Perplexity's response to NIST/CAISI RFI 2025-0035
+  on frontier AI agent security. Maps principal attack surfaces across tools,
+  connectors, hosting boundaries, and multi-agent coordination, with explicit
+  emphasis on indirect prompt injection, confused-deputy behavior, and
+  cascading failures in long-running workflows. Assesses defenses as a layered
+  stack: input/model-level mitigations, sandboxed execution, and deterministic
+  policy enforcement for high-consequence actions. Relates to SAICA-KG failure
+  modes: security_vulnerability, cascading_failure, supply_chain_attack.
+  Useful as an industry-perspective anchor for the layered-defense framing in
+  SAICA-KG's ControlParadigm axis.

@@ -39,7 +39,11 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:mcp-evaluation.
+  Architectural framework paper proposing standardized context sharing and
+  coordination mechanisms over the Model Context Protocol (MCP) for
+  multi-agent systems. Mostly theoretical (case studies in enterprise
+  knowledge management, collaborative research, and distributed
+  problem-solving) but useful as an MCP-vocabulary anchor for SAICA-KG's
+  tool-layer nodes. Relates to SAICA-KG failure modes: context_pollution,
+  cascading_failure. Cite when discussing how MCP is intended to constrain
+  context-sharing and where its design intent diverges from observed practice.

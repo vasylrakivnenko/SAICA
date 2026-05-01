@@ -18,6 +18,7 @@ tldr: >
   AGENTFORGE instantiates this with Planner/Coder/Tester/Debugger/Critic
   agents sharing memory and a mandatory Docker sandbox, achieving 40.0% on
   SWE-Bench Lite — 26-28 points above single-agent baselines.
+abstract: 'Large language models generate plausible code but cannot verify correctness. Existing multi-agent systems simulate execution or leave verification optional. We introduce execution-grounded verification as a first-class principle: every code change must survive sandboxed execution before propagation. We instantiate this principle in AGENTFORGE, a multi-agent framework where Planner, Coder, Tester, Debugger, and Critic agents coordinate through shared memory and a mandatory Docker sandbox. We formalize software engineering with LLMs as an iterative decision process over repository states, where execution feedback provides a stronger supervision signal than next-token likelihood. AGENTFORGE achieves 40.0\% resolution on SWE-BENCH Lite, outperforming single-agent baselines by 26--28 points. Ablations confirm that execution feedback and role decomposition each independently drive performance. The framework is open-source at https://github.com/raja21068/AutoCodeAI.'
 relevance_tags:
   - multi-agent
   - execution-grounded

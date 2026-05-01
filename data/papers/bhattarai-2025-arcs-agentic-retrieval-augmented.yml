@@ -36,6 +36,13 @@ tldr: >
 relevance_tags:
   - agentic-ai
 notes: >
-  Relates to SAICA-KG failure modes: fabrication. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:retrieval-augmented-code-generation.
+  Introduces ARCS (Agentic Retrieval-Augmented Code Synthesis), a budgeted
+  synthesize-execute-repair loop over a frozen LLM with formal guarantees on
+  termination, monotonic improvement, and bounded cost. Evaluated on
+  HumanEval, TransCoder, and a LANL scientific corpus; reports 87.2% pass@1 on
+  HumanEval with Llama-3.1-405B vs. CodeAgent at 82.3%. The
+  retrieval-before-generation design is a concrete example of a pre_generation
+  guardrail that targets fabrication. Relates to SAICA-KG failure modes:
+  fabrication, logic_error. Useful as a case study for the ControlParadigm
+  axis: a tiered controller (Small/Medium/Large) is a worked example of
+  cost-aware supervision.

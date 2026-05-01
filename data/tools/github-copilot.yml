@@ -52,7 +52,8 @@ security_notes: >
 signed_manifest: true
 openssf_scorecard_score:
 
-cited_in: []
+cited_in:
+  - jiang-2024-survey-llm-code
 documented_in: []
 
 inclusion_rationale: >

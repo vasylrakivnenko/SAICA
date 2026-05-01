@@ -54,7 +54,14 @@ relevance_tags:
   - benchmark
   - empirical
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:supervising-ai-coding-agents.
+  Large-scale empirical study of agentic refactoring on the AIDev dataset:
+  15,451 refactoring instances across 12,256 PRs and 14,988 commits in
+  real-world open-source Java projects, with agents (OpenAI Codex, Claude
+  Code, Cursor named) targeting refactoring in 26.1% of commits. Finds agentic
+  refactoring is dominated by low-level consistency edits (rename
+  variable/parameter, change variable type) rather than the high-level design
+  changes humans favor — a behavioral signature relevant to scope_creep
+  (over-eager local edits) and incomplete_execution (rarely finishes a real
+  architectural refactor). Relates to SAICA-KG failure modes: scope_creep,
+  incomplete_execution. Primary citation for what agentic edits actually look
+  like in production today.

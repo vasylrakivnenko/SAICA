@@ -42,7 +42,12 @@ relevance_tags:
   - benchmark
   - supply-chain
 notes: >
-  Relates to SAICA-KG failure modes: supply_chain_attack, fabrication,
-  security_vulnerability. Auto-graduated from candidate pool; review the
-  editorial framing before promoting to a primary cite. Source:
-  s2:package-hallucination-slopsquatting.
+  Measures package-hallucination behavior across multiple LLMs and programming
+  languages. Two key empirical claims for SAICA-KG: (a) the Pareto frontier
+  between code-generation performance and package-hallucination rate is
+  sparsely populated, suggesting coding models are not currently optimized for
+  secure code, and (b) there is an inverse correlation between
+  package-hallucination rate and HumanEval performance, offering a heuristic
+  for forecasting which models are most exposed. Relates to SAICA-KG failure
+  modes: supply_chain_attack, fabrication, security_vulnerability. Cite as a
+  complement to spracklen-2024 — same problem, different measurement angle.

@@ -44,7 +44,14 @@ tldr: >
 relevance_tags:
   - supply-chain
 notes: >
-  Relates to SAICA-KG failure modes: supply_chain_attack, fabrication,
-  security_vulnerability. Auto-graduated from candidate pool; review the
-  editorial framing before promoting to a primary cite. Source:
-  s2:package-hallucination-slopsquatting.
+  Proposes HFuzzer, a phrase-based fuzzing framework that systematically tests
+  LLMs for package hallucinations by seeding the fuzzer with phrases drawn
+  from package metadata or coding tasks. Across multiple LLMs HFuzzer triggers
+  package hallucinations in every model tested and identifies 2.60x more
+  unique hallucinated packages than mutational fuzzing baselines; against
+  GPT-4o it surfaces 46 unique hallucinated packages and shows hallucinations
+  occur not just during code generation but also during environment
+  configuration. Relates to SAICA-KG failure modes: supply_chain_attack,
+  fabrication, security_vulnerability. Cite as a fuzzing-style measurement
+  tool that complements static prevalence studies (Spracklen-2024,
+  Krishna-2025).

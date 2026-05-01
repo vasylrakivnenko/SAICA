@@ -48,7 +48,15 @@ relevance_tags:
   - supervision
   - supply-chain
 notes: >
-  Relates to SAICA-KG failure modes: fabrication, dependency_blindness,
-  supply_chain_attack. Auto-graduated from candidate pool; review the
-  editorial framing before promoting to a primary cite. Source:
-  s2:package-hallucination-slopsquatting.
+  Introduces PackMonitor, a decoding-time monitor that eliminates (not just
+  mitigates) package hallucinations by constraining the decoding space to an
+  authoritative package list when the agent is generating an install command.
+  Three mechanisms: a Context-Aware Parser that triggers intervention only
+  during install-command generation, a Package-Name Intervenor that restricts
+  decoding, and a DFA-Caching mechanism that scales to millions of packages.
+  Tested on five widely used LLMs, drives package-hallucination rate to zero
+  with negligible latency overhead. Direct demonstration that in_generation
+  TemporalPhase supervision can fully prevent a specific FailureMode. Relates
+  to SAICA-KG failure modes: supply_chain_attack, fabrication,
+  dependency_blindness. Strong primary cite for the in_generation phase of the
+  TemporalPhase axis.

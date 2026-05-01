@@ -50,6 +50,13 @@ relevance_tags:
   - supervision
   - benchmark
 notes: >
-  Relates to SAICA-KG failure modes: logic_error. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:self-debug-reflexion-coding-agent.
+  Releases three resources for visualization-coding agents: VisCode-Multi-679K
+  (679K validated executable visualization samples with multi-turn correction
+  dialogues across 12 languages), VisPlotBench (an executable benchmark with
+  single-shot and multi-round self-debug protocols), and VisCoder2 (a model
+  family trained on the dataset). Reports 82.4% overall execution pass rate at
+  32B with iterative self-debug, particularly in symbolic and
+  compiler-dependent languages. Useful as a worked example of how iterative
+  self-debug closes the gap on logic_error and incomplete_execution failures,
+  and as a Tool-node citation for the visualization-coding subdomain. Relates
+  to SAICA-KG failure modes: logic_error, incomplete_execution.

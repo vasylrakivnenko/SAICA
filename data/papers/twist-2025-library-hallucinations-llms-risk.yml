@@ -43,7 +43,14 @@ tldr: >
 relevance_tags:
   - supply-chain
 notes: >
-  Relates to SAICA-KG failure modes: security_vulnerability,
-  supply_chain_attack, fabrication. Auto-graduated from candidate pool;
-  review the editorial framing before promoting to a primary cite. Source:
-  s2:package-hallucination-slopsquatting.
+  First systematic study of how user-level prompt variations impact library
+  hallucinations in LLM-generated code. Evaluates seven LLMs across two
+  hallucination types — library-name hallucinations (invalid imports) and
+  library-member hallucinations (invalid calls from valid libraries) — using
+  realistic developer-forum language and controlled misspelling/fake-name
+  perturbations. Striking findings: one-character misspellings trigger
+  hallucinations in up to 26% of tasks, fake library names are accepted in up
+  to 99% of tasks, and time-related prompts hallucinate in up to 84% of tasks
+  (an obsolescence signal). Relates to SAICA-KG failure modes: fabrication,
+  supply_chain_attack, obsolescence, dependency_blindness. The fake-name
+  acceptance rate is a direct slopsquatting attack vector.

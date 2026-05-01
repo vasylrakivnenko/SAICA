@@ -39,6 +39,11 @@ relevance_tags:
   - benchmark
   - survey
 notes: >
-  Relates to SAICA-KG failure modes: logic_error. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: elicit:Q3.
+  Survey of AI agentic programming: introduces a taxonomy of agent behaviors
+  and system architectures and reviews techniques for planning, context
+  management, tool integration, execution monitoring, and benchmarking
+  datasets. Useful as a coverage map for SAICA-KG's relationship to the wider
+  coding-agent literature; broad rather than deep. Relates to SAICA-KG failure
+  modes: logic_error, context_pollution, incomplete_execution. Cite when
+  situating SAICA-KG against the survey landscape rather than against a
+  primary measurement paper.

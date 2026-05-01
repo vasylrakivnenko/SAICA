@@ -161,22 +161,59 @@ URL_ONLY_TOOL_IDS: frozenset[str] = frozenset({
 })
 
 # Corroborating signals — words/phrases that, if present in the surrounding
-# 60-char window, lift a borderline match to the 0.9 tier.
+# CONTEXT_WINDOW around a borderline-name match, lift it to the 0.9 tier.
+# Pattern is case-insensitive and matches plurals/inflections via lookarounds
+# (so "LLMs", "agents", "tools", "developers", "evaluations" all count).
 CONTEXT_SIGNALS = (
-    "llm", "agent", "agentic", "code", "coding", "model", "tool",
-    "eval", "evaluation", "benchmark", "framework", "sandbox",
-    "framework", "ai", "ide", "cli",
+    # core supervision-domain vocabulary
+    "llm", "agent", "agentic", "code", "coding", "coder", "developer",
+    "develop", "development", "engineer", "engineering",
+    "model", "tool", "eval", "evaluation", "benchmark", "framework",
+    "sandbox", "ide", "ai", "cli", "harness", "test", "testing",
+    # software/build context that papers commonly use around tool names
+    "software", "program", "programming", "compile", "compiler",
+    "production", "research", "study", "experiment", "vscode", "vs code",
+    "repository", "repo", "github", "library", "package", "system",
+    # supervision keywords
+    "supervision", "guardrail", "guardrails", "monitor", "observability",
+    "trace", "tracing", "audit", "lint", "static analysis", "fuzz",
+    "red-team", "red team", "evaluation harness",
 )
 _SIGNAL_RE = re.compile(
-    r"\b(" + "|".join(re.escape(s) for s in CONTEXT_SIGNALS) + r")\b",
+    r"(?<![A-Za-z0-9])(?:"
+    + "|".join(re.escape(s) for s in CONTEXT_SIGNALS)
+    + r")[A-Za-z]{0,4}(?![A-Za-z])",
     re.IGNORECASE,
 )
 
 # Window radius for context-signal lookup around a borderline name match.
-CONTEXT_WINDOW = 60
+# Bumped from 60 → 200 because abstracts pack the relevant signal a sentence
+# or two away from the tool mention rather than immediately adjacent.
+CONTEXT_WINDOW = 200
 
 # Width of the evidence snippet stored in the report.
 SNIPPET_RADIUS = 40
+
+# Hand-curated additional name variants per tool id. The matcher tries each
+# alias as if it were the tool's name, with the same conservative rules
+# (NO_REPO_TOOL_IDS still requires a context word; LOWERCASE_WORD_BRANDS
+# still require exact-case). Keep this list small and justified.
+NAME_ALIASES: dict[str, tuple[str, ...]] = {
+    "codex-cli":     ("OpenAI Codex", "Codex CLI"),
+    "gemini-cli":    ("Gemini CLI", "Gemini-CLI"),
+    "continue-dev":  ("Continue.dev",),
+    "github-copilot": ("Copilot",),  # only with context (NO_REPO + signals)
+    "sourcegraph-cody": ("Cody",),
+    "claude-code":   ("Claude Code CLI",),
+    "pydantic-ai":   ("PydanticAI", "Pydantic-AI"),
+    "openai-evals":  ("OpenAI Evals",),
+    "lm-evaluation-harness": ("LM Eval Harness", "lm-eval"),
+    "browser-use":   ("Browser-Use",),
+    "swe-agent":     ("SWE-Agent", "SWE Agent"),
+    "promptfoo":     ("Prompt Foo",),
+    "deepteam":      ("DeepTeam",),
+    "confident-ai-deepteam": ("DeepTeam",),
+}
 
 
 # --------------------------------------------------------------------------- #
@@ -392,37 +429,27 @@ def match_paper_to_tool(
                     best = m
                 continue
 
-        # 3. Name match.
+        # 3. Name match (canonical + aliases).
         if tool.name and tool.id not in URL_ONLY_TOOL_IDS:
-            multi_word = " " in tool.name.strip()
-            is_borderline = tool.id in BORDERLINE_TOOL_IDS and not multi_word
-            # For borderline single-word names that are also common English
-            # words ("continue", "guidance", "manifest", "instructor", "modal",
-            # "outlines", "rebuff"), require an exact-case match to weed out
-            # the verb/noun usages from the brand usages.
-            case_sensitive = is_borderline
-            span = _find_name(text, tool.name, case_sensitive=case_sensitive)
-            if span:
+            candidate_names = [tool.name, *NAME_ALIASES.get(tool.id, ())]
+            for cand in candidate_names:
+                multi_word = " " in cand.strip() or "-" in cand.strip()
+                is_borderline = tool.id in BORDERLINE_TOOL_IDS and not multi_word
+                # For borderline single-word names that are also common English
+                # words, require exact-case to weed out verb/noun usages.
+                case_sensitive = is_borderline
+                span = _find_name(text, cand, case_sensitive=case_sensitive)
+                if not span:
+                    continue
                 if is_borderline:
                     if not _has_context_signal(text, *span):
                         continue
                     rule, conf = "name+context", 0.9
                 elif tool.is_no_repo:
-                    # Proprietary / academic product: require a
-                    # corroborating context word in the surrounding window.
-                    # Per the spec ("full tool name + code-related context
-                    # word in the same sentence"), this is treated as a
-                    # high-confidence match. Single-word brand names that
-                    # are also common English words (``cursor``, ``modal``)
-                    # additionally require exact-case matching to weed out
-                    # the noun usage from the brand usage.
                     if not _has_context_signal(text, *span):
                         continue
-                    # Re-check with case sensitivity if the name is a single
-                    # English word. Multi-word brands like "Claude Code" or
-                    # "Replit Agent" are safe without case enforcement.
-                    if not multi_word and tool.name.lower() in _LOWERCASE_WORD_BRANDS:
-                        if _find_name(text, tool.name, case_sensitive=True) is None:
+                    if not multi_word and cand.lower() in _LOWERCASE_WORD_BRANDS:
+                        if _find_name(text, cand, case_sensitive=True) is None:
                             continue
                     rule, conf = "name+context", 0.9
                 else:
@@ -430,12 +457,13 @@ def match_paper_to_tool(
 
                 m = Match(
                     paper_id=paper_id, tool_id=tool.id, field=field,
-                    matched_text=tool.name,
+                    matched_text=cand,
                     snippet=_snippet_of(text, *span),
                     confidence=conf, rule=rule,
                 )
                 if best is None or m.confidence > best.confidence:
                     best = m
+                    break  # take the first matching alias per field
     return best
 
 

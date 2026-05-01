@@ -44,7 +44,12 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:mcp-evaluation.
+  Position paper proposing a Zero-Trust Architecture (ZTA) framework for MCP
+  server communications, covering identity and device verification, mutual
+  authentication, micro-segmentation, dynamic policy enforcement, continuous
+  monitoring, and breach containment. Names MCP-specific threat surfaces:
+  client-server interactions, tool invocations, context leakage, and lateral
+  movement. Relates to SAICA-KG failure modes: security_vulnerability,
+  supply_chain_attack. Useful as a vocabulary anchor for the security-layer
+  Tool nodes; light on empirical evidence so cite as theoretical framing
+  rather than primary measurement.

@@ -45,7 +45,14 @@ relevance_tags:
   - agentic-ai
   - MCP
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:code-reinvention-duplicate-detection-llm.
+  Introduces AVDA, an MCP-based framework for automating cybersecurity
+  detection authoring by feeding organizational context (existing detections,
+  telemetry schemas, style guides) into AI-assisted code generation. Compares
+  Baseline, Sequential, and Agentic workflows; reports a 19% similarity uplift
+  for Agentic over Baseline at 40x higher token cost than Sequential. Notable
+  failure pattern: 8.9% exclusion-parity score (the agent struggles to honor
+  explicit not-this-detection constraints) — a clear instance of scope_creep
+  when the agent is pointed at security telemetry. Relates to SAICA-KG failure
+  modes: scope_creep, context_pollution. Useful as MCP integration evidence
+  and as a worked example of how organizational context becomes supervision
+  substrate.

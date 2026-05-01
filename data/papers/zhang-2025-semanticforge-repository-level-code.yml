@@ -56,6 +56,17 @@ relevance_tags:
   - benchmark
   - knowledge-graph
 notes: >
-  Relates to SAICA-KG failure modes: fabrication. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:code-gen-hallucination-classification.
+  Proposes SemanticForge, a repository-level code-generation framework that
+  targets two failure modes the authors name explicitly: 'logical
+  hallucination' (incorrect control/data-flow reasoning, ~ SAICA's
+  logic_error) and 'schematic hallucination' (type mismatches, signature
+  violations, architectural inconsistencies, ~ a mix of logic_error and
+  dependency_blindness). The fix combines a heterogeneous repository knowledge
+  graph (static + dynamic traces), neural query planners, SMT-guided beam
+  search for constraint satisfaction, and incremental graph updates. Reports
+  49.8% Pass@1 with 52% reduction in schematic hallucination and 31% reduction
+  in logical hallucination on a 4,250-task benchmark across 50 Python
+  projects. Relates to SAICA-KG failure modes: fabrication, logic_error,
+  dependency_blindness. Cite as a peer example of using a knowledge graph as a
+  supervision substrate — directly relevant to SAICA-KG's own architecture
+  argument.

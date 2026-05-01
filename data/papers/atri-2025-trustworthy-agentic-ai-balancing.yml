@@ -30,7 +30,12 @@ relevance_tags:
   - supervision
   - autonomy
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: elicit:Q3.
+  Pattern paper proposing a trustworthy-agentic-AI architecture built from a
+  policy gate, typed tools and effects, human-in-the-loop (HITL) controls,
+  layered safety monitors, and evidence logs, aligned to NIST AI RMF, ISO/IEC
+  42001, and the EU AI Act. Light on empirical content but useful as a
+  supervision-vocabulary anchor for SAICA-KG's ControlParadigm (policy gate,
+  HITL) and TemporalPhase (real-time monitor vs. ex-post evidence log)
+  partitions. Relates to SAICA-KG failure modes: scope_creep,
+  security_vulnerability, incomplete_execution. Cite for the typed-effects
+  framing when arguing that supervision must be explicit at the tool boundary.

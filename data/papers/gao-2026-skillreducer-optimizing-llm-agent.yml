@@ -45,6 +45,14 @@ relevance_tags:
   - benchmark
   - empirical
 notes: >
-  Relates to SAICA-KG failure modes: logic_error, context_pollution.
-  Auto-graduated from candidate pool; review the editorial framing before
-  promoting to a primary cite. Source: s2:self-debug-reflexion-coding-agent.
+  Large-scale empirical study of 55,315 publicly available agent skills
+  (pre-packaged instruction sets) finding systemic inefficiencies: 26.4% lack
+  routing descriptions, over 60% of body content is non-actionable, and
+  reference files inject tens of thousands of tokens per invocation. Proposes
+  SkillReducer, a two-stage compression framework evaluated on 600 skills and
+  the SkillsBench benchmark, achieving 48% description and 39% body
+  compression while improving functional quality by 2.8%. The 'less-is-more'
+  finding directly evidences context_pollution as a supervision-relevant
+  failure mode. Relates to SAICA-KG failure modes: context_pollution,
+  scope_creep. Useful for arguing that context curation is a first-class
+  supervision activity, not just a cost optimization.

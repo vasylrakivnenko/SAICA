@@ -44,6 +44,12 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG failure modes: security_vulnerability. Auto-graduated
-  from candidate pool; review the editorial framing before promoting to a
-  primary cite. Source: s2:mcp-evaluation.
+  Proposes MCP-GUARD, a three-stage layered defense for LLM-tool interactions
+  over MCP: lightweight static scanning for overt threats, a deep neural
+  detector for semantic attacks, and a fine-tuned E5-based model achieving
+  96.01% accuracy on adversarial-prompt detection, with an LLM arbitrator for
+  the final decision. Releases MCP-AttackBench, a 70,448-sample benchmark
+  generated with GPT-4 that simulates real-world attack vectors circumventing
+  conventional defenses. Relates to SAICA-KG failure modes:
+  security_vulnerability, supply_chain_attack. Cite as a layered-defense
+  Tool-node and as one of the better-grounded MCP-defense benchmarks.

@@ -42,6 +42,12 @@ relevance_tags:
   - benchmark
   - empirical
 notes: >
-  Relates to SAICA-KG failure modes: context_pollution. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:retrieval-augmented-code-generation.
+  Empirical study of which retrieved-information sources actually help
+  repository-level code generation. Key finding: in-context code and potential
+  API information help, but retrieved similar-code snippets often introduce
+  noise that degrades results by up to 15%. Proposes AllianceCoder with
+  chain-of-thought decomposition and semantic-description API retrieval;
+  evaluated on CoderEval and RepoExec with up to 20% Pass@1 improvement.
+  Direct evidence that uncurated RAG context is a context_pollution vector.
+  Relates to SAICA-KG failure modes: context_pollution, dependency_blindness.
+  Cite when arguing that retrieval-quality is itself a supervisable surface.

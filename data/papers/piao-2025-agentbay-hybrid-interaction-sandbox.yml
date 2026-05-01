@@ -77,6 +77,14 @@ relevance_tags:
   - benchmark
   - guardrails
 notes: >
-  Relates to SAICA-KG failure modes: incomplete_execution. Auto-graduated
-  from candidate pool; review the editorial framing before promoting to a
-  primary cite. Source: s2:hitl-code-generation.
+  Introduces AgentBay, a sandbox service providing isolated execution
+  environments across Windows, Linux, Android, web browsers, and code
+  interpreters with a hybrid AI-or-human control interface (MCP / SDK
+  programmatic access for agents; seamless human takeover via an Adaptive
+  Streaming Protocol). Reports >48% success-rate improvement on complex tasks
+  for the Agent+Human model. Direct evidence that
+  HITL-with-low-friction-takeover is a measurable supervision lever. Relates
+  to SAICA-KG failure modes: incomplete_execution, scope_creep. Useful as a
+  Tool-node citation for the sandbox category and as evidence that the
+  human-takeover latency budget is itself a supervision design parameter
+  (echoing Lindner-2025's sync/semi-sync/async axis).

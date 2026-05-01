@@ -55,7 +55,14 @@ relevance_tags:
   - benchmark
   - empirical
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: elicit:Q1.
+  Manual analysis of 150 failed SWE-Bench-Verified instances across three SOTA
+  tools (pipeline-based and agentic) produces a taxonomy of 3 phases, 9 main
+  categories, and 25 fine-grained failure subcategories. Key finding: agentic
+  failures are dominated by flawed reasoning and 'cognitive deadlocks' —
+  distinct failure fingerprints from pipeline-based tools. Proposes a
+  collaborative Expert-Executor framework where a supervisory Expert agent
+  provides strategic oversight and course-correction, solving 22.2% of
+  previously intractable issues. Strong primary citation for SAICA-KG's
+  logic_error and incomplete_execution modes; the cognitive-deadlock finding
+  is direct evidence for incomplete_execution. Relates to SAICA-KG failure
+  modes: logic_error, incomplete_execution, cascading_failure.

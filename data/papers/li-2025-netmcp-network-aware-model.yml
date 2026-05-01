@@ -42,7 +42,13 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
-  specific failure-mode tags pending editorial review. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:mcp-evaluation.
+  Builds NetMCP, an experimental MCP testbed over five representative network
+  states, and proposes SONAR (Semantic Oriented and Network Aware Routing), an
+  MCP tool-routing algorithm that jointly optimizes semantic similarity and
+  network QoS. Demonstrates that semantic-only routing leaves task success and
+  latency on the table when MCP servers degrade or fail. Relates to SAICA-KG
+  failure modes: incomplete_execution, cascading_failure. Useful as a
+  production-engineering anchor: even when the agent reasons correctly,
+  infrastructure-layer faults propagate as task-level failures, which informs
+  the supervision boundary between tool-call layer and agent layer. Code at
+  github.com/NICE-HKU/NetMCP.

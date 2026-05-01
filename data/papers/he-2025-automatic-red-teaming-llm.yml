@@ -41,7 +41,13 @@ relevance_tags:
   - benchmark
   - red-teaming
 notes: >
-  Relates to SAICA-KG failure modes: security_vulnerability,
-  supply_chain_attack. Auto-graduated from candidate pool; review the
-  editorial framing before promoting to a primary cite. Source:
-  s2:mcp-evaluation.
+  Proposes AutoMalTool, an automated red-teaming framework that generates
+  malicious MCP tools capable of manipulating the behavior of mainstream
+  LLM-based agents while evading current detection mechanisms. The first
+  systematic (rather than proof-of-concept) treatment of MCP tool-poisoning
+  attacks. Direct evidence that the MCP integration surface is a
+  supply_chain_attack vector and that detection-mechanism gaps are
+  exploitable. Relates to SAICA-KG failure modes: supply_chain_attack,
+  security_vulnerability. Cite alongside spracklen-2024 and the MCP-Guard /
+  MSB benchmarks when arguing that supply-chain awareness must extend to MCP
+  tool marketplaces, not just package registries.

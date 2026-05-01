@@ -49,6 +49,12 @@ relevance_tags:
   - benchmark
   - empirical
 notes: >
-  Relates to SAICA-KG failure modes: logic_error. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:sandboxed-execution-ai-code-agent.
+  Empirical study chaining multi-agent collaboration with
+  runtime-execution-information-based debugging across 19 LLMs on HumanEval
+  and MBPP, measuring functional accuracy, reliability, and generation
+  latency. Useful as evidence that runtime feedback loops (a post-generation
+  supervision pattern) reduce logic_error rates over single-shot generation,
+  but also as evidence that naive chaining inflates latency. Relates to
+  SAICA-KG failure modes: logic_error, incomplete_execution. Informs the
+  post_generation TemporalPhase axis: runtime-debug agents act as a
+  self-correcting layer that shifts where supervision catches faults.

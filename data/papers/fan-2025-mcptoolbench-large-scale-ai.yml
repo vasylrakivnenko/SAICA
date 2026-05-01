@@ -47,6 +47,14 @@ relevance_tags:
   - MCP
   - benchmark
 notes: >
-  Relates to SAICA-KG failure modes: context_pollution. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:mcp-evaluation.
+  Introduces MCPToolBench++, a large-scale multi-domain MCP tool use benchmark
+  built on a marketplace of over 4k MCP servers across 40+ categories
+  collected from MCP marketplaces and GitHub. Datasets include single-step and
+  multi-step tool calls evaluated against SOTA agentic LLMs. Notable for
+  explicitly calling out two SAICA-relevant pressures: (a) real-world MCP
+  server success rates are not guaranteed and vary across servers
+  (incomplete_execution), and (b) the LLM context window caps the number of
+  available tools that can be called in a single run because tool descriptions
+  are long-token (context_pollution). Relates to SAICA-KG failure modes:
+  context_pollution, incomplete_execution. Cite as the canonical MCP tool-use
+  evaluation harness.

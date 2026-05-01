@@ -21,6 +21,7 @@ tldr: >
   Introduces a high-level safety-case sketch and identifies three core
   challenges (oversight, latency, recovery) across four future-deployment
   case studies.
+abstract: 'Automated control monitors could play an important role in overseeing highly capable AI agents that we do not fully trust. Prior work has explored control monitoring in simplified settings, but scaling monitoring to real-world deployments introduces additional dynamics: parallel agent instances, non-negligible oversight latency, incremental attacks between agent instances, and the difficulty of identifying scheming agents based on individual harmful actions. In this paper, we analyse design choices to address these challenges, focusing on three forms of monitoring with different latency-safety trade-offs: synchronous, semi-synchronous, and asynchronous monitoring. We introduce a high-level safety case sketch as a tool for understanding and comparing these monitoring protocols. Our analysis identifies three challenges -- oversight, latency, and recovery -- and explores them in four case studies of possible future AI deployments.'
 relevance_tags:
   - monitoring
   - temporal-phase

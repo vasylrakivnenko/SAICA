@@ -50,7 +50,16 @@ relevance_tags:
   - supply-chain
   - empirical
 notes: >
-  Relates to SAICA-KG failure modes: fabrication, supply_chain_attack,
-  dependency_blindness, security_vulnerability. Auto-graduated from
-  candidate pool; review the editorial framing before promoting to a primary
-  cite. Source: s2:package-hallucination-slopsquatting.
+  First systematic empirical study of how quantization (8-bit and 4-bit vs.
+  full-precision) affects package hallucination and vulnerability rates in
+  LLM-generated Go install commands. Evaluates five Qwen model sizes across
+  SO, MBPP, and paraphrase datasets; finds quantization substantially
+  increases the package hallucination rate (PHR), with 4-bit degrading most,
+  and that vulnerability presence rate (VPR) among correctly-generated
+  packages also rises as precision decreases. Most fabricated packages
+  resemble realistic URL-based Go module paths (malformed GitHub or golang.org
+  repositories) — a slopsquatting-adjacent supply-chain risk. Relates to
+  SAICA-KG failure modes: supply_chain_attack, fabrication,
+  dependency_blindness, security_vulnerability. Cite as evidence that
+  deployment-time decisions (quantization) materially shift FailureMode
+  distributions.
