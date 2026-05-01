@@ -1,0 +1,48 @@
+id: li-2025-netmcp-network-aware-model
+authors:
+  - Enhan Li
+  - Hongyang Du
+  - Kaibin Huang
+year: 2025
+title: "NetMCP: Network-Aware Model Context Protocol Platform for LLM Capability Extension"
+venue: arXiv
+arxiv_id: "2510.13467"
+doi: "10.48550/arXiv.2510.13467"
+url: https://www.semanticscholar.org/paper/5797ce51c448e9bc05869f1be77ce92b85e35761
+semantic_scholar_id: "5797ce51c448e9bc05869f1be77ce92b85e35761"
+citation_count: 4
+abstract: >
+  Large Language Models (LLMs) remain static in functionality after
+  training, and extending their capabilities requires integration with
+  external data, computation, and services. The Model Context Protocol (MCP)
+  has emerged as a standard interface for such extensions, but current
+  implementations rely solely on semantic matching between users'requests
+  and server function descriptions, which makes current deployments and
+  simulation testbeds fragile under latency fluctuations or server failures.
+  We address this gap by enhancing MCP tool routing algorithms with
+  real-time awareness of network and server status. To provide a controlled
+  test environment for development and evaluation, we construct a
+  heterogeneous experimental platform, namely Network-aware MCP (NetMCP),
+  which offers five representative network states and build a benchmark for
+  latency sequence generation and MCP server datasets. On top of NetMCP
+  platform, we analyze latency sequences and propose a Semantic-Oriented and
+  Network-Aware Routing (SONAR) algorithm, which jointly optimizes semantic
+  similarity and network Quality of Service (QoS) metrics for adaptive tool
+  routing. Results show that SONAR consistently improves task success rate
+  and reduces completion time and failure number compared with
+  semantic-only, LLM-based baselines, demonstrating the value of
+  network-aware design for production-scale LLM systems. The code for NetMCP
+  is available at https://github.com/NICE-HKU/NetMCP.
+tldr: >
+  Results show that SONAR consistently improves task success rate and
+  reduces completion time and failure number compared with semantic-only,
+  LLM-based baselines, demonstrating the value of network-aware design for
+  production-scale LLM systems.
+relevance_tags:
+  - MCP
+  - benchmark
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:mcp-evaluation.

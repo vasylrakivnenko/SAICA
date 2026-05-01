@@ -52,3 +52,6 @@ inclusion_rationale: >
   Archetype of graduated-HITL coding agent. Useful as the reference point
   for the graduated_hitl autonomy level and for prevention × pre_generation
   tool-allow-list pattern.
+cited_in:
+  - horikawa-2025-agentic-refactoring-empirical-study
+  - santos-2025-decoding-configuration-ai-coding

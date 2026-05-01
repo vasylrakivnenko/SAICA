@@ -1,0 +1,43 @@
+id: santos-2025-decoding-configuration-ai-coding
+authors:
+  - Helio Victor F. Santos
+  - V. Costa
+  - João Eduardo Montandon
+  - Marco Túlio Valente
+year: 2025
+title: "Decoding the Configuration of AI Coding Agents: Insights from Claude Code Projects"
+venue: arXiv
+arxiv_id: "2511.09268"
+doi: "10.48550/arXiv.2511.09268"
+url: https://www.semanticscholar.org/paper/218bfac4d245f01e1d01868e6ae3ae56d741fd27
+semantic_scholar_id: "218bfac4d245f01e1d01868e6ae3ae56d741fd27"
+citation_count: 5
+abstract: >
+  Agentic code assistants are a new generation of AI systems capable of
+  performing end-to-end software engineering tasks. While these systems
+  promise unprecedented productivity gains, their behavior and effectiveness
+  depend heavily on configuration files that define architectural
+  constraints, coding practices, and tool usage policies. However, little is
+  known about the structure and content of these configuration artifacts.
+  This paper presents an empirical study of the configuration ecosystem of
+  Claude Code, one of the most widely used agentic coding systems. We
+  collected and analyzed 328 configuration files from public Claude Code
+  projects to identify (i) the software engineering concerns and practices
+  they specify and (ii) how these concerns co-occur within individual files.
+  The results highlight the importance of defining a wide range of concerns
+  and practices in agent configuration files, with particular emphasis on
+  specifying the architecture the agent should follow.
+tldr: >
+  An empirical study of the configuration ecosystem of Claude Code, one of
+  the most widely used agentic coding systems, to identify the software
+  engineering concerns and practices they specify and how these concerns
+  co-occur within individual files.
+relevance_tags:
+  - coding-agent
+  - agentic-ai
+  - empirical
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:supervising-ai-coding-agents.

@@ -1,0 +1,55 @@
+id: ni-2025-viscoder2-building-multi-language
+authors:
+  - Yuansheng Ni
+  - Songcheng Cai
+  - Xiang Chen
+  - Jiarong Liang
+  - Z. Lyu
+  - Jiaqi Deng
+  - Kai Zou
+  - Ping Nie
+  - Fei Yuan
+  - Xiang Yue
+  - Wenhu Chen
+year: 2025
+title: "VisCoder2: Building Multi-Language Visualization Coding Agents"
+venue: arXiv
+arxiv_id: "2510.23642"
+doi: "10.48550/arXiv.2510.23642"
+url: https://www.semanticscholar.org/paper/86366ae838f8b9e3e4f7dfa0ebb218f17b305142
+semantic_scholar_id: "86366ae838f8b9e3e4f7dfa0ebb218f17b305142"
+citation_count: 2
+abstract: >
+  Large language models (LLMs) have recently enabled coding agents capable
+  of generating, executing, and revising visualization code. However,
+  existing models often fail in practical workflows due to limited language
+  coverage, unreliable execution, and lack of iterative correction
+  mechanisms. Progress has been constrained by narrow datasets and
+  benchmarks that emphasize single-round generation and single-language
+  tasks. To address these challenges, we introduce three complementary
+  resources for advancing visualization coding agents. VisCode-Multi-679K is
+  a large-scale, supervised dataset containing 679K validated and executable
+  visualization samples with multi-turn correction dialogues across 12
+  programming languages. VisPlotBench is a benchmark for systematic
+  evaluation, featuring executable tasks, rendered outputs, and protocols
+  for both initial generation and multi-round self-debug. Finally, we
+  present VisCoder2, a family of multi-language visualization models trained
+  on VisCode-Multi-679K. Experiments show that VisCoder2 significantly
+  outperforms strong open-source baselines and approaches the performance of
+  proprietary models like GPT-4.1, with further gains from iterative
+  self-debug, reaching 82.4% overall execution pass rate at the 32B scale,
+  particularly in symbolic or compiler-dependent languages.
+tldr: >
+  Experiments show that VisCoder2 significantly outperforms strong
+  open-source baselines and approaches the performance of proprietary models
+  like GPT-4.1, with further gains from iterative self-debug, reaching 82.4%
+  overall execution pass rate at the 32B scale, particularly in symbolic or
+  compiler-dependent languages.
+relevance_tags:
+  - coding-agent
+  - supervision
+  - benchmark
+notes: >
+  Relates to SAICA-KG failure modes: logic_error. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:self-debug-reflexion-coding-agent.

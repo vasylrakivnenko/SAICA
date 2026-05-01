@@ -1,0 +1,46 @@
+id: song-2025-help-hurdle-rethinking-model
+authors:
+  - Wei Song
+  - Haonan Zhong
+  - Ziqi Ding
+  - Jingling Xue
+  - Yuekang Li
+year: 2025
+title: "Help or Hurdle? Rethinking Model Context Protocol-Augmented Large Language Models"
+venue: arXiv
+arxiv_id: "2508.12566"
+doi: "10.48550/arXiv.2508.12566"
+url: https://www.semanticscholar.org/paper/a35799715bfe73519d5be6bfdfaa07014a1f4086
+semantic_scholar_id: "a35799715bfe73519d5be6bfdfaa07014a1f4086"
+citation_count: 3
+abstract: >
+  The Model Context Protocol (MCP) enables large language models (LLMs) to
+  access external resources on demand. While commonly assumed to enhance
+  performance, how LLMs actually leverage this capability remains poorly
+  understood. We introduce MCPGAUGE, the first comprehensive evaluation
+  framework for probing LLM-MCP interactions along four key dimensions:
+  proactivity (self-initiated tool use), compliance (adherence to tool-use
+  instructions), effectiveness (task performance post-integration), and
+  overhead (computational cost incurred). MCPGAUGE comprises a 160-prompt
+  suite and 25 datasets spanning knowledge comprehension, general reasoning,
+  and code generation. Our large-scale evaluation, spanning six commercial
+  LLMs, 30 MCP tool suites, and both one- and two-turn interaction settings,
+  comprises around 20,000 API calls and over USD 6,000 in computational
+  cost. This comprehensive study reveals four key findings that challenge
+  prevailing assumptions about the effectiveness of MCP integration. These
+  insights highlight critical limitations in current AI-tool integration and
+  position MCPGAUGE as a principled benchmark for advancing controllable,
+  tool-augmented LLMs.
+tldr: >
+  MCPGAUGE is introduced, the first comprehensive evaluation framework for
+  probing LLM-MCP interactions along four key dimensions: proactivity
+  (self-initiated tool use), compliance, effectiveness, effectiveness, and
+  overhead (computational cost incurred).
+relevance_tags:
+  - MCP
+  - benchmark
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:mcp-evaluation.

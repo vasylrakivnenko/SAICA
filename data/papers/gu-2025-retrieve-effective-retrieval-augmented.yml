@@ -1,0 +1,47 @@
+id: gu-2025-retrieve-effective-retrieval-augmented
+authors:
+  - Wenchao Gu
+  - Juntao Chen
+  - Yanlin Wang
+  - Tianyue Jiang
+  - Xing Li
+  - Mingwei Liu
+  - Xilin Liu
+  - Yuchi Ma
+  - Zibin Zheng
+year: 2025
+title: "What to Retrieve for Effective Retrieval-Augmented Code Generation? An Empirical Study and Beyond"
+venue: arXiv
+arxiv_id: "2503.20589"
+doi: "10.48550/arXiv.2503.20589"
+url: https://www.semanticscholar.org/paper/695f334494f305d2ff57f2d584c27cdcaa4012ff
+semantic_scholar_id: "695f334494f305d2ff57f2d584c27cdcaa4012ff"
+citation_count: 11
+abstract: >
+  Repository-level code generation remains challenging due to complex code
+  dependencies and the limitations of large language models (LLMs) in
+  processing long contexts. While retrieval-augmented generation (RAG)
+  frameworks are widely adopted, the effectiveness of different retrieved
+  information sources-contextual code, APIs, and similar snippets-has not
+  been rigorously analyzed. Through an empirical study on two benchmarks, we
+  demonstrate that in-context code and potential API information
+  significantly enhance LLM performance, whereas retrieved similar code
+  often introduces noise, degrading results by up to 15%. Based on the
+  preliminary results, we propose AllianceCoder, a novel context-integrated
+  method that employs chain-of-thought prompting to decompose user queries
+  into implementation steps and retrieves APIs via semantic description
+  matching. Through extensive experiments on CoderEval and RepoExec,
+  AllianceCoder achieves state-of-the-art performance, improving Pass@1 by
+  up to 20% over existing approaches.
+tldr: >
+  AllianceCoder is proposed, a novel context-integrated method that employs
+  chain-of-thought prompting to decompose user queries into implementation
+  steps and retrieves APIs via semantic description matching and achieves
+  state-of-the-art performance.
+relevance_tags:
+  - benchmark
+  - empirical
+notes: >
+  Relates to SAICA-KG failure modes: context_pollution. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:retrieval-augmented-code-generation.

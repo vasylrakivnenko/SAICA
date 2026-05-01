@@ -1,0 +1,41 @@
+id: bhattarai-2025-arcs-agentic-retrieval-augmented
+authors:
+  - Manish Bhattarai
+  - Miguel Cordova
+  - Javier E. Santos
+  - Dan O'Malley
+year: 2025
+title: "ARCS: Agentic Retrieval-Augmented Code Synthesis with Iterative Refinement"
+venue: arXiv
+arxiv_id: "2504.20434"
+doi: "10.48550/arXiv.2504.20434"
+url: https://www.semanticscholar.org/paper/172e194d8b190377e12ffad78d025ca32459cb79
+semantic_scholar_id: "172e194d8b190377e12ffad78d025ca32459cb79"
+citation_count: 7
+abstract: >
+  We present Agentic Retrieval-Augmented Code Synthesis (ARCS), a system
+  that improves LLM-based code generation without fine-tuning. ARCS operates
+  through a budgeted synthesize-execute-repair loop over a frozen model: it
+  retrieves relevant code context before generation, proposes candidates,
+  executes them against tests, and repairs based on execution feedback. This
+  retrieval-before-generation design reduces hallucination and accelerates
+  convergence. We formalize ARCS as a state-action process with provable
+  guarantees on termination, monotonic improvement, and bounded cost. A
+  tiered controller (Small/Medium/Large) trades latency for accuracy
+  predictably. On HumanEval, ARCS achieves up to 87.2% pass@1 with
+  Llama-3.1-405B, surpassing CodeAgent (82.3%) while using simpler control
+  than tree-search methods. On TransCoder, it achieves>= 90% accuracy on
+  most translation pairs. On a LANL scientific corpus, it improves CodeBLEU
+  by +0.115 over baseline RAG. ARCS provides a practical, reproducible
+  approach to reliable code synthesis using existing LLM checkpoints.
+tldr: >
+  ARS provides a practical, reproducible approach to reliable code synthesis
+  using existing LLM checkpoints using existing LLM checkpoints as a
+  state-action process with provable guarantees on termination, monotonic
+  improvement, and bounded cost.
+relevance_tags:
+  - agentic-ai
+notes: >
+  Relates to SAICA-KG failure modes: fabrication. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:retrieval-augmented-code-generation.

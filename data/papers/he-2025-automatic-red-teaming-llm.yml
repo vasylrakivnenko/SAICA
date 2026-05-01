@@ -1,0 +1,47 @@
+id: he-2025-automatic-red-teaming-llm
+authors:
+  - Ping He
+  - Changjiang Li
+  - Binbin Zhao
+  - Tianyu Du
+  - Shouling Ji
+year: 2025
+title: "Automatic Red Teaming LLM-based Agents with Model Context Protocol Tools"
+venue: arXiv
+arxiv_id: "2509.21011"
+doi: "10.48550/arXiv.2509.21011"
+url: https://www.semanticscholar.org/paper/299ec08b60dbb993f96cf45c011c387477e3f9c8
+semantic_scholar_id: "299ec08b60dbb993f96cf45c011c387477e3f9c8"
+citation_count: 10
+abstract: >
+  The remarkable capability of large language models (LLMs) has led to the
+  wide application of LLM-based agents in various domains. To standardize
+  interactions between LLM-based agents and their environments, model
+  context protocol (MCP) tools have become the de facto standard and are now
+  widely integrated into these agents. However, the incorporation of MCP
+  tools introduces the risk of tool poisoning attacks, which can manipulate
+  the behavior of LLM-based agents. Although previous studies have
+  identified such vulnerabilities, their red teaming approaches have largely
+  remained at the proof-of-concept stage, leaving the automatic and
+  systematic red teaming of LLM-based agents under the MCP tool poisoning
+  paradigm an open question. To bridge this gap, we propose AutoMalTool, an
+  automated red teaming framework for LLM-based agents by generating
+  malicious MCP tools. Our extensive evaluation shows that AutoMalTool
+  effectively generates malicious MCP tools capable of manipulating the
+  behavior of mainstream LLM-based agents while evading current detection
+  mechanisms, thereby revealing new security risks in these agents.
+tldr: >
+  This work proposes AutoMalTool, an automated red teaming framework for
+  LLM-based agents by generating malicious MCP tools capable of manipulating
+  the behavior of mainstream LLM-based agents while evading current
+  detection mechanisms, thereby revealing new security risks in these
+  agents.
+relevance_tags:
+  - MCP
+  - benchmark
+  - red-teaming
+notes: >
+  Relates to SAICA-KG failure modes: security_vulnerability,
+  supply_chain_attack. Auto-graduated from candidate pool; review the
+  editorial framing before promoting to a primary cite. Source:
+  s2:mcp-evaluation.

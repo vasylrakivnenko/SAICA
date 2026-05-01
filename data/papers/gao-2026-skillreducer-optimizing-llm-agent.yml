@@ -1,0 +1,50 @@
+id: gao-2026-skillreducer-optimizing-llm-agent
+authors:
+  - Yudong Gao
+  - Zongjie Li
+  - Yuanyuanyuan
+  - Zimo Ji
+  - Pingchuan Ma
+  - Shuai Wang
+year: 2026
+title: "SkillReducer: Optimizing LLM Agent Skills for Token Efficiency"
+venue: arXiv
+arxiv_id: "2603.29919"
+url: https://www.semanticscholar.org/paper/515bbd3bda703bdf891d373713451f985f6a0bc9
+semantic_scholar_id: "515bbd3bda703bdf891d373713451f985f6a0bc9"
+abstract: >
+  LLM-based coding agents rely on \emph{skills}, pre-packaged instruction
+  sets that extend agent capabilities, yet every token of skill content
+  injected into the context window incurs both monetary cost and attention
+  dilution. To understand the severity of this problem, we conduct a
+  large-scale empirical study of 55,315 publicly available skills and find
+  systemic inefficiencies: 26.4\% lack routing descriptions entirely, over
+  60\% of body content is non-actionable, and reference files can inject
+  tens of thousands of tokens per invocation. Motivated by these findings,
+  we present \textsc{SkillReducer}, a two-stage optimization framework.
+  Stage~1 optimizes the routing layer by compressing verbose descriptions
+  and generating missing ones via adversarial delta debugging. Stage~2
+  restructures skill bodies through taxonomy-driven classification and
+  progressive disclosure, separating actionable core rules from
+  supplementary content loaded on demand, validated by faithfulness checks
+  and a self-correcting feedback loop. Evaluated on 600 skills and the
+  SkillsBench benchmark, \textsc{SkillReducer} achieves 48\% description
+  compression and 39\% body compression while improving functional quality
+  by 2.8\%, revealing a \emph{less-is-more} effect where removing
+  non-essential content reduces distraction in the context window. These
+  benefits transfer across five models from four families with a mean
+  retention of 0.965, and generalize to an independent agent framework.
+tldr: >
+  A two-stage optimization framework that achieves a less-is-more effect
+  where removing non-essential content reduces distraction in the context
+  window, and generalize to an independent agent framework is presented.
+relevance_tags:
+  - failure-mode-taxonomy
+  - coding-agent
+  - agentic-ai
+  - benchmark
+  - empirical
+notes: >
+  Relates to SAICA-KG failure modes: logic_error, context_pollution.
+  Auto-graduated from candidate pool; review the editorial framing before
+  promoting to a primary cite. Source: s2:self-debug-reflexion-coding-agent.

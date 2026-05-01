@@ -1,0 +1,61 @@
+id: liu-2025-empirical-study-failures-automated
+authors:
+  - Simiao Liu
+  - Fang Liu
+  - Liehao Li
+  - Xin Tan
+  - Yinghao Zhu
+  - Xiaoli Lian
+  - Li Zhang
+year: 2025
+title: "An Empirical Study on Failures in Automated Issue Solving"
+venue: arXiv
+arxiv_id: "2509.13941"
+doi: "10.48550/arXiv.2509.13941"
+url: https://arxiv.org/pdf/2509.13941
+semantic_scholar_id: "281333210"
+citation_count: 5
+abstract: >
+  Automated issue solving seeks to autonomously identify and repair
+  defective code snippets across an entire codebase. SWE-Bench has emerged
+  as the most widely adopted benchmark for evaluating progress in this area.
+  While LLM-based agentic tools show great promise, they still fail on a
+  substantial portion of tasks. Moreover, current evaluations primarily
+  report aggregate issue-solving rates, which obscure the underlying causes
+  of success and failure, making it challenging to diagnose model weaknesses
+  or guide targeted improvements. To bridge this gap, we first analyze the
+  performance and efficiency of three SOTA tools, spanning both
+  pipeline-based and agentic architectures, in automated issue solving tasks
+  of SWE-Bench-Verified under varying task characteristics. Furthermore, to
+  move from high-level performance metrics to underlying cause analysis, we
+  conducted a systematic manual analysis of 150 failed instances. From this
+  analysis, we developed a comprehensive taxonomy of failure modes
+  comprising 3 primary phases, 9 main categories, and 25 fine-grained
+  subcategories. Then we systematically analyze the distribution of the
+  identified failure modes, the results reveal distinct failure fingerprints
+  between the two architectural paradigms, with the majority of agentic
+  failures stemming from flawed reasoning and cognitive deadlocks. Motivated
+  by these insights, we propose a collaborative Expert-Executor framework.
+  It introduces a supervisory Expert agent tasked with providing strategic
+  oversight and course-correction for a primary Executor agent. This
+  architecture is designed to correct flawed reasoning and break the
+  cognitive deadlocks that frequently lead to failure. Experiments show that
+  our framework solves 22.2% of previously intractable issues for a leading
+  single agent. These findings pave the way for building more robust agents
+  through diagnostic evaluation and collaborative design.
+tldr: >
+  Automated issue solving seeks to autonomously identify and repair
+  defective code snippets across an entire codebase. SWE-Bench has emerged
+  as the most widely adopted benchmark for evaluating progress in this area.
+relevance_tags:
+  - failure-mode-taxonomy
+  - coding-agent
+  - agentic-ai
+  - supervision
+  - benchmark
+  - empirical
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: elicit:Q1.

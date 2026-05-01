@@ -1,0 +1,50 @@
+id: zhao-2025-hfuzzer-testing-large-language
+authors:
+  - Yukai Zhao
+  - Menghan Wu
+  - Xing Hu
+  - Xin Xia
+year: 2025
+title: "HFuzzer: Testing Large Language Models for Package Hallucinations via Phrase-based Fuzzing"
+venue: International Conference on Automated Software Engineering
+arxiv_id: "2509.23835"
+doi: "10.1109/ASE63991.2025.00225"
+url: https://www.semanticscholar.org/paper/df95b7e84de5ef5bdc2009a0438b8bf32eed4b3e
+semantic_scholar_id: "df95b7e84de5ef5bdc2009a0438b8bf32eed4b3e"
+citation_count: 1
+abstract: >
+  Large Language Models (LLMs) are widely used for code generation, but they
+  face critical security risks when applied to practical production due to
+  package hallucinations, in which LLMs recommend non-existent packages.
+  These hallucinations can be exploited in software supply chain attacks,
+  where malicious attackers exploit them to register harmful packages. It is
+  critical to test LLMs for package hallucinations to mitigate package
+  hallucinations and defend against potential attacks. Although researchers
+  have proposed testing frameworks for fact-conflicting hallucinations in
+  natural language generation, there is a lack of research on package
+  hallucinations. To fill this gap, we propose HFuzzer, a novel phrase-based
+  fuzzing framework to test LLMs for package hallucinations. HFuzzer adopts
+  fuzzing technology and guides the model to infer a wider range of
+  reasonable information based on phrases, thereby generating enough and
+  diverse coding tasks. Furthermore, HFuzzer extracts phrases from package
+  information or coding tasks to ensure the relevance of phrases and code,
+  thereby improving the relevance of generated tasks and code. We evaluate
+  HFuzzer on multiple LLMs and find that it triggers package hallucinations
+  across all selected models. Compared to the mutational fuzzing framework,
+  HFuzzer identifies 2.60× more unique hallucinated packages and generates
+  more diverse tasks. Additionally, when testing the model GPT-4o, HFuzzer
+  finds 46 unique hallucinated packages. Further analysis reveals that for
+  GPT-4o, LLMs exhibit package hallucinations not only during code
+  generation but also when assisting with environment configuration.
+tldr: >
+  H HFuzzer is proposed, a novel phrase-based fuzzing framework to test LLMs
+  for package hallucinations that adopts fuzzing technology and guides the
+  model to infer a wider range of reasonable information based on phrases,
+  thereby generating enough and diverse coding tasks.
+relevance_tags:
+  - supply-chain
+notes: >
+  Relates to SAICA-KG failure modes: supply_chain_attack, fabrication,
+  security_vulnerability. Auto-graduated from candidate pool; review the
+  editorial framing before promoting to a primary cite. Source:
+  s2:package-hallucination-slopsquatting.

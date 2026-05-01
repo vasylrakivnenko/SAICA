@@ -1,0 +1,36 @@
+id: atri-2025-trustworthy-agentic-ai-balancing
+authors:
+  - S. Atri
+year: 2025
+title: "Trustworthy Agentic AI: Balancing Autonomy with Human Oversight"
+venue: International journal of computer science and mobile computing
+doi: "10.47760/ijcsmc.2025.v14i11.013"
+url: https://doi.org/10.47760/ijcsmc.2025.v14i11.013
+semantic_scholar_id: "284745809"
+abstract: >
+  Agentic AI systems increasingly plan, decide, and execute actions across
+  tools and data sources with minimal supervision. To be deployable in
+  safety- and compliance-sensitive environments, autonomy must be bounded by
+  transparent decision making, predictable behavior, and recoverable failure
+  modes. This paper proposes a practical pattern for trustworthy agentic AI
+  that integrates a policy gate, typed tools and effects, human-in-the-loop
+  (HITL) controls, layered safety monitors, and rigorous verification via
+  evidence logs. We align these choices with the NIST AI Risk Management
+  Framework and its Generative AI Profile, ISO/IEC 42001 for AI management
+  systems, and the staged implementation of the EU AI Act [1–6].
+tldr: >
+  Agentic AI systems increasingly plan, decide, and execute actions across
+  tools and data sources with minimal supervision. To be deployable in
+  safety- and compliance-sensitive environments, autonomy must be bounded by
+  transparent decision making, predictable behavior, and recoverable failure
+  modes.
+relevance_tags:
+  - failure-mode-taxonomy
+  - agentic-ai
+  - supervision
+  - autonomy
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: elicit:Q3.

@@ -1,0 +1,45 @@
+id: krishnan-2025-advancing-multi-agent-systems
+authors:
+  - N. Krishnan
+year: 2025
+title: "Advancing Multi-Agent Systems Through Model Context Protocol: Architecture, Implementation, and Applications"
+venue: arXiv
+arxiv_id: "2504.21030"
+doi: "10.48550/arXiv.2504.21030"
+url: https://www.semanticscholar.org/paper/66098cff05d84454084aa442640c98c076f375f2
+semantic_scholar_id: "66098cff05d84454084aa442640c98c076f375f2"
+citation_count: 46
+abstract: >
+  Multi-agent systems represent a significant advancement in artificial
+  intelligence, enabling complex problem-solving through coordinated
+  specialized agents. However, these systems face fundamental challenges in
+  context management, coordination efficiency, and scalable operation. This
+  paper introduces a comprehensive framework for advancing multi-agent
+  systems through Model Context Protocol (MCP), addressing these challenges
+  through standardized context sharing and coordination mechanisms. We
+  extend previous work on AI agent architectures by developing a unified
+  theoretical foundation, advanced context management techniques, and
+  scalable coordination patterns. Through detailed implementation case
+  studies across enterprise knowledge management, collaborative research,
+  and distributed problem-solving domains, we demonstrate significant
+  performance improvements compared to traditional approaches. Our
+  evaluation methodology provides a systematic assessment framework with
+  benchmark tasks and datasets specifically designed for multi-agent
+  systems. We identify current limitations, emerging research opportunities,
+  and potential transformative applications across industries. This work
+  contributes to the evolution of more capable, collaborative, and
+  context-aware artificial intelligence systems that can effectively address
+  complex real-world challenges.
+tldr: >
+  A comprehensive framework for advancing multi-agent systems through Model
+  Context Protocol (MCP), addressing these challenges through standardized
+  context sharing and coordination mechanisms through standardized context
+  sharing and coordination mechanisms is introduced.
+relevance_tags:
+  - MCP
+  - benchmark
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:mcp-evaluation.

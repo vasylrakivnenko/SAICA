@@ -13,6 +13,7 @@ land their results in the staging Postgres tables (see `pipeline/db.py`)
 | `semantic_scholar.py` | Semantic Scholar Graph API | `S2_API_KEY` (optional) | `raw_results` |
 | `github.py` | GitHub `/search/repositories` + READMEs | `GITHUB_TOKEN` (optional) | `raw_results`, `raw_readmes` |
 | `github_trending.py` | github.com/trending HTML scrape | none (public) | `data/trending.json` |
+| `arxiv_recent.py` | export.arxiv.org Atom feed (recent submissions in cs.SE / cs.AI / cs.LG) | none (public) | `data/arxiv_candidates.json` |
 
 ## github_trending — trending ranking signal
 
@@ -42,3 +43,24 @@ Tests are network-free and use `tests/fixtures/trending_sample.html`:
 ```bash
 .venv/bin/python -m pytest pipeline/sources/tests -q
 ```
+
+## arxiv_recent — recent-submission discovery signal
+
+Polls `export.arxiv.org` for the last `--lookback-days` (default 30) of
+submissions in `cs.SE`, `cs.AI`, `cs.LG` (and optionally `cs.CL`),
+dedupes by arxiv id, and routes each entry to either `matched_in_kg`
+(already in `data/papers/*.yml`) or `new_candidates` (above the same
+0.4 relevance threshold). The orchestrator lives in
+`validator/screen_arxiv.py`. Polite-scraper defaults: 3.0s minimum
+interval, `SAICA-KG-Arxiv-Bot/0.1` User-Agent, per-day per-category
+disk cache under `.cache/arxiv/`, paginated until the lookback window
+is exhausted (capped at 1000 entries / category).
+
+```bash
+.venv/bin/python -m validator.screen_arxiv                   # real scrape
+.venv/bin/python -m validator.screen_arxiv --no-network      # cache only
+.venv/bin/python -m validator.screen_arxiv --dry             # no writes
+.venv/bin/python -m validator.screen_arxiv --lookback-days 60 --categories cs.SE,cs.AI,cs.LG,cs.CL
+```
+
+Tests use `tests/fixtures/arxiv_sample.xml` and are network-free.

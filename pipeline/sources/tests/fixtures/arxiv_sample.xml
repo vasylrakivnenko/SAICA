@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/fixture-feed</id>
+  <title>arXiv Query: search_query=cat:cs.SE&amp;id_list=&amp;start=0&amp;max_results=4</title>
+  <updated>2026-04-30T12:00:00Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=cat:cs.SE" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>4</opensearch:itemsPerPage>
+  <opensearch:totalResults>4</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2603.06847v1</id>
+    <title>Characterizing Faults in Agentic AI: A Taxonomy of Types, Symptoms, and Root Causes</title>
+    <updated>2026-03-06T10:00:00Z</updated>
+    <link href="https://arxiv.org/abs/2603.06847v1" rel="alternate" type="text/html"/>
+    <summary>Agentic AI systems combine LLM reasoning with external tool invocation. We conduct a large-scale empirical study of failure modes across 40 open-source agentic-AI repositories and derive taxonomies of fault types, symptoms, and root causes for coding agents.</summary>
+    <category term="cs.SE" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-03-06T10:00:00Z</published>
+    <arxiv:primary_category term="cs.SE"/>
+    <author>
+      <name>Mehil B. Shah</name>
+    </author>
+    <author>
+      <name>Mohammad Mehdi Morovati</name>
+    </author>
+    <author>
+      <name>Foutse Khomh</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2604.99001v1</id>
+    <title>Guardrails for LLM Coding Agents: Detecting Scope Creep and Fabrication</title>
+    <updated>2026-04-29T09:30:00Z</updated>
+    <link href="https://arxiv.org/abs/2604.99001v1" rel="alternate" type="text/html"/>
+    <summary>We propose a supervision framework for LLM coding agents that detects scope creep and fabrication of nonexistent APIs in real time. Our guardrails system catches failure modes such as prompt injection and hallucination across Claude Code and Codex traces.</summary>
+    <category term="cs.SE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-04-29T09:30:00Z</published>
+    <arxiv:primary_category term="cs.SE"/>
+    <author>
+      <name>Jane Q. Doe</name>
+    </author>
+    <author>
+      <name>Alex Smith</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2604.99002v1</id>
+    <title>Diffusion Models for Music and Image Generation in Fashion Design</title>
+    <updated>2026-04-28T11:00:00Z</updated>
+    <link href="https://arxiv.org/abs/2604.99002v1" rel="alternate" type="text/html"/>
+    <summary>We present a new diffusion-based pipeline for image generation and music synthesis tailored to fashion industry workflows. Our blockchain-backed NFT marketplace integration is also discussed.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-04-28T11:00:00Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Pat O'Neil</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2604.99003v1</id>
+    <title>A Lightweight Static Analysis Helper</title>
+    <updated>2026-04-27T08:15:00Z</updated>
+    <link href="https://arxiv.org/abs/2604.99003v1" rel="alternate" type="text/html"/>
+    <summary>This paper proposes a lint helper for code execution traces.</summary>
+    <category term="cs.SE" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-04-27T08:15:00Z</published>
+    <arxiv:primary_category term="cs.SE"/>
+    <author>
+      <name>Renee Garcia</name>
+    </author>
+  </entry>
+</feed>

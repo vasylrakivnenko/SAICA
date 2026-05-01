@@ -1,0 +1,44 @@
+id: wang-2025-ai-agentic-programming-survey
+authors:
+  - Huanting Wang
+  - Jingzhi Gong
+  - Huawei Zhang
+  - Zheng Wang
+year: 2025
+title: "AI Agentic Programming: A Survey of Techniques, Challenges, and Opportunities"
+venue: arXiv
+arxiv_id: "2508.11126"
+doi: "10.48550/arXiv.2508.11126"
+url: https://arxiv.org/abs/2508.11126
+semantic_scholar_id: "280671610"
+citation_count: 17
+abstract: >
+  AI agentic programming is an emerging paradigm where large language model
+  (LLM)-based coding agents autonomously plan, execute, and interact with
+  tools such as compilers, debuggers, and version control systems. Unlike
+  conventional code generation, these agents decompose goals, coordinate
+  multi-step processes, and adapt based on feedback, reshaping software
+  development practices. This survey provides a timely review of the field,
+  introducing a taxonomy of agent behaviors and system architectures and
+  examining relevant techniques for planning, context management, tool
+  integration, execution monitoring, and benchmarking datasets. We highlight
+  challenges of this fast-moving field and discuss opportunities for
+  building reliable, transparent, and collaborative coding agents.
+tldr: >
+  AI agentic programming is an emerging paradigm where large language model
+  (LLM)-based coding agents autonomously plan, execute, and interact with
+  tools such as compilers, debuggers, and version control systems. Unlike
+  conventional code generation, these agents decompose goals, coordinate
+  multi-step processes, and adapt based on feedback, reshaping software
+  development practices.
+relevance_tags:
+  - failure-mode-taxonomy
+  - coding-agent
+  - agentic-ai
+  - supervision
+  - benchmark
+  - survey
+notes: >
+  Relates to SAICA-KG failure modes: logic_error. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: elicit:Q3.

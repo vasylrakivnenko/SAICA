@@ -1,0 +1,48 @@
+id: krishna-2025-importing-phantoms-measuring-llm
+authors:
+  - Arjun Krishna
+  - Erick Galinkin
+  - Leon Derczynski
+  - Jeffrey Martin
+year: 2025
+title: "Importing Phantoms: Measuring LLM Package Hallucination Vulnerabilities"
+venue: arXiv
+arxiv_id: "2501.19012"
+doi: "10.48550/arXiv.2501.19012"
+url: https://www.semanticscholar.org/paper/473e0cc43e9c95be45e0d8a23fbe6d51cdfce485
+semantic_scholar_id: "473e0cc43e9c95be45e0d8a23fbe6d51cdfce485"
+citation_count: 7
+abstract: >
+  Large Language Models (LLMs) have become an essential tool in the
+  programmer's toolkit, but their tendency to hallucinate code can be used
+  by malicious actors to introduce vulnerabilities to broad swathes of the
+  software supply chain. In this work, we analyze package hallucination
+  behaviour in LLMs across popular programming languages examining both
+  existing package references and fictional dependencies. By analyzing this
+  package hallucination behaviour we find potential attacks and suggest
+  defensive strategies to defend against these attacks. We discover that
+  package hallucination rate is predicated not only on model choice, but
+  also programming language, model size, and specificity of the coding task
+  request. The Pareto optimality boundary between code generation
+  performance and package hallucination is sparsely populated, suggesting
+  that coding models are not being optimized for secure code. Additionally,
+  we find an inverse correlation between package hallucination rate and the
+  HumanEval coding benchmark, offering a heuristic for evaluating the
+  propensity of a model to hallucinate packages. Our metrics, findings and
+  analyses provide a base for future models, securing AI-assisted software
+  development workflows against package supply chain attacks.
+tldr: >
+  This work analyzes package hallucination behaviour in LLMs across popular
+  programming languages examining both existing package references and
+  fictional dependencies, finding an inverse correlation between package
+  hallucination rate and the HumanEval coding benchmark, offering a
+  heuristic for evaluating the propensity of a model to hallucinate
+  packages.
+relevance_tags:
+  - benchmark
+  - supply-chain
+notes: >
+  Relates to SAICA-KG failure modes: supply_chain_attack, fabrication,
+  security_vulnerability. Auto-graduated from candidate pool; review the
+  editorial framing before promoting to a primary cite. Source:
+  s2:package-hallucination-slopsquatting.

@@ -1,0 +1,50 @@
+id: kota-2025-zero-trust-security-frameworks
+authors:
+  - S. Kota
+year: 2025
+title: "Zero-Trust Security Frameworks for Model Context Protocol (MCP) Server Communications"
+venue: International Journal of Innovative Research in Engineering &amp; Multidisciplinary Physical Sciences
+doi: "10.37082/ijirmps.v13.i6.232959"
+url: https://www.semanticscholar.org/paper/90e083c73a326a4e553d9534c63470f99be413a5
+semantic_scholar_id: "90e083c73a326a4e553d9534c63470f99be413a5"
+abstract: >
+  In the era of agentic artificial intelligence (AI), where large language
+  models (LLMs) and autonomous agents invoke external tools and services
+  through protocols such as the Model Context Protocol (MCP), the need for
+  robust and rigorous security architectures is paramount. Conventional
+  perimeter-based defenses are increasingly inadequate in these dynamic,
+  distributed, and interconnected environments. This paper investigates the
+  application of Zero-Trust Architecture (ZTA) principles to MCP server
+  communications. We first analyze the threat surface introduced by MCP
+  communications—the client-server interactions, tool invocations, context
+  leakage, and lateral movement risks. We then propose a structured
+  zero-trust framework tailored to the MCP ecosystem, encompassing identity
+  and device verification, mutual authentication, micro-segmentation,
+  dynamic policy enforcement, continuous monitoring, and breach containment.
+  We provide a detailed architectural description, pseudo-code for policy
+  evaluation, and complexity/scalability analysis. We also discuss
+  deployment considerations in enterprise and cloud-native contexts. Our
+  contribution is three-fold: (1) We bridge the gap between emerging AI
+  agent-to-tool protocols (specifically MCP) and zero-trust security
+  foundations. (2) We propose a formalised zero-trust framework for MCP
+  communications. (3) We present an evaluative discussion of performance,
+  scalability, strengths, and limitations. We conclude that zero-trust
+  frameworks can significantly reduce risk in MCP deployments with
+  manageable overhead, but real-world implementation requires rigorous
+  identity, telemetry, and policy-management infrastructure.
+tldr: >
+  This paper analyzes the threat surface introduced by MCP communications
+  and proposes a structured zero-trust framework tailored to the MCP
+  ecosystem, encompassing identity and device verification, mutual
+  authentication, micro-segmentation, dynamic policy enforcement, continuous
+  monitoring, and breach containment.
+relevance_tags:
+  - agentic-ai
+  - supervision
+  - MCP
+  - benchmark
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:mcp-evaluation.

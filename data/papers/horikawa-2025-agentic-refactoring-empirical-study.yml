@@ -1,0 +1,60 @@
+id: horikawa-2025-agentic-refactoring-empirical-study
+authors:
+  - Kosei Horikawa
+  - Hao Li
+  - Yutaro Kashiwa
+  - Bram Adams
+  - Hajimu Iida
+  - Ahmed E. Hassan
+year: 2025
+title: "Agentic Refactoring: An Empirical Study of AI Coding Agents"
+venue: arXiv
+arxiv_id: "2511.04824"
+doi: "10.48550/arXiv.2511.04824"
+url: https://www.semanticscholar.org/paper/65b7e09b4b19bb763f1e1d7b17a4e927e0d8179b
+semantic_scholar_id: "65b7e09b4b19bb763f1e1d7b17a4e927e0d8179b"
+citation_count: 5
+abstract: >
+  Agentic coding tools, such as OpenAI Codex, Claude Code, and Cursor, are
+  transforming the software engineering landscape. These AI-powered systems
+  function as autonomous teammates capable of planning and executing complex
+  development tasks. Agents have become active participants in refactoring,
+  a cornerstone of sustainable software development aimed at improving
+  internal code quality without altering observable behavior. Despite their
+  increasing adoption, there is a critical lack of empirical understanding
+  regarding how agentic refactoring is utilized in practice, how it compares
+  to human-driven refactoring, and what impact it has on code quality. To
+  address this empirical gap, we present a large-scale study of AI
+  agent-generated refactorings in real-world open-source Java projects,
+  analyzing 15,451 refactoring instances across 12,256 pull requests and
+  14,988 commits derived from the AIDev dataset. Our empirical analysis
+  shows that refactoring is a common and intentional activity in this
+  development paradigm, with agents explicitly targeting refactoring in
+  26.1% of commits. Analysis of refactoring types reveals that agentic
+  efforts are dominated by low-level, consistency-oriented edits, such as
+  Change Variable Type (11.8%), Rename Parameter (10.4%), and Rename
+  Variable (8.5%), reflecting a preference for localized improvements over
+  the high-level design changes common in human refactoring. Additionally,
+  the motivations behind agentic refactoring focus overwhelmingly on
+  internal quality concerns, with maintainability (52.5%) and readability
+  (28.1%). Furthermore, quantitative evaluation of code quality metrics
+  shows that agentic refactoring yields small but statistically significant
+  improvements in structural metrics, particularly for medium-level changes,
+  reducing class size and complexity (e.g., Class LOC median $\Delta$ =
+  -15.25).
+tldr: >
+  A large-scale study of AI agent-generated refactorings in real-world
+  open-source Java projects, analyzing 15,451 refactoring instances across
+  12,256 pull requests and 14,988 commits derived from the AIDev dataset
+  shows that refactoring is a common and intentional activity in this
+  development paradigm.
+relevance_tags:
+  - coding-agent
+  - agentic-ai
+  - benchmark
+  - empirical
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:supervising-ai-coding-agents.

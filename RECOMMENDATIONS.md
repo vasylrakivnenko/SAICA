@@ -1,7 +1,7 @@
 # SAICA-KG — Supervision recommendations
 
 Pre-computed from the KG. Regenerate with `python -m validator.generate_recommendations`.
-Last regenerated: 2026-04-30 from KG version 2026.04.
+Last regenerated: 2026-04-30 from KG version 2026.05.
 
 > 🔥 marks repos currently on github.com/trending. Trending tools win ties
 > against non-trending peers with up to ~+30% more raw stars (boost = 1.43×; see

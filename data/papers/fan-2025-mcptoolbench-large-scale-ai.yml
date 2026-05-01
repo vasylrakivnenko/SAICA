@@ -1,0 +1,52 @@
+id: fan-2025-mcptoolbench-large-scale-ai
+authors:
+  - Shiqing Fan
+  - Xichen Ding
+  - Liang Zhang
+  - Linjian Mo
+year: 2025
+title: "MCPToolBench++: A Large Scale AI Agent Model Context Protocol MCP Tool Use Benchmark"
+venue: arXiv
+arxiv_id: "2508.07575"
+doi: "10.48550/arXiv.2508.07575"
+url: https://www.semanticscholar.org/paper/153e3227cdc8e8b54034b6166a468bd751e117cc
+semantic_scholar_id: "153e3227cdc8e8b54034b6166a468bd751e117cc"
+citation_count: 23
+abstract: >
+  LLMs'capabilities are enhanced by using function calls to integrate
+  various data sources or API results into the context window. Typical tools
+  include search, web crawlers, maps, financial data, file systems, and
+  browser usage, etc. Integrating these data sources or functions requires a
+  standardized method. The Model Context Protocol (MCP) provides a
+  standardized way to supply context to LLMs. However, the evaluation of
+  LLMs and AI Agents'MCP tool use abilities suffer from several issues.
+  First, there's a lack of comprehensive datasets or benchmarks to evaluate
+  various MCP tools. Second, the diverse formats of response from MCP tool
+  call execution further increase the difficulty of evaluation.
+  Additionally, unlike existing tool-use benchmarks with high success rates
+  in functions like programming and math functions, the success rate of
+  real-world MCP tool is not guaranteed and varies across different MCP
+  servers. Furthermore, the LLMs'context window also limits the number of
+  available tools that can be called in a single run, because the textual
+  descriptions of tool and the parameters have long token length for an LLM
+  to process all at once. To help address the challenges of evaluating
+  LLMs'performance on calling MCP tools, we propose MCPToolBench++, a
+  large-scale, multi-domain AI Agent tool use benchmark. As of July 2025,
+  this benchmark is build upon marketplace of over 4k MCP servers from more
+  than 40 categories, collected from the MCP marketplaces and GitHub
+  communities. The datasets consist of both single-step and multi-step tool
+  calls across different categories. We evaluated SOTA LLMs with agentic
+  abilities on this benchmark and reported the results.
+tldr: >
+  This work proposes MCPToolBench++, a large-scale, multi-domain AI Agent
+  tool use benchmark, build upon marketplace of over 4k MCP servers from
+  more than 40 categories, collected from the MCP marketplaces and GitHub
+  communities.
+relevance_tags:
+  - agentic-ai
+  - MCP
+  - benchmark
+notes: >
+  Relates to SAICA-KG failure modes: context_pollution. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:mcp-evaluation.

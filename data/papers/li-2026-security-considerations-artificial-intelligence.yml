@@ -1,0 +1,47 @@
+id: li-2026-security-considerations-artificial-intelligence
+authors:
+  - Ninghui Li
+  - Kaiyuan Zhang
+  - Kyle Polley
+  - Jerry Ma
+year: 2026
+title: "Security Considerations for Artificial Intelligence Agents"
+venue: arXiv
+arxiv_id: "2603.12230"
+url: https://www.semanticscholar.org/paper/91abd24806296eb10748aec15af67f4ee0b43ee1
+semantic_scholar_id: "91abd24806296eb10748aec15af67f4ee0b43ee1"
+abstract: >
+  This article, a lightly adapted version of Perplexity's response to
+  NIST/CAISI Request for Information 2025-0035, details our observations and
+  recommendations concerning the security of frontier AI agents. These
+  insights are informed by Perplexity's experience operating general-purpose
+  agentic systems used by millions of users and thousands of enterprises in
+  both controlled and open-world environments. Agent architectures change
+  core assumptions around code-data separation, authority boundaries, and
+  execution predictability, creating new confidentiality, integrity, and
+  availability failure modes. We map principal attack surfaces across tools,
+  connectors, hosting boundaries, and multi-agent coordination, with
+  particular emphasis on indirect prompt injection, confused-deputy
+  behavior, and cascading failures in long-running workflows. We then assess
+  current defenses as a layered stack: input-level and model-level
+  mitigations, sandboxed execution, and deterministic policy enforcement for
+  high-consequence actions. Finally, we identify standards and research
+  gaps, including adaptive security benchmarks, policy models for delegation
+  and privilege control, and guidance for secure multi-agent system design
+  aligned with NIST risk management principles.
+tldr: >
+  This article details observations and recommendations concerning the
+  security of frontier AI agents, and identifies standards and research
+  gaps, including adaptive security benchmarks, policy models for delegation
+  and privilege control, and guidance for secure multi-agent system design
+  aligned with NIST risk management principles.
+relevance_tags:
+  - failure-mode-taxonomy
+  - agentic-ai
+  - benchmark
+  - guardrails
+notes: >
+  Relates to SAICA-KG failure modes: security_vulnerability,
+  cascading_failure. Auto-graduated from candidate pool; review the
+  editorial framing before promoting to a primary cite. Source:
+  s2:sandboxed-execution-ai-code-agent.

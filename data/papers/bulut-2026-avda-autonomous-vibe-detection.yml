@@ -1,0 +1,51 @@
+id: bulut-2026-avda-autonomous-vibe-detection
+authors:
+  - Fatih Bulut
+  - C. Depaolis
+  - Raghav Batta
+  - Anjali Mangal
+year: 2026
+title: "AVDA: Autonomous Vibe Detection Authoring for Cybersecurity"
+venue: arXiv
+arxiv_id: "2603.25930"
+doi: "10.1145/3803437.3805261 10.1145/3803437.3805261 10.1145/3803437.3805261"
+url: https://www.semanticscholar.org/paper/a4343100a053fd94c99800cd388de3f5d17fd612
+semantic_scholar_id: "a4343100a053fd94c99800cd388de3f5d17fd612"
+abstract: >
+  With the rapid advancement of AI in code generation, cybersecurity
+  detection engineering faces new opportunities to automate traditionally
+  manual processes. Detection authoring - the practice of creating
+  executable logic that identifies malicious activities from security
+  telemetry - is hindered by fragmented code across repositories,
+  duplication, and limited organizational visibility. Current workflows
+  remain heavily manual, constraining both coverage and velocity. In this
+  paper, we introduce AVDA, a framework that leverages the Model Context
+  Protocol (MCP) to automate detection authoring by integrating
+  organizational context - existing detections, telemetry schemas, and style
+  guides - into AI-assisted code generation. We evaluate three authoring
+  strategies - Baseline, Sequential, and Agentic - across a diverse corpus
+  of production detections and state-of-the-art LLMs. Our results show that
+  Agentic workflows achieve a 19% improvement in overall similarity score
+  over Baseline approaches, while Sequential workflows attain 87% of Agentic
+  quality at 40x lower token cost. Generated detections excel at TTP
+  matching (99.4%) and syntax validity (95.9%) but struggle with exclusion
+  parity (8.9%). Expert validation on a 22-detection subset confirms strong
+  Spearman correlation between automated metrics and practitioner judgment
+  ($\rho = 0.64$, $p<0.002$). By integrating seamlessly into standard
+  developer environments, AVDA provides a practical path toward AI-assisted
+  detection engineering with quantified trade-offs between quality, cost,
+  and latency.
+tldr: >
+  AVDA is introduced, a framework that leverages the Model Context Protocol
+  to automate detection authoring by integrating organizational context -
+  existing detections, telemetry schemas, and style guides - into
+  AI-assisted code generation by integrating seamlessly into standard
+  developer environments.
+relevance_tags:
+  - agentic-ai
+  - MCP
+notes: >
+  Relates to SAICA-KG's broader supervision / coding-agent evaluation theme;
+  specific failure-mode tags pending editorial review. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:code-reinvention-duplicate-detection-llm.

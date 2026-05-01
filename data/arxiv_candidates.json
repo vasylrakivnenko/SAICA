@@ -1,0 +1,2128 @@
+{
+  "scraped_at": "2026-05-01T02:05:41Z",
+  "categories": [
+    "cs.SE",
+    "cs.AI",
+    "cs.LG"
+  ],
+  "lookback_days": 60,
+  "matched_in_kg": [],
+  "new_candidates": [
+    {
+      "arxiv_id": "2604.27996",
+      "title": "Exploring Interaction Paradigms for LLM Agents in Scientific Visualization",
+      "authors": [
+        "Jackson Vonderhorst",
+        "Kuangshi Ai",
+        "Haichao Miao",
+        "Shusen Liu",
+        "Chaoli Wang"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "This paper examines how different types of large language model (LLM) agents perform on scientific visualization (SciVis) tasks, where users generate visualization workflows from natural-language instructions. We compare three primary interaction paradigms, including domain-specific agents with structured tool use, computer-use agents, and general-purpose coding agents, by evaluating eight...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.GR",
+        "cs.HC"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "vonderhorst-2026-exploring-interaction-paradigms-llm"
+    },
+    {
+      "arxiv_id": "2604.27962",
+      "title": "Language Models Refine Mechanical Linkage Designs Through Symbolic Reflection and Modular Optimisation",
+      "authors": [
+        "João Pedro Gandarela",
+        "Thiago Rios",
+        "Stefan Menzel",
+        "André Freitas"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Designing mechanical linkages involves combinatorial topology selection and continuous parameter fitting. We show that language models can systematically improve linkage designs through symbolic representations. Language model agents explore discrete topologies while numerical optimisers fit continuous parameters. A symbolic lifting operator translates simulator trajectories into qualitative...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CE",
+        "cs.MA"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "gandarela-2026-language-refine-mechanical-linkage"
+    },
+    {
+      "arxiv_id": "2604.27419",
+      "title": "InteractWeb-Bench: Can Multimodal Agent Escape Blind Execution in Interactive Website Generation?",
+      "authors": [
+        "Qiyao Wang",
+        "Haoran Hu",
+        "Longze Chen",
+        "Hongbo Wang",
+        "Hamid Alinejad-Rokny",
+        "Yuan Lin",
+        "Min Yang"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "With the advancement of multimodal large language models (MLLMs) and coding agents, the website development has shifted from manual programming to agent-based project-level code synthesis. Existing benchmarks rely on idealized assumptions, especially for well-structured, information-rich inputs and static execution settings. In contrast, real-world development is constrained by a critical...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "wang-2026-interactweb-bench-can-multimodal"
+    },
+    {
+      "arxiv_id": "2604.27292",
+      "title": "The Two Boundaries: Why Behavioral AI Governance Fails Structurally",
+      "authors": [
+        "Alan L. McCann"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Every system that performs effects has two boundaries: what it can do (expressiveness) and what governance covers (governance). In nearly all deployed AI systems, these boundaries are defined independently, creating three regions: governed capabilities (the only useful region), ungoverned capabilities (risk), and governance policies that address non-existent capabilities (theater). Two of the...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "mccann-2026-two-boundaries-why-behavioral"
+    },
+    {
+      "arxiv_id": "2604.27209",
+      "title": "Theory Under Construction: Orchestrating Language Models for Research Software Where the Specification Evolves",
+      "authors": [
+        "Halley Young",
+        "Nikolaj Björner"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Large language models can now generate substantial code and draft research text, but research-software projects require more than either artifact alone. The mathematical thesis, executable system, benchmark surface, and public claims must mature together, yet often drift apart. We identify two LM-specific failure modes: hallucination accumulation, in which claims exceed what code or theory...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [
+        "fabrication",
+        "incomplete_execution"
+      ],
+      "suggested_id": "young-2026-theory-under-construction-orchestrating"
+    },
+    {
+      "arxiv_id": "2604.26275",
+      "title": "Agentic AI in the Software Development Lifecycle: Architecture, Empirical Evidence, and the Reshaping of Software Engineering",
+      "authors": [
+        "Happy Bhati"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "The arrival of large language models (LLMs) capable of multi-step reasoning, tool use, and long-horizon planning has produced a qualitative shift in software engineering. Where earlier code-completion tools such as GitHub Copilot operated at the granularity of a line or function, modern agentic systems -- Claude Code, OpenAI Codex CLI, Google Jules, Devin, OpenHands, SWE-agent, MetaGPT, ChatDev,...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "bhati-2026-agentic-software-development-lifecycle"
+    },
+    {
+      "arxiv_id": "2604.27228",
+      "title": "When Roles Fail: Epistemic Constraints on Advocate Role Fidelity in LLM-Based Political Statement Analysis",
+      "authors": [
+        "Juergen Dietrich"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Democratic discourse analysis systems increasingly rely on multi-agent LLM pipelines in which distinct evaluator models are assigned adversarial roles to generate structured, multi-perspective assessments of political statements. A core assumption is that models will reliably maintain their assigned roles. This paper provides the first systematic empirical test of that assumption using the TRUST...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.CY",
+        "cs.MA"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "dietrich-2026-when-roles-fail-epistemic"
+    },
+    {
+      "arxiv_id": "2604.27143",
+      "title": "Enhancing Linux Privilege Escalation Attack Capabilities of Local LLM Agents",
+      "authors": [
+        "Benjamin Probst",
+        "Andreas Happe",
+        "Jürgen Cito"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Recent research has demonstrated the potential of Large Language Models (LLMs) for autonomous penetration testing, particularly when using cloud-based restricted-weight models. However, reliance on such models introduces security, privacy, and sovereignty concerns, motivating the use of locally hosted open-weight alternatives. Prior work shows that small open-weight models perform poorly on...",
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.AI",
+        "cs.CR"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "suggested_id": "probst-2026-enhancing-linux-privilege-escalation"
+    },
+    {
+      "arxiv_id": "2604.27093",
+      "title": "Useless but Safe? Benchmarking Utility Recovery with User Intent Clarification in Multi-Turn Conversations",
+      "authors": [
+        "Mingqian Zheng",
+        "Malia Morgan",
+        "Liwei Jiang",
+        "Carolyn Rose",
+        "Maarten Sap"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Current LLM safety alignment techniques improve model robustness against adversarial attacks, but overlook whether and how LLMs can recover helpfulness when benign users clarify their intent. We introduce CarryOnBench, the first interactive benchmark that measures whether LLMs can revise their interpretation of user intent and recover utility, while remaining safe through multi-turn...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "zheng-2026-useless-but-safe-benchmarking"
+    },
+    {
+      "arxiv_id": "2604.24955",
+      "title": "BenchGuard: Who Guards the Benchmarks? Automated Auditing of LLM Agent Benchmarks",
+      "authors": [
+        "Xinming Tu",
+        "Tianze Wang",
+        "Yingzhou",
+        "Lu",
+        "Kexin Huang",
+        "Yuanhao Qu",
+        "Sara Mostafavi"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "As benchmarks grow in complexity, many apparent agent failures are not failures of the agent at all - they are failures of the benchmark itself: broken specifications, implicit assumptions, and rigid evaluation scripts that penalize valid alternative approaches. We propose employing frontier LLMs as systematic auditors of evaluation infrastructure, and realize this vision through BenchGuard, the...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "tu-2026-benchguard-who-guards-benchmarks"
+    },
+    {
+      "arxiv_id": "2604.23822",
+      "title": "KISS Sorcar: A Stupidly-Simple General-Purpose and Software Engineering AI Assistant",
+      "authors": [
+        "Koushik Sen"
+      ],
+      "first_published": "2026-04-26",
+      "abstract_excerpt": "Large language models can generate code and call tools with remarkable fluency, yet deploying them as practical software engineering assistants still expose stubborn gaps: finite context windows, single mistakes that derail entire sessions, agents that get stuck in dead ends, AI slop, and generated changes that are difficult to review or revert. We present KISS Sorcar, a general-purpose assistant...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "suggested_id": "sen-2026-kiss-sorcar-stupidly-simple"
+    },
+    {
+      "arxiv_id": "2604.23106",
+      "title": "No Test Cases, No Problem: Distillation-Driven Code Generation for Scientific Workflows",
+      "authors": [
+        "Siddeshwar Raghavan",
+        "Tanwi Mallick"
+      ],
+      "first_published": "2026-04-25",
+      "abstract_excerpt": "Existing multi-agent Large Language Model (LLM) frameworks for code generation typically use execution feedback and improve iteratively using Input/Output (I/O) test cases. However, this does not work for scientific workflows, where I/O test cases do not exist, and generating them requires solving the very problem at hand. To address this, we introduce MOSAIC, a training-free multi-agent...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.MA",
+        "cs.SE"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "raghavan-2026-test-problem-distillation-driven"
+    },
+    {
+      "arxiv_id": "2604.26805",
+      "title": "Bian Que: An Agentic Framework with Flexible Skill Arrangement for Online System Operations",
+      "authors": [
+        "Bochao Liu",
+        "Zhipeng Qian",
+        "Yang Zhao",
+        "Xinyuan Jiang",
+        "Zihan Liang",
+        "Yufei Ma",
+        "Junpeng Zhuang",
+        "Ben Chen",
+        "Shuo Yang",
+        "Hongen Wan",
+        "Yao Wu",
+        "Chenyi Lei",
+        "Xiao Liang"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Operating and maintaining (O&M) large-scale online engine systems (search, recommendation, advertising) demands substantial human effort for release monitoring, alert response, and root cause analysis. While LLM-based agents are a natural fit for these tasks, the deployment bottleneck is not reasoning capability but orchestration: selecting, for each operational event, the relevant data (metrics,...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "relevance_score": 0.9,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "liu-2026-bian-que-agentic-flexible"
+    },
+    {
+      "arxiv_id": "2604.27275",
+      "title": "Evaluating Epistemic Guardrails in AI Reading Assistants: A Behavioral Audit of a Minimal Prototype",
+      "authors": [
+        "Matthew Christian Agustin"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Large language model (LLM) reading assistants are increasingly used in settings that require interpretation rather than simple retrieval. In these contexts, the central risk is not only error or unsafe output, but interpretive displacement: the transfer of meaning-making work from reader to system. This paper examines that problem through the concept of epistemic guardrails, defined here as...",
+      "primary_category": "cs.HC",
+      "categories": [
+        "cs.AI",
+        "cs.CY",
+        "cs.HC"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [],
+      "suggested_id": "agustin-2026-evaluating-epistemic-guardrails-reading"
+    },
+    {
+      "arxiv_id": "2604.27001",
+      "title": "An Empirical Security Evaluation of LLM-Generated Cryptographic Rust Code",
+      "authors": [
+        "Mohamed Elsayed",
+        "Kenneth Fulton",
+        "Jeong Yang"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Developers and organizations are using Large Language Models (LLMs) to generate security-critical code more frequently than ever, including cryptographic solutions for their products. This study presents an empirical evaluation of cryptographic security in 240 Rust code samples for two crypto algorithms (AES-256-GCM and ChaCha20-Poly1305) generated by three LLMs (Gemini 2.5 Pro, GPT-4o, and...",
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.SE"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [
+        "fabrication",
+        "security_vulnerability"
+      ],
+      "suggested_id": "elsayed-2026-empirical-security-llm-generated"
+    },
+    {
+      "arxiv_id": "2604.27092",
+      "title": "End-to-end autonomous scientific discovery on a real optical platform",
+      "authors": [
+        "Shuxing Yang",
+        "Fujia Chen",
+        "Rui Zhao",
+        "Junyao Wu",
+        "Yize Wang",
+        "Haiyao Luo",
+        "Ning Han",
+        "Qiaolu Chen",
+        "Yuze Hu",
+        "Wenhao Li",
+        "Mingzhu Li",
+        "Hongsheng Chen",
+        "Yihao Yang"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Scientific research has long been human-led, driving new knowledge and transformative technologies through the continual revision of questions, methods and claims as evidence accumulates. Although large language model (LLM)-based agents are beginning to move beyond assisting predefined research workflows, none has yet demonstrated end-to-end autonomous discovery in a real physical system that...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "physics.optics"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [],
+      "suggested_id": "yang-2026-end-end-autonomous-scientific"
+    },
+    {
+      "arxiv_id": "2604.26152",
+      "title": "AI Observability for Large Language Model Systems: A Multi-Layer Analysis of Monitoring Approaches from Confidence Calibration to Infrastructure Tracing",
+      "authors": [
+        "Twinkll Sisodia"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "The deployment of large language models (LLMs) in production environments has created an urgent need for observability systems that span the full stack -- from model internals to GPU kernels. Yet existing monitoring approaches address isolated layers of this stack, and no comprehensive analysis has examined how these techniques relate, overlap, or complement each other. This paper presents a...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [],
+      "suggested_id": "sisodia-2026-observability-large-language-multi"
+    },
+    {
+      "arxiv_id": "2604.25737",
+      "title": "SAFEdit: Does Multi-Agent Decomposition Resolve the Reliability Challenges of Instructed Code Editing?",
+      "authors": [
+        "Noam Tarshish",
+        "Nofar Selouk",
+        "Daniel Hodisan",
+        "Bar Ezra Gafniel",
+        "Yuval Elovici",
+        "Asaf Shabtai",
+        "Eliya Nachmani"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "Instructed code editing is a significant challenge for large language models (LLMs). On the EditBench benchmark, 39 of 40 evaluated models obtain a task success rate (TSR) below 60 percent, highlighting a gap between general code generation and the ability to perform instruction-driven editing under executable test constraints. To address this, we propose SAFEdit, a multi-agent framework for...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "tarshish-2026-safedit-does-multi-agent"
+    },
+    {
+      "arxiv_id": "2604.24550",
+      "title": "Mono2Sls: Automated Monolith-to-Serverless Migration via Multi-Stage Pipeline with Static Analysis",
+      "authors": [
+        "Xingyan Chen",
+        "Yuxin Su",
+        "Zishan Su",
+        "Yang Yu",
+        "Zibin Zheng"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Cloud computing platforms offer elastic scaling, managed infrastructure, and pay-per-use pricing, but moving existing monolithic backends to them remains a difficult software engineering task. In practice, the migration requires coordinated changes to program structure, source code, infrastructure configuration, and cloud-specific design decisions, and these changes are still largely carried out...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [],
+      "suggested_id": "chen-2026-mono2sls-automated-monolith-serverless"
+    },
+    {
+      "arxiv_id": "2604.24218",
+      "title": "RefEvo: Agentic Design with Co-Evolutionary Verification for Agile Reference Model Generation",
+      "authors": [
+        "Yifan Zhang",
+        "Jianmin Ye",
+        "Jiahao Yang",
+        "Xi Wang"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "As the complexity of System-on-Chip (SoC) designs grows, the shift-left paradigm necessitates the rapid development of high-fidelity reference models (typically written in SystemC) for early architecture exploration and verification. While Large Language Models (LLMs) show promise in code generation, their application to hardware modeling faces unique challenges: (1) Rigid, static workflows fail...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "zhang-2026-refevo-agentic-design-evolutionary"
+    },
+    {
+      "arxiv_id": "2604.22601",
+      "title": "From Natural Language to Verified Code: Toward AI Assisted Problem-to-Code Generation with Dafny-Based Formal Verification",
+      "authors": [
+        "Md Erfan",
+        "Md Kamal Hossain Chowdhury",
+        "Ahmed Ryan",
+        "Md Rayhanur Rahman"
+      ],
+      "first_published": "2026-04-24",
+      "abstract_excerpt": "Large Language Models (LLMs) show promise in automated software engineering, yet their guarantee of correctness is frequently undermined by erroneous or hallucinated code. To enforce model honesty, formal verification requires LLMs to synthesize implementation logic alongside formal specifications that are subsequently proven correct by a mathematical verifier. However, the transition from...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "erfan-2026-natural-language-verified-code"
+    },
+    {
+      "arxiv_id": "2604.27969",
+      "title": "From Mirage to Grounding: Towards Reliable Multimodal Circuit-to-Verilog Code Generation",
+      "authors": [
+        "Guang Yang",
+        "Xing Hu",
+        "Xiang Chen",
+        "Xin Xi"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Multimodal large language models (MLLMs) are increasingly used to translate visual artifacts into code, from UI mockups into HTML to scientific plots into Python scripts. A circuit diagram can be viewed as a visual domain-specific language for hardware: it encodes timing, topology, and bit level semantics that are invisible to casual inspection yet safety critical once fabricated in silicon....",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "yang-2026-mirage-grounding-reliable-multimodal"
+    },
+    {
+      "arxiv_id": "2604.27586",
+      "title": "Trace-Level Analysis of Information Contamination in Multi-Agent Systems",
+      "authors": [
+        "Anna Mazhar",
+        "Huzaifa Suri",
+        "Sainyam Galhotra"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Reasoning over heterogeneous artifacts (PDFs, spreadsheets, slide decks, etc.) increasingly occurs within structured agent workflows that iteratively extract, transform, and reference external information. In these workflows, uncertainty is not merely an input-quality issue: it can redirect decomposition and routing decisions, reshape intermediate state, and produce qualitatively different...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "suggested_id": "mazhar-2026-trace-level-information-contamination"
+    },
+    {
+      "arxiv_id": "2604.26469",
+      "title": "An Empirical Study of Speculative Decoding on Software Engineering Tasks",
+      "authors": [
+        "Yijia Li",
+        "Junkai Chen",
+        "Xing Hu",
+        "Xin Xia"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Large Language Models (LLMs) have become widely used for Software Engineering (SE) tasks, spanning from function-level code generation to complex repository-level workflows. However, the high latency of autoregressive inference remains a significant bottleneck, hindering their deployment in interactive environments. While Speculative Decoding (SD) offers a promising technique for lossless...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "suggested_id": "li-2026-empirical-speculative-decoding-software"
+    },
+    {
+      "arxiv_id": "2604.27245",
+      "title": "Addressing the Reality Gap: A Three-Tension Framework for Agentic AI Adoption",
+      "authors": [
+        "Jason Fournier",
+        "Kacper Łodzikowski"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Generative AI has rapidly entered education through free consumer tools, outpacing the ability of schools and universities to respond. Now a new wave of more autonomous agentic AI systems--with the capacity to plan and act towards goals--promises both greater educational personalization and greater disruption. This chapter argues that successfully navigating these innovations requires balancing...",
+      "primary_category": "cs.CY",
+      "categories": [
+        "cs.AI",
+        "cs.CY"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "suggested_id": "fournier-2026-addressing-reality-gap-three"
+    },
+    {
+      "arxiv_id": "2604.25850",
+      "title": "Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses",
+      "authors": [
+        "Jiahang Lin",
+        "Shichun Liu",
+        "Chengjun Pan",
+        "Lizhi Lin",
+        "Shihan Dou",
+        "Xuanjing Huang",
+        "Hang Yan",
+        "Zhenhua Han",
+        "Tao Gui"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "Harnesses have become a central determinant of coding-agent performance, shaping how models interact with repositories, tools, and execution environments. Yet automating harness engineering is hard: a heterogeneous action space, sparse and noisy evaluation signal, multi-million-token trajectories, and edits whose effect is hard to attribute to the next round's outcomes. We introduce Agentic...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "suggested_id": "lin-2026-agentic-harness-engineering-observability"
+    },
+    {
+      "arxiv_id": "2604.24212",
+      "title": "Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis",
+      "authors": [
+        "Jiahong Xiang",
+        "Xiaoyang Xu",
+        "Xiaopan Chu",
+        "Hongliang Tian",
+        "Yuqun Zhang"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Autonomous agents for automated program repair represent a promising frontier in software engineering, yet their effectiveness is often hindered by reliance on post-mortem, coarse-grained execution feedback. While integrating traditional interactive debuggers seems a natural solution, their low-level, line-by-line interaction paradigm turns out to be cost-inefficient for LLM-based agents, leading...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "suggested_id": "xiang-2026-empowering-autonomous-debugging-agents"
+    },
+    {
+      "arxiv_id": "2604.23190",
+      "title": "RAT: RunAnyThing via Fully Automated Environment Configuration",
+      "authors": [
+        "Renhong Huang",
+        "Dongdong Hua",
+        "Yifei Sun",
+        "Sitao Ding",
+        "Hanyang Yuan",
+        "Daixin Wang",
+        "Yang Yang"
+      ],
+      "first_published": "2026-04-25",
+      "abstract_excerpt": "Automating repository-level software engineering tasks is a foundational challenge for autonomous code agents, largely due to the difficulty of configuring executable environments. However, manual configuration remains a labor-intensive bottleneck, necessitating a transition toward fully automated environment configuration. Existing approaches often rely on pre-defined artifacts or are restricted...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "suggested_id": "huang-2026-rat-runanything-fully-automated"
+    },
+    {
+      "arxiv_id": "2604.21505",
+      "title": "Assessing the Impact of Requirement Ambiguity on LLM-based Function-Level Code Generation",
+      "authors": [
+        "Di Yang",
+        "Xinou Xie",
+        "Xiuwen Yang",
+        "Ming Hu",
+        "Yihao Huang",
+        "Yueling Zhang",
+        "Weikai Miao",
+        "Ting Su",
+        "Chengcheng Wan",
+        "Geguang Pu"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Software requirement ambiguity is ubiquitous in real-world development, stemming from the inherent imprecision of natural language and the varying interpretations of stakeholders. While Large Language Models (LLMs) have demonstrated impressive capabilities in generating code from precise specifications, such ambiguity poses a significant obstacle to reliable automated code generation. Existing...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "suggested_id": "yang-2026-assessing-impact-requirement-ambiguity"
+    },
+    {
+      "arxiv_id": "2604.21375",
+      "title": "VLAA-GUI: Knowing When to Stop, Recover, and Search, A Modular Framework for GUI Automation",
+      "authors": [
+        "Qijun Han",
+        "Haoqin Tu",
+        "Zijun Wang",
+        "Haoyue Dai",
+        "Yiyang Zhou",
+        "Nancy Lau",
+        "Alvaro A. Cardenas",
+        "Yuhui Xu",
+        "Ran Xu",
+        "Caiming Xiong",
+        "Zeyu Zheng",
+        "Huaxiu Yao",
+        "Yuyin Zhou",
+        "Cihang Xie"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Autonomous GUI agents face two fundamental challenges: early stopping, where agents prematurely declare success without verifiable evidence, and repetitive loops, where agents cycle through the same failing actions without recovery. We present VLAA-GUI, a modular GUI agentic framework built around three integrated components that guide the system on when to Stop, Recover, and Search. First, a...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "suggested_id": "han-2026-vlaa-gui-knowing-when"
+    },
+    {
+      "arxiv_id": "2604.28010",
+      "title": "Learning from Disagreement: Clinician Overrides as Implicit Preference Signals for Clinical AI in Value-Based Care",
+      "authors": [
+        "Prabhjot Singh",
+        "Abhishek Gupta",
+        "Chris Betz",
+        "Abe Flansburg",
+        "Brett Ives",
+        "Sudeep Lama",
+        "Jung Hoon Son"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "We reframe clinician overrides of clinical AI recommendations as implicit preference data - the same signal structure exploited by reinforcement learning from human feedback (RLHF), but richer: the annotator is a domain expert, the alternatives carry real consequences, and downstream outcomes are observable. We present a formal framework extending standard preference learning with three...",
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "singh-2026-learning-disagreement-clinician-overrides"
+    },
+    {
+      "arxiv_id": "2604.27820",
+      "title": "ObjectGraph: From Document Injection to Knowledge Traversal -- A Native File Format for the Agentic Era",
+      "authors": [
+        "Mohit Dubey",
+        "Open Gigantic"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Every document format in existence was designed for a human reader moving linearly through text. Autonomous LLM agents do not read - they retrieve. This fundamental mismatch forces agents to inject entire documents into their context window, wasting tokens on irrelevant content, compounding state across multi-turn loops, and broadcasting information indiscriminately across agent roles. We argue...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.DB",
+        "cs.IR",
+        "cs.MA"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "dubey-2026-objectgraph-document-injection-knowledge"
+    },
+    {
+      "arxiv_id": "2604.27759",
+      "title": "Learning to Reason: Targeted Knowledge Discovery and Fuzzy Logic Update for Robust Image Recognition",
+      "authors": [
+        "Gurucharan Srinivas",
+        "Joshua Niemeijer",
+        "Frank Köster"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Integrating domain knowledge into deep neural networks is a promising way to improve generalization. Existing methods either encode prior knowledge in the loss function or apply post-processing modules, but both depend on identifying useful symbolic knowledge to integrate. Since such rules are often unavailable in real-world vision tasks, we propose a method for targeted knowledge discovery. We...",
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "srinivas-2026-learning-reason-targeted-knowledge"
+    },
+    {
+      "arxiv_id": "2604.27660",
+      "title": "From Context to Skills: Can Language Models Learn from Context Skillfully?",
+      "authors": [
+        "Shuzheng Si",
+        "Haozhe Zhao",
+        "Yu Lei",
+        "Qingyi Wang",
+        "Dingwei Chen",
+        "Zhitong Wang",
+        "Zhenhailong Wang",
+        "Kangyang Luo",
+        "Zheng Wang",
+        "Gang Chen",
+        "Fanchao Qi",
+        "Minjia Zhang",
+        "Maosong Sun"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Many real-world tasks require language models (LMs) to reason over complex contexts that exceed their parametric knowledge. This calls for context learning, where LMs directly learn relevant knowledge from the given context. An intuitive solution is inference-time skill augmentation: extracting the rules and procedures from context into natural-language skills. However, constructing such skills...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "si-2026-context-skills-can-language"
+    },
+    {
+      "arxiv_id": "2604.27644",
+      "title": "ANCORA: Learning to Question via Manifold-Anchored Self-Play for Verifiable Reasoning",
+      "authors": [
+        "Chengcao Yang",
+        "Jun Chen"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "We propose a paradigm shift from learning to answer to learning to question: can a language model generate verifiable problems, solve them, and turn the resulting feedback into self-improvement without human supervision? We introduce ANCORA, an anchored-curriculum framework in which a unified policy alternates between a Proposer that synthesizes novel specifications and a Solver that produces...",
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.PL"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "yang-2026-ancora-learning-question-manifold"
+    },
+    {
+      "arxiv_id": "2604.27358",
+      "title": "Safe Bilevel Delegation (SBD): A Formal Framework for Runtime Delegation Safety in Multi-Agent Systems",
+      "authors": [
+        "Yuan Sun"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "As large language model (LLM) agents are deployed in high-stakes environments, the question of how safely to delegate subtasks to specialized sub-agents becomes critical. Existing work addresses multi-agent architecture selection at design time or provides broad empirical guidelines, but neither provides a runtime mechanism that dynamically adjusts the safety-efficiency trade-off as task context...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "sun-2026-safe-bilevel-delegation-sbd"
+    },
+    {
+      "arxiv_id": "2604.27914",
+      "title": "Geometry-Calibrated Conformal Abstention for Language Models",
+      "authors": [
+        "Rui Xu",
+        "Yi Chen",
+        "Sihong Xie",
+        "Hui Xiong"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "When language models lack relevant knowledge for a given query, they frequently generate plausible responses that can be hallucinations, rather than admitting being agnostic about the answer. Retraining models to reward admitting ignorance can lead to overly conservative behaviors and poor generalization due to scarce evaluation benchmarks. We propose a post hoc framework, Conformal Abstention...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "xu-2026-geometry-calibrated-conformal-abstention"
+    },
+    {
+      "arxiv_id": "2604.26892",
+      "title": "Hot Fixing in the Wild",
+      "authors": [
+        "Carol Hanna",
+        "Karine Even-Mendoza",
+        "W. B. Langdon",
+        "Mar Zamorano López",
+        "Justyna Petke",
+        "Federica Sarro"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Despite the operational importance of hot fixes, large-scale evidence on how they reshape routine maintenance workflows, particularly in the era of autonomous coding agents, remains limited. We analyse hot fixes present in over 61,000 GitHub repositories from the Hao-Li/AIDev dataset and find consistent patterns of urgency: reduced collaboration (typically a single contributor), smaller and more...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "hanna-2026-hot-fixing-wild"
+    },
+    {
+      "arxiv_id": "2604.26192",
+      "title": "LLM-Assisted Empirical Software Engineering: Systematic Literature Review and Research Agenda",
+      "authors": [
+        "Victoria Gomes",
+        "Delaney Selb",
+        "Fabio Palomba",
+        "Rodrigo Spinola",
+        "David Lo"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Context: Empirical Software Engineering (ESE) faces increasing challenges due to data scale, methodological complexity, and reproducibility concerns. Large Language Models (LLMs) have emerged as promising tools to support empirical workflows, yet their use remains fragmented, with no comprehensive synthesis to guide responsible adoption. Aims: This study analyzes how LLMs are used in ESE,...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [
+        "fabrication",
+        "incomplete_execution"
+      ],
+      "suggested_id": "gomes-2026-llm-assisted-empirical-software"
+    },
+    {
+      "arxiv_id": "2604.27253",
+      "title": "AutoSurfer -- Teaching Web Agents through Comprehensive Surfing, Learning, and Modeling",
+      "authors": [
+        "Fazle Elahi Faisal",
+        "Qianhui Wu",
+        "Baolin Peng",
+        "Jianfeng Gao"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Recent advances in multimodal large language models (LLMs) have revolutionized web agents that can automate complex tasks on websites. However, their accuracy remains limited by the scarcity of high-quality web trajectory training data. Existing automatic trajectory generation methods suffer from incomplete website coverage due to homepage-based task proposals or random-walk exploration. Such...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [
+        "fabrication",
+        "incomplete_execution"
+      ],
+      "suggested_id": "faisal-2026-autosurfer-teaching-web-agents"
+    },
+    {
+      "arxiv_id": "2604.26671",
+      "title": "From Black-Box Confidence to Measurable Trust in Clinical AI: A Framework for Evidence, Supervision, and Staged Autonomy",
+      "authors": [
+        "Serhii Zabolotnii",
+        "Viktoriia Holinko",
+        "Olha Antonenko"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Trust in clinical artificial intelligence (AI) cannot be reduced to model accuracy, fluency of generation, or overall positive user impression. In medicine, trust must be engineered as a measurable system property grounded in evidence, supervision, and operational boundaries of AI autonomy. This article proposes a practical framework for trustworthy clinical AI built around three principles:...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.CY"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "suggested_id": "zabolotnii-2026-black-box-confidence-measurable"
+    },
+    {
+      "arxiv_id": "2604.25880",
+      "title": "From Threads to Trajectories: A Multi-LLM Pipeline for Community Knowledge Extraction from GitHub Issue Discussions",
+      "authors": [
+        "Nazia Shehnaz Joynab",
+        "Soneya Binta Hossain"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "Resolution of complex post-production issues in large-scale open-source software (OSS) projects requires significant cognitive effort, as developers need to go through long, unstructured and fragmented issue discussion threads before that. In this paper, we present SWE-MIMIC-Bench, an issue trajectory dataset generated from raw GitHub discussions using an automated multi-LLM pipeline. Unlike...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "joynab-2026-threads-trajectories-multi-llm"
+    },
+    {
+      "arxiv_id": "2604.25778",
+      "title": "Can Code Evaluation Metrics Detect Code Plagiarism?",
+      "authors": [
+        "Fahad Ebrahim",
+        "Mike Joy"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "Source Code Plagiarism Detection (SCPD) plays an important role in maintaining fairness and academic integrity in software engineering education. Code Evaluation Metrics (CEMs) are developed for assessing code generation tasks. However, it remains unclear whether such metrics can reliably detect plagiarism across different levels of modification (L1-L6), increasing in complexity. In this paper,...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.IR",
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "ebrahim-2026-can-code-metrics-detect"
+    },
+    {
+      "arxiv_id": "2604.25960",
+      "title": "Large Language Models for Multilingual Code Intelligence: A Survey",
+      "authors": [
+        "Chao Jiang",
+        "Dugang Liu",
+        "Cheng Wen",
+        "Zhiwu Xu",
+        "Hua Zheng",
+        "Muhammad Sadiq",
+        "Jawwad Ahmed Shamsi",
+        "Shengchao Qin",
+        "Zhong Ming"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Large language models have transformed AI-assisted software engineering, but current research remains biased toward high-resource languages such as Python, with weaker performance in languages like Rust and OCaml. Since real-world systems are inherently polyglot, robust multilingual code intelligence is crucial. This survey focuses on two key tasks: multilingual code generation from shared...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.LG",
+        "cs.PL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "jiang-2026-large-language-multilingual-code"
+    },
+    {
+      "arxiv_id": "2604.24450",
+      "title": "On the Footprints of Reviewer Bots Feedback on Agentic Pull Requests in OSS GitHub Repositories",
+      "authors": [
+        "Syeda Kaneez Fatima",
+        "Yousuf Abrar",
+        "Abdul Rehman Tahir",
+        "Amelia Nawaz",
+        "Shamsa Abid",
+        "Abdul Ali Bangash"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Autonomous coding agents are reshaping software development by creating pull requests (PRs) on GitHub, referred to as agentic PRs. In parallel, the review process is also becoming autonomous, thereby making reviewer bots key actors in the assessment of these agentic PRs. However, their influence on PR acceptance and resolution remains unclear. This study empirically investigates the relationship...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "fatima-2026-footprints-reviewer-bots-feedback"
+    },
+    {
+      "arxiv_id": "2604.23581",
+      "title": "AgentEval: DAG-Structured Step-Level Evaluation for Agentic Workflows with Error Propagation Tracking",
+      "authors": [
+        "Dongxin Guo",
+        "Jikun Wu",
+        "Siu Ming Yiu"
+      ],
+      "first_published": "2026-04-26",
+      "abstract_excerpt": "Agentic systems that chain reasoning, tool use, and synthesis into multi-step workflows are entering production, yet prevailing evaluation practices like end-to-end outcome checks and ad-hoc trace inspection systematically mask the intermediate failures that dominate real-world error budgets. We present AgentEval, a framework that formalizes agent executions as evaluation directed acyclic graphs...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [
+        "cascading_failure"
+      ],
+      "suggested_id": "guo-2026-agenteval-dag-structured-step"
+    },
+    {
+      "arxiv_id": "2604.23361",
+      "title": "An Empirical Evaluation of Locally Deployed LLMs for Bug Detection in Python Code",
+      "authors": [
+        "Jelena Ilić Vulićević"
+      ],
+      "first_published": "2026-04-25",
+      "abstract_excerpt": "Large language models (LLMs) have demonstrated strong performance on a wide range of software engineering tasks, including code generation and analysis. However, most prior work relies on cloud-based models or specialized hardware, limiting practical applicability in privacy-sensitive or resource-constrained environments. In this paper, we present a systematic empirical evaluation of two locally...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "vulicevic-2026-empirical-locally-deployed-llms"
+    },
+    {
+      "arxiv_id": "2604.23285",
+      "title": "Towards Agentic Test-Driven Quality Assurance for 6G Networks",
+      "authors": [
+        "Christos Tranoris",
+        "Besiana Agko",
+        "Kostis Trantzas",
+        "Irene Denazi"
+      ],
+      "first_published": "2026-04-25",
+      "abstract_excerpt": "This work proposes an agentic, intent-driven end-to-end (E2E) orchestration framework that integrates intent co-creation with a Test-Driven Quality Assurance paradigm. In this framework, autonomous agents iteratively refine a user's initial intent into a confirmed, auditable specification. Furthermore, the system automatically derives validation tests from these intents before provisioning,...",
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "suggested_id": "tranoris-2026-agentic-test-driven-quality"
+    },
+    {
+      "arxiv_id": "2604.22217",
+      "title": "RAG-Reflect: Agentic Retrieval-Augmented Generation with Reflections for Comment-Driven Code Maintenance on Stack Overflow",
+      "authors": [
+        "Mehedi Hasan Shanto",
+        "Muhammad Asaduzzaman",
+        "Alioune Ngom"
+      ],
+      "first_published": "2026-04-24",
+      "abstract_excerpt": "User comments on online programming platforms such as Stack Overflow play a vital role in maintaining the correctness and relevance of shared code examples. However, the majority of comments express gratitude or clarification, while only a small fraction highlight actionable issues that drive meaningful edits. This paper demonstrates how agentic AI principles can revolutionize software...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "shanto-2026-rag-reflect-agentic-retrieval"
+    },
+    {
+      "arxiv_id": "2604.21090",
+      "title": "Structural Quality Gaps in Practitioner AI Governance Prompts: An Empirical Study Using a Five-Principle Evaluation Framework",
+      "authors": [
+        "Christo Zietsman"
+      ],
+      "first_published": "2026-04-22",
+      "abstract_excerpt": "AI governance programmes increasingly rely on natural language prompts to constrain and direct AI agent behaviour. These prompts function as executable specifications: they define the agent's mandate, scope, and quality criteria. Despite this role, no systematic framework exists for evaluating whether a governance prompt is structurally complete. We introduce a five-principle evaluation framework...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "suggested_id": "zietsman-2026-structural-quality-gaps-practitioner"
+    },
+    {
+      "arxiv_id": "2604.27955",
+      "title": "GUI Agents with Reinforcement Learning: Toward Digital Inhabitants",
+      "authors": [
+        "Junan Hu",
+        "Jian Liu",
+        "Jingxiang Lai",
+        "Jiarui Hu",
+        "Yiwei Sheng",
+        "Shuang Chen",
+        "Jian Li",
+        "Dazhao Du",
+        "Song Guo"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Graphical User Interface (GUI) agents have emerged as a promising paradigm for intelligent systems that perceive and interact with graphical interfaces visually. Yet supervised fine-tuning alone cannot handle long-horizon credit assignment, distribution shifts, and safe exploration in irreversible environments, making Reinforcement Learning (RL) a central methodology for advancing automation. In...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "hu-2026-gui-agents-reinforcement-learning"
+    },
+    {
+      "arxiv_id": "2604.27725",
+      "title": "AgentEconomist: An End-to-end Agentic System Translating Economic Intuitions into Executable Computational Experiments",
+      "authors": [
+        "Jiaju Chen",
+        "Jinghua Piao",
+        "Xia Xu",
+        "Songwei Li",
+        "Tong Xia",
+        "Xiangnan He",
+        "Yong Li"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "A long-standing challenge in economics lies not in the lack of intuition, but in the difficulty of translating intuitive insights into verifiable research. To address this challenge, we introduce AgentEconomist, an end-to-end interactive system designed to translate abstract intuitions into executable computational experiments. Grounded in a domain-specific knowledge base covering over 13,000...",
+      "primary_category": "cs.HC",
+      "categories": [
+        "cs.AI",
+        "cs.HC"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "chen-2026-agenteconomist-end-end-agentic"
+    },
+    {
+      "arxiv_id": "2604.27351",
+      "title": "Heterogeneous Scientific Foundation Model Collaboration",
+      "authors": [
+        "Zihao Li",
+        "Jiaru Zou",
+        "Feihao Fang",
+        "Xuying Ning",
+        "Mengting Ai",
+        "Tianxin Wei",
+        "Sirui Chen",
+        "Xiyuan Yang",
+        "Jingrui He"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Agentic large language model systems have demonstrated strong capabilities. However, their reliance on language as the universal interface fundamentally limits their applicability to many real-world problems, especially in scientific domains where domain-specific foundation models have been developed to address specialized tasks beyond natural language. In this work, we introduce Eywa, a...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "li-2026-heterogeneous-scientific-foundation-collaboration"
+    },
+    {
+      "arxiv_id": "2604.27309",
+      "title": "End-to-End Evaluation and Governance of an EHR-Embedded AI Agent for Clinicians",
+      "authors": [
+        "Aaryan Shah",
+        "Andrew Hines",
+        "Alexia Downs",
+        "Denis Bajet",
+        "Paulius Mui",
+        "Fabiano Araujo",
+        "Laura Offutt",
+        "Aida Rutledge",
+        "Elizabeth Jimenez"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Clinical AI systems require not just point-in-time evaluation but continuous governance: the ongoing practice of monitoring, evaluating, iterating, and re-evaluating performance throughout deployment. We present an end-to-end framework of governance that integrates rubric validation, live deployment feedback, technical performance monitoring, and cost tracking, with controlled experimentation...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "shah-2026-end-end-governance-ehr"
+    },
+    {
+      "arxiv_id": "2604.28016",
+      "title": "Faster 3D Gaussian Splatting Convergence via Structure-Aware Densification",
+      "authors": [
+        "Linjie Lyu",
+        "Ayush Tewari",
+        "Jianchun Chen",
+        "Thomas Leimkühler",
+        "Christian Theobalt"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "3D Gaussian Splatting has emerged as a powerful scene representation for real-time novel-view synthesis. However, its standard adaptive density control relies on screen-space positional gradients, which do not distinguish between geometric misplacement and frequency aliasing, often leading to either over-blurred high-frequency textures or inefficient over-densification. We present a...",
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.GR",
+        "cs.LG"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "lyu-2026-faster-gaussian-splatting-convergence"
+    },
+    {
+      "arxiv_id": "2604.26923",
+      "title": "ClassEval-Pro: A Cross-Domain Benchmark for Class-Level Code Generation",
+      "authors": [
+        "Yeheng Chen",
+        "Chaoxiang Xie",
+        "Yuling Shi",
+        "Wenhao Zeng",
+        "Yongpan Wang",
+        "Hongyu Zhang",
+        "Xiaodong Gu"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "LLMs have achieved strong results on both function-level code synthesis and repository-level code modification, yet a capability that falls between these two extremes -- compositional code creation, i.e., building a complete, internally structured class from a specification -- remains underserved. Current evaluations are either confined to isolated functions or rely on manually curated...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [
+        "logic_error"
+      ],
+      "suggested_id": "chen-2026-classeval-pro-cross-domain"
+    },
+    {
+      "arxiv_id": "2604.26815",
+      "title": "What Is the Cost of Energy Monitoring? An Empirical Study on the Overhead of RAPL-Based Tools",
+      "authors": [
+        "Jeremy Diamond",
+        "Vincenzo Stoico"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "The Running Average Power Limit (RAPL) interface is widely used to estimate software energy consumption via CPU and DRAM counters, but tool design differences and high-frequency polling can introduce measurement overhead, namely, extra time and energy consumed by the tool itself.This paper quantifies the impact of RAPL-based tools on high-frequency (1 kHz) energy monitoring and investigates...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.PF",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "diamond-2026-what-cost-energy-monitoring"
+    },
+    {
+      "arxiv_id": "2604.26670",
+      "title": "Which Types of Heterogeneity Matter for Root Cause Localization in Microservice Systems ?",
+      "authors": [
+        "Runzhou Wang",
+        "Shenglin Zhang",
+        "Wenwei Gu",
+        "Yongxin Zhao",
+        "Chenyu Zhao",
+        "Dan Pei",
+        "Yuxuan Chen",
+        "Yangyuxin Huang"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Microservice root cause localization is fundamentally challenged by the inherent heterogeneity of cloud-native systems, which encompasses diverse observability data and multiple system entities. Existing approaches typically focus on only one aspect of heterogeneity and thus fail to capture its full diagnostic value. In this work, we systematically examine the multifaceted role of heterogeneity...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "wang-2026-which-types-heterogeneity-matter"
+    },
+    {
+      "arxiv_id": "2604.26645",
+      "title": "SciHorizon-DataEVA: An Agentic System for AI-Readiness Evaluation of Heterogeneous Scientific Data",
+      "authors": [
+        "Dianyu Liu",
+        "Chuan Qin",
+        "Xi Chen",
+        "Xiaohan Li",
+        "Wenxi Xu",
+        "Yuyang Wang",
+        "Xin Chen",
+        "Yuanchun Zhou",
+        "Hengshu Zhu"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "AI-for-Science (AI4Science) is increasingly transforming scientific discovery by embedding machine learning models into prediction, simulation, and hypothesis generation workflows across domains. However, the effectiveness of these models is fundamentally constrained by the AI-readiness of scientific data, for which no scalable and systematic evaluation mechanism currently exists. In this work,...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "liu-2026-scihorizon-dataeva-agentic-readiness"
+    },
+    {
+      "arxiv_id": "2604.26573",
+      "title": "PAINT: Partial-Solution Adaptive Interpolated Training for Self-Distilled Reasoners",
+      "authors": [
+        "Zhiquan Tan",
+        "Yinrong Hong"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Improving large language model (LLM) reasoning requires supervision that is both aligned with the model's own test-time states and informative at the token level. Reinforcement learning with verifiable rewards provides on-policy exploration but offers sparse, high-variance credit; supervised fine-tuning and distillation provide dense targets but often train on fixed trajectories or rely on...",
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "tan-2026-paint-partial-solution-adaptive"
+    },
+    {
+      "arxiv_id": "2604.25903",
+      "title": "Carbon-Taxed Transformers: A Green Compression Pipeline for Overgrown Language Models",
+      "authors": [
+        "Ajmain Inqiad Alam",
+        "Palash Roy",
+        "Chanchal K. Roy",
+        "Banani Roy",
+        "Kevin A. Schneider"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "The accelerating adoption of Large Language Models (LLMs) in software engineering (SE) has brought with it a silent crisis: unsustainable computational cost. While these models demonstrate remarkable capabilities in different SE tasks, they are unmanageably large, slow to deploy, memory-intensive, and carbon-heavy. This reality threatens not only the scalability and accessibility of AI-powered...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.LG",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "alam-2026-carbon-taxed-transformers-green"
+    },
+    {
+      "arxiv_id": "2604.25399",
+      "title": "CoRE: A Fine-Grained Code Reasoning Benchmark Beyond Output Prediction",
+      "authors": [
+        "Jun Gao",
+        "Yun Peng",
+        "Qian Qiao",
+        "Changhai Zhou",
+        "Yuhua Zhou",
+        "Shiyang Zhang",
+        "Shichao Weng",
+        "Zhenchang Xing",
+        "Xiaoxue Ren"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "Despite strong performance on code generation tasks, it remains unclear whether large language models (LLMs) genuinely reason about code execution. Existing code reasoning benchmarks primarily evaluate final output correctness under a single canonical implementation, leaving two critical aspects underexplored: (1) whether LLMs can maintain consistency to functionally equivalent implementations,...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "gao-2026-core-fine-grained-code"
+    },
+    {
+      "arxiv_id": "2604.24712",
+      "title": "When Prompt Under-Specification Improves Code Correctness: An Exploratory Study of Prompt Wording and Structure Effects on LLM-Based Code Generation",
+      "authors": [
+        "Amal AKLI",
+        "Mike PAPADAKIS",
+        "Maxime CORDY",
+        "Yves Le TRAON"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Large language models are increasingly used for code generation, yet the correctness of their outputs depends not only on model capability but also on how tasks are specified. Prior studies demonstrate that small changes in natural language prompts, particularly under-specification can substantially reduce code correctness; however, these findings are largely based on minimal-specification...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "akli-2026-when-prompt-under-specification"
+    },
+    {
+      "arxiv_id": "2604.24703",
+      "title": "Defective Task Descriptions in LLM-Based Code Generation: Detection and Analysis",
+      "authors": [
+        "Amal Akli",
+        "Mike Papadakis",
+        "Maxime Cordy",
+        "Yves Le Traon"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Large language models are widely used for code generation, yet they rely on an implicit assumption that the task descriptions are sufficiently detailed and well-formed. However, in practice, users may provide defective descriptions, which can have a strong effect on code correctness. To address this issue, we develop SpecValidator, a lightweight classifier based on a small model that has been...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "akli-2026-defective-task-descriptions-llm"
+    },
+    {
+      "arxiv_id": "2604.24621",
+      "title": "Evaluation of LLM-Based Software Engineering Tools: Practices, Challenges, and Future Directions",
+      "authors": [
+        "Utku Boran Torun",
+        "Veli Karakaya",
+        "Ali Babar",
+        "Eray Tüzün"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Large Language Models (LLMs) are increasingly embedded in software engineering (SE) tools, powering applications such as code generation, automated code review, and bug triage. As these LLM-based AI for Software Engineering (AI4SE) systems transition from experimental prototypes to widely deployed tools, the question of what it means to evaluate their behavior reliably has become both critical...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "torun-2026-llm-software-engineering-tools"
+    },
+    {
+      "arxiv_id": "2604.24222",
+      "title": "MEMCoder: Multi-dimensional Evolving Memory for Private-Library-Oriented Code Generation",
+      "authors": [
+        "Mofei Li",
+        "Taozhi Chen",
+        "Guowei Yang",
+        "Jia Li"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Large Language Models (LLMs) excel at general code generation, but their performance drops sharply in enterprise settings that rely on internal private libraries absent from public pre-training corpora. While Retrieval-Augmented Generation (RAG) offers a training-free alternative by providing static API documentation, we find that such documentation typically provides only isolated definitions,...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "li-2026-memcoder-multi-dimensional-evolving"
+    },
+    {
+      "arxiv_id": "2604.24038",
+      "title": "AgentPulse: A Continuous Multi-Signal Framework for Evaluating AI Agents in Deployment",
+      "authors": [
+        "Yuxuan Gao",
+        "Megan Wang",
+        "Yi Ling Yu"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Static benchmarks measure what AI agents can do at a fixed point in time but not how they are adopted, maintained, or experienced in deployment. We introduce AgentPulse, a continuous evaluation framework scoring 50 agents across 10 workload categories along four factors (Benchmark Performance, Adoption Signals, Community Sentiment, and Ecosystem Health) aggregated from 18 real-time signals across...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "gao-2026-agentpulse-continuous-multi-signal"
+    },
+    {
+      "arxiv_id": "2604.23940",
+      "title": "Constraint-Guided Multi-Agent Decompilation for Executable Binary Recovery",
+      "authors": [
+        "Yifan Zhang",
+        "Xiaohan Wang",
+        "Yueke Zhang",
+        "Kevin Leach"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Decompilation -- recovering source code from compiled binaries -- is essential for security analysis, malware reverse engineering, and legacy software maintenance. However, existing decompilers produce code that often fails to compile or execute correctly, limiting their practical utility. We present a multi-agent framework that transforms decompiled code into re-executable source through...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "zhang-2026-constraint-guided-multi-agent"
+    },
+    {
+      "arxiv_id": "2604.23855",
+      "title": "Learning Selective LLM Autonomy from Copilot Feedback in Enterprise Customer Support Workflows",
+      "authors": [
+        "Nikita Borovkov",
+        "Elisei Rykov",
+        "Olga Tsymboi",
+        "Sergei Filimonov",
+        "Nikita Surnachev",
+        "Dmitry Bitman",
+        "Anatolii Potapov"
+      ],
+      "first_published": "2026-04-26",
+      "abstract_excerpt": "We present a deployed system that automates end-to-end customer support workflows inside an enterprise Business Process Management (BPM) platform. The approach is scalable in production and reaches selective automation within two weeks for a new process, leveraging supervision already generated at scale: structured per-case UI interaction traces and low-overhead copilot feedback, where operators...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "borovkov-2026-learning-selective-llm-autonomy"
+    },
+    {
+      "arxiv_id": "2604.23455",
+      "title": "CUJBench: Benchmarking LLM-Agent on Cross-Modal Failure Diagnosis from Browser to Backend",
+      "authors": [
+        "Haoming Meng"
+      ],
+      "first_published": "2026-04-25",
+      "abstract_excerpt": "Automated failure diagnosis requires correlating browser-visible symptoms with backend observability signals, yet existing benchmarks do not evaluate this cross-modal reasoning task. Constructing one is non-trivial: multi-modal failure scenarios are costly to annotate, and live-environment capture introduces stochasticity that makes cross-run agent comparison unreliable. We present CUJBench, to...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "meng-2026-cujbench-benchmarking-llm-agent"
+    },
+    {
+      "arxiv_id": "2604.22659",
+      "title": "RealBench: A Repo-Level Code Generation Benchmark Aligned with Real-World Software Development Practices",
+      "authors": [
+        "Jia Li",
+        "Hongyi Deng",
+        "Yiran Zhang",
+        "Kechi Zhang",
+        "Tianqi Shao",
+        "Tiankuo Zhao",
+        "Weinan Wang",
+        "Zhi Jin",
+        "Ge Li",
+        "Yang Liu",
+        "Yingtao Fang",
+        "Yihong Dong"
+      ],
+      "first_published": "2026-04-24",
+      "abstract_excerpt": "Writing code requires significant time and effort in software development. To automate this process, researchers have made substantial progress using Large Language Models (LLMs) for code generation. Many benchmarks like HumanEval and EvoCodeBench have been created to evaluate LLMs by requiring them to generate code from natural language requirements. However, in enterprise applications and team...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [
+        "logic_error"
+      ],
+      "suggested_id": "li-2026-realbench-repo-level-code"
+    },
+    {
+      "arxiv_id": "2604.21716",
+      "title": "From If-Statements to ML Pipelines: Revisiting Bias in Code-Generation",
+      "authors": [
+        "Minh Duc Bui",
+        "Xenia Heilmann",
+        "Mattia Cerrato",
+        "Manuel Mager",
+        "Katharina von der Wense"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Prior work evaluates code generation bias primarily through simple conditional statements, which represent only a narrow slice of real-world programming and reveal solely overt, explicitly encoded bias. We demonstrate that this approach dramatically underestimates bias in practice by examining a more realistic task: generating machine learning (ML) pipelines. Testing both code-specialized and...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "suggested_id": "bui-2026-statements-pipelines-revisiting-bias"
+    },
+    {
+      "arxiv_id": "2604.21950",
+      "title": "Feedback Over Form: Why Execution Feedback Matters More Than Pipeline Topology in 1-3B Code Generation",
+      "authors": [
+        "Charles Junichi McAndrews"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Small language models (1-3B) are practical to run locally, but individually limited on harder code generation tasks. We ask whether composing them into pipelines can recover some of that lost capability. We study code generation pipelines built from 1-3B models with execution feedback, and use a NEAT-inspired evolutionary search to test whether more complex pipeline structure helps beyond a...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.SE"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [
+        "logic_error"
+      ],
+      "suggested_id": "mcandrews-2026-feedback-over-form-why"
+    },
+    {
+      "arxiv_id": "2604.28001",
+      "title": "A Pattern Language for Resilient Visual Agents",
+      "authors": [
+        "Habtom Kahsay Gidey",
+        "Alexander Lenz",
+        "Alois Knoll"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Integrating multimodal foundation models into enterprise ecosystems presents a fundamental software architecture challenge. Architects must balance competing quality attributes: the high latency and non-determinism of vision language action (VLA) models versus the strict determinism and real-time performance required by enterprise control loops. In this study, we propose an architectural pattern...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "gidey-2026-pattern-language-resilient-visual"
+    },
+    {
+      "arxiv_id": "2604.27781",
+      "title": "The Grand Software Supply Chain of AI Systems",
+      "authors": [
+        "Carmine Cesarano",
+        "Martin Monperrus"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "AI systems rest on software with low integrity mechanisms, leaving AI systems exposed across every stage from data acquisition to final inference. This paper makes the AI supply chain a first-class object of analysis, decomposing it across four architectural layers: data acquisition, model training, model inference, and a cross-cutting substrate. Within these layers, we identify four structural...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [
+        "supply_chain_attack"
+      ],
+      "suggested_id": "cesarano-2026-grand-software-supply-chain"
+    },
+    {
+      "arxiv_id": "2604.28049",
+      "title": "Agent-Agnostic Evaluation of SQL Accuracy in Production Text-to-SQL Systems",
+      "authors": [
+        "Taslim Jamal Arif",
+        "Kuldeep Singh"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Text-to-SQL (T2SQL) evaluation in production environments poses fundamental challenges that existing benchmarks do not address. Current evaluation methodologies whether rule-based SQL matching or schema-dependent semantic parsers assume access to ground-truth queries and structured database schema, constraints that are rarely satisfied in real-world deployments. This disconnect leaves production...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "arif-2026-agent-agnostic-sql-accuracy"
+    },
+    {
+      "arxiv_id": "2604.28043",
+      "title": "Collaborative Agent Reasoning Engineering (CARE): A Three-Party Design Methodology for Systematically Engineering AI Agents with Subject Matter Experts, Developers, and Helper Agents",
+      "authors": [
+        "Rahul Ramachandran",
+        "Nidhi Jha",
+        "Muthukumaran Ramasubramanian"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "We present Collaborative Agent Reasoning Engineering (CARE), a disciplined methodology for engineering Large Language Model (LLM) agents in scientific domains. Unlike ad-hoc trial-and-error approaches, CARE specifies behavior, grounding, tool orchestration, and verification through reusable artifacts and systematic, stage-gated phases. The methodology employs a three-party workflow involving...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "ramachandran-2026-collaborative-agent-reasoning-engineering"
+    },
+    {
+      "arxiv_id": "2604.27895",
+      "title": "Graph World Models: Concepts, Taxonomy, and Future Directions",
+      "authors": [
+        "Jiawei Liu",
+        "Senqiao Yang",
+        "Mingjun Wang",
+        "Yu Wang",
+        "Bei Yu"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "As one of the mainstream models of artificial intelligence, world models allow agents to learn the representation of the environment for efficient prediction and planning. However, classical world models based on flat tensors face several key problems, including noise sensitivity, error accumulation and weak reasoning. To address these limitations, many recent studies use graph structure to...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "liu-2026-graph-world-concepts-taxonomy"
+    },
+    {
+      "arxiv_id": "2604.27891",
+      "title": "In-Context Prompting Obsoletes Agent Orchestration for Procedural Tasks",
+      "authors": [
+        "Simon Dennis",
+        "Michael Diamond",
+        "Rivaan Patil",
+        "Kevin Shabahang",
+        "Hao Guo"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Agent orchestration frameworks -- LangGraph, CrewAI, Google ADK, OpenAI Agents SDK, and others -- place an external orchestrator above the LLM, tracking state and injecting routing instructions at every turn. We present a controlled comparison showing that for procedural tasks, this architecture is dominated by a simpler alternative: putting the entire procedure in the system prompt and letting...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "dennis-2026-context-prompting-obsoletes-agent"
+    },
+    {
+      "arxiv_id": "2604.27872",
+      "title": "Modeling Clinical Concern Trajectories in Language Model Agents",
+      "authors": [
+        "Sukesh Subaharan",
+        "Venkatesan VS",
+        "Murugadasan P",
+        "Sivakumar D",
+        "Gautham N",
+        "Ganeshkumar M"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Large language model (LLM) agents deployed in clinical settings often exhibit abrupt, threshold-driven behavior, offering little visibility into accumulating risk prior to escalation. In real-world care, however, clinicians act on gradually rising concern rather than instantaneous triggers. We study whether explicit state dynamics can expose such pre-escalation signals without delegating clinical...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "subaharan-2026-modeling-clinical-concern-trajectories"
+    },
+    {
+      "arxiv_id": "2604.27472",
+      "title": "PRTS: A Primitive Reasoning and Tasking System via Contrastive Representations",
+      "authors": [
+        "Yang Zhang",
+        "Jiangyuan Zhao",
+        "Chenyou Fan",
+        "Fangzheng Yan",
+        "Tian Li",
+        "Haitong Tang",
+        "Sen Fu",
+        "Xuan'er Wu",
+        "Qizhen Weng",
+        "Weinan Zhang",
+        "Xiu Li",
+        "Chi Zhang",
+        "Chenjia Bai",
+        "Xuelong Li"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Vision-Language-Action (VLA) models advance robotic control via strong visual-linguistic priors. However, existing VLAs predominantly frame pretraining as supervised behavior cloning, overlooking the fundamental nature of robot learning as a goal-reaching process that requires understanding temporal task progress. We present \\textbf{PRTS} (\\textbf{P}rimitive \\textbf{R}easoning and...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.RO"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "zhang-2026-prts-primitive-reasoning-tasking"
+    },
+    {
+      "arxiv_id": "2604.27283",
+      "title": "Learning When to Remember: Risk-Sensitive Contextual Bandits for Abstention-Aware Memory Retrieval in LLM-Based Coding Agents",
+      "authors": [
+        "Mehmet Iscan"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Large language model (LLM)-based coding agents increasingly rely on external memory to reuse prior debugging experience, repair traces, and repository-local operational knowledge. However, retrieved memory is useful only when the current failure is genuinely compatible with a previous one; superficial similarity in stack traces, terminal errors, paths, or configuration symptoms can lead to unsafe...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "suggested_id": "iscan-2026-learning-when-remember-risk"
+    },
+    {
+      "arxiv_id": "2604.27277",
+      "title": "BrainDINO: A Brain MRI Foundation Model for Generalizable Clinical Representation Learning",
+      "authors": [
+        "Yizhou Wu",
+        "Shansong Wang",
+        "Yuheng Li",
+        "Mojtaba Safari",
+        "Mingzhe Hu",
+        "Chih-Wei Chang",
+        "Harini Veeraraghavan",
+        "Xiaofeng Yang"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Brain MRI underpins a wide range of neuroscientific and clinical applications, yet most learning-based methods remain task-specific and require substantial labeled data. Here we show that a single self-supervised representation can generalize across heterogeneous brain MRI endpoints. We trained BrainDINO, a self-distilled foundation model, on approximately 6.6 million unlabeled axial slices from...",
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.AI",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "wu-2026-braindino-brain-mri-foundation"
+    },
+    {
+      "arxiv_id": "2604.27279",
+      "title": "Predicting Upcoming Stuttering Events from Three-Second Audio: Stratified Evaluation Reveals Severity-Selective Precursors, and the Model Deploys Fully On-Device",
+      "authors": [
+        "Nazar Kozak"
+      ],
+      "first_published": "2026-04-30",
+      "abstract_excerpt": "Audio-based stuttering systems to date have been trained for detection -- what disfluency is present now -- leaving prediction, the capability needed for closed-loop intervention, unstudied at deployable scale. We train a 616K-parameter CNN on SEP-28k (Apple, 20,131 three-second clips) to predict whether the next contiguous clip contains any disfluency. (1) Severity-selective precursor signal: on...",
+      "primary_category": "cs.SD",
+      "categories": [
+        "cs.LG",
+        "cs.SD",
+        "eess.AS"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "kozak-2026-predicting-upcoming-stuttering-events"
+    },
+    {
+      "arxiv_id": "2604.27148",
+      "title": "CI-Repair-Bench: A Repository-Aware Benchmark for Automated Patch Validation via CI Workflows",
+      "authors": [
+        "Rabeya Khatun Muna",
+        "Md Nakhla Rafi",
+        "Tse-Hsun",
+        "Chen"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Continuous Integration (CI) enforces repository-level correctness through multi-stage workflows and is central to modern software development, yet diagnosing and repairing CI failures remains challenging. Unlike traditional program repair, CI failures frequently involve non-code artifacts, environment and dependency issues, noisy execution logs, and workflow-level constraints. Existing program...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "muna-2026-repair-bench-repository-aware"
+    },
+    {
+      "arxiv_id": "2604.27267",
+      "title": "From Prompt to Physical Actuation: Holistic Threat Modeling of LLM-Enabled Robotic Systems",
+      "authors": [
+        "Neha Nagaraja",
+        "Hayretdin Bahsi",
+        "Carlo R. da Cunha"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "As large language models are integrated into autonomous robotic systems for task planning and control, compromised inputs or unsafe model outputs can propagate through the planning pipeline to physical-world consequences. Although prior work has studied robotic cybersecurity, adversarial perception attacks, and LLM safety independently, no existing study traces how these threat categories...",
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.AI",
+        "cs.CR",
+        "cs.RO"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "nagaraja-2026-prompt-physical-actuation-holistic"
+    },
+    {
+      "arxiv_id": "2604.27256",
+      "title": "Towards Accelerated SCF Workflows with Equivariant Density-Matrix Learning and Analytic Refinement",
+      "authors": [
+        "Zuriel Y. Yescas-Ramos",
+        "Andrés Álvarez-García",
+        "Huziel E. Sauceda"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "We present \\textsc{dm-PhiSNet}, a physically constrained \\textsc{PhiSNet}-based equivariant model that predicts one-electron reduced density matrices (1-RDMs) directly from molecular geometries in an atomic-orbital (AO) basis for accelerated self-consistent field (SCF) workflows. Training follows a two-stage schedule with progressively introduced physically motivated objectives, and the resulting...",
+      "primary_category": "physics.chem-ph",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "physics.chem-ph",
+        "physics.comp-ph",
+        "quant-ph"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "yescasramos-2026-accelerated-scf-workflows-equivariant"
+    },
+    {
+      "arxiv_id": "2604.26522",
+      "title": "AGEL-Comp: A Neuro-Symbolic Framework for Compositional Generalization in Interactive Agents",
+      "authors": [
+        "Mahnoor Shahid",
+        "Hannes Rothe"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Large Language Model (LLM)-based agents exhibit systemic failures in compositional generalization, limiting their robustness in interactive environments. This work introduces AGEL-Comp, a neuro-symbolic AI agent architecture designed to address this challenge by grounding actions of the agent. AGEL-Comp integrates three core innovations: (1) a dynamic Causal Program Graph (CPG) as a world model,...",
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.LO",
+        "cs.MA",
+        "cs.SC"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "shahid-2026-agel-comp-neuro-symbolic"
+    },
+    {
+      "arxiv_id": "2604.26363",
+      "title": "CO-EVO: Co-evolving Semantic Anchoring and Style Diversification for Federated DG-ReID",
+      "authors": [
+        "Fengchun Zhang",
+        "Qiang Ma",
+        "Liuyu Xiang",
+        "Jinshan Lai",
+        "Tingxuan Huang",
+        "Jianwei Hu"
+      ],
+      "first_published": "2026-04-29",
+      "abstract_excerpt": "Federated domain generalization for person re-identification (FedDG-ReID) aims to collaboratively train a pedestrian retrieval model across multiple decentralized source domains such that it can generalize to unseen target environments without compromising raw data privacy. However, this task is significantly challenged by the inherent stylistic gaps across decentralized clients. Without global...",
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "zhang-2026-evo-evolving-semantic-anchoring"
+    },
+    {
+      "arxiv_id": "2604.26990",
+      "title": "UCSC-NLP at SemEval-2026 Task 13: Multi-View Generalization and Diagnostic Analysis of Machine-Generated Code Detection",
+      "authors": [
+        "Kargi Chauhan",
+        "Sadiba Nusrat Nur"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "With the rapid growth of large language models for code generation, distinguishing between human-written and AI-generated code has become increasingly critical for academic integrity, hiring evaluations, and software security. We present our system for SemEval-2026 Task 13: Multilingual Machine-Generated Code Detection, participating in Subtask A (binary detection) and Subtask B (multi-class...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "chauhan-2026-ucsc-nlp-semeval-2026"
+    },
+    {
+      "arxiv_id": "2604.25700",
+      "title": "Bug-Report-Driven Fault Localization: Industrial Benchmarking and Lesson Learned at ABB Robotics",
+      "authors": [
+        "Pernilla Hall",
+        "Anton Ununger",
+        "Riccardo Rubei",
+        "Alessio Bucaioni"
+      ],
+      "first_published": "2026-04-28",
+      "abstract_excerpt": "Software quality assurance remains a major challenge in industrial environments, where large-scale and long-lived systems inevitably accumulate defects. Identifying the location of a fault is often time-consuming and costly, particularly during maintenance phases when developers must rely primarily on textual bug reports rather than complete runtime or code-level context. In this study, we...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.LG",
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "hall-2026-bug-report-driven-fault"
+    },
+    {
+      "arxiv_id": "2604.24678",
+      "title": "Leveraging LLMs for Multi-File DSL Code Generation: An Industrial Case Study",
+      "authors": [
+        "Sivajeet Chand",
+        "Kevin Nguyen",
+        "Peter Kuntz",
+        "Alexander Pretschner"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Large language models (LLMs) perform strongly on general-purpose code generation, yet their applicability to enterprise domain-specific languages (DSLs) remains underexplored, especially for repository-scale change generation spanning multiple files and folder structures from a single natural-language (NL) instruction. We report an industrial case study at BMW that adapts code-oriented LLMs to...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "chand-2026-leveraging-llms-multi-file"
+    },
+    {
+      "arxiv_id": "2604.24116",
+      "title": "Closing the Loop: A Software Framework for AI to Support Business Decision Making",
+      "authors": [
+        "Jeffrey Wong",
+        "Antoine Creux"
+      ],
+      "first_published": "2026-04-27",
+      "abstract_excerpt": "Create an idea, prototype it, evaluate if users like it, then learn. It is the circle of business. If AI can operate in all parts of the circle, it will enable rapid iteration and learning speeds for businesses. Experiment platforms that deploy experiments to evaluate return on investment for businesses are abundant, but systems that help businesses learn personalization, mechanisms, and what to...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "stat.AP"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "wong-2026-closing-loop-software-support"
+    },
+    {
+      "arxiv_id": "2604.23667",
+      "title": "Automated Classification of Human Code Review Comments with Large Language Models",
+      "authors": [
+        "Semih Çağlar",
+        "Şükrü Eren Gökırmak",
+        "Eray Tüzün"
+      ],
+      "first_published": "2026-04-26",
+      "abstract_excerpt": "Context: Code reviews are essential for maintaining software quality, yet many human review comments suffer from issues such as redundancy, vagueness, or lack of constructiveness. These types of comments may slow down feedback and obscure important insights. Prior work on code review comments mostly explore the detection and categorization of useful comments, while fine-grained categorization of...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "caglar-2026-automated-classification-human-code"
+    },
+    {
+      "arxiv_id": "2604.23342",
+      "title": "Empirical Insights of Test Selection Metrics under Multiple Testing Objectives and Distribution Shifts",
+      "authors": [
+        "Jingyu Zhang",
+        "Fan Wang",
+        "Jacky Keung",
+        "Yihan Liao",
+        "Yan Xiao",
+        "Lei Ma"
+      ],
+      "first_published": "2026-04-25",
+      "abstract_excerpt": "Deep learning (DL)-based systems can exhibit unexpected behavior when exposed to out-of-distribution (OOD) scenarios, posing serious risks in safety-critical domains such as malware detection and autonomous driving. This underscores the importance of thoroughly testing such systems before deployment. To this end, researchers have proposed a wide range of test selection metrics designed to...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "zhang-2026-empirical-insights-test-selection"
+    },
+    {
+      "arxiv_id": "2604.22750",
+      "title": "How Do AI Agents Spend Your Money? Analyzing and Predicting Token Consumption in Agentic Coding Tasks",
+      "authors": [
+        "Longju Bai",
+        "Zhemin Huang",
+        "Xingyao Wang",
+        "Jiao Sun",
+        "Rada Mihalcea",
+        "Erik Brynjolfsson",
+        "Alex Pentland",
+        "Jiaxin Pei"
+      ],
+      "first_published": "2026-04-24",
+      "abstract_excerpt": "The wide adoption of AI agents in complex human workflows is driving rapid growth in LLM token consumption. When agents are deployed on tasks that require a significant amount of tokens, three questions naturally arise: (1) Where do AI agents spend the tokens? (2) Which models are more token-efficient? and (3) Can agents predict their token usage before task execution? In this paper, we present...",
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.CY",
+        "cs.HC",
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "bai-2026-how-agents-spend-your"
+    },
+    {
+      "arxiv_id": "2604.22046",
+      "title": "Call-Chain-Aware LLM-Based Test Generation for Java Projects",
+      "authors": [
+        "Guancheng Wang",
+        "Qinghua Xu",
+        "Lionel C. Briand",
+        "Zhaoqiang Guo",
+        "Kui Liu"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Large language models (LLMs) have recently shown strong potential for generating project-level unit tests. However, existing state-of-the-art approaches primarily rely on execution-path information to guide prompt construction, which is often insufficient for complex software systems with rich inter-class dependencies, deep call chains, and intricate object initialization requirements. In this...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.AI",
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "wang-2026-call-chain-aware-llm"
+    },
+    {
+      "arxiv_id": "2604.22028",
+      "title": "FlyCatcher: Neural Inference of Runtime Checkers from Tests",
+      "authors": [
+        "Beatriz Souza",
+        "Chang Lou",
+        "Suman Nath",
+        "Michael Pradel"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Complex software systems often suffer from silent failures, i.e., violations of the intended semantics that do not cause explicit errors. A promising approach to detect such errors is to use system-specific runtime checkers that monitor the execution of a system and check for violations of the intended semantics. However, writing such checkers for a given software system is challenging and...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "souza-2026-flycatcher-neural-inference-runtime"
+    },
+    {
+      "arxiv_id": "2604.21917",
+      "title": "CrossCommitVuln-Bench: A Dataset of Multi-Commit Python Vulnerabilities Invisible to Per-Commit Static Analysis",
+      "authors": [
+        "Arunabh Majumdar"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "We present CrossCommitVuln-Bench, a curated benchmark of 15 real-world Python vulnerabilities (CVEs) in which the exploitable condition was introduced across multiple commits - each individually benign to per-commit static analysis - but collectively critical. We manually annotate each CVE with its contributing commit chain, a structured rationale for why each commit evades per-commit analysis,...",
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "suggested_id": "majumdar-2026-crosscommitvuln-bench-dataset-multi"
+    },
+    {
+      "arxiv_id": "2604.21746",
+      "title": "Less Is More: Measuring How LLM Involvement affects Chatbot Accuracy in Static Analysis",
+      "authors": [
+        "Krishna Narasimhan"
+      ],
+      "first_published": "2026-04-23",
+      "abstract_excerpt": "Large language models are increasingly used to make static analysis tools accessible through natural language, yet existing systems differ in how much they delegate to the LLM without treating the degree of delegation as an independent variable. We compare three architectures along a spectrum of LLM involvement for translating natural language to Joern's query language \\cpgql{}: direct query...",
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "suggested_id": "narasimhan-2026-less-more-measuring-how"
+    }
+  ]
+}

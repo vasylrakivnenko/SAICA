@@ -1,0 +1,54 @@
+id: ashrafi-2025-enhancing-llm-code-generation
+authors:
+  - Nazmus Ashrafi
+  - Salah Bouktif
+  - Mohammed Mediani
+year: 2025
+title: "Enhancing LLM Code Generation: A Systematic Evaluation of Multi-Agent Collaboration and Runtime Debugging for Improved Accuracy, Reliability, and Latency"
+venue: arXiv
+arxiv_id: "2505.02133"
+doi: "10.48550/arXiv.2505.02133"
+url: https://www.semanticscholar.org/paper/92b2ea3c244855235d10ca270dea7348fae07a25
+semantic_scholar_id: "92b2ea3c244855235d10ca270dea7348fae07a25"
+citation_count: 12
+abstract: >
+  The use of large language models (LLMs) for automated code generation has
+  emerged as a significant focus within AI research. As these pretrained
+  models continue to evolve, their ability to understand and generate
+  complex code structures has opened new possibilities for automating
+  intricate programming tasks for the sake of accurate code generation.
+  Although contemporary foundational models demonstrate promoting results,
+  researchers continue to explore optimal post-training strategies to
+  enhance code quality. These include supervised fine-tuning,
+  retrieval-augmented generation (RAG), debugging, and many others. In this
+  paper, we combine two widely used approaches namely multi-agent
+  collaboration and runtime execution information-based debugging, for
+  improving code generation functionality, reliability, and practical
+  applicability. We perform an empirical study in order to extend the
+  evaluation of the individual strategies as well as the proposed
+  composition of the activities of both strategies. Our study use 19 LLMs to
+  examines the performance of individual and the proposed strategies,
+  offering comprehensive insights into how different programming activities
+  compositions and training paradigms influence code generation
+  effectiveness. In particular, we implement a chained system that combines
+  both strategies to assess their combined impact on functional accuracy,
+  code reliability, and generation latency using two benchmark datasets
+  commonly used for code generation. Our findings provide valuable insights
+  for organizations seeking robust AI-driven coding solutions by guiding
+  them in selecting models that can better adapt to complex post-training
+  strategies, ultimately fostering the adoption of more effective and
+  reliable code generation technologies.
+tldr: >
+  This paper combines two widely used approaches namely multi-agent
+  collaboration and runtime execution information-based debugging, for
+  improving code generation functionality, reliability, and practical
+  applicability and implements a chained system that combines both
+  strategies.
+relevance_tags:
+  - supervision
+  - benchmark
+  - empirical
+notes: >
+  Relates to SAICA-KG failure modes: logic_error. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:sandboxed-execution-ai-code-agent.

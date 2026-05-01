@@ -1,0 +1,56 @@
+id: haque-2025-secure-suspect-investigating-package
+authors:
+  - Md Nazmul Haque
+  - Elizabeth Lin
+  - L. Arkoh
+  - B. Tadesse
+  - Bowen Xu
+year: 2025
+title: "Secure or Suspect? Investigating Package Hallucinations of Shell Command in Original and Quantized LLMs"
+venue: arXiv
+arxiv_id: "2512.08213"
+doi: "10.48550/arXiv.2512.08213"
+url: https://www.semanticscholar.org/paper/91cf61ed35840fb8676d5cda64c55267e5a929ae
+semantic_scholar_id: "91cf61ed35840fb8676d5cda64c55267e5a929ae"
+abstract: >
+  Large Language Models for code (LLMs4Code) are increasingly used to
+  generate software artifacts, including library and package recommendations
+  in languages such as Go. However, recent evidence shows that LLMs
+  frequently hallucinate package names or generate dependencies containing
+  known security vulnerabilities, posing significant risks to developers and
+  downstream software supply chains. At the same time, quantization has
+  become a widely adopted technique to reduce inference cost and enable
+  deployment of LLMs on resource-constrained environments. Despite its
+  popularity, little is known about how quantization affects the correctness
+  and security of LLM-generated software dependencies while generating shell
+  commands for package installation. In this work, we conduct the first
+  systematic empirical study of the impact of quantization on package
+  hallucination and vulnerability risks in LLM-generated Go packages. We
+  evaluate five Qwen model sizes under full-precision, 8-bit, and 4-bit
+  quantization across three datasets (SO, MBPP, and paraphrase). Our results
+  show that quantization substantially increases the package hallucination
+  rate (PHR), with 4-bit models exhibiting the most severe degradation. We
+  further find that even among the correctly generated packages, the
+  vulnerability presence rate (VPR) rises as precision decreases, indicating
+  elevated security risk in lower-precision models. Finally, our analysis of
+  hallucinated outputs reveals that most fabricated packages resemble
+  realistic URL-based Go module paths, such as most commonly malformed or
+  non-existent GitHub and golang.org repositories, highlighting a systematic
+  pattern in how LLMs hallucinate dependencies. Overall, our findings
+  provide actionable insights into the reliability and security implications
+  of deploying quantized LLMs for code generation and dependency
+  recommendation.
+tldr: >
+  This work conducts the first systematic empirical study of the impact of
+  quantization on package hallucination and vulnerability risks in
+  LLM-generated Go packages and reveals that most fabricated packages
+  resemble realistic URL-based Go module paths, highlighting a systematic
+  pattern in how LLMs hallucinate dependencies.
+relevance_tags:
+  - supply-chain
+  - empirical
+notes: >
+  Relates to SAICA-KG failure modes: fabrication, supply_chain_attack,
+  dependency_blindness, security_vulnerability. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:package-hallucination-slopsquatting.

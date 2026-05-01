@@ -1,0 +1,49 @@
+id: li-2025-glue-code-protocols-critical
+authors:
+  - Qiaomu Li
+  - Ying Xie
+year: 2025
+title: "From Glue-Code to Protocols: A Critical Analysis of A2A and MCP Integration for Scalable Agent Systems"
+venue: arXiv
+arxiv_id: "2505.03864"
+doi: "10.48550/arXiv.2505.03864"
+url: https://www.semanticscholar.org/paper/e790fbf3be688cc5c3cbda9c6fc6b15f1d3c2a49
+semantic_scholar_id: "e790fbf3be688cc5c3cbda9c6fc6b15f1d3c2a49"
+citation_count: 13
+abstract: >
+  Artificial intelligence is rapidly evolving towards multi-agent systems
+  where numerous AI agents collaborate and interact with external tools. Two
+  key open standards, Google's Agent to Agent (A2A) protocol for inter-agent
+  communication and Anthropic's Model Context Protocol (MCP) for
+  standardized tool access, promise to overcome the limitations of
+  fragmented, custom integration approaches. While their potential synergy
+  is significant, this paper argues that effectively integrating A2A and MCP
+  presents unique, emergent challenges at their intersection, particularly
+  concerning semantic interoperability between agent tasks and tool
+  capabilities, the compounded security risks arising from combined
+  discovery and execution, and the practical governance required for the
+  envisioned"Agent Economy". This work provides a critical analysis, moving
+  beyond a survey to evaluate the practical implications and inherent
+  difficulties of combining these horizontal and vertical integration
+  standards. We examine the benefits (e.g., specialization, scalability)
+  while critically assessing their dependencies and trade-offs in an
+  integrated context. We identify key challenges increased by the
+  integration, including novel security vulnerabilities, privacy
+  complexities, debugging difficulties across protocols, and the need for
+  robust semantic negotiation mechanisms. In summary, A2A+MCP offers a vital
+  architectural foundation, but fully realizing its potential requires
+  substantial advancements to manage the complexities of their combined
+  operation.
+tldr: >
+  This work provides a critical analysis, moving beyond a survey to evaluate
+  the practical implications and inherent difficulties of combining these
+  horizontal and vertical integration standards, and examines the benefits
+  (e.g., specialization, scalability) while critically assessing their
+  dependencies and trade-offs in an integrated context.
+relevance_tags:
+  - MCP
+  - survey
+notes: >
+  Relates to SAICA-KG failure modes: logic_error, security_vulnerability.
+  Auto-graduated from candidate pool; review the editorial framing before
+  promoting to a primary cite. Source: s2:sandboxed-execution-ai-code-agent.

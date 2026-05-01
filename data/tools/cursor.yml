@@ -46,7 +46,8 @@ security_notes: >
 signed_manifest: false
 openssf_scorecard_score:
 
-cited_in: []
+cited_in:
+  - horikawa-2025-agentic-refactoring-empirical-study
 documented_in: []
 
 inclusion_rationale: >

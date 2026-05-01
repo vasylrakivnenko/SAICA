@@ -1,0 +1,61 @@
+id: zhang-2025-semanticforge-repository-level-code
+authors:
+  - Wuyang Zhang
+  - Chenkai Zhang
+  - Zhen Luo
+  - Jianming Ma
+  - Wangming Yuan
+  - Chuqiao Gu
+  - Chenwei Feng
+year: 2025
+title: "SemanticForge: Repository-Level Code Generation through Semantic Knowledge Graphs and Constraint Satisfaction"
+venue: "INNO-PRESS: Journal of Emerging Applied AI"
+arxiv_id: "2511.07584"
+doi: "10.65563/jeaai.v1i7.65"
+url: https://www.semanticscholar.org/paper/7d2789c02f48ebbc7ae052fb6d2b599ee9b88bd6
+semantic_scholar_id: "7d2789c02f48ebbc7ae052fb6d2b599ee9b88bd6"
+citation_count: 6
+abstract: >
+  Large language models (LLMs) have transformed software development by
+  enabling automated code generation, yet they frequently suffer from
+  systematic errors that limit practical deployment. We identify two
+  critical failure modes: \textit{logical hallucination} (incorrect
+  control/data-flow reasoning) and \textit{schematic hallucination} (type
+  mismatches, signature violations, and architectural inconsistencies).
+  These errors stem from the absence of explicit, queryable representations
+  of repository-wide semantics. This paper presents \textbf{\framework}, a
+  novel framework for code generation that addresses these limitations
+  through knowledge graph-guided constraint satisfaction. Our approach
+  proceeds in four integrated stages: (1) constructing heterogeneous
+  repository knowledge graphs that capture both static analysis and dynamic
+  execution traces; (2) learning neural query planners that extract
+  task-relevant context from these graphs; (3) employing satisfiability
+  modulo theories (SMT)-guided beam search to ensure generated code
+  satisfies semantic constraints; and (4) maintaining graph fidelity through
+  continual incremental updates. Our comprehensive evaluation on \dataset, a
+  curated benchmark of 4,250 repository-level tasks across 50 Python
+  projects, demonstrates significant improvements over state-of-the-art
+  baselines: 49.8\% Pass@1 (18.1\% absolute improvement), 52\% reduction in
+  schematic hallucination, and 31\% reduction in logical hallucination.
+  Cross-repository generalization analysis shows strong transfer
+  capabilities with only 4.3\% average performance degradation across
+  architectural patterns. These results establish new benchmarks for
+  repository-level code generation while providing theoretical foundations
+  and practical tools for semantically-aware automated software development.
+  The explicit semantic representation and constraint satisfaction framework
+  introduced in \framework\ enables more reliable automated development
+  tools and provides a foundation for future advances in AI-assisted
+  software engineering.
+tldr: >
+  The explicit semantic representation and constraint satisfaction framework
+  introduced in framework enables more reliable automated development tools
+  and provides a foundation for future advances in AI-assisted software
+  engineering.
+relevance_tags:
+  - failure-mode-taxonomy
+  - benchmark
+  - knowledge-graph
+notes: >
+  Relates to SAICA-KG failure modes: fabrication. Auto-graduated from
+  candidate pool; review the editorial framing before promoting to a primary
+  cite. Source: s2:code-gen-hallucination-classification.
