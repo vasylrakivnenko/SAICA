@@ -30,6 +30,10 @@ minimum_pre_commit_version: "3.0"
 default_language_version:
   python: python3
 
+# Default existing hooks to commit-time only. Pre-push hooks are opted
+# into explicitly via `stages: [pre-push]` (see local repo at the bottom).
+default_stages: [pre-commit]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
