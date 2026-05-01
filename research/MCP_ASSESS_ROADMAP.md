@@ -207,3 +207,19 @@ Keep scope tight. Out of scope right now:
   page is static, regenerated weekly by GitHub Actions, JSON committed
   into `site/public/`. Hosting + GitHub PR-bot are the next-bigger
   bets, deferred to v0.4.
+- **2026-05-01:** v0.3.1 scope sharpening — *coding-agent systems are
+  not in the catalog*. Removed 16 tool YAMLs (Claude Code, Cursor,
+  Windsurf, Zed Agent, Replit Agent, v0, Devin, GitHub Copilot,
+  Continue, Sourcegraph Cody, Aider, OpenHands, SWE-agent, Codex CLI,
+  Gemini CLI, Cline) plus 3 recipes whose stacks were 100% agent IDs
+  (`cascading-failure-resistant-flow`, `complete-execution-enforced-flow`,
+  `scope-creep-bounded-autonomous-agent`). Rationale: SAICA helps
+  agents, doesn't catalog/evaluate them. Recommending Cursor to a
+  Claude Code user — or vice-versa — is a category error the project's
+  shape implied but never owned. Tool count: 103 → 87 modular
+  supervisors. The `CODING_AGENT_IDS` filter in the recommender stays
+  (defense-in-depth: if a peer agent YAML re-lands by accident, we
+  still won't surface it). v0.3.2 follow-up: re-add modular-supervisor
+  recipes for `cascading_failure`, `incomplete_execution`,
+  `scope_creep` (all currently uncovered in `data/recipes/` after the
+  3 deletions).

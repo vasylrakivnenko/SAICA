@@ -34,7 +34,6 @@ documented_by: []
 
 mitigated_by:
 - semgrep
-- aider
 
 notes: >
   Mitigations are the pattern from Recipe 8 (test-manipulation-resistant

@@ -46,21 +46,22 @@
         {
           "addresses_failure_modes": [
             "scope_creep",
-            "supply_chain_attack",
-            "context_pollution"
+            "context_pollution",
+            "supply_chain_attack"
           ],
           "autonomy_level": "graduated_hitl",
           "control_paradigm": "prevention",
           "integration_surfaces": [
-            "ide_plugin"
+            "web_app",
+            "http_service"
           ],
-          "stars": 60646,
-          "tagline": "VS Code extension coding agent with per-action approval and auto-approve allow-lists.",
+          "stars": 21825,
+          "tagline": "AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.",
           "temporal_phase": "pre_generation",
-          "tool_id": "cline",
-          "tool_name": "Cline",
+          "tool_id": "activepieces",
+          "tool_name": "activepieces",
           "trending": false,
-          "url": "/tools/cline"
+          "url": "/tools/activepieces"
         },
         {
           "addresses_failure_modes": [
@@ -106,22 +107,20 @@
         },
         {
           "addresses_failure_modes": [
-            "fabrication",
             "dependency_blindness"
           ],
-          "autonomy_level": "graduated_hitl",
+          "autonomy_level": "fully_autonomous",
           "control_paradigm": "prevention",
           "integration_surfaces": [
-            "ide_plugin",
             "library"
           ],
-          "stars": 32739,
-          "tagline": "Open-source IDE assistant with configurable providers, rules, and context.",
+          "stars": 24948,
+          "tagline": "Incremental parser toolkit that powers structural code analysis and symbol discovery.",
           "temporal_phase": "pre_generation",
-          "tool_id": "continue-dev",
-          "tool_name": "Continue",
+          "tool_id": "tree-sitter",
+          "tool_name": "tree-sitter",
           "trending": false,
-          "url": "/tools/continue-dev"
+          "url": "/tools/tree-sitter"
         }
       ],
       "uncovered_failure_modes": []
@@ -218,21 +217,22 @@
         {
           "addresses_failure_modes": [
             "scope_creep",
-            "supply_chain_attack",
-            "context_pollution"
+            "context_pollution",
+            "supply_chain_attack"
           ],
           "autonomy_level": "graduated_hitl",
           "control_paradigm": "prevention",
           "integration_surfaces": [
-            "ide_plugin"
+            "web_app",
+            "http_service"
           ],
-          "stars": 60646,
-          "tagline": "VS Code extension coding agent with per-action approval and auto-approve allow-lists.",
+          "stars": 21825,
+          "tagline": "AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.",
           "temporal_phase": "pre_generation",
-          "tool_id": "cline",
-          "tool_name": "Cline",
+          "tool_id": "activepieces",
+          "tool_name": "activepieces",
           "trending": false,
-          "url": "/tools/cline"
+          "url": "/tools/activepieces"
         },
         {
           "addresses_failure_modes": [
@@ -4578,40 +4578,42 @@
       },
       {
         "addresses_failure_modes": [
-          "scope_creep",
-          "context_pollution"
-        ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
-        "integration_surfaces": [
-          "desktop_app"
-        ],
-        "stars": 79584,
-        "tagline": "Built-in agentic coding mode inside the Zed editor with rules.md and thread-based review.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "zed-agent",
-        "tool_name": "Zed Agent",
-        "trending": true,
-        "url": "/tools/zed-agent"
-      },
-      {
-        "addresses_failure_modes": [
-          "scope_creep",
           "fabrication",
           "context_pollution"
         ],
         "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
+        "control_paradigm": "detection",
         "integration_surfaces": [
-          "cli"
+          "http_service",
+          "library"
         ],
-        "stars": 102183,
-        "tagline": "Google's official terminal coding agent built on Gemini with MCP and tool-allow-list supervision.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "gemini-cli",
-        "tool_name": "Gemini CLI",
+        "stars": 78820,
+        "tagline": "Open-source RAG engine based on deep document understanding.",
+        "temporal_phase": "post_generation",
+        "tool_id": "ragflow",
+        "tool_name": "ragflow",
         "trending": false,
-        "url": "/tools/gemini-cli"
+        "url": "/tools/ragflow"
+      },
+      {
+        "addresses_failure_modes": [
+          "fabrication",
+          "context_pollution",
+          "obsolescence"
+        ],
+        "autonomy_level": "graduated_hitl",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "library",
+          "http_service"
+        ],
+        "stars": 59931,
+        "tagline": "Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.",
+        "temporal_phase": "post_generation",
+        "tool_id": "pathway-llm-app",
+        "tool_name": "llm-app",
+        "trending": false,
+        "url": "/tools/pathway-llm-app"
       }
     ],
     "dependency_blindness": [
@@ -4654,82 +4656,83 @@
       },
       {
         "addresses_failure_modes": [
-          "fabrication",
+          "scope_creep",
+          "security_vulnerability",
           "dependency_blindness",
-          "obsolescence"
+          "fabrication"
         ],
         "autonomy_level": "graduated_hitl",
         "control_paradigm": "prevention",
         "integration_surfaces": [
-          "ide_plugin",
-          "cli"
+          "cli",
+          "ci_app"
         ],
         "stars": null,
-        "tagline": "Codebase-indexed coding assistant that grounds generation in repository context.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "sourcegraph-cody",
-        "tool_name": "Sourcegraph Cody",
+        "tagline": "Multi-language framework that runs configurable hooks before commits land — denies the commit on hook failure.",
+        "temporal_phase": "post_generation",
+        "tool_id": "pre-commit",
+        "tool_name": "pre-commit",
         "trending": false,
-        "url": "/tools/sourcegraph-cody"
+        "url": "/tools/pre-commit"
       }
     ],
     "fabrication": [
       {
         "addresses_failure_modes": [
           "fabrication",
-          "scope_creep"
-        ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
-        "integration_surfaces": [
-          "web_app"
-        ],
-        "stars": null,
-        "tagline": "Vercel's generative-UI coding agent for React and Next.js web interfaces.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "v0",
-        "tool_name": "v0",
-        "trending": false,
-        "url": "/tools/v0"
-      },
-      {
-        "addresses_failure_modes": [
-          "fabrication",
-          "dependency_blindness",
-          "obsolescence"
-        ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
-        "integration_surfaces": [
-          "ide_plugin",
-          "cli"
-        ],
-        "stars": null,
-        "tagline": "Codebase-indexed coding assistant that grounds generation in repository context.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "sourcegraph-cody",
-        "tool_name": "Sourcegraph Cody",
-        "trending": false,
-        "url": "/tools/sourcegraph-cody"
-      },
-      {
-        "addresses_failure_modes": [
-          "scope_creep",
-          "fabrication",
           "context_pollution"
         ],
         "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
+        "control_paradigm": "detection",
         "integration_surfaces": [
-          "cli"
+          "http_service",
+          "library"
         ],
-        "stars": 102183,
-        "tagline": "Google's official terminal coding agent built on Gemini with MCP and tool-allow-list supervision.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "gemini-cli",
-        "tool_name": "Gemini CLI",
+        "stars": 78820,
+        "tagline": "Open-source RAG engine based on deep document understanding.",
+        "temporal_phase": "post_generation",
+        "tool_id": "ragflow",
+        "tool_name": "ragflow",
         "trending": false,
-        "url": "/tools/gemini-cli"
+        "url": "/tools/ragflow"
+      },
+      {
+        "addresses_failure_modes": [
+          "fabrication",
+          "context_pollution",
+          "obsolescence"
+        ],
+        "autonomy_level": "graduated_hitl",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "library",
+          "http_service"
+        ],
+        "stars": 59931,
+        "tagline": "Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.",
+        "temporal_phase": "post_generation",
+        "tool_id": "pathway-llm-app",
+        "tool_name": "llm-app",
+        "trending": false,
+        "url": "/tools/pathway-llm-app"
+      },
+      {
+        "addresses_failure_modes": [
+          "logic_error",
+          "fabrication"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "library"
+        ],
+        "stars": 26835,
+        "tagline": "Minimalist code-agent library that expresses actions as executed Python.",
+        "temporal_phase": "post_generation",
+        "tool_id": "smolagents",
+        "tool_name": "Smolagents",
+        "trending": false,
+        "url": "/tools/smolagents"
       }
     ],
     "incomplete_execution": [
@@ -4958,20 +4961,21 @@
       {
         "addresses_failure_modes": [
           "scope_creep",
-          "context_pollution"
+          "security_vulnerability"
         ],
         "autonomy_level": "graduated_hitl",
         "control_paradigm": "prevention",
         "integration_surfaces": [
-          "desktop_app"
+          "library",
+          "web_app"
         ],
-        "stars": 79584,
-        "tagline": "Built-in agentic coding mode inside the Zed editor with rules.md and thread-based review.",
-        "temporal_phase": "pre_generation",
-        "tool_id": "zed-agent",
-        "tool_name": "Zed Agent",
-        "trending": true,
-        "url": "/tools/zed-agent"
+        "stars": 89651,
+        "tagline": "Make websites accessible for AI agents.",
+        "temporal_phase": "post_generation",
+        "tool_id": "browser-use",
+        "tool_name": "browser-use",
+        "trending": false,
+        "url": "/tools/browser-use"
       }
     ],
     "security_vulnerability": [
@@ -5077,21 +5081,22 @@
       {
         "addresses_failure_modes": [
           "scope_creep",
-          "supply_chain_attack",
-          "context_pollution"
+          "context_pollution",
+          "supply_chain_attack"
         ],
         "autonomy_level": "graduated_hitl",
         "control_paradigm": "prevention",
         "integration_surfaces": [
-          "ide_plugin"
+          "web_app",
+          "http_service"
         ],
-        "stars": 60646,
-        "tagline": "VS Code extension coding agent with per-action approval and auto-approve allow-lists.",
+        "stars": 21825,
+        "tagline": "AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.",
         "temporal_phase": "pre_generation",
-        "tool_id": "cline",
-        "tool_name": "Cline",
+        "tool_id": "activepieces",
+        "tool_name": "activepieces",
         "trending": false,
-        "url": "/tools/cline"
+        "url": "/tools/activepieces"
       }
     ],
     "test_manipulation": [

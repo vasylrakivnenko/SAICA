@@ -35,9 +35,7 @@ source_urls:
 
 documented_by: []
 
-mitigated_by:
-- claude-code
-- aider
+mitigated_by: []
 
 notes: >
   `mitigated_by` is conservative: plan-mode + HITL gating (claude-code) and

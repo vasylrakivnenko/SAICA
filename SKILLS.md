@@ -46,8 +46,8 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "Coding agents emit calls to functions, constants, or packages that do not exist in any reachable dependency — a direct empirical instance of the canonical `fabrication` FailureMode, observed..." — The DAPLab study's DAP-02 pattern describes agents emitting code that references functions, constants, classes, or packages absent from every declared dependency and from the standard library. While this overlaps with t… [`daplab-fabricated-references-observation-2026`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['fabrication'])`):**
-- [`v0`](data/tools/v0.yml) — prevention/pre_generation, surfaces: web_app; Vercel's generative-UI coding agent for React and Next.js web interfaces.
-- [`sourcegraph-cody`](data/tools/sourcegraph-cody.yml) — prevention/pre_generation, surfaces: ide_plugin, cli; Codebase-indexed coding assistant that grounds generation in repository context.
+- [`ragflow`](data/tools/ragflow.yml) — detection/post_generation, surfaces: http_service, library; Open-source RAG engine based on deep document understanding.
+- [`pathway-llm-app`](data/tools/pathway-llm-app.yml) — detection/post_generation, surfaces: library, http_service; Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.
 
 **Pre-action heuristic for an agent:**
 > If you're about to import a package or call an API you didn't see in the existing `requirements.txt` / `package.json` / `go.mod`, first verify it actually exists — check the lockfile, run `pip show` / `npm view`, or grep the codebase. Never invent package names; if unsure, ask the user which library they want.
@@ -142,7 +142,7 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['context_pollution'])`):**
 - [`langgraph`](data/tools/langgraph.yml) — prevention/pre_generation, surfaces: library; Graph-structured state machines for stateful multi-agent orchestration.
-- [`zed-agent`](data/tools/zed-agent.yml) — prevention/pre_generation, surfaces: desktop_app; Built-in agentic coding mode inside the Zed editor with rules.md and thread-based review.
+- [`ragflow`](data/tools/ragflow.yml) — detection/post_generation, surfaces: http_service, library; Open-source RAG engine based on deep document understanding.
 
 **Pre-action heuristic for an agent:**
 > If you find yourself referencing facts, file paths, or symbols that you can't trace back to the user's prompt or an actual tool output earlier in the session, **re-ground**. Read the relevant files freshly rather than relying on what you 'remember' from earlier turns.

@@ -34,7 +34,6 @@ source_urls:
 documented_by: []
 
 mitigated_by:
-- claude-code
 - daytona
 
 notes: >

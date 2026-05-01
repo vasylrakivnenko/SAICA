@@ -452,7 +452,7 @@ If you don't use one of the listed coding agents — or you're evaluating superv
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [Cline](data/tools/cline.yml) | prevention | pre_generation | ide_plugin | 60,646 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
 | [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 
 **Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
@@ -460,10 +460,10 @@ If you don't use one of the listed coding agents — or you're evaluating superv
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [Cline](data/tools/cline.yml) | prevention | pre_generation | ide_plugin | 60,646 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
 | [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [Continue](data/tools/continue-dev.yml) | prevention | pre_generation | ide_plugin, library | 32,739 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ---
 
@@ -477,9 +477,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
-| [v0](data/tools/v0.yml) | prevention | pre_generation | web_app | — |  | Vercel's generative-UI coding agent for React and Next.js web interfa… |
-| [Sourcegraph Cody](data/tools/sourcegraph-cody.yml) | prevention | pre_generation | ide_plugin, cli | — |  | Codebase-indexed coding assistant that grounds generation in reposito… |
-| [Gemini CLI](data/tools/gemini-cli.yml) | prevention | pre_generation | cli | 102,183 |  | Google's official terminal coding agent built on Gemini with MCP and… |
+| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  | Open-source RAG engine based on deep document understanding. |
+| [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  | Ready-to-run cloud templates for RAG, AI pipelines, and enterprise se… |
+| [Smolagents](data/tools/smolagents.yml) | detection | post_generation | library | 26,835 |  | Minimalist code-agent library that expresses actions as executed Pyth… |
 
 ### Obsolescence
 
@@ -499,7 +499,7 @@ Top 3 supervisors:
 | --- | --- | --- | --- | ---: | :---: | --- |
 | [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  | Incremental parser toolkit that powers structural code analysis and s… |
 | [Semgrep](data/tools/semgrep.yml) | detection | post_generation | cli, ci_app, library | 14,901 |  | Fast, rule-based static analysis with a pattern syntax that mirrors s… |
-| [Sourcegraph Cody](data/tools/sourcegraph-cody.yml) | prevention | pre_generation | ide_plugin, cli | — |  | Codebase-indexed coding assistant that grounds generation in reposito… |
+| [pre-commit](data/tools/pre-commit.yml) | prevention | post_generation | cli, ci_app | — |  | Multi-language framework that runs configurable hooks before commits… |
 
 ### Logic error
 
@@ -529,7 +529,7 @@ Top 3 supervisors:
 | --- | --- | --- | --- | ---: | :---: | --- |
 | [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  | Graph-structured state machines for stateful multi-agent orchestratio… |
 | [LangSmith](data/tools/langsmith.yml) | detection | post_generation | http_service, library | — |  | Hosted LLM observability, tracing, and evaluation platform. |
-| [Zed Agent](data/tools/zed-agent.yml) | prevention | pre_generation | desktop_app | 79,584 | 🔥 | Built-in agentic coding mode inside the Zed editor with rules.md and… |
+| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  | Make websites accessible for AI agents. |
 
 ### Context pollution
 
@@ -538,8 +538,8 @@ Top 3 supervisors:
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
 | [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  | Graph-structured state machines for stateful multi-agent orchestratio… |
-| [Zed Agent](data/tools/zed-agent.yml) | prevention | pre_generation | desktop_app | 79,584 | 🔥 | Built-in agentic coding mode inside the Zed editor with rules.md and… |
-| [Gemini CLI](data/tools/gemini-cli.yml) | prevention | pre_generation | cli | 102,183 |  | Google's official terminal coding agent built on Gemini with MCP and… |
+| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  | Open-source RAG engine based on deep document understanding. |
+| [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  | Ready-to-run cloud templates for RAG, AI pipelines, and enterprise se… |
 
 ### Supply chain attack
 
@@ -549,7 +549,7 @@ Top 3 supervisors:
 | --- | --- | --- | --- | ---: | :---: | --- |
 | [DeepTeam](data/tools/confident-ai-deepteam.yml) | detection | post_generation | library, cli | 1,566 |  | Open-source LLM red-teaming framework from Confident AI with 40+ atta… |
 | [Socket](data/tools/socket.yml) | detection | pre_generation | ci_app, cli, library | — |  | Dependency supply-chain scanner that inspects packages before install. |
-| [Cline](data/tools/cline.yml) | prevention | pre_generation | ide_plugin | 60,646 |  | VS Code extension coding agent with per-action approval and auto-appr… |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  | AI agents, MCPs, and AI workflow automation — open-source Zapier alte… |
 
 ### Cascading failure
 

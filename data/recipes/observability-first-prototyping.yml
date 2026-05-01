@@ -23,7 +23,6 @@ targets_failure_modes:
 - logic_error
 
 stack:
-- cursor
 - langfuse
 - confident-ai-deepteam
 

@@ -26,8 +26,8 @@ targets_failure_modes:
   - test_manipulation
 
 stack:
-  - aider
   - semgrep
+  - promptfoo
 
 evidence_tier: anecdotal
 language: polyglot

@@ -55,11 +55,11 @@ def test_manifest_includes_canonical_urls_for_tools() -> None:
             url is not None
         ), f"tool {tool_id!r} has no canonical or documentation URL"
 
-    # Spot-check the GitHub canonicalization path: aider lives on GitHub.
-    assert tools["aider"] == "https://github.com/paul-gauthier/aider"
-    # Spot-check the documentation-url fallback: cursor is not on GitHub.
-    assert tools["cursor"].startswith("http")
-    assert "github.com" not in tools["cursor"]
+    # Spot-check the GitHub canonicalization path: semgrep lives on GitHub.
+    assert tools["semgrep"] == "https://github.com/semgrep/semgrep"
+    # Spot-check the documentation-url fallback: braintrust is not on GitHub.
+    assert tools["braintrust"].startswith("http")
+    assert "github.com" not in tools["braintrust"]
 
 
 # ---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ def test_manifest_check_exits_one_when_out_of_date(tmp_path: Path) -> None:
     original = MANIFEST_PATH.read_text()
     tampered = json.loads(original)
     # Pretend a tool was renamed: drop a known id from the manifest.
-    tampered["ids"]["tools"].pop("aider", None)
+    tampered["ids"]["tools"].pop("semgrep", None)
     tampered["counts"]["tools"] -= 1
 
     try:
@@ -111,7 +111,7 @@ def test_manifest_check_exits_one_when_out_of_date(tmp_path: Path) -> None:
             f"--check should fail when manifest is stale; got {result.returncode}\n"
             f"stdout: {result.stdout}\nstderr: {result.stderr}"
         )
-        assert "drift" in result.stderr.lower() or "aider" in result.stderr
+        assert "drift" in result.stderr.lower() or "semgrep" in result.stderr
     finally:
         MANIFEST_PATH.write_text(original)
 

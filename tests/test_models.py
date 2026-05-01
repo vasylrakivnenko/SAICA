@@ -45,8 +45,10 @@ def _load(kind: str, filename: str) -> dict[str, Any]:
 
 
 def test_parse_sample_tool() -> None:
-    tool = Tool.model_validate(_load("tools", "claude-code.yml"))
-    assert tool.id == "claude-code"
+    # pre-commit is prevention-paradigm and declares scope_creep coverage —
+    # same shape as the original sample (claude-code, removed in v0.3.1).
+    tool = Tool.model_validate(_load("tools", "pre-commit.yml"))
+    assert tool.id == "pre-commit"
     assert tool.control_paradigm.value == "prevention"
     assert "scope_creep" in [fm.value for fm in tool.addresses_failure_modes]
 

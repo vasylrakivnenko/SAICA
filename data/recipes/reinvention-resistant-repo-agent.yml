@@ -25,7 +25,6 @@ targets_failure_modes:
 - dependency_blindness
 
 stack:
-- sourcegraph-cody
 - tree-sitter
 - semgrep
 

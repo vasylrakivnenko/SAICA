@@ -43,7 +43,6 @@ openssf_scorecard_score:
 composes_with:
   - pydantic-ai
   - e2b
-  - claude-code
 
 inclusion_rationale: >
   Occupies a previously unfilled cell in the grid (prevention ×

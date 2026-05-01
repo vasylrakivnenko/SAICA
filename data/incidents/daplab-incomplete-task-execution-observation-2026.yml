@@ -31,8 +31,7 @@ source_urls:
 
 documented_by: []
 
-mitigated_by:
-  - claude-code
+mitigated_by: []
 
 notes: >
   Mitigation: plan-mode checklists that the agent must explicitly mark

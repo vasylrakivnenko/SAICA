@@ -35,9 +35,7 @@ source_urls:
 
 documented_by: []
 
-mitigated_by:
-- aider
-- claude-code
+mitigated_by: []
 
 notes: >
   The DAPLab post is a blog (gray literature); `reproducibility: confirmed`

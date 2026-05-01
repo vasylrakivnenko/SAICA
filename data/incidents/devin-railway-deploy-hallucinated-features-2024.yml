@@ -34,9 +34,7 @@ source_urls:
 
 documented_by: []
 
-mitigated_by:
-- claude-code
-- aider
+mitigated_by: []
 
 notes: >
   `mitigated_by` cites tools whose plan-mode / per-step review pattern

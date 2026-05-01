@@ -11,12 +11,13 @@ Two modes, per the v0.2.1 design:
 
 Two filter layers gate every recommendation:
 
-1. **CODING_AGENT_IDS.** The whole point of MCP-served recommendations is
-   *supervision for the asking agent*. Suggesting Replit Agent to a Cursor
-   user — or vice-versa — is a category error. When ``agent_kind`` is set
-   to one of the known coding-agent ids, we filter every coding-agent peer
-   out of the recommendation pool. The asking agent itself is also
-   filtered (so Cursor never recommends Cursor).
+1. **CODING_AGENT_IDS.** As of v0.3.1 the KG no longer catalogs coding-
+   agent systems themselves (Claude Code, Cursor, Replit Agent, Codex,
+   etc.) — SAICA is for *modular supervisors you add to a stack*, not
+   for the agents that consume that stack. This frozenset is kept as
+   a defense-in-depth safety net: if a coding-agent YAML ever re-lands
+   in ``data/tools/`` (by accident or via an upstream PR), the
+   recommender still won't surface it. Empty on the happy path.
 
 2. **RECOMMENDATION_BLOCKLIST.** A tiny list of tools whose role is too
    ambiguous to be a confident recommendation regardless of who's asking
@@ -43,11 +44,13 @@ TOOLS_DIR = REPO / "data" / "tools"
 # Filter layers
 # ---------------------------------------------------------------------------
 
-# Tools that ARE coding agents — never recommended *to* another coding agent.
-# Stays narrow on purpose. Adding a tool here means "users of any other coding
-# agent should not be told to additionally install this one." Frameworks /
-# libraries / MCP servers / browser-RPA tools are NOT in this list — they
-# compose alongside whatever coding agent the caller is using.
+# Defense-in-depth. As of v0.3.1, none of these IDs exist in
+# ``data/tools/`` — coding-agent systems were removed from the catalog
+# because SAICA recommends supervisors *for* agents, not agents
+# themselves. We keep the list so that if any of these YAMLs ever
+# re-lands (accidentally or via an upstream PR), the recommender still
+# refuses to surface it. Frameworks / libraries / MCP servers / proxy
+# gateways stay in the catalog and are NOT in this list.
 CODING_AGENT_IDS: frozenset[str] = frozenset(
     {
         # IDE / desktop coding agents

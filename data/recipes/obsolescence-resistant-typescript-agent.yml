@@ -23,9 +23,8 @@ targets_failure_modes:
 - obsolescence
 
 stack:
-- sourcegraph-cody
-- cursor
 - semgrep
+- context-hub
 
 evidence_tier: case_studied
 language: typescript

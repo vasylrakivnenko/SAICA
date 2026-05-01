@@ -33,7 +33,6 @@ source_urls:
 documented_by: []
 
 mitigated_by:
-- aider
 - daytona
 
 notes: >

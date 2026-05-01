@@ -34,7 +34,6 @@ documented_by:
 - wang-2024-llms-meet-library-evolution
 
 mitigated_by:
-- sourcegraph-cody
 - semgrep
 
 notes: >
