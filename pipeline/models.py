@@ -152,6 +152,13 @@ class Provenance(BaseModel):
     Attached to :class:`Tool` (and in future, other node types) at graduation
     time. ``reviewer`` / ``review_date`` are populated post-merge; everything
     else is filled in by the graduation CLI from the Postgres candidate row.
+
+    Stage 11 of the v2 ingestion-pipeline spec extended this block with
+    ``discovery_sources``, ``failure_mode_hits``, ``prompt_version``, and
+    ``schema_version`` so bulk re-extraction (on prompt-version bumps)
+    and per-FM coverage metrics become tractable. Older nodes that
+    pre-date these fields keep working — every addition is Optional
+    with a default.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -159,7 +166,9 @@ class Provenance(BaseModel):
     source: str = Field(
         description=(
             "Where this node came from (e.g. 'manual', 'pipeline-v0.1',"
-            " 'import-from-awesome-list')."
+            " 'import-from-awesome-list'). Single-valued for backwards"
+            " compatibility; v2 nodes additionally populate"
+            " ``discovery_sources`` with the full multi-source list."
         ),
     )
     ingested_at: date = Field(
@@ -192,6 +201,44 @@ class Provenance(BaseModel):
     review_date: Optional[date] = Field(
         default=None,
         description="Date the merge was accepted.",
+    )
+
+    # --- v2 ingestion-pipeline additions (Stage 11) ----------------------
+
+    discovery_sources: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Multi-source attribution from Stage 1 discovery. Values are"
+            " short source identifiers (e.g. 's2', 'github', 'arxiv',"
+            " 'elicit', 'perplexity', 'awesome-list'). When the same"
+            " candidate is surfaced by several sources, all are listed"
+            " — useful for the corroboration signal at Stage 4."
+        ),
+    )
+    failure_mode_hits: list[str] = Field(
+        default_factory=list,
+        description=(
+            "FM ids whose Stage 0b synonym queries surfaced this"
+            " candidate. Used by per-FM coverage metrics (Stage 14) and"
+            " to flag candidates whose discovery FM hits don't match"
+            " their final ``addresses_failure_modes``."
+        ),
+    )
+    prompt_version: Optional[str] = Field(
+        default=None,
+        description=(
+            "Pinned identifier of the Kimi extraction prompt (e.g."
+            " 'kimi-extract-v0.4.2'). Lets us bulk re-run extraction"
+            " against newer prompts and diff vs the live YAML."
+        ),
+    )
+    schema_version: Optional[str] = Field(
+        default=None,
+        description=(
+            "Schema version this node was extracted/validated against"
+            " (e.g. '0.1'). Distinct from the runtime Pydantic schema —"
+            " this is the contract version captured at extraction time."
+        ),
     )
 
 
@@ -299,6 +346,54 @@ class Tool(BaseModel):
             "How this tool entered the KG. Optional on pre-existing nodes;"
             " newly-graduated tools must populate this."
         ),
+    )
+
+    maturity_override: Optional["MaturityOverride"] = Field(
+        default=None,
+        description=(
+            "Curator override for the auto-computed maturity tier (Stage 9"
+            " of the v2 ingestion pipeline). When present, downstream"
+            " consumers use ``override.tier`` instead of"
+            " ``compute_maturity(tool).tier``. Required to carry a"
+            " justification — overrides are auditable, not invisible."
+        ),
+    )
+
+
+# --- MaturityOverride -----------------------------------------------------
+
+
+class MaturityOverride(BaseModel):
+    """Curator override of the auto-computed maturity tier (Stage 9).
+
+    The auto-computer reads observable facets (citations, surfaces,
+    recency) and bins to a tier. Sometimes the editor knows better
+    (e.g. an early-stage tool with strong production evidence the YAML
+    doesn't yet capture). This block records that judgment with a
+    required justification so the override is auditable.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    tier: str = Field(
+        pattern=r"^(1A|1B|2A|2B|3|4)$",
+        description="One of the six tiers: 1A, 1B, 2A, 2B, 3, 4.",
+    )
+    justification: str = Field(
+        min_length=10,
+        max_length=400,
+        description=(
+            "Why the auto-tier is wrong. Required so future readers"
+            " (or new curators) can reproduce or revisit the decision."
+        ),
+    )
+    by: Optional[str] = Field(
+        default=None,
+        description="GitHub handle of the curator who set the override.",
+    )
+    at: Optional[date] = Field(
+        default=None,
+        description="Date the override was set (YYYY-MM-DD).",
     )
 
 
@@ -567,6 +662,7 @@ __all__ = [
     "Incident",
     "IncidentReproducibility",
     "LocusOfControl",
+    "MaturityOverride",
     "MaturityStatus",
     "NODE_MODELS",
     "Paper",

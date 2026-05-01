@@ -1,0 +1,263 @@
+# Per-failure-mode synonym dictionary — Stage 0b of the v2 ingestion pipeline.
+#
+# Why this file exists:
+#   Discovery quality is bottlenecked by query-string coverage. Search
+#   "scope creep" and you miss "task drift," "instruction overflow,"
+#   "role violation." The `aliases` field on each FM YAML is the
+#   community-canonical short list; this file is the *richer* set used
+#   by discovery queries to expand the search surface, paired with
+#   *negative* keywords that look related but aren't.
+#
+# Schema per FM:
+#   <fm_id>:
+#     canonical:        the human-facing name (mirror of name in data/failure_modes/)
+#     synonyms:         3-8 query terms used by discovery to expand the search
+#     anchor_papers:    1-3 ids from data/papers/ that established or
+#                       popularised the term (used to seed S2 citation-graph
+#                       traversal)
+#     negative_keywords: 5-10 terms that match by surface form but mean
+#                        something else — used to filter out false positives
+#                        before any expensive stage runs
+#
+# Editorial notes:
+#   * Synonyms are an inclusive OR, not a strict semantic match — we want
+#     recall here; precision is enforced downstream by the classifier
+#     (Stage 6) and the substring-verified extractions (Stage 7a).
+#   * Negative keywords are a strict NOT — any candidate matching one of
+#     these in the abstract drops at Stage 1 unless a positive synonym
+#     also appears.
+#   * `anchor_papers` reuses ids from data/papers/*.yml. If the paper id
+#     here doesn't resolve, the validator won't error (this file is
+#     advisory) but the discovery pipeline will skip the seed.
+#
+# How it's used downstream:
+#   * Stage 1 (discovery) — every query is built as
+#       (FM canonical OR synonym1 OR ... OR synonymN) AND NOT (negative keywords)
+#   * Stage 5 (substantive-use) — anchor_papers seed S2 citation-graph
+#     traversal for substantive-use scoring.
+#
+# Versioning: bump `version` on any non-trivial change. Discovery runs
+# log the version they consumed for reproducibility.
+
+version: 1
+last_updated: 2026-05-01
+
+
+scope_creep:
+  canonical: Scope creep
+  synonyms:
+    - task drift
+    - over-action
+    - over-execution
+    - unrequested changes
+    - role violation
+    - instruction overflow
+    - mission creep
+    - boundary violation
+  anchor_papers:
+    - cemri-2025-mast
+    - zhu-2025-agent-error-taxonomy
+  negative_keywords:
+    - feature creep   # software-eng concept about product, not agent behaviour
+    - scope statement  # PM/PMI usage
+    - in-scope
+    - mvp scope
+    - scope of work
+
+
+fabrication:
+  canonical: Fabrication
+  synonyms:
+    - hallucination
+    - api hallucination
+    - package hallucination
+    - confabulation
+    - made-up reference
+    - non-existent api
+    - phantom import
+    - imagined dependency
+  anchor_papers:
+    - liu-2024-beyond-functional-correctness
+    - spracklen-2024-we-have-a-package
+  negative_keywords:
+    - hallucination benchmark   # the metric, not the failure
+    - hallucination index
+    - text-to-image hallucination
+    - vqa hallucination
+    - factual qa
+
+
+obsolescence:
+  canonical: Obsolescence
+  synonyms:
+    - training data staleness
+    - deprecated api
+    - outdated reference
+    - stale knowledge
+    - api drift
+    - knowledge cutoff drift
+    - library evolution
+    - deprecated method
+  anchor_papers:
+    - wang-2024-llms-meet-library-evolution
+  negative_keywords:
+    - hardware obsolescence
+    - planned obsolescence
+    - end-of-life device
+    - schedule obsolescence
+
+
+dependency_blindness:
+  canonical: Dependency blindness
+  synonyms:
+    - import blindness
+    - library mismatch
+    - version blindness
+    - lockfile ignored
+    - undeclared dependency
+    - implicit dependency
+    - dependency drift
+  anchor_papers:
+    - cemri-2025-mast
+  negative_keywords:
+    - dependency injection   # DI pattern, unrelated
+    - dependency graph
+    - circular dependency
+    - dependency parsing
+
+
+logic_error:
+  canonical: Logic error
+  synonyms:
+    - semantic bug
+    - off-by-one
+    - control-flow bug
+    - incorrect implementation
+    - faulty algorithm
+    - reasoning error
+    - inverted condition
+  anchor_papers:
+    - liu-2024-beyond-functional-correctness
+  negative_keywords:
+    - syntax error
+    - parse error
+    - runtime exception
+    - segmentation fault
+    - linker error
+
+
+security_vulnerability:
+  canonical: Security vulnerability
+  synonyms:
+    - insecure code
+    - code injection
+    - sql injection
+    - cross-site scripting
+    - xss
+    - rce
+    - auth bypass
+    - secret leakage
+    - hardcoded credential
+  anchor_papers:
+    - haque-2025-secure-suspect-investigating-package
+    - kota-2025-zero-trust-security-frameworks
+  negative_keywords:
+    - security paper   # too generic
+    - cybersecurity policy
+    - threat intelligence
+    - red-team exercise   # the activity, not the bug class
+    - cve database
+
+
+context_pollution:
+  canonical: Context pollution
+  synonyms:
+    - context contamination
+    - context leakage
+    - irrelevant context
+    - cross-task contamination
+    - conversation history bleed
+    - prompt pollution
+    - stale context
+  anchor_papers:
+    - zhu-2025-agent-error-taxonomy
+  negative_keywords:
+    - context window size
+    - context length
+    - long-context benchmark
+    - retrieval context
+
+
+supply_chain_attack:
+  canonical: Supply-chain attack
+  synonyms:
+    - package squatting
+    - typosquatting
+    - slopsquatting
+    - malicious dependency
+    - compromised upstream
+    - dependency confusion
+    - poisoned package
+  anchor_papers:
+    - spracklen-2024-we-have-a-package
+  negative_keywords:
+    - supply chain optimisation   # operations research
+    - supply chain logistics
+    - sbom format   # the artifact, not the attack
+    - sigstore
+
+
+cascading_failure:
+  canonical: Cascading failure
+  synonyms:
+    - error propagation
+    - retry storm
+    - autonomous loop
+    - runaway iteration
+    - failure cascade
+    - feedback loop divergence
+    - amplifying error
+  anchor_papers:
+    - cemri-2025-mast
+  negative_keywords:
+    - cascading style sheets   # CSS, irrelevant
+    - cascade classifier
+    - cascade learning
+
+
+incomplete_execution:
+  canonical: Incomplete execution
+  synonyms:
+    - premature completion
+    - false-done
+    - task abandonment
+    - declared done not done
+    - early termination
+    - unfinished task
+    - partial completion claimed complete
+  anchor_papers:
+    - cemri-2025-mast
+    - zhu-2025-agent-error-taxonomy
+  negative_keywords:
+    - early stopping   # ML training term
+    - graceful shutdown
+    - partial evaluation   # PL technique
+
+
+test_manipulation:
+  canonical: Test manipulation
+  synonyms:
+    - test bypass
+    - test skip
+    - test mocked out
+    - gaming the metric
+    - coverage hacking
+    - assertion weakening
+    - silent test passing
+  anchor_papers:
+    - liu-2024-beyond-functional-correctness
+  negative_keywords:
+    - mock data   # legitimate test fixture
+    - fixture data
+    - integration test setup
+    - test framework comparison

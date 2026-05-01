@@ -207,6 +207,35 @@ Keep scope tight. Out of scope right now:
   page is static, regenerated weekly by GitHub Actions, JSON committed
   into `site/public/`. Hosting + GitHub PR-bot are the next-bigger
   bets, deferred to v0.4.
+- **2026-05-01:** v0.4 — *cherry-picked* the v2 ingestion-pipeline spec.
+  Shipped the 5 load-bearing items and explicitly deferred the
+  paper-grade methodology infrastructure (calibration, two-pool
+  classifier, isotonic regression, Streamlit UI, Zenodo deposits) on
+  the grounds that the project's North Star is practitioner utility,
+  not publishable methodology. Items shipped:
+    * Stage 0b — `data/failure_mode_synonyms.yml`: per-FM synonyms +
+      anchor papers + negative keywords. Will drive Stage 1 query
+      expansion and Stage 5 substantive-use scoring.
+    * Stage 7a — `pipeline/extract/verify.py`: deterministic
+      substring verification of evidence quotes from
+      `ConfidenceField.evidence`. Catches the worst class of LLM
+      hallucination at zero inference cost.
+    * Stage 11 — extended `pipeline.models.Provenance` with
+      `discovery_sources`, `failure_mode_hits`, `prompt_version`,
+      `schema_version`. All Optional with defaults; existing 60 tools
+      keep working.
+    * Stage 9 — `pipeline/maturity/`: deterministic 6-tier scorer
+      (1A through 4) over observable facets. Curator override slot
+      via `MaturityOverride` Pydantic model. Calibrated against the
+      87-tool corpus distribution.
+    * Stage 3 — `pipeline/discovery/novelty.py`: canonical-id
+      classifier (DROP / UPDATE_QUEUE / CONTINUE) so future ingestion
+      runs don't re-show known tools.
+  v2 spec items deferred (filed for paper-time decision): 0a labeled
+  holdout, 4 composite quality gate, 6 two-pool classifier, 7b
+  verifier model, 8 per-field calibration, 10 Streamlit triage UI,
+  12 active learning loop, 13 Zenodo deposits, 14 methodology metrics.
+
 - **2026-05-01:** v0.3.1.1 dropped the `kg_tools` SAICA Index board.
   The "supervisors supervising themselves" framing promised something
   the score didn't deliver (we measure repo hygiene of maintainer

@@ -247,7 +247,7 @@
       ],
       "properties": {
         "source": {
-          "description": "Where this node came from (e.g. 'manual', 'pipeline-v0.1', 'import-from-awesome-list').",
+          "description": "Where this node came from (e.g. 'manual', 'pipeline-v0.1', 'import-from-awesome-list'). Single-valued for backwards compatibility; v2 nodes additionally populate ``discovery_sources`` with the full multi-source list.",
           "type": "string"
         },
         "ingested_at": {
@@ -283,10 +283,63 @@
           "format": "date",
           "type": "string",
           "description": "Date the merge was accepted."
+        },
+        "discovery_sources": {
+          "description": "Multi-source attribution from Stage 1 discovery. Values are short source identifiers (e.g. 's2', 'github', 'arxiv', 'elicit', 'perplexity', 'awesome-list'). When the same candidate is surfaced by several sources, all are listed — useful for the corroboration signal at Stage 4.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "failure_mode_hits": {
+          "description": "FM ids whose Stage 0b synonym queries surfaced this candidate. Used by per-FM coverage metrics (Stage 14) and to flag candidates whose discovery FM hits don't match their final ``addresses_failure_modes``.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "prompt_version": {
+          "type": "string",
+          "description": "Pinned identifier of the Kimi extraction prompt (e.g. 'kimi-extract-v0.4.2'). Lets us bulk re-run extraction against newer prompts and diff vs the live YAML."
+        },
+        "schema_version": {
+          "type": "string",
+          "description": "Schema version this node was extracted/validated against (e.g. '0.1'). Distinct from the runtime Pydantic schema — this is the contract version captured at extraction time."
         }
       },
       "additionalProperties": false,
       "description": "How this tool entered the KG. Optional on pre-existing nodes; newly-graduated tools must populate this."
+    },
+    "maturity_override": {
+      "type": "object",
+      "required": [
+        "tier",
+        "justification"
+      ],
+      "properties": {
+        "tier": {
+          "description": "One of the six tiers: 1A, 1B, 2A, 2B, 3, 4.",
+          "pattern": "^(1A|1B|2A|2B|3|4)$",
+          "type": "string"
+        },
+        "justification": {
+          "description": "Why the auto-tier is wrong. Required so future readers (or new curators) can reproduce or revisit the decision.",
+          "maxLength": 400,
+          "minLength": 10,
+          "type": "string"
+        },
+        "by": {
+          "type": "string",
+          "description": "GitHub handle of the curator who set the override."
+        },
+        "at": {
+          "format": "date",
+          "type": "string",
+          "description": "Date the override was set (YYYY-MM-DD)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Curator override for the auto-computed maturity tier (Stage 9 of the v2 ingestion pipeline). When present, downstream consumers use ``override.tier`` instead of ``compute_maturity(tool).tier``. Required to carry a justification — overrides are auditable, not invisible."
     }
   },
   "additionalProperties": false
