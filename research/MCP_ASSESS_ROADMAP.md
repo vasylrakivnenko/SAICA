@@ -194,3 +194,16 @@ Keep scope tight. Out of scope right now:
   `SKILLS.md` as the recommended integration shape; (c) sharpened README +
   MCP README to make the cadence (session-start setup, not per-action
   query) unmissable. Audit + recommend remain the killer one-shot tools.
+- **2026-05-01:** v0.3 SAICA Index added (`pipeline/saica_index/` →
+  `/leaderboard` page, weekly cron). Two boards: `kg_tools` (auto-derived
+  — every supervisor in the KG, audited against itself: "do supervisors
+  supervise themselves?") and `popular_oss` (curated list of repos AI
+  agents touch a lot — FastAPI, langchain, Astro, etc.). Score formula
+  is the *single source of truth* in `pipeline/saica_index/score.py`:
+  per-FM coverage tier × paradigm-diversity bonus, weighted by FM
+  priority, mapped to A–F. Thresholds biased harsh on purpose so an A
+  feels earned (langchain/fastapi land at D today). The Index drives
+  external attention without committing us to a hosted backend — the
+  page is static, regenerated weekly by GitHub Actions, JSON committed
+  into `site/public/`. Hosting + GitHub PR-bot are the next-bigger
+  bets, deferred to v0.4.

@@ -1,0 +1,136 @@
+# SAICA Index — curated seed list for the `popular_oss` board.
+#
+# The `kg_tools` board is auto-derived at run time from
+# `data/tools/*.yml` (every tool's `repository_url` field), so we don't
+# duplicate that here.
+#
+# Curation principles:
+#   * Repos that AI coding agents touch a lot (frameworks, language
+#     runtimes, popular libraries).
+#   * Mix of languages — Python, TypeScript, JS, Go, Rust — so the
+#     leaderboard isn't a single-ecosystem story.
+#   * High-stars + active development. Avoid abandoned repos.
+#   * Each entry has `category` so the UI can group rows.
+#
+# Schema:
+#   repos:
+#     - url: https://github.com/<owner>/<repo>
+#       category: <one of: ai_tooling | agent_framework | web_framework |
+#                          language_runtime | data_lib | infra_tool>
+#       note: optional one-line context
+#
+# Adding a repo: just append to the list. The runner will pick it up on
+# the next weekly cron. There is no validator schema for this file
+# (deliberately — the seed list should be cheap to edit).
+
+version: 1
+last_updated: 2026-05-01
+
+repos:
+
+  # ---------------------------------------------------------------------
+  # AI / LLM tooling — the orbit closest to SAICA itself
+  # ---------------------------------------------------------------------
+  - url: https://github.com/langchain-ai/langchain
+    category: ai_tooling
+    note: Most-cited LLM orchestration framework
+  - url: https://github.com/run-llama/llama_index
+    category: ai_tooling
+  - url: https://github.com/openai/openai-python
+    category: ai_tooling
+  - url: https://github.com/anthropics/anthropic-sdk-python
+    category: ai_tooling
+  - url: https://github.com/instructor-ai/instructor
+    category: ai_tooling
+  - url: https://github.com/BerriAI/litellm
+    category: ai_tooling
+  - url: https://github.com/langfuse/langfuse
+    category: ai_tooling
+  - url: https://github.com/microsoft/semantic-kernel
+    category: ai_tooling
+
+  # ---------------------------------------------------------------------
+  # Agent frameworks
+  # ---------------------------------------------------------------------
+  - url: https://github.com/microsoft/autogen
+    category: agent_framework
+  - url: https://github.com/crewAIInc/crewAI
+    category: agent_framework
+  - url: https://github.com/joaomdmoura/crewAI
+    category: agent_framework
+  - url: https://github.com/All-Hands-AI/OpenHands
+    category: agent_framework
+  - url: https://github.com/SWE-agent/SWE-agent
+    category: agent_framework
+
+  # ---------------------------------------------------------------------
+  # Web frameworks — the things AI agents most often scaffold against
+  # ---------------------------------------------------------------------
+  - url: https://github.com/tiangolo/fastapi
+    category: web_framework
+  - url: https://github.com/django/django
+    category: web_framework
+  - url: https://github.com/pallets/flask
+    category: web_framework
+  - url: https://github.com/withastro/astro
+    category: web_framework
+  - url: https://github.com/vercel/next.js
+    category: web_framework
+  - url: https://github.com/remix-run/remix
+    category: web_framework
+  - url: https://github.com/sveltejs/svelte
+    category: web_framework
+  - url: https://github.com/vuejs/core
+    category: web_framework
+  - url: https://github.com/vitejs/vite
+    category: web_framework
+
+  # ---------------------------------------------------------------------
+  # Language runtimes / core tooling
+  # ---------------------------------------------------------------------
+  - url: https://github.com/nodejs/node
+    category: language_runtime
+  - url: https://github.com/oven-sh/bun
+    category: language_runtime
+  - url: https://github.com/denoland/deno
+    category: language_runtime
+  - url: https://github.com/python/cpython
+    category: language_runtime
+  - url: https://github.com/microsoft/TypeScript
+    category: language_runtime
+
+  # ---------------------------------------------------------------------
+  # Data / typing libraries — touched constantly by AI agents
+  # ---------------------------------------------------------------------
+  - url: https://github.com/pydantic/pydantic
+    category: data_lib
+  - url: https://github.com/pandas-dev/pandas
+    category: data_lib
+  - url: https://github.com/numpy/numpy
+    category: data_lib
+  - url: https://github.com/pola-rs/polars
+    category: data_lib
+  - url: https://github.com/sqlalchemy/sqlalchemy
+    category: data_lib
+  - url: https://github.com/encode/httpx
+    category: data_lib
+
+  # ---------------------------------------------------------------------
+  # Infra / dev tools — high-impact when supervised
+  # ---------------------------------------------------------------------
+  - url: https://github.com/astral-sh/ruff
+    category: infra_tool
+  - url: https://github.com/astral-sh/uv
+    category: infra_tool
+  - url: https://github.com/prisma/prisma
+    category: infra_tool
+  - url: https://github.com/supabase/supabase
+    category: infra_tool
+  - url: https://github.com/PostgREST/postgrest
+    category: infra_tool
+  - url: https://github.com/redis/redis
+    category: infra_tool
+  - url: https://github.com/grafana/grafana
+    category: infra_tool
+  - url: https://github.com/elastic/elasticsearch
+    category: infra_tool

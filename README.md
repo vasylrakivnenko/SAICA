@@ -108,11 +108,38 @@ contribution mechanics are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
   vocabulary. Use `SKILLS.md` instead.
 - As an LLM substitute. SAICA-KG indexes; it doesn't reason.
 
+## SAICA Index — weekly supervision leaderboard
+
+[`/leaderboard`](https://saica-kg.dev/leaderboard) shows two boards:
+
+- **KG Tools** — every supervisor in our KG, audited against itself.
+  ("Do supervisors supervise themselves?" — auto-derived, always in
+  sync with the corpus.)
+- **Popular OSS** — curated list of repos AI coding agents touch a lot
+  (FastAPI, langchain, Astro, Pydantic, etc.). PR against
+  [`data/saica_index/seed_repos.yml`](data/saica_index/seed_repos.yml)
+  to add one.
+
+Each repo gets a letter grade A–F. The scoring formula lives at
+[`pipeline/saica_index/score.py`](pipeline/saica_index/score.py) — per-
+failure-mode coverage tier (1 → 0.40, 2 → 0.70, 3 → 1.00) plus a
+paradigm-diversity bonus (+0.10 for ≥2 control paradigms), weighted by
+FM priority (likelihood × impact). Thresholds biased harsh on purpose
+so an A feels earned. Regenerated weekly by
+[`.github/workflows/saica-index.yml`](.github/workflows/saica-index.yml).
+
+Run it locally:
+
+```bash
+.venv/bin/python -m pipeline.saica_index.runner --limit 5
+open http://localhost:4321/leaderboard
+```
+
 ## Live site
 
 [https://saica-kg.dev](https://saica-kg.dev) (when deployed) — browse
-the corpus, run an audit from the web, ask the chat box. The site is a
-mirror of `data/`, not the source of truth.
+the corpus, run an audit from the web, see the leaderboard, ask the
+chat box. The site is a mirror of `data/`, not the source of truth.
 
 ## License
 

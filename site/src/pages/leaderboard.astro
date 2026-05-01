@@ -1,0 +1,238 @@
+---
+// /leaderboard — SAICA Index.
+//
+// Reads /saica_index.json (produced by `python -m pipeline.saica_index.runner`,
+// regenerated weekly by `.github/workflows/saica-index.yml`) and renders two
+// boards:
+//   * kg_tools     — every tool in the SAICA-KG, audited against itself
+//   * popular_oss  — curated list of well-known repos AI agents touch a lot
+//
+// Static page — no backend, no JS dependency. Sorting is server-side
+// (rows arrive pre-sorted by score desc); a tiny inline script lets the
+// user re-sort by name / grade / FMs covered.
+//
+// The scoring formula is documented in pipeline/saica_index/score.py.
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const title = "SAICA Index — Supervision leaderboard";
+
+type Row = {
+  name: string;
+  url: string;
+  category: string;
+  note: string | null;
+  score: number;
+  grade: "A" | "B" | "C" | "D" | "F";
+  fms_covered: number;
+  fms_total: number;
+  paradigm_counts: Record<string, number>;
+  is_balanced: boolean;
+  per_fm: Record<string, number>;
+  summary: string;
+  audited_at: string;
+  score_notes: string[];
+};
+
+type Snapshot = {
+  version: number;
+  generated_at: string;
+  boards: Record<string, Row[]>;
+  errors: { url: string; board: string; error: string }[];
+};
+
+// Load the JSON at build time. Astro inlines it; no fetch at runtime.
+import snapshot from "../../public/saica_index.json";
+const data = snapshot as Snapshot;
+
+const boardLabels: Record<string, string> = {
+  kg_tools: "KG Tools (meta — supervisors supervising themselves)",
+  popular_oss: "Popular OSS (repos AI coding agents touch a lot)",
+};
+
+const gradeColors: Record<string, string> = {
+  A: "bg-emerald-600 text-white",
+  B: "bg-emerald-400 text-white",
+  C: "bg-amber-400 text-stone-900",
+  D: "bg-orange-500 text-white",
+  F: "bg-red-600 text-white",
+};
+
+const generated = new Date(data.generated_at).toLocaleString("en-US", {
+  dateStyle: "long",
+  timeStyle: "short",
+  timeZone: "UTC",
+});
+---
+
+<BaseLayout title={title}>
+  <section class="mb-6 max-w-3xl">
+    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+      Leaderboard
+    </p>
+    <h1 class="mt-2">SAICA Index</h1>
+    <p class="mt-4 leading-7">
+      How well do popular open-source projects supervise their AI-coding
+      workflows? We audit each repo with the same analyzer that powers
+      <a href="/assess" class="underline">/assess</a>, score it against the
+      11 SAICA failure modes weighted by likelihood × impact, and assign a
+      letter grade. Rankings are regenerated weekly.
+    </p>
+    <p class="mt-2 text-sm text-ink-faint">
+      Last updated: <strong>{generated} UTC</strong> · {data.boards.kg_tools?.length ?? 0} KG-tool repos · {data.boards.popular_oss?.length ?? 0} popular OSS repos
+      {data.errors.length > 0 && (
+        <span class="text-amber-700"> · {data.errors.length} repos errored (see footer)</span>
+      )}
+    </p>
+  </section>
+
+  <section class="mb-8 max-w-3xl">
+    <details class="rounded border border-ink/10 bg-paper-soft p-3">
+      <summary class="cursor-pointer text-sm font-semibold">How the score works</summary>
+      <div class="mt-3 space-y-2 text-sm leading-6">
+        <p>
+          For each of the 11 failure modes we take the best evidence tier
+          across detected supervisors:
+          <code>tier 1 → 0.40</code>, <code>tier 2 → 0.70</code>,
+          <code>tier 3 → 1.00</code>. We add <code>+0.10</code> when ≥2
+          control paradigms (prevention/detection/correction/recovery)
+          cover the same FM — layered defense matters.
+        </p>
+        <p>
+          Then we weight by per-FM priority (likelihood × impact, see
+          <code>data/failure_mode_priorities.yml</code>) and sum to a
+          score in <code>[0, 1]</code>:
+        </p>
+        <pre class="rounded bg-stone-900 px-3 py-2 text-xs text-stone-100 overflow-x-auto">score = Σ priority(f) × c(f)  /  Σ priority(f)</pre>
+        <p>
+          Grades are deliberately harsh: <strong>A ≥ 0.80</strong>,
+          <strong>B ≥ 0.60</strong>, <strong>C ≥ 0.40</strong>,
+          <strong>D ≥ 0.20</strong>, <strong>F &lt; 0.20</strong>.
+          A freshly-init'd repo should land at F; an A should feel earned.
+        </p>
+        <p class="text-ink-faint">
+          Source of truth: <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/pipeline/saica_index/score.py" class="underline">pipeline/saica_index/score.py</a>
+        </p>
+      </div>
+    </details>
+  </section>
+
+  {Object.entries(data.boards).map(([boardKey, rows]) => (
+    <section class="mb-12">
+      <h2 class="mb-3 text-xl">{boardLabels[boardKey] ?? boardKey}</h2>
+
+      {rows.length === 0 ? (
+        <p class="text-sm text-ink-faint">No rows yet for this board.</p>
+      ) : (
+        <div class="overflow-x-auto rounded border border-ink/10">
+          <table class="leaderboard-table w-full text-sm">
+            <thead class="bg-paper-soft text-left text-xs uppercase tracking-wider text-ink-faint">
+              <tr>
+                <th class="px-3 py-2 cursor-pointer" data-sort="rank">#</th>
+                <th class="px-3 py-2 cursor-pointer" data-sort="name">Repo</th>
+                <th class="px-3 py-2 cursor-pointer" data-sort="grade">Grade</th>
+                <th class="px-3 py-2 cursor-pointer text-right" data-sort="score">Score</th>
+                <th class="px-3 py-2 cursor-pointer text-right" data-sort="fms">FMs</th>
+                <th class="px-3 py-2">Paradigms (P · D · C · R)</th>
+                <th class="px-3 py-2">Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr class="border-t border-ink/10 hover:bg-paper-soft">
+                  <td class="px-3 py-2 text-ink-faint" data-rank={i + 1}>{i + 1}</td>
+                  <td class="px-3 py-2">
+                    <a href={row.url} class="underline" rel="noopener" target="_blank">{row.name}</a>
+                    {row.note && <div class="text-xs text-ink-faint">{row.note}</div>}
+                  </td>
+                  <td class="px-3 py-2">
+                    <span class={`inline-block rounded px-2 py-0.5 text-xs font-bold ${gradeColors[row.grade] ?? "bg-stone-300"}`}>
+                      {row.grade}
+                    </span>
+                    {row.is_balanced && (
+                      <span title="All four paradigms covered" class="ml-1 inline-block rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] uppercase text-indigo-700">balanced</span>
+                    )}
+                  </td>
+                  <td class="px-3 py-2 text-right tabular-nums">{row.score.toFixed(3)}</td>
+                  <td class="px-3 py-2 text-right tabular-nums" data-fms={row.fms_covered}>{row.fms_covered}/{row.fms_total}</td>
+                  <td class="px-3 py-2 text-xs tabular-nums text-ink-faint">
+                    {row.paradigm_counts.prevention ?? 0} · {row.paradigm_counts.detection ?? 0} · {row.paradigm_counts.correction ?? 0} · {row.paradigm_counts.recovery ?? 0}
+                  </td>
+                  <td class="px-3 py-2 text-xs text-ink-faint">{row.category}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  ))}
+
+  {data.errors.length > 0 && (
+    <section class="mb-8 max-w-3xl">
+      <details class="rounded border border-amber-200 bg-amber-50 p-3 text-sm">
+        <summary class="cursor-pointer font-semibold text-amber-900">
+          {data.errors.length} repos errored during this run
+        </summary>
+        <ul class="mt-2 space-y-1 text-xs text-amber-900/80">
+          {data.errors.map((e) => (
+            <li><code>{e.url}</code> — {e.error}</li>
+          ))}
+        </ul>
+      </details>
+    </section>
+  )}
+
+  <section class="max-w-3xl text-xs text-ink-faint">
+    <p>
+      Scoring formula: <code>pipeline/saica_index/score.py</code>.
+      Seed list (popular OSS): <code>data/saica_index/seed_repos.yml</code>.
+      Cron: <code>.github/workflows/saica-index.yml</code>.
+      Want to add a repo? Open a PR against the seed YAML.
+    </p>
+  </section>
+
+  <script is:inline>
+    // Lightweight column sorter — no framework. Click a sortable header
+    // to toggle asc/desc on that column. Sort key is read from
+    // `data-sort`, value is read from per-row `data-rank` / `data-fms` /
+    // textContent.
+    document.querySelectorAll(".leaderboard-table").forEach((table) => {
+      const tbody = table.querySelector("tbody");
+      if (!tbody) return;
+      const headers = table.querySelectorAll("thead th[data-sort]");
+      let active = { key: "rank", dir: 1 };
+      const valueOf = (row, key) => {
+        const cells = row.children;
+        switch (key) {
+          case "rank": return Number(cells[0].dataset.rank ?? 0);
+          case "name": return (cells[1].textContent ?? "").trim().toLowerCase();
+          case "grade": return -("ABCDF".indexOf(cells[2].textContent.trim()[0]));
+          case "score": return parseFloat(cells[3].textContent ?? "0");
+          case "fms": return Number(cells[4].dataset.fms ?? 0);
+          default: return 0;
+        }
+      };
+      headers.forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.sort;
+          if (!key) return;
+          if (active.key === key) {
+            active.dir = -active.dir;
+          } else {
+            active = { key, dir: key === "name" ? 1 : -1 };
+          }
+          const rows = Array.from(tbody.querySelectorAll("tr"));
+          rows.sort((a, b) => {
+            const av = valueOf(a, key);
+            const bv = valueOf(b, key);
+            if (av < bv) return -1 * active.dir;
+            if (av > bv) return 1 * active.dir;
+            return 0;
+          });
+          rows.forEach((r) => tbody.appendChild(r));
+        });
+      });
+    });
+  </script>
+</BaseLayout>
