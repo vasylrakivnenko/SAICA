@@ -35,34 +35,48 @@ default_language_version:
 default_stages: [pre-commit]
 
 repos:
+  # Note: every hook below is explicitly pinned to `stages: [pre-commit]`.
+  # Upstream pre-commit-hooks (and some others) declare their own internal
+  # `stages: [commit, push, manual]` in the upstream `.pre-commit-hooks.yaml`,
+  # which overrides our top-level `default_stages`. The explicit pin here
+  # is the only thing that keeps these hooks out of the pre-push run.
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        stages: [pre-commit]
       - id: end-of-file-fixer
+        stages: [pre-commit]
       - id: check-yaml
         # Prevent malformed data/*.yml from being committed.
+        stages: [pre-commit]
       - id: check-json
+        stages: [pre-commit]
       - id: check-added-large-files
         args: ["--maxkb=2000"]
+        stages: [pre-commit]
       - id: detect-private-key
+        stages: [pre-commit]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.9
     hooks:
       - id: ruff
         args: [--fix]
+        stages: [pre-commit]
 
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
+        stages: [pre-commit]
 
   - repo: https://github.com/semgrep/semgrep
     rev: v1.96.0
     hooks:
       - id: semgrep
         args: ["--config=auto", "--error", "--quiet"]
+        stages: [pre-commit]
 
   # Pre-push gate — slow checks that would gum up every commit but must pass
   # before code reaches the remote. Targets the three high-severity FMs that
