@@ -1,0 +1,79 @@
+id: pre-commit
+name: pre-commit
+tagline: Multi-language framework that runs configurable hooks before commits land — denies the commit on hook failure.
+description: >
+  pre-commit is the canonical git-hook orchestrator: developers declare a
+  `.pre-commit-config.yaml` listing hook repositories (semgrep, ruff,
+  black, custom shell scripts, etc.), and the framework runs them on
+  every `git commit`, blocking the commit if any hook returns non-zero.
+  This makes pre-commit the *prevention* primitive: bad code never lands
+  in the repository, so downstream supervisors (CI gates, code review)
+  see less noise. Hooks compose — pre-commit itself is paradigm-agnostic;
+  the failure modes it addresses depend on which hooks are installed.
+  This entry credits pre-commit with the failure modes its standard
+  hook ecosystem most reliably guards against.
+
+first_released: 2014-09-01
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: pre-commit
+repository_url: https://github.com/pre-commit/pre-commit
+documentation_url: https://pre-commit.com/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: graduated_hitl
+
+addresses_failure_modes:
+  - scope_creep
+  - security_vulnerability
+  - dependency_blindness
+  - fabrication
+
+locus_of_control:
+  - environment
+  - human
+
+integration_surfaces:
+  - cli
+  - ci_app
+
+implements_techniques:
+  - git-hook-orchestration
+  - hook-version-pinning
+  - parallel-hook-execution
+  - configurable-stage-gating
+
+security_notes: >
+  Hooks pull from upstream repositories pinned by SHA in
+  `.pre-commit-config.yaml`; supply-chain risk is bounded to whatever
+  the developer pins. `--no-verify` allows bypass per-commit (humans
+  can override; visible in `git log`). Default config does not run
+  hooks against `.git/`-tracked secrets — pair with `detect-private-key`
+  hook for that surface.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+  - javascript
+  - typescript
+  - shell
+  - yaml
+  - json
+
+inclusion_rationale: >
+  Occupies prevention × post_generation × graduated_hitl in the canonical
+  3-axis grid. Distinct from CI-gate tools (semgrep, snyk) because the
+  block point is the local commit, not the central CI run — so feedback
+  is faster and bad code never enters the shared history. Distinct from
+  IDE-level prevention (Cursor rules, CLAUDE.md) because the gate is
+  language-agnostic and works across whichever agent generated the code.
+  Standardised supply chain (every hook is a pinned upstream repo) makes
+  pre-commit the closest thing the agentic-coding stack has to a
+  hook-framework "kernel".

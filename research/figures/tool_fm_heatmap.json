@@ -495,6 +495,27 @@
       }
     },
     {
+      "id": "pre-commit",
+      "name": "pre-commit",
+      "stars": 0,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 1,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
       "id": "confident-ai-deepteam",
       "name": "DeepTeam",
       "stars": 1566,

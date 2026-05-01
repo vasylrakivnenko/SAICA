@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-01T02:12:05Z",
+  "generated_at": "2026-05-01T06:16:53Z",
   "kg_version": "2026.05",
   "counts": {
-    "tools": 102,
+    "tools": 103,
     "failure_modes": 11,
     "papers": 55,
     "taxonomies": 6,
@@ -87,6 +87,7 @@
       "pezzo": "https://github.com/pezzolabs/pezzo",
       "playwright-mcp": "https://github.com/microsoft/playwright-mcp",
       "pr-agent": "https://github.com/codium-ai/pr-agent",
+      "pre-commit": "https://github.com/pre-commit/pre-commit",
       "promptbench": "https://github.com/microsoft/promptbench",
       "promptflow": "https://github.com/microsoft/promptflow",
       "promptfoo": "https://github.com/promptfoo/promptfoo",
