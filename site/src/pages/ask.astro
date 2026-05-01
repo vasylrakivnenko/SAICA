@@ -29,8 +29,17 @@ const examples: string[] = [
 >
   <h1>Ask SAICA-KG</h1>
   <p class="mt-3 text-lg text-ink-muted max-w-3xl">
-    Ask a question in plain English. We retrieve the most relevant KG nodes
-    by semantic similarity and synthesize an answer with inline citations.
+    Browse the SAICA-KG corpus chat-style. Ask a question in plain English
+    and get a synthesized answer with inline citations to the underlying
+    KG nodes.
+  </p>
+  <p class="mt-2 text-sm text-ink-muted max-w-3xl">
+    This is for <strong>humans browsing the corpus</strong>. If you're an
+    agent looking for context, the right artifact is
+    <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/SKILLS.md">SKILLS.md</a>
+    (drop it into your skills / rules directory). For one-shot stack analysis,
+    see <a href="/assess">/assess</a>; for ranked recommendations, see
+    <a href="/tool-coverage">/tool-coverage</a>.
   </p>
   <p class="mt-2 text-sm text-ink-muted max-w-3xl">
     Answers cite node ids in brackets like <code>[guardrails-ai]</code> — each

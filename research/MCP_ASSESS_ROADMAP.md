@@ -186,3 +186,11 @@ Keep scope tight. Out of scope right now:
 - **2026-04-24:** Audit analyzer is shared between `/assess` (web) and `saica_audit_repo` (MCP) — one component, two surfaces.
 - **2026-04-24:** Public-repo URL input for MVP; OAuth deferred.
 - **2026-04-24:** Claude Code is the first-class MCP target; Cursor / Replit follow.
+- **2026-05-01:** Scope clarification triggered by external Replit-Agent
+  feedback ("SAICA isn't a library I'd call at runtime — it's a curated
+  dataset best consumed as injected context"). The critique was largely
+  correct. Result: (a) demoted `/ask` from headline interface to "browse
+  the corpus chat-style"; (b) added `validator/generate_skills.py` →
+  `SKILLS.md` as the recommended integration shape; (c) sharpened README +
+  MCP README to make the cadence (session-start setup, not per-action
+  query) unmissable. Audit + recommend remain the killer one-shot tools.

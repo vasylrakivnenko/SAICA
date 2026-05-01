@@ -278,6 +278,16 @@ def render_markdown(payload: dict[str, Any]) -> str:
     out.append("# SAICA-KG — Supervision recommendations")
     out.append("")
     out.append(
+        "> Read once at project setup. Don't poll this file per-task."
+    )
+    out.append(
+        "> For per-action agent guidance, see `SKILLS.md` (drop into your"
+    )
+    out.append(
+        "> `.claude/skills/`, `.cursor/rules/`, or equivalent skills directory)."
+    )
+    out.append("")
+    out.append(
         "Pre-computed from the KG. Regenerate with "
         "`python -m validator.generate_recommendations`."
     )

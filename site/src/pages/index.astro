@@ -1,132 +1,146 @@
 ---
+// / — SAICA-KG landing.
+//
+// Reframed: SAICA-KG is a *curated reference + one-shot setup tooling +
+// skill-file generator*, not a runtime per-action service. Three first-class
+// consumption paths — /assess, /tool-coverage, SKILLS.md — sit above the
+// reference layer (tools, failure modes, taxonomies, papers, etc.).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { graph, counts } from '../lib/data.ts';
 
 const c = counts();
-
-// "Recent additions" = Tools by last_updated or first_released, then top 6.
-const recentTools = Object.values(graph.tools)
-  .slice()
-  .sort((a, b) => {
-    const ad = a.last_updated ?? a.first_released ?? '';
-    const bd = b.last_updated ?? b.first_released ?? '';
-    return bd.localeCompare(ad);
-  })
-  .slice(0, 6);
+const SKILLS_URL = 'https://github.com/vasylrakivnenko/SAICA/blob/main/SKILLS.md';
 ---
 
-<BaseLayout title="SAICA-KG — Supervising AI Coding Agents">
+<BaseLayout title="SAICA-KG">
+  <!-- Hero ------------------------------------------------------------- -->
   <section class="max-w-3xl">
     <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
       Knowledge Graph &middot; v{graph.kgVersion}
     </p>
-    <h1 class="mt-2 text-4xl leading-tight">
-      SAICA-KG — Supervising AI Coding Agents
-    </h1>
+    <h1 class="mt-2 text-4xl leading-tight">SAICA-KG</h1>
     <p class="mt-4 text-lg text-ink-muted">
-      A faceted knowledge graph of supervision tools for AI coding agents.
+      A curated knowledge graph of failure modes for AI coding agents and the
+      supervision tools that address them.
     </p>
-    <p class="mt-5 leading-7">
-      SAICA-KG classifies supervision tools along three orthogonal strict partitions
-      (ControlParadigm &times; TemporalPhase &times; AutonomyLevel) plus multi-valued
-      FailureMode tags. It absorbs existing failure-mode taxonomies — OWASP Agentic
-      Top 10, MAST, DAPLab 9 Patterns, Microsoft AIRT — as first-class data with
-      explicit crosswalks into our facets.
-      <strong class="font-semibold">Navigational, not evaluative.</strong>
+    <p class="mt-4 text-sm text-ink-faint leading-7">
+      Reference + one-shot setup tooling + skill-file generator. Not a runtime
+      service. Read once, integrate the artifact, don't poll per-task.
     </p>
   </section>
 
-  <section class="mt-10 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-    <a href="/tools" class="card no-underline hover:border-accent/50 text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.tools}</div>
-      <div class="text-sm text-ink-muted font-sans">Tools</div>
-    </a>
-    <a href="/failure-modes" class="card no-underline hover:border-accent/50 text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.failure_modes}</div>
-      <div class="text-sm text-ink-muted font-sans">Failure modes</div>
-    </a>
-    <a href="/taxonomies" class="card no-underline hover:border-accent/50 text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.taxonomies}</div>
-      <div class="text-sm text-ink-muted font-sans">Taxonomies</div>
-    </a>
-    <a href="/papers" class="card no-underline hover:border-accent/50 text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.papers}</div>
-      <div class="text-sm text-ink-muted font-sans">Papers</div>
-    </a>
-    <a href="/incidents" class="card no-underline hover:border-accent/50 text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.incidents}</div>
-      <div class="text-sm text-ink-muted font-sans">Incidents</div>
-    </a>
-    <a href="/recipes" class="card no-underline hover:border-accent/50 text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.recipes}</div>
-      <div class="text-sm text-ink-muted font-sans">Recipes</div>
-    </a>
-    <div class="card text-ink">
-      <div class="text-3xl font-sans font-semibold">{c.crosswalks}</div>
-      <div class="text-sm text-ink-muted font-sans">Crosswalk edges</div>
+  <!-- Three first-class consumption paths ----------------------------- -->
+  <section class="mt-10">
+    <h2>Use it three ways</h2>
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a href="/assess" class="card no-underline text-ink hover:border-accent/50">
+        <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
+          Step 1
+        </div>
+        <h3 class="!mt-1 !mb-2 text-lg">Audit your repo</h3>
+        <p class="text-sm leading-6 text-ink-muted">
+          Paste a GitHub URL, get a coverage report: which supervisors you
+          have, which failure modes are unguarded, what to add.
+        </p>
+        <p class="mt-3 text-xs text-ink-faint">One-shot. Public repos only.</p>
+      </a>
+
+      <a href="/tool-coverage" class="card no-underline text-ink hover:border-accent/50">
+        <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
+          Step 2
+        </div>
+        <h3 class="!mt-1 !mb-2 text-lg">Pick a supervision stack</h3>
+        <p class="text-sm leading-6 text-ink-muted">
+          Three-tier ranked recommendations (minimum / optimal / full) weighted
+          by failure-mode priority &times; tool reliability.
+        </p>
+        <p class="mt-3 text-xs text-ink-faint">
+          Browse the matrix or pull <code>recommendations.json</code>.
+        </p>
+      </a>
+
+      <a href={SKILLS_URL} rel="noopener" class="card no-underline text-ink hover:border-accent/50">
+        <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
+          Step 3
+        </div>
+        <h3 class="!mt-1 !mb-2 text-lg">Drop the skill file</h3>
+        <p class="text-sm leading-6 text-ink-muted">
+          SKILLS.md distills the corpus into agent-readable context. Drop it
+          into <code>.claude/skills/</code>, <code>.cursor/rules/</code>, or
+          your equivalent.
+        </p>
+        <p class="mt-3 text-xs text-ink-faint">
+          No service call. Regenerated from the KG.
+        </p>
+      </a>
     </div>
   </section>
 
+  <!-- What's in the KG (counts) --------------------------------------- -->
   <section class="mt-12">
-    <h2>Recent additions</h2>
-    <ul class="divide-y divide-ink/10 border-y border-ink/10">
-      {recentTools.map((t) => (
-        <li class="py-3 flex items-baseline justify-between gap-4">
-          <div>
-            <a href={`/tools/${t.id}`} class="font-sans font-semibold">{t.name}</a>
-            <span class="text-ink-muted"> — {t.tagline ?? t.description.slice(0, 120)}</span>
-          </div>
-          <div class="font-sans text-xs text-ink-faint whitespace-nowrap">
-            {t.last_updated ?? t.first_released}
-          </div>
-        </li>
-      ))}
+    <h2>In the corpus</h2>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <a href="/tools" class="card no-underline hover:border-accent/50 text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.tools}</div>
+        <div class="text-sm text-ink-muted font-sans">Tools</div>
+      </a>
+      <a href="/failure-modes" class="card no-underline hover:border-accent/50 text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.failure_modes}</div>
+        <div class="text-sm text-ink-muted font-sans">Failure modes</div>
+      </a>
+      <a href="/taxonomies" class="card no-underline hover:border-accent/50 text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.taxonomies}</div>
+        <div class="text-sm text-ink-muted font-sans">Taxonomies</div>
+      </a>
+      <a href="/papers" class="card no-underline hover:border-accent/50 text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.papers}</div>
+        <div class="text-sm text-ink-muted font-sans">Papers</div>
+      </a>
+      <a href="/incidents" class="card no-underline hover:border-accent/50 text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.incidents}</div>
+        <div class="text-sm text-ink-muted font-sans">Incidents</div>
+      </a>
+      <a href="/recipes" class="card no-underline hover:border-accent/50 text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.recipes}</div>
+        <div class="text-sm text-ink-muted font-sans">Recipes</div>
+      </a>
+      <div class="card text-ink">
+        <div class="text-3xl font-sans font-semibold">{c.crosswalks}</div>
+        <div class="text-sm text-ink-muted font-sans">Crosswalk edges</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Honest scope ---------------------------------------------------- -->
+  <section class="mt-12 max-w-3xl">
+    <h2>What this is NOT</h2>
+    <ul class="mt-3 list-disc pl-6 space-y-2 leading-7">
+      <li><strong>Not an LLM.</strong> SAICA-KG indexes and ranks; it doesn't reason.</li>
+      <li><strong>Not a per-tool-call runtime API.</strong> Read at setup;
+        integrate the artifact (SKILLS.md / recommendations.json); don't poll.</li>
+      <li><strong>Not a replacement for your agent's judgment</strong> — it's
+        context the agent reads to ground its supervision concerns.</li>
     </ul>
   </section>
 
+  <!-- Reference layer ------------------------------------------------- -->
   <section class="mt-12 max-w-3xl">
-    <h2>Explore</h2>
-    <ul class="mt-2 grid gap-2 sm:grid-cols-2 text-sm font-sans">
-      <li><a href="/tools">Tools &rarr;</a> {c.tools} supervision tools with facet filters</li>
-      <li><a href="/failure-modes">Failure modes &rarr;</a> {c.failure_modes} canonical modes</li>
-      <li><a href="/taxonomies">Taxonomies &rarr;</a> OWASP, MAST, DAPLab, MSFT AIRT, +2</li>
-      <li><a href="/papers">Papers &rarr;</a> {c.papers} cited papers</li>
-      <li><a href="/incidents">Incidents &rarr;</a> {c.incidents} ground-truth failure events</li>
+    <h2>Browse the reference layer</h2>
+    <p class="mt-3 leading-7 text-ink-muted">
+      Three-axis facet grid (control_paradigm &times; temporal_phase &times;
+      autonomy_level), six external taxonomies crosswalked.
+    </p>
+    <ul class="mt-4 grid gap-2 sm:grid-cols-2 text-sm font-sans">
+      <li><a href="/tools">Tools catalog &rarr;</a> {c.tools} supervision tools</li>
+      <li><a href="/failure-modes">Failure modes &rarr;</a> the {c.failure_modes}-mode taxonomy</li>
+      <li><a href="/taxonomies">Source taxonomies &rarr;</a> OWASP, MAST, Shah, DAPLab, MSFT AIRT, Swiss Cheese</li>
+      <li><a href="/papers">Papers &rarr;</a> {c.papers} primary sources</li>
+      <li><a href="/incidents">Incidents &rarr;</a> {c.incidents} documented real-world cases</li>
       <li><a href="/recipes">Recipes &rarr;</a> {c.recipes} composed supervision stacks</li>
-      <li><a href="/graph">Graph &rarr;</a> interactive Cytoscape view</li>
-      <li><a href="/taxonomy-study">Cluster study &rarr;</a> do 121 categories cluster into SAICA's 11?</li>
-      <li><a href="/pipeline">Pipeline &rarr;</a> how tools enter the KG</li>
-      <li><a href="/about">About &rarr;</a> design principles, licensing</li>
+      <li><a href="/graph">Graph view &rarr;</a> the whole KG visualised</li>
+      <li><a href="/taxonomy-study">Cluster study &rarr;</a> does the taxonomy carve real structure?</li>
+      <li><a href="/prevention-log">Prevention log &rarr;</a> observe live supervision events</li>
+      <li><a href="/ask">Ask &rarr;</a> chat-style browse the corpus</li>
     </ul>
-  </section>
-
-  <section class="mt-12 max-w-3xl">
-    <h2>API</h2>
-    <p>
-      All nodes are available as JSON. See
-      <a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> for the
-      full graph, or <a href="/api/v1/tools.json"><code>/api/v1/tools.json</code></a>,
-      <a href="/api/v1/failure_modes.json"><code>/api/v1/failure_modes.json</code></a>,
-      <a href="/api/v1/taxonomies.json"><code>/api/v1/taxonomies.json</code></a>,
-      <a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a>,
-      <a href="/api/v1/incidents.json"><code>/api/v1/incidents.json</code></a>,
-      <a href="/api/v1/recipes.json"><code>/api/v1/recipes.json</code></a>.
-    </p>
-  </section>
-
-  <section class="mt-12 max-w-3xl">
-    <h2>How to cite</h2>
-    <p class="text-sm">
-      When citing SAICA-KG in user-facing output, use the phrase
-      <em>"according to SAICA-KG (v{graph.kgVersion})"</em>. A full BibTeX block
-      ships with v0.1; placeholder:
-    </p>
-    <pre class="mt-2 overflow-x-auto rounded border border-ink/10 bg-paper-alt p-3 text-xs"><code>{`@misc{saica-kg-2026,
-  title        = {{SAICA-KG: A Faceted Knowledge Graph for Supervising AI Coding Agents}},
-  author       = {Paskevych, Vasyl and SAICA-KG contributors},
-  year         = {2026},
-  howpublished = {\\url{https://github.com/saica-kg/saica-kg}},
-  note         = {v0.1, data release ${graph.kgVersion}}
-}`}</code></pre>
   </section>
 </BaseLayout>

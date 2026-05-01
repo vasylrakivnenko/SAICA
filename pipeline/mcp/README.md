@@ -1,5 +1,21 @@
 # SAICA-KG MCP server
 
+# Intended cadence — read this first
+
+The MCP server is a **session-start setup tool**, not a per-tool-call
+runtime API. Call `saica_recommend` once when you start working on a
+project to get the supervision recommendation. Call `saica_lookup` only
+when an agent needs the full facets of a tool already mentioned in the
+recommendation.
+
+**Do not** call SAICA-KG mid-task to ask "what failure modes apply
+here?" — that's wrong shape. For per-action guidance, use the
+`SKILLS.md` artifact (regenerated from the corpus by
+`validator/generate_skills.py`) injected into your agent's context. The
+agent reads it like any other rules / skills file; no service call.
+
+---
+
 Two tools for MCP-speaking coding agents (Claude Code first, Cursor / Replit / etc. follow).
 The whole server runs locally as a subprocess of your agent — no hosting required.
 
@@ -168,3 +184,7 @@ guarantee — `optimal` covers ~9/11 FMs typically). The default
 ```bash
 .venv/bin/python -m pytest pipeline/mcp/tests/ -q
 ```
+
+---
+
+For per-action guidance, see [`SKILLS.md`](../../SKILLS.md).

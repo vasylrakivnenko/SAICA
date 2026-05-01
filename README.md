@@ -1,112 +1,126 @@
 # SAICA-KG
 
-**Supervising AI Coding Agents — Knowledge Graph**
+> A curated knowledge graph of failure modes for AI coding agents and the
+> supervision tools that address them.
 
-A living, faceted, queryable knowledge graph for the governance of agentic AI coding tools. Paper + GitHub + website.
+## What this is
 
-SAICA-KG absorbs existing failure-mode taxonomies for AI coding agents (OWASP Agentic Top 10, MAST, DAPLab 9, Microsoft AIRT) as multi-valued tags, then adds orthogonal **strict partitions** — ControlParadigm × TemporalPhase × AutonomyLevel — that no single existing taxonomy provides. Queries like *"which supervisors cover OWASP ASI04 at post-generation in graduated-HITL?"* resolve against the graph with explicit citations and crosswalks.
+A static, human-reviewed reference: a faceted catalog of ~100 supervision
+tools, an 11-mode failure-mode taxonomy with crosswalks to OWASP / MAST /
+DAPLab / Microsoft AIRT, an incident corpus, named recipes, and tooling
+that turns all of it into a one-shot setup recommendation. It is consumed
+as **injected context** at project setup, not as a runtime service queried
+per tool action.
 
-**Navigational, not evaluative.**
+## What this is NOT
 
-## Status
+- Not a runtime service called per-tool-action.
+- Not a replacement for an agent's own judgment.
+- Not a research database that needs constant querying.
+- Not an LLM — it doesn't reason, it indexes and ranks.
 
-![version](https://img.shields.io/badge/version-2026.04-blue)
-![license-code](https://img.shields.io/badge/code-Apache--2.0-green)
-![license-data](https://img.shields.io/badge/data-CC--BY--4.0-green)
-![validator](https://img.shields.io/badge/validator-green-brightgreen)
+## How to use it (in priority order)
 
-Current corpus (from [`data/MANIFEST.json`](data/MANIFEST.json), regenerated on every validator run):
+### 1. Drop the skill file into your agent's context
 
-| Tools | Failure modes | Papers | Taxonomies | Crosswalks |
-|------:|--------------:|-------:|-----------:|-----------:|
-| 52    | 8             | 25     | 6          | 6          |
+`SKILLS.md` is regenerated from the corpus by
+`validator/generate_skills.py` and lists the named "what to watch for"
+supervision concerns plus the recipes that fix them. Copy it into
+`.claude/skills/`, `.cursor/rules/`, `.windsurfrules`, or whichever
+skills directory your agent reads. Your agent reads it as plain context
+on every session — no service call, no latency.
 
-v0.1 in development; not yet published. The website (Astro static site under `site/`) builds ~99 pages in about a second and renders a page per node plus an interactive graph view at `/graph` and a pipeline flow at `/pipeline`.
-
-## Consumption channels
-
-Five ways to consume SAICA-KG:
-
-1. **Browse** — the static site renders one page per Tool, FailureMode, Taxonomy, Paper, and Recipe, with facet-filtered search and an interactive Cytoscape graph.
-2. **JSON API** — the site ships machine-readable endpoints: `/api/v1/snapshot.json`, `/api/v1/tools.json`, `/api/v1/failure_modes.json`, `/api/v1/taxonomies.json`, `/api/v1/papers.json`, and per-node JSON.
-3. **GitHub YAML** — clone the repo and read `data/**/*.yml` directly. Data is CC-BY-4.0.
-4. **Ingestion pipeline** — `pipeline/` drives discovery (Perplexity Sonar / Elicit / Semantic Scholar / GitHub / awesome-list scrapers), Postgres staging, NLP preprocess (keyword + entity + dedup), Cohere Rerank v4.0 Pro semantic filtering, and Azure-hosted Kimi-K2.5 structured extraction. See `research/PIPELINE_ARCHITECTURE.md`.
-5. **CI / validator** — `validator/cli.py` runs cross-node invariants and is the gate between human-reviewed YAML and the canonical corpus.
-
-## Ingestion pipeline (one-line summary)
-
-```
-Discovery (Perplexity / Elicit / S2 / GitHub / awesome-lists)
-  → Postgres raw_search_results
-  → NLP preprocess (keyword + entity + dedup)
-  → candidate_tools (pending)
-  → Cohere Rerank v4.0 Pro semantic filter
-  → Azure Kimi-K2.5 structured extraction
-  → Human-review graduation CLI
-  → data/tools/*.yml (canonical)
-```
-
-No LLM output is ever committed without human review. The graduation gate is load-bearing — see `EDITORIAL_POLICY.md`. Full architecture in `research/PIPELINE_ARCHITECTURE.md`. Visual version on the site at `/pipeline`.
-
-## Architecture reviews
-
-Three parallel reviews completed 2026-04-22/23:
-
-- [research/ARCH_REVIEW_SYSTEM_DESIGN.md](research/ARCH_REVIEW_SYSTEM_DESIGN.md) — layering, duplication, logging
-- [research/ARCH_REVIEW_RELIABILITY.md](research/ARCH_REVIEW_RELIABILITY.md) — retries, partial-failure recovery, cost caps
-- [research/ARCH_REVIEW_GOVERNANCE.md](research/ARCH_REVIEW_GOVERNANCE.md) — data integrity, COI, CI enforcement
-
-Also see `research/SYNTHESIS.md` (research angle), `research/landscape_report.md` (industry scan), `research/s2_report.md` (Semantic Scholar corpus), and `research/README.md` for a full index.
-
-## Repository layout
-
-```
-saica-kg/
-├── README.md, EDITORIAL_POLICY.md, CONTRIBUTING.md, llms.txt
-├── LICENSE (Apache-2.0), LICENSE-DATA (CC-BY-4.0)
-├── schema/            # JSON Schemas + enum definitions (generated from Pydantic)
-├── data/              # Canonical YAML — tools/, failure_modes/, papers/,
-│                      # taxonomies/, crosswalks/, + MANIFEST.json
-├── pipeline/          # Ingestion: discovery, NLP, rerank, extract, graduate
-├── validator/         # cli.py + coverage_report.py; enforces cross-invariants
-├── site/              # Astro static site + JSON API
-├── tests/             # Pytest suite (~140 tests)
-└── research/          # SYNTHESIS, landscape, arch reviews, candidate dumps
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution rules and [EDITORIAL_POLICY.md](EDITORIAL_POLICY.md) for scope, inclusion criteria, and governance.
-
-## Running it locally
+### 2. Audit your repo's supervision coverage (one-shot)
 
 ```bash
-# Validate the corpus (reads data/, regenerates MANIFEST.json)
-.venv/bin/python validator/cli.py
-
-# Build the site
-cd site && npm run build        # ~95 pages, ~1s
-
-# Refresh GitHub stargazer counts (optional; requires GITHUB_TOKEN)
-.venv/bin/python validator/fetch_github_stars.py
+python -m pipeline.audit.cli https://github.com/<owner>/<repo>
 ```
 
-### Local secrets (`.env.local`)
+Returns a coverage grid (which of the 11 failure modes your existing
+stack already supervises), a ranked gap list, and 2–3 tailored
+recommendations per gap matched to your detected language / CI / agent.
+Run once at project setup. Re-run when your stack materially changes.
 
-Pipeline scripts read API keys and DB settings from `.env.local` at the repo root. Copy `.env.example` and lock down permissions:
+### 3. Get a tailored supervision-tool recommendation (one-shot)
 
+```bash
+python -m pipeline.mcp.server   # then call saica_recommend from your agent
 ```
-cp .env.example .env.local && chmod 600 .env.local
-```
 
-`.env.local` is gitignored. `pipeline.config.load_env_once` loads it once per process and never overrides variables already set in the environment, so CI can still override via real env vars.
+Or read [`RECOMMENDATIONS.md`](RECOMMENDATIONS.md) /
+[`recommendations.json`](recommendations.json) directly — both are
+pre-computed and committed. Three tiers: **minimum** (1 tool, fast
+onboarding), **optimal** (3 tools, default), **full / MECE** (4–5 tools
+that together cover all 11 failure modes).
+
+## What's in the KG
+
+Live counts from [`data/MANIFEST.json`](data/MANIFEST.json) (KG version
+2026.05):
+
+- **103** supervision tools, faceted by paradigm × phase × autonomy ×
+  surface × failure-mode coverage
+- **11** failure modes (`scope_creep`, `fabrication`,
+  `security_vulnerability`, `supply_chain_attack`, `logic_error`,
+  `cascading_failure`, `context_pollution`, `obsolescence`,
+  `test_manipulation`, `dependency_blindness`, `incomplete_execution`)
+- **55** papers
+- **6** external taxonomies + **6** crosswalks (OWASP Agentic Top 10,
+  MAST, DAPLab, Microsoft AIRT, …)
+- **18** real-world incidents
+- **10** named recipes (e.g. `scope-creep-bounded-autonomous-agent`,
+  `fabrication-resistant-python-agent`, `supply-chain-hardened-agent`)
+
+## How the recommender ranks tools
+
+Selection is **likelihood × impact × reliability**. Per-failure-mode
+likelihood and impact live in
+[`data/failure_mode_priorities.yml`](data/failure_mode_priorities.yml)
+(hybrid: KG tool-coverage prior + editorial calibration against Shah
+2026 / DAPLab evidence). Reliability is a bounded combiner of log-stars,
+github-trending boost, citation count, and maturity, computed in
+[`pipeline/shared/priorities.py`](pipeline/shared/priorities.py) and
+[`pipeline/shared/trending.py`](pipeline/shared/trending.py). Coding-agent
+peers are filtered out so a Cursor user is never told to install Claude
+Code, and vice versa.
+
+## How to contribute
+
+Data is YAML under [`data/`](data/) (CC-BY-4.0). Add a tool by writing
+`data/tools/<id>.yml`, run `python validator/cli.py` to confirm 0
+errors, open a PR. The validator runs in CI. Editorial scope and
+inclusion criteria are in [`EDITORIAL_POLICY.md`](EDITORIAL_POLICY.md);
+contribution mechanics are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## When this corpus is most useful
+
+- The first 30 minutes of a new agentic-AI project (audit + recommend +
+  drop in `SKILLS.md`).
+- When you're reading a paper that cites a failure-mode taxonomy and
+  want to translate it into a different one (the crosswalks).
+- When you want a list of named "what to watch for" supervision concerns
+  injected into your agent's context (`SKILLS.md`).
+
+## When it's NOT useful
+
+- As a per-tool-call lookup mid-task. Too slow, wrong shape, and your
+  agent already has enough training-level knowledge of the basic
+  vocabulary. Use `SKILLS.md` instead.
+- As an LLM substitute. SAICA-KG indexes; it doesn't reason.
+
+## Live site
+
+[https://saica-kg.dev](https://saica-kg.dev) (when deployed) — browse
+the corpus, run an audit from the web, ask the chat box. The site is a
+mirror of `data/`, not the source of truth.
 
 ## License
 
-- Code: Apache-2.0 (`LICENSE`)
-- Data (KG contents under `data/`): CC-BY-4.0 (`LICENSE-DATA`)
+- Code: Apache-2.0 ([`LICENSE`](LICENSE))
+- Data (everything under `data/`): CC-BY-4.0
+  ([`LICENSE-DATA`](LICENSE-DATA))
 
-## Citation
-
-When citing SAICA-KG in user-facing output, use the phrase *"according to SAICA-KG (v2026.04)"*. A full BibTeX block will ship with the v0.1 arXiv submission; placeholder:
+## Cite
 
 ```bibtex
 @misc{saica-kg-2026,
@@ -114,6 +128,14 @@ When citing SAICA-KG in user-facing output, use the phrase *"according to SAICA-
   author       = {Paskevych, Vasyl and SAICA-KG contributors},
   year         = {2026},
   howpublished = {\url{https://github.com/saica-kg/saica-kg}},
-  note         = {v0.1, data release 2026.04}
+  note         = {v0.1, data release 2026.05}
 }
 ```
+
+---
+
+*Acknowledgement: the framing in this README — "curated dataset best
+consumed as injected context, not a library called at runtime" —
+sharpened in response to external Replit-Agent feedback (2026-05-01).
+The critique was largely correct; see
+[`research/MCP_ASSESS_ROADMAP.md`](research/MCP_ASSESS_ROADMAP.md) §10.*
