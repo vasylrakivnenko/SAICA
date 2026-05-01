@@ -1,9 +1,9 @@
 # SAICA Index — weekly leaderboard regeneration.
 #
-# Runs every Sunday at 04:17 UTC: audits every repo in both boards
-# (kg_tools auto-derived from data/tools/, popular_oss curated in
-# data/saica_index/seed_repos.yml), scores each with the formula in
-# pipeline/saica_index/score.py, and writes site/public/saica_index.json.
+# Runs every Sunday at 04:17 UTC: audits every repo in the popular_oss
+# board (curated in data/saica_index/seed_repos.yml), scores each with
+# the formula in pipeline/saica_index/score.py, and writes
+# site/public/saica_index.json.
 #
 # When the JSON changes, the workflow opens a commit on main with the
 # new snapshot. The static site picks it up on next deploy.

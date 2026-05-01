@@ -1,16 +1,17 @@
 """Seed-list resolution for the SAICA Index.
 
-Two boards:
+One board:
 
-  * ``kg_tools``     — auto-derived from ``data/tools/*.yml``. Every tool
-    that has a non-empty ``repository_url`` becomes a board entry. The
-    list is regenerated on each run, so adding a tool to the KG
-    automatically expands the leaderboard.
+  * ``popular_oss`` — read from ``data/saica_index/seed_repos.yml``
+    (curated list of repos AI coding agents touch a lot).
 
-  * ``popular_oss``  — read from ``data/saica_index/seed_repos.yml``
-    (curated by hand).
-
-Both produce ``list[SeedRepo]``. The runner consumes them uniformly.
+The previous ``kg_tools`` auto-derived board (every supervisor in the
+KG, audited against itself) was removed in v0.3.1.1. Its label
+("supervisors supervising themselves") promised something the score
+didn't measure — repo hygiene of maintainer teams ≠ tool quality —
+and the board is conceptually inconsistent with v0.3.1's scope
+("SAICA helps tools, doesn't evaluate them"). Trivially re-addable
+if needed: restore ``load_kg_tools_board()`` from git history.
 """
 
 from __future__ import annotations
@@ -21,10 +22,9 @@ from typing import Literal
 
 import yaml
 
-Board = Literal["kg_tools", "popular_oss"]
+Board = Literal["popular_oss"]
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_TOOLS_DIR = _REPO / "data" / "tools"
 _SEED_FILE = _REPO / "data" / "saica_index" / "seed_repos.yml"
 
 
@@ -42,32 +42,6 @@ class SeedRepo:
 # ---------------------------------------------------------------------------
 # Board loaders
 # ---------------------------------------------------------------------------
-
-
-def load_kg_tools_board() -> list[SeedRepo]:
-    """Every KG tool with a non-empty ``repository_url``."""
-    out: list[SeedRepo] = []
-    for yml in sorted(_TOOLS_DIR.glob("*.yml")):
-        try:
-            doc = yaml.safe_load(yml.read_text()) or {}
-        except yaml.YAMLError:
-            continue
-        url = (doc.get("repository_url") or "").strip()
-        if not url.startswith("https://github.com/"):
-            continue
-        # Skip any URL that points to a subdirectory or branch.
-        if "/tree/" in url or "/blob/" in url:
-            continue
-        out.append(
-            SeedRepo(
-                board="kg_tools",
-                url=url.rstrip("/"),
-                category=str(doc.get("control_paradigm") or "uncategorised"),
-                name=str(doc.get("id") or yml.stem),
-                note=str(doc.get("tagline") or "") or None,
-            )
-        )
-    return out
 
 
 def load_popular_oss_board() -> list[SeedRepo]:
@@ -94,8 +68,7 @@ def load_popular_oss_board() -> list[SeedRepo]:
 
 
 def load_all_boards() -> dict[Board, list[SeedRepo]]:
-    """Return both boards in one dict, ready for the runner."""
+    """Return all boards in one dict, ready for the runner."""
     return {
-        "kg_tools": load_kg_tools_board(),
         "popular_oss": load_popular_oss_board(),
     }

@@ -207,6 +207,14 @@ Keep scope tight. Out of scope right now:
   page is static, regenerated weekly by GitHub Actions, JSON committed
   into `site/public/`. Hosting + GitHub PR-bot are the next-bigger
   bets, deferred to v0.4.
+- **2026-05-01:** v0.3.1.1 dropped the `kg_tools` SAICA Index board.
+  The "supervisors supervising themselves" framing promised something
+  the score didn't deliver (we measure repo hygiene of maintainer
+  teams, not tool quality), and self-evaluating the catalog conflicts
+  with v0.3.1's stance ("SAICA helps tools, doesn't evaluate them").
+  Trivially restorable from git history; left out on purpose. The
+  `popular_oss` board carries the Index now.
+
 - **2026-05-01:** v0.3.1 scope sharpening — *coding-agent systems are
   not in the catalog*. Removed 16 tool YAMLs (Claude Code, Cursor,
   Windsurf, Zed Agent, Replit Agent, v0, Devin, GitHub Copilot,

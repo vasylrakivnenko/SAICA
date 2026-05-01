@@ -14,7 +14,6 @@ Output schema (``site/public/saica_index.json``)
       "version": 1,
       "generated_at": "2026-05-01T12:34:56Z",
       "boards": {
-        "kg_tools":     [<row>, ...],
         "popular_oss":  [<row>, ...]
       },
       "errors": [
@@ -184,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--boards",
         nargs="*",
-        choices=["kg_tools", "popular_oss"],
+        choices=["popular_oss"],
         default=None,
         help="Only run these boards (default: all).",
     )

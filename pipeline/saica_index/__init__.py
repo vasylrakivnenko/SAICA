@@ -1,16 +1,16 @@
 """SAICA Index — weekly leaderboard of how well popular AI-adjacent
 GitHub repos supervise their own AI-coding workflows.
 
-Two boards:
-
-  * ``kg_tools``     — auto-derived from ``data/tools/*.yml`` (every tool
-    in the KG, audited against itself: "do supervisors supervise
-    themselves?"). Free + meta + always in sync with the corpus.
+One board:
 
   * ``popular_oss``  — curated list in ``data/saica_index/seed_repos.yml``
     of well-known OSS projects that AI coding agents touch a lot
-    (FastAPI, langchain, Astro, Pydantic, etc.). The PR-/marketing-
-    weight board.
+    (FastAPI, langchain, Astro, Pydantic, etc.).
+
+The previous ``kg_tools`` board (KG supervisors audited against
+themselves) was removed in v0.3.1.1 — its label promised something the
+score didn't deliver, and self-evaluating the catalog conflicts with
+the "SAICA helps tools, doesn't evaluate them" stance from v0.3.1.
 
 Pipeline:
 
