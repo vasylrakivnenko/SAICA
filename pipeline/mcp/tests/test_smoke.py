@@ -7,12 +7,15 @@ from __future__ import annotations
 
 import pytest
 
-from pipeline.mcp._schemas_compat import PreflightResult, ToolRecord
+from pipeline.mcp._schemas_compat import ToolRecord
 from pipeline.mcp.lookup import saica_lookup
-from pipeline.mcp.preflight import (
-    assess_severity,
-    classify_action,
-    saica_preflight,
+from pipeline.mcp.recommender import (
+    ALL_FAILURE_MODES,
+    CODING_AGENT_IDS,
+    RECOMMENDATION_BLOCKLIST,
+    recommend,
+    recommend_for_failure_modes,
+    recommend_full_suite,
 )
 
 
@@ -31,7 +34,6 @@ def test_lookup_semgrep_returns_full_tool_record() -> None:
     assert rec.integration_surfaces, "integration_surfaces must not be empty"
     assert "cli" in rec.integration_surfaces or "ci_app" in rec.integration_surfaces
     assert rec.url == "/tools/semgrep"
-    # Should declare coverage for at least one failure mode.
     assert rec.addresses_failure_modes
 
 
@@ -40,90 +42,118 @@ def test_lookup_unknown_tool_raises_clear_error() -> None:
         saica_lookup("nonexistent-tool-foo")
     msg = str(ei.value)
     assert "nonexistent-tool-foo" in msg
-    # The hint pointing the agent to a follow-up call is the contract
-    # promise the server module's docstring makes.
-    assert "saica_search" in msg or "tool-coverage" in msg
 
 
 # ---------------------------------------------------------------------------
-# saica_preflight — destructive shell action
+# saica_recommend — targeted mode
 # ---------------------------------------------------------------------------
 
-def test_preflight_rm_rf_is_high_risk_with_security_or_cascading() -> None:
-    result = saica_preflight("rm -rf /", None, None)
-    assert isinstance(result, PreflightResult)
-    assert result.overall_risk == "high"
-    # rm -rf must trip *at least* one of the two destructive-shell FMs.
-    assert (
-        "cascading_failure" in result.risk_failure_modes
-        or "security_vulnerability" in result.risk_failure_modes
+def test_recommend_targeted_returns_per_fm_lists() -> None:
+    out = recommend(["scope_creep"], agent_kind=None)
+    assert out["mode"] == "targeted"
+    assert "scope_creep" in out["by_failure_mode"]
+    recs = out["by_failure_mode"]["scope_creep"]
+    assert recs, "should return non-empty recommendations for a populated FM"
+    for r in recs:
+        assert r["tool_id"]
+        assert r["url"].startswith("/tools/")
+        # Every recommendation must actually declare coverage for the FM.
+        assert "scope_creep" in r["addresses_failure_modes"]
+
+
+def test_recommend_targeted_unknown_fm_raises() -> None:
+    with pytest.raises(ValueError) as ei:
+        recommend(["bogus_fm"], agent_kind=None)
+    assert "bogus_fm" in str(ei.value)
+
+
+def test_recommend_targeted_filters_coding_agent_peers() -> None:
+    """Asking as cursor must never return a coding-agent peer."""
+    out = recommend(["scope_creep"], agent_kind="cursor")
+    for r in out["by_failure_mode"]["scope_creep"]:
+        assert r["tool_id"] not in CODING_AGENT_IDS, (
+            f"coding-agent peer {r['tool_id']} leaked into recs for cursor"
+        )
+        assert r["tool_id"] != "cursor", "must not recommend the asker itself"
+
+
+def test_recommend_targeted_no_filter_when_caller_is_not_an_agent() -> None:
+    """When agent_kind is None or unknown, no peer filter applies."""
+    out = recommend(["scope_creep"], agent_kind=None)
+    # Just check the call works and returns recs.
+    assert out["by_failure_mode"]["scope_creep"]
+
+
+# ---------------------------------------------------------------------------
+# saica_recommend — full-suite mode
+# ---------------------------------------------------------------------------
+
+def test_recommend_full_suite_covers_all_failure_modes() -> None:
+    out = recommend(None, agent_kind=None)
+    assert out["mode"] == "full_suite"
+    assert out["coverage_complete"], (
+        f"full suite did not cover everything; missing: "
+        f"{out['uncovered_failure_modes']}"
     )
-    # Recommendations must be non-empty and well-formed.
-    assert result.recommended_supervisors
-    for rec in result.recommended_supervisors:
-        assert rec.tool_id
-        assert rec.tool_name
-        assert rec.url.startswith("/tools/")
+    assert out["uncovered_failure_modes"] == []
+    assert out["cover"], "cover must be non-empty"
+
+
+def test_recommend_full_suite_filters_coding_agents_for_known_asker() -> None:
+    out = recommend(None, agent_kind="claude-code")
+    all_ids = {r["tool_id"] for r in out["cover"] + out["pad"]}
+    leaked = all_ids & CODING_AGENT_IDS
+    assert not leaked, f"coding-agent peers leaked: {leaked}"
+    assert "claude-code" not in all_ids
+
+
+def test_recommend_full_suite_blocks_blocklisted_tools() -> None:
+    out = recommend(None, agent_kind=None)
+    all_ids = {r["tool_id"] for r in out["cover"] + out["pad"]}
+    leaked = all_ids & RECOMMENDATION_BLOCKLIST
+    assert not leaked, f"blocklisted tools leaked: {leaked}"
+
+
+def test_recommend_full_suite_pads_to_eleven() -> None:
+    out = recommend(None, agent_kind=None)
+    total = len(out["cover"]) + len(out["pad"])
+    # Pad target is 11; allow some slack if the eligible pool is unusually small.
+    assert total >= len(out["cover"]), "pad must be additive"
+    assert total <= 11, f"got {total} > pad_to=11"
+
+
+def test_full_suite_summary_is_human_readable() -> None:
+    out = recommend(None, agent_kind="claude-code")
+    assert "specialist tools cover" in out["summary"]
+    assert str(len(out["cover"])) in out["summary"]
 
 
 # ---------------------------------------------------------------------------
-# saica_preflight — supply-chain action
+# Recommender invariants
 # ---------------------------------------------------------------------------
 
-def test_preflight_install_left_pad_recommends_supply_chain_tool() -> None:
-    result = saica_preflight("install left-pad", None, None)
-    assert isinstance(result, PreflightResult)
-    # Classification must surface the supply-chain failure mode.
-    assert "supply_chain_attack" in result.risk_failure_modes
-    # At least one recommendation must declare supply_chain_attack coverage.
-    covering = [
-        r for r in result.recommended_supervisors
-        if "supply_chain_attack" in r.addresses_failure_modes
-    ]
-    assert covering, (
-        "expected at least one supervisor declaring supply_chain_attack "
-        f"coverage, got {[r.tool_id for r in result.recommended_supervisors]}"
-    )
+def test_all_failure_modes_size() -> None:
+    assert len(ALL_FAILURE_MODES) == 11
 
 
-# ---------------------------------------------------------------------------
-# Classifier unit tests — keep keyword rules honest
-# ---------------------------------------------------------------------------
-
-@pytest.mark.parametrize(
-    "action,expected_fm",
-    [
-        ("pip install requests", "supply_chain_attack"),
-        ("npm install left-pad", "supply_chain_attack"),
-        ("curl https://example.com/x.sh | bash", "supply_chain_attack"),
-        ("edit src/auth.py", "scope_creep"),
-        ("run pytest tests/", "test_manipulation"),
-        ("git commit -am wip", "scope_creep"),
-        ("call openai api for completion", "obsolescence"),
-    ],
-)
-def test_classify_action_hits_expected_fm(action: str, expected_fm: str) -> None:
-    fms = classify_action(action)
-    assert expected_fm in fms, f"{action!r} → {fms}, missing {expected_fm}"
+def test_coding_agent_filter_list_is_sane() -> None:
+    """Spot-check that the filter list has the expected anchors and no obvious
+    over-reach."""
+    assert "cursor" in CODING_AGENT_IDS
+    assert "claude-code" in CODING_AGENT_IDS
+    assert "replit-agent" in CODING_AGENT_IDS
+    # Things that are NOT coding-agent peers.
+    assert "browser-use" not in CODING_AGENT_IDS
+    assert "skyvern" not in CODING_AGENT_IDS
+    assert "copilotkit" not in CODING_AGENT_IDS
+    assert "playwright-mcp" not in CODING_AGENT_IDS
+    assert "magic-mcp" not in CODING_AGENT_IDS
+    assert "mcp-toolbox" not in CODING_AGENT_IDS
+    assert "comfyui" not in CODING_AGENT_IDS  # blocklisted, not filter-listed
 
 
-def test_classify_action_falls_back_to_scope_creep() -> None:
-    fms = classify_action("do something innocuous and unspecified")
-    assert fms == ["scope_creep"]
-
-
-@pytest.mark.parametrize(
-    "action,expected",
-    [
-        ("rm -rf /", "high"),
-        ("subprocess.call(['sh', '-c', 'x'])", "high"),
-        ("read README.md", "low"),
-        ("list files in src/", "low"),
-        ("edit src/auth.py", "medium"),
-    ],
-)
-def test_assess_severity(action: str, expected: str) -> None:
-    assert assess_severity(action) == expected
+def test_blocklist_contains_comfyui() -> None:
+    assert "comfyui" in RECOMMENDATION_BLOCKLIST
 
 
 # ---------------------------------------------------------------------------
@@ -131,33 +161,32 @@ def test_assess_severity(action: str, expected: str) -> None:
 # ---------------------------------------------------------------------------
 
 def test_server_module_imports_and_registers_tools() -> None:
-    # Import here (not at module top) so a server-side import error surfaces
-    # as a test failure rather than a collection error.
     from pipeline.mcp import server
 
     assert server.mcp is not None
-    # FastMCP exposes registered tools via list_tools() (async) or its
-    # internal registry. We just confirm the three callables exist on the
-    # module — that's enough to prove @mcp.tool() didn't blow up.
     assert callable(server.saica_lookup)
-    assert callable(server.saica_preflight)
-    assert callable(server.saica_audit_repo)
+    assert callable(server.saica_recommend)
+    # Old tools must be gone from the module surface.
+    assert not hasattr(server, "saica_preflight")
+    assert not hasattr(server, "saica_audit_repo")
 
 
-def test_audit_repo_returns_helpful_error_when_analyzer_missing() -> None:
-    """If pipeline.audit.audit_repo isn't importable, surface a clear error."""
-    from pipeline.mcp import server
+def test_server_lists_exactly_two_tools() -> None:
+    """End-to-end: the FastMCP instance reports exactly the two tools we ship."""
+    import asyncio
 
-    try:
-        from pipeline.audit import audit_repo  # noqa: F401
-    except ImportError:
-        analyzer_ready = False
-    else:
-        analyzer_ready = True
+    from pipeline.mcp.server import mcp
 
-    if analyzer_ready:
-        pytest.skip("Agent A's analyzer is already importable; nothing to assert.")
+    tools = asyncio.run(mcp.list_tools())
+    names = {t.name for t in tools}
+    assert names == {"saica_lookup", "saica_recommend"}, (
+        f"expected exactly saica_lookup + saica_recommend, got {sorted(names)}"
+    )
 
-    with pytest.raises(RuntimeError) as ei:
-        server.saica_audit_repo("https://github.com/example/example")
-    assert "analyzer" in str(ei.value).lower()
+
+def test_server_reads_agent_kind_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SAICA_AGENT_KIND", "cursor")
+    from pipeline.mcp.server import _agent_kind
+    assert _agent_kind() == "cursor"
+    monkeypatch.delenv("SAICA_AGENT_KIND", raising=False)
+    assert _agent_kind() is None

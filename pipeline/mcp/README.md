@@ -1,15 +1,26 @@
 # SAICA-KG MCP server
 
-Three tools for MCP-speaking coding agents (Claude Code first, Cursor / Replit
-follow):
+Two tools for MCP-speaking coding agents (Claude Code first, Cursor / Replit / etc. follow).
+The whole server runs locally as a subprocess of your agent — no hosting required.
 
 | Tool | What it does | When to call it |
 |---|---|---|
-| `saica_lookup(tool_id)` | Returns the full `ToolRecord` for one SAICA-KG tool. | When you want the facets / surfaces / paradigm of a specific tool. |
-| `saica_preflight(action, context?, agent_kind?)` | Returns risk failure modes + 2-3 supervisor recommendations for a proposed agent action. **Hot path** — keyword classification, no LLM call. | Before any non-trivial action: edit, install, shell, commit, network fetch. |
-| `saica_audit_repo(repo_url)` | One-shot supervision-coverage audit of a public GitHub repo. Delegates to `pipeline.audit`. | At session start, on the user's repo. |
+| `saica_lookup(tool_id)` | Returns the full `ToolRecord` for one SAICA-KG tool — facets, surfaces, paradigm, failure-mode coverage, link to the site page. | After `saica_recommend` when you want to show the human the full facets of a recommended tool. |
+| `saica_recommend(failure_modes?)` | **Two modes** — pass `failure_modes=["scope_creep", "fabrication"]` for targeted recs, or omit the argument for the **full-suite** mode that picks the minimum set of supervisors covering all 11 failure modes (greedy set-cover + small depth pad). | Once at session start to set up supervision; or whenever the agent needs guidance on a specific failure category. |
 
-All three return Pydantic objects defined in `pipeline/audit/schemas.py`.
+**Coding-agent filter (MECE recommendations).** When the asking agent
+identifies itself via the `SAICA_AGENT_KIND` env var, *no peer coding
+agent is ever recommended back*. Cursor users won't be told to install
+Claude Code; Replit Agent users won't be told to install Cursor; nobody
+gets recommended to install themselves.
+
+Filter list (peer coding agents — auto-filtered): `cursor`, `windsurf`,
+`zed-agent`, `replit-agent`, `v0`, `devin`, `github-copilot`,
+`continue-dev`, `sourcegraph-cody`, `claude-code`, `aider`, `openhands`,
+`swe-agent`, `codex-cli`, `gemini-cli`, `cline`.
+
+Also blocklisted regardless of asker (role too ambiguous to recommend
+confidently): `comfyui`.
 
 ---
 
@@ -21,9 +32,9 @@ cd /Users/vasyl/saicakg
 ```
 
 That starts the server on stdio. It prints nothing until an MCP client
-connects (that's expected — stdio servers are silent in idle).
+connects (expected — stdio servers are silent when idle).
 
-Smoke test without a client:
+Quick import smoke test without a client:
 
 ```bash
 .venv/bin/python -c "from pipeline.mcp.server import mcp; print(mcp)"
@@ -39,15 +50,14 @@ Claude Code reads MCP servers from one of two places:
 2. **User-scoped** — `~/.claude.json` under the `mcpServers` key. Available
    in every Claude Code session.
 
-> Note: Claude **Desktop** uses `~/Library/Application Support/Claude/claude_desktop_config.json`.
-> Claude **Code** is the CLI; its config lives under `~/.claude/` or in
-> `.mcp.json` next to your project. The snippets below work for either —
-> the JSON shape is the same.
-> If you're unsure where your install reads from, run `claude mcp list` after
-> adding the entry; if your version doesn't have that subcommand, add it via
-> `claude mcp add` and let the CLI pick the location.
+> Note: Claude **Desktop** uses
+> `~/Library/Application Support/Claude/claude_desktop_config.json`.
+> Claude **Code** is the CLI; its config lives at `~/.claude.json` or
+> in `.mcp.json` next to the project. The JSON shape is the same.
+> If your install supports it, `claude mcp list` will show the resolved
+> location; `claude mcp add` will pick it for you.
 
-Copy-pasteable snippet — the same content is in `mcp_config.example.json`:
+Copy-pasteable snippet — same content as `mcp_config.example.json`:
 
 ```json
 {
@@ -55,11 +65,18 @@ Copy-pasteable snippet — the same content is in `mcp_config.example.json`:
     "saica-kg": {
       "command": "/Users/vasyl/saicakg/.venv/bin/python",
       "args": ["-m", "pipeline.mcp.server"],
-      "cwd": "/Users/vasyl/saicakg"
+      "cwd": "/Users/vasyl/saicakg",
+      "env": {
+        "SAICA_AGENT_KIND": "claude-code"
+      }
     }
   }
 }
 ```
+
+**`SAICA_AGENT_KIND`** is the per-user identity flag. Set it once to whichever
+coding agent you're using. Valid values are the ids in the filter list above.
+If unset, no filter applies — useful for non-agent callers (CI bots, scripts).
 
 For other machines, change `command` to your venv's Python and `cwd` to
 your local checkout of `saicakg`.
@@ -72,6 +89,9 @@ claude mcp add saica-kg \
   -m pipeline.mcp.server
 ```
 
+For Cursor or other agents, change `SAICA_AGENT_KIND` accordingly:
+`cursor`, `windsurf`, `aider`, etc.
+
 ---
 
 ## Three example tool calls
@@ -79,44 +99,61 @@ claude mcp add saica-kg \
 ### 1. Look up `semgrep`
 
 ```jsonc
-// from the agent
 { "name": "saica_lookup", "arguments": { "tool_id": "semgrep" } }
 ```
 
 Returns a `ToolRecord` with `control_paradigm: "detection"`,
 `integration_surfaces: ["cli", "ci_app", "library"]`, and the failure modes
-Semgrep declares coverage for (`dependency_blindness`,
-`security_vulnerability`).
+Semgrep declares coverage for (`dependency_blindness`, `security_vulnerability`).
 
-### 2. Preflight `pip install left-pad` from Claude Code
+### 2. Targeted recommendation — supervise `scope_creep` + `fabrication`
 
 ```jsonc
 {
-  "name": "saica_preflight",
+  "name": "saica_recommend",
   "arguments": {
-    "action": "pip install left-pad",
-    "agent_kind": "claude-code"
+    "failure_modes": ["scope_creep", "fabrication"]
   }
 }
 ```
 
-Returns `risk_failure_modes: ["supply_chain_attack", "dependency_blindness"]`
-and 2-3 supervisor recommendations preferring `cli` / `ci_app` / `library`
-surfaces (since `claude-code` is CLI-first).
-
-### 3. Audit a GitHub repo
+Returns:
 
 ```jsonc
 {
-  "name": "saica_audit_repo",
-  "arguments": { "repo_url": "https://github.com/langfuse/langfuse" }
+  "mode": "targeted",
+  "agent_kind": "claude-code",   // from SAICA_AGENT_KIND
+  "by_failure_mode": {
+    "scope_creep":   [/* up to 3 ranked supervisors */],
+    "fabrication":   [/* up to 3 ranked supervisors */]
+  }
 }
 ```
 
-Returns an `AuditReport` (detected stack + coverage grid + ranked gaps +
-Markdown rendering). Note: this delegates to `pipeline.audit.audit_repo`,
-which is built in parallel; if it's not yet ready you'll get a clear
-"analyzer module isn't ready" error.
+Ranking: prevention/detection paradigm preferred over correction/recovery,
+then rationale-evidence, then GitHub stars. Coding-agent peers are filtered
+out per the asker's `SAICA_AGENT_KIND`.
+
+### 3. Full-suite recommendation — cover everything
+
+```jsonc
+{ "name": "saica_recommend", "arguments": {} }
+```
+
+Returns:
+
+```jsonc
+{
+  "mode": "full_suite",
+  "agent_kind": "claude-code",
+  "coverage_complete": true,
+  "uncovered_failure_modes": [],
+  "cover": [/* the minimum set of specialists; together they declare
+              coverage for all 11 failure modes */],
+  "pad":   [/* a few high-stars depth additions */],
+  "summary": "4 specialist tools cover 11 of 11 failure modes; 7 additional tools included for depth."
+}
+```
 
 ---
 

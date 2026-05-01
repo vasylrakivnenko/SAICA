@@ -32,6 +32,7 @@ locus_of_control:
 
 integration_surfaces:
   - ci_app
+  - cli
 implements_techniques:
   - dependency-version-diff
   - cve-advisory-matching

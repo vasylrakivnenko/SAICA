@@ -510,9 +510,6 @@ def _parse_kimi_inline_tool_call(content: str, tool_name: str) -> dict | None:
                 pass
     return None
 
-    # Should be unreachable due to the raise inside the loop.
-    raise RuntimeError("Kimi call exhausted retries") from last_exc
-
 
 # ---------------------------------------------------------------------------
 # Public API

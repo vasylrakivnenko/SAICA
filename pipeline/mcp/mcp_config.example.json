@@ -3,7 +3,10 @@
     "saica-kg": {
       "command": "/Users/vasyl/saicakg/.venv/bin/python",
       "args": ["-m", "pipeline.mcp.server"],
-      "cwd": "/Users/vasyl/saicakg"
+      "cwd": "/Users/vasyl/saicakg",
+      "env": {
+        "SAICA_AGENT_KIND": "claude-code"
+      }
     }
   }
 }

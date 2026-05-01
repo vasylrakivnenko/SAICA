@@ -49,8 +49,8 @@ def saica_lookup(tool_id: str) -> ToolRecord:
     doc = load_tool(tool_id)
     if doc is None:
         raise ValueError(
-            f"unknown tool_id: {tool_id!r}; try saica_search() first "
-            "or check /tool-coverage for the canonical id list"
+            f"unknown tool_id: {tool_id!r}; check /tool-coverage on the site "
+            "or browse data/tools/ in the repo for the canonical id list"
         )
 
     canonical_id = str(doc.get("id") or tool_id)

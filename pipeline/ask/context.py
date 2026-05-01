@@ -160,7 +160,6 @@ _SURFACE_OVERRIDES: dict[str, tuple[str, ...]] = {
     # Eval / red-team / testing harnesses
     "promptfoo":        ("cli", "library", "ci_app"),
     "deepeval":         ("library", "cli"),
-    "deepteam":         ("library", "cli"),
     "confident-ai-deepteam": ("library", "cli"),
     "judgeval":         ("library", "cli"),
     "ragas":            ("library",),
@@ -185,7 +184,6 @@ _SURFACE_OVERRIDES: dict[str, tuple[str, ...]] = {
     "langsmith":        ("http_service", "library"),
     "helicone":         ("proxy_gateway", "http_service", "library"),
     "arize-phoenix":    ("http_service", "library"),
-    "phoenix":          ("http_service", "library"),
     "logfire":          ("http_service", "library"),
     "openlit":          ("http_service", "library"),
     "opik":             ("http_service", "library"),

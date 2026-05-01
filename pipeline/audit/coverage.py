@@ -34,6 +34,8 @@ from pipeline.audit.schemas import (
     Recommendation,
     Severity,
 )
+from pipeline.mcp.recommender import CODING_AGENT_IDS, RECOMMENDATION_BLOCKLIST
+from pipeline.shared.trending import effective_stars
 
 PARADIGMS: tuple[Paradigm, ...] = get_args(Paradigm)  # ("prevention", "detection", ...)
 
@@ -149,15 +151,19 @@ def recommend_for_gap(
     stack_surfaces = _stack_surfaces(stack)
 
     # Candidate pool: all KG tools that declare coverage for this FM.
+    detected_agent_ids = {d.id for d in stack.agents if d.id}
+    asker_is_coding_agent = bool(detected_agent_ids & CODING_AGENT_IDS)
     candidates: list[dict] = []
     for tool in tools_by_failure_mode(fm):
         tid = tool.get("id")
         if not tid or tid in detected_ids:
             continue
-        # Skip tools that are themselves coding agents (recovery + fully_autonomous)
-        # because they self-recover rather than supervise.
-        if (tool.get("control_paradigm") == "recovery"
-                and tool.get("autonomy_level") == "fully_autonomous"):
+        # Never recommend a tool we've blocklisted (role too ambiguous).
+        if tid in RECOMMENDATION_BLOCKLIST:
+            continue
+        # Don't recommend a peer coding agent to a user who already has one.
+        # (Cursor users shouldn't be told to install Claude Code, etc.)
+        if asker_is_coding_agent and tid in CODING_AGENT_IDS:
             continue
         candidates.append(tool)
 
@@ -168,9 +174,9 @@ def recommend_for_gap(
         paradigm_bonus = 1 if (preferred_paradigm and tool.get("control_paradigm") == preferred_paradigm) else 0
         surface_fit = _surface_fit_score(tool, stack_surfaces)
         per_fm_tier = cell_tier(tool, fm)
-        stars = int(tool.get("stars") or 0)
-        # Larger tuples sort first when reversed; we want max on each.
-        return (paradigm_bonus, surface_fit, per_fm_tier, stars)
+        # `effective_stars` applies the github-trending boost so a trending tool
+        # wins against a non-trending peer with up to ~+30% more raw stars.
+        return (paradigm_bonus, surface_fit, per_fm_tier, effective_stars(tool))
 
     ranked = sorted(candidates, key=sort_key, reverse=True)[:top_n]
 
@@ -188,7 +194,7 @@ def recommend_for_gap(
             autonomy_level=str(tool.get("autonomy_level") or "fully_autonomous"),
             integration_surfaces=surfaces,
             addresses_failure_modes=list(tool.get("addresses_failure_modes") or []),
-            stars=int(tool["stars"]) if tool.get("stars") else None,
+            stars=int(tool["stars"]) if tool.get("stars") is not None else None,
             url=tool_url(tid),
         ))
     return recs

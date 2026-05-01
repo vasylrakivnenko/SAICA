@@ -32,6 +32,8 @@ locus_of_control:
 
 integration_surfaces:
   - ci_app
+  - cli
+  - library
 implements_techniques:
   - dependency-manifest-scan
   - capability-diff

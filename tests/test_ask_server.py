@@ -209,7 +209,9 @@ def test_build_prompt_contains_instructions_and_question() -> None:
     nodes = ask_context.hydrate([("fabrication", 0.9)])
     prompt = ask_context.build_prompt("What is fabrication?", nodes)
     assert "What is fabrication?" in prompt
-    assert "cite a node id" in prompt
+    # The exact phrasing has evolved (now "cites a node id"), but the
+    # cite-in-brackets convention must remain.
+    assert "cite" in prompt and "in brackets" in prompt
     assert "The KG doesn't have this information." in prompt
 
 

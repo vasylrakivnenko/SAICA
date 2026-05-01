@@ -29,6 +29,7 @@ locus_of_control:
 
 integration_surfaces:
   - mcp_server
+  - cli
 implements_techniques:
   - doc-grounded-rag
   - skill-library

@@ -110,6 +110,29 @@ FailureMode:
     supply_chain_attack:
       label: Supply-chain attack
       description: Slopsquatting, typosquatting, compromised MCP servers.
+    cascading_failure:
+      label: Cascading failure
+      description: >
+        Recovery attempts that compound the original error — each fix introduces
+        new errors and the diff diverges from the working state.
+      aliases:
+        - recovery-spiral
+        - compound-error
+        - fix-regression
+    incomplete_execution:
+      label: Incomplete execution
+      description: >
+        Agent stops short of finishing the requested task — partial diffs,
+        unfinished migrations, leftover TODOs.
+    test_manipulation:
+      label: Test manipulation
+      description: >
+        Agent gaming the test harness — disabling failing tests, adding overly
+        permissive assertions, or mocking real interfaces away.
+      aliases:
+        - test-gaming
+        - reward-hacking
+        - spec-gaming
 
 LocusOfControl:
   description: >

@@ -33,6 +33,10 @@ import yaml
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from pipeline.shared.trending import TRENDING_BOOST, is_trending  # noqa: E402
+
 REPO = Path(__file__).resolve().parents[1]
 TOOLS_DIR = REPO / "data" / "tools"
 FM_DIR = REPO / "data" / "failure_modes"
@@ -75,9 +79,15 @@ class Row:
     id: str
     name: str
     stars: int
+    trending: bool
     breadth: int
     tier_sum: int
     row: np.ndarray  # shape (n_fms,), values in 0..3
+
+    @property
+    def effective_stars(self) -> float:
+        """Star count with the trending boost applied (no-op if not trending)."""
+        return self.stars * TRENDING_BOOST if self.trending else float(self.stars)
 
     def addressed_fms(self, fm_ids: list[str]) -> set[str]:
         return {fm for fm, v in zip(fm_ids, self.row) if v > 0}
@@ -128,6 +138,7 @@ def build_rows(tools: list[dict], fm_ids: list[str]) -> list[Row]:
             id=t["id"],
             name=t.get("name") or t["id"],
             stars=int(t.get("stars") or 0),
+            trending=is_trending(t),
             breadth=int((arr > 0).sum()),
             tier_sum=int(arr.sum()),
             row=arr,
@@ -136,7 +147,11 @@ def build_rows(tools: list[dict], fm_ids: list[str]) -> list[Row]:
 
 
 def select_breadth(rows: list[Row], n: int) -> list[Row]:
-    return sorted(rows, key=lambda r: (-r.breadth, -r.tier_sum, -r.stars))[:n]
+    # Effective stars (trending-boosted) is the tiebreaker.
+    return sorted(
+        rows,
+        key=lambda r: (-r.breadth, -r.tier_sum, -r.effective_stars),
+    )[:n]
 
 
 def select_covering(rows: list[Row], fm_ids: list[str], n: int) -> list[Row]:
@@ -162,7 +177,7 @@ def select_covering(rows: list[Row], fm_ids: list[str], n: int) -> list[Row]:
     picked_ids: set[str] = set()
 
     while remaining_fms and len(selected) < n:
-        best: tuple[int, int, int, int] | None = None
+        best: tuple[int, int, float, int] | None = None
         chosen: Row | None = None
         for r in rows:
             if r.id in picked_ids:
@@ -170,7 +185,8 @@ def select_covering(rows: list[Row], fm_ids: list[str], n: int) -> list[Row]:
             new = len(r.addressed_fms(fm_ids) & remaining_fms)
             if new == 0:
                 continue
-            key = (new, r.tier_sum, r.stars, r.breadth)
+            # Tiebreak: most-new FMs > tier_sum > effective_stars (trending-boosted) > breadth.
+            key = (new, r.tier_sum, r.effective_stars, r.breadth)
             if best is None or key > best:
                 best = key
                 chosen = r
@@ -183,7 +199,7 @@ def select_covering(rows: list[Row], fm_ids: list[str], n: int) -> list[Row]:
     if len(selected) < n:
         pad_pool = sorted(
             (r for r in rows if r.id not in picked_ids),
-            key=lambda r: (-r.tier_sum, -r.breadth, -r.stars),
+            key=lambda r: (-r.tier_sum, -r.breadth, -r.effective_stars),
         )
         for r in pad_pool:
             if len(selected) >= n:
@@ -239,8 +255,13 @@ def render_figure(
         fontsize=9, rotation=40, ha="left", rotation_mode="anchor",
     )
     ax.set_yticks(range(len(selection)))
+    # Trending tools get a fire glyph appended to the row label so the
+    # boosted ranking is legible at a glance.
     ax.set_yticklabels(
-        [f"{r.name}  [{fmt_stars(r.stars).strip()}]" for r in selection],
+        [
+            f"{r.name}  [{fmt_stars(r.stars).strip()}]" + ("  🔥" if r.trending else "")
+            for r in selection
+        ],
         fontsize=10,
     )
     ax.xaxis.tick_top()
@@ -287,6 +308,7 @@ def render_figure(
 def _row_payload(r: Row, fm_ids_ordered: list[str], fm_ids: list[str]) -> dict:
     return {
         "id": r.id, "name": r.name, "stars": r.stars,
+        "trending": r.trending,
         "breadth": r.breadth, "tier_sum": r.tier_sum,
         "tiers": {fm: int(r.row[fm_ids.index(fm)]) for fm in fm_ids_ordered},
     }

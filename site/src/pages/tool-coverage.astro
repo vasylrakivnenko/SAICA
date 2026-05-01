@@ -121,6 +121,7 @@ const title = "Tool × Failure-Mode Coverage";
     id: string;
     name: string;
     stars: number;
+    trending?: boolean;
     breadth: number;
     tier_sum: number;
     tiers: Record<string, number>;
@@ -223,9 +224,12 @@ const title = "Tool × Failure-Mode Coverage";
         return `<td class="text-center align-middle p-0" style="background:${bg}; height:2.25rem; min-width:2.25rem">`
           + clickable + `</td>`;
       }).join("");
+      const trendingMark = r.trending
+        ? ` <span class="ml-1" title="On github.com/trending — rank tiebreak preferred">🔥</span>`
+        : "";
       return `<tr class="border-t border-ink/10${dividerCls}">`
         + `<td class="px-3 py-1.5 sticky left-0 bg-white z-10 border-r border-ink/10">`
-        + `<a href="/tools/${encodeURIComponent(r.id)}" class="text-ink hover:text-accent">${escapeHtml(r.name)}</a>`
+        + `<a href="/tools/${encodeURIComponent(r.id)}" class="text-ink hover:text-accent">${escapeHtml(r.name)}</a>${trendingMark}`
         + `</td>`
         + `<td class="px-3 py-1.5 text-right font-mono text-xs text-ink-muted">${fmtStars(r.stars)}</td>`
         + `<td class="px-3 py-1.5 text-right font-mono text-xs">${r.breadth}</td>`

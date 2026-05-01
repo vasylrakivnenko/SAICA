@@ -33,6 +33,7 @@ locus_of_control:
 
 integration_surfaces:
   - ide_plugin
+  - cli
 implements_techniques:
   - codebase-retrieval
   - scip-index-grounding

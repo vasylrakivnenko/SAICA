@@ -8,7 +8,7 @@ description: >
   raises distinct supervision concerns.
 first_released: '2025-03-28'
 last_updated: '2025-04-24'
-maturity_status: stable
+maturity_status: at_risk
 published_by: browsermcp
 repository_url: https://github.com/BrowserMCP/mcp
 license: MIT

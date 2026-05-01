@@ -4,7 +4,7 @@ tagline: LLM Prompt Injection Detector
 description: Rebuff is a prompt injection detection system designed to identify and filter malicious injection attempts in LLM prompts before processing. It analyzes incoming prompts to detect adversarial patterns that could compromise application security or manipulate model behavior.
 first_released: '2023-04-24'
 last_updated: '2024-08-07'
-maturity_status: experimental
+maturity_status: at_risk
 repository_url: https://github.com/protectai/rebuff
 license: Apache-2.0
 control_paradigm: detection

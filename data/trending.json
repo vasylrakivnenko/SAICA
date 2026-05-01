@@ -1,0 +1,548 @@
+{
+  "scraped_at": "2026-05-01T00:07:18Z",
+  "sources": [
+    "github.com/trending?since=daily",
+    "github.com/trending?since=weekly",
+    "github.com/trending/python?since=daily",
+    "github.com/trending/python?since=weekly",
+    "github.com/trending/typescript?since=daily",
+    "github.com/trending/typescript?since=weekly",
+    "github.com/trending/rust?since=daily",
+    "github.com/trending/rust?since=weekly"
+  ],
+  "trending_repository_urls": [
+    "https://github.com/1jehuang/jcode",
+    "https://github.com/Alishahryar1/free-claude-code",
+    "https://github.com/Anil-matcha/Open-Generative-AI",
+    "https://github.com/CJackHwang/ds2api",
+    "https://github.com/ComposioHQ/awesome-codex-skills",
+    "https://github.com/DayuanJiang/next-ai-draw-io",
+    "https://github.com/Fincept-Corporation/FinceptTerminal",
+    "https://github.com/RooCodeInc/Roo-Code",
+    "https://github.com/ThinkInAIXYZ/deepchat",
+    "https://github.com/Tracer-Cloud/opensre",
+    "https://github.com/abhigyanpatwari/GitNexus",
+    "https://github.com/anomalyco/opencode",
+    "https://github.com/badlogic/pi-mono",
+    "https://github.com/browserbase/skills",
+    "https://github.com/chaitin/MonkeyCode",
+    "https://github.com/codexu/note-gen",
+    "https://github.com/davila7/claude-code-templates",
+    "https://github.com/dmtrKovalenko/fff",
+    "https://github.com/farion1231/cc-switch",
+    "https://github.com/forrestchang/andrej-karpathy-skills",
+    "https://github.com/iOfficeAI/AionUi",
+    "https://github.com/iii-hq/iii",
+    "https://github.com/lsdefine/GenericAgent",
+    "https://github.com/lukilabs/craft-agents-oss",
+    "https://github.com/mattpocock/skills",
+    "https://github.com/mksglu/context-mode",
+    "https://github.com/nilbuild/developer-roadmap",
+    "https://github.com/njbrake/agent-of-empires",
+    "https://github.com/obra/superpowers",
+    "https://github.com/openai/codex",
+    "https://github.com/rtk-ai/rtk",
+    "https://github.com/rustfs/rustfs",
+    "https://github.com/sgl-project/sglang",
+    "https://github.com/stalwartlabs/stalwart",
+    "https://github.com/trycua/cua",
+    "https://github.com/warpdotdev/warp",
+    "https://github.com/zed-industries/zed",
+    "https://github.com/zilliztech/claude-context",
+    "https://github.com/zilliztech/memsearch"
+  ],
+  "matched_in_kg": [
+    {
+      "tool_id": "zed-agent",
+      "repository_url": "https://github.com/zed-industries/zed",
+      "stars": 80871,
+      "trending_in": [
+        "rust:daily",
+        "rust:weekly"
+      ]
+    },
+    {
+      "tool_id": "codex-cli",
+      "repository_url": "https://github.com/openai/codex",
+      "stars": 79162,
+      "trending_in": [
+        "rust:daily"
+      ]
+    }
+  ],
+  "new_candidates": [
+    {
+      "repository_url": "https://github.com/obra/superpowers",
+      "name": "superpowers",
+      "stars": 174554,
+      "primary_language": "Shell",
+      "trending_in": [
+        "daily"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them."
+    },
+    {
+      "repository_url": "https://github.com/anomalyco/opencode",
+      "name": "opencode",
+      "stars": 152613,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:daily"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "The open source AI coding agent."
+    },
+    {
+      "repository_url": "https://github.com/farion1231/cc-switch",
+      "name": "cc-switch",
+      "stars": 56510,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:daily",
+        "rust:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Thanks to AIGoCode for sponsoring this project! AIGoCode is an all-in-one platform that integrates Claude Code, Codex, and the latest Gemini models, providing you with stable, efficient, and highly cost-effective AI coding services. The platform offers flexible subscription plans, zero risk of account suspension, direct access with no VPN required, and lightning-fast responses. AIGoCode has..."
+    },
+    {
+      "repository_url": "https://github.com/mattpocock/skills",
+      "name": "skills",
+      "stars": 49384,
+      "primary_language": "Shell",
+      "trending_in": [
+        "daily",
+        "weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [
+        "cascading_failure"
+      ],
+      "readme_excerpt": "I built these skills as a way to fix common failure modes I see with Claude Code, Codex, and other coding agents."
+    },
+    {
+      "repository_url": "https://github.com/rtk-ai/rtk",
+      "name": "rtk",
+      "stars": 38981,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [
+        "obsolescence"
+      ],
+      "readme_excerpt": "| Tool | Install | Method | |------|---------|--------| | **Claude Code** | `rtk init -g` | PreToolUse hook (bash) | | **GitHub Copilot (VS Code)** | `rtk init -g --copilot` | PreToolUse hook — transparent rewrite | | **GitHub Copilot CLI** | `rtk init -g --copilot` | PreToolUse deny-with-suggestion (CLI limitation) | | **Cursor** | `rtk init -g --agent cursor` | preToolUse hook (hooks.json) | |..."
+    },
+    {
+      "repository_url": "https://github.com/abhigyanpatwari/GitNexus",
+      "name": "GitNexus",
+      "stars": 33766,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "| | **CLI + MCP** | **Web UI** | | ----------------- | -------------------------------------------------------------- | ------------------------------------------------------------ | | **What** | Index repos locally, connect AI agents via MCP | Visual graph explorer + AI chat in browser | | **For** | Daily development with Cursor, Claude Code, Codex, Windsurf, OpenCode | Quick exploration, demos,..."
+    },
+    {
+      "repository_url": "https://github.com/iii-hq/iii",
+      "name": "iii",
+      "stars": 15468,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:daily"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Software engineering is an exercise in assembling categories of services. Each service has its own internals, its own lifecycle, its own integration story, and its own failure modes. The cost of every new service addition is quadratic. Every new service has potential integration points with every other service."
+    },
+    {
+      "repository_url": "https://github.com/trycua/cua",
+      "name": "cua",
+      "stars": 15396,
+      "primary_language": "HTML",
+      "trending_in": [
+        "weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Drive any native macOS app **in the background** — agents click, type, and verify without stealing the cursor, focus, or Space, even on non-AX surfaces like Chromium web content and canvas-based tools (Blender, Figma, DAWs, game engines). Use with the CLI or MCP server for Claude Code, Cursor, and custom clients. Every session records as a replayable trajectory."
+    },
+    {
+      "repository_url": "https://github.com/mksglu/context-mode",
+      "name": "context-mode",
+      "stars": 11502,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [
+        "cascading_failure"
+      ],
+      "readme_excerpt": "> **Note:** Full session continuity (capture + snapshot + restore) works on **Claude Code**, **Gemini CLI**, **VS Code Copilot**, and **JetBrains Copilot**. **OpenCode** provides **high** session continuity: it captures tool events and injects compaction snapshots via the plugin, but SessionStart is not yet available ([#14808](https://github.com/sst/opencode/issues/14808)), so startup/resume..."
+    },
+    {
+      "repository_url": "https://github.com/zilliztech/claude-context",
+      "name": "claude-context",
+      "stars": 10434,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly",
+        "weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "**Claude Context** is an MCP plugin that adds semantic code search to Claude Code and other AI coding agents, giving them deep context from your entire codebase."
+    },
+    {
+      "repository_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "name": "Open-Generative-AI",
+      "stars": 10416,
+      "primary_language": "JavaScript",
+      "trending_in": [
+        "weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "> 🤖 **Automate Higgsfield, Freepik, Krea, Openart & more with AI coding agents:** [Generative-Media-Skills](https://github.com/SamurAIGPT/Generative-Media-Skills) — a library of skills that let agents like **Claude Code**, **Codex**, and other coding assistants drive 200+ image/video models end-to-end (prompt → generate → edit → stitch) directly from your terminal. Perfect for building automated..."
+    },
+    {
+      "repository_url": "https://github.com/ThinkInAIXYZ/deepchat",
+      "name": "deepchat",
+      "stars": 5760,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "You can install Skills from folders, ZIP files, or URLs, and import/export them with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, Kiro, Antigravity, OpenCode, Goose, Kilo Code, and other compatible tools."
+    },
+    {
+      "repository_url": "https://github.com/ComposioHQ/awesome-codex-skills",
+      "name": "awesome-codex-skills",
+      "stars": 5194,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:daily"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "- [email-draft-polish/](./email-draft-polish/) - Draft, rewrite, or condense emails for the right tone and audience. - [changelog-generator/](./changelog-generator/) - Create clear changelogs from commits or summaries. - [content-research-writer/](./content-research-writer/) - Research and draft content with sourced citations. - [novel-writing](https://github.com/wgwtest/novel-writing) - External..."
+    },
+    {
+      "repository_url": "https://github.com/Tracer-Cloud/opensre",
+      "name": "opensre",
+      "stars": 4074,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "We do that because SWE-bench 1 gave coding agents scalable training data and clear feedback. Production incident response still lacks an equivalent."
+    },
+    {
+      "repository_url": "https://github.com/1jehuang/jcode",
+      "name": "jcode",
+      "stars": 1868,
+      "primary_language": "Rust",
+      "trending_in": [
+        "daily",
+        "rust:daily"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "| Tool | Time to first frame | Range | Comparison | |---|---:|---:|---:| | **jcode** | **14.0 ms** | 10.1–19.3 ms | baseline | | **pi** | **590.7 ms** | 369.6–934.8 ms | **42.2× slower** | | **Codex CLI** | **882.8 ms** | 742.3–1640.9 ms | **63.1× slower** | | **OpenCode** | **1035.9 ms** | 922.5–1104.4 ms | **74.0× slower** | | **GitHub Copilot CLI** | **1518.6 ms** | 1357.4–1826.8 ms | **108.5×..."
+    },
+    {
+      "repository_url": "https://github.com/njbrake/agent-of-empires",
+      "name": "agent-of-empires",
+      "stars": 1831,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:daily",
+        "rust:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "- **Multi-agent support**: Claude Code, OpenCode, Mistral Vibe, Codex CLI, Gemini CLI, Cursor CLI, Copilot CLI, Pi.dev, Factory Droid, and Hermes - **TUI app**: visual interface to create, monitor, and manage sessions - **Web app** (Beta, stabilization in progress): create, monitor, and control your agents from any browser, installable as a PWA ([guide](docs/guides/web-dashboard.md)) - **CLI..."
+    },
+    {
+      "repository_url": "https://github.com/zilliztech/memsearch",
+      "name": "memsearch",
+      "stars": 1546,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly"
+      ],
+      "relevance_score": 1.0,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Cross-platform semantic memory for AI coding agents."
+    },
+    {
+      "repository_url": "https://github.com/forrestchang/andrej-karpathy-skills",
+      "name": "andrej-karpathy-skills",
+      "stars": 102523,
+      "primary_language": "",
+      "trending_in": [
+        "weekly"
+      ],
+      "relevance_score": 0.9,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "This repository includes a committed Cursor project rule ([`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc)) so the same guidelines apply when you open the project in Cursor. See **[CURSOR.md](CURSOR.md)** for setup, using the rule in other projects, and how this relates to Claude Code."
+    },
+    {
+      "repository_url": "https://github.com/warpdotdev/warp",
+      "name": "warp",
+      "stars": 49149,
+      "primary_language": "Rust",
+      "trending_in": [
+        "daily",
+        "rust:daily",
+        "rust:weekly"
+      ],
+      "relevance_score": 0.9,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "readme_excerpt": "[Warp](https://www.warp.dev) is an agentic development environment, born out of the terminal. Use Warp's built-in coding agent, or bring your own CLI agent (Claude Code, Codex, Gemini CLI, and others)."
+    },
+    {
+      "repository_url": "https://github.com/dmtrKovalenko/fff",
+      "name": "fff",
+      "stars": 5650,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:daily"
+      ],
+      "relevance_score": 0.9,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Works with Claude Code, Codex, OpenCode, Cursor, Cline, and any MCP-capable client. Fewer grep roundtrips, less wasted context, faster answers."
+    },
+    {
+      "repository_url": "https://github.com/chaitin/MonkeyCode",
+      "name": "MonkeyCode",
+      "stars": 2648,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:daily"
+      ],
+      "relevance_score": 0.9,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "| 能力 | MonkeyCode | Cursor | Claude Code | Codex | |---|:---:|:---:|:---:|:---:| | 在线使用 | ✅ | ✅ | ✅ | ✅ | | 本地 IDE | ❌ | ✅ | ✅ | ✅ | | 本地 CLI | ❌ | ✅ | ✅ | ✅ | | 云端开发环境 | ✅ | 部分 | 部分 | 部分 | | 需求与 SPEC 管理 | ✅ | ❌ | ❌ | ❌ | | PR / MR 自动代码审查 | ✅ | 部分 | 部分 | 部分 | | 团队协作 | ✅ | ❌ | ❌ | ❌ | | 适配国产大模型 | ✅ | ❌ | ❌ | ❌ | | 私有化部署 | ✅ | ❌ | ❌ | ❌ | | 开源 | ✅ | ❌ | ❌ | ❌ |"
+    },
+    {
+      "repository_url": "https://github.com/nilbuild/developer-roadmap",
+      "name": "developer-roadmap",
+      "stars": 353947,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "- [Frontend Roadmap](https://roadmap.sh/frontend) / [Frontend Beginner Roadmap](https://roadmap.sh/frontend?r=frontend-beginner) - [Backend Roadmap](https://roadmap.sh/backend) / [Backend Beginner Roadmap](https://roadmap.sh/backend?r=backend-beginner) - [DevOps Roadmap](https://roadmap.sh/devops) / [DevOps Beginner Roadmap](https://roadmap.sh/devops?r=devops-beginner) - [DevSecOps..."
+    },
+    {
+      "repository_url": "https://github.com/badlogic/pi-mono",
+      "name": "pi-mono",
+      "stars": 43209,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "> **Looking for the pi coding agent?** See **[packages/coding-agent](packages/coding-agent)** for installation and usage."
+    },
+    {
+      "repository_url": "https://github.com/lukilabs/craft-agents-oss",
+      "name": "craft-agents-oss",
+      "stars": 5563,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "daily",
+        "typescript:daily",
+        "typescript:weekly"
+      ],
+      "relevance_score": 0.8,
+      "suggested_failure_modes": [
+        "cascading_failure",
+        "security_vulnerability"
+      ],
+      "readme_excerpt": "**How do I import my Claude Code skills and MCPs?** Tell the agent you want to import your skills from Claude Code. It handles the migration."
+    },
+    {
+      "repository_url": "https://github.com/DayuanJiang/next-ai-draw-io",
+      "name": "next-ai-draw-io",
+      "stars": 28291,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:daily"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Use Next AI Draw.io with AI agents like Claude Desktop, Cursor, and VS Code via MCP (Model Context Protocol)."
+    },
+    {
+      "repository_url": "https://github.com/sgl-project/sglang",
+      "name": "sglang",
+      "stars": 26792,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "Long-term active SGLang contributors are eligible for coding agent sponsorship, such as Cursor, Claude Code, or OpenAI Codex. Email [sglang@lmsys.org](mailto:sglang@lmsys.org) with your most important commits or pull requests."
+    },
+    {
+      "repository_url": "https://github.com/lsdefine/GenericAgent",
+      "name": "GenericAgent",
+      "stars": 8478,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly",
+        "weekly"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [
+        "fabrication"
+      ],
+      "readme_excerpt": "| Feature | GenericAgent | OpenClaw | Claude Code | |------|:---:|:---:|:---:| | **Codebase** | ~3K lines | ~530,000 lines | Open-sourced (large) | | **Deployment** | `pip install` + API Key | Multi-service orchestration | CLI + subscription | | **Browser Control** | Real browser (session preserved) | Sandbox / headless browser | Via MCP plugin | | **OS Control** | Mouse/kbd, vision, ADB |..."
+    },
+    {
+      "repository_url": "https://github.com/browserbase/skills",
+      "name": "skills",
+      "stars": 823,
+      "primary_language": "JavaScript",
+      "trending_in": [
+        "daily"
+      ],
+      "relevance_score": 0.7,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "To install the skill to popular coding agents:"
+    },
+    {
+      "repository_url": "https://github.com/davila7/claude-code-templates",
+      "name": "claude-code-templates",
+      "stars": 26493,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "**Ready-to-use configurations for Anthropic's Claude Code.** A comprehensive collection of AI agents, custom commands, settings, hooks, external integrations (MCPs), and project templates to enhance your development workflow."
+    },
+    {
+      "repository_url": "https://github.com/iOfficeAI/AionUi",
+      "name": "AionUi",
+      "stars": 23179,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:daily"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "| | Traditional AI Chat Clients | **AionUi (Cowork)** | | :------------------------------ | :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------- | | AI can operate on your files | Limited or No | **Yes — built-in agent with full file access** | | AI can execute multi-step tasks | Limited | **Yes..."
+    },
+    {
+      "repository_url": "https://github.com/CJackHwang/ds2api",
+      "name": "ds2api",
+      "stars": 2940,
+      "primary_language": "Go",
+      "trending_in": [
+        "weekly"
+      ],
+      "relevance_score": 0.6,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "#### Claude Code 接入避坑（实测）"
+    },
+    {
+      "repository_url": "https://github.com/RooCodeInc/Roo-Code",
+      "name": "Roo-Code",
+      "stars": 23796,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:weekly"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [
+        "security_vulnerability"
+      ],
+      "readme_excerpt": "- Add GPT-5.5 support via the OpenAI Codex provider. - Add Claude Opus 4.7 support on Vertex AI. - Add previous checkpoint navigation controls in chat so you can step back through prior checkpoints more easily."
+    },
+    {
+      "repository_url": "https://github.com/stalwartlabs/stalwart",
+      "name": "stalwart",
+      "stars": 12577,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:weekly"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "- **Email** server with complete protocol support: - JMAP: * [JMAP for Mail](https://datatracker.ietf.org/doc/html/rfc8621) server. * [JMAP for Sieve Scripts](https://www.ietf.org/archive/id/draft-ietf-jmap-sieve-22.html). * [WebSocket](https://datatracker.ietf.org/doc/html/rfc8887), [Blob Management](https://www.rfc-editor.org/rfc/rfc9404.html) and..."
+    },
+    {
+      "repository_url": "https://github.com/codexu/note-gen",
+      "name": "note-gen",
+      "stars": 11658,
+      "primary_language": "TypeScript",
+      "trending_in": [
+        "typescript:daily"
+      ],
+      "relevance_score": 0.5,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "感谢 优云智算 赞助了本项目！优云智算是 UCloud 旗下 AI 云平台，提供稳定、全面的国内外模型 API，仅一个 key 即可调用。主打包月、按量的高性价比 Coding Plan 套餐，基于官方 2~5 折优惠。支持接入 Claude Code、Codex 及 API 调用。支持企业高并发、7*24 技术支持、自助开票。通过此链接注册的用户，可得免费 5 元平台体验金！"
+    },
+    {
+      "repository_url": "https://github.com/rustfs/rustfs",
+      "name": "rustfs",
+      "stars": 26887,
+      "primary_language": "Rust",
+      "trending_in": [
+        "rust:daily"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "**NOTE**: We recommend reviewing the `docker-compose.yml` file before running. It defines several services including Grafana, Prometheus, and Jaeger, which are helpful for RustFS observability. If you wish to start Redis or Nginx containers, you can specify the corresponding profiles."
+    },
+    {
+      "repository_url": "https://github.com/Alishahryar1/free-claude-code",
+      "name": "free-claude-code",
+      "stars": 19169,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly",
+        "weekly"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [
+        "incomplete_execution"
+      ],
+      "readme_excerpt": "# 🤖 Free Claude Code"
+    },
+    {
+      "repository_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
+      "name": "FinceptTerminal",
+      "stars": 18308,
+      "primary_language": "Python",
+      "trending_in": [
+        "python:weekly",
+        "weekly"
+      ],
+      "relevance_score": 0.4,
+      "suggested_failure_modes": [],
+      "readme_excerpt": "| **Feature** | **Description** | |-------------|-----------------| | 📊 **CFA-Level Analytics** | DCF models, portfolio optimization, risk metrics (VaR, Sharpe), derivatives pricing via embedded Python | | 🤖 **AI Agents** | 37 agents across Trader/Investor (Buffett, Graham, Lynch, Munger, Klarman, Marks…), Economic, and Geopolitics frameworks; local LLM support; multi-provider (OpenAI, Anthropic,..."
+    }
+  ]
+}

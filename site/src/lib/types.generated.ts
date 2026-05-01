@@ -89,6 +89,20 @@ export interface Tool {
       | 'test_manipulation'
     )[];
   locus_of_control?: LocusOfControl[];
+  /**
+   * How this tool is deployed / consumed. Multi-valued — a tool can ship as several surfaces (e.g. cli + ci_app + library).
+   */
+  integration_surfaces?: (
+    | 'ide_plugin'
+    | 'desktop_app'
+    | 'web_app'
+    | 'cli'
+    | 'library'
+    | 'http_service'
+    | 'mcp_server'
+    | 'ci_app'
+    | 'proxy_gateway'
+  )[];
   implements_techniques?: string[];
   /**
    * Symmetric; both sides must declare.

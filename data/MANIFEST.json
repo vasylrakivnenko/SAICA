@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-23T10:14:26Z",
+  "generated_at": "2026-04-30T23:52:22Z",
   "kg_version": "2026.04",
   "counts": {
-    "tools": 104,
+    "tools": 102,
     "failure_modes": 11,
     "papers": 25,
     "taxonomies": 6,
@@ -41,7 +41,6 @@
       "cursor": "https://docs.cursor.com",
       "daytona": "https://github.com/daytonaio/daytona",
       "deepeval": "https://github.com/confident-ai/deepeval",
-      "deepteam": "https://github.com/confident-ai/deepteam",
       "dependabot": "https://github.com/dependabot/dependabot-core",
       "devin": "https://docs.devin.ai",
       "docetl": "https://github.com/ucbepic/docetl",
@@ -86,7 +85,6 @@
       "outlines": "https://github.com/dottxt-ai/outlines",
       "pathway-llm-app": "https://github.com/pathwaycom/llm-app",
       "pezzo": "https://github.com/pezzolabs/pezzo",
-      "phoenix": "https://github.com/arize-ai/phoenix",
       "playwright-mcp": "https://github.com/microsoft/playwright-mcp",
       "pr-agent": "https://github.com/codium-ai/pr-agent",
       "promptbench": "https://github.com/microsoft/promptbench",
