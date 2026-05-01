@@ -34,8 +34,6 @@ jobs:
   semgrep:
     name: scan
     runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep:latest
 
     steps:
       - name: Checkout
@@ -43,12 +41,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Uses the official Semgrep Action so SAICA-KG's own
+      # `pipeline.audit.detectors.detect_supervision_tools` recognises it
+      # via the canonical `uses: semgrep/semgrep-action` pattern in CI
+      # workflows. Behaviourally equivalent to the Docker-image route.
       - name: Run Semgrep
-        run: semgrep ci --config auto
+        uses: semgrep/semgrep-action@v1
         env:
-          # Semgrep's auto config pulls rule packs from semgrep.dev anonymously;
-          # no token needed. SEMGREP_APP_TOKEN can be added later for hosted
-          # findings triage in the Semgrep AppSec UI.
+          # Anonymous auto config pulls rule packs from semgrep.dev. No
+          # token required. SEMGREP_APP_TOKEN can be added later for the
+          # AppSec UI / managed-policies experience.
           SEMGREP_RULES: |
             p/default
             p/security-audit
