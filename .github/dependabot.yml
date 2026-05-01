@@ -1,0 +1,64 @@
+# Dependabot — supply-chain + obsolescence supervision for SAICA-KG itself.
+#
+# Rationale: SAICA-KG's own audit (validator/audit) recommended Dependabot
+# as a high-priority supervisor for the dependency_blindness +
+# supply_chain_attack failure modes. This is us eating our own dogfood.
+#
+# References:
+#   - data/tools/dependabot.yml (the KG's entry on this tool)
+#   - validator/backfill_citations.report.md (the citation evidence)
+#
+# Updates run weekly, opening PRs grouped by ecosystem. Versioning is
+# locked to the next-minor by default to keep the noise low; security
+# updates ignore that limit.
+
+version: 2
+updates:
+  # Python — agents + audit + ask + extract + sources + validator.
+  - package-ecosystem: "pip"
+    directory: "/pipeline"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    groups:
+      python-prod:
+        applies-to: version-updates
+        patterns: ["*"]
+        exclude-patterns: ["pytest", "ruff", "mypy"]
+      python-dev:
+        applies-to: version-updates
+        patterns: ["pytest", "ruff", "mypy"]
+    commit-message:
+      prefix: "deps(py)"
+      include: "scope"
+
+  # JS / TS — Astro site build + types.
+  - package-ecosystem: "npm"
+    directory: "/site"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    groups:
+      site-deps:
+        applies-to: version-updates
+        patterns: ["*"]
+    commit-message:
+      prefix: "deps(site)"
+
+  # GitHub Actions themselves — keep workflow versions current.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "deps(actions)"

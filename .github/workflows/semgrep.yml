@@ -1,0 +1,56 @@
+# Semgrep — static-analysis supervision for SAICA-KG itself.
+#
+# Rationale: the KG's recommender (saica_recommend(failure_modes=
+# ['security_vulnerability', 'dependency_blindness'])) names Semgrep as
+# the top fit for our stack (CI surface, prevention/detection paradigm,
+# matches our Python + GitHub Actions context). We're installing what we
+# recommend.
+#
+# References:
+#   - data/tools/semgrep.yml — KG entry
+#   - data/failure_modes/security_vulnerability.yml
+#   - data/failure_modes/dependency_blindness.yml
+#
+# Runs on every PR and on push to main; uses Semgrep's hosted "auto" rule
+# config (security + best-practice rule packs). No Semgrep AppSec login
+# required for the auto config — runs fully offline-from-our-side.
+
+name: Semgrep
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Weekly run catches new rules + fresh CVE coverage even on quiet weeks.
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+  pull-requests: write   # so Semgrep can post inline PR findings
+
+jobs:
+  semgrep:
+    name: scan
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep
+        run: semgrep ci --config auto
+        env:
+          # Semgrep's auto config pulls rule packs from semgrep.dev anonymously;
+          # no token needed. SEMGREP_APP_TOKEN can be added later for hosted
+          # findings triage in the Semgrep AppSec UI.
+          SEMGREP_RULES: |
+            p/default
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
