@@ -29,13 +29,13 @@ CLI::
         [--dry] [--no-network] [--threshold 0.4] \\
         [--lookback-days 30] [--categories cs.SE,cs.AI,cs.LG]
 """
+
 from __future__ import annotations
 
 import argparse
 import datetime as _dt
 import logging
 import sys
-from pathlib import Path
 from typing import Any, Iterable, Optional
 
 from pipeline.audit.kg import REPO_ROOT
@@ -63,6 +63,7 @@ ARXIV_JSON = DATA_DIR / "arxiv_candidates.json"
 # ---------------------------------------------------------------------------
 # Aggregation
 # ---------------------------------------------------------------------------
+
 
 def collect_categories(
     categories: Iterable[str],
@@ -103,6 +104,7 @@ def collect_categories(
 # ---------------------------------------------------------------------------
 # Scoring + classification
 # ---------------------------------------------------------------------------
+
 
 def _year_of(entry: dict[str, Any]) -> int:
     pub = entry.get("first_published") or entry.get("updated") or ""
@@ -182,6 +184,7 @@ def _date_int(iso: str) -> int:
 # Snapshot + markdown
 # ---------------------------------------------------------------------------
 
+
 def build_snapshot(
     *,
     categories: list[str],
@@ -250,13 +253,21 @@ def render_markdown(
         authors = c.get("authors") or []
         lines.append(
             "- **Authors:** "
-            + (", ".join(authors[:5]) + (" et al." if len(authors) > 5 else "") if authors else "(unknown)")
+            + (
+                ", ".join(authors[:5]) + (" et al." if len(authors) > 5 else "")
+                if authors
+                else "(unknown)"
+            )
         )
         lines.append(f"- **First published:** {c.get('first_published', '')}")
         cats = c.get("categories") or []
         lines.append(
             f"- **Primary category:** {c.get('primary_category', '')}"
-            + (f" (also: {', '.join(x for x in cats if x != c.get('primary_category'))})" if len(cats) > 1 else "")
+            + (
+                f" (also: {', '.join(x for x in cats if x != c.get('primary_category'))})"
+                if len(cats) > 1
+                else ""
+            )
         )
         lines.append(f"- **Relevance score:** {c.get('relevance_score', 0)}")
         fms = c.get("suggested_failure_modes") or []
@@ -273,6 +284,7 @@ def render_markdown(
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def _parse_categories(arg: str) -> list[str]:
     out: list[str] = []

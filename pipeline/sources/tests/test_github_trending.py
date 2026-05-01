@@ -4,6 +4,7 @@ All tests are network-free: HTML fixtures are stored under
 ``fixtures/trending_sample.html`` and the trending fetcher is exercised
 through the on-disk cache (``--no-network`` mode).
 """
+
 from __future__ import annotations
 
 import json
@@ -21,6 +22,7 @@ SAMPLE_HTML = (FIXTURES / "trending_sample.html").read_text(encoding="utf-8")
 # ---------------------------------------------------------------------------
 # normalize_repository_url
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "raw, expected",
@@ -42,6 +44,7 @@ def test_normalize_repository_url(raw: str, expected: str) -> None:
 # ---------------------------------------------------------------------------
 # score_relevance — boundary checks
 # ---------------------------------------------------------------------------
+
 
 def test_score_relevance_empty_returns_zero() -> None:
     assert gt.score_relevance("") == 0.0
@@ -90,6 +93,7 @@ def test_score_relevance_just_below_threshold_is_filtered() -> None:
 # infer_failure_modes — README-driven, reuses kg.FM_KEYWORDS
 # ---------------------------------------------------------------------------
 
+
 def test_infer_failure_modes_picks_up_scope_creep_and_fabrication() -> None:
     readme = (
         "These skills fix common failure modes I see with Claude Code: "
@@ -117,6 +121,7 @@ def test_infer_failure_modes_empty_text_returns_empty_list() -> None:
 # parse_trending_html
 # ---------------------------------------------------------------------------
 
+
 def test_parse_trending_html_extracts_three_repos() -> None:
     items = gt.parse_trending_html(SAMPLE_HTML)
     assert len(items) == 3
@@ -141,6 +146,7 @@ def test_parse_trending_html_regex_fallback_matches_bs4() -> None:
 # ---------------------------------------------------------------------------
 # fetch_trending_page — uses on-disk cache, no network
 # ---------------------------------------------------------------------------
+
 
 def test_fetch_trending_page_uses_cache(tmp_path: Path) -> None:
     cache_dir = tmp_path / "cache"
@@ -174,6 +180,7 @@ def test_fetch_trending_page_no_cache_no_network_returns_empty(tmp_path: Path) -
 # End-to-end orchestrator integration (network-free, fixture-fed)
 # ---------------------------------------------------------------------------
 
+
 def _seed_cache(cache_dir: Path, today: str) -> None:
     """Seed every (lang, since) cache entry with the same fixture HTML."""
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -184,7 +191,9 @@ def _seed_cache(cache_dir: Path, today: str) -> None:
         )
 
 
-def test_end_to_end_orchestrator_offline(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_end_to_end_orchestrator_offline(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     cache_dir = tmp_path / "cache" / "trending"
     today = "2026-04-23"
     _seed_cache(cache_dir, today)
@@ -232,7 +241,8 @@ def test_end_to_end_orchestrator_offline(monkeypatch: pytest.MonkeyPatch, tmp_pa
 
     # The skills candidate must include at least one of the targeted FMs.
     skills = next(
-        c for c in snap["new_candidates"]
+        c
+        for c in snap["new_candidates"]
         if c["repository_url"] == "https://github.com/mattpocock/skills"
     )
     assert skills["relevance_score"] >= gt.RELEVANCE_THRESHOLD

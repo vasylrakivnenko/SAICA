@@ -57,55 +57,82 @@ PIPELINE_INTENT_RE = re.compile(
 # precision-biased; over-tagging muddies the answer, under-tagging just means
 # the prompt can't use that hint. Tools can match multiple surfaces.
 _SURFACE_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
-    ("ide_plugin", re.compile(
-        r"\b(vs\s?code(?:\sextension)?|vscode|jetbrains|intellij|pycharm|"
-        r"neovim\splugin|emacs\spackage|ide\s(?:plugin|extension)|editor\sextension)\b",
-        re.IGNORECASE,
-    )),
-    ("desktop_app", re.compile(
-        r"\b(desktop\sapp(?:lication)?|standalone\s(?:ide|editor)|ai[- ]first\sIDE|"
-        r"forked?\svs\s?code|ai\s?code\seditor|rust-based\sIDE)\b",
-        re.IGNORECASE,
-    )),
-    ("web_app", re.compile(
-        r"\b(in[- ]browser|hosted\sworkspace|web\sworkspace|web\sIDE|"
-        r"browser-based\sIDE|generative\sUI|web\sapp\sbuilder|cloud\sworkspace|"
-        r"ai\sapp\splatform|hosted\splatform\sUI)\b",
-        re.IGNORECASE,
-    )),
-    ("cli", re.compile(
-        r"\b(CLI\b|command[- ]line|terminal\stool|\-\-help\b|"
-        r"\bnpx\s|\bpipx\s|invok(?:e|ed)\sfrom\s(?:the\s)?shell)\b",
-        re.IGNORECASE,
-    )),
-    ("library", re.compile(
-        r"\b(python\s(?:library|package|sdk)|typescript\s(?:library|sdk)|"
-        r"node\s(?:library|package|sdk)|\bsdk\b|pip\sinstall|npm\sinstall|"
-        r"imported?\s(?:as|in)\scode|programmatic(?:\sAPI)?|framework\sfor\s"
-        r"building|decorator-based)\b",
-        re.IGNORECASE,
-    )),
-    ("http_service", re.compile(
-        r"\b(self[- ]hosted\sservice|rest\sapi|http\sapi|http\sservice|"
-        r"http\sendpoint|observability\splatform|telemetry\sbackend|"
-        r"tracing\sbackend|dashboard(?:\sservice)?|hosted\sendpoint)\b",
-        re.IGNORECASE,
-    )),
-    ("mcp_server", re.compile(
-        r"\b(mcp\sserver|model\scontext\sprotocol|mcp\sendpoint|mcp\scell)\b",
-        re.IGNORECASE,
-    )),
-    ("ci_app", re.compile(
-        r"\b(github\sactions?|gitlab\sci|pre[- ]commit|ci\sgate|ci\sgating|"
-        r"dependabot|renovate|bot\sthat\sopens\sPRs?|PR\sbot|pull-request\sbot)\b",
-        re.IGNORECASE,
-    )),
-    ("proxy_gateway", re.compile(
-        r"\b(llm\sgateway|llm\sproxy|model\sgateway|intercepts?\s(?:calls|traffic)|"
-        r"drop[- ]in\sproxy|unified\sproxy|sits?\sbetween\s(?:the\s)?caller|"
-        r"transparent\sproxy)\b",
-        re.IGNORECASE,
-    )),
+    (
+        "ide_plugin",
+        re.compile(
+            r"\b(vs\s?code(?:\sextension)?|vscode|jetbrains|intellij|pycharm|"
+            r"neovim\splugin|emacs\spackage|ide\s(?:plugin|extension)|editor\sextension)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "desktop_app",
+        re.compile(
+            r"\b(desktop\sapp(?:lication)?|standalone\s(?:ide|editor)|ai[- ]first\sIDE|"
+            r"forked?\svs\s?code|ai\s?code\seditor|rust-based\sIDE)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "web_app",
+        re.compile(
+            r"\b(in[- ]browser|hosted\sworkspace|web\sworkspace|web\sIDE|"
+            r"browser-based\sIDE|generative\sUI|web\sapp\sbuilder|cloud\sworkspace|"
+            r"ai\sapp\splatform|hosted\splatform\sUI)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "cli",
+        re.compile(
+            r"\b(CLI\b|command[- ]line|terminal\stool|\-\-help\b|"
+            r"\bnpx\s|\bpipx\s|invok(?:e|ed)\sfrom\s(?:the\s)?shell)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "library",
+        re.compile(
+            r"\b(python\s(?:library|package|sdk)|typescript\s(?:library|sdk)|"
+            r"node\s(?:library|package|sdk)|\bsdk\b|pip\sinstall|npm\sinstall|"
+            r"imported?\s(?:as|in)\scode|programmatic(?:\sAPI)?|framework\sfor\s"
+            r"building|decorator-based)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "http_service",
+        re.compile(
+            r"\b(self[- ]hosted\sservice|rest\sapi|http\sapi|http\sservice|"
+            r"http\sendpoint|observability\splatform|telemetry\sbackend|"
+            r"tracing\sbackend|dashboard(?:\sservice)?|hosted\sendpoint)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "mcp_server",
+        re.compile(
+            r"\b(mcp\sserver|model\scontext\sprotocol|mcp\sendpoint|mcp\scell)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "ci_app",
+        re.compile(
+            r"\b(github\sactions?|gitlab\sci|pre[- ]commit|ci\sgate|ci\sgating|"
+            r"dependabot|renovate|bot\sthat\sopens\sPRs?|PR\sbot|pull-request\sbot)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "proxy_gateway",
+        re.compile(
+            r"\b(llm\sgateway|llm\sproxy|model\sgateway|intercepts?\s(?:calls|traffic)|"
+            r"drop[- ]in\sproxy|unified\sproxy|sits?\sbetween\s(?:the\s)?caller|"
+            r"transparent\sproxy)\b",
+            re.IGNORECASE,
+        ),
+    ),
 )
 
 # Additional per-id overrides — for the cases where the description is a poor
@@ -114,121 +141,128 @@ _SURFACE_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
 # calls read the declared field rather than re-inferring.
 _SURFACE_OVERRIDES: dict[str, tuple[str, ...]] = {
     # IDE / desktop / hosted coding agents
-    "cursor":           ("desktop_app",),
-    "windsurf":         ("desktop_app",),
-    "zed-agent":        ("desktop_app",),
-    "replit-agent":     ("web_app",),
-    "v0":               ("web_app",),
-    "devin":            ("web_app",),
-    "github-copilot":   ("ide_plugin",),
-    "continue-dev":     ("ide_plugin", "library"),
+    "cursor": ("desktop_app",),
+    "windsurf": ("desktop_app",),
+    "zed-agent": ("desktop_app",),
+    "replit-agent": ("web_app",),
+    "v0": ("web_app",),
+    "devin": ("web_app",),
+    "github-copilot": ("ide_plugin",),
+    "continue-dev": ("ide_plugin", "library"),
     "sourcegraph-cody": ("ide_plugin",),
-    "claude-code":      ("cli", "ide_plugin"),
-    "codex-cli":        ("cli",),
-    "gemini-cli":       ("cli",),
-    "aider":            ("cli",),
-    "swe-agent":        ("cli", "library"),
-    "openhands":        ("cli", "library"),
+    "claude-code": ("cli", "ide_plugin"),
+    "codex-cli": ("cli",),
+    "gemini-cli": ("cli",),
+    "aider": ("cli",),
+    "swe-agent": ("cli", "library"),
+    "openhands": ("cli", "library"),
     # Static analysis / supply chain / CI
-    "semgrep":          ("cli", "ci_app", "library"),
-    "snyk":             ("cli", "ci_app"),
-    "socket":           ("ci_app",),
-    "dependabot":       ("ci_app",),
-    "renovate":         ("ci_app",),
-    "pr-agent":         ("ci_app", "cli"),
+    "semgrep": ("cli", "ci_app", "library"),
+    "snyk": ("cli", "ci_app"),
+    "socket": ("ci_app",),
+    "dependabot": ("ci_app",),
+    "renovate": ("ci_app",),
+    "pr-agent": ("ci_app", "cli"),
     # Guardrails / structured output / proxies
-    "litellm":          ("library", "proxy_gateway"),
-    "bifrost":          ("proxy_gateway", "http_service"),
-    "llm-guard":        ("library",),
-    "guardrails-ai":    ("library",),
-    "nemo-guardrails":  ("library",),
-    "instructor":       ("library",),
-    "pydantic-ai":      ("library",),
-    "langgraph":        ("library",),
-    "crewai":           ("library",),
-    "autogen":          ("library",),
-    "agno":             ("library",),
-    "smolagents":       ("library",),
-    "letta":            ("library", "http_service"),
-    "mastra":           ("library",),
-    "voltagent":        ("library",),
-    "rebuff":           ("library",),
-    "superagent":       ("library", "http_service"),
-    "outlines":         ("library",),
-    "guidance":         ("library",),
-    "tree-sitter":      ("library",),
+    "litellm": ("library", "proxy_gateway"),
+    "bifrost": ("proxy_gateway", "http_service"),
+    "llm-guard": ("library",),
+    "guardrails-ai": ("library",),
+    "nemo-guardrails": ("library",),
+    "instructor": ("library",),
+    "pydantic-ai": ("library",),
+    "langgraph": ("library",),
+    "crewai": ("library",),
+    "autogen": ("library",),
+    "agno": ("library",),
+    "smolagents": ("library",),
+    "letta": ("library", "http_service"),
+    "mastra": ("library",),
+    "voltagent": ("library",),
+    "rebuff": ("library",),
+    "superagent": ("library", "http_service"),
+    "outlines": ("library",),
+    "guidance": ("library",),
+    "tree-sitter": ("library",),
     # Eval / red-team / testing harnesses
-    "promptfoo":        ("cli", "library", "ci_app"),
-    "deepeval":         ("library", "cli"),
+    "promptfoo": ("cli", "library", "ci_app"),
+    "deepeval": ("library", "cli"),
     "confident-ai-deepteam": ("library", "cli"),
-    "judgeval":         ("library", "cli"),
-    "ragas":            ("library",),
-    "trulens":          ("library",),
-    "garak":            ("cli", "library"),
-    "pyrit":            ("library", "cli"),
-    "giskard":          ("library", "cli", "ci_app"),
-    "openai-evals":     ("library", "cli"),
+    "judgeval": ("library", "cli"),
+    "ragas": ("library",),
+    "trulens": ("library",),
+    "garak": ("cli", "library"),
+    "pyrit": ("library", "cli"),
+    "giskard": ("library", "cli", "ci_app"),
+    "openai-evals": ("library", "cli"),
     "lm-evaluation-harness": ("cli", "library"),
-    "lmms-eval":        ("cli", "library"),
-    "lighteval":        ("cli", "library"),
-    "helm":             ("cli", "library"),
-    "promptbench":      ("library",),
-    "fuzzyai":          ("cli", "library"),
+    "lmms-eval": ("cli", "library"),
+    "lighteval": ("cli", "library"),
+    "helm": ("cli", "library"),
+    "promptbench": ("library",),
+    "fuzzyai": ("cli", "library"),
     "agentic-security": ("cli", "library"),
     "ai-red-teaming-playground-labs": ("web_app",),
-    "uqlm":             ("library",),
-    "autorag":          ("library", "cli"),
-    "safe-rlhf":        ("library",),
+    "uqlm": ("library",),
+    "autorag": ("library", "cli"),
+    "safe-rlhf": ("library",),
     # Observability backends
-    "langfuse":         ("http_service", "library"),
-    "langsmith":        ("http_service", "library"),
-    "helicone":         ("proxy_gateway", "http_service", "library"),
-    "arize-phoenix":    ("http_service", "library"),
-    "logfire":          ("http_service", "library"),
-    "openlit":          ("http_service", "library"),
-    "opik":             ("http_service", "library"),
-    "lmnr":             ("http_service", "library"),
-    "braintrust":       ("http_service", "library"),
-    "mlflow":           ("http_service", "library", "cli"),
-    "agenta":           ("http_service", "library"),
-    "pezzo":            ("http_service", "library"),
+    "langfuse": ("http_service", "library"),
+    "langsmith": ("http_service", "library"),
+    "helicone": ("proxy_gateway", "http_service", "library"),
+    "arize-phoenix": ("http_service", "library"),
+    "logfire": ("http_service", "library"),
+    "openlit": ("http_service", "library"),
+    "opik": ("http_service", "library"),
+    "lmnr": ("http_service", "library"),
+    "braintrust": ("http_service", "library"),
+    "mlflow": ("http_service", "library", "cli"),
+    "agenta": ("http_service", "library"),
+    "pezzo": ("http_service", "library"),
     # Sandboxes / runtime isolation
-    "modal":            ("library", "cli"),
-    "e2b":              ("library", "http_service"),
-    "daytona":          ("cli", "http_service"),
-    "nono":             ("cli", "library"),
+    "modal": ("library", "cli"),
+    "e2b": ("library", "http_service"),
+    "daytona": ("cli", "http_service"),
+    "nono": ("cli", "library"),
     # Workflow / low-code / platforms
-    "flowise":          ("web_app", "http_service"),
-    "activepieces":     ("web_app", "http_service"),
-    "coze-loop":        ("web_app", "http_service"),
-    "comfyui":          ("web_app", "desktop_app"),
+    "flowise": ("web_app", "http_service"),
+    "activepieces": ("web_app", "http_service"),
+    "coze-loop": ("web_app", "http_service"),
+    "comfyui": ("web_app", "desktop_app"),
     "agent-governance-toolkit": ("library", "cli"),
-    "pathway-llm-app":  ("library", "http_service"),
-    "ragflow":          ("http_service", "library"),
-    "docetl":           ("library", "cli"),
+    "pathway-llm-app": ("library", "http_service"),
+    "ragflow": ("http_service", "library"),
+    "docetl": ("library", "cli"),
     # Browser / RPA
-    "skyvern":          ("library", "http_service"),
-    "browser-use":      ("library", "web_app"),
+    "skyvern": ("library", "http_service"),
+    "browser-use": ("library", "web_app"),
     # Honeypots / deception
-    "beelzebub":        ("http_service", "library"),
+    "beelzebub": ("http_service", "library"),
     # Explicit MCP servers (covered by regex for most, pin the borderline cases)
-    "browser-mcp":      ("mcp_server",),
-    "mcp-playwright":   ("mcp_server",),
+    "browser-mcp": ("mcp_server",),
+    "mcp-playwright": ("mcp_server",),
     "mcp-server-browserbase": ("mcp_server", "library"),
-    "playwright-mcp":   ("mcp_server",),
-    "magic-mcp":        ("mcp_server",),
-    "context-hub":      ("mcp_server",),
-    "mcp-toolbox":      ("mcp_server",),
+    "playwright-mcp": ("mcp_server",),
+    "magic-mcp": ("mcp_server",),
+    "context-hub": ("mcp_server",),
+    "mcp-toolbox": ("mcp_server",),
     # Prompt/workflow tooling
-    "promptflow":       ("library", "ide_plugin"),
-    "promptmap":        ("cli",),
-    "manifest":         ("library",),
+    "promptflow": ("library", "ide_plugin"),
+    "promptmap": ("cli",),
+    "manifest": ("library",),
 }
 
 # For rendering + the prompt rule: which surfaces count as pipeline-friendly?
-PIPELINE_FRIENDLY: frozenset[str] = frozenset({
-    "cli", "library", "http_service", "mcp_server", "ci_app", "proxy_gateway",
-})
+PIPELINE_FRIENDLY: frozenset[str] = frozenset(
+    {
+        "cli",
+        "library",
+        "http_service",
+        "mcp_server",
+        "ci_app",
+        "proxy_gateway",
+    }
+)
 
 
 def _detect_integration_surfaces(data: dict) -> tuple[str, ...]:
@@ -251,12 +285,14 @@ def _detect_integration_surfaces(data: dict) -> tuple[str, ...]:
     if node_id in _SURFACE_OVERRIDES:
         return _SURFACE_OVERRIDES[node_id]
 
-    text = " ".join([
-        str(data.get("name") or ""),
-        str(data.get("tagline") or ""),
-        str(data.get("description") or ""),
-        str(data.get("inclusion_rationale") or ""),
-    ])
+    text = " ".join(
+        [
+            str(data.get("name") or ""),
+            str(data.get("tagline") or ""),
+            str(data.get("description") or ""),
+            str(data.get("inclusion_rationale") or ""),
+        ]
+    )
     seen: set[str] = set()
     out: list[str] = []
     for surface, pat in _SURFACE_RULES:
@@ -345,7 +381,9 @@ def hydrate(hits: Iterable[tuple[str, float]]) -> list[NodeContext]:
     for node_id, sim in hits:
         loaded = _load_node_yaml(node_id)
         if loaded is None:
-            log.warning("ask: retrieval hit %r did not resolve to a known node", node_id)
+            log.warning(
+                "ask: retrieval hit %r did not resolve to a known node", node_id
+            )
             continue
         node_type, data = loaded
         snippet = _extract_description(node_type, data)
@@ -363,9 +401,9 @@ def hydrate(hits: Iterable[tuple[str, float]]) -> list[NodeContext]:
             fms = data.get("addresses_failure_modes") or []
             if isinstance(fms, list):
                 kwargs["addresses_failure_modes"] = tuple(str(x) for x in fms)
-            kwargs["control_paradigm"] = (data.get("control_paradigm") or None)
-            kwargs["temporal_phase"] = (data.get("temporal_phase") or None)
-            kwargs["autonomy_level"] = (data.get("autonomy_level") or None)
+            kwargs["control_paradigm"] = data.get("control_paradigm") or None
+            kwargs["temporal_phase"] = data.get("temporal_phase") or None
+            kwargs["autonomy_level"] = data.get("autonomy_level") or None
             kwargs["integration_surfaces"] = _detect_integration_surfaces(data)
 
         out.append(NodeContext(**kwargs))
@@ -469,7 +507,11 @@ def _wants_pipeline(question: str) -> bool:
 
 
 def build_prompt(question: str, nodes: list[NodeContext]) -> str:
-    rule = INTEGRATION_RULE_PIPELINE if _wants_pipeline(question) else INTEGRATION_RULE_NEUTRAL
+    rule = (
+        INTEGRATION_RULE_PIPELINE
+        if _wants_pipeline(question)
+        else INTEGRATION_RULE_NEUTRAL
+    )
     return PROMPT_TEMPLATE.format(
         context_blocks=render_context_block(nodes),
         question=question.strip(),

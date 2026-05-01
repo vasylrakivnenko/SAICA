@@ -60,7 +60,9 @@ def _insert_after(doc, anchor: str, key: str, value) -> bool:
     return True
 
 
-def annotate_file(path: Path, *, yaml: YAML, overwrite: bool) -> tuple[str, list[str] | None]:
+def annotate_file(
+    path: Path, *, yaml: YAML, overwrite: bool
+) -> tuple[str, list[str] | None]:
     """Annotate one tool file.
 
     Returns ``(action, surfaces)`` where action is one of:
@@ -106,15 +108,23 @@ def annotate_file(path: Path, *, yaml: YAML, overwrite: bool) -> tuple[str, list
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry", action="store_true", help="preview surfaces; do not write")
-    parser.add_argument("--overwrite", action="store_true", help="rewrite files even when the field is already set")
+    parser.add_argument(
+        "--dry", action="store_true", help="preview surfaces; do not write"
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="rewrite files even when the field is already set",
+    )
     args = parser.parse_args()
 
     yaml = _make_yaml()
     paths = sorted(TOOLS_DIR.glob("*.yml"))
     counts: dict[str, int] = {
-        "wrote": 0, "rewrote": 0,
-        "skipped_has_field": 0, "skipped_no_surfaces_detected": 0,
+        "wrote": 0,
+        "rewrote": 0,
+        "skipped_has_field": 0,
+        "skipped_no_surfaces_detected": 0,
     }
     no_surface_ids: list[str] = []
 
@@ -147,7 +157,9 @@ def main() -> int:
         print(f"  {k}: {v}")
     if no_surface_ids:
         print()
-        print(f"no surfaces detected ({len(no_surface_ids)}): {', '.join(no_surface_ids)}")
+        print(
+            f"no surfaces detected ({len(no_surface_ids)}): {', '.join(no_surface_ids)}"
+        )
         print("(these tools need a manual entry or an override in _SURFACE_OVERRIDES)")
 
     return 0

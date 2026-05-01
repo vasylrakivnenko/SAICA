@@ -55,7 +55,10 @@ def run() -> int:
         proposed_id="tool-x",
         name="Tool X",
         summary="Supervision layer for coding agents.",
-        nlp_tags={"keywords": ["supervision", "agent"], "failure_modes": ["fabrication"]},
+        nlp_tags={
+            "keywords": ["supervision", "agent"],
+            "failure_modes": ["fabrication"],
+        },
     )
     assert isinstance(cid, int) and cid > 0
 

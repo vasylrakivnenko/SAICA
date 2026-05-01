@@ -25,7 +25,7 @@ import json
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence
 
 from pipeline.taxonomy_cluster.collect import (
     CategoryRow,
@@ -41,16 +41,16 @@ UNMAPPED = "__unmapped__"
 class ClusterSummary:
     """Per-cluster row of the comparison table."""
 
-    cluster_id: int                     # -1 for HDBSCAN noise
+    cluster_id: int  # -1 for HDBSCAN noise
     size: int
-    proposed_name: str                  # from the most-cited parent taxonomy's member
-    proposed_from_external_id: str      # the member category used for naming
+    proposed_name: str  # from the most-cited parent taxonomy's member
+    proposed_from_external_id: str  # the member category used for naming
     proposed_from_source_tax_id: str
-    top_saica_mode: str                 # winner of majority vote, or UNMAPPED
-    coverage_pct: float                 # share of cluster that lands in top_saica_mode
-    saica_mode_spread: int              # distinct SAICA modes spanned
-    disagreement: bool                  # cluster combines >1 SAICA modes or is unmapped
-    members: List[str]                  # row keys ("{tax}::{ext}") in the cluster
+    top_saica_mode: str  # winner of majority vote, or UNMAPPED
+    coverage_pct: float  # share of cluster that lands in top_saica_mode
+    saica_mode_spread: int  # distinct SAICA modes spanned
+    disagreement: bool  # cluster combines >1 SAICA modes or is unmapped
+    members: List[str]  # row keys ("{tax}::{ext}") in the cluster
 
     def to_jsonable(self) -> Dict:
         return asdict(self)
@@ -242,9 +242,7 @@ def render_comparison_markdown(
     lines: List[str] = []
     lines.append("# SAICA-vs-Algorithmic Cluster Comparison")
     lines.append("")
-    lines.append(
-        f"- Manual SAICA FailureModes: **{n_manual}**"
-    )
+    lines.append(f"- Manual SAICA FailureModes: **{n_manual}**")
     lines.append(
         f"- Text-embedding clusters: **{n_text}** "
         f"(ARI vs SAICA: {text_agreement['ari']}, NMI: {text_agreement['nmi']})"
@@ -305,9 +303,7 @@ def top_disagreements(
     Noise clusters (cid = -1) and single-member clusters are skipped.
     """
     candidates = [
-        s
-        for s in summaries
-        if s.disagreement and s.cluster_id >= 0 and s.size >= 2
+        s for s in summaries if s.disagreement and s.cluster_id >= 0 and s.size >= 2
     ]
     candidates.sort(
         key=lambda s: (-s.size, -s.saica_mode_spread, s.coverage_pct, s.cluster_id)

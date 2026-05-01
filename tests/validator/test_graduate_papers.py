@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 
 from validator.graduate_papers import (
     Candidate,
@@ -129,16 +128,16 @@ def test_dedup_doi_match() -> None:
 
 
 def test_dedup_title_match() -> None:
-    idx = DedupIndex(
-        titles={"taxonomy-failure-modes-llm-coding-agents"}
-    )
+    idx = DedupIndex(titles={"taxonomy-failure-modes-llm-coding-agents"})
     c = _candidate(arxiv_id=None, doi=None)
     assert idx.is_duplicate(c) and idx.is_duplicate(c).startswith("title=")
 
 
 def test_dedup_no_false_positive() -> None:
     idx = DedupIndex(
-        ids={"foo"}, arxiv_ids={"9999.9999"}, dois={"10.x/y"},
+        ids={"foo"},
+        arxiv_ids={"9999.9999"},
+        dois={"10.x/y"},
         titles={"some-other-title"},
     )
     c = _candidate()
@@ -162,7 +161,7 @@ def test_dedup_index_loads_existing(tmp_path: Path) -> None:
         "id: fake-2025-thing\n"
         "authors:\n  - Some Author\n"
         "year: 2025\n"
-        "title: \"Fake Thing About Stuff\"\n"
+        'title: "Fake Thing About Stuff"\n'
         'arxiv_id: "9000.0001"\n'
         'doi: "10.x/Fake"\n'
     )
@@ -281,7 +280,7 @@ def test_run_dry_mode_writes_no_files(tmp_path: Path, monkeypatch) -> None:
     papers_dir = tmp_path / "papers"
     papers_dir.mkdir()
     (papers_dir / "seed.yml").write_text(
-        "id: seed\nauthors:\n  - X\nyear: 2025\ntitle: \"Seed\"\n"
+        'id: seed\nauthors:\n  - X\nyear: 2025\ntitle: "Seed"\n'
     )
     report = tmp_path / "report.md"
     summary = run(
@@ -293,9 +292,7 @@ def test_run_dry_mode_writes_no_files(tmp_path: Path, monkeypatch) -> None:
     )
     # Existing seed file must be untouched and no new papers written.
     assert (papers_dir / "seed.yml").exists()
-    new_files = [
-        f for f in papers_dir.glob("*.yml") if f.name != "seed.yml"
-    ]
+    new_files = [f for f in papers_dir.glob("*.yml") if f.name != "seed.yml"]
     assert new_files == []
     assert report.exists()
     assert "graduate_papers report" in report.read_text()

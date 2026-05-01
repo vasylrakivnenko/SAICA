@@ -15,7 +15,6 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
-import pytest
 
 from pipeline.cli.graduate import Decision, _build_tool_yaml
 from pipeline.graduate.fallbacks import (
@@ -67,9 +66,7 @@ def _all_decisions(
     return {
         "proposed_id": Decision("widget", 0.95, accepted=True),
         "name": Decision("Widget", name_conf, accepted=name_conf >= 0.85),
-        "tagline": Decision(
-            tagline_value, tagline_conf, accepted=tagline_conf >= 0.85
-        ),
+        "tagline": Decision(tagline_value, tagline_conf, accepted=tagline_conf >= 0.85),
         "description": Decision(
             description_value,
             description_conf,
@@ -79,9 +76,7 @@ def _all_decisions(
             "https://github.com/acme/widget", 0.95, accepted=True
         ),
         "license_spdx": Decision(None, license_conf, accepted=False),
-        "control_paradigm": Decision(
-            None, control_paradigm_conf, accepted=False
-        ),
+        "control_paradigm": Decision(None, control_paradigm_conf, accepted=False),
         "temporal_phase": Decision(None, 0.3, accepted=False),
         "autonomy_level": Decision(None, 0.3, accepted=False),
         "addresses_failure_modes": Decision([], 0.3, accepted=False),
@@ -275,9 +270,9 @@ def test_strict_enum_fields_never_guess() -> None:
         "addresses_failure_modes",
         "locus_of_control",
     ):
-        assert field not in FALLBACK_ELIGIBLE_FIELDS, (
-            f"{field} must never be populated from GitHub data"
-        )
+        assert (
+            field not in FALLBACK_ELIGIBLE_FIELDS
+        ), f"{field} must never be populated from GitHub data"
         result = apply_field_fallback(
             field,
             kimi_value=None,

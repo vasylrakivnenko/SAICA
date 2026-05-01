@@ -12,6 +12,7 @@ we load ``schemas.py`` directly by file path using ``importlib.util``. Once
 Agent A lands ``analyzer.py``, the standard ``from pipeline.audit.schemas
 import ...`` form will also work, but this loader keeps working either way.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -25,6 +26,7 @@ def _load_schemas() -> ModuleType:
     # without the importlib detour and we benefit from the standard cache.
     try:
         from pipeline.audit import schemas as _real  # type: ignore[import-not-found]
+
         return _real
     except ImportError:
         pass
@@ -36,9 +38,7 @@ def _load_schemas() -> ModuleType:
     if cached is not None:
         return cached
 
-    schemas_path = (
-        Path(__file__).resolve().parents[1] / "audit" / "schemas.py"
-    )
+    schemas_path = Path(__file__).resolve().parents[1] / "audit" / "schemas.py"
     if not schemas_path.exists():
         raise ImportError(
             f"pipeline/audit/schemas.py not found at {schemas_path}; "

@@ -21,6 +21,7 @@ Polite-scraper defaults: 2.0s minimum interval to ``github.com/trending``
 pages and a custom User-Agent. The HTML parser prefers BeautifulSoup when
 available and falls back to a regex-based reader otherwise.
 """
+
 from __future__ import annotations
 
 import datetime as _dt
@@ -40,9 +41,7 @@ log = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CACHE_DIR = REPO_ROOT / ".cache" / "trending"
 
-USER_AGENT = (
-    "SAICA-KG-Trending-Bot/0.2 (https://github.com/saica-kg/saica-kg)"
-)
+USER_AGENT = "SAICA-KG-Trending-Bot/0.2 (https://github.com/saica-kg/saica-kg)"
 TRENDING_BASE = "https://github.com/trending"
 RAW_README_BASE = "https://raw.githubusercontent.com"
 
@@ -172,6 +171,7 @@ def _owner_repo(url: str) -> Optional[tuple[str, str]]:
 # HTML parsing — bs4 preferred, regex fallback
 # ---------------------------------------------------------------------------
 
+
 def _parse_with_bs4(html: str) -> list[dict[str, Any]]:
     from bs4 import BeautifulSoup  # local import: optional dep
 
@@ -224,11 +224,11 @@ _ARTICLE_RE = re.compile(
     r'<article[^>]*class="[^"]*Box-row[^"]*"[^>]*>(.*?)</article>',
     re.DOTALL | re.IGNORECASE,
 )
-_HREF_RE = re.compile(r'<h[12][^>]*>\s*<a[^>]*href="([^"]+)"', re.DOTALL | re.IGNORECASE)
-_DESC_RE = re.compile(r"<p[^>]*>(.*?)</p>", re.DOTALL | re.IGNORECASE)
-_LANG_RE = re.compile(
-    r'itemprop="programmingLanguage"[^>]*>([^<]+)<', re.IGNORECASE
+_HREF_RE = re.compile(
+    r'<h[12][^>]*>\s*<a[^>]*href="([^"]+)"', re.DOTALL | re.IGNORECASE
 )
+_DESC_RE = re.compile(r"<p[^>]*>(.*?)</p>", re.DOTALL | re.IGNORECASE)
+_LANG_RE = re.compile(r'itemprop="programmingLanguage"[^>]*>([^<]+)<', re.IGNORECASE)
 _STARS_RE = re.compile(
     r'href="[^"]+/stargazers"[^>]*>(.*?)</a>', re.DOTALL | re.IGNORECASE
 )
@@ -291,6 +291,7 @@ def parse_trending_html(html: str) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Trending page fetch (with disk cache)
 # ---------------------------------------------------------------------------
+
 
 def _cache_key(language: Optional[str], since: str, today_iso: str) -> str:
     lang = language or "all"
@@ -411,6 +412,7 @@ def fetch_readme(
 # Relevance + FM inference
 # ---------------------------------------------------------------------------
 
+
 def score_relevance(text: str) -> float:
     """Weighted-keyword relevance score in ``[0, 1]``.
 
@@ -520,7 +522,9 @@ def page_source_label(language: Optional[str], since: str) -> str:
 def write_json(path: Path, doc: dict[str, Any]) -> None:
     """Write JSON with a stable indent — used by tests + the orchestrator."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 __all__ = [

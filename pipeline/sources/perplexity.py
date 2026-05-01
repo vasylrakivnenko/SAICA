@@ -40,7 +40,9 @@ def _extract_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
                 {
                     "url": r.get("url"),
                     "title": r.get("title") or r.get("name"),
-                    "snippet": r.get("snippet") or r.get("description") or r.get("text"),
+                    "snippet": r.get("snippet")
+                    or r.get("description")
+                    or r.get("text"),
                     "raw": r,
                 }
             )
@@ -52,7 +54,9 @@ def _extract_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
     if isinstance(citations, list):
         for c in citations:
             if isinstance(c, str):
-                records.append({"url": c, "title": None, "snippet": None, "raw": {"url": c}})
+                records.append(
+                    {"url": c, "title": None, "snippet": None, "raw": {"url": c}}
+                )
             elif isinstance(c, dict):
                 records.append(
                     {
@@ -75,7 +79,9 @@ def _extract_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
         if isinstance(msg_cits, list):
             for c in msg_cits:
                 if isinstance(c, str):
-                    records.append({"url": c, "title": None, "snippet": None, "raw": {"url": c}})
+                    records.append(
+                        {"url": c, "title": None, "snippet": None, "raw": {"url": c}}
+                    )
                 elif isinstance(c, dict):
                     records.append(
                         {

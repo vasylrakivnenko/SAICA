@@ -10,46 +10,91 @@ from __future__ import annotations
 
 FAILURE_MODE_KEYWORDS: dict[str, list[str]] = {
     "fabrication": [
-        "hallucination", "hallucinate", "hallucinated", "fabrication",
-        "non-existent api", "imagined package", "phantom dependency",
+        "hallucination",
+        "hallucinate",
+        "hallucinated",
+        "fabrication",
+        "non-existent api",
+        "imagined package",
+        "phantom dependency",
         "invented function",
     ],
     "obsolescence": [
-        "deprecated", "retired api", "stale api", "outdated library",
-        "version drift", "library evolution", "deprecation",
+        "deprecated",
+        "retired api",
+        "stale api",
+        "outdated library",
+        "version drift",
+        "library evolution",
+        "deprecation",
     ],
     "dependency_blindness": [
-        "reinvention", "reinvent", "duplicate implementation", "code copycat",
-        "reimplements", "reimplementing", "ecosystem duplication",
+        "reinvention",
+        "reinvent",
+        "duplicate implementation",
+        "code copycat",
+        "reimplements",
+        "reimplementing",
+        "ecosystem duplication",
         "ignores existing",
     ],
     "logic_error": [
-        "incorrect logic", "silent fail", "compiles but wrong",
+        "incorrect logic",
+        "silent fail",
+        "compiles but wrong",
         "passes type check fails correctness",
     ],
     "security_vulnerability": [
-        "injection", "sql injection", "xss", "secret leak", "weak crypto",
-        "insecure deserialization", "cve", "bandit", "semgrep",
+        "injection",
+        "sql injection",
+        "xss",
+        "secret leak",
+        "weak crypto",
+        "insecure deserialization",
+        "cve",
+        "bandit",
+        "semgrep",
     ],
     "scope_creep": [
-        "scope creep", "unauthorized action", "boundary violation",
-        "role violation", "acted outside", "unsanctioned",
+        "scope creep",
+        "unauthorized action",
+        "boundary violation",
+        "role violation",
+        "acted outside",
+        "unsanctioned",
     ],
     "context_pollution": [
-        "context drift", "hallucination spiral", "context window overflow",
-        "trajectory drift", "long-context degradation", "memory poisoning",
+        "context drift",
+        "hallucination spiral",
+        "context window overflow",
+        "trajectory drift",
+        "long-context degradation",
+        "memory poisoning",
     ],
     "supply_chain_attack": [
-        "slopsquatting", "typosquatting", "compromised package",
-        "malicious mcp", "compromised mcp server", "supply chain attack",
-        "supply-chain vulnerability", "asi04",
+        "slopsquatting",
+        "typosquatting",
+        "compromised package",
+        "malicious mcp",
+        "compromised mcp server",
+        "supply chain attack",
+        "supply-chain vulnerability",
+        "asi04",
     ],
 }
 
 # High-signal publisher/venue names — a hit bumps relevance.
 HIGH_SIGNAL_ORGS: list[str] = [
-    "anthropic", "openai", "google", "microsoft", "meta", "huggingface",
-    "langchain", "deeplearning.ai", "nvidia", "sourcegraph",
+    "anthropic",
+    "openai",
+    "google",
+    "microsoft",
+    "meta",
+    "huggingface",
+    "langchain",
+    "deeplearning.ai",
+    "nvidia",
+    "sourcegraph",
 ]
 
 # Tool-shape signals (heuristic: is this a Tool or a Paper?)
@@ -58,8 +103,15 @@ HIGH_SIGNAL_ORGS: list[str] = [
 # the tool-vs-paper decision. Don't use for relevance boosting — use
 # ``TOOL_SHAPE_SIGNALS`` below for that, which is a richer domain-weighted set.
 TOOL_SIGNALS: list[str] = [
-    "cli", "framework", "sdk", "agent", "guardrails", "sandbox",
-    "registry", "platform", "extension",
+    "cli",
+    "framework",
+    "sdk",
+    "agent",
+    "guardrails",
+    "sandbox",
+    "registry",
+    "platform",
+    "extension",
 ]
 
 # Tool-shape signals used by relevance scoring. Each is a distinct phrase that
@@ -70,28 +122,62 @@ TOOL_SIGNALS: list[str] = [
 # with word boundaries.
 TOOL_SHAPE_SIGNALS: list[str] = [
     # MCP / model-context-protocol ecosystem
-    "mcp-server", "mcp server", "model context protocol", "mcp tool",
+    "mcp-server",
+    "mcp server",
+    "model context protocol",
+    "mcp tool",
     # guardrails
-    "guardrail", "guardrails", "guardrail framework",
+    "guardrail",
+    "guardrails",
+    "guardrail framework",
     # supervision / oversight
-    "supervisor", "supervise", "supervision", "oversight",
+    "supervisor",
+    "supervise",
+    "supervision",
+    "oversight",
     # sandboxing / isolated execution
-    "sandbox", "sandboxed", "isolated execution",
+    "sandbox",
+    "sandboxed",
+    "isolated execution",
     # evaluation harnesses
-    "evaluator", "eval framework", "llm-as-judge",
+    "evaluator",
+    "eval framework",
+    "llm-as-judge",
     # observability
-    "observability", "tracing", "tracer", "telemetry",
+    "observability",
+    "tracing",
+    "tracer",
+    "telemetry",
     # red-teaming / adversarial
-    "red team", "red-team", "red-teaming", "adversarial test",
+    "red team",
+    "red-team",
+    "red-teaming",
+    "adversarial test",
     # structured output / constrained decoding
-    "structured output", "constrained decoding", "tool calling",
+    "structured output",
+    "constrained decoding",
+    "tool calling",
     # agent frameworks / runtimes
-    "agent framework", "agent orchestration", "agent runtime",
+    "agent framework",
+    "agent orchestration",
+    "agent runtime",
     # policy enforcement
-    "policy enforcement", "policy engine", "allow-list", "deny-list",
+    "policy enforcement",
+    "policy engine",
+    "allow-list",
+    "deny-list",
 ]
 
 PAPER_SIGNALS: list[str] = [
-    "arxiv", "ieee", "usenix", "icse", "fse", "naacl", "emnlp",
-    "neurips", "iclr", "acm", "aaai",
+    "arxiv",
+    "ieee",
+    "usenix",
+    "icse",
+    "fse",
+    "naacl",
+    "emnlp",
+    "neurips",
+    "iclr",
+    "acm",
+    "aaai",
 ]

@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from datetime import date
 from enum import Enum
-from typing import Annotated, Optional, Union
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -139,12 +139,8 @@ class SaicaAxis(str, Enum):
 
 # --- Shared field type aliases --------------------------------------------
 
-KebabId = Annotated[
-    str, Field(pattern=r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")
-]
-SnakeId = Annotated[
-    str, Field(pattern=r"^[a-z0-9][a-z0-9_]*[a-z0-9]$")
-]
+KebabId = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")]
+SnakeId = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_]*[a-z0-9]$")]
 
 
 # --- Provenance -----------------------------------------------------------
@@ -222,8 +218,12 @@ class Tool(BaseModel):
     published_by: Optional[str] = Field(
         default=None, description="Organization node id."
     )
-    repository_url: Optional[str] = Field(default=None, json_schema_extra={"format": "uri"})
-    documentation_url: Optional[str] = Field(default=None, json_schema_extra={"format": "uri"})
+    repository_url: Optional[str] = Field(
+        default=None, json_schema_extra={"format": "uri"}
+    )
+    documentation_url: Optional[str] = Field(
+        default=None, json_schema_extra={"format": "uri"}
+    )
     license: str = Field(description="SPDX identifier or 'proprietary'.")
 
     control_paradigm: ControlParadigm
@@ -248,8 +248,7 @@ class Tool(BaseModel):
     feeds_into: Optional[list[str]] = Field(
         default=None,
         description=(
-            "Directed composition. A feeds_into B means A's output is"
-            " consumed by B."
+            "Directed composition. A feeds_into B means A's output is" " consumed by B."
         ),
     )
     supersedes: Optional[list[str]] = None
@@ -310,9 +309,7 @@ class FailureModeCrosswalk(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     taxonomy: str = Field(description="Taxonomy node id.")
-    external_id: str = Field(
-        description="Category id or label within that taxonomy."
-    )
+    external_id: str = Field(description="Category id or label within that taxonomy.")
     confidence: CrosswalkConfidence
     note: Optional[str] = None
 
@@ -353,8 +350,7 @@ class FailureMode(BaseModel):
     crosswalks: Optional[list[FailureModeCrosswalk]] = Field(
         default=None,
         description=(
-            "Explicit mappings from this SAICA-KG class into external"
-            " taxonomies."
+            "Explicit mappings from this SAICA-KG class into external" " taxonomies."
         ),
     )
 
@@ -422,8 +418,7 @@ class Taxonomy(BaseModel):
     owner: str = Field(description="Owning organization or working group.")
     version: str = Field(
         description=(
-            "Version or year identifier of the external taxonomy as of"
-            " ingestion."
+            "Version or year identifier of the external taxonomy as of" " ingestion."
         )
     )
     first_published: Optional[date] = None
@@ -458,9 +453,7 @@ class CrosswalkMapping(BaseModel):
     saica_value: str = Field(
         description="Value on the SAICA axis (e.g., a FailureMode id)."
     )
-    external_id: str = Field(
-        description="Category id in the external taxonomy."
-    )
+    external_id: str = Field(description="Category id in the external taxonomy.")
     confidence: CrosswalkConfidence
     note: Optional[str] = None
 

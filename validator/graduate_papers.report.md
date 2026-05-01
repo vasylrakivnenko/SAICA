@@ -63,4 +63,3 @@
 ## Schema-invalid candidates
 
 _None._
-

@@ -31,7 +31,6 @@ it does not touch any existing YAML, DB, or graduation path.
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Optional
 
@@ -154,7 +153,9 @@ job is to emit a structured classification against THREE SAICA-KG facets:
 - Prefer null-with-low-confidence over guessing.
 - Evidence is a list of short direct quotes from the description.
 - You MUST call the provided function. No free-form text.
-""".format(failure_mode_reference=_render_failure_mode_reference())
+""".format(
+    failure_mode_reference=_render_failure_mode_reference()
+)
 
 
 # ---------------------------------------------------------------------------

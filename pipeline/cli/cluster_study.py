@@ -38,7 +38,6 @@ Flags
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 import time
@@ -277,7 +276,9 @@ def render_narrative_report(
             f"{r.n_noise} | {r.bootstrap_ari:.3f} |"
         )
     for r in bipartite_runs:
-        marker = " *" if r.min_cluster_size == bipartite_canonical.min_cluster_size else ""
+        marker = (
+            " *" if r.min_cluster_size == bipartite_canonical.min_cluster_size else ""
+        )
         lines.append(
             f"| bipartite{marker} | {r.min_cluster_size} | {r.n_clusters} | "
             f"{r.n_noise} | {r.bootstrap_ari:.3f} |"
@@ -346,7 +347,9 @@ def render_narrative_report(
     lines.append("## Recommendation")
     lines.append("")
     lines.append(
-        _recommend(text_agreement, bipartite_agreement, text_summaries, bipartite_summaries)
+        _recommend(
+            text_agreement, bipartite_agreement, text_summaries, bipartite_summaries
+        )
     )
     lines.append("")
     return "\n".join(lines)
@@ -388,9 +391,7 @@ def _parse_args(argv=None) -> argparse.Namespace:
         action="store_true",
         help="Skip matplotlib PNG rendering.",
     )
-    p.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable debug logging."
-    )
+    p.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging.")
     return p.parse_args(argv)
 
 
@@ -413,12 +414,16 @@ def main(argv=None) -> int:
     encoder = _StubEncoder() if args.offline_encoder else None
     X = cluster_mod.embed_rows(rows, encoder=encoder)
     np_path, meta_path = cluster_mod.save_embeddings(rows, X, OUT_DIR)
-    log.info("Saved embeddings %s (dim=%d) + metadata %s", np_path, X.shape[1], meta_path)
+    log.info(
+        "Saved embeddings %s (dim=%d) + metadata %s", np_path, X.shape[1], meta_path
+    )
 
     # 3. Text clustering sweep
     text_runs = cluster_mod.run_hdbscan_sweep(X, metric="euclidean")
     text_canonical = cluster_mod.pick_canonical_run(text_runs)
-    cluster_mod.write_hdbscan_runs(text_runs, text_canonical, OUT_DIR / "hdbscan_runs.json")
+    cluster_mod.write_hdbscan_runs(
+        text_runs, text_canonical, OUT_DIR / "hdbscan_runs.json"
+    )
     log.info(
         "Text: canonical mcs=%d, K=%d, bootstrap ARI=%.3f",
         text_canonical.min_cluster_size,
@@ -519,7 +524,9 @@ def main(argv=None) -> int:
         )
         for p in paths:
             _enforce_figure_budget(p)
-        log.info("Rendered %d figures in %.2fs", len(paths), time.perf_counter() - fig_t)
+        log.info(
+            "Rendered %d figures in %.2fs", len(paths), time.perf_counter() - fig_t
+        )
 
     # 7. Final narrative report
     report = render_narrative_report(
@@ -546,7 +553,10 @@ def main(argv=None) -> int:
         site_path = export_site_mod.write_payload(payload)
         log.info("Refreshed site JSON -> %s", site_path)
     except Exception as exc:  # pragma: no cover - export is a best-effort sidecar
-        log.warning("Could not refresh site JSON (%s); /taxonomy-study will show stale data.", exc)
+        log.warning(
+            "Could not refresh site JSON (%s); /taxonomy-study will show stale data.",
+            exc,
+        )
 
     log.info("Total runtime: %.2fs", time.perf_counter() - t0)
     return EXIT_OK

@@ -41,7 +41,10 @@ from typing import Any
 try:
     import requests
 except ImportError:
-    print("Missing dependency: requests. Install with: pip install requests", file=sys.stderr)
+    print(
+        "Missing dependency: requests. Install with: pip install requests",
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 try:
@@ -237,7 +240,10 @@ def _get_with_retry(
                     delay = min(60.0, max(1.0, float(reset) - time.time()))
                 except ValueError:
                     pass
-            print(f"  rate-limited (403); sleeping {delay:.0f}s before retry…", file=sys.stderr)
+            print(
+                f"  rate-limited (403); sleeping {delay:.0f}s before retry…",
+                file=sys.stderr,
+            )
             time.sleep(delay)
             continue
         if r.status_code == 404:
@@ -246,7 +252,9 @@ def _get_with_retry(
     return 403, None, "rate-limited (retry exhausted)"
 
 
-def fetch_repo(session: requests.Session, owner: str, repo: str) -> tuple[RepoMeta | None, str | None]:
+def fetch_repo(
+    session: requests.Session, owner: str, repo: str
+) -> tuple[RepoMeta | None, str | None]:
     status, data, err = _get_with_retry(session, f"{API_ROOT}/repos/{owner}/{repo}")
     if err or not isinstance(data, dict):
         return None, err or "malformed response"
@@ -281,13 +289,17 @@ def fetch_repo(session: requests.Session, owner: str, repo: str) -> tuple[RepoMe
 
     # README (optional, non-fatal)
     time.sleep(REQUEST_SLEEP)
-    _, readme_data, _ = _get_with_retry(session, f"{API_ROOT}/repos/{owner}/{repo}/readme")
+    _, readme_data, _ = _get_with_retry(
+        session, f"{API_ROOT}/repos/{owner}/{repo}/readme"
+    )
     if isinstance(readme_data, dict):
         content = readme_data.get("content")
         encoding = readme_data.get("encoding", "base64")
         if isinstance(content, str) and encoding == "base64":
             try:
-                meta.readme = base64.b64decode(content).decode("utf-8", errors="replace")
+                meta.readme = base64.b64decode(content).decode(
+                    "utf-8", errors="replace"
+                )
             except Exception:
                 meta.readme = None
 
@@ -358,7 +370,9 @@ def derive_description(meta: RepoMeta) -> str:
     if desc and not desc.endswith((".", "!", "?")):
         desc = desc + "."
     if len(desc) >= 200 or not meta.readme:
-        return desc or (first_sentence(first_paragraph(meta.readme or ""), 400) or meta.name)
+        return desc or (
+            first_sentence(first_paragraph(meta.readme or ""), 400) or meta.name
+        )
     para = first_paragraph(meta.readme)
     extra = first_sentence(para, 400) if para else ""
     if not extra:
@@ -385,7 +399,9 @@ def _make_yaml() -> YAML:
     return y
 
 
-def compose_stub(meta: RepoMeta, source_url: str, today: dt.date) -> tuple[str, CommentedMap]:
+def compose_stub(
+    meta: RepoMeta, source_url: str, today: dt.date
+) -> tuple[str, CommentedMap]:
     tool_id = kebab(meta.repo)
     name = derive_name(meta)
     tagline = derive_tagline(meta)
@@ -417,11 +433,17 @@ def compose_stub(meta: RepoMeta, source_url: str, today: dt.date) -> tuple[str, 
     # emit these as scalar strings so a reviewer notices them instantly; the
     # validator will also reject them, which is the intended tripwire.
     doc["control_paradigm"] = "TODO"
-    doc.yaml_add_eol_comment("TODO: one of prevention|detection|correction|recovery", "control_paradigm")
+    doc.yaml_add_eol_comment(
+        "TODO: one of prevention|detection|correction|recovery", "control_paradigm"
+    )
     doc["temporal_phase"] = "TODO"
-    doc.yaml_add_eol_comment("TODO: one of pre_generation|in_generation|post_generation", "temporal_phase")
+    doc.yaml_add_eol_comment(
+        "TODO: one of pre_generation|in_generation|post_generation", "temporal_phase"
+    )
     doc["autonomy_level"] = "TODO"
-    doc.yaml_add_eol_comment("TODO: one of fully_autonomous|graduated_hitl|full_hitl", "autonomy_level")
+    doc.yaml_add_eol_comment(
+        "TODO: one of fully_autonomous|graduated_hitl|full_hitl", "autonomy_level"
+    )
 
     doc["addresses_failure_modes"] = []
     doc.yaml_add_eol_comment(
@@ -430,14 +452,20 @@ def compose_stub(meta: RepoMeta, source_url: str, today: dt.date) -> tuple[str, 
         "addresses_failure_modes",
     )
     doc["locus_of_control"] = []
-    doc.yaml_add_eol_comment("TODO: subset of model|prompt|context|environment|human", "locus_of_control")
+    doc.yaml_add_eol_comment(
+        "TODO: subset of model|prompt|context|environment|human", "locus_of_control"
+    )
     doc["implements_techniques"] = []
-    doc.yaml_add_eol_comment("TODO: free-form technique slugs (kebab-case)", "implements_techniques")
+    doc.yaml_add_eol_comment(
+        "TODO: free-form technique slugs (kebab-case)", "implements_techniques"
+    )
 
     doc["stars"] = int(meta.stars)
     doc["stars_updated_at"] = today.isoformat()
 
-    doc["inclusion_rationale"] = "TODO: explain the MECE cell this tool occupies and why it merits inclusion."
+    doc["inclusion_rationale"] = (
+        "TODO: explain the MECE cell this tool occupies and why it merits inclusion."
+    )
 
     # --- Top-of-file comment block -----------------------------------------
     header = (
@@ -488,7 +516,9 @@ def process_url(
     print(f"[fetch] {owner}/{repo}")
     meta, err = fetch_repo(session, owner, repo)
     if meta is None:
-        return IngestResult(url, None, None, None, None, "failed", err or "fetch failed")
+        return IngestResult(
+            url, None, None, None, None, "failed", err or "fetch failed"
+        )
 
     tool_id, doc = compose_stub(meta, url, today)
     target = TOOLS_DIR / f"{tool_id}.yml"
@@ -501,16 +531,24 @@ def process_url(
             sys.stdout.write("\n")
         print(f"--- end {tool_id} ---")
         return IngestResult(
-            url, tool_id, meta.stars, parse_iso_date(meta.created_at).isoformat() if meta.created_at else None,
-            meta.spdx or "NOASSERTION", "dry-run"
+            url,
+            tool_id,
+            meta.stars,
+            parse_iso_date(meta.created_at).isoformat() if meta.created_at else None,
+            meta.spdx or "NOASSERTION",
+            "dry-run",
         )
 
     if target.exists():
         print(f"  skipping: {target.name} already exists")
         return IngestResult(
-            url, tool_id, meta.stars,
+            url,
+            tool_id,
+            meta.stars,
             parse_iso_date(meta.created_at).isoformat() if meta.created_at else None,
-            meta.spdx or "NOASSERTION", "skipped", "file exists",
+            meta.spdx or "NOASSERTION",
+            "skipped",
+            "file exists",
         )
 
     TOOLS_DIR.mkdir(parents=True, exist_ok=True)
@@ -518,12 +556,23 @@ def process_url(
         with target.open("w") as fh:
             _make_yaml().dump(doc, fh)
     except Exception as exc:  # noqa: BLE001
-        return IngestResult(url, tool_id, meta.stars, None, meta.spdx or "NOASSERTION", "failed", f"write error: {exc}")
+        return IngestResult(
+            url,
+            tool_id,
+            meta.stars,
+            None,
+            meta.spdx or "NOASSERTION",
+            "failed",
+            f"write error: {exc}",
+        )
     print(f"  wrote {target}")
     return IngestResult(
-        url, tool_id, meta.stars,
+        url,
+        tool_id,
+        meta.stars,
         parse_iso_date(meta.created_at).isoformat() if meta.created_at else None,
-        meta.spdx or "NOASSERTION", "created",
+        meta.spdx or "NOASSERTION",
+        "created",
     )
 
 
@@ -540,8 +589,12 @@ def print_summary(results: list[IngestResult]) -> None:
         stars = f"{r.stars:,}" if r.stars is not None else "—"
         first = r.first_released or "—"
         lic = r.license or "—"
-        extra = f" ({r.reason})" if r.reason and r.status in ("skipped", "failed") else ""
-        print(f"{url_s:<55}  {tid:<24}  {stars:>7}  {first:<10}  {lic:<14}  {r.status}{extra}")
+        extra = (
+            f" ({r.reason})" if r.reason and r.status in ("skipped", "failed") else ""
+        )
+        print(
+            f"{url_s:<55}  {tid:<24}  {stars:>7}  {first:<10}  {lic:<14}  {r.status}{extra}"
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -572,7 +625,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if not urls:
         ap.print_usage()
-        print("error: need at least one URL (positional or via --from-file).", file=sys.stderr)
+        print(
+            "error: need at least one URL (positional or via --from-file).",
+            file=sys.stderr,
+        )
         return 2
 
     session = build_session()
@@ -586,7 +642,9 @@ def main(argv: list[str] | None = None) -> int:
             results.append(process_url(session, url, today, dry_run=args.dry_run))
         except Exception as exc:  # noqa: BLE001
             print(f"  unexpected error for {url}: {exc}", file=sys.stderr)
-            results.append(IngestResult(url, None, None, None, None, "failed", str(exc)))
+            results.append(
+                IngestResult(url, None, None, None, None, "failed", str(exc))
+            )
 
     print_summary(results)
     # Always exit 0 — partial success is acceptable; the summary is the truth.

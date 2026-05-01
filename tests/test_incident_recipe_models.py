@@ -205,9 +205,9 @@ def test_every_incident_mitigated_by_tool_exists() -> None:
     for p in sorted((DATA / "incidents").glob("*.yml")):
         data = yaml.safe_load(p.read_text())
         for tid in data.get("mitigated_by", []) or []:
-            assert tid in tool_ids, (
-                f"{p.name}: mitigated_by references missing tool '{tid}'"
-            )
+            assert (
+                tid in tool_ids
+            ), f"{p.name}: mitigated_by references missing tool '{tid}'"
 
 
 def test_every_incident_documented_by_paper_exists() -> None:
@@ -215,9 +215,9 @@ def test_every_incident_documented_by_paper_exists() -> None:
     for p in sorted((DATA / "incidents").glob("*.yml")):
         data = yaml.safe_load(p.read_text())
         for pid in data.get("documented_by", []) or []:
-            assert pid in paper_ids, (
-                f"{p.name}: documented_by references missing paper '{pid}'"
-            )
+            assert (
+                pid in paper_ids
+            ), f"{p.name}: documented_by references missing paper '{pid}'"
 
 
 def test_every_recipe_stack_tool_exists() -> None:
@@ -227,9 +227,7 @@ def test_every_recipe_stack_tool_exists() -> None:
         stack = data.get("stack", []) or []
         assert len(stack) >= 2, f"{p.name}: stack must have >=2 tools"
         for tid in stack:
-            assert tid in tool_ids, (
-                f"{p.name}: stack references missing tool '{tid}'"
-            )
+            assert tid in tool_ids, f"{p.name}: stack references missing tool '{tid}'"
 
 
 def test_every_recipe_target_failure_mode_is_known() -> None:
@@ -237,9 +235,7 @@ def test_every_recipe_target_failure_mode_is_known() -> None:
     for p in sorted((DATA / "recipes").glob("*.yml")):
         data = yaml.safe_load(p.read_text())
         for fm in data.get("targets_failure_modes", []) or []:
-            assert fm in known, (
-                f"{p.name}: targets unknown FailureMode '{fm}'"
-            )
+            assert fm in known, f"{p.name}: targets unknown FailureMode '{fm}'"
 
 
 def test_incident_corpus_has_harm_class_coverage() -> None:
@@ -250,6 +246,6 @@ def test_incident_corpus_has_harm_class_coverage() -> None:
     for p in (DATA / "incidents").glob("*.yml"):
         data = yaml.safe_load(p.read_text())
         classes.add(data["harm_class"])
-    assert len(classes) >= 3, (
-        f"incident corpus only uses {classes!r}; expected >=3 distinct harm_class values"
-    )
+    assert (
+        len(classes) >= 3
+    ), f"incident corpus only uses {classes!r}; expected >=3 distinct harm_class values"

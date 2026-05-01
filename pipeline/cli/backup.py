@@ -90,7 +90,11 @@ def parse_dsn(dsn: str) -> DsnParts:
         )
     host = parsed.hostname or "localhost"
     port = str(parsed.port) if parsed.port else "5432"
-    user = unquote(parsed.username) if parsed.username else os.environ.get("USER", "postgres")
+    user = (
+        unquote(parsed.username)
+        if parsed.username
+        else os.environ.get("USER", "postgres")
+    )
     password = unquote(parsed.password) if parsed.password else None
     dbname = parsed.path.lstrip("/") or user
     return DsnParts(host=host, port=port, user=user, password=password, dbname=dbname)
@@ -102,7 +106,10 @@ def parse_dsn(dsn: str) -> DsnParts:
 
 
 def default_backup_path(
-    dsn: DsnParts, *, now: Optional[dt.datetime] = None, backups_dir: Optional[Path] = None,
+    dsn: DsnParts,
+    *,
+    now: Optional[dt.datetime] = None,
+    backups_dir: Optional[Path] = None,
 ) -> Path:
     """Return ``research/backups/<dbname>_<ISO>.sql.gz``.
 
@@ -120,11 +127,15 @@ def _pg_dump_cmd(dsn: DsnParts) -> list[str]:
     """Build a ``pg_dump`` argv — plain SQL, no owner/privileges."""
     return [
         "pg_dump",
-        "--host", dsn.host,
-        "--port", dsn.port,
-        "--username", dsn.user,
-        "--no-password",       # never prompt; rely on PGPASSWORD
-        "--format", "plain",   # human-readable SQL, not -F c
+        "--host",
+        dsn.host,
+        "--port",
+        dsn.port,
+        "--username",
+        dsn.user,
+        "--no-password",  # never prompt; rely on PGPASSWORD
+        "--format",
+        "plain",  # human-readable SQL, not -F c
         "--no-owner",
         "--no-privileges",
         dsn.dbname,
@@ -134,12 +145,17 @@ def _pg_dump_cmd(dsn: DsnParts) -> list[str]:
 def _psql_restore_cmd(dsn: DsnParts) -> list[str]:
     return [
         "psql",
-        "--host", dsn.host,
-        "--port", dsn.port,
-        "--username", dsn.user,
+        "--host",
+        dsn.host,
+        "--port",
+        dsn.port,
+        "--username",
+        dsn.user,
         "--no-password",
-        "--dbname", dsn.dbname,
-        "--set", "ON_ERROR_STOP=1",
+        "--dbname",
+        dsn.dbname,
+        "--set",
+        "ON_ERROR_STOP=1",
     ]
 
 
@@ -170,9 +186,12 @@ def _run_backup(
         # Test stubs write the dump payload to stdout; we gzip it ourselves.
         if result.returncode != 0:
             stderr = (result.stderr or b"").decode("utf-8", "replace")
-            print(f"pg_dump failed (rc={result.returncode}):\n{stderr}", file=sys.stderr)
+            print(
+                f"pg_dump failed (rc={result.returncode}):\n{stderr}", file=sys.stderr
+            )
             return EXIT_PG_DUMP_FAIL
         import gzip
+
         payload = result.stdout or b""
         if isinstance(payload, str):
             payload = payload.encode("utf-8")
@@ -243,7 +262,10 @@ def _run_restore(
         )
         if result.returncode != 0:
             stderr = (result.stderr or b"").decode("utf-8", "replace")
-            print(f"psql restore failed (rc={result.returncode}):\n{stderr}", file=sys.stderr)
+            print(
+                f"psql restore failed (rc={result.returncode}):\n{stderr}",
+                file=sys.stderr,
+            )
             return EXIT_PG_DUMP_FAIL
         return EXIT_OK
 
@@ -299,7 +321,9 @@ def list_snapshots(
     backups_dir = backups_dir or DEFAULT_BACKUPS_DIR
     if not backups_dir.exists():
         return []
-    snaps = [p for p in backups_dir.iterdir() if p.is_file() and p.name.endswith(".sql.gz")]
+    snaps = [
+        p for p in backups_dir.iterdir() if p.is_file() and p.name.endswith(".sql.gz")
+    ]
     snaps.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return snaps
 

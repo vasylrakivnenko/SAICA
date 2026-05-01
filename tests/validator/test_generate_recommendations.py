@@ -6,6 +6,7 @@ we just verify the payload shape, the asker-filter regression invariants,
 the blocklist invariant, the JSON round-trip, and that the rendered MD
 contains the expected anchor strings.
 """
+
 from __future__ import annotations
 
 import json
@@ -93,13 +94,13 @@ def test_asker_filter_regression_across_levels(payload: dict) -> None:
     for agent_id, levels in payload["by_agent"].items():
         for level, block in levels.items():
             all_ids = {r["tool_id"] for r in block["tools"]}
-            assert agent_id not in all_ids, (
-                f"{agent_id}/{level} recommended itself; ids: {sorted(all_ids)}"
-            )
+            assert (
+                agent_id not in all_ids
+            ), f"{agent_id}/{level} recommended itself; ids: {sorted(all_ids)}"
             peers = (CODING_AGENT_IDS - {agent_id}) & all_ids
-            assert not peers, (
-                f"{agent_id}/{level} got coding-agent peers: {sorted(peers)}"
-            )
+            assert (
+                not peers
+            ), f"{agent_id}/{level} got coding-agent peers: {sorted(peers)}"
 
 
 def test_blocklist_applied_to_agnostic_across_levels(payload: dict) -> None:

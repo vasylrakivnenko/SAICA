@@ -101,7 +101,10 @@ def _default_budget() -> CallBudget:
 
 
 def _default_find_similar(
-    question: str, k: int, *, node_type: str | None = None,
+    question: str,
+    k: int,
+    *,
+    node_type: str | None = None,
 ) -> list[tuple[str, float]]:
     """Thin wrapper around ``pipeline.embeddings.query.find_similar``.
 
@@ -176,7 +179,9 @@ def create_app(
             hits = hybrid_retrieve(question, k, find_similar=find_similar)
         except Exception as exc:  # noqa: BLE001
             log.exception("retrieval failed")
-            raise HTTPException(status_code=500, detail=f"retrieval failed: {exc}") from exc
+            raise HTTPException(
+                status_code=500, detail=f"retrieval failed: {exc}"
+            ) from exc
 
         nodes = hydrate(hits)
         prompt = build_prompt(question, nodes)
@@ -192,7 +197,9 @@ def create_app(
             raise
         except Exception as exc:  # noqa: BLE001
             log.exception("kimi call failed")
-            raise HTTPException(status_code=500, detail=f"kimi call failed: {exc}") from exc
+            raise HTTPException(
+                status_code=500, detail=f"kimi call failed: {exc}"
+            ) from exc
 
         tokens = _extract_total_tokens(raw)
         lifetime_budget.consume(call=False, tokens=tokens)
@@ -254,7 +261,9 @@ def _extract_total_tokens(raw: Any) -> int:
 
 
 def _raw_model_name(raw: Any) -> str:
-    return str(getattr(raw, "model", "") or os.environ.get("AZURE_KIMI_MODEL", "Kimi-K2.5"))
+    return str(
+        getattr(raw, "model", "") or os.environ.get("AZURE_KIMI_MODEL", "Kimi-K2.5")
+    )
 
 
 def _node_to_citation(n: NodeContext) -> Citation:

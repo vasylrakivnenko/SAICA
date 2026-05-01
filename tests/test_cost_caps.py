@@ -90,6 +90,7 @@ def test_budget_negative_tokens_are_clamped() -> None:
 
 def _fake_tool_args() -> dict:
     """Minimal ToolExtraction-shaped payload. Matches test_kimi_prompt helper."""
+
     def cf(value, confidence: float = 0.9) -> dict:
         return {"value": value, "confidence": confidence, "evidence": []}
 
@@ -204,6 +205,7 @@ def test_perplexity_search_respects_budget(monkeypatch) -> None:
 
     # Also stub out insert_raw_result so we don't hit the DB.
     import pipeline.db as db_mod
+
     monkeypatch.setattr(db_mod, "insert_raw_result", lambda *a, **kw: 1)
 
     session = _StubSession(_StubResp())

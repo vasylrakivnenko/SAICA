@@ -18,14 +18,13 @@ Conventions:
       0.7 — file pattern with possible ambiguity
       0.5 — heuristic only; flag in ``note``
 """
+
 from __future__ import annotations
 
 import json
 import re
 from pathlib import Path
-from typing import Iterable
 
-import yaml
 
 from pipeline.audit.kg import load_tool_index
 from pipeline.audit.schemas import DetectedAgent, DetectedTool
@@ -40,6 +39,7 @@ except ModuleNotFoundError:  # pragma: no cover - py<3.11 fallback
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _rel(repo_root: Path, p: Path) -> str:
     try:
@@ -66,10 +66,19 @@ def _glob(repo_root: Path, pattern: str) -> list[Path]:
     out: list[Path] = []
     for p in repo_root.glob(pattern):
         s = str(p)
-        if any(seg in s for seg in (
-            "/.git/", "/node_modules/", "/.venv/", "/venv/",
-            "/__pycache__/", "/dist/", "/build/", "/.tox/",
-        )):
+        if any(
+            seg in s
+            for seg in (
+                "/.git/",
+                "/node_modules/",
+                "/.venv/",
+                "/venv/",
+                "/__pycache__/",
+                "/dist/",
+                "/build/",
+                "/.tox/",
+            )
+        ):
             continue
         out.append(p)
     return out
@@ -80,16 +89,18 @@ def _glob(repo_root: Path, pattern: str) -> list[Path]:
 # ---------------------------------------------------------------------------
 
 LANGUAGE_MARKERS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("python",     ("pyproject.toml", "setup.py", "setup.cfg", "Pipfile",
-                    "requirements.txt")),
+    (
+        "python",
+        ("pyproject.toml", "setup.py", "setup.cfg", "Pipfile", "requirements.txt"),
+    ),
     ("typescript", ("tsconfig.json",)),
     ("javascript", ("package.json",)),
-    ("go",         ("go.mod",)),
-    ("rust",       ("Cargo.toml",)),
-    ("java",       ("pom.xml", "build.gradle", "build.gradle.kts")),
-    ("ruby",       ("Gemfile",)),
-    ("php",        ("composer.json",)),
-    ("csharp",     ("*.csproj",)),
+    ("go", ("go.mod",)),
+    ("rust", ("Cargo.toml",)),
+    ("java", ("pom.xml", "build.gradle", "build.gradle.kts")),
+    ("ruby", ("Gemfile",)),
+    ("php", ("composer.json",)),
+    ("csharp", ("*.csproj",)),
 )
 
 
@@ -116,12 +127,27 @@ def detect_runtime_hints(repo_root: Path) -> list[str]:
     """Return the marker filenames we actually saw, in canonical order."""
     seen: list[str] = []
     candidates = [
-        "pyproject.toml", "requirements.txt", "Pipfile", "setup.py", "setup.cfg",
-        "package.json", "tsconfig.json", "yarn.lock", "pnpm-lock.yaml",
+        "pyproject.toml",
+        "requirements.txt",
+        "Pipfile",
+        "setup.py",
+        "setup.cfg",
+        "package.json",
+        "tsconfig.json",
+        "yarn.lock",
+        "pnpm-lock.yaml",
         "package-lock.json",
-        "go.mod", "go.sum", "Cargo.toml", "Cargo.lock",
-        "Dockerfile", "docker-compose.yml", "docker-compose.yaml",
-        "Makefile", ".python-version", ".nvmrc", ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "Cargo.toml",
+        "Cargo.lock",
+        "Dockerfile",
+        "docker-compose.yml",
+        "docker-compose.yaml",
+        "Makefile",
+        ".python-version",
+        ".nvmrc",
+        ".tool-versions",
     ]
     for c in candidates:
         if (repo_root / c).exists():
@@ -161,7 +187,9 @@ def detect_package_managers(repo_root: Path) -> list[str]:
             pm.append("uv")
         if (repo_root / "pdm.lock").exists():
             pm.append("pdm")
-    elif any((repo_root / f).exists() for f in ("requirements.txt", "setup.py", "Pipfile")):
+    elif any(
+        (repo_root / f).exists() for f in ("requirements.txt", "setup.py", "Pipfile")
+    ):
         pm.append("pip")
         if (repo_root / "Pipfile").exists():
             pm.append("pipenv")
@@ -185,40 +213,66 @@ def detect_package_managers(repo_root: Path) -> list[str]:
 
 # (kg_id, name, [(path_or_glob, confidence)]).  First match wins per agent.
 _AGENT_RULES: tuple[tuple[str, str, tuple[tuple[str, float], ...]], ...] = (
-    ("claude-code", "Claude Code", (
-        (".claude/", 1.0),
-        ("CLAUDE.md", 1.0),
-        (".claude.json", 1.0),
-    )),
-    ("cursor", "Cursor", (
-        (".cursor/", 1.0),
-        (".cursorrules", 1.0),
-        (".cursorignore", 0.7),
-    )),
-    ("windsurf", "Windsurf", (
-        (".windsurfrules", 1.0),
-        (".codeium/", 0.7),
-    )),
-    ("zed-agent", "Zed Agent", (
-        (".zed/settings.json", 0.7),
-    )),
-    ("aider", "Aider", (
-        (".aider.conf.yml", 1.0),
-        (".aider.chat.history.md", 0.7),
-        (".aider.input.history", 0.5),
-    )),
-    ("github-copilot", "GitHub Copilot", (
-        (".github/copilot/", 1.0),
-        (".github/copilot-instructions.md", 1.0),
-    )),
-    ("continue-dev", "Continue", (
-        (".continue/", 1.0),
-        (".continuerc.json", 1.0),
-    )),
-    ("sourcegraph-cody", "Sourcegraph Cody", (
-        (".sourcegraph/", 0.7),
-        (".cody/", 0.7),
-    )),
+    (
+        "claude-code",
+        "Claude Code",
+        (
+            (".claude/", 1.0),
+            ("CLAUDE.md", 1.0),
+            (".claude.json", 1.0),
+        ),
+    ),
+    (
+        "cursor",
+        "Cursor",
+        (
+            (".cursor/", 1.0),
+            (".cursorrules", 1.0),
+            (".cursorignore", 0.7),
+        ),
+    ),
+    (
+        "windsurf",
+        "Windsurf",
+        (
+            (".windsurfrules", 1.0),
+            (".codeium/", 0.7),
+        ),
+    ),
+    ("zed-agent", "Zed Agent", ((".zed/settings.json", 0.7),)),
+    (
+        "aider",
+        "Aider",
+        (
+            (".aider.conf.yml", 1.0),
+            (".aider.chat.history.md", 0.7),
+            (".aider.input.history", 0.5),
+        ),
+    ),
+    (
+        "github-copilot",
+        "GitHub Copilot",
+        (
+            (".github/copilot/", 1.0),
+            (".github/copilot-instructions.md", 1.0),
+        ),
+    ),
+    (
+        "continue-dev",
+        "Continue",
+        (
+            (".continue/", 1.0),
+            (".continuerc.json", 1.0),
+        ),
+    ),
+    (
+        "sourcegraph-cody",
+        "Sourcegraph Cody",
+        (
+            (".sourcegraph/", 0.7),
+            (".cody/", 0.7),
+        ),
+    ),
 )
 
 
@@ -242,12 +296,14 @@ def detect_agents(repo_root: Path) -> list[DetectedAgent]:
                 paths.append(_rel(repo_root, target))
                 confidence = max(confidence, conf)
         if paths:
-            found.append(DetectedAgent(
-                id=agent_id,
-                name=name,
-                detection_paths=paths,
-                confidence=confidence,
-            ))
+            found.append(
+                DetectedAgent(
+                    id=agent_id,
+                    name=name,
+                    detection_paths=paths,
+                    confidence=confidence,
+                )
+            )
     return found
 
 
@@ -257,78 +313,98 @@ def detect_agents(repo_root: Path) -> list[DetectedAgent]:
 
 # (kg_id, name, github-actions "uses" prefix patterns).
 _CI_ACTION_RULES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
-    ("semgrep", "Semgrep", (
-        "semgrep/semgrep-action",
-        "returntocorp/semgrep-action",
-        "returntocorp/semgrep",
-    )),
-    ("snyk", "Snyk", (
-        "snyk/actions",
-    )),
-    ("socket", "Socket", (
-        "socketdev/",
-        "socket-dev/",
-    )),
-    ("pr-agent", "Qodo Merge / PR-Agent", (
-        "qodo-ai/pr-agent",
-        "codium-ai/pr-agent",
-        "Codium-ai/pr-agent",
-    )),
+    (
+        "semgrep",
+        "Semgrep",
+        (
+            "semgrep/semgrep-action",
+            "returntocorp/semgrep-action",
+            "returntocorp/semgrep",
+        ),
+    ),
+    ("snyk", "Snyk", ("snyk/actions",)),
+    (
+        "socket",
+        "Socket",
+        (
+            "socketdev/",
+            "socket-dev/",
+        ),
+    ),
+    (
+        "pr-agent",
+        "Qodo Merge / PR-Agent",
+        (
+            "qodo-ai/pr-agent",
+            "codium-ai/pr-agent",
+            "Codium-ai/pr-agent",
+        ),
+    ),
 )
 
 # Python distribution-name → KG tool id.
 # Keys are normalized to lower-case dashed form (PEP 503).
 _PY_PKG_TO_TOOL: dict[str, tuple[str, str]] = {
-    "guardrails-ai":   ("guardrails-ai",   "Guardrails AI"),
-    "llm-guard":       ("llm-guard",       "LLM Guard"),
-    "nemoguardrails":  ("nemo-guardrails", "NeMo Guardrails"),
-    "instructor":      ("instructor",      "Instructor"),
-    "pydantic-ai":     ("pydantic-ai",     "Pydantic AI"),
-    "langgraph":       ("langgraph",       "LangGraph"),
-    "langfuse":        ("langfuse",        "Langfuse"),
-    "langsmith":       ("langsmith",       "LangSmith"),
-    "crewai":          ("crewai",          "CrewAI"),
-    "autogen-agentchat": ("autogen",       "AutoGen"),
-    "pyautogen":       ("autogen",         "AutoGen"),
-    "deepeval":        ("deepeval",        "DeepEval"),
-    "ragas":           ("ragas",           "Ragas"),
-    "garak":           ("garak",           "garak"),
-    "pyrit":           ("pyrit",           "PyRIT"),
-    "promptfoo":       ("promptfoo",       "promptfoo"),
-    "litellm":         ("litellm",         "LiteLLM"),
-    "helicone":        ("helicone",        "Helicone"),
+    "guardrails-ai": ("guardrails-ai", "Guardrails AI"),
+    "llm-guard": ("llm-guard", "LLM Guard"),
+    "nemoguardrails": ("nemo-guardrails", "NeMo Guardrails"),
+    "instructor": ("instructor", "Instructor"),
+    "pydantic-ai": ("pydantic-ai", "Pydantic AI"),
+    "langgraph": ("langgraph", "LangGraph"),
+    "langfuse": ("langfuse", "Langfuse"),
+    "langsmith": ("langsmith", "LangSmith"),
+    "crewai": ("crewai", "CrewAI"),
+    "autogen-agentchat": ("autogen", "AutoGen"),
+    "pyautogen": ("autogen", "AutoGen"),
+    "deepeval": ("deepeval", "DeepEval"),
+    "ragas": ("ragas", "Ragas"),
+    "garak": ("garak", "garak"),
+    "pyrit": ("pyrit", "PyRIT"),
+    "promptfoo": ("promptfoo", "promptfoo"),
+    "litellm": ("litellm", "LiteLLM"),
+    "helicone": ("helicone", "Helicone"),
 }
 
 # JS package-name → KG tool id.
 _JS_PKG_TO_TOOL: dict[str, tuple[str, str]] = {
-    "langfuse":               ("langfuse",  "Langfuse"),
-    "langsmith":              ("langsmith", "LangSmith"),
-    "helicone":               ("helicone",  "Helicone"),
-    "litellm":                ("litellm",   "LiteLLM"),
+    "langfuse": ("langfuse", "Langfuse"),
+    "langsmith": ("langsmith", "LangSmith"),
+    "helicone": ("helicone", "Helicone"),
+    "litellm": ("litellm", "LiteLLM"),
     "@instructor-ai/instructor": ("instructor", "Instructor"),
-    "promptfoo":              ("promptfoo", "promptfoo"),
+    "promptfoo": ("promptfoo", "promptfoo"),
 }
 
 # Eval / config files → KG tool id.
 _EVAL_CONFIG_RULES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
-    ("promptfoo", "promptfoo", (
-        "promptfooconfig.yaml",
-        "promptfooconfig.yml",
-        "promptfooconfig.json",
-    )),
-    ("judgeval", "judgeval", (
-        "judgeval/",
-        "judgeval.yaml",
-        "judgeval.yml",
-    )),
-    ("deepeval", "DeepEval", (
-        ".deepeval/",
-        "deepeval.yaml",
-        "deepeval.yml",
-    )),
-    ("lm-evaluation-harness", "lm-evaluation-harness", (
-        "lm-eval-config.yaml",
-    )),
+    (
+        "promptfoo",
+        "promptfoo",
+        (
+            "promptfooconfig.yaml",
+            "promptfooconfig.yml",
+            "promptfooconfig.json",
+        ),
+    ),
+    (
+        "judgeval",
+        "judgeval",
+        (
+            "judgeval/",
+            "judgeval.yaml",
+            "judgeval.yml",
+        ),
+    ),
+    (
+        "deepeval",
+        "DeepEval",
+        (
+            ".deepeval/",
+            "deepeval.yaml",
+            "deepeval.yml",
+        ),
+    ),
+    ("lm-evaluation-harness", "lm-evaluation-harness", ("lm-eval-config.yaml",)),
 )
 
 
@@ -363,7 +439,7 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
             doc = {}
         # PEP 621
         proj = doc.get("project") or {}
-        for dep in (proj.get("dependencies") or []):
+        for dep in proj.get("dependencies") or []:
             name = _parse_requirement_line(str(dep))
             if name:
                 add(name, pyproject)
@@ -375,7 +451,7 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
                     if name:
                         add(name, pyproject)
         # Poetry
-        poetry = ((doc.get("tool") or {}).get("poetry") or {})
+        poetry = (doc.get("tool") or {}).get("poetry") or {}
         for section in ("dependencies", "dev-dependencies"):
             sect = poetry.get(section) or {}
             if isinstance(sect, dict):
@@ -383,7 +459,9 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
                     if str(k).lower() == "python":
                         continue
                     add(str(k), pyproject)
-        groups = (poetry.get("group") or {}) if isinstance(poetry.get("group"), dict) else {}
+        groups = (
+            (poetry.get("group") or {}) if isinstance(poetry.get("group"), dict) else {}
+        )
         for grp in groups.values():
             deps = (grp or {}).get("dependencies") or {}
             if isinstance(deps, dict):
@@ -392,7 +470,9 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
                         continue
                     add(str(k), pyproject)
         # PDM / hatch dev groups live under [tool.pdm.dev-dependencies] or [tool.hatch...].
-        pdm_dev = ((doc.get("tool") or {}).get("pdm") or {}).get("dev-dependencies") or {}
+        pdm_dev = ((doc.get("tool") or {}).get("pdm") or {}).get(
+            "dev-dependencies"
+        ) or {}
         if isinstance(pdm_dev, dict):
             for grp in pdm_dev.values():
                 for dep in grp or []:
@@ -445,7 +525,12 @@ def _js_packages_from_package_json(repo_root: Path) -> dict[str, list[str]]:
     except (json.JSONDecodeError, ValueError):
         return {}
     out: dict[str, list[str]] = {}
-    for section in ("dependencies", "devDependencies", "optionalDependencies", "peerDependencies"):
+    for section in (
+        "dependencies",
+        "devDependencies",
+        "optionalDependencies",
+        "peerDependencies",
+    ):
         deps = doc.get(section) or {}
         if isinstance(deps, dict):
             for name in deps.keys():
@@ -481,22 +566,30 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
     out: list[DetectedTool] = []
     seen_keys: set[tuple[str, str]] = set()
 
-    def emit(kg_id: str, name: str, source: str, paths: list[str],
-             confidence: float, note: str | None = None) -> None:
+    def emit(
+        kg_id: str,
+        name: str,
+        source: str,
+        paths: list[str],
+        confidence: float,
+        note: str | None = None,
+    ) -> None:
         in_kg = kg_id in kg
         key = (kg_id, source)
         if key in seen_keys:
             return
         seen_keys.add(key)
-        out.append(DetectedTool(
-            id=kg_id if in_kg else "",
-            name=kg.get(kg_id, {}).get("name", name) if in_kg else name,
-            in_kg=in_kg,
-            detection_source=source,  # type: ignore[arg-type]
-            detection_paths=sorted(set(paths)),
-            confidence=confidence,
-            note=note,
-        ))
+        out.append(
+            DetectedTool(
+                id=kg_id if in_kg else "",
+                name=kg.get(kg_id, {}).get("name", name) if in_kg else name,
+                in_kg=in_kg,
+                detection_source=source,  # type: ignore[arg-type]
+                detection_paths=sorted(set(paths)),
+                confidence=confidence,
+                note=note,
+            )
+        )
 
     # --- CI workflow `uses:` lines ----------------------------------------
     uses_pairs = _ci_action_uses(repo_root)
@@ -510,33 +603,44 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
             emit(kg_id, name, "ci_workflow", matched_paths, 1.0)
 
     # --- Dependabot config -------------------------------------------------
-    if (p := _exists(repo_root, ".github", "dependabot.yml")) or \
-       (p := _exists(repo_root, ".github", "dependabot.yaml")):
-        emit("dependabot", "Dependabot", "dependabot",
-             [_rel(repo_root, p)], 1.0)
+    if (p := _exists(repo_root, ".github", "dependabot.yml")) or (
+        p := _exists(repo_root, ".github", "dependabot.yaml")
+    ):
+        emit("dependabot", "Dependabot", "dependabot", [_rel(repo_root, p)], 1.0)
 
     # --- Renovate config ---------------------------------------------------
     renovate_paths: list[str] = []
-    for cand in ("renovate.json", ".github/renovate.json", ".renovaterc",
-                 ".renovaterc.json", ".renovaterc.json5", "renovate.json5"):
-        if (p := _exists(repo_root, *cand.split("/"))):
+    for cand in (
+        "renovate.json",
+        ".github/renovate.json",
+        ".renovaterc",
+        ".renovaterc.json",
+        ".renovaterc.json5",
+        "renovate.json5",
+    ):
+        if p := _exists(repo_root, *cand.split("/")):
             renovate_paths.append(_rel(repo_root, p))
     if renovate_paths:
         emit("renovate", "Renovate", "renovate", renovate_paths, 1.0)
 
     # --- pre-commit framework itself --------------------------------------
-    if (p := _exists(repo_root, ".pre-commit-config.yaml")) or \
-       (p := _exists(repo_root, ".pre-commit-config.yml")):
+    if (p := _exists(repo_root, ".pre-commit-config.yaml")) or (
+        p := _exists(repo_root, ".pre-commit-config.yml")
+    ):
         # The framework itself is `pre-commit`. We ALSO scan for tools
         # referenced inside the config (semgrep, etc.) below.
-        emit("pre-commit", "pre-commit", "pre_commit",
-             [_rel(repo_root, p)], 1.0,
-             note="Detected the pre-commit framework; underlying hooks also scanned.")
+        emit(
+            "pre-commit",
+            "pre-commit",
+            "pre_commit",
+            [_rel(repo_root, p)],
+            1.0,
+            note="Detected the pre-commit framework; underlying hooks also scanned.",
+        )
         # Look for semgrep among hooks → high-confidence semgrep detection.
         text = _safe_read_text(p)
         if re.search(r"semgrep", text, re.IGNORECASE):
-            emit("semgrep", "Semgrep", "pre_commit",
-                 [_rel(repo_root, p)], 1.0)
+            emit("semgrep", "Semgrep", "pre_commit", [_rel(repo_root, p)], 1.0)
 
     # --- Python deps -------------------------------------------------------
     py_pkgs = _python_packages_from_files(repo_root)

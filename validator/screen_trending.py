@@ -30,13 +30,13 @@ CLI::
 ``--no-network`` — read trending pages from ``.cache/trending/`` only; skip
   README fetches. Useful in CI / offline tests.
 """
+
 from __future__ import annotations
 
 import argparse
 import datetime as _dt
 import logging
 import sys
-from pathlib import Path
 from typing import Any, Iterable, Optional
 
 from pipeline.audit.kg import REPO_ROOT, load_tool_index
@@ -64,6 +64,7 @@ TRENDING_JSON = DATA_DIR / "trending.json"
 # KG matching
 # ---------------------------------------------------------------------------
 
+
 def build_url_to_tool_id(tool_index: dict[str, dict]) -> dict[str, str]:
     """Reverse map: normalized ``repository_url`` → ``tool_id``."""
     out: dict[str, str] = {}
@@ -78,6 +79,7 @@ def build_url_to_tool_id(tool_index: dict[str, dict]) -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # Aggregation helpers
 # ---------------------------------------------------------------------------
+
 
 def _trending_in(language: Optional[str], since: str) -> str:
     """Compact label for the per-candidate ``trending_in`` array."""
@@ -136,7 +138,9 @@ def collect_pages(
                     existing["trending_in"].append(slice_label)
                 # Keep the highest stars seen across slices (GitHub
                 # sometimes shows slightly different counts per page).
-                if int(item.get("stars_total") or 0) > int(existing.get("stars_total") or 0):
+                if int(item.get("stars_total") or 0) > int(
+                    existing.get("stars_total") or 0
+                ):
                     existing["stars_total"] = int(item.get("stars_total") or 0)
                 if not existing.get("description") and item.get("description"):
                     existing["description"] = item["description"]
@@ -148,6 +152,7 @@ def collect_pages(
 # ---------------------------------------------------------------------------
 # Classification + scoring
 # ---------------------------------------------------------------------------
+
 
 def classify(
     by_url: dict[str, dict[str, Any]],
@@ -205,13 +210,16 @@ def classify(
         )
 
     matched.sort(key=lambda r: (-int(r.get("stars") or 0), r["repository_url"]))
-    new.sort(key=lambda r: (-float(r.get("relevance_score") or 0), -int(r.get("stars") or 0)))
+    new.sort(
+        key=lambda r: (-float(r.get("relevance_score") or 0), -int(r.get("stars") or 0))
+    )
     return matched, new
 
 
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
+
 
 def build_snapshot(
     *,
@@ -257,7 +265,9 @@ def render_markdown(new: list[dict[str, Any]], today_iso: str) -> str:
         lines.append(f"- **Stars:** {c['stars']:,}")
         lang = c.get("primary_language") or "(unknown)"
         lines.append(f"- **Primary language:** {lang}")
-        lines.append(f"- **Trending in:** {', '.join(c.get('trending_in') or []) or '(none)'}")
+        lines.append(
+            f"- **Trending in:** {', '.join(c.get('trending_in') or []) or '(none)'}"
+        )
         lines.append(f"- **Relevance score:** {c['relevance_score']}")
         fms = c.get("suggested_failure_modes") or []
         lines.append(
@@ -273,6 +283,7 @@ def render_markdown(new: list[dict[str, Any]], today_iso: str) -> str:
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
+
 
 def main(argv: Optional[list[str]] = None) -> int:
     logging.basicConfig(
@@ -310,7 +321,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         use_network=use_network,
         today_iso=today_iso,
     )
-    log.info("collected %d unique trending repos across %d pages", len(by_url), len(sources))
+    log.info(
+        "collected %d unique trending repos across %d pages", len(by_url), len(sources)
+    )
 
     matched, new = classify(
         by_url,

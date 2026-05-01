@@ -90,7 +90,9 @@ def _extract_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
             {
                 "url": url,
                 "title": item.get("title"),
-                "snippet": item.get("abstract") or item.get("summary") or item.get("snippet"),
+                "snippet": item.get("abstract")
+                or item.get("summary")
+                or item.get("snippet"),
                 "raw": item,
             }
         )

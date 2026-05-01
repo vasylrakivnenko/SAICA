@@ -19,6 +19,7 @@ The combiners are kept *additive on log-stars*, *bounded on citations and
 maturity*, so a single dimension can't dominate. Any change to weights here
 should bump the version field in the YAML and document the rationale.
 """
+
 from __future__ import annotations
 
 import math

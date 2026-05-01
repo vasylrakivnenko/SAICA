@@ -23,6 +23,7 @@ Two filter layers gate every recommendation:
    (e.g. an image-diffusion GUI that incidentally declares ``scope_creep``
    coverage but doesn't supervise *coding* in any practical sense).
 """
+
 from __future__ import annotations
 
 import glob
@@ -31,7 +32,7 @@ from typing import Any
 
 import yaml
 
-from pipeline.shared.priorities import coverage_value, priority, reliability
+from pipeline.shared.priorities import coverage_value, reliability
 from pipeline.shared.trending import effective_stars, is_trending
 
 # Resolve REPO at import time so subprocess invocations from any CWD work.
@@ -47,26 +48,41 @@ TOOLS_DIR = REPO / "data" / "tools"
 # agent should not be told to additionally install this one." Frameworks /
 # libraries / MCP servers / browser-RPA tools are NOT in this list — they
 # compose alongside whatever coding agent the caller is using.
-CODING_AGENT_IDS: frozenset[str] = frozenset({
-    # IDE / desktop coding agents
-    "cursor", "windsurf", "zed-agent",
-    # Hosted coding agents
-    "replit-agent", "v0", "devin",
-    # IDE-extension coding agents
-    "github-copilot", "continue-dev", "sourcegraph-cody",
-    # CLI coding agents
-    "claude-code", "aider", "openhands", "swe-agent",
-    "codex-cli", "gemini-cli", "cline",
-})
+CODING_AGENT_IDS: frozenset[str] = frozenset(
+    {
+        # IDE / desktop coding agents
+        "cursor",
+        "windsurf",
+        "zed-agent",
+        # Hosted coding agents
+        "replit-agent",
+        "v0",
+        "devin",
+        # IDE-extension coding agents
+        "github-copilot",
+        "continue-dev",
+        "sourcegraph-cody",
+        # CLI coding agents
+        "claude-code",
+        "aider",
+        "openhands",
+        "swe-agent",
+        "codex-cli",
+        "gemini-cli",
+        "cline",
+    }
+)
 
 # Tools we never recommend, regardless of asker. Reserved for genuinely
 # ambiguous cases — e.g. an image-generation GUI whose declared FM coverage
 # doesn't translate to "stop bugs in coding agents." Keep this list as
 # small as possible; prefer fixing the YAML facets to better reflect role
 # over silently blocking.
-RECOMMENDATION_BLOCKLIST: frozenset[str] = frozenset({
-    "comfyui",  # diffusion-model GUI; declared scope_creep coverage is for image workflows, not code.
-})
+RECOMMENDATION_BLOCKLIST: frozenset[str] = frozenset(
+    {
+        "comfyui",  # diffusion-model GUI; declared scope_creep coverage is for image workflows, not code.
+    }
+)
 
 # All 11 failure modes, kept stable here so the full-suite mode doesn't
 # silently drift if a new FM lands in data/failure_modes/.
@@ -170,6 +186,7 @@ def _to_recommendation_dict(tool: dict[str, Any]) -> dict[str, Any]:
 # Mode 1: targeted recommendation for a specific list of failure modes
 # ---------------------------------------------------------------------------
 
+
 def recommend_for_failure_modes(
     failure_modes: list[str],
     *,
@@ -201,7 +218,8 @@ def recommend_for_failure_modes(
     by_fm: dict[str, list[dict[str, Any]]] = {}
     for fm in failure_modes:
         candidates = [
-            t for t in tools.values()
+            t
+            for t in tools.values()
             if fm in (t.get("addresses_failure_modes") or [])
             and _eligible(t, agent_kind=agent_kind)
         ]
@@ -239,7 +257,8 @@ OPTIMAL_K: int = 3
 def _eligible_pool(agent_kind: str | None) -> list[dict[str, Any]]:
     """Tools eligible to be recommended given the asker's agent kind."""
     return [
-        t for t in _load_tools().values()
+        t
+        for t in _load_tools().values()
         if _eligible(t, agent_kind=agent_kind)
         and (t.get("addresses_failure_modes") or [])
     ]
@@ -271,7 +290,9 @@ def recommend_minimum(*, agent_kind: str | None = None) -> dict[str, Any]:
     """Return the single highest-priority * reliability tool. Best starter."""
     pool = _eligible_pool(agent_kind)
     chosen, _ = _greedy_weighted_pick(
-        pool, target_fms=set(ALL_FAILURE_MODES), already_covered=set(),
+        pool,
+        target_fms=set(ALL_FAILURE_MODES),
+        already_covered=set(),
     )
     selected = [chosen] if chosen is not None else []
     covered = set(chosen.get("addresses_failure_modes") or []) if chosen else set()
@@ -286,13 +307,16 @@ def recommend_minimum(*, agent_kind: str | None = None) -> dict[str, Any]:
         "summary": (
             f"1 tool covers {len(covered)} of {len(ALL_FAILURE_MODES)} "
             f"failure modes (highest-priority single pick)."
-            if chosen else "No eligible tool found."
+            if chosen
+            else "No eligible tool found."
         ),
     }
 
 
 def recommend_optimal(
-    *, agent_kind: str | None = None, k: int = OPTIMAL_K,
+    *,
+    agent_kind: str | None = None,
+    k: int = OPTIMAL_K,
 ) -> dict[str, Any]:
     """Greedy weighted set cover capped at ``k`` tools. Best responsible kit."""
     pool = _eligible_pool(agent_kind)
@@ -342,7 +366,9 @@ def recommend_full(*, agent_kind: str | None = None) -> dict[str, Any]:
     while covered != target:
         candidates = [t for t in pool if t["id"] not in selected_ids]
         chosen, _ = _greedy_weighted_pick(
-            candidates, target_fms=target, already_covered=covered,
+            candidates,
+            target_fms=target,
+            already_covered=covered,
         )
         if chosen is None:
             break  # uncoverable
@@ -370,6 +396,7 @@ def recommend_full(*, agent_kind: str | None = None) -> dict[str, Any]:
 # Public entrypoint used by the MCP tool
 # ---------------------------------------------------------------------------
 
+
 def recommend(
     failure_modes: list[str] | None = None,
     *,
@@ -389,9 +416,7 @@ def recommend(
         return recommend_for_failure_modes(failure_modes, agent_kind=agent_kind)
     chosen_level = (level or DEFAULT_LEVEL).strip().lower()
     if chosen_level not in LEVELS:
-        raise ValueError(
-            f"unknown level: {chosen_level!r}; valid: {list(LEVELS)}"
-        )
+        raise ValueError(f"unknown level: {chosen_level!r}; valid: {list(LEVELS)}")
     if chosen_level == "minimum":
         return recommend_minimum(agent_kind=agent_kind)
     if chosen_level == "full":

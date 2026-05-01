@@ -34,7 +34,10 @@ from typing import Any
 try:
     import requests
 except ImportError:
-    print("Missing dependency: requests. Install with: pip install requests", file=sys.stderr)
+    print(
+        "Missing dependency: requests. Install with: pip install requests",
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 # Prefer ruamel.yaml for round-trip; fall back to pyyaml.
@@ -147,7 +150,9 @@ def build_session() -> requests.Session:
     return s
 
 
-def fetch_stars(session: requests.Session, owner: str, repo: str) -> tuple[int | None, str | None]:
+def fetch_stars(
+    session: requests.Session, owner: str, repo: str
+) -> tuple[int | None, str | None]:
     """Return (stars, error). One retry on 403 (rate limit) with backoff."""
     url = f"https://api.github.com/repos/{owner}/{repo}"
     for attempt in (1, 2):
@@ -266,7 +271,9 @@ def main() -> int:
     ok = sum(1 for r in results if r.stars is not None)
     print(f"\n{ok}/{total} tools updated")
     if skipped_no_repo:
-        print(f"No GitHub repo (expected for proprietary tools): {', '.join(skipped_no_repo)}")
+        print(
+            f"No GitHub repo (expected for proprietary tools): {', '.join(skipped_no_repo)}"
+        )
     if failures:
         print("Failures:")
         for r in failures:

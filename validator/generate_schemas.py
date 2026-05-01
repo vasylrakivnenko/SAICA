@@ -139,7 +139,12 @@ def _collapse_optional(node: Any) -> Any:
                 keep_null = outer.pop("_keep_null", False)
 
                 if keep_null and inner.get("type") in {
-                    "string", "number", "integer", "boolean", "array", "object"
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "array",
+                    "object",
                 }:
                     t = inner.pop("type")
                     merged = {"type": [t, "null"], **inner, **outer}
@@ -174,7 +179,9 @@ def _strip_titles(schema: dict[str, Any]) -> dict[str, Any]:
                     out[k] = {name: walk_subschema(inner) for name, inner in v.items()}
                 elif k in {"items", "additionalProperties"} and isinstance(v, dict):
                     out[k] = walk_subschema(v)
-                elif k in {"anyOf", "oneOf", "allOf", "prefixItems"} and isinstance(v, list):
+                elif k in {"anyOf", "oneOf", "allOf", "prefixItems"} and isinstance(
+                    v, list
+                ):
                     out[k] = [walk_subschema(x) for x in v]
                 elif k == "$defs" and isinstance(v, dict):
                     out[k] = {name: walk_subschema(inner) for name, inner in v.items()}
@@ -268,9 +275,7 @@ def _reorder_object_keys(node: Any) -> Any:
     return node
 
 
-def _reorder_properties_by_model(
-    schema: dict[str, Any], model: type
-) -> dict[str, Any]:
+def _reorder_properties_by_model(schema: dict[str, Any], model: type) -> dict[str, Any]:
     """Reorder ``properties`` to match the model's field-declaration order.
 
     Pydantic already emits properties in field order, but it may reorder
@@ -336,7 +341,9 @@ def normalize_schema(
 # ---- CLI -----------------------------------------------------------------
 
 
-def build_schema(model: type, *, schema_id: str, title: str, description: str) -> dict[str, Any]:
+def build_schema(
+    model: type, *, schema_id: str, title: str, description: str
+) -> dict[str, Any]:
     raw = model.model_json_schema()
     return normalize_schema(
         raw,

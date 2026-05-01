@@ -127,7 +127,9 @@ def _format_pydantic_error(err: dict[str, Any]) -> str:
     inp = err.get("input")
 
     if etype == "extra_forbidden":
-        return f"Additional properties are not allowed ('{err['loc'][-1]}' was unexpected)"
+        return (
+            f"Additional properties are not allowed ('{err['loc'][-1]}' was unexpected)"
+        )
     if etype == "missing":
         return f"'{err['loc'][-1]}' is a required property"
     if etype == "enum":
@@ -206,9 +208,7 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
     for cw_id, cw in crosswalks.items():
         tax_id = cw.get("taxonomy")
         if tax_id not in taxonomies:
-            err.append(
-                f"[crosswalks] {cw_id} references missing taxonomy '{tax_id}'"
-            )
+            err.append(f"[crosswalks] {cw_id} references missing taxonomy '{tax_id}'")
             continue
         known_ext_ids = {
             c["external_id"]
@@ -252,10 +252,10 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
             try:
                 last = dt.date.fromisoformat(str(tool["last_updated"]))
                 age = (dt.date.today() - last).days
-                if (
-                    age > STALE_AT_RISK_DAYS
-                    and tool.get("maturity_status")
-                    not in ("at_risk", "deprecated", "abandoned")
+                if age > STALE_AT_RISK_DAYS and tool.get("maturity_status") not in (
+                    "at_risk",
+                    "deprecated",
+                    "abandoned",
                 ):
                     warn.append(
                         f"[tools] {tid}: last_updated is {age} days old; should be at_risk"
@@ -277,7 +277,9 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
 
     for tid, tool in tools.items():
         if not tool.get("signed_manifest") and not tool.get("security_notes"):
-            warn.append(f"[tools] {tid}: neither signed_manifest nor security_notes populated")
+            warn.append(
+                f"[tools] {tid}: neither signed_manifest nor security_notes populated"
+            )
         if not tool.get("cited_in"):
             warn.append(f"[tools] {tid}: no cited_in papers")
 
@@ -298,33 +300,23 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
     for inc_id, inc in incidents.items():
         for fm in inc.get("exhibited_failure_modes", []) or []:
             if fm not in known_modes:
-                err.append(
-                    f"[incidents] {inc_id} exhibited unknown FailureMode '{fm}'"
-                )
+                err.append(f"[incidents] {inc_id} exhibited unknown FailureMode '{fm}'")
         for pid in inc.get("documented_by", []) or []:
             if pid not in papers:
-                err.append(
-                    f"[incidents] {inc_id} documented_by missing paper '{pid}'"
-                )
+                err.append(f"[incidents] {inc_id} documented_by missing paper '{pid}'")
         for tid in inc.get("mitigated_by", []) or []:
             if tid not in tools:
-                err.append(
-                    f"[incidents] {inc_id} mitigated_by missing tool '{tid}'"
-                )
+                err.append(f"[incidents] {inc_id} mitigated_by missing tool '{tid}'")
 
     # Recipe invariants: every tool in `stack` must be a known Tool id;
     # targets_failure_modes must be known.
     for rec_id, rec in recipes.items():
         for tid in rec.get("stack", []) or []:
             if tid not in tools:
-                err.append(
-                    f"[recipes] {rec_id} stack references missing tool '{tid}'"
-                )
+                err.append(f"[recipes] {rec_id} stack references missing tool '{tid}'")
         for fm in rec.get("targets_failure_modes", []) or []:
             if fm not in known_modes:
-                err.append(
-                    f"[recipes] {rec_id} targets unknown FailureMode '{fm}'"
-                )
+                err.append(f"[recipes] {rec_id} targets unknown FailureMode '{fm}'")
 
     # ID-immutability lock: every id in the committed MANIFEST.json must
     # still exist in the YAML corpus. A missing id means someone renamed
@@ -412,9 +404,7 @@ def has_cycle(edges: list[tuple[str, str]]) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--strict", action="store_true", help="Treat warnings as errors")
-    ap.add_argument(
-        "--only", default="", help="Comma-separated node kinds to validate"
-    )
+    ap.add_argument("--only", default="", help="Comma-separated node kinds to validate")
     args = ap.parse_args()
 
     kinds = (
@@ -439,7 +429,9 @@ def main() -> int:
         print(f"ERROR {e}", file=sys.stderr)
 
     total_nodes = sum(len(iter_nodes(k)) for k in NODE_MODELS)
-    print(f"\nValidated {total_nodes} nodes: {len(errors)} errors, {len(warnings)} warnings")
+    print(
+        f"\nValidated {total_nodes} nodes: {len(errors)} errors, {len(warnings)} warnings"
+    )
 
     if errors:
         return 1

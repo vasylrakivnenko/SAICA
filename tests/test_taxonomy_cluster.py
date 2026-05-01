@@ -140,9 +140,7 @@ def test_collect_corpus_tmp_dir_respects_citation_counts(tmp_path: Path):
         encoding="utf-8",
     )
 
-    rows = collect_mod.collect_corpus(
-        taxonomies_dir=taxonomies, papers_dir=papers
-    )
+    rows = collect_mod.collect_corpus(taxonomies_dir=taxonomies, papers_dir=papers)
     assert len(rows) == 3
     by_key = {r.key: r for r in rows}
     assert by_key["tax-a::A1"].citation_count_of_parent_taxonomy == 777
@@ -234,16 +232,32 @@ def test_pick_canonical_prefers_stability():
     # the larger min_cluster_size.
     runs = [
         cluster_mod.ClusteringRun(
-            min_cluster_size=2, n_clusters=7, n_noise=0, labels=[0]*10, bootstrap_ari=0.3
+            min_cluster_size=2,
+            n_clusters=7,
+            n_noise=0,
+            labels=[0] * 10,
+            bootstrap_ari=0.3,
         ),
         cluster_mod.ClusteringRun(
-            min_cluster_size=5, n_clusters=4, n_noise=2, labels=[0]*10, bootstrap_ari=0.9
+            min_cluster_size=5,
+            n_clusters=4,
+            n_noise=2,
+            labels=[0] * 10,
+            bootstrap_ari=0.9,
         ),
         cluster_mod.ClusteringRun(
-            min_cluster_size=7, n_clusters=2, n_noise=4, labels=[0]*10, bootstrap_ari=0.95
+            min_cluster_size=7,
+            n_clusters=2,
+            n_noise=4,
+            labels=[0] * 10,
+            bootstrap_ari=0.95,
         ),
         cluster_mod.ClusteringRun(
-            min_cluster_size=10, n_clusters=1, n_noise=6, labels=[0]*10, bootstrap_ari=1.0
+            min_cluster_size=10,
+            n_clusters=1,
+            n_noise=6,
+            labels=[0] * 10,
+            bootstrap_ari=1.0,
         ),
     ]
     picked = cluster_mod.pick_canonical_run(runs)
@@ -382,10 +396,10 @@ def test_top_disagreements_skips_noise_and_singletons():
     )
     summaries = [
         make(-1, 15, 4, 20.0),  # noise, skipped
-        make(0, 1, 0, 100.0),   # singleton, skipped
-        make(1, 8, 3, 40.0),    # keep, biggest
-        make(2, 6, 5, 20.0),    # keep
-        make(3, 2, 1, 99.0),    # disagreement False; filtered
+        make(0, 1, 0, 100.0),  # singleton, skipped
+        make(1, 8, 3, 40.0),  # keep, biggest
+        make(2, 6, 5, 20.0),  # keep
+        make(3, 2, 1, 99.0),  # disagreement False; filtered
     ]
     top = compare_mod.top_disagreements(summaries, n=5)
     ids = [s.cluster_id for s in top]

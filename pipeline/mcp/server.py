@@ -23,6 +23,7 @@ server file small means Claude Code's MCP client can import it fast on
 every session start, and tests can exercise the tools without touching
 the MCP machinery.
 """
+
 from __future__ import annotations
 
 import logging

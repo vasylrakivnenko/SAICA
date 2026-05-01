@@ -22,6 +22,7 @@ The MD file embeds the date (no sub-day timestamp) and the KG version so
 that running the generator twice on the same KG produces byte-identical
 output.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -224,7 +225,7 @@ def _row_with_why(rec: dict[str, Any]) -> str:
 _LEVEL_HEADINGS: dict[str, str] = {
     "minimum": "Minimum (1 tool — best starter)",
     "optimal": "Optimal (3 tools — best responsible kit)",
-    "full":    "Full / MECE (minimum tools to cover all 11 failure modes)",
+    "full": "Full / MECE (minimum tools to cover all 11 failure modes)",
 }
 
 
@@ -250,7 +251,9 @@ def _render_level_block(level: str, payload: dict[str, Any]) -> list[str]:
     return out
 
 
-def _render_agent_section(agent_id: str, levels_payload: dict[str, dict[str, Any]]) -> list[str]:
+def _render_agent_section(
+    agent_id: str, levels_payload: dict[str, dict[str, Any]]
+) -> list[str]:
     """One ``### If you use **<Agent>**`` block, all three tiers."""
     lines: list[str] = [f"### If you use **{_agent_display(agent_id)}**", ""]
     for level in LEVELS:
@@ -277,12 +280,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
     out: list[str] = []
     out.append("# SAICA-KG — Supervision recommendations")
     out.append("")
-    out.append(
-        "> Read once at project setup. Don't poll this file per-task."
-    )
-    out.append(
-        "> For per-action agent guidance, see `SKILLS.md` (drop into your"
-    )
+    out.append("> Read once at project setup. Don't poll this file per-task.")
+    out.append("> For per-action agent guidance, see `SKILLS.md` (drop into your")
     out.append(
         "> `.claude/skills/`, `.cursor/rules/`, or equivalent skills directory)."
     )
@@ -356,7 +355,9 @@ def render_markdown(payload: dict[str, Any]) -> str:
     )
     out.append("")
     for fm in ALL_FAILURE_MODES:
-        out.extend(_render_failure_mode_section(fm, payload["by_failure_mode"].get(fm, [])))
+        out.extend(
+            _render_failure_mode_section(fm, payload["by_failure_mode"].get(fm, []))
+        )
 
     out.append("---")
     out.append("")
@@ -378,9 +379,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "- **Minimum (1 tool)** — single tool maximising "
         "Σ priority(fm) over its addressed FMs × its reliability."
     )
-    out.append(
-        "- **Optimal (3 tools)** — greedy weighted set cover capped at 3."
-    )
+    out.append("- **Optimal (3 tools)** — greedy weighted set cover capped at 3.")
     out.append(
         "- **Full / MECE** — greedy weighted set cover until every FM is "
         "covered (no pad). Typically 4-5 tools."
@@ -461,8 +460,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="generate_recommendations",
         description=(
-            "Regenerate RECOMMENDATIONS.md and recommendations.json from "
-            "the KG."
+            "Regenerate RECOMMENDATIONS.md and recommendations.json from " "the KG."
         ),
     )
     parser.add_argument(

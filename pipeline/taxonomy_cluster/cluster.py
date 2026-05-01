@@ -21,9 +21,9 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
 
@@ -147,10 +147,10 @@ class ClusteringRun:
     """One HDBSCAN run + its bootstrap stability figure."""
 
     min_cluster_size: int
-    n_clusters: int            # count of non-noise clusters
-    n_noise: int               # points labelled -1
-    labels: List[int]          # per-row cluster id (-1 == noise)
-    bootstrap_ari: float       # mean pairwise ARI over N bootstrap resamples
+    n_clusters: int  # count of non-noise clusters
+    n_noise: int  # points labelled -1
+    labels: List[int]  # per-row cluster id (-1 == noise)
+    bootstrap_ari: float  # mean pairwise ARI over N bootstrap resamples
 
     def to_jsonable(self) -> Dict:
         return {

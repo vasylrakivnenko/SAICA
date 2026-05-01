@@ -56,11 +56,11 @@ DEFAULT_MODEL = "Cohere-rerank-v4.0-pro"
 MAX_DOC_CHARS = 25_000
 README_CHARS = 12_000
 HTTP_TIMEOUT_SECONDS = 60
-RATE_LIMIT_SLEEP_SECONDS = 0.25          # ~4 req/s, well below 250 RPM
-MAX_RETRIES = 2                          # 1 initial attempt + 1 retry
+RATE_LIMIT_SLEEP_SECONDS = 0.25  # ~4 req/s, well below 250 RPM
+MAX_RETRIES = 2  # 1 initial attempt + 1 retry
 MAX_BACKOFF_SECONDS = 30.0
 BASE_BACKOFF_SECONDS = 2.0
-MAX_RETRY_AFTER_SECONDS = 120.0          # cap for server-specified Retry-After
+MAX_RETRY_AFTER_SECONDS = 120.0  # cap for server-specified Retry-After
 
 # Back-compat alias so tests / external callers that monkeypatch the
 # pre-refactor name (``pipeline.rerank.cohere._load_env_local_once``) still
@@ -175,8 +175,7 @@ class CohereRerankClient:
             missing.append(ENV_API_KEY)
         if missing:
             raise RuntimeError(
-                "Azure Cohere rerank env not configured. Missing: "
-                + ", ".join(missing)
+                "Azure Cohere rerank env not configured. Missing: " + ", ".join(missing)
             )
 
     def rerank(
@@ -247,7 +246,9 @@ class CohereRerankClient:
                     log.warning(
                         "cohere rerank http %d — honoring Retry-After=%.1fs "
                         "(attempt %d)",
-                        resp.status_code, retry_after, attempt,
+                        resp.status_code,
+                        retry_after,
+                        attempt,
                     )
                     time.sleep(retry_after)
                 else:
@@ -276,7 +277,9 @@ class CohereRerankClient:
         backoff = min(backoff, MAX_BACKOFF_SECONDS)
         log.warning(
             "cohere rerank retry in %.1fs (attempt %d, %s)",
-            backoff, attempt, reason,
+            backoff,
+            attempt,
+            reason,
         )
         time.sleep(backoff)
 
@@ -369,9 +372,7 @@ def rerank_candidates(
     rerank_client = client if client is not None else CohereRerankClient()
 
     # per_candidate[cid][query_id] = score
-    per_candidate: dict[int, dict[str, float]] = {
-        cid: {} for cid in candidate_ids
-    }
+    per_candidate: dict[int, dict[str, float]] = {cid: {} for cid in candidate_ids}
 
     for i, q in enumerate(query_list):
         t0 = time.time()
@@ -389,7 +390,10 @@ def rerank_candidates(
         top_score = max((r["relevance_score"] for r in results), default=0.0)
         log.info(
             "cohere rerank query=%s docs=%d top=%.3f elapsed=%.2fs",
-            q.id, len(documents), top_score, elapsed,
+            q.id,
+            len(documents),
+            top_score,
+            elapsed,
         )
 
         for result in results:

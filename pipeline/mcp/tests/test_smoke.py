@@ -3,6 +3,7 @@
 These exercise the *pure-function* layer (no MCP transport spin-up). The
 server module is also imported to confirm it has no import-time errors.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -16,16 +17,13 @@ from pipeline.mcp.recommender import (
     LEVELS,
     RECOMMENDATION_BLOCKLIST,
     recommend,
-    recommend_for_failure_modes,
-    recommend_full,
-    recommend_minimum,
-    recommend_optimal,
 )
 
 
 # ---------------------------------------------------------------------------
 # saica_lookup
 # ---------------------------------------------------------------------------
+
 
 def test_lookup_semgrep_returns_full_tool_record() -> None:
     rec = saica_lookup("semgrep")
@@ -52,6 +50,7 @@ def test_lookup_unknown_tool_raises_clear_error() -> None:
 # saica_recommend — targeted mode
 # ---------------------------------------------------------------------------
 
+
 def test_recommend_targeted_returns_per_fm_lists() -> None:
     out = recommend(failure_modes=["scope_creep"], agent_kind=None)
     assert out["mode"] == "targeted"
@@ -75,9 +74,9 @@ def test_recommend_targeted_filters_coding_agent_peers() -> None:
     """Asking as cursor must never return a coding-agent peer."""
     out = recommend(failure_modes=["scope_creep"], agent_kind="cursor")
     for r in out["by_failure_mode"]["scope_creep"]:
-        assert r["tool_id"] not in CODING_AGENT_IDS, (
-            f"coding-agent peer {r['tool_id']} leaked into recs for cursor"
-        )
+        assert (
+            r["tool_id"] not in CODING_AGENT_IDS
+        ), f"coding-agent peer {r['tool_id']} leaked into recs for cursor"
         assert r["tool_id"] != "cursor", "must not recommend the asker itself"
 
 
@@ -85,12 +84,15 @@ def test_recommend_targeted_filters_coding_agent_peers() -> None:
 # saica_recommend — three-tier coverage modes
 # ---------------------------------------------------------------------------
 
+
 def test_recommend_minimum_returns_one_tool() -> None:
     out = recommend(level="minimum", agent_kind=None)
     assert out["mode"] == "minimum"
     assert out["level"] == "minimum"
     assert len(out["tools"]) == 1
-    assert out["tools"][0]["addresses_failure_modes"], "picked tool must address something"
+    assert out["tools"][0][
+        "addresses_failure_modes"
+    ], "picked tool must address something"
 
 
 def test_recommend_optimal_returns_at_most_three_tools() -> None:
@@ -103,9 +105,9 @@ def test_recommend_optimal_returns_at_most_three_tools() -> None:
 def test_recommend_full_covers_all_failure_modes() -> None:
     out = recommend(level="full", agent_kind=None)
     assert out["mode"] == "full"
-    assert out["coverage_complete"], (
-        f"full did not cover everything; missing: {out['uncovered_failure_modes']}"
-    )
+    assert out[
+        "coverage_complete"
+    ], f"full did not cover everything; missing: {out['uncovered_failure_modes']}"
     assert out["uncovered_failure_modes"] == []
 
 
@@ -165,6 +167,7 @@ def test_summary_is_human_readable_per_level() -> None:
 # Recommender invariants
 # ---------------------------------------------------------------------------
 
+
 def test_all_failure_modes_size() -> None:
     assert len(ALL_FAILURE_MODES) == 11
 
@@ -193,6 +196,7 @@ def test_blocklist_contains_comfyui() -> None:
 # Server module imports cleanly + tools are registered
 # ---------------------------------------------------------------------------
 
+
 def test_server_module_imports_and_registers_tools() -> None:
     from pipeline.mcp import server
 
@@ -212,14 +216,16 @@ def test_server_lists_exactly_two_tools() -> None:
 
     tools = asyncio.run(mcp.list_tools())
     names = {t.name for t in tools}
-    assert names == {"saica_lookup", "saica_recommend"}, (
-        f"expected exactly saica_lookup + saica_recommend, got {sorted(names)}"
-    )
+    assert names == {
+        "saica_lookup",
+        "saica_recommend",
+    }, f"expected exactly saica_lookup + saica_recommend, got {sorted(names)}"
 
 
 def test_server_reads_agent_kind_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SAICA_AGENT_KIND", "cursor")
     from pipeline.mcp.server import _agent_kind
+
     assert _agent_kind() == "cursor"
     monkeypatch.delenv("SAICA_AGENT_KIND", raising=False)
     assert _agent_kind() is None

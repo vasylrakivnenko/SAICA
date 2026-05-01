@@ -38,9 +38,9 @@ def test_generated_matches_committed(
         description=description,
     )
     committed = (SCHEMA_DIR / filename).read_text()
-    assert format_schema(schema) == committed, (
-        f"schema/{filename} is stale — run `python -m validator.generate_schemas`"
-    )
+    assert (
+        format_schema(schema) == committed
+    ), f"schema/{filename} is stale — run `python -m validator.generate_schemas`"
 
 
 def test_schema_ids_look_correct() -> None:

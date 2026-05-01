@@ -2,7 +2,6 @@
 """Analyze Semantic Scholar raw results and surface the most relevant papers."""
 import json
 import os
-import re
 from collections import defaultdict
 
 RAW_DIR = "/Users/vasyl/saicakg/research/s2_raw"
@@ -31,29 +30,74 @@ THEME = {
 
 # Relevance signal keywords per theme
 POSITIVE = [
-    "llm", "large language model", "code generation", "coding agent", "software agent",
-    "hallucination", "taxonomy", "classification", "supervision", "monitoring",
-    "knowledge graph", "ontology", "mcp", "model context protocol", "faceted",
-    "reflexion", "self-debug", "self-repair", "sandbox", "guardrail", "retrieval",
-    "human-in-the-loop", "hitl", "agent", "reinvent", "duplicate", "supply chain",
-    "slopsquat", "deprecated api", "api evolution", "failure", "benchmark",
-    "evaluation", "verification", "trajectory", "autonomy", "copilot", "swe-bench",
-    "structured output", "constrained decoding",
+    "llm",
+    "large language model",
+    "code generation",
+    "coding agent",
+    "software agent",
+    "hallucination",
+    "taxonomy",
+    "classification",
+    "supervision",
+    "monitoring",
+    "knowledge graph",
+    "ontology",
+    "mcp",
+    "model context protocol",
+    "faceted",
+    "reflexion",
+    "self-debug",
+    "self-repair",
+    "sandbox",
+    "guardrail",
+    "retrieval",
+    "human-in-the-loop",
+    "hitl",
+    "agent",
+    "reinvent",
+    "duplicate",
+    "supply chain",
+    "slopsquat",
+    "deprecated api",
+    "api evolution",
+    "failure",
+    "benchmark",
+    "evaluation",
+    "verification",
+    "trajectory",
+    "autonomy",
+    "copilot",
+    "swe-bench",
+    "structured output",
+    "constrained decoding",
 ]
 NEGATIVE = [
-    "education", "classroom", "students", "teaching", "medical imaging",
-    "biology", "chemistry", "clinical trial", "agriculture", "crop",
-    "social media sentiment", "molecular", "genome", "robot arm",
+    "education",
+    "classroom",
+    "students",
+    "teaching",
+    "medical imaging",
+    "biology",
+    "chemistry",
+    "clinical trial",
+    "agriculture",
+    "crop",
+    "social media sentiment",
+    "molecular",
+    "genome",
+    "robot arm",
 ]
 
 
 def score(paper, query_slug):
-    txt = " ".join([
-        (paper.get("title") or ""),
-        (paper.get("abstract") or ""),
-        ((paper.get("tldr") or {}).get("text") or ""),
-        (paper.get("venue") or ""),
-    ]).lower()
+    txt = " ".join(
+        [
+            (paper.get("title") or ""),
+            (paper.get("abstract") or ""),
+            ((paper.get("tldr") or {}).get("text") or ""),
+            (paper.get("venue") or ""),
+        ]
+    ).lower()
     s = 0
     for kw in POSITIVE:
         if kw in txt:
@@ -81,13 +125,19 @@ def score(paper, query_slug):
         s += 1
     # theme-specific boosts
     theme = THEME.get(query_slug, "")
-    if theme == "mece_methods" and ("facet" in txt or "mece" in txt or "taxonomy" in txt):
+    if theme == "mece_methods" and (
+        "facet" in txt or "mece" in txt or "taxonomy" in txt
+    ):
         s += 2
     if theme == "kg_approaches" and ("knowledge graph" in txt or "ontolog" in txt):
         s += 2
-    if theme == "failure_classes" and ("taxonomy" in txt or "empirical study" in txt or "classification" in txt):
+    if theme == "failure_classes" and (
+        "taxonomy" in txt or "empirical study" in txt or "classification" in txt
+    ):
         s += 2
-    if theme == "supervision" and ("agent" in txt or "supervis" in txt or "monitor" in txt):
+    if theme == "supervision" and (
+        "agent" in txt or "supervis" in txt or "monitor" in txt
+    ):
         s += 1
     return s
 
@@ -111,7 +161,11 @@ def main():
                 continue
         papers = data.get("data") or []
         for p in papers:
-            pid = p.get("paperId") or (p.get("externalIds") or {}).get("DOI") or p.get("title")
+            pid = (
+                p.get("paperId")
+                or (p.get("externalIds") or {}).get("DOI")
+                or p.get("title")
+            )
             if not pid:
                 continue
             sc = score(p, slug)
@@ -162,7 +216,11 @@ def main():
             author_counts[a]["count"] += 1
             author_counts[a]["score"] += sc
             author_counts[a]["papers"].append(p.get("title"))
-    top_authors = sorted(author_counts.items(), key=lambda kv: (kv[1]["score"], kv[1]["count"]), reverse=True)[:40]
+    top_authors = sorted(
+        author_counts.items(),
+        key=lambda kv: (kv[1]["score"], kv[1]["count"]),
+        reverse=True,
+    )[:40]
     print("\nTop authors by aggregate relevance score (from top-120 papers):")
     for name, info in top_authors:
         print(f"  {name}: score={info['score']} papers={info['count']}")

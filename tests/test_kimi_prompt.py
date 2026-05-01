@@ -27,7 +27,9 @@ def test_license_preseed_uses_github_api_spdx() -> None:
     """An inline raw_json with a real SPDX id must be surfaced in the prompt."""
     row = {
         "source_url": "https://github.com/acme/supervisor",
-        "raw_json": {"license": {"spdx_id": "Apache-2.0", "name": "Apache License 2.0"}},
+        "raw_json": {
+            "license": {"spdx_id": "Apache-2.0", "name": "Apache License 2.0"}
+        },
     }
     prompt = kimi._build_system_prompt(row)
     assert "Apache-2.0" in prompt
@@ -57,9 +59,9 @@ def test_license_preseed_absent_when_spdx_missing() -> None:
 
     for row in (row1, row2, row3, row4):
         prompt = kimi._build_system_prompt(row)
-        assert "GitHub API license field" not in prompt, (
-            f"expected no license authority block for {row!r}"
-        )
+        assert (
+            "GitHub API license field" not in prompt
+        ), f"expected no license authority block for {row!r}"
         assert "License pre-seed (authoritative)" not in prompt
 
 
@@ -91,8 +93,12 @@ def test_failure_mode_definitions_included_in_prompt() -> None:
     prompt = kimi.SYSTEM_PROMPT
     lower = prompt.lower()
     # Alias stems from data/failure_modes/*.yml
-    assert "hallucinat" in lower, "expected 'hallucinat' stem (fabrication alias) in prompt"
-    assert "slopsquat" in lower, "expected 'slopsquat' stem (supply_chain_attack alias) in prompt"
+    assert (
+        "hallucinat" in lower
+    ), "expected 'hallucinat' stem (fabrication alias) in prompt"
+    assert (
+        "slopsquat" in lower
+    ), "expected 'slopsquat' stem (supply_chain_attack alias) in prompt"
     # All 11 canonical ids appear verbatim
     for fm_id in (
         "fabrication",
@@ -125,10 +131,12 @@ def test_failure_mode_reference_enumerates_all_eleven_ids() -> None:
     from pipeline.models import FailureModeId
 
     enum_ids = {m.value for m in FailureModeId}
-    assert len(enum_ids) == 11, f"expected 11 canonical FailureModeIds, got {len(enum_ids)}"
-    assert set(kimi.FAILURE_MODE_DEFINITIONS) == enum_ids, (
-        "FAILURE_MODE_DEFINITIONS drifted from pipeline.models.FailureModeId"
-    )
+    assert (
+        len(enum_ids) == 11
+    ), f"expected 11 canonical FailureModeIds, got {len(enum_ids)}"
+    assert (
+        set(kimi.FAILURE_MODE_DEFINITIONS) == enum_ids
+    ), "FAILURE_MODE_DEFINITIONS drifted from pipeline.models.FailureModeId"
 
 
 # ---------------------------------------------------------------------------
@@ -138,6 +146,7 @@ def test_failure_mode_reference_enumerates_all_eleven_ids() -> None:
 
 def _fake_tool_args(license_spdx: str = "Apache-2.0") -> dict[str, Any]:
     """Build a minimal JSON payload conforming to ToolExtraction."""
+
     def cf(value: Any, confidence: float = 0.9) -> dict[str, Any]:
         return {"value": value, "confidence": confidence, "evidence": []}
 

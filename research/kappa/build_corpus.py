@@ -97,9 +97,7 @@ def _extract_rq1(path: str) -> list[FaultRecord]:
     # For each \item[...]: block, the subcategory body runs until the next
     # \item[ or \end{description} or \paragraph or \subsubsection.
     # Each body contains one or more GitHub URLs; emit one record per URL.
-    stop_re = re.compile(
-        r"\\item\[|\\end\{description\}|\\paragraph\{|\\subsubsection"
-    )
+    stop_re = re.compile(r"\\item\[|\\end\{description\}|\\paragraph\{|\\subsubsection")
 
     last_dim_idx = -1
     last_major_idx = -1

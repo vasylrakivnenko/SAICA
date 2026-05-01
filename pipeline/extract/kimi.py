@@ -40,10 +40,10 @@ log = logging.getLogger(__name__)
 _REQUIRED_ENV = ("AZURE_KIMI_API_KEY", "AZURE_KIMI_ENDPOINT")
 DEFAULT_MODEL = "Kimi-K2.5"
 
-MAX_CONCURRENCY = 3          # leave 5 vendor-headroom
-MAX_TOKENS_DEFAULT = 4096    # must be >= 2048 for this model
-MAX_RETRIES = 3              # attempts on 429 / transient network errors
-BASE_BACKOFF_SECONDS = 2.0   # 2, 4, 8 ... plus jitter
+MAX_CONCURRENCY = 3  # leave 5 vendor-headroom
+MAX_TOKENS_DEFAULT = 4096  # must be >= 2048 for this model
+MAX_RETRIES = 3  # attempts on 429 / transient network errors
+BASE_BACKOFF_SECONDS = 2.0  # 2, 4, 8 ... plus jitter
 MAX_RETRY_AFTER_SECONDS = 120.0  # cap for server-specified Retry-After
 
 _concurrency_sem = threading.BoundedSemaphore(MAX_CONCURRENCY)
@@ -208,7 +208,9 @@ guessing" is a hard rule. Humans will review anything below 0.7.
 
 You MUST call the function provided by the tool_choice parameter with the
 structured payload. Do not return free-form text.
-""".format(failure_mode_reference=_render_failure_mode_reference())
+""".format(
+    failure_mode_reference=_render_failure_mode_reference()
+)
 
 
 # ---------------------------------------------------------------------------
@@ -268,7 +270,7 @@ def _candidate_user_prompt(kind: str, row: dict) -> str:
     """
     if kind == "tools":
         parts = [
-            f"Candidate kind: tool",
+            "Candidate kind: tool",
             f"Source URL: {row.get('source_url') or '(none)'}",
             f"Proposed id (pre-seed): {row.get('proposed_id') or '(none)'}",
             f"Name (pre-seed): {row.get('name') or '(none)'}",
@@ -283,7 +285,7 @@ def _candidate_user_prompt(kind: str, row: dict) -> str:
         return "\n".join(parts)
     elif kind == "papers":
         parts = [
-            f"Candidate kind: paper",
+            "Candidate kind: paper",
             f"Source URL: {row.get('source_url') or '(none)'}",
             f"Title (pre-seed): {row.get('title') or '(none)'}",
             f"Authors (pre-seed): {row.get('authors') or '(none)'}",
@@ -419,7 +421,9 @@ def _call_kimi_function(
             if not retryable or attempt >= MAX_RETRIES:
                 raise
 
-            retry_after = _retry_after_seconds(exc) if is_rate_limit or is_server_err else None
+            retry_after = (
+                _retry_after_seconds(exc) if is_rate_limit or is_server_err else None
+            )
             if retry_after is not None:
                 backoff = retry_after
                 backoff_source = f"Retry-After={retry_after:.1f}s"
@@ -429,7 +433,12 @@ def _call_kimi_function(
                 backoff_source = "exp-backoff"
             log.warning(
                 "kimi call failed (attempt %d/%d, status=%s, %s): %s — backing off %.1fs",
-                attempt, MAX_RETRIES, status, backoff_source, exc, backoff,
+                attempt,
+                MAX_RETRIES,
+                status,
+                backoff_source,
+                exc,
+                backoff,
             )
             time.sleep(backoff)
             continue
@@ -465,7 +474,9 @@ def _call_kimi_function(
             "arguments"
         )
         try:
-            return json.loads(args_json) if isinstance(args_json, str) else dict(args_json)
+            return (
+                json.loads(args_json) if isinstance(args_json, str) else dict(args_json)
+            )
         except json.JSONDecodeError as exc:
             raise RuntimeError(f"Kimi returned malformed JSON args: {exc}") from exc
 
@@ -636,7 +647,8 @@ def extract_tool(
     if preseed_spdx:
         returned = (
             extraction.license_spdx.value
-            if extraction.license_spdx and isinstance(extraction.license_spdx.value, str)
+            if extraction.license_spdx
+            and isinstance(extraction.license_spdx.value, str)
             else None
         )
         if returned and returned.strip() and returned.strip() != preseed_spdx:

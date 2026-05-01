@@ -8,8 +8,6 @@ in-memory tool index.
 
 from __future__ import annotations
 
-import json
-import re
 from typing import Any, Optional
 
 import pytest
@@ -38,12 +36,13 @@ class _FakeCursor:
 
     def execute(self, sql: str, params: tuple = ()) -> None:
         sql_norm = " ".join(sql.split())
-        if "FROM candidate_tools WHERE status IN" in sql_norm and "ORDER BY id ASC" in sql_norm:
+        if (
+            "FROM candidate_tools WHERE status IN" in sql_norm
+            and "ORDER BY id ASC" in sql_norm
+        ):
             self._result = [
                 (row["id"], row["source_url"])
-                for row in sorted(
-                    self._conn.candidates, key=lambda r: r["id"]
-                )
+                for row in sorted(self._conn.candidates, key=lambda r: r["id"])
                 if row["status"] in ("pending", "low_relevance")
             ]
             return
@@ -124,7 +123,9 @@ class _FakeConn:
 # ---------------------------------------------------------------------------
 
 
-def _make_checker(monkeypatch: pytest.MonkeyPatch, yaml_tools: list[dict]) -> DupChecker:
+def _make_checker(
+    monkeypatch: pytest.MonkeyPatch, yaml_tools: list[dict]
+) -> DupChecker:
     """Build a DupChecker whose YAML index is the given in-memory list.
 
     Each entry: ``{"id": ..., "name": ..., "url": ...}``.
@@ -141,9 +142,7 @@ def _make_checker(monkeypatch: pytest.MonkeyPatch, yaml_tools: list[dict]) -> Du
                 repo_key=repo_key,
                 name=tool.get("name"),
                 compact_name=(
-                    dedup_mod._compact_name(tool["name"])
-                    if tool.get("name")
-                    else None
+                    dedup_mod._compact_name(tool["name"]) if tool.get("name") else None
                 ),
             )
             self._entries.append(entry)
@@ -179,7 +178,13 @@ def test_marks_yaml_matches_as_duplicate(monkeypatch):
     conn = _FakeConn(candidates)
     checker = _make_checker(
         monkeypatch,
-        [{"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"}],
+        [
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            }
+        ],
     )
 
     plan = dc.run(conn, checker, dry_run=False, purge_raw=False)
@@ -215,7 +220,13 @@ def test_preserves_non_matching_pending(monkeypatch):
     conn = _FakeConn(candidates)
     checker = _make_checker(
         monkeypatch,
-        [{"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"}],
+        [
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            }
+        ],
     )
 
     plan = dc.run(conn, checker, dry_run=False, purge_raw=False)
@@ -299,7 +310,13 @@ def test_dry_run_emits_report_but_no_writes(monkeypatch):
     conn = _FakeConn(candidates)
     checker = _make_checker(
         monkeypatch,
-        [{"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"}],
+        [
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            }
+        ],
     )
 
     plan = dc.run(conn, checker, dry_run=True, purge_raw=False)
@@ -338,7 +355,13 @@ def test_purge_raw_tags_raw_json(monkeypatch):
     conn = _FakeConn(candidates, raw=raw)
     checker = _make_checker(
         monkeypatch,
-        [{"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"}],
+        [
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            }
+        ],
     )
 
     plan = dc.run(conn, checker, dry_run=False, purge_raw=True)
@@ -367,7 +390,13 @@ def test_purge_raw_off_by_default(monkeypatch):
     conn = _FakeConn(candidates, raw=raw)
     checker = _make_checker(
         monkeypatch,
-        [{"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"}],
+        [
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            }
+        ],
     )
 
     plan = dc.run(conn, checker, dry_run=False, purge_raw=False)
@@ -395,7 +424,13 @@ def test_skipped_rows_are_not_scanned(monkeypatch):
     conn = _FakeConn(candidates)
     checker = _make_checker(
         monkeypatch,
-        [{"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"}],
+        [
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            }
+        ],
     )
 
     plan = dc.run(conn, checker, dry_run=False, purge_raw=False)
@@ -425,7 +460,11 @@ def test_format_report_contains_per_tool_breakdown(monkeypatch):
     checker = _make_checker(
         monkeypatch,
         [
-            {"id": "helicone", "name": "Helicone", "url": "https://github.com/helicone/helicone"},
+            {
+                "id": "helicone",
+                "name": "Helicone",
+                "url": "https://github.com/helicone/helicone",
+            },
             {"id": "aider", "name": "Aider", "url": "https://github.com/foo/aider"},
         ],
     )

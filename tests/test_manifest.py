@@ -12,7 +12,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 from validator import generate_manifest as gm
 
@@ -52,7 +51,9 @@ def test_manifest_includes_canonical_urls_for_tools() -> None:
     # Sanity: every Tool has SOME URL (corpus invariant we also want to
     # preserve going forward).
     for tool_id, url in tools.items():
-        assert url is not None, f"tool {tool_id!r} has no canonical or documentation URL"
+        assert (
+            url is not None
+        ), f"tool {tool_id!r} has no canonical or documentation URL"
 
     # Spot-check the GitHub canonicalization path: aider lives on GitHub.
     assert tools["aider"] == "https://github.com/paul-gauthier/aider"

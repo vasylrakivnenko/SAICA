@@ -30,7 +30,12 @@ def _headers() -> dict[str, str]:
     return h
 
 
-def _build_query(topic: Optional[str], language: Optional[str], min_stars: int, pushed_after: Optional[str]) -> str:
+def _build_query(
+    topic: Optional[str],
+    language: Optional[str],
+    min_stars: int,
+    pushed_after: Optional[str],
+) -> str:
     parts: list[str] = []
     if topic:
         for t in (topic,) if isinstance(topic, str) else topic:
@@ -71,7 +76,9 @@ def search_code(
     }
 
     try:
-        resp = _SESSION.get(SEARCH_ENDPOINT, params=params, headers=_headers(), timeout=60)
+        resp = _SESSION.get(
+            SEARCH_ENDPOINT, params=params, headers=_headers(), timeout=60
+        )
         if resp.status_code == 403 and "rate limit" in resp.text.lower():
             log.warning("github search rate-limited on %r", q)
             return []
@@ -102,7 +109,9 @@ def search_code(
             log.warning("github insert failed for %s: %s", url, exc)
             continue
         if row_id is not None:
-            inserted.append({"id": row_id, "url": url, "title": title, "snippet": snippet})
+            inserted.append(
+                {"id": row_id, "url": url, "title": title, "snippet": snippet}
+            )
     return inserted
 
 
@@ -125,7 +134,11 @@ def fetch_readme(owner: str, repo: str) -> Optional[str]:
 
     content_b64 = payload.get("content") or ""
     try:
-        content = base64.b64decode(content_b64).decode("utf-8", errors="replace") if content_b64 else ""
+        content = (
+            base64.b64decode(content_b64).decode("utf-8", errors="replace")
+            if content_b64
+            else ""
+        )
     except Exception as exc:  # noqa: BLE001
         log.warning("github readme decode failed for %s/%s: %s", owner, repo, exc)
         return None

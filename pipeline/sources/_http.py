@@ -53,6 +53,8 @@ class _RateLimitedSession(requests.Session):
                 self._last_call = time.monotonic()
 
 
-def rate_limited_session(min_interval_s: float, user_agent: str = USER_AGENT) -> _RateLimitedSession:
+def rate_limited_session(
+    min_interval_s: float, user_agent: str = USER_AGENT
+) -> _RateLimitedSession:
     """Return a requests.Session that sleeps to enforce ``min_interval_s`` between calls."""
     return _RateLimitedSession(min_interval_s, user_agent)

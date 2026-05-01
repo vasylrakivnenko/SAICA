@@ -3,10 +3,10 @@
 These run against the saica-kg repo itself (we have it on disk anyway) and
 against synthetic temp dirs for the per-detector unit tests.
 """
+
 from __future__ import annotations
 
 import json
-import shutil
 import textwrap
 from pathlib import Path
 
@@ -28,6 +28,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 # URL parsing
 # ---------------------------------------------------------------------------
 
+
 def test_parse_repo_url_accepts_canonical():
     owner, repo = parse_repo_url("https://github.com/owner/repo")
     assert (owner, repo) == ("owner", "repo")
@@ -38,14 +39,17 @@ def test_parse_repo_url_accepts_dotgit_suffix():
     assert (owner, repo) == ("owner", "repo")
 
 
-@pytest.mark.parametrize("bad", [
-    "https://github.com/owner/repo/tree/main",
-    "https://github.com/owner/repo/blob/main/file.py",
-    "github.com/owner/repo",          # no scheme
-    "https://gitlab.com/owner/repo",  # not github
-    "https://github.com/owner",       # no repo
-    "https://github.com/owner/repo?x=1",
-])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "https://github.com/owner/repo/tree/main",
+        "https://github.com/owner/repo/blob/main/file.py",
+        "github.com/owner/repo",  # no scheme
+        "https://gitlab.com/owner/repo",  # not github
+        "https://github.com/owner",  # no repo
+        "https://github.com/owner/repo?x=1",
+    ],
+)
 def test_parse_repo_url_rejects_bad(bad):
     with pytest.raises(ValueError):
         parse_repo_url(bad)
@@ -54,6 +58,7 @@ def test_parse_repo_url_rejects_bad(bad):
 # ---------------------------------------------------------------------------
 # Detectors — synthetic temp dirs
 # ---------------------------------------------------------------------------
+
 
 def test_detect_languages_python_node(tmp_path: Path):
     (tmp_path / "pyproject.toml").write_text("[project]\nname='x'\n")
@@ -82,14 +87,18 @@ def test_detect_agents_cursor(tmp_path: Path):
 
 
 def test_detect_supervision_tools_python_dep(tmp_path: Path):
-    (tmp_path / "pyproject.toml").write_text(textwrap.dedent("""
+    (tmp_path / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
         [project]
         name = "x"
         dependencies = [
             "guardrails-ai>=0.5",
             "litellm",
         ]
-    """).strip())
+    """
+        ).strip()
+    )
     detected = detect_supervision_tools(tmp_path)
     ids = {d.id for d in detected if d.in_kg}
     assert "guardrails-ai" in ids
@@ -109,13 +118,17 @@ def test_detect_supervision_tools_dependabot_renovate(tmp_path: Path):
 def test_detect_supervision_tools_ci_action(tmp_path: Path):
     wf = tmp_path / ".github" / "workflows"
     wf.mkdir(parents=True)
-    (wf / "sec.yml").write_text(textwrap.dedent("""
+    (wf / "sec.yml").write_text(
+        textwrap.dedent(
+            """
         jobs:
           scan:
             steps:
               - uses: semgrep/semgrep-action@v1
               - uses: snyk/actions/python@master
-    """))
+    """
+        )
+    )
     detected = detect_supervision_tools(tmp_path)
     ids = {d.id for d in detected if d.in_kg}
     assert "semgrep" in ids
@@ -123,12 +136,16 @@ def test_detect_supervision_tools_ci_action(tmp_path: Path):
 
 
 def test_detect_supervision_tools_js_dep(tmp_path: Path):
-    (tmp_path / "package.json").write_text(json.dumps({
-        "dependencies": {
-            "langfuse": "^1",
-            "@instructor-ai/instructor": "^0.0.1",
-        },
-    }))
+    (tmp_path / "package.json").write_text(
+        json.dumps(
+            {
+                "dependencies": {
+                    "langfuse": "^1",
+                    "@instructor-ai/instructor": "^0.0.1",
+                },
+            }
+        )
+    )
     detected = detect_supervision_tools(tmp_path)
     ids = {d.id for d in detected if d.in_kg}
     assert "langfuse" in ids
@@ -139,9 +156,12 @@ def test_detect_supervision_tools_js_dep(tmp_path: Path):
 # End-to-end on the saica-kg repo itself
 # ---------------------------------------------------------------------------
 
+
 def test_audit_self_repo_smoke():
     """Audit the saica-kg repo using audit_repo_local. Should not crash."""
-    report = audit_repo_local(REPO_ROOT, repo_url="https://github.com/saica-kg/saica-kg")
+    report = audit_repo_local(
+        REPO_ROOT, repo_url="https://github.com/saica-kg/saica-kg"
+    )
     assert report.repo_url.endswith("saica-kg")
     assert report.audited_at is not None
     assert isinstance(report.markdown, str) and len(report.markdown) > 200
@@ -160,8 +180,15 @@ def test_audit_self_repo_smoke():
 
 
 def test_to_markdown_renders_sections():
-    report = audit_repo_local(REPO_ROOT, repo_url="https://github.com/saica-kg/saica-kg")
+    report = audit_repo_local(
+        REPO_ROOT, repo_url="https://github.com/saica-kg/saica-kg"
+    )
     md = to_markdown(report)
     assert md.startswith("# Audit:")
-    for header in ("## Executive summary", "## Detected stack", "## Coverage", "## Gaps and recommendations"):
+    for header in (
+        "## Executive summary",
+        "## Detected stack",
+        "## Coverage",
+        "## Gaps and recommendations",
+    ):
         assert header in md

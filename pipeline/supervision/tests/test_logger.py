@@ -30,6 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 # Round-trip
 # ---------------------------------------------------------------------------
 
+
 def test_log_then_read_round_trip(tmp_path: Path):
     path = log_prevention(
         tool_id="semgrep",
@@ -75,6 +76,7 @@ def test_read_returns_descending(tmp_path: Path):
 # Idempotency
 # ---------------------------------------------------------------------------
 
+
 def test_idempotent_same_second(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Two writes with identical (ts, tool_id, mechanism) collapse to one."""
 
@@ -119,6 +121,7 @@ def test_not_idempotent_when_mechanism_differs(
 # Filename / timestamp formats
 # ---------------------------------------------------------------------------
 
+
 def test_date_bucket_filename(tmp_path: Path):
     log_prevention(
         tool_id="x",
@@ -153,6 +156,7 @@ def test_iso_timestamp_with_z_suffix(tmp_path: Path):
 # Validation
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("missing", ["tool_id", "failure_mode", "mechanism"])
 def test_missing_required_field_raises(tmp_path: Path, missing: str):
     kwargs = dict(
@@ -173,6 +177,7 @@ def test_read_events_missing_dir_returns_empty(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # CLI smoke
 # ---------------------------------------------------------------------------
+
 
 def test_cli_smoke_writes_line(tmp_path: Path):
     """Exec ``python -m pipeline.supervision log ...`` and confirm a line lands."""

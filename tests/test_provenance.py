@@ -106,7 +106,10 @@ def test_provenance_rejects_extra_fields() -> None:
         )
     # Pydantic surfaces "Extra inputs are not permitted" for extra fields
     # under extra='forbid'.
-    assert "extra" in str(excinfo.value).lower() or "not permitted" in str(excinfo.value).lower()
+    assert (
+        "extra" in str(excinfo.value).lower()
+        or "not permitted" in str(excinfo.value).lower()
+    )
 
 
 def test_provenance_requires_source_and_ingested_at() -> None:

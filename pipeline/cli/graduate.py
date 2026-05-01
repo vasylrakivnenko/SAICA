@@ -63,7 +63,7 @@ DATA_DIR = REPO_ROOT / "data"
 VALIDATOR_SCRIPT = REPO_ROOT / "validator" / "cli.py"
 
 DEFAULT_ACCEPT_THRESHOLD = 0.85  # used by field-level accept check
-AUTO_MODE_DEFAULT = 0.85         # used by --auto-accept-above default
+AUTO_MODE_DEFAULT = 0.85  # used by --auto-accept-above default
 
 # Value stamped into provenance.source for every newly-graduated tool.
 # Reviewers can override on post-merge hooks; the graduation CLI is the
@@ -81,34 +81,54 @@ _KIND_DATA_DIR = {"tool": "tools", "paper": "papers"}
 
 # Each tuple: (schema_field_name, yaml_key, is_required, comment)
 TOOL_FIELDS = [
-    ("proposed_id",             "id",                  True,  None),
-    ("name",                    "name",                True,  None),
-    ("tagline",                 "tagline",             False, None),
-    ("description",             "description",         True,  None),
-    ("repository_url",          "repository_url",      False, None),
-    ("license_spdx",            "license",             True,  None),
-    ("control_paradigm",        "control_paradigm",    True,
-     "one of prevention|detection|correction|recovery"),
-    ("temporal_phase",          "temporal_phase",      True,
-     "one of pre_generation|in_generation|post_generation"),
-    ("autonomy_level",          "autonomy_level",      True,
-     "one of fully_autonomous|graduated_hitl|full_hitl"),
-    ("addresses_failure_modes", "addresses_failure_modes", True,
-     "subset of fabrication|obsolescence|dependency_blindness|logic_error|"
-     "security_vulnerability|scope_creep|context_pollution|supply_chain_attack"),
-    ("locus_of_control",        "locus_of_control",    False,
-     "subset of model|prompt|context|environment|human"),
-    ("inclusion_rationale",     "inclusion_rationale", False, None),
+    ("proposed_id", "id", True, None),
+    ("name", "name", True, None),
+    ("tagline", "tagline", False, None),
+    ("description", "description", True, None),
+    ("repository_url", "repository_url", False, None),
+    ("license_spdx", "license", True, None),
+    (
+        "control_paradigm",
+        "control_paradigm",
+        True,
+        "one of prevention|detection|correction|recovery",
+    ),
+    (
+        "temporal_phase",
+        "temporal_phase",
+        True,
+        "one of pre_generation|in_generation|post_generation",
+    ),
+    (
+        "autonomy_level",
+        "autonomy_level",
+        True,
+        "one of fully_autonomous|graduated_hitl|full_hitl",
+    ),
+    (
+        "addresses_failure_modes",
+        "addresses_failure_modes",
+        True,
+        "subset of fabrication|obsolescence|dependency_blindness|logic_error|"
+        "security_vulnerability|scope_creep|context_pollution|supply_chain_attack",
+    ),
+    (
+        "locus_of_control",
+        "locus_of_control",
+        False,
+        "subset of model|prompt|context|environment|human",
+    ),
+    ("inclusion_rationale", "inclusion_rationale", False, None),
 ]
 
 PAPER_FIELDS = [
-    ("title",          "title",          True,  None),
-    ("authors",        "authors",        True,  None),
-    ("year",           "year",           True,  "integer"),
-    ("venue",          "venue",          False, None),
-    ("doi",            "doi",            False, None),
-    ("arxiv_id",       "arxiv_id",       False, None),
-    ("tldr",           "tldr",           False, None),
+    ("title", "title", True, None),
+    ("authors", "authors", True, None),
+    ("year", "year", True, "integer"),
+    ("venue", "venue", False, None),
+    ("doi", "doi", False, None),
+    ("arxiv_id", "arxiv_id", False, None),
+    ("tldr", "tldr", False, None),
     ("relevance_tags", "relevance_tags", False, None),
 ]
 
@@ -149,7 +169,11 @@ def _field_triple(payload: dict, field: str) -> tuple[Any, float, list[str]]:
     f = payload.get(field) or {}
     if not isinstance(f, dict):
         return None, 0.0, []
-    return f.get("value"), float(f.get("confidence") or 0.0), list(f.get("evidence") or [])
+    return (
+        f.get("value"),
+        float(f.get("confidence") or 0.0),
+        list(f.get("evidence") or []),
+    )
 
 
 def _prompt_yn(prompt: str, default: str = "a") -> str:
@@ -221,7 +245,10 @@ def _resolve_field(
         return Decision(value, conf, accepted=True)
     if not interactive:
         return Decision(
-            value, conf, accepted=False, reason=f"confidence {conf:.2f} < {auto_threshold}"
+            value,
+            conf,
+            accepted=False,
+            reason=f"confidence {conf:.2f} < {auto_threshold}",
         )
     # Interactive path.
     print(f"\n--- {yaml_key} ---")
@@ -248,7 +275,9 @@ def _resolve_field(
 # ---------------------------------------------------------------------------
 
 
-def _emit_review_required(doc: CommentedMap, yaml_key: str, decision: Decision, hint: Optional[str]) -> None:
+def _emit_review_required(
+    doc: CommentedMap, yaml_key: str, decision: Decision, hint: Optional[str]
+) -> None:
     """Write a REVIEW-REQUIRED placeholder for a rejected/low-conf field."""
     prior = decision.value
     if isinstance(prior, list):
@@ -304,7 +333,8 @@ def _build_tool_yaml(
 ) -> tuple[str, CommentedMap]:
     tool_id = (
         decisions["proposed_id"].value
-        if decisions["proposed_id"].accepted and isinstance(decisions["proposed_id"].value, str)
+        if decisions["proposed_id"].accepted
+        and isinstance(decisions["proposed_id"].value, str)
         else str(row.get("proposed_id") or "review-required")
     )
     doc: CommentedMap = CommentedMap()
@@ -336,7 +366,11 @@ def _build_tool_yaml(
             continue
         # Attempt a GitHub-API fallback before emitting REVIEW_REQUIRED.
         fb = _try_fallback(
-            field, d, raw_payload, today=today, auto_threshold=auto_threshold,
+            field,
+            d,
+            raw_payload,
+            today=today,
+            auto_threshold=auto_threshold,
         )
         if fb is not None:
             doc[yaml_key] = fb.value
@@ -440,7 +474,9 @@ def _build_provenance_block(
     prov["ingested_at"] = today.isoformat()
     prov["extractor_model"] = PROVENANCE_EXTRACTOR_MODEL
 
-    overall_conf = payload.get("overall_confidence") if isinstance(payload, dict) else None
+    overall_conf = (
+        payload.get("overall_confidence") if isinstance(payload, dict) else None
+    )
     if isinstance(overall_conf, (int, float)):
         # Clamp to the schema's [0,1] range defensively.
         prov["extractor_confidence"] = float(max(0.0, min(1.0, overall_conf)))
@@ -473,6 +509,7 @@ def _build_paper_yaml(
 
     def _slug(s: str) -> str:
         import re
+
         s = s.lower().strip()
         s = re.sub(r"[^a-z0-9]+", "-", s)
         return re.sub(r"-+", "-", s).strip("-")
@@ -480,7 +517,12 @@ def _build_paper_yaml(
     paper_id = None
     if arxiv and arxiv.accepted and isinstance(arxiv.value, str) and arxiv.value:
         paper_id = f"arxiv-{_slug(arxiv.value)}"
-    elif title_d and title_d.accepted and isinstance(title_d.value, str) and title_d.value:
+    elif (
+        title_d
+        and title_d.accepted
+        and isinstance(title_d.value, str)
+        and title_d.value
+    ):
         y = ""
         if year_d and year_d.accepted and year_d.value:
             y = f"{year_d.value}-"
@@ -538,7 +580,8 @@ def _run_validator(kind: str, yaml_path: Path) -> tuple[int, str]:
     # in unrelated warnings from other YAML files.
     fname = yaml_path.name
     focused = [
-        line for line in output.splitlines()
+        line
+        for line in output.splitlines()
         if fname in line or line.startswith(("WARN", "ERROR")) is False
     ]
     if not any(fname in line for line in output.splitlines()):

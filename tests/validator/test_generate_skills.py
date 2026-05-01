@@ -10,6 +10,7 @@ The actual recommender ranking is covered in ``pipeline/mcp/tests`` and
 priority logic in ``pipeline/shared/tests``; we only assert orchestrator
 behaviour here.
 """
+
 from __future__ import annotations
 
 import glob
@@ -39,7 +40,9 @@ def payload() -> dict:
     return build_payload(today="2026-04-23")
 
 
-def test_payload_covers_all_eleven_failure_modes_in_priority_desc(payload: dict) -> None:
+def test_payload_covers_all_eleven_failure_modes_in_priority_desc(
+    payload: dict,
+) -> None:
     """All 11 FMs present, ordered by priority descending."""
     fm_ids = [fm["id"] for fm in payload["failure_modes"]]
     assert set(fm_ids) == set(ALL_FAILURE_MODES)
@@ -48,9 +51,7 @@ def test_payload_covers_all_eleven_failure_modes_in_priority_desc(payload: dict)
     # Priority-descending: each FM's priority must be >= the next.
     priorities = [fm["priority"] for fm in payload["failure_modes"]]
     for a, b in zip(priorities, priorities[1:]):
-        assert a >= b, (
-            f"FMs not in priority-desc order: {fm_ids} → {priorities}"
-        )
+        assert a >= b, f"FMs not in priority-desc order: {fm_ids} → {priorities}"
 
     # And the leading FM is the highest in all_priorities() (sanity).
     expected_first = next(iter(all_priorities()))
@@ -60,9 +61,9 @@ def test_payload_covers_all_eleven_failure_modes_in_priority_desc(payload: dict)
 def test_each_failure_mode_has_at_least_one_supervisor(payload: dict) -> None:
     """KG isn't empty: every FM gets at least one recommended supervisor."""
     for fm in payload["failure_modes"]:
-        assert len(fm["supervisors"]) >= 1, (
-            f"{fm['id']} has no recommended supervisor — KG drift?"
-        )
+        assert (
+            len(fm["supervisors"]) >= 1
+        ), f"{fm['id']} has no recommended supervisor — KG drift?"
         # ... and at most _TOP_SUPERVISORS_PER_FM (= 2).
         assert len(fm["supervisors"]) <= 2
 
@@ -168,6 +169,4 @@ def test_pre_action_heuristics_render_for_every_fm(payload: dict) -> None:
     for block in fm_blocks:
         assert "**Pre-action heuristic for an agent:**" in block
         # And the blockquote line directly follows.
-        assert "\n> " in block, (
-            f"FM block missing heuristic blockquote:\n{block[:200]}"
-        )
+        assert "\n> " in block, f"FM block missing heuristic blockquote:\n{block[:200]}"

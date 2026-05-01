@@ -24,7 +24,9 @@ from typing import Any
 try:
     import yaml
 except ImportError:
-    print("Missing dependency: pyyaml. Install with: pip install pyyaml", file=sys.stderr)
+    print(
+        "Missing dependency: pyyaml. Install with: pip install pyyaml", file=sys.stderr
+    )
     sys.exit(2)
 
 
@@ -47,22 +49,33 @@ FAILURE_MODES_CANONICAL = [
 ]
 
 STALE_DAYS_THRESHOLD = 180
-TODAY = dt.date(2026, 4, 22)  # hardcoded per spec; also matches dt.date.today() in this env
+TODAY = dt.date(
+    2026, 4, 22
+)  # hardcoded per spec; also matches dt.date.today() in this env
 
 # Keyword heuristics for "papers a tool probably ought to cite" (Section 7).
 # Each tuple: (paper_id, keywords that should match the tool description/tagline).
 PAPER_KEYWORDS: list[tuple[str, list[str]]] = [
-    ("spracklen-2024-we-have-a-package", ["slopsquat", "package hallucin", "typosquat", "supply chain", "supply-chain"]),
+    (
+        "spracklen-2024-we-have-a-package",
+        ["slopsquat", "package hallucin", "typosquat", "supply chain", "supply-chain"],
+    ),
     ("liu-2024-beyond-functional-correctness", ["hallucin", "fabricat"]),
     ("tian-2024-codehalu", ["hallucin", "code halu"]),
     ("zhang-wang-shi-ma-2024-practical-hallucination", ["hallucin"]),
     ("lee-2025-hallucination-taxonomy", ["hallucin"]),
-    ("wang-2024-llms-meet-library-evolution", ["deprecat", "library evolution", "obsolescen", "version"]),
+    (
+        "wang-2024-llms-meet-library-evolution",
+        ["deprecat", "library evolution", "obsolescen", "version"],
+    ),
     ("liu-2025-code-copycat", ["repetition", "copycat", "duplicat"]),
     ("cemri-2025-mast", ["multi-agent", "multi agent", "mas"]),
     ("williams-2025-sscs", ["supply chain", "supply-chain", "sscs"]),
     ("lindner-2025-monitoring", ["monitor", "observability", "trace"]),
-    ("manheim-homewood-2025-control-oversight", ["oversight", "control", "supervision"]),
+    (
+        "manheim-homewood-2025-control-oversight",
+        ["oversight", "control", "supervision"],
+    ),
     ("navneet-2025-safe-ai", ["safety", "safe ai"]),
     ("cihon-stein-2025-autonomy-scoring", ["autonomy", "autonomous"]),
     ("yan-2025-fault-tolerant-sandboxing", ["sandbox", "isolation", "fault toleran"]),
@@ -75,13 +88,17 @@ PAPER_KEYWORDS: list[tuple[str, list[str]]] = [
     ("ehsani-2026-where-ai-agents-fail", ["fail", "failure"]),
     ("zhu-2025-agent-error-taxonomy", ["error taxonomy", "agent error"]),
     ("jiang-2024-survey-llm-code", ["survey", "llm code"]),
-    ("spracklen-2024-we-have-a-package", ["hallucinated package", "non-existent package"]),
+    (
+        "spracklen-2024-we-have-a-package",
+        ["hallucinated package", "non-existent package"],
+    ),
 ]
 
 
 # ---------------------------------------------------------------------------
 # Loading
 # ---------------------------------------------------------------------------
+
 
 def _coerce(value: Any) -> Any:
     """Convert date/datetime to ISO strings recursively (matches validator/cli.py)."""
@@ -116,6 +133,7 @@ def load_dir(kind: str) -> list[dict[str, Any]]:
 # Analysis
 # ---------------------------------------------------------------------------
 
+
 def parse_date(s: Any) -> dt.date | None:
     if not s:
         return None
@@ -129,21 +147,27 @@ def facet_cells(tools: list[dict]) -> list[dict]:
     """Return all 4*3*3 cells with tool membership."""
     index: dict[tuple[str, str, str], list[str]] = defaultdict(list)
     for t in tools:
-        key = (t.get("control_paradigm"), t.get("temporal_phase"), t.get("autonomy_level"))
+        key = (
+            t.get("control_paradigm"),
+            t.get("temporal_phase"),
+            t.get("autonomy_level"),
+        )
         index[key].append(t.get("name") or t.get("id"))
     cells = []
     for cp in CONTROL_PARADIGMS:
         for tp in TEMPORAL_PHASES:
             for al in AUTONOMY_LEVELS:
                 names = sorted(index.get((cp, tp, al), []))
-                cells.append({
-                    "control_paradigm": cp,
-                    "temporal_phase": tp,
-                    "autonomy_level": al,
-                    "count": len(names),
-                    "tools": names,
-                    "empty": len(names) == 0,
-                })
+                cells.append(
+                    {
+                        "control_paradigm": cp,
+                        "temporal_phase": tp,
+                        "autonomy_level": al,
+                        "count": len(names),
+                        "tools": names,
+                        "empty": len(names) == 0,
+                    }
+                )
     return cells
 
 
@@ -203,15 +227,17 @@ def taxonomy_completeness(
         cat_ids = [c["external_id"] for c in cats]
         touched = touched_by_tax.get(tx_id, set())
         missing = [cid for cid in cat_ids if cid not in touched]
-        rows.append({
-            "id": tx_id,
-            "name": tx.get("name", tx_id),
-            "category_count": len(cat_ids),
-            "mapped_saica_modes": sorted(mapped_modes_by_tax.get(tx_id, set())),
-            "mapped_mode_count": len(mapped_modes_by_tax.get(tx_id, set())),
-            "covered_categories": len(cat_ids) - len(missing),
-            "missing_categories": missing,
-        })
+        rows.append(
+            {
+                "id": tx_id,
+                "name": tx.get("name", tx_id),
+                "category_count": len(cat_ids),
+                "mapped_saica_modes": sorted(mapped_modes_by_tax.get(tx_id, set())),
+                "mapped_mode_count": len(mapped_modes_by_tax.get(tx_id, set())),
+                "covered_categories": len(cat_ids) - len(missing),
+                "missing_categories": missing,
+            }
+        )
     return rows
 
 
@@ -220,15 +246,17 @@ def stale_rows(tools: list[dict]) -> list[dict]:
     for t in tools:
         last = parse_date(t.get("last_updated"))
         age_days = (TODAY - last).days if last else None
-        rows.append({
-            "id": t["id"],
-            "name": t.get("name", t["id"]),
-            "last_updated": t.get("last_updated"),
-            "age_days": age_days,
-            "maturity_status": t.get("maturity_status"),
-            "stale": (age_days is not None and age_days > STALE_DAYS_THRESHOLD),
-            "at_risk": t.get("maturity_status") == "at_risk",
-        })
+        rows.append(
+            {
+                "id": t["id"],
+                "name": t.get("name", t["id"]),
+                "last_updated": t.get("last_updated"),
+                "age_days": age_days,
+                "maturity_status": t.get("maturity_status"),
+                "stale": (age_days is not None and age_days > STALE_DAYS_THRESHOLD),
+                "at_risk": t.get("maturity_status") == "at_risk",
+            }
+        )
     rows.sort(key=lambda r: (r["last_updated"] or "0000-00-00"))
     return rows
 
@@ -245,18 +273,23 @@ def missing_metadata(tools: list[dict]) -> list[dict]:
         missing: list[str] = []
         if "stars" not in t or t.get("stars") is None:
             missing.append("stars")
-        if "openssf_scorecard_score" not in t or t.get("openssf_scorecard_score") is None:
+        if (
+            "openssf_scorecard_score" not in t
+            or t.get("openssf_scorecard_score") is None
+        ):
             missing.append("openssf_scorecard_score")
         if not t.get("cited_in"):
             missing.append("cited_in")
         if not t.get("inclusion_rationale"):
             missing.append("inclusion_rationale")
         if missing:
-            out.append({
-                "id": t["id"],
-                "name": t.get("name", t["id"]),
-                "missing": missing,
-            })
+            out.append(
+                {
+                    "id": t["id"],
+                    "name": t.get("name", t["id"]),
+                    "missing": missing,
+                }
+            )
     return out
 
 
@@ -266,12 +299,14 @@ def paper_suggestions(tools: list[dict], papers_by_id: dict[str, dict]) -> list[
     for t in tools:
         if t.get("cited_in"):
             continue
-        blob = " ".join([
-            t.get("description") or "",
-            t.get("tagline") or "",
-            t.get("inclusion_rationale") or "",
-            " ".join(t.get("implements_techniques") or []),
-        ]).lower()
+        blob = " ".join(
+            [
+                t.get("description") or "",
+                t.get("tagline") or "",
+                t.get("inclusion_rationale") or "",
+                " ".join(t.get("implements_techniques") or []),
+            ]
+        ).lower()
         hits: list[str] = []
         for paper_id, kws in PAPER_KEYWORDS:
             if paper_id not in papers_by_id:
@@ -280,11 +315,13 @@ def paper_suggestions(tools: list[dict], papers_by_id: dict[str, dict]) -> list[
                 if paper_id not in hits:
                     hits.append(paper_id)
         if hits:
-            suggestions.append({
-                "id": t["id"],
-                "name": t.get("name", t["id"]),
-                "suggested_papers": hits,
-            })
+            suggestions.append(
+                {
+                    "id": t["id"],
+                    "name": t.get("name", t["id"]),
+                    "suggested_papers": hits,
+                }
+            )
     return suggestions
 
 
@@ -294,16 +331,14 @@ def org_counts(tools: list[dict]) -> list[dict]:
         org = t.get("published_by") or "<unknown>"
         c[org] += 1
     total = sum(c.values()) or 1
-    rows = [
-        {"org": org, "count": n, "share": n / total}
-        for org, n in c.most_common()
-    ]
+    rows = [{"org": org, "count": n, "share": n / total} for org, n in c.most_common()]
     return rows
 
 
 # ---------------------------------------------------------------------------
 # Next-step prioritization
 # ---------------------------------------------------------------------------
+
 
 def next_steps(
     cells: list[dict],
@@ -319,11 +354,13 @@ def next_steps(
     # Empty facet cells — highest priority: they are the prescriptive gaps.
     empty = [c for c in cells if c["empty"]]
     for c in empty:
-        steps.append((
-            0,
-            f"Add Tool for {c['control_paradigm']} x {c['temporal_phase']} x {c['autonomy_level']} "
-            f"(0 tools in that cell)",
-        ))
+        steps.append(
+            (
+                0,
+                f"Add Tool for {c['control_paradigm']} x {c['temporal_phase']} x {c['autonomy_level']} "
+                f"(0 tools in that cell)",
+            )
+        )
 
     # Under-covered failure modes (<3 mitigators), sorted by fewest mitigators first.
     under = sorted(
@@ -332,7 +369,12 @@ def next_steps(
     )
     for fm, n in under:
         if n < 3:
-            steps.append((1, f"FailureMode '{fm}' has only {n} mitigators - add supervision tools that address it"))
+            steps.append(
+                (
+                    1,
+                    f"FailureMode '{fm}' has only {n} mitigators - add supervision tools that address it",
+                )
+            )
 
     # Taxonomy coverage gaps
     for tx in tax_rows:
@@ -340,27 +382,48 @@ def next_steps(
         if missing_n:
             sample = ", ".join(tx["missing_categories"][:5])
             more = " ..." if missing_n > 5 else ""
-            steps.append((
-                2,
-                f"{tx['name']} has {tx['category_count']} categories; {tx['covered_categories']} crosswalked - "
-                f"map remaining {missing_n} ({sample}{more})",
-            ))
+            steps.append(
+                (
+                    2,
+                    f"{tx['name']} has {tx['category_count']} categories; {tx['covered_categories']} crosswalked - "
+                    f"map remaining {missing_n} ({sample}{more})",
+                )
+            )
 
     # Modes with no external-taxonomy crosswalk at all
     for fm in FAILURE_MODES_CANONICAL:
         if mode_crosswalk_counts.get(fm, 0) == 0:
-            steps.append((3, f"FailureMode '{fm}' has no external-taxonomy crosswalks - add at least one"))
+            steps.append(
+                (
+                    3,
+                    f"FailureMode '{fm}' has no external-taxonomy crosswalks - add at least one",
+                )
+            )
 
     # Stale / at-risk tools
     stale_n = sum(1 for r in stale if r["stale"])
     if stale_n:
-        worst = max((r for r in stale if r["stale"]), key=lambda r: r["age_days"] or 0, default=None)
+        worst = max(
+            (r for r in stale if r["stale"]),
+            key=lambda r: r["age_days"] or 0,
+            default=None,
+        )
         if worst:
-            steps.append((4, f"Re-review {stale_n} tools with last_updated > {STALE_DAYS_THRESHOLD} days "
-                            f"(oldest: {worst['name']} at {worst['age_days']} days)"))
+            steps.append(
+                (
+                    4,
+                    f"Re-review {stale_n} tools with last_updated > {STALE_DAYS_THRESHOLD} days "
+                    f"(oldest: {worst['name']} at {worst['age_days']} days)",
+                )
+            )
     at_risk_n = sum(1 for r in stale if r["at_risk"])
     if at_risk_n:
-        steps.append((4, f"{at_risk_n} tools flagged at_risk - confirm successor or mark deprecated"))
+        steps.append(
+            (
+                4,
+                f"{at_risk_n} tools flagged at_risk - confirm successor or mark deprecated",
+            )
+        )
 
     # Missing-metadata rollup
     metadata_counts: Counter = Counter()
@@ -373,8 +436,13 @@ def next_steps(
     # Governance bias
     for org in orgs:
         if org["share"] > 0.30:
-            steps.append((6, f"Org '{org['org']}' produces {org['count']} tools ({org['share']*100:.0f}%) "
-                            f"- diversify sources to reduce vendor bias"))
+            steps.append(
+                (
+                    6,
+                    f"Org '{org['org']}' produces {org['count']} tools ({org['share']*100:.0f}%) "
+                    f"- diversify sources to reduce vendor bias",
+                )
+            )
 
     steps.sort(key=lambda x: x[0])
     return [t for _, t in steps][:10]
@@ -384,9 +452,12 @@ def next_steps(
 # Markdown rendering
 # ---------------------------------------------------------------------------
 
+
 def md_table(header: list[str], rows: list[list[str]]) -> str:
-    out = ["| " + " | ".join(header) + " |",
-           "| " + " | ".join(["---"] * len(header)) + " |"]
+    out = [
+        "| " + " | ".join(header) + " |",
+        "| " + " | ".join(["---"] * len(header)) + " |",
+    ]
     for r in rows:
         out.append("| " + " | ".join(str(c) for c in r) + " |")
     return "\n".join(out)
@@ -410,7 +481,9 @@ def render_markdown(ctx: dict[str, Any]) -> str:
 
     generated_at = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     empty_cells = [c for c in cells if c["empty"]]
-    under_covered = [fm for fm in FAILURE_MODES_CANONICAL if len(mitigators.get(fm, [])) < 3]
+    under_covered = [
+        fm for fm in FAILURE_MODES_CANONICAL if len(mitigators.get(fm, [])) < 3
+    ]
     stale_n = sum(1 for r in stale if r["stale"])
 
     lines: list[str] = []
@@ -418,31 +491,37 @@ def render_markdown(ctx: dict[str, Any]) -> str:
     lines.append("")
     lines.append(f"_Generated: {generated_at} (report date: {TODAY.isoformat()})_")
     lines.append("")
-    lines.append("This report highlights where the SAICA-KG is thin and what to add next. "
-                 "It is produced by `validator/coverage_report.py` and never blocks CI; "
-                 "the companion script `validator/cli.py` handles hard invariants.")
+    lines.append(
+        "This report highlights where the SAICA-KG is thin and what to add next. "
+        "It is produced by `validator/coverage_report.py` and never blocks CI; "
+        "the companion script `validator/cli.py` handles hard invariants."
+    )
     lines.append("")
 
     # ---- 1. Summary ----
     lines.append("## 1. Summary")
     lines.append("")
-    lines.append(md_table(
-        ["Node type", "Count"],
-        [
-            ["Tools", len(tools)],
-            ["FailureModes", len(modes)],
-            ["Papers", len(papers)],
-            ["Taxonomies", len(taxonomies)],
-            ["Crosswalks (bulk)", len(crosswalks)],
-            ["Facet cells (filled / 36)", f"{36 - len(empty_cells)} / 36"],
-            ["FailureModes with < 3 mitigators", len(under_covered)],
-            ["Tools older than 180 days", stale_n],
-        ],
-    ))
+    lines.append(
+        md_table(
+            ["Node type", "Count"],
+            [
+                ["Tools", len(tools)],
+                ["FailureModes", len(modes)],
+                ["Papers", len(papers)],
+                ["Taxonomies", len(taxonomies)],
+                ["Crosswalks (bulk)", len(crosswalks)],
+                ["Facet cells (filled / 36)", f"{36 - len(empty_cells)} / 36"],
+                ["FailureModes with < 3 mitigators", len(under_covered)],
+                ["Tools older than 180 days", stale_n],
+            ],
+        )
+    )
     lines.append("")
 
     # ---- 2. Facet-cell occupancy ----
-    lines.append("## 2. Facet-cell occupancy (ControlParadigm x TemporalPhase x AutonomyLevel)")
+    lines.append(
+        "## 2. Facet-cell occupancy (ControlParadigm x TemporalPhase x AutonomyLevel)"
+    )
     lines.append("")
     lines.append(f"Total cells: 4 x 3 x 3 = 36. Empty cells: **{len(empty_cells)}**.")
     lines.append("")
@@ -450,23 +529,35 @@ def render_markdown(ctx: dict[str, Any]) -> str:
     for c in cells:
         flag = "**WARN EMPTY**" if c["empty"] else ""
         tool_list = ", ".join(c["tools"]) if c["tools"] else flag
-        rows.append([
-            c["control_paradigm"],
-            c["temporal_phase"],
-            c["autonomy_level"],
-            c["count"],
-            tool_list,
-        ])
-    lines.append(md_table(
-        ["control_paradigm", "temporal_phase", "autonomy_level", "# tools", "tool names"],
-        rows,
-    ))
+        rows.append(
+            [
+                c["control_paradigm"],
+                c["temporal_phase"],
+                c["autonomy_level"],
+                c["count"],
+                tool_list,
+            ]
+        )
+    lines.append(
+        md_table(
+            [
+                "control_paradigm",
+                "temporal_phase",
+                "autonomy_level",
+                "# tools",
+                "tool names",
+            ],
+            rows,
+        )
+    )
     lines.append("")
     if empty_cells:
         lines.append("### Empty cells (prescriptive gaps)")
         lines.append("")
         for c in empty_cells:
-            lines.append(f"- `{c['control_paradigm']}` x `{c['temporal_phase']}` x `{c['autonomy_level']}`")
+            lines.append(
+                f"- `{c['control_paradigm']}` x `{c['temporal_phase']}` x `{c['autonomy_level']}`"
+            )
         lines.append("")
 
     # ---- 3. FailureMode coverage ----
@@ -477,17 +568,27 @@ def render_markdown(ctx: dict[str, Any]) -> str:
         tools_for = mitigators.get(fm, [])
         n = len(tools_for)
         flag = "**UNDER-COVERED**" if n < 3 else ""
-        rows.append([
-            fm,
-            n,
-            flag,
-            mode_cw_counts.get(fm, 0),
-            ", ".join(tools_for) if tools_for else "_(none)_",
-        ])
-    lines.append(md_table(
-        ["failure_mode", "# mitigators", "flag", "# external crosswalks", "mitigating tools"],
-        rows,
-    ))
+        rows.append(
+            [
+                fm,
+                n,
+                flag,
+                mode_cw_counts.get(fm, 0),
+                ", ".join(tools_for) if tools_for else "_(none)_",
+            ]
+        )
+    lines.append(
+        md_table(
+            [
+                "failure_mode",
+                "# mitigators",
+                "flag",
+                "# external crosswalks",
+                "mitigating tools",
+            ],
+            rows,
+        )
+    )
     lines.append("")
 
     # ---- 4. Taxonomy crosswalk completeness ----
@@ -498,26 +599,39 @@ def render_markdown(ctx: dict[str, Any]) -> str:
         missing_sample = ", ".join(tx["missing_categories"][:8])
         if len(tx["missing_categories"]) > 8:
             missing_sample += f", ... (+{len(tx['missing_categories']) - 8} more)"
-        rows.append([
-            tx["id"],
-            tx["category_count"],
-            tx["mapped_mode_count"],
-            tx["covered_categories"],
-            len(tx["missing_categories"]),
-            missing_sample or "_(all covered)_",
-        ])
-    lines.append(md_table(
-        ["taxonomy", "# categories", "# SAICA modes mapped", "# categories covered", "# missing", "missing category ids"],
-        rows,
-    ))
+        rows.append(
+            [
+                tx["id"],
+                tx["category_count"],
+                tx["mapped_mode_count"],
+                tx["covered_categories"],
+                len(tx["missing_categories"]),
+                missing_sample or "_(all covered)_",
+            ]
+        )
+    lines.append(
+        md_table(
+            [
+                "taxonomy",
+                "# categories",
+                "# SAICA modes mapped",
+                "# categories covered",
+                "# missing",
+                "missing category ids",
+            ],
+            rows,
+        )
+    )
     lines.append("")
 
     # ---- 5. Staleness ----
     lines.append("## 5. Staleness table")
     lines.append("")
-    lines.append(f"Tools sorted by `last_updated` ascending. "
-                 f"Flag = age > {STALE_DAYS_THRESHOLD} days vs {TODAY.isoformat()}, "
-                 f"or `maturity_status: at_risk`.")
+    lines.append(
+        f"Tools sorted by `last_updated` ascending. "
+        f"Flag = age > {STALE_DAYS_THRESHOLD} days vs {TODAY.isoformat()}, "
+        f"or `maturity_status: at_risk`."
+    )
     lines.append("")
     rows = []
     for r in stale:
@@ -526,17 +640,21 @@ def render_markdown(ctx: dict[str, Any]) -> str:
             flags.append("STALE")
         if r["at_risk"]:
             flags.append("AT_RISK")
-        rows.append([
-            r["id"],
-            r["last_updated"] or "_(none)_",
-            r["age_days"] if r["age_days"] is not None else "_n/a_",
-            r["maturity_status"] or "_(none)_",
-            ", ".join(flags) if flags else "",
-        ])
-    lines.append(md_table(
-        ["tool", "last_updated", "age_days", "maturity_status", "flags"],
-        rows,
-    ))
+        rows.append(
+            [
+                r["id"],
+                r["last_updated"] or "_(none)_",
+                r["age_days"] if r["age_days"] is not None else "_n/a_",
+                r["maturity_status"] or "_(none)_",
+                ", ".join(flags) if flags else "",
+            ]
+        )
+    lines.append(
+        md_table(
+            ["tool", "last_updated", "age_days", "maturity_status", "flags"],
+            rows,
+        )
+    )
     lines.append("")
 
     # ---- 6. Missing metadata ----
@@ -552,7 +670,9 @@ def render_markdown(ctx: dict[str, Any]) -> str:
     # ---- 7. Paper citation suggestions ----
     lines.append("## 7. Papers the tool description suggests should be cited")
     lines.append("")
-    lines.append("_Best-effort keyword matching. Suggestions only; no YAML edits performed._")
+    lines.append(
+        "_Best-effort keyword matching. Suggestions only; no YAML edits performed._"
+    )
     lines.append("")
     if suggestions:
         rows = [[s["id"], ", ".join(s["suggested_papers"])] for s in suggestions]
@@ -588,6 +708,7 @@ def render_markdown(ctx: dict[str, Any]) -> str:
 # Entrypoint
 # ---------------------------------------------------------------------------
 
+
 def build_context() -> dict[str, Any]:
     tools = load_dir("tools")
     modes = load_dir("failure_modes")
@@ -604,7 +725,9 @@ def build_context() -> dict[str, Any]:
     missing = missing_metadata(tools)
     suggestions = paper_suggestions(tools, papers_by_id)
     orgs = org_counts(tools)
-    steps = next_steps(cells, mitigators, mode_cw_counts, tax_rows, stale, missing, orgs)
+    steps = next_steps(
+        cells, mitigators, mode_cw_counts, tax_rows, stale, missing, orgs
+    )
 
     return {
         "tools": tools,
@@ -650,10 +773,16 @@ def json_payload(ctx: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", default=str(REPO / "research" / "coverage_report.md"),
-                    help="Output Markdown path (default: research/coverage_report.md)")
-    ap.add_argument("--json", action="store_true",
-                    help="Also write a sibling .json file with structured data.")
+    ap.add_argument(
+        "--out",
+        default=str(REPO / "research" / "coverage_report.md"),
+        help="Output Markdown path (default: research/coverage_report.md)",
+    )
+    ap.add_argument(
+        "--json",
+        action="store_true",
+        help="Also write a sibling .json file with structured data.",
+    )
     args = ap.parse_args()
 
     out_path = Path(args.out).resolve()
@@ -664,7 +793,9 @@ def main() -> int:
 
     if args.json:
         json_path = out_path.with_suffix(".json")
-        json_path.write_text(json.dumps(json_payload(ctx), indent=2, sort_keys=False) + "\n")
+        json_path.write_text(
+            json.dumps(json_payload(ctx), indent=2, sort_keys=False) + "\n"
+        )
         print(f"Wrote {out_path} and {json_path}")
     else:
         print(f"Wrote {out_path}")

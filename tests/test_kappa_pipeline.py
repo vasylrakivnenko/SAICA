@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -75,19 +75,19 @@ def test_rule_based_rater_classifies_known_examples(
 ):
     cls = classify_fault_rules(description)
     if expected_phase is not None:
-        assert cls.temporal_phase == expected_phase, (
-            f"phase mismatch: got {cls.temporal_phase!r}"
-        )
+        assert (
+            cls.temporal_phase == expected_phase
+        ), f"phase mismatch: got {cls.temporal_phase!r}"
     if expected_paradigm is not None:
-        assert cls.control_paradigm == expected_paradigm, (
-            f"paradigm mismatch: got {cls.control_paradigm!r}"
-        )
+        assert (
+            cls.control_paradigm == expected_paradigm
+        ), f"paradigm mismatch: got {cls.control_paradigm!r}"
     emitted = set(cls.failure_modes)
     # Require at least one of the expected modes to be present (rule-based
     # raters are imprecise and may catch additional modes, which is fine).
-    assert emitted & expected_modes_any, (
-        f"expected one of {expected_modes_any}, got {emitted}"
-    )
+    assert (
+        emitted & expected_modes_any
+    ), f"expected one of {expected_modes_any}, got {emitted}"
 
 
 def test_rule_tables_are_non_empty():
@@ -169,9 +169,7 @@ def test_kimi_rater_returns_schema_compliant_output():
         "evidence": ["installation failed because the dependency was missing"],
     }
     client = MagicMock()
-    client.chat.completions.create.return_value = _fake_tool_call_response(
-        fake_payload
-    )
+    client.chat.completions.create.return_value = _fake_tool_call_response(fake_payload)
 
     result = classify_fault_kimi(
         "Installation failed because the dependency was missing.",
@@ -205,9 +203,7 @@ def test_kimi_rater_coerces_unknown_enum_values_to_null():
         "evidence": [],
     }
     client = MagicMock()
-    client.chat.completions.create.return_value = _fake_tool_call_response(
-        fake_payload
-    )
+    client.chat.completions.create.return_value = _fake_tool_call_response(fake_payload)
 
     result = classify_fault_kimi("noise", client=client, fault_id="fake-2")
     assert result.control_paradigm is None
@@ -220,7 +216,9 @@ def test_kimi_rater_coerces_unknown_enum_values_to_null():
 # ---------------------------------------------------------------------------
 
 
-def _mk_rater_record(fid: str, cp: str | None, tp: str | None, modes: list[str]) -> dict:
+def _mk_rater_record(
+    fid: str, cp: str | None, tp: str | None, modes: list[str]
+) -> dict:
     return {
         "fault_id": fid,
         "classification": {

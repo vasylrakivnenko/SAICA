@@ -30,6 +30,7 @@ CLI::
     .venv/bin/python -m validator.enrich_abstracts --dry      # report only
     .venv/bin/python -m validator.enrich_abstracts --no-network  # no arxiv/S2 calls
 """
+
 from __future__ import annotations
 
 import argparse
@@ -67,6 +68,7 @@ log = logging.getLogger(__name__)
 # YAML round-trip
 # ---------------------------------------------------------------------------
 
+
 def _make_yaml() -> YAML:
     y = YAML()
     y.preserve_quotes = True
@@ -83,6 +85,7 @@ def _normalize_title(s: str) -> str:
 # ---------------------------------------------------------------------------
 # Source 1: local s2_raw bundles
 # ---------------------------------------------------------------------------
+
 
 def _build_s2_index() -> dict[str, dict]:
     """Return dict keyed by every retrievable id (paperId, arxiv_id, normalized
@@ -205,6 +208,7 @@ def _abstract_from_s2_api(paper: dict) -> Optional[str]:
 # Per-paper enrichment
 # ---------------------------------------------------------------------------
 
+
 def _insert_abstract(doc, abstract: str) -> None:
     """Insert the ``abstract`` key into ruamel doc, after ``tldr`` if present."""
     if "abstract" in doc:
@@ -263,13 +267,22 @@ def enrich_paper(
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry", action="store_true", help="print proposed enrichments without writing")
-    parser.add_argument("--no-network", action="store_true", help="skip arxiv + S2 API; use only local s2_raw cache")
+    parser.add_argument(
+        "--dry", action="store_true", help="print proposed enrichments without writing"
+    )
+    parser.add_argument(
+        "--no-network",
+        action="store_true",
+        help="skip arxiv + S2 API; use only local s2_raw cache",
+    )
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.WARNING, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.WARNING, format="%(asctime)s %(levelname)s %(message)s"
+    )
 
     yaml = _make_yaml()
     s2_index = _build_s2_index()
@@ -299,7 +312,10 @@ def main() -> int:
                 counts["wrote"] += 1
         else:
             status, source = enrich_paper(
-                path, yaml=yaml, s2_index=s2_index, use_network=not args.no_network,
+                path,
+                yaml=yaml,
+                s2_index=s2_index,
+                use_network=not args.no_network,
             )
             counts[status] = counts.get(status, 0) + 1
             if source:

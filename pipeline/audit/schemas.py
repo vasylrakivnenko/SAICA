@@ -19,6 +19,7 @@ Design notes:
     user can see "we recommended promptfoo because it has cli + library +
     ci_app surfaces and your stack already uses GitHub Actions."
 """
+
 from __future__ import annotations
 
 from datetime import date
@@ -31,19 +32,20 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 
 DetectionSource = Literal[
-    "agent_config",   # .claude/, .cursorrules, CLAUDE.md, .windsurfrules, etc.
-    "ci_workflow",    # .github/workflows/*.yml action references
-    "dep_file",       # pyproject.toml / requirements*.txt / package.json etc.
-    "pre_commit",     # .pre-commit-config.yaml
-    "eval_config",    # promptfooconfig.yaml, deepeval.yaml, judgeval/
-    "dependabot",     # .github/dependabot.yml
-    "renovate",       # renovate.json or .github/renovate.json
-    "other",          # anything else
+    "agent_config",  # .claude/, .cursorrules, CLAUDE.md, .windsurfrules, etc.
+    "ci_workflow",  # .github/workflows/*.yml action references
+    "dep_file",  # pyproject.toml / requirements*.txt / package.json etc.
+    "pre_commit",  # .pre-commit-config.yaml
+    "eval_config",  # promptfooconfig.yaml, deepeval.yaml, judgeval/
+    "dependabot",  # .github/dependabot.yml
+    "renovate",  # renovate.json or .github/renovate.json
+    "other",  # anything else
 ]
 
 
 class DetectedAgent(BaseModel):
     """Coding agent (Claude Code / Cursor / Windsurf / Replit Agent / etc.)."""
+
     id: str = Field(description="KG tool id, e.g. 'claude-code'")
     name: str
     detection_paths: list[str] = Field(description="Files that signaled the detection")
@@ -52,9 +54,12 @@ class DetectedAgent(BaseModel):
 
 class DetectedTool(BaseModel):
     """One supervision tool detected in the user's repo."""
+
     id: str = Field(description="KG tool id, e.g. 'semgrep'. Empty if unknown.")
     name: str
-    in_kg: bool = Field(description="True if the detected tool resolved to a SAICA-KG node.")
+    in_kg: bool = Field(
+        description="True if the detected tool resolved to a SAICA-KG node."
+    )
     detection_source: DetectionSource
     detection_paths: list[str]
     confidence: float = Field(ge=0, le=1)
@@ -63,12 +68,21 @@ class DetectedTool(BaseModel):
 
 class DetectedStack(BaseModel):
     """Inferred stack of the audited repo."""
-    languages: list[str] = Field(description="Primary languages, e.g. ['python','typescript']")
-    runtime_hints: list[str] = Field(description="Marker files seen, e.g. ['pyproject.toml']")
+
+    languages: list[str] = Field(
+        description="Primary languages, e.g. ['python','typescript']"
+    )
+    runtime_hints: list[str] = Field(
+        description="Marker files seen, e.g. ['pyproject.toml']"
+    )
     ci_providers: list[str] = Field(description="e.g. ['github_actions']")
     package_managers: list[str] = Field(description="e.g. ['pip','npm']")
-    agents: list[DetectedAgent] = Field(description="Coding agent(s) inferred from configs")
-    supervision_tools: list[DetectedTool] = Field(description="Supervision tools we found")
+    agents: list[DetectedAgent] = Field(
+        description="Coding agent(s) inferred from configs"
+    )
+    supervision_tools: list[DetectedTool] = Field(
+        description="Supervision tools we found"
+    )
     unresolved_tools: list[DetectedTool] = Field(
         default_factory=list,
         description="Detected but not in the KG — flagged for editorial review.",
@@ -85,14 +99,18 @@ Paradigm = Literal["prevention", "detection", "correction", "recovery"]
 
 class CoverageCell(BaseModel):
     """One (failure_mode × paradigm) cell of the user's coverage grid."""
+
     failure_mode: str = Field(description="e.g. 'scope_creep'")
     paradigm: Paradigm
     tier: Tier
-    contributing_tools: list[str] = Field(description="KG tool ids in the user's stack covering this cell")
+    contributing_tools: list[str] = Field(
+        description="KG tool ids in the user's stack covering this cell"
+    )
 
 
 class CoverageGrid(BaseModel):
     """User's current supervision coverage."""
+
     cells: list[CoverageCell]
     failure_modes_covered: list[str]
     failure_modes_missing: list[str]
@@ -110,6 +128,7 @@ Severity = Literal["high", "medium", "low"]
 
 class Recommendation(BaseModel):
     """One tool we recommend the user add, with the rationale."""
+
     tool_id: str = Field(description="KG tool id")
     tool_name: str
     why: str = Field(description="One-sentence rationale tied to the user's stack")
@@ -124,6 +143,7 @@ class Recommendation(BaseModel):
 
 class GapItem(BaseModel):
     """One gap in the user's supervision coverage."""
+
     failure_mode: str
     paradigm: Optional[Paradigm] = Field(
         default=None,
@@ -138,8 +158,10 @@ class GapItem(BaseModel):
 # Final report
 # ---------------------------------------------------------------------------
 
+
 class AuditReport(BaseModel):
     """The thing /assess and saica_audit_repo both return."""
+
     repo_url: str
     audited_at: date
     stack: DetectedStack
@@ -153,8 +175,10 @@ class AuditReport(BaseModel):
 # MCP-only schemas (saica_lookup, saica_preflight)
 # ---------------------------------------------------------------------------
 
+
 class ToolRecord(BaseModel):
     """Return type for saica_lookup."""
+
     id: str
     name: str
     tagline: Optional[str]
@@ -174,7 +198,10 @@ class ToolRecord(BaseModel):
 
 class PreflightInput(BaseModel):
     """Input for saica_preflight."""
-    action: str = Field(description="What the agent is about to do, e.g. 'edit src/auth.py'")
+
+    action: str = Field(
+        description="What the agent is about to do, e.g. 'edit src/auth.py'"
+    )
     context: Optional[str] = Field(
         default=None,
         description="Optional surrounding context: file paths, prior diff, task description.",
@@ -187,7 +214,10 @@ class PreflightInput(BaseModel):
 
 class PreflightResult(BaseModel):
     """Return type for saica_preflight."""
-    risk_failure_modes: list[str] = Field(description="FM ids the action plausibly triggers")
+
+    risk_failure_modes: list[str] = Field(
+        description="FM ids the action plausibly triggers"
+    )
     overall_risk: Severity
     recommended_supervisors: list[Recommendation]
     rationale: str

@@ -54,10 +54,14 @@ def payload() -> dict:
 def test_export_writes_taxonomy_study_json(tmp_path: Path) -> None:
     """The CLI produces taxonomy_study.json with all expected top-level keys."""
     out = tmp_path / "taxonomy_study.json"
-    rc = export_mod.main([
-        "--research-dir", str(RESEARCH_DIR),
-        "--out", str(out),
-    ])
+    rc = export_mod.main(
+        [
+            "--research-dir",
+            str(RESEARCH_DIR),
+            "--out",
+            str(out),
+        ]
+    )
     assert rc == 0
     assert out.exists()
 
@@ -165,9 +169,9 @@ def test_taxonomies_have_color_and_name(payload: dict) -> None:
     for tid, meta in payload["taxonomies"].items():
         assert meta.get("name"), f"taxonomy {tid} missing name"
         color = meta.get("color", "")
-        assert color.startswith("#") and len(color) == 7, (
-            f"taxonomy {tid} color must be a hex literal: {color!r}"
-        )
+        assert (
+            color.startswith("#") and len(color) == 7
+        ), f"taxonomy {tid} color must be a hex literal: {color!r}"
 
 
 def test_site_json_under_size_budget() -> None:

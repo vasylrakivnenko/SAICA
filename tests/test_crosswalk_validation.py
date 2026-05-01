@@ -58,7 +58,9 @@ def _install_fake_corpus(
     # is effectively skipped. Each test opts in explicitly when it wants
     # manifest coverage.
     monkeypatch.setattr(
-        validator_cli, "MANIFEST_PATH", Path("/tmp/does-not-exist-manifest.json"),
+        validator_cli,
+        "MANIFEST_PATH",
+        Path("/tmp/does-not-exist-manifest.json"),
     )
 
 
@@ -81,8 +83,16 @@ def test_valid_crosswalk_passes(monkeypatch: pytest.MonkeyPatch) -> None:
         "saica_axis": "failure_mode",
         "taxonomy": "owasp-agentic-top-10-2026",
         "mappings": [
-            {"saica_value": "scope_creep", "external_id": "ASI01", "confidence": "partial"},
-            {"saica_value": "supply_chain_attack", "external_id": "ASI04", "confidence": "exact"},
+            {
+                "saica_value": "scope_creep",
+                "external_id": "ASI01",
+                "confidence": "partial",
+            },
+            {
+                "saica_value": "supply_chain_attack",
+                "external_id": "ASI04",
+                "confidence": "exact",
+            },
         ],
     }
     _install_fake_corpus(
@@ -103,7 +113,11 @@ def test_crosswalk_to_missing_taxonomy_errors(monkeypatch: pytest.MonkeyPatch) -
         "saica_axis": "failure_mode",
         "taxonomy": "does-not-exist",
         "mappings": [
-            {"saica_value": "scope_creep", "external_id": "X01", "confidence": "partial"},
+            {
+                "saica_value": "scope_creep",
+                "external_id": "X01",
+                "confidence": "partial",
+            },
         ],
     }
     _install_fake_corpus(
@@ -134,9 +148,17 @@ def test_crosswalk_with_unknown_external_id_errors(
         "saica_axis": "failure_mode",
         "taxonomy": "owasp-agentic-top-10-2026",
         "mappings": [
-            {"saica_value": "scope_creep", "external_id": "ASI01", "confidence": "partial"},
+            {
+                "saica_value": "scope_creep",
+                "external_id": "ASI01",
+                "confidence": "partial",
+            },
             # ASI99 does not exist in the taxonomy — bug.
-            {"saica_value": "fabrication", "external_id": "ASI99", "confidence": "related"},
+            {
+                "saica_value": "fabrication",
+                "external_id": "ASI99",
+                "confidence": "related",
+            },
         ],
     }
     _install_fake_corpus(
@@ -147,9 +169,7 @@ def test_crosswalk_with_unknown_external_id_errors(
 
     _, err = _run_invariants()
     matching = [
-        e
-        for e in err
-        if "[crosswalks]" in e and "owasp-to-saica" in e and "ASI99" in e
+        e for e in err if "[crosswalks]" in e and "owasp-to-saica" in e and "ASI99" in e
     ]
     assert matching, f"expected unknown-external_id error; got: {err}"
     # And the other (valid) mapping is NOT flagged.
@@ -170,9 +190,17 @@ def test_inline_failure_mode_crosswalk_validated(
         "name": "Scope creep",
         "crosswalks": [
             # Good mapping.
-            {"taxonomy": "owasp-agentic-top-10-2026", "external_id": "ASI02", "confidence": "partial"},
+            {
+                "taxonomy": "owasp-agentic-top-10-2026",
+                "external_id": "ASI02",
+                "confidence": "partial",
+            },
             # Bad mapping — ASI77 is not in the OWASP taxonomy.
-            {"taxonomy": "owasp-agentic-top-10-2026", "external_id": "ASI77", "confidence": "related"},
+            {
+                "taxonomy": "owasp-agentic-top-10-2026",
+                "external_id": "ASI77",
+                "confidence": "related",
+            },
         ],
     }
     _install_fake_corpus(
@@ -183,9 +211,7 @@ def test_inline_failure_mode_crosswalk_validated(
 
     _, err = _run_invariants()
     bad = [
-        e
-        for e in err
-        if "[failure_modes]" in e and "scope_creep" in e and "ASI77" in e
+        e for e in err if "[failure_modes]" in e and "scope_creep" in e and "ASI77" in e
     ]
     assert bad, f"expected inline-crosswalk error on ASI77; got: {err}"
     # The ASI02 row (which is valid) should NOT show up as an error.
@@ -203,7 +229,11 @@ def test_inline_failure_mode_crosswalk_missing_taxonomy(
     mode = {
         "id": "fabrication",
         "crosswalks": [
-            {"taxonomy": "non-existent-taxonomy", "external_id": "X-01", "confidence": "related"},
+            {
+                "taxonomy": "non-existent-taxonomy",
+                "external_id": "X-01",
+                "confidence": "related",
+            },
         ],
     }
     _install_fake_corpus(
@@ -236,7 +266,8 @@ def test_corpus_has_no_crosswalk_violations(monkeypatch: pytest.MonkeyPatch) -> 
         for e in err
         if "[crosswalks]" in e or ("[failure_modes]" in e and "crosswalk" in e)
     ]
-    assert crosswalk_errors == [], (
-        "current corpus has crosswalk-category violations:\n  "
-        + "\n  ".join(crosswalk_errors)
+    assert (
+        crosswalk_errors == []
+    ), "current corpus has crosswalk-category violations:\n  " + "\n  ".join(
+        crosswalk_errors
     )

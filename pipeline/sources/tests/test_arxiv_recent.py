@@ -4,6 +4,7 @@ All tests are network-free: the Atom XML fixture lives at
 ``fixtures/arxiv_sample.xml`` and the fetcher is exercised through the
 on-disk cache (``--no-network`` mode) plus a tiny ``papers/`` shim.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,6 +22,7 @@ SAMPLE_XML = (FIXTURES / "arxiv_sample.xml").read_text(encoding="utf-8")
 # ---------------------------------------------------------------------------
 # parse_atom
 # ---------------------------------------------------------------------------
+
 
 def test_parse_atom_extracts_all_entries() -> None:
     items = ar.parse_atom(SAMPLE_XML)
@@ -58,6 +60,7 @@ def test_parse_atom_empty_returns_empty() -> None:
 # ---------------------------------------------------------------------------
 # score_relevance
 # ---------------------------------------------------------------------------
+
 
 def test_score_relevance_empty_returns_zero() -> None:
     assert ar.score_relevance("") == 0.0
@@ -104,6 +107,7 @@ def test_score_relevance_just_below_threshold_is_filtered() -> None:
 # infer_failure_modes
 # ---------------------------------------------------------------------------
 
+
 def test_infer_failure_modes_picks_up_scope_creep_and_fabrication() -> None:
     text = (
         "We detect scope creep on edits, fabrication of nonexistent APIs, "
@@ -130,6 +134,7 @@ def test_infer_failure_modes_empty_text_returns_empty_list() -> None:
 # suggested_id
 # ---------------------------------------------------------------------------
 
+
 def test_suggested_id_matches_shah_2026_convention() -> None:
     sid = ar.suggested_id(
         ["Mehil B. Shah", "Mohammad Mehdi Morovati"],
@@ -145,7 +150,9 @@ def test_suggested_id_matches_shah_2026_convention() -> None:
 
 
 def test_suggested_id_strips_diacritics_and_handles_comma_form() -> None:
-    sid = ar.suggested_id(["Renée García, Maria"], 2025, "A Novel Framework for Code Generation")
+    sid = ar.suggested_id(
+        ["Renée García, Maria"], 2025, "A Novel Framework for Code Generation"
+    )
     # Comma form: surname is "García" -> diacritic-stripped to "garcia".
     assert sid.startswith("garcia-2025-")
     assert "code" in sid
@@ -166,11 +173,12 @@ def test_suggested_id_empty_authors_falls_back_to_unknown() -> None:
 # match_against_kg + load_kg_arxiv_ids
 # ---------------------------------------------------------------------------
 
+
 def test_load_kg_arxiv_ids_from_fixture_papers_dir(tmp_path: Path) -> None:
     pdir = tmp_path / "papers"
     pdir.mkdir()
     (pdir / "shah-2026-characterizing-faults.yml").write_text(
-        "id: shah-2026-characterizing-faults\narxiv_id: \"2603.06847\"\n",
+        'id: shah-2026-characterizing-faults\narxiv_id: "2603.06847"\n',
         encoding="utf-8",
     )
     (pdir / "kumar-2026-agentforge.yml").write_text(
@@ -213,6 +221,7 @@ def test_match_against_kg_routes_known_ids() -> None:
 # fetch_recent — uses on-disk cache, no network
 # ---------------------------------------------------------------------------
 
+
 def test_fetch_recent_uses_cache(tmp_path: Path) -> None:
     cache_dir = tmp_path / "cache"
     cache_dir.mkdir()
@@ -244,7 +253,10 @@ def test_fetch_recent_no_cache_no_network_returns_empty(tmp_path: Path) -> None:
 # End-to-end orchestrator (network-free, fixture-fed)
 # ---------------------------------------------------------------------------
 
-def _seed_cache(cache_dir: Path, today: str, lookback_days: int, categories: list[str]) -> None:
+
+def _seed_cache(
+    cache_dir: Path, today: str, lookback_days: int, categories: list[str]
+) -> None:
     """Seed every category's cache slot with the same fixture XML."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     for cat in categories:
@@ -266,7 +278,7 @@ def test_end_to_end_orchestrator_offline(
     pdir = tmp_path / "data" / "papers"
     pdir.mkdir(parents=True)
     (pdir / "shah-2026-characterizing-faults.yml").write_text(
-        "id: shah-2026-characterizing-faults\narxiv_id: \"2603.06847\"\n",
+        'id: shah-2026-characterizing-faults\narxiv_id: "2603.06847"\n',
         encoding="utf-8",
     )
 
@@ -286,8 +298,9 @@ def test_end_to_end_orchestrator_offline(
 
     monkeypatch.setattr(_dt, "date", _FixedDate)
 
-    rc = sa.main(["--no-network", "--lookback-days", "30",
-                  "--categories", ",".join(categories)])
+    rc = sa.main(
+        ["--no-network", "--lookback-days", "30", "--categories", ",".join(categories)]
+    )
     assert rc == 0
 
     snap_path = tmp_path / "data" / "arxiv_candidates.json"
@@ -362,10 +375,16 @@ def test_end_to_end_dry_does_not_write(
 
     monkeypatch.setattr(_dt, "date", _FixedDate)
 
-    rc = sa.main([
-        "--dry", "--no-network", "--lookback-days", "30",
-        "--categories", "cs.SE",
-    ])
+    rc = sa.main(
+        [
+            "--dry",
+            "--no-network",
+            "--lookback-days",
+            "30",
+            "--categories",
+            "cs.SE",
+        ]
+    )
     assert rc == 0
     assert not (tmp_path / "data" / "arxiv_candidates.json").exists()
     assert not (tmp_path / "research" / "arxiv_candidates_2026-04-30.md").exists()
@@ -373,8 +392,11 @@ def test_end_to_end_dry_does_not_write(
 
 def test_render_markdown_handles_empty_candidates() -> None:
     md = sa.render_markdown(
-        matched=[], new=[], today_iso="2026-04-30",
-        categories=["cs.SE"], lookback_days=30,
+        matched=[],
+        new=[],
+        today_iso="2026-04-30",
+        categories=["cs.SE"],
+        lookback_days=30,
     )
     assert "2026-04-30" in md
     assert "No new arXiv submissions" in md

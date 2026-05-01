@@ -71,7 +71,7 @@ def _refold_notes_block(text: str) -> str:
         if (
             indent_len == 0
             and stripped.startswith("notes:")
-            and stripped[len("notes:"):].lstrip().startswith(">")
+            and stripped[len("notes:") :].lstrip().startswith(">")
         ):
             # Collect body lines: any subsequent line that is empty or
             # indented more than 0 cols. (notes is the last field in our
@@ -188,7 +188,14 @@ ENTRIES: dict[str, dict[str, object]] = {
             " supervision."
         ),
         "modes": ["fabrication", "logic_error"],
-        "tools": ["HumanEval", "TransCoder", "Llama-3.1-405B", "CodeAgent", "CoderEval", "RepoExec"],
+        "tools": [
+            "HumanEval",
+            "TransCoder",
+            "Llama-3.1-405B",
+            "CodeAgent",
+            "CoderEval",
+            "RepoExec",
+        ],
     },
     "bulut-2026-avda-autonomous-vibe-detection": {
         "notes": (
@@ -301,7 +308,12 @@ ENTRIES: dict[str, dict[str, object]] = {
             " Cite as evidence that deployment-time decisions (quantization)"
             " materially shift FailureMode distributions."
         ),
-        "modes": ["supply_chain_attack", "fabrication", "dependency_blindness", "security_vulnerability"],
+        "modes": [
+            "supply_chain_attack",
+            "fabrication",
+            "dependency_blindness",
+            "security_vulnerability",
+        ],
         "tools": ["Qwen", "MBPP", "GitHub"],
     },
     "fan-2025-mcptoolbench-large-scale-ai": {
@@ -546,11 +558,15 @@ ENTRIES: dict[str, dict[str, object]] = {
             " dependency_blindness. The fake-name acceptance rate is a"
             " direct slopsquatting attack vector."
         ),
-        "modes": ["fabrication", "supply_chain_attack", "obsolescence", "dependency_blindness"],
+        "modes": [
+            "fabrication",
+            "supply_chain_attack",
+            "obsolescence",
+            "dependency_blindness",
+        ],
         "tools": [],
     },
-    "ni-2025-viscoder2-building-multi-language"
-    : {
+    "ni-2025-viscoder2-building-multi-language": {
         "notes": (
             "Releases three resources for visualization-coding agents:"
             " VisCode-Multi-679K (679K validated executable visualization"
@@ -604,7 +620,13 @@ ENTRIES: dict[str, dict[str, object]] = {
             " as one of the better-grounded MCP-defense benchmarks."
         ),
         "modes": ["security_vulnerability", "supply_chain_attack"],
-        "tools": ["MCP", "Model Context Protocol", "MCP-Guard", "MCP-AttackBench", "GPT-4"],
+        "tools": [
+            "MCP",
+            "Model Context Protocol",
+            "MCP-Guard",
+            "MCP-AttackBench",
+            "GPT-4",
+        ],
     },
     "santos-2025-decoding-configuration-ai-coding": {
         "notes": (
@@ -664,7 +686,13 @@ ENTRIES: dict[str, dict[str, object]] = {
             " github.com/dongsenzhang/MSB."
         ),
         "modes": ["security_vulnerability", "supply_chain_attack", "scope_creep"],
-        "tools": ["MCP", "Model Context Protocol", "MSB", "MCP Security Benchmark", "GitHub"],
+        "tools": [
+            "MCP",
+            "Model Context Protocol",
+            "MSB",
+            "MCP Security Benchmark",
+            "GitHub",
+        ],
     },
     "wang-2025-ai-agentic-programming-survey": {
         "notes": (
@@ -786,8 +814,7 @@ def write_report(report_path: Path, results: list[tuple[str, dict]]) -> None:
         1 for _, info in results if info and len(info.get("new_notes", "")) >= 600
     )
     minimal = sum(
-        1 for _, info in results
-        if info and 0 < len(info.get("new_notes", "")) < 600
+        1 for _, info in results if info and 0 < len(info.get("new_notes", "")) < 600
     )
     lines.append(f"- Total FM mode mentions: {total_modes}")
     lines.append(f"- Total tool / dataset names extracted: {total_tools}")
@@ -813,7 +840,9 @@ def write_report(report_path: Path, results: list[tuple[str, dict]]) -> None:
         lines.append("")
         lines.append("**Original notes:**")
         lines.append("")
-        lines.append("> " + (info.get("original_notes") or "_(empty)_").replace("\n", "\n> "))
+        lines.append(
+            "> " + (info.get("original_notes") or "_(empty)_").replace("\n", "\n> ")
+        )
         lines.append("")
         lines.append("**New notes:**")
         lines.append("")
@@ -832,7 +861,9 @@ def main() -> int:
     for paper_id in sorted(ENTRIES):
         path = PAPERS_DIR / f"{paper_id}.yml"
         if not path.exists():
-            results.append(("missing_file", {"paper_id": paper_id, "modes": [], "tools": []}))
+            results.append(
+                ("missing_file", {"paper_id": paper_id, "modes": [], "tools": []})
+            )
             continue
         action, info = update_notes(path, yaml=yaml, dry=args.dry)
         results.append((action, info))

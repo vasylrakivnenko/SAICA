@@ -103,5 +103,13 @@ def search(
             log.warning("semantic_scholar insert failed for %s: %s", url, exc)
             continue
         if row_id is not None:
-            inserted.append({"id": row_id, "url": url, "title": title, "snippet": snippet, "raw": item})
+            inserted.append(
+                {
+                    "id": row_id,
+                    "url": url,
+                    "title": title,
+                    "snippet": snippet,
+                    "raw": item,
+                }
+            )
     return inserted

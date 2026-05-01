@@ -64,9 +64,7 @@ def _cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
     return 1.0 - float(np.dot(a, b) / (na * nb))
 
 
-def _top3_similar_tools(
-    tools: EmbeddingStore, i: int
-) -> List[Tuple[str, float]]:
+def _top3_similar_tools(tools: EmbeddingStore, i: int) -> List[Tuple[str, float]]:
     """Top-3 other tools by cosine similarity (regardless of cell)."""
     V = tools.vectors
     v = V[i]
@@ -76,7 +74,9 @@ def _top3_similar_tools(
     return [(tools.ids[j], float(sims[j])) for j in order]
 
 
-def compute_drift(tools: EmbeddingStore, *, top_n: int = DEFAULT_TOP_N) -> List[DriftRow]:
+def compute_drift(
+    tools: EmbeddingStore, *, top_n: int = DEFAULT_TOP_N
+) -> List[DriftRow]:
     """Rank tools by distance from their own cell centroid (descending)."""
     centroids = _cell_centroids(tools)
     rows: List[DriftRow] = []
@@ -139,10 +139,16 @@ def render_markdown(
     lines.append(
         "| # | tool | current cell | distance | nearest alt cell | alt distance |"
     )
-    lines.append("|---|------|--------------|---------:|------------------|-------------:|")
+    lines.append(
+        "|---|------|--------------|---------:|------------------|-------------:|"
+    )
     for i, r in enumerate(rows, 1):
         alt = _fmt_cell(r.nearest_alt_cell) if r.nearest_alt_cell else "—"
-        alt_d = f"{r.nearest_alt_distance:.4f}" if r.nearest_alt_distance is not None else "—"
+        alt_d = (
+            f"{r.nearest_alt_distance:.4f}"
+            if r.nearest_alt_distance is not None
+            else "—"
+        )
         lines.append(
             f"| {i} | `{r.tool_id}` | {_fmt_cell(r.current_cell)} | "
             f"{r.distance_from_own_centroid:.4f} | {alt} | {alt_d} |"
@@ -163,9 +169,7 @@ def render_markdown(
                 f"(distance {r.nearest_alt_distance:.4f})"
             )
         if r.top3_similar:
-            sims = ", ".join(
-                f"`{tid}` ({s:.3f})" for tid, s in r.top3_similar
-            )
+            sims = ", ".join(f"`{tid}` ({s:.3f})" for tid, s in r.top3_similar)
             lines.append(f"- **top-3 embedding-similar tools**: {sims}")
     lines.append("")
     return "\n".join(lines)

@@ -35,14 +35,16 @@ from pipeline.dedup import canonical_github_url
 # Fields where a GitHub-API fallback is *allowed*. The CLI consults this
 # set before attempting any fallback; strict enum / editorial fields are
 # deliberately absent.
-FALLBACK_ELIGIBLE_FIELDS: frozenset[str] = frozenset({
-    "license_spdx",
-    "description",
-    "tagline",
-    "first_released",
-    "last_updated",
-    "stars",
-})
+FALLBACK_ELIGIBLE_FIELDS: frozenset[str] = frozenset(
+    {
+        "license_spdx",
+        "description",
+        "tagline",
+        "first_released",
+        "last_updated",
+        "stars",
+    }
+)
 
 # Confidence below this triggers the fallback ladder.
 FALLBACK_THRESHOLD_DEFAULT = 0.85
@@ -74,7 +76,9 @@ def _unwrap_github_payload(raw_json: Any) -> Optional[dict]:
         return result
     # Heuristic: top-level looks like a GitHub repo item if it carries
     # any of the identifying keys we rely on.
-    if any(k in raw_json for k in ("license", "stargazers_count", "full_name", "pushed_at")):
+    if any(
+        k in raw_json for k in ("license", "stargazers_count", "full_name", "pushed_at")
+    ):
         return raw_json
     return None
 
@@ -248,7 +252,11 @@ def apply_field_fallback(
     today = today or dt.date.today()
 
     if field == "license_spdx":
-        if kimi_confidence >= threshold and isinstance(kimi_value, str) and kimi_value.strip():
+        if (
+            kimi_confidence >= threshold
+            and isinstance(kimi_value, str)
+            and kimi_value.strip()
+        ):
             return None  # caller keeps the Kimi value
         spdx = _github_spdx(raw)
         if spdx:
@@ -258,7 +266,11 @@ def apply_field_fallback(
     if field == "description":
         # Tier 1: Kimi already passed the auto-accept bar — not our
         # problem, caller will use it.
-        if kimi_confidence >= threshold and isinstance(kimi_value, str) and kimi_value.strip():
+        if (
+            kimi_confidence >= threshold
+            and isinstance(kimi_value, str)
+            and kimi_value.strip()
+        ):
             return None
         # Tier 2: Kimi still has useful signal — keep it but flag conf.
         if (
@@ -278,7 +290,11 @@ def apply_field_fallback(
 
     if field == "tagline":
         # Same three tiers as description.
-        if kimi_confidence >= threshold and isinstance(kimi_value, str) and kimi_value.strip():
+        if (
+            kimi_confidence >= threshold
+            and isinstance(kimi_value, str)
+            and kimi_value.strip()
+        ):
             return None
         if (
             isinstance(kimi_value, str)

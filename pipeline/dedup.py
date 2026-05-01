@@ -291,9 +291,7 @@ class DupChecker:
             return
         try:
             with db.get_conn() as conn, conn.cursor() as cur:
-                cur.execute(
-                    "SELECT id, source_url, name FROM candidate_tools"
-                )
+                cur.execute("SELECT id, source_url, name FROM candidate_tools")
                 rows = list(cur.fetchall())
         except Exception:  # noqa: BLE001 - tolerate DB absence in tests
             return
@@ -318,9 +316,7 @@ class DupChecker:
 
     # -- public API ---------------------------------------------------------
 
-    def check_url(
-        self, url: str, *, name: Optional[str] = None
-    ) -> Optional[DupHit]:
+    def check_url(self, url: str, *, name: Optional[str] = None) -> Optional[DupHit]:
         """Check a URL (and optional name) against every population.
 
         Rule order: canonical_url (yaml) > canonical_url (candidate) >
@@ -405,9 +401,7 @@ class DupChecker:
             raw_score = float(fuzz.token_set_ratio(name, entry.name))
             compact_score = 0.0
             if compact and entry.compact_name:
-                compact_score = float(
-                    fuzz.token_set_ratio(compact, entry.compact_name)
-                )
+                compact_score = float(fuzz.token_set_ratio(compact, entry.compact_name))
             score = max(raw_score, compact_score)
             if score > best_score:
                 best_score = score

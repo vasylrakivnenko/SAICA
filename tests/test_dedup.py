@@ -174,8 +174,7 @@ def test_check_url_hits_yaml_after_normalization(checker_no_db: DupChecker):
 
 def test_check_url_miss_returns_none(checker_no_db: DupChecker):
     assert (
-        checker_no_db.check_url("https://github.com/example-org/no-such-repo")
-        is None
+        checker_no_db.check_url("https://github.com/example-org/no-such-repo") is None
     )
 
 
@@ -204,9 +203,7 @@ def test_check_url_hits_candidate(monkeypatch):
         self._by_url[entry.url] = entry
         self._by_repo_key[entry.repo_key] = entry
 
-    monkeypatch.setattr(
-        dedup_mod.DupChecker, "_load_candidate_index", _fake_load
-    )
+    monkeypatch.setattr(dedup_mod.DupChecker, "_load_candidate_index", _fake_load)
     checker = DupChecker(yaml_dir=YAML_DIR, include_candidates=True)
 
     hit = checker.check_url("https://github.com/FakeOrg/fakerepo/")
@@ -243,9 +240,7 @@ def test_fuzzy_name_returns_none_for_unrelated(checker_no_db: DupChecker):
 
 def test_check_url_falls_back_to_fuzzy_name(checker_no_db: DupChecker):
     # Non-GitHub URL but name matches an indexed YAML.
-    hit = checker_no_db.check_url(
-        "https://example.com/whatever", name="PydanticAI"
-    )
+    hit = checker_no_db.check_url("https://example.com/whatever", name="PydanticAI")
     assert hit is not None
     assert hit.rule == "fuzzy_name"
     assert hit.match_id == "pydantic-ai"
@@ -263,9 +258,7 @@ def test_register_batch_then_check_hits_batch():
         "https://github.com/example-org/brand-new-repo", name="BrandNew"
     )
 
-    hit = checker.check_url(
-        "https://github.com/example-org/brand-new-repo/tree/main"
-    )
+    hit = checker.check_url("https://github.com/example-org/brand-new-repo/tree/main")
     assert hit is not None
     assert hit.kind == "batch"
     assert hit.rule == "canonical_url"
@@ -276,9 +269,7 @@ def test_register_batch_then_check_hits_batch():
 def test_register_batch_first_occurrence_is_not_a_hit():
     checker = DupChecker(yaml_dir="/nonexistent-dir", include_candidates=False)
     # Before registration, no hit.
-    assert (
-        checker.check_url("https://github.com/example-org/xyz-repo") is None
-    )
+    assert checker.check_url("https://github.com/example-org/xyz-repo") is None
     checker.register_batch("https://github.com/example-org/xyz-repo")
     # After registration, same URL is a batch hit.
     hit = checker.check_url("https://github.com/example-org/xyz-repo")

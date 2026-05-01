@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Iterable, Iterator, Optional
+from typing import Any, Iterator, Optional
 
 log = logging.getLogger(__name__)
 
@@ -81,7 +81,9 @@ def _proposed_tool_id(github_url: str, title: Optional[str]) -> str:
     return _kebab(github_url)
 
 
-def _proposed_paper_id(arxiv_id: Optional[str], doi: Optional[str], title: Optional[str]) -> str:
+def _proposed_paper_id(
+    arxiv_id: Optional[str], doi: Optional[str], title: Optional[str]
+) -> str:
     if arxiv_id:
         return f"arxiv-{_kebab(arxiv_id)}"
     if doi:
@@ -90,9 +92,7 @@ def _proposed_paper_id(arxiv_id: Optional[str], doi: Optional[str], title: Optio
 
 
 def _row_text(raw_row: dict) -> str:
-    return "\n".join(
-        str(raw_row.get(f) or "") for f in ("title", "snippet", "url")
-    )
+    return "\n".join(str(raw_row.get(f) or "") for f in ("title", "snippet", "url"))
 
 
 def _iter_raw_results(conn, since: Optional[datetime]) -> Iterator[dict]:
@@ -141,7 +141,9 @@ def _mark_low_relevance(conn, table: str, source_url: str) -> None:
         conn.commit()
 
 
-def _process_row(raw_row: dict, summary: RunSummary, *, conn, _db, dup_checker=None) -> None:
+def _process_row(
+    raw_row: dict, summary: RunSummary, *, conn, _db, dup_checker=None
+) -> None:
     """Classify + upsert one raw row."""
     summary.rows_processed += 1
 
@@ -270,7 +272,9 @@ def run(since: Optional[datetime] = None) -> RunSummary:
     with db.get_conn() as conn:
         for raw_row in _iter_raw_results(conn, since):
             try:
-                _process_row(raw_row, summary, conn=conn, _db=db, dup_checker=dup_checker)
+                _process_row(
+                    raw_row, summary, conn=conn, _db=db, dup_checker=dup_checker
+                )
             except Exception as exc:  # pragma: no cover (defensive)
                 summary.errors.append(f"row {raw_row.get('id')!r}: {exc!r}")
 

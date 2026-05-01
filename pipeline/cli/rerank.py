@@ -98,7 +98,8 @@ def _fetch_rows(
     if rescore_stale:
         current_hash = queries_content_hash()
         rows = [
-            r for r in rows
+            r
+            for r in rows
             if (r.get("nlp_tags") or {}).get("rerank_query_set_hash") != current_hash
         ]
     return rows
@@ -185,8 +186,10 @@ def _print_top(
     n = min(top, len(scores))
     print(f"top {n}:")
     name_col = max(
-        (len((rows_by_id[s.candidate_id].get("proposed_id") or "") or "")
-         for s in scores[:n]),
+        (
+            len((rows_by_id[s.candidate_id].get("proposed_id") or "") or "")
+            for s in scores[:n]
+        ),
         default=12,
     )
     name_col = max(name_col, 12)
@@ -202,7 +205,7 @@ def _print_top(
 
 def _dry_run(rows: list[dict], queries: list[RerankQuery]) -> None:
     print(f"DRY RUN — would send {len(queries)} queries × {len(rows)} docs")
-    print(f"endpoint: <AZURE_COHERE_RERANK_ENDPOINT>")
+    print("endpoint: <AZURE_COHERE_RERANK_ENDPOINT>")
     print("queries:")
     for q in queries:
         facet = f" ({q.facet})" if q.facet else ""
@@ -237,9 +240,7 @@ def _select_queries(query_id: Optional[str]) -> list[RerankQuery]:
     matched = [q for q in SUPERVISION_QUERIES if q.id == query_id]
     if not matched:
         known = ", ".join(q.id for q in SUPERVISION_QUERIES)
-        raise SystemExit(
-            f"unknown --query-id {query_id!r}; known ids: {known}"
-        )
+        raise SystemExit(f"unknown --query-id {query_id!r}; known ids: {known}")
     return matched
 
 
@@ -300,7 +301,8 @@ def _cmd_tools(args: argparse.Namespace) -> int:
     # Surface any rate-limit header info Cohere may expose.
     last = getattr(client, "last_headers", {}) or {}
     interesting = {
-        k: v for k, v in last.items()
+        k: v
+        for k, v in last.items()
         if any(t in k.lower() for t in ("ratelimit", "x-ms-region", "request-id"))
     }
     if interesting:

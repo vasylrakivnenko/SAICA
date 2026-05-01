@@ -23,6 +23,7 @@ from pipeline.nlp.preprocess import (
 # keyword_hits
 # ---------------------------------------------------------------------------
 
+
 def test_keyword_hits_combined_fabrication_and_supply_chain():
     text = "The agent hallucinated a package name from npm (slopsquatting risk)"
     hits = keyword_hits(text)
@@ -62,6 +63,7 @@ def test_keyword_hits_whitespace_runs_in_phrase():
 # ---------------------------------------------------------------------------
 # extract_github_urls
 # ---------------------------------------------------------------------------
+
 
 def test_extract_github_urls_basic():
     text = "see https://github.com/anthropic/claude-agent-sdk for details"
@@ -105,6 +107,7 @@ def test_extract_github_urls_empty():
 # ---------------------------------------------------------------------------
 # relevance_score
 # ---------------------------------------------------------------------------
+
 
 def test_relevance_score_low_for_empty_row():
     assert relevance_score({"title": "", "snippet": "", "url": ""}) == 0.0
@@ -165,6 +168,7 @@ def test_relevance_score_paper_signal_without_github():
 # Listicle rescue / drop behavior (borderline-candidate policy)
 # ---------------------------------------------------------------------------
 
+
 def test_relevance_score_listicle_without_github_is_dropped():
     """A Perplexity listicle with no entity signal must fall below the
     promotion threshold so we don't Kimi-extract it."""
@@ -214,6 +218,7 @@ def test_relevance_score_outlines_tool_with_github_clears_high_bar():
 # tool_shape_hits + keyword coverage spot checks
 # ---------------------------------------------------------------------------
 
+
 def test_tool_shape_hits_distinct_phrases():
     text = (
         "An MCP server providing guardrails, sandboxed execution, and "
@@ -222,8 +227,13 @@ def test_tool_shape_hits_distinct_phrases():
     hits = tool_shape_hits(text)
     # Distinct TOOL_SHAPE_SIGNALS phrases that should match this text.
     for expected in (
-        "mcp server", "guardrails", "sandboxed",
-        "observability", "tracing", "telemetry", "agent orchestration",
+        "mcp server",
+        "guardrails",
+        "sandboxed",
+        "observability",
+        "tracing",
+        "telemetry",
+        "agent orchestration",
     ):
         assert expected in hits, f"expected {expected!r} in tool_shape_hits"
 
@@ -264,6 +274,7 @@ def test_promotion_and_low_relevance_thresholds_are_sane():
 # canonical_url
 # ---------------------------------------------------------------------------
 
+
 def test_canonical_url_lowercases_host_and_strips_trailing_slash():
     assert (
         canonical_url("HTTPS://GitHub.com/Anthropics/Claude/")
@@ -299,6 +310,7 @@ def test_canonical_url_drops_default_port():
 # ---------------------------------------------------------------------------
 # fuzzy_title_matches
 # ---------------------------------------------------------------------------
+
 
 def test_fuzzy_title_matches_finds_near_duplicate():
     candidates = [
@@ -336,6 +348,7 @@ def test_fuzzy_title_matches_rejects_unrelated():
 # ---------------------------------------------------------------------------
 # extras: extract_arxiv_ids / extract_dois / classify_kind (light coverage)
 # ---------------------------------------------------------------------------
+
 
 def test_extract_arxiv_ids_new_and_old():
     text = "see arXiv:2403.12345v2 and cs.CL/0608032 for details"

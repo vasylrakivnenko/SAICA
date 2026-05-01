@@ -114,9 +114,7 @@ def project_all(
                     "type": node_type,
                     "x": float(coords[i, 0]),
                     "y": float(coords[i, 1]),
-                    "top_similar_ids": [
-                        sid for sid, _ in neighbors.get(nid, [])
-                    ],
+                    "top_similar_ids": [sid for sid, _ in neighbors.get(nid, [])],
                     "facet": (
                         {
                             "control_paradigm": subset.cells[i][0],
@@ -155,9 +153,7 @@ def project_all(
     }
 
 
-def write_embeddings_json(
-    payload: Dict, out_path: Path = EMBEDDINGS_JSON_PATH
-) -> Path:
+def write_embeddings_json(payload: Dict, out_path: Path = EMBEDDINGS_JSON_PATH) -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, separators=(",", ":"))

@@ -97,68 +97,79 @@ PAPER_TEXT_FIELDS = ("title", "tldr", "notes", "abstract")
 
 # Tool ids whose ``name`` is a borderline english / overloaded term. We only
 # match these when surrounding context contains a corroborating signal.
-BORDERLINE_TOOL_IDS: frozenset[str] = frozenset({
-    "aider",       # English word "aider" (helper)
-    "agno",        # short token, can collide
-    "agenta",      # short token
-    "cody",        # name; could be unrelated
-    "cline",       # CLI tool but short
-    "continue-dev", # name "Continue" is a keyword
-    "evals",       # common word
-    "garak",       # rare proper noun, but borderline
-    "guidance",    # common english word
-    "helm",        # k8s helm overlap
-    "helicone",    # OK but borderline in context
-    "instructor",  # english word
-    "letta",       # short proper noun
-    "logfire",     # short proper noun
-    "manifest",    # english word
-    "modal",       # english word + lib name + product
-    "nono",        # nonsense token, often false positive
-    "outlines",    # english plural
-    "phoenix",     # multi-meaning (city / framework / "Phoenix")
-    "rebuff",      # english verb
-    "snyk",        # OK but short
-    "socket",      # english word
-    "v0",          # too short to match safely
-})
+BORDERLINE_TOOL_IDS: frozenset[str] = frozenset(
+    {
+        "aider",  # English word "aider" (helper)
+        "agno",  # short token, can collide
+        "agenta",  # short token
+        "cody",  # name; could be unrelated
+        "cline",  # CLI tool but short
+        "continue-dev",  # name "Continue" is a keyword
+        "evals",  # common word
+        "garak",  # rare proper noun, but borderline
+        "guidance",  # common english word
+        "helm",  # k8s helm overlap
+        "helicone",  # OK but borderline in context
+        "instructor",  # english word
+        "letta",  # short proper noun
+        "logfire",  # short proper noun
+        "manifest",  # english word
+        "modal",  # english word + lib name + product
+        "nono",  # nonsense token, often false positive
+        "outlines",  # english plural
+        "phoenix",  # multi-meaning (city / framework / "Phoenix")
+        "rebuff",  # english verb
+        "snyk",  # OK but short
+        "socket",  # english word
+        "v0",  # too short to match safely
+    }
+)
 
 # Names where there is no GitHub repo to disambiguate (proprietary /
 # academic products). Require corroborating context word in same sentence.
-NO_REPO_TOOL_IDS: frozenset[str] = frozenset({
-    "braintrust",
-    "claude-code",
-    "cursor",
-    "devin",
-    "github-copilot",
-    "langsmith",
-    "modal",
-    "replit-agent",
-    "v0",
-    "windsurf",
-})
+NO_REPO_TOOL_IDS: frozenset[str] = frozenset(
+    {
+        "braintrust",
+        "claude-code",
+        "cursor",
+        "devin",
+        "github-copilot",
+        "langsmith",
+        "modal",
+        "replit-agent",
+        "v0",
+        "windsurf",
+    }
+)
 
 # Single-word brand names that overlap with common English nouns/verbs.
 # When matching these as ``no_repo`` brands, we additionally require an
 # exact-case occurrence (``Cursor`` not ``cursor``, ``Modal`` not ``modal``).
-_LOWERCASE_WORD_BRANDS: frozenset[str] = frozenset({
-    "cursor", "modal", "windsurf", "v0",
-})
+_LOWERCASE_WORD_BRANDS: frozenset[str] = frozenset(
+    {
+        "cursor",
+        "modal",
+        "windsurf",
+        "v0",
+    }
+)
 
 # Tools whose ``name`` is a generic technology term and would over-match
 # (e.g. ``browser-mcp``'s name is "mcp" — any mention of the Model Context
 # Protocol concept would falsely cite this tool). For these, only repo URL
 # or owner/repo slug matches count; name matches are SUPPRESSED entirely.
-URL_ONLY_TOOL_IDS: frozenset[str] = frozenset({
-    "browser-mcp",          # name == "mcp" (Model Context Protocol concept)
-    "magic-mcp",            # name == "magic-mcp"; OK actually, but stay strict
-    "mcp-playwright",       # generic protocol prefix
-    "mcp-server-browserbase",
-    "mcp-toolbox",          # name is "genai-toolbox" — keep but treat strict
-    "playwright-mcp",
-    "pathway-llm-app",      # name == "llm-app" (very generic)
-    "openai-evals",         # name == "evals" (handled by BORDERLINE too)
-})
+URL_ONLY_TOOL_IDS: frozenset[str] = frozenset(
+    {
+        "browser-mcp",  # name == "mcp" (Model Context Protocol concept)
+        "magic-mcp",  # name == "magic-mcp"; OK actually, but stay strict
+        "mcp-playwright",  # generic protocol prefix
+        "mcp-server-browserbase",
+        "mcp-toolbox",  # name is "genai-toolbox" — keep but treat strict
+        "playwright-mcp",
+        "pathway-llm-app",  # name == "llm-app" (very generic)
+        "openai-evals",  # name == "evals" (handled by BORDERLINE too)
+    }
+)
 
 # Corroborating signals — words/phrases that, if present in the surrounding
 # CONTEXT_WINDOW around a borderline-name match, lift it to the 0.9 tier.
@@ -166,18 +177,63 @@ URL_ONLY_TOOL_IDS: frozenset[str] = frozenset({
 # (so "LLMs", "agents", "tools", "developers", "evaluations" all count).
 CONTEXT_SIGNALS = (
     # core supervision-domain vocabulary
-    "llm", "agent", "agentic", "code", "coding", "coder", "developer",
-    "develop", "development", "engineer", "engineering",
-    "model", "tool", "eval", "evaluation", "benchmark", "framework",
-    "sandbox", "ide", "ai", "cli", "harness", "test", "testing",
+    "llm",
+    "agent",
+    "agentic",
+    "code",
+    "coding",
+    "coder",
+    "developer",
+    "develop",
+    "development",
+    "engineer",
+    "engineering",
+    "model",
+    "tool",
+    "eval",
+    "evaluation",
+    "benchmark",
+    "framework",
+    "sandbox",
+    "ide",
+    "ai",
+    "cli",
+    "harness",
+    "test",
+    "testing",
     # software/build context that papers commonly use around tool names
-    "software", "program", "programming", "compile", "compiler",
-    "production", "research", "study", "experiment", "vscode", "vs code",
-    "repository", "repo", "github", "library", "package", "system",
+    "software",
+    "program",
+    "programming",
+    "compile",
+    "compiler",
+    "production",
+    "research",
+    "study",
+    "experiment",
+    "vscode",
+    "vs code",
+    "repository",
+    "repo",
+    "github",
+    "library",
+    "package",
+    "system",
     # supervision keywords
-    "supervision", "guardrail", "guardrails", "monitor", "observability",
-    "trace", "tracing", "audit", "lint", "static analysis", "fuzz",
-    "red-team", "red team", "evaluation harness",
+    "supervision",
+    "guardrail",
+    "guardrails",
+    "monitor",
+    "observability",
+    "trace",
+    "tracing",
+    "audit",
+    "lint",
+    "static analysis",
+    "fuzz",
+    "red-team",
+    "red team",
+    "evaluation harness",
 )
 _SIGNAL_RE = re.compile(
     r"(?<![A-Za-z0-9])(?:"
@@ -199,19 +255,19 @@ SNIPPET_RADIUS = 40
 # (NO_REPO_TOOL_IDS still requires a context word; LOWERCASE_WORD_BRANDS
 # still require exact-case). Keep this list small and justified.
 NAME_ALIASES: dict[str, tuple[str, ...]] = {
-    "codex-cli":     ("OpenAI Codex", "Codex CLI"),
-    "gemini-cli":    ("Gemini CLI", "Gemini-CLI"),
-    "continue-dev":  ("Continue.dev",),
+    "codex-cli": ("OpenAI Codex", "Codex CLI"),
+    "gemini-cli": ("Gemini CLI", "Gemini-CLI"),
+    "continue-dev": ("Continue.dev",),
     "github-copilot": ("Copilot",),  # only with context (NO_REPO + signals)
     "sourcegraph-cody": ("Cody",),
-    "claude-code":   ("Claude Code CLI",),
-    "pydantic-ai":   ("PydanticAI", "Pydantic-AI"),
-    "openai-evals":  ("OpenAI Evals",),
+    "claude-code": ("Claude Code CLI",),
+    "pydantic-ai": ("PydanticAI", "Pydantic-AI"),
+    "openai-evals": ("OpenAI Evals",),
     "lm-evaluation-harness": ("LM Eval Harness", "lm-eval"),
-    "browser-use":   ("Browser-Use",),
-    "swe-agent":     ("SWE-Agent", "SWE Agent"),
-    "promptfoo":     ("Prompt Foo",),
-    "deepteam":      ("DeepTeam",),
+    "browser-use": ("Browser-Use",),
+    "swe-agent": ("SWE-Agent", "SWE Agent"),
+    "promptfoo": ("Prompt Foo",),
+    "deepteam": ("DeepTeam",),
     "confident-ai-deepteam": ("DeepTeam",),
 }
 
@@ -219,6 +275,7 @@ NAME_ALIASES: dict[str, tuple[str, ...]] = {
 # --------------------------------------------------------------------------- #
 # Data classes
 # --------------------------------------------------------------------------- #
+
 
 @dataclass(frozen=True)
 class ToolMeta:
@@ -249,6 +306,7 @@ class Match:
 # --------------------------------------------------------------------------- #
 # Loading
 # --------------------------------------------------------------------------- #
+
 
 def _make_yaml() -> YAML:
     y = YAML()
@@ -282,12 +340,14 @@ def load_tools() -> list[ToolMeta]:
     out: list[ToolMeta] = []
     for tp in sorted(TOOLS_DIR.glob("*.yml")):
         d = _load_tool_readonly(tp)
-        out.append(ToolMeta(
-            id=d.get("id", tp.stem),
-            name=str(d.get("name") or "").strip(),
-            repo_url=str(d.get("repository_url") or "").strip(),
-            repo_slug=_slug_from_repo(str(d.get("repository_url") or "")),
-        ))
+        out.append(
+            ToolMeta(
+                id=d.get("id", tp.stem),
+                name=str(d.get("name") or "").strip(),
+                repo_url=str(d.get("repository_url") or "").strip(),
+                repo_slug=_slug_from_repo(str(d.get("repository_url") or "")),
+            )
+        )
     return out
 
 
@@ -304,6 +364,7 @@ def load_papers() -> dict[str, dict]:
 # --------------------------------------------------------------------------- #
 # Matching
 # --------------------------------------------------------------------------- #
+
 
 def _iter_text_fields(paper: dict) -> Iterable[tuple[str, str]]:
     """Yield ``(field_name, text)`` pairs from a paper, skipping non-strings."""
@@ -363,7 +424,10 @@ _MIN_NAME_LEN = 3
 
 
 def _find_name(
-    text: str, name: str, *, case_sensitive: bool = False,
+    text: str,
+    name: str,
+    *,
+    case_sensitive: bool = False,
 ) -> tuple[int, int] | None:
     """Search for ``name`` as a non-word-bounded phrase.
 
@@ -406,10 +470,13 @@ def match_paper_to_tool(
             span = _find_repo_url(text, tool.repo_url)
             if span:
                 m = Match(
-                    paper_id=paper_id, tool_id=tool.id, field=field,
+                    paper_id=paper_id,
+                    tool_id=tool.id,
+                    field=field,
                     matched_text=tool.repo_url,
                     snippet=_snippet_of(text, *span),
-                    confidence=1.0, rule="url",
+                    confidence=1.0,
+                    rule="url",
                 )
                 if best is None or m.confidence > best.confidence:
                     best = m
@@ -420,10 +487,13 @@ def match_paper_to_tool(
             span = _find_slug(text, tool.repo_slug)
             if span:
                 m = Match(
-                    paper_id=paper_id, tool_id=tool.id, field=field,
+                    paper_id=paper_id,
+                    tool_id=tool.id,
+                    field=field,
                     matched_text=tool.repo_slug,
                     snippet=_snippet_of(text, *span),
-                    confidence=1.0, rule="slug",
+                    confidence=1.0,
+                    rule="slug",
                 )
                 if best is None or m.confidence > best.confidence:
                     best = m
@@ -456,10 +526,13 @@ def match_paper_to_tool(
                     rule, conf = "name", 0.9
 
                 m = Match(
-                    paper_id=paper_id, tool_id=tool.id, field=field,
+                    paper_id=paper_id,
+                    tool_id=tool.id,
+                    field=field,
                     matched_text=cand,
                     snippet=_snippet_of(text, *span),
-                    confidence=conf, rule=rule,
+                    confidence=conf,
+                    rule=rule,
                 )
                 if best is None or m.confidence > best.confidence:
                     best = m
@@ -481,6 +554,7 @@ def match_all(papers: dict[str, dict], tools: list[ToolMeta]) -> list[Match]:
 # --------------------------------------------------------------------------- #
 # YAML write-back
 # --------------------------------------------------------------------------- #
+
 
 def apply_matches(
     matches: list[Match],
@@ -549,6 +623,7 @@ def apply_matches(
 # Report
 # --------------------------------------------------------------------------- #
 
+
 def render_report(
     *,
     today: str,
@@ -571,8 +646,10 @@ def render_report(
     lines: list[str] = []
     lines.append(f"# Citation backfill report — {today}")
     lines.append("")
-    lines.append("Generated by `validator/backfill_citations.py`. "
-                 "Conservative tool-mention matching over the paper corpus.")
+    lines.append(
+        "Generated by `validator/backfill_citations.py`. "
+        "Conservative tool-mention matching over the paper corpus."
+    )
     lines.append("")
     lines.append("## Summary")
     lines.append("")
@@ -591,12 +668,14 @@ def render_report(
     lines.append("## Applied citations")
     lines.append("")
     if not added:
-        lines.append("_No new citations applied. This is an honest finding: "
-                     "the current paper YAMLs (`title` / `tldr` / `notes` / "
-                     "`abstract`) rarely name specific tools or include "
-                     "GitHub repository URLs, so the high-confidence match "
-                     "set is sparse. The script will pick up new matches as "
-                     "papers gain richer text or new papers/tools are added._")
+        lines.append(
+            "_No new citations applied. This is an honest finding: "
+            "the current paper YAMLs (`title` / `tldr` / `notes` / "
+            "`abstract`) rarely name specific tools or include "
+            "GitHub repository URLs, so the high-confidence match "
+            "set is sparse. The script will pick up new matches as "
+            "papers gain richer text or new papers/tools are added._"
+        )
         lines.append("")
     else:
         for tool_id in sorted(added):
@@ -605,8 +684,9 @@ def render_report(
             lines.append("")
             for pid in new_pids:
                 # Find the supporting match(es) for this (paper, tool).
-                evidences = [m for m in accepted
-                             if m.tool_id == tool_id and m.paper_id == pid]
+                evidences = [
+                    m for m in accepted if m.tool_id == tool_id and m.paper_id == pid
+                ]
                 for m in evidences:
                     lines.append(
                         f"- **+{pid}** "
@@ -617,14 +697,15 @@ def render_report(
             lines.append("")
 
     # Show all accepted matches even if they were already present (for audit).
-    pre_existing = [m for m in accepted
-                    if m.paper_id not in added.get(m.tool_id, [])]
+    pre_existing = [m for m in accepted if m.paper_id not in added.get(m.tool_id, [])]
     if pre_existing:
         lines.append("## Already-present citations (no-op)")
         lines.append("")
-        lines.append("Matches at/above threshold whose paper id was already "
-                     "in the tool's `cited_in` list. Listed here so the "
-                     "audit trail captures the full evidence set.")
+        lines.append(
+            "Matches at/above threshold whose paper id was already "
+            "in the tool's `cited_in` list. Listed here so the "
+            "audit trail captures the full evidence set."
+        )
         lines.append("")
         for m in pre_existing:
             lines.append(
@@ -638,9 +719,11 @@ def render_report(
     if candidates:
         lines.append("## Candidates needing review")
         lines.append("")
-        lines.append(f"Matches BELOW the auto-apply threshold of "
-                     f"{threshold:.2f}. Inspect manually; "
-                     "promote to `cited_in` by hand if the evidence holds.")
+        lines.append(
+            f"Matches BELOW the auto-apply threshold of "
+            f"{threshold:.2f}. Inspect manually; "
+            "promote to `cited_in` by hand if the evidence holds."
+        )
         lines.append("")
         for m in candidates:
             lines.append(
@@ -660,17 +743,23 @@ def render_report(
     )
     lines.append("")
     lines.append("1. **`url` (conf 1.0)** — literal `repository_url` substring.")
-    lines.append("2. **`slug` (conf 1.0)** — `owner/repo` GitHub slug as a standalone token.")
-    lines.append("3. **`name` (conf 0.9)** — tool `name` as a non-word-bounded phrase. "
-                 "Borderline single-word names "
-                 f"({sorted(BORDERLINE_TOOL_IDS)[:6]}…) require a "
-                 "corroborating context word in the surrounding 60-char window.")
-    lines.append("4. **`name+context` (conf 0.9)** — proprietary / academic products "
-                 f"({sorted(NO_REPO_TOOL_IDS)[:6]}…) require both the name "
-                 "and a code-related context word in the surrounding window. "
-                 "Single-word brands that overlap with English nouns "
-                 f"({sorted(_LOWERCASE_WORD_BRANDS)}) additionally require "
-                 "exact-case matching.")
+    lines.append(
+        "2. **`slug` (conf 1.0)** — `owner/repo` GitHub slug as a standalone token."
+    )
+    lines.append(
+        "3. **`name` (conf 0.9)** — tool `name` as a non-word-bounded phrase. "
+        "Borderline single-word names "
+        f"({sorted(BORDERLINE_TOOL_IDS)[:6]}…) require a "
+        "corroborating context word in the surrounding 60-char window."
+    )
+    lines.append(
+        "4. **`name+context` (conf 0.9)** — proprietary / academic products "
+        f"({sorted(NO_REPO_TOOL_IDS)[:6]}…) require both the name "
+        "and a code-related context word in the surrounding window. "
+        "Single-word brands that overlap with English nouns "
+        f"({sorted(_LOWERCASE_WORD_BRANDS)}) additionally require "
+        "exact-case matching."
+    )
     lines.append("")
     lines.append(
         "`cited_in` is the only field this script ever writes; an absent "
@@ -685,18 +774,24 @@ def render_report(
 # CLI
 # --------------------------------------------------------------------------- #
 
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--dry", action="store_true",
+        "--dry",
+        action="store_true",
         help="Preview matches and write the report; do NOT modify YAMLs.",
     )
     parser.add_argument(
-        "--threshold", type=float, default=0.9,
+        "--threshold",
+        type=float,
+        default=0.9,
         help="Minimum confidence to auto-apply a match (default: 0.9).",
     )
     parser.add_argument(
-        "--report", type=Path, default=None,
+        "--report",
+        type=Path,
+        default=None,
         help="Path to the markdown report (default: validator/backfill_citations.report.md).",
     )
     args = parser.parse_args(argv)
@@ -712,9 +807,14 @@ def main(argv: list[str] | None = None) -> int:
     today = dt.date.today().isoformat()
     elapsed = time.monotonic() - t0
     report = render_report(
-        today=today, elapsed_s=elapsed,
-        papers=papers, tools=tools, matches=matches,
-        threshold=args.threshold, added=added, dry=args.dry,
+        today=today,
+        elapsed_s=elapsed,
+        papers=papers,
+        tools=tools,
+        matches=matches,
+        threshold=args.threshold,
+        added=added,
+        dry=args.dry,
     )
 
     report_path = args.report or (REPORT_DIR / "backfill_citations.report.md")

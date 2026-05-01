@@ -10,13 +10,10 @@ from __future__ import annotations
 
 import datetime as dt
 import gzip
-import io
 import os
 import re
 from pathlib import Path
-from typing import Optional
 
-import pytest
 
 from pipeline.cli import backup as backup_cli
 
@@ -37,7 +34,9 @@ class FakeRunner:
     ``stdout`` / ``stderr`` bytes.
     """
 
-    def __init__(self, *, returncode: int = 0, stdout: bytes = b"", stderr: bytes = b""):
+    def __init__(
+        self, *, returncode: int = 0, stdout: bytes = b"", stderr: bytes = b""
+    ):
         self.calls: list[dict] = []
         self._rc = returncode
         self._stdout = stdout

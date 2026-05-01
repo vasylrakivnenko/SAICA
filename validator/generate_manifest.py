@@ -195,7 +195,9 @@ def main() -> int:
         return 0
 
     MANIFEST_PATH.write_text(text)
-    print(f"wrote {MANIFEST_PATH.relative_to(REPO)} ({sum(manifest['counts'].values())} ids)")
+    print(
+        f"wrote {MANIFEST_PATH.relative_to(REPO)} ({sum(manifest['counts'].values())} ids)"
+    )
     return 0
 
 

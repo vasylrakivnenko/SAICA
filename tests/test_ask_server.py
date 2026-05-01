@@ -27,7 +27,9 @@ def _fake_usage(total: int = 250) -> Any:
     return SimpleNamespace(total_tokens=total, prompt_tokens=200, completion_tokens=50)
 
 
-def _fake_kimi_response(answer: str, *, tokens: int = 250, model: str = "Kimi-K2.5") -> Any:
+def _fake_kimi_response(
+    answer: str, *, tokens: int = 250, model: str = "Kimi-K2.5"
+) -> Any:
     """Shape-of-an-OpenAI-response stub with just the fields our code reads."""
     return SimpleNamespace(usage=_fake_usage(tokens), model=model)
 
@@ -92,7 +94,10 @@ def test_ask_returns_answer_and_citations() -> None:
     assert urls["guardrails-ai"] == "/tools/guardrails-ai"
     assert urls["fabrication"] == "/failure-modes/fabrication"
     assert urls["owasp-agentic-top-10-2026"] == "/taxonomies/owasp-agentic-top-10-2026"
-    assert urls["spracklen-2024-we-have-a-package"] == "/papers/spracklen-2024-we-have-a-package"
+    assert (
+        urls["spracklen-2024-we-have-a-package"]
+        == "/papers/spracklen-2024-we-have-a-package"
+    )
 
     # The prompt we handed to Kimi must carry the context blocks + question
     # so a failure where we silently drop context is caught here.

@@ -25,15 +25,12 @@ from __future__ import annotations
 
 import argparse
 import csv
-import dataclasses
 import datetime as _dt
 import json
 import logging
-import os
 import sys
-from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Make sure "research" is importable when run from anywhere.
 HERE = Path(__file__).resolve()
@@ -287,9 +284,7 @@ def compute_kappas(
         # Sorted union of labels for a stable confusion-matrix axis.
         labels = sorted(set(la) | set(lb))
         kappa = (
-            float(cohen_kappa_score(la, lb, labels=labels))
-            if len(labels) >= 2
-            else 1.0
+            float(cohen_kappa_score(la, lb, labels=labels)) if len(labels) >= 2 else 1.0
         )
         cm = confusion_matrix(la, lb, labels=labels).tolist()
         metrics[facet] = {
@@ -410,7 +405,9 @@ def _render_ascii_confusion(metrics: dict, facet: str) -> str:
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--corpus", default=str(REPO / "research/kappa_corpus_shah2026.json"))
+    p.add_argument(
+        "--corpus", default=str(REPO / "research/kappa_corpus_shah2026.json")
+    )
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--skip-kimi", action="store_true")
     p.add_argument(

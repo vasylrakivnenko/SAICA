@@ -18,7 +18,6 @@ This module is importable from tests; the CLI wrapper lives in
 
 from __future__ import annotations
 
-import dataclasses
 import json
 import logging
 import os
@@ -91,7 +90,7 @@ class Candidate:
 class IngestResult:
     candidate: Candidate
     status: str  # one of: ingested, dry_run, skip_yaml, skip_candidate, skip_batch,
-                 # skip_min_stars, skip_since, github_404, github_rate_limited, error
+    # skip_min_stars, skip_since, github_404, github_rate_limited, error
     detail: str = ""
     stars: Optional[int] = None
     pushed_at: Optional[str] = None
@@ -127,8 +126,7 @@ class BulkRunReport:
     @property
     def dedup_hits(self) -> int:
         return sum(
-            self.counts.get(k, 0)
-            for k in ("skip_yaml", "skip_candidate", "skip_batch")
+            self.counts.get(k, 0) for k in ("skip_yaml", "skip_candidate", "skip_batch")
         )
 
 
@@ -207,7 +205,9 @@ class GitHubClient:
         try:
             resp = self.session.get(url, headers=self._headers(), timeout=30)
         except requests.RequestException as exc:
-            log.warning("github repo fetch network error for %s/%s: %s", owner, repo, exc)
+            log.warning(
+                "github repo fetch network error for %s/%s: %s", owner, repo, exc
+            )
             return ("error", None)
 
         if resp.status_code == 404:
@@ -219,7 +219,9 @@ class GitHubClient:
             try:
                 resp = self.session.get(url, headers=self._headers(), timeout=30)
             except requests.RequestException as exc:
-                log.warning("github retry network error for %s/%s: %s", owner, repo, exc)
+                log.warning(
+                    "github retry network error for %s/%s: %s", owner, repo, exc
+                )
                 return ("error", None)
             if resp.status_code == 404:
                 return ("not_found", None)
@@ -282,9 +284,8 @@ def _canonical_url(cand: Candidate) -> str:
     fallback = f"https://github.com/{cand.full_name}".lower()
     try:
         from pipeline.dedup import canonical_github_url  # type: ignore
-        canon = canonical_github_url(
-            cand.url or f"https://github.com/{cand.full_name}"
-        )
+
+        canon = canonical_github_url(cand.url or f"https://github.com/{cand.full_name}")
         return canon or fallback
     except Exception:  # noqa: BLE001
         return fallback
@@ -339,21 +340,27 @@ def ingest_one(
     if min_stars is not None and stars < min_stars:
         _try_register_batch(dup, canon)
         return IngestResult(
-            cand, "skip_min_stars", detail=f"{stars} < {min_stars}", stars=stars,
+            cand,
+            "skip_min_stars",
+            detail=f"{stars} < {min_stars}",
+            stars=stars,
             pushed_at=pushed_at,
         )
     if since_dt is not None and not _pushed_after(payload, since_dt):
         _try_register_batch(dup, canon)
         return IngestResult(
-            cand, "skip_since",
+            cand,
+            "skip_since",
             detail=f"pushed_at={pushed_at} < {since_dt.date().isoformat()}",
-            stars=stars, pushed_at=pushed_at,
+            stars=stars,
+            pushed_at=pushed_at,
         )
 
     # 3. README.
     readme_text: Optional[str] = None
     try:
         from pipeline.sources.github import fetch_readme
+
         readme_text = fetch_readme(cand.owner, cand.repo)
     except Exception as exc:  # noqa: BLE001
         log.warning("readme fetch failed for %s: %s", cand.full_name, exc)
@@ -364,6 +371,7 @@ def ingest_one(
     # 4. Insert into raw_search_results.
     try:
         from pipeline.db import insert_raw_result
+
         row_id = insert_raw_result(
             BULK_SOURCE,
             BULK_QUERY,
@@ -379,15 +387,20 @@ def ingest_one(
         )
     except Exception as exc:  # noqa: BLE001
         log.warning("raw_search_results insert failed for %s: %s", canon, exc)
-        return IngestResult(cand, "error", detail=f"db insert: {exc}", stars=stars,
-                             pushed_at=pushed_at)
+        return IngestResult(
+            cand, "error", detail=f"db insert: {exc}", stars=stars, pushed_at=pushed_at
+        )
 
     # 5. Register in batch dedup set.
     _try_register_batch(dup, canon)
 
     detail = "inserted" if row_id is not None else "duplicate row (content_hash)"
     return IngestResult(
-        cand, "ingested", detail=detail, stars=stars, pushed_at=pushed_at,
+        cand,
+        "ingested",
+        detail=detail,
+        stars=stars,
+        pushed_at=pushed_at,
         raw_row_id=row_id,
     )
 
@@ -461,7 +474,7 @@ def run_bulk(
     cands, _meta = load_candidates(input_path)
     total = len(cands)
     ranked = rank_candidates(cands)
-    selected = ranked[: top] if top else ranked
+    selected = ranked[:top] if top else ranked
 
     since_dt = _parse_since(since)
 
@@ -471,6 +484,7 @@ def run_bulk(
         github: Optional[GitHubClient] = None
     else:
         from pipeline.dedup import DupChecker  # type: ignore
+
         dup = DupChecker()
         github = GitHubClient()
 
@@ -509,6 +523,7 @@ def run_bulk(
     if preprocess_after and not dry_run:
         try:
             from pipeline.nlp.pipeline import run as _nlp_run
+
             _nlp_run()
         except Exception as exc:  # noqa: BLE001
             log.warning("preprocess.run() failed: %s", exc)
@@ -528,6 +543,7 @@ class _DryRunDup:
         self._batch: set[str] = set()
         try:
             from pipeline.dedup import DupChecker  # type: ignore
+
             self._inner = DupChecker()
         except Exception as exc:  # noqa: BLE001
             log.debug("DupChecker unavailable in dry-run: %s", exc)
@@ -640,9 +656,7 @@ def render_report(report: BulkRunReport) -> str:
     if errors:
         lines.append(f"- Errors: {errors}")
     lines.append(f"- Elapsed: {_fmt_elapsed(report.elapsed)}")
-    lines.append(
-        "- Estimated cost: $0.00 (GitHub API free; Kimi extraction deferred)"
-    )
+    lines.append("- Estimated cost: $0.00 (GitHub API free; Kimi extraction deferred)")
     lines.append("")
     lines.append("## Next steps")
     if report.preprocess_after:

@@ -25,7 +25,6 @@ import argparse
 import logging
 import sys
 import time
-from pathlib import Path
 
 from pipeline.embeddings.compute import (
     CACHE_DIR,
@@ -66,9 +65,7 @@ def _parse_args(argv=None) -> argparse.Namespace:
         default=20,
         help="Number of tools to list in the drift report (default: 20).",
     )
-    p.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable debug logging."
-    )
+    p.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging.")
     return p.parse_args(argv)
 
 

@@ -17,6 +17,7 @@ Coverage targets:
 The integration tests use the live ``data/papers`` and ``data/tools``
 corpora — they don't write to those YAMLs (we use a tmp working copy).
 """
+
 from __future__ import annotations
 
 import io
@@ -34,9 +35,12 @@ from validator import backfill_citations as bc
 # Helpers
 # --------------------------------------------------------------------------- #
 
+
 def _tool(id_: str, name: str = "", repo: str = "") -> bc.ToolMeta:
     return bc.ToolMeta(
-        id=id_, name=name, repo_url=repo,
+        id=id_,
+        name=name,
+        repo_url=repo,
         repo_slug=bc._slug_from_repo(repo),
     )
 
@@ -50,6 +54,7 @@ def _paper(**fields) -> dict:
 # --------------------------------------------------------------------------- #
 # Unit tests — matcher rules
 # --------------------------------------------------------------------------- #
+
 
 def test_repo_url_match_is_high_confidence() -> None:
     paper = _paper(
@@ -83,8 +88,11 @@ def test_name_match_with_hyphen_space_tolerance() -> None:
         id="paper-x",
         tldr="…contrasted against Gemini-CLI's headless-incompatible auth model.",
     )
-    tool = _tool("gemini-cli", name="Gemini CLI",
-                 repo="https://github.com/google-gemini/gemini-cli")
+    tool = _tool(
+        "gemini-cli",
+        name="Gemini CLI",
+        repo="https://github.com/google-gemini/gemini-cli",
+    )
     m = bc.match_paper_to_tool("paper-x", paper, tool)
     assert m is not None
     assert m.rule == "name"
@@ -202,6 +210,7 @@ def test_partial_word_does_not_match() -> None:
 # Unit tests — slug extractor
 # --------------------------------------------------------------------------- #
 
+
 @pytest.mark.parametrize(
     "url,expected",
     [
@@ -220,6 +229,7 @@ def test_slug_from_repo(url: str, expected: str) -> None:
 # --------------------------------------------------------------------------- #
 # Integration test — real corpus, tmp tool dir, idempotency
 # --------------------------------------------------------------------------- #
+
 
 @pytest.fixture
 def tmp_tools_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
@@ -278,9 +288,9 @@ def test_apply_does_not_create_empty_cited_in(tmp_tools_dir: Path) -> None:
         # absent, it must still be absent.
         live_text = (bc.TOOLS_DIR / f"{tid}.yml").read_text()
         if "cited_in:" not in live_text:
-            assert "cited_in:" not in path.read_text(encoding="utf-8"), (
-                f"backfill introduced an empty cited_in into {tid}"
-            )
+            assert "cited_in:" not in path.read_text(
+                encoding="utf-8"
+            ), f"backfill introduced an empty cited_in into {tid}"
 
 
 def test_dry_mode_does_not_write(tmp_tools_dir: Path) -> None:
@@ -311,14 +321,24 @@ def test_render_report_is_pure() -> None:
     tools = bc.load_tools()
     matches = bc.match_all(papers, tools)
     a = bc.render_report(
-        today="2026-04-23", elapsed_s=0.0,
-        papers=papers, tools=tools, matches=matches,
-        threshold=0.9, added={}, dry=True,
+        today="2026-04-23",
+        elapsed_s=0.0,
+        papers=papers,
+        tools=tools,
+        matches=matches,
+        threshold=0.9,
+        added={},
+        dry=True,
     )
     b = bc.render_report(
-        today="2026-04-23", elapsed_s=0.0,
-        papers=papers, tools=tools, matches=matches,
-        threshold=0.9, added={}, dry=True,
+        today="2026-04-23",
+        elapsed_s=0.0,
+        papers=papers,
+        tools=tools,
+        matches=matches,
+        threshold=0.9,
+        added={},
+        dry=True,
     )
     assert a == b
 
@@ -326,6 +346,7 @@ def test_render_report_is_pure() -> None:
 # --------------------------------------------------------------------------- #
 # YAML round-trip — preserves comments, quote styles, blank lines
 # --------------------------------------------------------------------------- #
+
 
 def test_yaml_roundtrip_preserves_structure(tmp_path: Path) -> None:
     """Editing only ``cited_in`` with our ruamel config must NOT churn

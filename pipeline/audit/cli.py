@@ -10,6 +10,7 @@ Without ``--md`` or ``--json`` we print the Markdown report followed by a
 short JSON summary so users get the human view first and the machine view
 on the same invocation.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -42,10 +43,13 @@ def main(argv: list[str] | None = None) -> int:
         help="Treat repo_url as a local filesystem path (skip clone). Useful for testing.",
     )
     fmt = parser.add_mutually_exclusive_group()
-    fmt.add_argument("--md", action="store_true", help="Print only the Markdown report.")
+    fmt.add_argument(
+        "--md", action="store_true", help="Print only the Markdown report."
+    )
     fmt.add_argument("--json", action="store_true", help="Print only the JSON report.")
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         type=Path,
         default=None,
         help="Optional file to write the chosen format to (default: stdout).",

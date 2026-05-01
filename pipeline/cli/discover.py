@@ -116,7 +116,10 @@ def _run_github(
         per_page=per_page,
         raw_query=raw_query,
     )
-    label = raw_query or f"topic={topic} lang={language} stars>{min_stars} pushed>{pushed_after}"
+    label = (
+        raw_query
+        or f"topic={topic} lang={language} stars>{min_stars} pushed>{pushed_after}"
+    )
     print(f"[github] {label!r} -> {len(inserted)} rows")
     return len(inserted)
 
@@ -148,7 +151,12 @@ def _run_runbook() -> int:
     for q in RUNBOOK_GITHUB:
         try:
             total += _run_github(
-                topic=None, language=None, min_stars=0, pushed_after=None, per_page=50, raw_query=q
+                topic=None,
+                language=None,
+                min_stars=0,
+                pushed_after=None,
+                per_page=50,
+                raw_query=q,
             )
         except Exception as exc:  # noqa: BLE001
             log.warning("github runbook query failed: %s", exc)
@@ -163,7 +171,9 @@ def _run_runbook() -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="pipeline.cli.discover", description="Run discovery-source searches")
+    p = argparse.ArgumentParser(
+        prog="pipeline.cli.discover", description="Run discovery-source searches"
+    )
     sub = p.add_subparsers(dest="command", required=True)
 
     pp = sub.add_parser("perplexity", help="Perplexity sonar web search")
@@ -241,7 +251,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         _run_elicit(args.query, args.limit)
     elif cmd == "github":
         _run_github(
-            args.topic, args.language, args.min_stars, args.pushed_after, args.per_page, args.raw_query
+            args.topic,
+            args.language,
+            args.min_stars,
+            args.pushed_after,
+            args.per_page,
+            args.raw_query,
         )
     elif cmd == "runbook":
         _run_runbook()

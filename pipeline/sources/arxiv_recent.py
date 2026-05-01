@@ -29,6 +29,7 @@ Public surface (what the orchestrator imports):
 * :func:`load_kg_arxiv_ids` — collect known arxiv ids from
   ``data/papers/*.yml``.
 """
+
 from __future__ import annotations
 
 import datetime as _dt
@@ -51,9 +52,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CACHE_DIR = REPO_ROOT / ".cache" / "arxiv"
 PAPERS_DIR = REPO_ROOT / "data" / "papers"
 
-USER_AGENT = (
-    "SAICA-KG-Arxiv-Bot/0.1 (https://github.com/saica-kg/saica-kg)"
-)
+USER_AGENT = "SAICA-KG-Arxiv-Bot/0.1 (https://github.com/saica-kg/saica-kg)"
 ARXIV_API_BASE = "https://export.arxiv.org/api/query"
 
 # arXiv asks for "be reasonable"; 3s between requests is the conventional
@@ -182,11 +181,7 @@ def infer_failure_modes(text: str) -> list[str]:
     t = text.lower()
     hits: set[str] = set()
     for fm_id, kws in FM_KEYWORDS.items():
-        if (
-            fm_id in t
-            or fm_id.replace("_", " ") in t
-            or fm_id.replace("_", "-") in t
-        ):
+        if fm_id in t or fm_id.replace("_", " ") in t or fm_id.replace("_", "-") in t:
             hits.add(fm_id)
             continue
         for kw in kws:
@@ -258,9 +253,7 @@ def parse_atom(xml_str: str) -> list[dict[str, Any]]:
         title = _txt(entry.find("atom:title", _NS))
         summary_el = entry.find("atom:summary", _NS)
         abstract = (
-            " ".join((summary_el.text or "").split())
-            if summary_el is not None
-            else ""
+            " ".join((summary_el.text or "").split()) if summary_el is not None else ""
         )
         published = _txt(entry.find("atom:published", _NS))
         updated = _txt(entry.find("atom:updated", _NS))
@@ -305,12 +298,47 @@ def parse_atom(xml_str: str) -> list[dict[str, Any]]:
 # carry the paper's identity. Kept small and deliberate.
 _SLUG_STOPWORDS = frozenset(
     {
-        "a", "an", "the", "of", "for", "on", "in", "to", "with", "and",
-        "or", "by", "from", "via", "is", "are", "be", "as", "at", "into",
-        "towards", "toward", "using", "based", "study", "studies",
-        "approach", "method", "methods", "framework", "system", "systems",
-        "case", "cases", "model", "models", "new", "novel", "paper",
-        "analysis", "evaluation",
+        "a",
+        "an",
+        "the",
+        "of",
+        "for",
+        "on",
+        "in",
+        "to",
+        "with",
+        "and",
+        "or",
+        "by",
+        "from",
+        "via",
+        "is",
+        "are",
+        "be",
+        "as",
+        "at",
+        "into",
+        "towards",
+        "toward",
+        "using",
+        "based",
+        "study",
+        "studies",
+        "approach",
+        "method",
+        "methods",
+        "framework",
+        "system",
+        "systems",
+        "case",
+        "cases",
+        "model",
+        "models",
+        "new",
+        "novel",
+        "paper",
+        "analysis",
+        "evaluation",
     }
 )
 
@@ -378,6 +406,7 @@ def suggested_id(authors: list[str], year: int, title: str) -> str:
 # KG-side helpers
 # ---------------------------------------------------------------------------
 
+
 def load_kg_arxiv_ids(papers_dir: Optional[Path] = None) -> dict[str, str]:
     """Return ``{bare_arxiv_id: paper_id}`` for every KG paper that has one.
 
@@ -438,13 +467,16 @@ def match_against_kg(
             )
         else:
             new.append(c)
-    matched.sort(key=lambda r: (r.get("first_published") or "", r["arxiv_id"]), reverse=True)
+    matched.sort(
+        key=lambda r: (r.get("first_published") or "", r["arxiv_id"]), reverse=True
+    )
     return matched, new
 
 
 # ---------------------------------------------------------------------------
 # Excerpt
 # ---------------------------------------------------------------------------
+
 
 def abstract_excerpt(text: str, max_chars: int = 400) -> str:
     """Return a leading-sentence excerpt of the abstract, ``max_chars`` cap."""
@@ -461,6 +493,7 @@ def abstract_excerpt(text: str, max_chars: int = 400) -> str:
 # Fetch (with disk cache)
 # ---------------------------------------------------------------------------
 
+
 def _cache_key(category: str, lookback_days: int, today_iso: str) -> str:
     safe_cat = category.replace("/", "_")
     return f"{today_iso}__{safe_cat}__lb{int(lookback_days)}.xml"
@@ -476,9 +509,7 @@ def _cache_key_page(
     :func:`fetch_recent` for the read path.
     """
     safe_cat = category.replace("/", "_")
-    return (
-        f"{today_iso}__{safe_cat}__lb{int(lookback_days)}__p{int(page_start)}.xml"
-    )
+    return f"{today_iso}__{safe_cat}__lb{int(lookback_days)}__p{int(page_start)}.xml"
 
 
 def _today_iso() -> str:
@@ -530,7 +561,8 @@ def _fetch_one_page(
     if not use_network:
         log.info(
             "arxiv: no cache for %s page %d and --no-network set",
-            category, page_start,
+            category,
+            page_start,
         )
         return None
 
@@ -540,9 +572,7 @@ def _fetch_one_page(
         today_d = _dt.date.today()
     start, end = _arxiv_date_window(today_d, lookback_days)
     params = {
-        "search_query": (
-            f"cat:{category} AND lastUpdatedDate:[{start} TO {end}]"
-        ),
+        "search_query": (f"cat:{category} AND lastUpdatedDate:[{start} TO {end}]"),
         "start": str(int(page_start)),
         "max_results": str(int(page_size)),
         "sortBy": "submittedDate",
@@ -552,7 +582,9 @@ def _fetch_one_page(
         resp = _SESSION.get(ARXIV_API_BASE, params=params, timeout=60)
         if resp.status_code == 429:
             log.warning(
-                "arxiv: rate-limited on %s page %d", category, page_start,
+                "arxiv: rate-limited on %s page %d",
+                category,
+                page_start,
             )
             return None
         resp.raise_for_status()
@@ -560,7 +592,9 @@ def _fetch_one_page(
     except Exception as exc:  # noqa: BLE001
         log.warning(
             "arxiv fetch failed for %s page %d: %s",
-            category, page_start, exc,
+            category,
+            page_start,
+            exc,
         )
         return None
 
@@ -617,8 +651,9 @@ def fetch_recent(
         try:
             page_items = parse_atom(xml_str)
         except ET.ParseError as exc:
-            log.warning("arxiv: malformed XML for %s page %d: %s",
-                        category, page_start, exc)
+            log.warning(
+                "arxiv: malformed XML for %s page %d: %s", category, page_start, exc
+            )
             break
         if not page_items:
             break
@@ -635,6 +670,7 @@ def fetch_recent(
 # ---------------------------------------------------------------------------
 # Public IO
 # ---------------------------------------------------------------------------
+
 
 def write_json(path: Path, doc: dict[str, Any]) -> None:
     """Write JSON with a stable indent — used by tests + the orchestrator."""

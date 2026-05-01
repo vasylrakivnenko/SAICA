@@ -4,6 +4,7 @@ Pure function (no MCP imports) — the MCP server in ``server.py`` thinly
 wraps this for transport. Returning a strict ``ToolRecord`` keeps the wire
 contract aligned with ``pipeline/audit/schemas.py`` and the /assess UI.
 """
+
 from __future__ import annotations
 
 from typing import Optional

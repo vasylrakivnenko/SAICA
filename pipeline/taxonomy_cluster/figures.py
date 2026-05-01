@@ -15,9 +15,8 @@ Figures:
 from __future__ import annotations
 
 import logging
-from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Sequence
 
 import numpy as np
 
@@ -107,7 +106,10 @@ def plot_umap_by_source(
     xy: np.ndarray, source_ids: Sequence[str], *, out_path: Path
 ) -> Path:
     return _scatter_by_label(
-        xy, list(source_ids), title="UMAP of 128 categories — by source taxonomy", out_path=out_path
+        xy,
+        list(source_ids),
+        title="UMAP of 128 categories — by source taxonomy",
+        out_path=out_path,
     )
 
 

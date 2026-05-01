@@ -34,7 +34,9 @@ def _reset_loader_latch():
         delattr(cfg.load_env_once, "_loaded")
 
 
-def _point_env_at(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, contents: str) -> Path:
+def _point_env_at(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, contents: str
+) -> Path:
     """Point ``cfg.ENV_PATH`` at a tmp file containing ``contents``."""
     fake = tmp_path / ".env.local"
     fake.write_text(contents, encoding="utf-8")

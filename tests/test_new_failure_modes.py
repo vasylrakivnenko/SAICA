@@ -58,7 +58,9 @@ def _coerce(v: Any) -> Any:
 def test_enum_has_eleven_modes() -> None:
     """FailureModeId must carry exactly 11 members, matching the expected set."""
     values = {m.value for m in FailureModeId}
-    assert len(FailureModeId) == 11, f"expected 11 FailureModeId members, got {len(FailureModeId)}"
+    assert (
+        len(FailureModeId) == 11
+    ), f"expected 11 FailureModeId members, got {len(FailureModeId)}"
     assert values == EXPECTED_ENUM_VALUES, (
         f"FailureModeId drifted from expected set. "
         f"missing={EXPECTED_ENUM_VALUES - values}, "
@@ -96,4 +98,6 @@ def test_prompt_reference_enumerates_all_eleven() -> None:
     # LLM can use it without guessing.
     prompt = kimi.SYSTEM_PROMPT
     for fm_id in EXPECTED_ENUM_VALUES:
-        assert fm_id in prompt, f"expected canonical id {fm_id!r} in rendered system prompt"
+        assert (
+            fm_id in prompt
+        ), f"expected canonical id {fm_id!r} in rendered system prompt"

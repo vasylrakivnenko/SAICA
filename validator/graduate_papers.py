@@ -363,11 +363,47 @@ _EXCLUDE_KEYWORDS = (
 # --- Title slug / id helpers ----------------------------------------------
 
 _SLUG_STOPWORDS = {
-    "a", "an", "the", "of", "for", "to", "and", "or", "in", "on", "with",
-    "from", "by", "via", "across", "between", "into", "is", "are", "be",
-    "as", "at", "this", "that", "these", "those", "we", "our", "their",
-    "its", "it", "can", "will", "do", "how", "why", "what", "when",
-    "toward", "towards", "based",
+    "a",
+    "an",
+    "the",
+    "of",
+    "for",
+    "to",
+    "and",
+    "or",
+    "in",
+    "on",
+    "with",
+    "from",
+    "by",
+    "via",
+    "across",
+    "between",
+    "into",
+    "is",
+    "are",
+    "be",
+    "as",
+    "at",
+    "this",
+    "that",
+    "these",
+    "those",
+    "we",
+    "our",
+    "their",
+    "its",
+    "it",
+    "can",
+    "will",
+    "do",
+    "how",
+    "why",
+    "what",
+    "when",
+    "toward",
+    "towards",
+    "based",
 }
 
 _NON_ALPHANUM = re.compile(r"[^a-z0-9]+")
@@ -448,7 +484,7 @@ def _strip_doi(value: str | None) -> str | None:
 class Candidate:
     """A normalized paper candidate from any source bundle."""
 
-    source: str          # e.g. "s2:llm-code-failure-taxonomy", "elicit:Q1"
+    source: str  # e.g. "s2:llm-code-failure-taxonomy", "elicit:Q1"
     title: str
     authors: list[str]
     year: int
@@ -465,9 +501,7 @@ class Candidate:
     failure_modes: list[str] = field(default_factory=list)
 
     def text_blob(self) -> str:
-        return " ".join(
-            [self.title, self.tldr, self.abstract, self.venue]
-        ).lower()
+        return " ".join([self.title, self.tldr, self.abstract, self.venue]).lower()
 
     def dedup_keys(self) -> tuple[str | None, str | None, str | None]:
         return (
@@ -547,8 +581,7 @@ def _elicit_to_candidate(p: dict[str, Any], slug: str) -> Candidate | None:
         url=url,
         doi=p.get("doi"),
         arxiv_id=arxiv_id,
-        semantic_scholar_id=(p.get("elicitId") or "").replace("ss-", "")
-        or None,
+        semantic_scholar_id=(p.get("elicitId") or "").replace("ss-", "") or None,
         citation_count=int(p.get("citedByCount") or 0),
     )
 
@@ -731,9 +764,7 @@ def _build_notes(c: Candidate, modes: list[str]) -> str:
     """
     if modes:
         modes_phrase = ", ".join(modes)
-        first_sentence = (
-            f"Relates to SAICA-KG failure modes: {modes_phrase}."
-        )
+        first_sentence = f"Relates to SAICA-KG failure modes: {modes_phrase}."
     else:
         first_sentence = (
             "Relates to SAICA-KG's broader supervision / coding-agent"
@@ -844,7 +875,9 @@ def _block_scalar(text: str) -> str:
     return "\n".join(lines)
 
 
-def candidate_to_yaml(c: Candidate, paper_id: str, modes: list[str]) -> tuple[str, dict]:
+def candidate_to_yaml(
+    c: Candidate, paper_id: str, modes: list[str]
+) -> tuple[str, dict]:
     """Render the YAML body and the equivalent dict (for validation)."""
     venue = _venue(c)
     url = _url(c)
@@ -886,7 +919,9 @@ def candidate_to_yaml(c: Candidate, paper_id: str, modes: list[str]) -> tuple[st
     lines.append("authors:")
     for a in c.authors:
         # Quote if it contains a colon, comma, or starts with a punctuation.
-        if any(ch in a for ch in ":#") or a.startswith(("-", "?", "!", "&", "*", "'", '"')):
+        if any(ch in a for ch in ":#") or a.startswith(
+            ("-", "?", "!", "&", "*", "'", '"')
+        ):
             quoted = a.replace('"', '\\"')
             lines.append(f'  - "{quoted}"')
         else:
@@ -1048,7 +1083,10 @@ def dedup_candidates(cands: list[Candidate]) -> list[Candidate]:
         ax, doi, title = c.dedup_keys()
         key = (ax or "", doi or "", title or "")
         prev = by_key.get(key)
-        if prev is None or (c.score, c.citation_count) > (prev.score, prev.citation_count):
+        if prev is None or (c.score, c.citation_count) > (
+            prev.score,
+            prev.citation_count,
+        ):
             by_key[key] = c
     return list(by_key.values())
 
@@ -1188,7 +1226,9 @@ def write_report(
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--dry", action="store_true", help="Plan only; don't write YAMLs.")
-    ap.add_argument("--limit", type=int, default=30, help="Cap on accepted papers (default 30).")
+    ap.add_argument(
+        "--limit", type=int, default=30, help="Cap on accepted papers (default 30)."
+    )
     ap.add_argument(
         "--from-source",
         choices=["s2", "elicit", "candidates", "all"],

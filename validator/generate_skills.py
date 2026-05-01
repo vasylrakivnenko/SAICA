@@ -28,6 +28,7 @@ Run from the repo root::
     python -m validator.generate_skills          # write SKILLS.md
     python -m validator.generate_skills --check  # CI: diff-only
 """
+
 from __future__ import annotations
 
 import argparse
@@ -41,7 +42,6 @@ from typing import Any
 import yaml
 
 from pipeline.mcp.recommender import (
-    ALL_FAILURE_MODES,
     recommend_for_failure_modes,
 )
 from pipeline.shared.priorities import all_priorities
@@ -106,7 +106,7 @@ _PRE_ACTION_HEURISTICS: dict[str, str] = {
     "logic_error": (
         "If you're about to claim a function works, run its tests (or "
         "a quick sandbox invocation with representative inputs) before "
-        "saying so. \"Type-checks clean\" ≠ \"correct\". Property-based "
+        'saying so. "Type-checks clean" ≠ "correct". Property-based '
         "or boundary-case checks beat happy-path-only assertions."
     ),
     "cascading_failure": (
@@ -145,7 +145,7 @@ _PRE_ACTION_HEURISTICS: dict[str, str] = {
         "library that's already installed."
     ),
     "incomplete_execution": (
-        "Before claiming \"done\", grep your own diff for `TODO`, `FIXME`, "
+        'Before claiming "done", grep your own diff for `TODO`, `FIXME`, '
         "`NotImplementedError`, bare `pass`, and `...` — and verify each "
         "subtask the user named is actually implemented (not just stubbed "
         "with a docstring). If something is incomplete, say so explicitly "
@@ -214,8 +214,7 @@ def _pick_headline_incident(
     ``incident_date``. Returns ``None`` if no incident lists this FM.
     """
     candidates = [
-        inc for inc in incidents
-        if fm_id in (inc.get("exhibited_failure_modes") or [])
+        inc for inc in incidents if fm_id in (inc.get("exhibited_failure_modes") or [])
     ]
     if not candidates:
         return None
@@ -276,7 +275,9 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
 
         # Top 2 supervisors for this FM, agnostic.
         rec_payload = recommend_for_failure_modes(
-            [fm_id], agent_kind=None, per_fm=_TOP_SUPERVISORS_PER_FM,
+            [fm_id],
+            agent_kind=None,
+            per_fm=_TOP_SUPERVISORS_PER_FM,
         )
         supervisors = list(rec_payload["by_failure_mode"].get(fm_id, []))
 
@@ -293,16 +294,18 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
                 "incident_date": str(incident.get("incident_date") or ""),
             }
 
-        fm_blocks.append({
-            "id": fm_id,
-            "name": str(fm_doc.get("name") or fm_id),
-            "description": _normalize_text(str(fm_doc.get("description") or "")),
-            "detection_signals": list(fm_doc.get("detection_signals") or []),
-            "supervisors": supervisors,
-            "incident": incident_block,
-            "heuristic": _PRE_ACTION_HEURISTICS.get(fm_id, ""),
-            "priority": float(priorities.get(fm_id, 0.0)),
-        })
+        fm_blocks.append(
+            {
+                "id": fm_id,
+                "name": str(fm_doc.get("name") or fm_id),
+                "description": _normalize_text(str(fm_doc.get("description") or "")),
+                "detection_signals": list(fm_doc.get("detection_signals") or []),
+                "supervisors": supervisors,
+                "incident": incident_block,
+                "heuristic": _PRE_ACTION_HEURISTICS.get(fm_id, ""),
+                "priority": float(priorities.get(fm_id, 0.0)),
+            }
+        )
 
     # Sanity index used by tests — every (incident_id, tool_id) we cite
     # must resolve in the KG. Caller-side asserts use these.
@@ -331,8 +334,7 @@ def _supervisor_line(rec: dict[str, Any]) -> str:
     tagline = _truncate(str(rec.get("tagline") or ""), 110)
     name_link = f"[`{tid}`](data/tools/{tid}.yml)" if tid else f"`{name}`"
     return (
-        f"- {name_link} — {paradigm}/{phase}, surfaces: {surfaces_str}; "
-        f"{tagline}"
+        f"- {name_link} — {paradigm}/{phase}, surfaces: {surfaces_str}; " f"{tagline}"
     )
 
 
@@ -342,8 +344,7 @@ def _render_failure_mode(fm: dict[str, Any]) -> list[str]:
     out.append("")
     out.append(f"**What it is:** {fm['description']}")
     out.append("")
-    out.append("**Detection signals (from `data/failure_modes/"
-               f"{fm['id']}.yml`):**")
+    out.append("**Detection signals (from `data/failure_modes/" f"{fm['id']}.yml`):**")
     for sig in fm["detection_signals"]:
         out.append(f"- {sig}")
     out.append("")
@@ -360,14 +361,18 @@ def _render_failure_mode(fm: dict[str, Any]) -> list[str]:
         out.append("**Real incident:** no documented incident yet.")
     out.append("")
 
-    out.append("**Recommended supervisors "
-               f"(from `saica_recommend(failure_modes=['{fm['id']}'])`):**")
+    out.append(
+        "**Recommended supervisors "
+        f"(from `saica_recommend(failure_modes=['{fm['id']}'])`):**"
+    )
     if fm["supervisors"]:
         for rec in fm["supervisors"]:
             out.append(_supervisor_line(rec))
     else:
-        out.append("- _(no eligible supervisor declares coverage; see "
-                   "RECOMMENDATIONS.md for the agnostic baseline)_")
+        out.append(
+            "- _(no eligible supervisor declares coverage; see "
+            "RECOMMENDATIONS.md for the agnostic baseline)_"
+        )
     out.append("")
 
     out.append("**Pre-action heuristic for an agent:**")
@@ -487,10 +492,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "- Browse the catalog: see `data/tools/`, `data/failure_modes/`, "
         "`data/incidents/`, `data/papers/`, `data/crosswalks/`"
     )
-    out.append(
-        "- Run an audit on a repo: "
-        "`python -m pipeline.audit.cli <repo-url>`"
-    )
+    out.append("- Run an audit on a repo: " "`python -m pipeline.audit.cli <repo-url>`")
     out.append(
         "- Get a tailored recommendation: "
         "`python -m pipeline.mcp.server` (MCP) or fetch "
@@ -550,9 +552,7 @@ def _check_outputs(payload: dict[str, Any], out_dir: Path) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="generate_skills",
-        description=(
-            "Regenerate SKILLS.md — the SAICA-KG agent-context skill file."
-        ),
+        description=("Regenerate SKILLS.md — the SAICA-KG agent-context skill file."),
     )
     parser.add_argument(
         "--check",

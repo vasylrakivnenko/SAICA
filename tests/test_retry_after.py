@@ -12,7 +12,6 @@ from the ``requests`` response. Both clamp to 120s.
 from __future__ import annotations
 
 import json
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -24,6 +23,7 @@ import pytest
 
 def _valid_tool_args() -> dict:
     """Tool-call payload that matches ToolExtraction.model_validate()."""
+
     def cf(value, confidence: float = 0.9) -> dict:
         return {"value": value, "confidence": confidence, "evidence": []}
 
@@ -106,9 +106,7 @@ def test_kimi_honors_retry_after_header(monkeypatch: pytest.MonkeyPatch) -> None
     kimi.extract_tool(row, client=client)
 
     assert client.chat.completions.create.call_count == 2
-    assert slept == [7.0], (
-        f"expected one sleep of 7s (Retry-After) — got {slept}"
-    )
+    assert slept == [7.0], f"expected one sleep of 7s (Retry-After) — got {slept}"
 
 
 def test_kimi_falls_back_to_backoff_without_header(
@@ -164,7 +162,9 @@ def test_kimi_retry_after_is_clamped_to_max(
 class _CohereResp:
     """Stub for the ``requests.Response`` shape CohereRerankClient consumes."""
 
-    def __init__(self, status_code: int, body: dict | None = None, headers: dict | None = None):
+    def __init__(
+        self, status_code: int, body: dict | None = None, headers: dict | None = None
+    ):
         self.status_code = status_code
         self._body = body or {}
         self.headers = headers or {}
@@ -188,13 +188,15 @@ def test_cohere_honors_retry_after_header(monkeypatch: pytest.MonkeyPatch) -> No
     """A 429 with Retry-After on Cohere triggers a sleep of that many seconds."""
     from pipeline.rerank import cohere
 
-    session = _CohereSession([
-        _CohereResp(429, body={}, headers={"Retry-After": "4"}),
-        _CohereResp(
-            200,
-            body={"results": [{"index": 0, "relevance_score": 0.9}]},
-        ),
-    ])
+    session = _CohereSession(
+        [
+            _CohereResp(429, body={}, headers={"Retry-After": "4"}),
+            _CohereResp(
+                200,
+                body={"results": [{"index": 0, "relevance_score": 0.9}]},
+            ),
+        ]
+    )
     client = cohere.CohereRerankClient(
         endpoint="https://example/rerank",
         api_key="k",
@@ -216,13 +218,15 @@ def test_cohere_falls_back_to_backoff_without_header(
     """Without Retry-After on a 429, the code uses exp-backoff."""
     from pipeline.rerank import cohere
 
-    session = _CohereSession([
-        _CohereResp(429, body={}, headers={}),
-        _CohereResp(
-            200,
-            body={"results": [{"index": 0, "relevance_score": 0.5}]},
-        ),
-    ])
+    session = _CohereSession(
+        [
+            _CohereResp(429, body={}, headers={}),
+            _CohereResp(
+                200,
+                body={"results": [{"index": 0, "relevance_score": 0.5}]},
+            ),
+        ]
+    )
     client = cohere.CohereRerankClient(
         endpoint="https://example/rerank",
         api_key="k",
@@ -243,13 +247,15 @@ def test_cohere_retry_after_is_clamped(monkeypatch: pytest.MonkeyPatch) -> None:
     """Retry-After > MAX_RETRY_AFTER_SECONDS is clamped."""
     from pipeline.rerank import cohere
 
-    session = _CohereSession([
-        _CohereResp(503, body={}, headers={"Retry-After": "9999"}),
-        _CohereResp(
-            200,
-            body={"results": []},
-        ),
-    ])
+    session = _CohereSession(
+        [
+            _CohereResp(503, body={}, headers={"Retry-After": "9999"}),
+            _CohereResp(
+                200,
+                body={"results": []},
+            ),
+        ]
+    )
     client = cohere.CohereRerankClient(
         endpoint="https://example/rerank",
         api_key="k",

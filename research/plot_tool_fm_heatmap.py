@@ -34,6 +34,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch
 
 import sys
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from pipeline.mcp.recommender import (  # noqa: E402
     recommend_full,
@@ -53,15 +54,65 @@ TOP_N = 11
 FM_KEYWORDS: dict[str, tuple[str, ...]] = {
     "fabrication": ("fabricat", "hallucin", "nonexistent api", "made-up", "confabulat"),
     "obsolescence": ("obsolesc", "deprecat", "outdated", "stale api", "api evolution"),
-    "dependency_blindness": ("dependency blind", "dependency-blind", "reinvent", "home-rolled", "duplicate code", "reimplement"),
-    "logic_error": ("logic error", "logic bug", "reasoning error", "incorrect behavior", "wrong answer"),
-    "security_vulnerability": ("security vuln", "vulnerab", " cve", "insecure", "sast", "taint"),
-    "scope_creep": ("scope creep", "off-task", "off task", "unrelated change", "out-of-scope"),
-    "context_pollution": ("context polluti", "prompt inject", "jailbreak", "context manipul", "indirect injection"),
-    "supply_chain_attack": ("supply chain", "slopsquat", "typosquat", "malicious package", "malicious depend"),
+    "dependency_blindness": (
+        "dependency blind",
+        "dependency-blind",
+        "reinvent",
+        "home-rolled",
+        "duplicate code",
+        "reimplement",
+    ),
+    "logic_error": (
+        "logic error",
+        "logic bug",
+        "reasoning error",
+        "incorrect behavior",
+        "wrong answer",
+    ),
+    "security_vulnerability": (
+        "security vuln",
+        "vulnerab",
+        " cve",
+        "insecure",
+        "sast",
+        "taint",
+    ),
+    "scope_creep": (
+        "scope creep",
+        "off-task",
+        "off task",
+        "unrelated change",
+        "out-of-scope",
+    ),
+    "context_pollution": (
+        "context polluti",
+        "prompt inject",
+        "jailbreak",
+        "context manipul",
+        "indirect injection",
+    ),
+    "supply_chain_attack": (
+        "supply chain",
+        "slopsquat",
+        "typosquat",
+        "malicious package",
+        "malicious depend",
+    ),
     "cascading_failure": ("cascading", "error propagat", "runaway", "cascade"),
-    "incomplete_execution": ("incomplete", "partial execution", "unfinished", "stop short", "half-done"),
-    "test_manipulation": ("test manipul", "test gaming", "reward hack", "spec gaming", "gaming the test"),
+    "incomplete_execution": (
+        "incomplete",
+        "partial execution",
+        "unfinished",
+        "stop short",
+        "half-done",
+    ),
+    "test_manipulation": (
+        "test manipul",
+        "test gaming",
+        "reward hack",
+        "spec gaming",
+        "gaming the test",
+    ),
 }
 
 FM_DISPLAY = {
@@ -99,7 +150,9 @@ class Row:
 
 
 def load_tools() -> list[dict]:
-    return [yaml.safe_load(open(p)) for p in sorted(glob.glob(str(TOOLS_DIR / "*.yml")))]
+    return [
+        yaml.safe_load(open(p)) for p in sorted(glob.glob(str(TOOLS_DIR / "*.yml")))
+    ]
 
 
 def load_fm_ids() -> list[str]:
@@ -119,7 +172,9 @@ def rationale_mentions(text: str, fm_id: str) -> bool:
 
 
 def has_citation_evidence(tool: dict) -> bool:
-    return bool(tool.get("cited_in") or tool.get("documented_in") or tool.get("evaluated_on"))
+    return bool(
+        tool.get("cited_in") or tool.get("documented_in") or tool.get("evaluated_on")
+    )
 
 
 def cell_tier(tool: dict, fm_id: str) -> int:
@@ -139,15 +194,17 @@ def build_rows(tools: list[dict], fm_ids: list[str]) -> list[Row]:
     out: list[Row] = []
     for t in tools:
         arr = np.array([cell_tier(t, fm) for fm in fm_ids], dtype=int)
-        out.append(Row(
-            id=t["id"],
-            name=t.get("name") or t["id"],
-            stars=int(t.get("stars") or 0),
-            trending=is_trending(t),
-            breadth=int((arr > 0).sum()),
-            tier_sum=int(arr.sum()),
-            row=arr,
-        ))
+        out.append(
+            Row(
+                id=t["id"],
+                name=t.get("name") or t["id"],
+                stars=int(t.get("stars") or 0),
+                trending=is_trending(t),
+                breadth=int((arr > 0).sum()),
+                tier_sum=int(arr.sum()),
+                row=arr,
+            )
+        )
     return out
 
 
@@ -160,7 +217,9 @@ def select_breadth(rows: list[Row], n: int) -> list[Row]:
 
 
 def select_by_recommender_level(
-    rows: list[Row], level: str, agent_kind: str | None = None,
+    rows: list[Row],
+    level: str,
+    agent_kind: str | None = None,
 ) -> list[Row]:
     """Use the canonical pipeline.mcp.recommender to pick rows for a level.
 
@@ -222,7 +281,10 @@ def render_figure(
     ax.set_xticks(range(len(fm_ids_ordered)))
     ax.set_xticklabels(
         [FM_DISPLAY.get(f, f) for f in fm_ids_ordered],
-        fontsize=9, rotation=40, ha="left", rotation_mode="anchor",
+        fontsize=9,
+        rotation=40,
+        ha="left",
+        rotation_mode="anchor",
     )
     ax.set_yticks(range(len(selection)))
     # Trending tools get a fire glyph appended to the row label so the
@@ -242,15 +304,26 @@ def render_figure(
             if v == 0:
                 continue
             color = "white" if v >= 2 else "#1f4e79"
-            ax.text(j, i, str(int(v)), ha="center", va="center", fontsize=9, color=color)
+            ax.text(
+                j, i, str(int(v)), ha="center", va="center", fontsize=9, color=color
+            )
 
     if specialist_divider is not None and 0 < specialist_divider < len(selection):
-        ax.axhline(specialist_divider - 0.5, color="#1f4e79",
-                   linewidth=1.2, linestyle="--", alpha=0.6)
+        ax.axhline(
+            specialist_divider - 0.5,
+            color="#1f4e79",
+            linewidth=1.2,
+            linestyle="--",
+            alpha=0.6,
+        )
         ax.text(
-            len(fm_ids_ordered) - 0.5, specialist_divider - 0.5,
+            len(fm_ids_ordered) - 0.5,
+            specialist_divider - 0.5,
             "  set-cover ↑  ·  pad for depth ↓",
-            fontsize=8, color="#1f4e79", va="center", ha="right",
+            fontsize=8,
+            color="#1f4e79",
+            va="center",
+            ha="right",
         )
 
     ax.set_title(title, fontsize=11, pad=14, loc="left")
@@ -261,12 +334,23 @@ def render_figure(
         Patch(color="#6aa3d3", label="2 — rationale discusses FM"),
         Patch(color="#1f4e79", label="3 — + external citation"),
     ]
-    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.01, 0.55),
-              frameon=False, fontsize=9, title="Evidence tier", title_fontsize=9)
+    ax.legend(
+        handles=handles,
+        loc="upper left",
+        bbox_to_anchor=(1.01, 0.55),
+        frameon=False,
+        fontsize=9,
+        title="Evidence tier",
+        title_fontsize=9,
+    )
     ax.text(
-        1.01, 0.0,
+        1.01,
+        0.0,
         "Row labels show GitHub stars.\nStars are *not* used as cell color —\npopularity ≠ per-mapping evidence.",
-        transform=ax.transAxes, fontsize=8, color="#555", va="top",
+        transform=ax.transAxes,
+        fontsize=8,
+        color="#555",
+        va="top",
     )
 
     plt.subplots_adjust(left=0.18, right=0.80, top=0.80, bottom=0.08)
@@ -277,9 +361,12 @@ def render_figure(
 
 def _row_payload(r: Row, fm_ids_ordered: list[str], fm_ids: list[str]) -> dict:
     return {
-        "id": r.id, "name": r.name, "stars": r.stars,
+        "id": r.id,
+        "name": r.name,
+        "stars": r.stars,
         "trending": r.trending,
-        "breadth": r.breadth, "tier_sum": r.tier_sum,
+        "breadth": r.breadth,
+        "tier_sum": r.tier_sum,
         "tiers": {fm: int(r.row[fm_ids.index(fm)]) for fm in fm_ids_ordered},
     }
 
@@ -294,22 +381,30 @@ def main() -> None:
 
     # --- minimum view (1 tool) ---
     minimum_sel = select_by_recommender_level(rows, "minimum")
-    min_col_order = order_columns(minimum_sel, fm_ids) if minimum_sel else list(range(len(fm_ids)))
+    min_col_order = (
+        order_columns(minimum_sel, fm_ids) if minimum_sel else list(range(len(fm_ids)))
+    )
     fm_ids_min = [fm_ids[i] for i in min_col_order]
 
     # --- optimal view (3 tools, weighted set cover) ---
     optimal_sel = select_by_recommender_level(rows, "optimal")
-    opt_col_order = order_columns(optimal_sel, fm_ids) if optimal_sel else list(range(len(fm_ids)))
+    opt_col_order = (
+        order_columns(optimal_sel, fm_ids) if optimal_sel else list(range(len(fm_ids)))
+    )
     fm_ids_opt = [fm_ids[i] for i in opt_col_order]
 
     # --- full view (minimum set covering all 11 FMs, no pad) ---
     full_sel = select_by_recommender_level(rows, "full")
-    full_col_order = order_columns(full_sel, fm_ids) if full_sel else list(range(len(fm_ids)))
+    full_col_order = (
+        order_columns(full_sel, fm_ids) if full_sel else list(range(len(fm_ids)))
+    )
     fm_ids_full = [fm_ids[i] for i in full_col_order]
 
     # --- render the FULL view as the canonical paper figure ---
     render_figure(
-        full_sel, fm_ids, full_col_order,
+        full_sel,
+        fm_ids,
+        full_col_order,
         title=(
             f"Tool × Failure-Mode evidence  ({len(full_sel)} tools — full MECE coverage)\n"
             "weighted greedy set cover by likelihood × impact × reliability; cell tier: "
@@ -320,16 +415,24 @@ def main() -> None:
     )
 
     # --- JSON payload (site renders all four views) ---
-    all_sorted = sorted(rows, key=lambda r: (-r.breadth, -r.tier_sum, -r.effective_stars))
+    all_sorted = sorted(
+        rows, key=lambda r: (-r.breadth, -r.tier_sum, -r.effective_stars)
+    )
     fm_ids_canonical = fm_ids_full  # use the full view's column order as canonical
 
     payload = {
         "failure_modes": fm_ids_canonical,
-        "failure_mode_display": {k: FM_DISPLAY.get(k, k).replace("\n", " ") for k in fm_ids_canonical},
-        "tools_minimum": [_row_payload(r, fm_ids_canonical, fm_ids) for r in minimum_sel],
-        "tools_optimal": [_row_payload(r, fm_ids_canonical, fm_ids) for r in optimal_sel],
-        "tools_full":    [_row_payload(r, fm_ids_canonical, fm_ids) for r in full_sel],
-        "tools_all":     [_row_payload(r, fm_ids_canonical, fm_ids) for r in all_sorted],
+        "failure_mode_display": {
+            k: FM_DISPLAY.get(k, k).replace("\n", " ") for k in fm_ids_canonical
+        },
+        "tools_minimum": [
+            _row_payload(r, fm_ids_canonical, fm_ids) for r in minimum_sel
+        ],
+        "tools_optimal": [
+            _row_payload(r, fm_ids_canonical, fm_ids) for r in optimal_sel
+        ],
+        "tools_full": [_row_payload(r, fm_ids_canonical, fm_ids) for r in full_sel],
+        "tools_all": [_row_payload(r, fm_ids_canonical, fm_ids) for r in all_sorted],
         "legend": {
             "0": "not addressed",
             "1": "declared mapping (addresses_failure_modes)",
@@ -339,8 +442,8 @@ def main() -> None:
         "selections": {
             "minimum": "1 tool maximising coverage_value × reliability",
             "optimal": "3 tools, greedy weighted set cover by likelihood × impact × reliability",
-            "full":    "minimum tools needed to cover all 11 failure modes (no pad)",
-            "all":     "every tool with ≥1 declared mapping",
+            "full": "minimum tools needed to cover all 11 failure modes (no pad)",
+            "all": "every tool with ≥1 declared mapping",
         },
     }
     (OUT_DIR / "tool_fm_heatmap.json").write_text(json.dumps(payload, indent=2))

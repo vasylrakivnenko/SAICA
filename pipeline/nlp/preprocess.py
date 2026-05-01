@@ -104,6 +104,7 @@ def extract_dois(text: str) -> list[str]:
 # Keyword matching
 # ---------------------------------------------------------------------------
 
+
 def _compile_keyword_patterns() -> dict[str, list[tuple[str, re.Pattern[str]]]]:
     compiled: dict[str, list[tuple[str, re.Pattern[str]]]] = {}
     for fm_id, phrases in FAILURE_MODE_KEYWORDS.items():
@@ -170,7 +171,8 @@ def canonical_url(url: str) -> str:
         path = path.rstrip("/")
     # Filter tracking params.
     kept = [
-        (k, v) for (k, v) in parse_qsl(parsed.query, keep_blank_values=False)
+        (k, v)
+        for (k, v) in parse_qsl(parsed.query, keep_blank_values=False)
         if not any(k.lower().startswith(pref) for pref in _TRACKING_PREFIXES)
     ]
     query = urlencode(kept)
@@ -302,8 +304,12 @@ def classify_kind(raw_row: dict) -> Optional[str]:
     tool_signal = any(sig in low for sig in TOOL_SIGNALS)
     has_github = bool(extract_github_urls(text))
     incident_signal = any(
-        w in low for w in (
-            "incident report", "postmortem", "post-mortem", "outage report",
+        w in low
+        for w in (
+            "incident report",
+            "postmortem",
+            "post-mortem",
+            "outage report",
             "root cause analysis",
         )
     )
@@ -331,6 +337,7 @@ def classify_kind(raw_row: dict) -> Optional[str]:
 # Dedupe / fuzzy title match
 # ---------------------------------------------------------------------------
 
+
 def fuzzy_title_matches(
     title: str,
     candidates: Iterable[str],
@@ -346,9 +353,7 @@ def fuzzy_title_matches(
     for c in candidates:
         if not c:
             continue
-        score = fuzz.token_set_ratio(
-            t, c, processor=_rf_utils.default_process
-        )
+        score = fuzz.token_set_ratio(t, c, processor=_rf_utils.default_process)
         if score >= threshold:
             matches.append(c)
     return matches

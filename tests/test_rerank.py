@@ -12,7 +12,6 @@ import pytest
 
 from pipeline.rerank.cohere import (
     CohereRerankClient,
-    DocScore,
     compose_document,
     rerank_candidates,
 )
@@ -198,9 +197,7 @@ def test_rerank_candidates_sorted_by_score_max_desc():
         {"id": 3, "name": "mid"},
     ]
     score_lookup = {"low": 0.1, "high": 0.9, "mid": 0.5}
-    client = FakeClient(
-        score_fn=lambda q, d: score_lookup[d.strip()]
-    )
+    client = FakeClient(score_fn=lambda q, d: score_lookup[d.strip()])
     scores = rerank_candidates(
         rows,
         [RerankQuery(id="qa", text="anything")],
@@ -254,7 +251,9 @@ def test_rerank_candidates_missing_result_yields_zero_score():
 
 
 class _StubResp:
-    def __init__(self, status_code: int, json_body: dict, headers: Optional[dict] = None):
+    def __init__(
+        self, status_code: int, json_body: dict, headers: Optional[dict] = None
+    ):
         self.status_code = status_code
         self._body = json_body
         self.headers = headers or {}
@@ -325,6 +324,7 @@ def test_cohere_client_requires_configuration(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     # Prevent the constructor from re-loading .env.local.
     from pipeline.rerank import cohere as cohere_mod
+
     monkeypatch.setattr(cohere_mod, "_load_env_local_once", lambda: None)
     client = CohereRerankClient(endpoint="", api_key="")
     with pytest.raises(RuntimeError, match="not configured"):

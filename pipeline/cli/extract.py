@@ -32,7 +32,6 @@ from pipeline import db
 from pipeline.cost_caps import CallBudget, CostCapExceeded
 from pipeline.extract import cache as cache_mod
 from pipeline.extract import kimi
-from pipeline.extract.schemas import PaperExtraction, ToolExtraction
 
 
 # ---------------------------------------------------------------------------
@@ -120,7 +119,9 @@ def _cmd_batch(args: argparse.Namespace) -> int:
     if not pending:
         print(f"no pending {kind}")
         return 0
-    print(f"extracting {len(pending)} pending {kind} (concurrency={kimi.MAX_CONCURRENCY})")
+    print(
+        f"extracting {len(pending)} pending {kind} (concurrency={kimi.MAX_CONCURRENCY})"
+    )
     budget = _budget_from_args(args)
     ok = 0
     failed = 0

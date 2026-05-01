@@ -18,6 +18,7 @@ before the trending scraper has ever run), the boost is a no-op:
 :func:`effective_stars` returns the raw star count and
 :func:`is_trending` returns ``False`` for everything.
 """
+
 from __future__ import annotations
 
 import json

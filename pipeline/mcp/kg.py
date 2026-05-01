@@ -10,6 +10,7 @@ to filter by failure mode + paradigm + integration_surfaces. All loads are
 LRU-cached per-process; the YAML directory is small (~100 files) so we can
 also pre-list the tool ids.
 """
+
 from __future__ import annotations
 
 import logging

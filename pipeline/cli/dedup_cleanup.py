@@ -217,9 +217,7 @@ def apply_plan(conn: Any, plan: Plan) -> None:
     """Apply every action in ``plan`` in a single transaction."""
     with conn.cursor() as cur:
         for action in plan.yaml_dups:
-            cur.execute(
-                _UPDATE_CANDIDATE_SQL, (action.tool_id, action.candidate_id)
-            )
+            cur.execute(_UPDATE_CANDIDATE_SQL, (action.tool_id, action.candidate_id))
         for action in plan.intra_dups:
             cur.execute(
                 _UPDATE_CANDIDATE_SQL,
@@ -290,18 +288,14 @@ def format_report(plan: Plan, *, dry_run: bool, include_raw: bool) -> str:
                 f"url={action.source_url} -> {action.tool_id} "
                 f"(rule={action.rule})"
             )
-    lines.append(
-        f"{prefix}  intra-candidate duplicates: {len(plan.intra_dups)}"
-    )
+    lines.append(f"{prefix}  intra-candidate duplicates: {len(plan.intra_dups)}")
     for action in plan.intra_dups:
         lines.append(
             f"{prefix}    candidate_id={action.candidate_id} "
             f"url={action.source_url} -> keeper id={action.keeper_candidate_id}"
         )
     if include_raw:
-        lines.append(
-            f"{prefix}  raw_search_results tagged: {len(plan.raw_dups)}"
-        )
+        lines.append(f"{prefix}  raw_search_results tagged: {len(plan.raw_dups)}")
         for action in plan.raw_dups:
             lines.append(
                 f"{prefix}    raw_id={action.raw_id} url={action.url} "
@@ -391,10 +385,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
             purge_raw=args.purge_raw,
         )
         sys.stdout.write(
-            format_report(
-                plan, dry_run=args.dry_run, include_raw=args.purge_raw
-            )
-            + "\n"
+            format_report(plan, dry_run=args.dry_run, include_raw=args.purge_raw) + "\n"
         )
     return 0
 

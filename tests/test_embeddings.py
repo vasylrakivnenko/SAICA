@@ -9,21 +9,18 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List
 
 import numpy as np
 import pytest
 import yaml
 
-from pipeline.embeddings import compute, drift_report, query, umap_project
+from pipeline.embeddings import compute
 from pipeline.embeddings.compute import (
     EMBED_DIM,
     EmbeddingStore,
     build_node_text,
     compute_embeddings,
-    encode_texts,
     save_store,
-    top_similar,
 )
 from pipeline.embeddings.drift_report import compute_drift, render_markdown
 from pipeline.embeddings.query import _reset_cache, find_similar
@@ -58,10 +55,22 @@ class StubEncoder:
             self._word_cache[w] = v
         return self._word_cache[w]
 
-    def encode(self, texts, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False):
+    def encode(
+        self,
+        texts,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    ):
         out = np.zeros((len(texts), self.dim), dtype=np.float32)
         for i, t in enumerate(texts):
-            words = [w for w in "".join(c if c.isalnum() else " " for c in str(t).lower()).split() if w]
+            words = [
+                w
+                for w in "".join(
+                    c if c.isalnum() else " " for c in str(t).lower()
+                ).split()
+                if w
+            ]
             if not words:
                 v = np.zeros(self.dim, dtype=np.float32)
                 v[0] = 1.0
@@ -247,9 +256,9 @@ def test_drift_report_flags_synthetic_outlier(store: EmbeddingStore):
     outlier_rank = tool_ids.index("outlier-x")
     for cid in cohesive_ids:
         if cid in tool_ids:
-            assert outlier_rank < tool_ids.index(cid), (
-                f"{cid} ranked more outlying than the synthetic outlier"
-            )
+            assert outlier_rank < tool_ids.index(
+                cid
+            ), f"{cid} ranked more outlying than the synthetic outlier"
 
     # Report content has the required structure
     assert outlier_row.current_cell == (
@@ -280,7 +289,9 @@ def test_umap_produces_correct_shape(store: EmbeddingStore):
         assert t in payload["by_type"]
         rows = payload["by_type"][t]
         for row in rows:
-            assert set(["id", "name", "type", "x", "y", "top_similar_ids"]) <= set(row.keys())
+            assert set(["id", "name", "type", "x", "y", "top_similar_ids"]) <= set(
+                row.keys()
+            )
             assert isinstance(row["x"], float)
             assert isinstance(row["y"], float)
             # Scaled to [0, 1]
@@ -298,7 +309,9 @@ def test_umap_produces_correct_shape(store: EmbeddingStore):
 # ---------------------------------------------------------------------------
 
 
-def test_find_similar_returns_topk_sorted_desc(store: EmbeddingStore, stub_encoder: StubEncoder):
+def test_find_similar_returns_topk_sorted_desc(
+    store: EmbeddingStore, stub_encoder: StubEncoder
+):
     _reset_cache()
     out = find_similar("LintA Python linter", k=4, store=store, encoder=stub_encoder)
     assert len(out) == 4

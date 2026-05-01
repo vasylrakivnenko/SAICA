@@ -37,7 +37,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 
@@ -151,8 +151,12 @@ def build_payload(
     corpus = json.loads((research_dir / "corpus.json").read_text(encoding="utf-8"))
     meta = json.loads((research_dir / "metadata.json").read_text(encoding="utf-8"))
     hdb = json.loads((research_dir / "hdbscan_runs.json").read_text(encoding="utf-8"))
-    bip = json.loads((research_dir / "bipartite_clusters.json").read_text(encoding="utf-8"))
-    sai = json.loads((research_dir / "saica_comparison.json").read_text(encoding="utf-8"))
+    bip = json.loads(
+        (research_dir / "bipartite_clusters.json").read_text(encoding="utf-8")
+    )
+    sai = json.loads(
+        (research_dir / "saica_comparison.json").read_text(encoding="utf-8")
+    )
 
     X = np.load(research_dir / "embeddings.npy")
     if X.shape[0] != len(corpus):
@@ -175,9 +179,7 @@ def build_payload(
 
     saica_labels_per_row: List[str] = list(sai.get("saica_labels", []))
     if len(saica_labels_per_row) != len(corpus):
-        raise RuntimeError(
-            "saica_comparison.saica_labels length mismatch with corpus."
-        )
+        raise RuntimeError("saica_comparison.saica_labels length mismatch with corpus.")
 
     # The research artifacts already use the same key ordering as corpus,
     # but belt-and-suspenders verify.
@@ -253,7 +255,16 @@ def build_payload(
     # --- taxonomies meta ----------------------------------------------------
     tax_ids = sorted({r["source_tax_id"] for r in corpus})
     taxonomies: Dict[str, Dict[str, str]] = {}
-    fallback_palette = ["#2563eb", "#e11d48", "#7c3aed", "#f59e0b", "#0891b2", "#64748b", "#059669", "#db2777"]
+    fallback_palette = [
+        "#2563eb",
+        "#e11d48",
+        "#7c3aed",
+        "#f59e0b",
+        "#0891b2",
+        "#64748b",
+        "#059669",
+        "#db2777",
+    ]
     for i, tid in enumerate(tax_ids):
         meta_entry = TAXONOMY_META.get(tid)
         if meta_entry:
@@ -300,9 +311,7 @@ def _parse_args(argv=None) -> argparse.Namespace:
         default=SITE_JSON_PATH,
         help="Output JSON path consumed by /taxonomy-study.",
     )
-    p.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable debug logging."
-    )
+    p.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging.")
     return p.parse_args(argv)
 
 

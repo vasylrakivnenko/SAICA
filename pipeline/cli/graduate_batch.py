@@ -22,7 +22,6 @@ import json
 import logging
 import sys
 from datetime import date
-from pathlib import Path
 from typing import Any, Optional
 
 from pipeline import config, db, dedup
@@ -40,8 +39,14 @@ PARADIGM = {"prevention", "detection", "correction", "recovery"}
 PHASE = {"pre_generation", "in_generation", "post_generation"}
 AUTONOMY = {"fully_autonomous", "graduated_hitl", "full_hitl"}
 FAILURE_MODES = {
-    "fabrication", "obsolescence", "dependency_blindness", "logic_error",
-    "security_vulnerability", "scope_creep", "context_pollution", "supply_chain_attack",
+    "fabrication",
+    "obsolescence",
+    "dependency_blindness",
+    "logic_error",
+    "security_vulnerability",
+    "scope_creep",
+    "context_pollution",
+    "supply_chain_attack",
 }
 
 
@@ -114,13 +119,21 @@ def build_tool_yaml(cand: dict) -> Optional[str]:
     name = (_val(payload, "name") or cand.get("name") or tool_id).strip()
     tagline = _val(payload, "tagline") or _github_field(raw, "description") or ""
     tagline = (tagline or "")[:140]
-    description = _val(payload, "description") or _github_field(raw, "description") or tagline
-    license_ = _val(payload, "license_spdx") or _github_field(raw, "license", "spdx_id") or "NOASSERTION"
+    description = (
+        _val(payload, "description") or _github_field(raw, "description") or tagline
+    )
+    license_ = (
+        _val(payload, "license_spdx")
+        or _github_field(raw, "license", "spdx_id")
+        or "NOASSERTION"
+    )
     if license_ in (None, "NOASSERTION", ""):
         license_ = "NOASSERTION"
 
     first_released = _github_field(raw, "created_at")
-    first_released = first_released[:10] if isinstance(first_released, str) else str(date.today())
+    first_released = (
+        first_released[:10] if isinstance(first_released, str) else str(date.today())
+    )
     last_updated = _github_field(raw, "pushed_at")
     last_updated = last_updated[:10] if isinstance(last_updated, str) else None
     stars = _github_field(raw, "stargazers_count") or 0
@@ -139,15 +152,17 @@ def build_tool_yaml(cand: dict) -> Optional[str]:
     ]
     if last_updated:
         lines.append(f"last_updated: '{last_updated}'")
-    lines.extend([
-        "maturity_status: experimental",
-        f"repository_url: {source_url}",
-        f"license: {_yaml_str(license_)}",
-        f"control_paradigm: {paradigm}",
-        f"temporal_phase: {phase}",
-        f"autonomy_level: {autonomy}",
-        "addresses_failure_modes:",
-    ])
+    lines.extend(
+        [
+            "maturity_status: experimental",
+            f"repository_url: {source_url}",
+            f"license: {_yaml_str(license_)}",
+            f"control_paradigm: {paradigm}",
+            f"temporal_phase: {phase}",
+            f"autonomy_level: {autonomy}",
+            "addresses_failure_modes:",
+        ]
+    )
     for fm in addresses:
         lines.append(f"  - {fm}")
     if stars:
@@ -155,10 +170,16 @@ def build_tool_yaml(cand: dict) -> Optional[str]:
         lines.append(f"stars_updated_at: '{date.today().isoformat()}'")
 
     lines.append("inclusion_rationale: >")
-    lines.append(f"  Graduated from pipeline candidate id={cand['id']} (Kimi-K2.5 extraction,")
-    lines.append(f"  overall_confidence={overall_conf}, rerank_score={rerank_score}). Pending human")
-    lines.append(f"  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if")
-    lines.append(f"  Kimi declined to assign.")
+    lines.append(
+        f"  Graduated from pipeline candidate id={cand['id']} (Kimi-K2.5 extraction,"
+    )
+    lines.append(
+        f"  overall_confidence={overall_conf}, rerank_score={rerank_score}). Pending human"
+    )
+    lines.append(
+        "  review of MECE facet placement; autonomy_level defaulted to fully_autonomous if"
+    )
+    lines.append("  Kimi declined to assign.")
 
     # Provenance
     lines.append("provenance:")
@@ -178,7 +199,10 @@ def _yaml_str(s: str) -> str:
     """Render a scalar string — quote if it contains special chars."""
     if not s:
         return '""'
-    if any(c in s for c in (":", "#", "[", "]", "{", "}", "|", ">", "\n", "\"")) or s.strip() != s:
+    if (
+        any(c in s for c in (":", "#", "[", "]", "{", "}", "|", ">", "\n", '"'))
+        or s.strip() != s
+    ):
         return json.dumps(s, ensure_ascii=False)  # JSON strings are valid YAML strings
     return s
 
@@ -195,6 +219,7 @@ def main(argv=None) -> int:
 
     with db.get_conn() as conn:
         from psycopg.rows import dict_row
+
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
                 "SELECT * FROM candidate_tools WHERE id = ANY(%s)",

@@ -639,4 +639,3 @@
 - Queries: hitl-code-generation
 - Themes: supervision
 - TLDR: IRIS incorporates innovative features to enhance ideation, including adaptive test-time compute expansion via Monte Carlo Tree Search, fine-grained feedback mechanism, and query-based literature synthesis, to empower researchers with greater control and insight throughout the ideation process.
-

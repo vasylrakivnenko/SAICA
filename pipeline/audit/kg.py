@@ -7,6 +7,7 @@ coverage grid construction, and gap recommendations.
 Self-contained: no imports from ``pipeline.ask`` or other pipeline packages
 (per Phase-1 hard constraint). Mirrors the YAML field names directly.
 """
+
 from __future__ import annotations
 
 import glob
@@ -59,37 +60,67 @@ FM_KEYWORDS: dict[str, tuple[str, ...]] = {
     "fabrication": ("fabricat", "hallucin", "nonexistent api", "made-up", "confabulat"),
     "obsolescence": ("obsolesc", "deprecat", "outdated", "stale api", "api evolution"),
     "dependency_blindness": (
-        "dependency blind", "dependency-blind", "reinvent", "home-rolled",
-        "duplicate code", "reimplement",
+        "dependency blind",
+        "dependency-blind",
+        "reinvent",
+        "home-rolled",
+        "duplicate code",
+        "reimplement",
     ),
     "logic_error": (
-        "logic error", "logic bug", "reasoning error", "incorrect behavior",
+        "logic error",
+        "logic bug",
+        "reasoning error",
+        "incorrect behavior",
         "wrong answer",
     ),
     "security_vulnerability": (
-        "security vuln", "vulnerab", " cve", "insecure", "sast", "taint",
+        "security vuln",
+        "vulnerab",
+        " cve",
+        "insecure",
+        "sast",
+        "taint",
     ),
     "scope_creep": (
-        "scope creep", "off-task", "off task", "unrelated change",
+        "scope creep",
+        "off-task",
+        "off task",
+        "unrelated change",
         "out-of-scope",
     ),
     "context_pollution": (
-        "context polluti", "prompt inject", "jailbreak", "context manipul",
+        "context polluti",
+        "prompt inject",
+        "jailbreak",
+        "context manipul",
         "indirect injection",
     ),
     "supply_chain_attack": (
-        "supply chain", "slopsquat", "typosquat", "malicious package",
+        "supply chain",
+        "slopsquat",
+        "typosquat",
+        "malicious package",
         "malicious depend",
     ),
     "cascading_failure": (
-        "cascading", "error propagat", "runaway", "cascade",
+        "cascading",
+        "error propagat",
+        "runaway",
+        "cascade",
     ),
     "incomplete_execution": (
-        "incomplete", "partial execution", "unfinished", "stop short",
+        "incomplete",
+        "partial execution",
+        "unfinished",
+        "stop short",
         "half-done",
     ),
     "test_manipulation": (
-        "test manipul", "test gaming", "reward hack", "spec gaming",
+        "test manipul",
+        "test gaming",
+        "reward hack",
+        "spec gaming",
         "gaming the test",
     ),
 }
@@ -98,6 +129,7 @@ FM_KEYWORDS: dict[str, tuple[str, ...]] = {
 # ---------------------------------------------------------------------------
 # Loaders
 # ---------------------------------------------------------------------------
+
 
 @lru_cache(maxsize=1)
 def load_tool_index() -> dict[str, dict]:
@@ -128,6 +160,7 @@ def load_failure_modes() -> list[str]:
 # Per-mapping evidence tier (mirrors research/plot_tool_fm_heatmap.py)
 # ---------------------------------------------------------------------------
 
+
 def _rationale_mentions(text: str, fm_id: str) -> bool:
     if not text:
         return False
@@ -142,9 +175,7 @@ def _rationale_mentions(text: str, fm_id: str) -> bool:
 
 def _has_citation_evidence(tool: dict) -> bool:
     return bool(
-        tool.get("cited_in")
-        or tool.get("documented_in")
-        or tool.get("evaluated_on")
+        tool.get("cited_in") or tool.get("documented_in") or tool.get("evaluated_on")
     )
 
 
@@ -170,6 +201,7 @@ def cell_tier(tool: dict, fm_id: str) -> int:
 # ---------------------------------------------------------------------------
 # Convenience lookups
 # ---------------------------------------------------------------------------
+
 
 def tools_by_failure_mode(fm: str) -> list[dict]:
     """Return all KG tools whose ``addresses_failure_modes`` includes ``fm``."""

@@ -65,13 +65,12 @@ LOG_DIR_DEFAULT = REPO_ROOT / ".saica" / "prevention_log"
 # Timestamp helpers
 # ---------------------------------------------------------------------------
 
+
 def _utcnow_iso() -> str:
     """ISO-8601 UTC timestamp with a literal ``Z`` suffix (no offset)."""
 
     return (
-        datetime.now(timezone.utc)
-        .replace(microsecond=0)
-        .strftime("%Y-%m-%dT%H:%M:%SZ")
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
     )
 
 
@@ -84,6 +83,7 @@ def _date_bucket(ts_iso: str) -> str:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def log_prevention(
     *,
@@ -190,6 +190,7 @@ def read_events(log_dir: Path | None = None) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Internals
 # ---------------------------------------------------------------------------
+
 
 def _is_duplicate(target: Path, event: dict[str, Any]) -> bool:
     """True if *event* matches the last line of *target* on (ts, tool_id, mechanism)."""

@@ -16,6 +16,7 @@ Pipeline:
 The ``audit_repo_local(path)`` helper is exposed for tests so we can audit
 a local working copy without going through git.
 """
+
 from __future__ import annotations
 
 import logging
@@ -59,6 +60,7 @@ GITHUB_URL_RE = re.compile(
 # URL parsing + validation
 # ---------------------------------------------------------------------------
 
+
 def parse_repo_url(repo_url: str) -> tuple[str, str]:
     """Validate ``repo_url`` and return ``(owner, repo)`` tuple.
 
@@ -75,9 +77,7 @@ def parse_repo_url(repo_url: str) -> tuple[str, str]:
         )
     m = GITHUB_URL_RE.match(url)
     if not m:
-        raise ValueError(
-            "repo_url must look like https://github.com/<owner>/<repo>"
-        )
+        raise ValueError("repo_url must look like https://github.com/<owner>/<repo>")
     return m.group(1), m.group(2)
 
 
@@ -87,30 +87,59 @@ def parse_repo_url(repo_url: str) -> tuple[str, str]:
 
 # Marker files we care about for the API-fallback fetch path.
 _MARKER_FILES: tuple[str, ...] = (
-    "pyproject.toml", "requirements.txt", "Pipfile", "setup.py", "setup.cfg",
-    "package.json", "tsconfig.json",
-    "go.mod", "Cargo.toml", "Gemfile", "composer.json",
-    "Dockerfile", "docker-compose.yml", "Makefile",
-    ".pre-commit-config.yaml", ".pre-commit-config.yml",
-    ".github/dependabot.yml", ".github/dependabot.yaml",
-    "renovate.json", ".github/renovate.json", ".renovaterc",
-    "CLAUDE.md", ".cursorrules", ".windsurfrules", ".cursorignore",
-    "promptfooconfig.yaml", "promptfooconfig.yml", "promptfooconfig.json",
-    "deepeval.yaml", "deepeval.yml", "judgeval.yaml",
+    "pyproject.toml",
+    "requirements.txt",
+    "Pipfile",
+    "setup.py",
+    "setup.cfg",
+    "package.json",
+    "tsconfig.json",
+    "go.mod",
+    "Cargo.toml",
+    "Gemfile",
+    "composer.json",
+    "Dockerfile",
+    "docker-compose.yml",
+    "Makefile",
+    ".pre-commit-config.yaml",
+    ".pre-commit-config.yml",
+    ".github/dependabot.yml",
+    ".github/dependabot.yaml",
+    "renovate.json",
+    ".github/renovate.json",
+    ".renovaterc",
+    "CLAUDE.md",
+    ".cursorrules",
+    ".windsurfrules",
+    ".cursorignore",
+    "promptfooconfig.yaml",
+    "promptfooconfig.yml",
+    "promptfooconfig.json",
+    "deepeval.yaml",
+    "deepeval.yml",
+    "judgeval.yaml",
     "lm-eval-config.yaml",
 )
 _MARKER_DIRS: tuple[str, ...] = (
     ".github/workflows",
-    ".claude", ".cursor", ".windsurf", ".zed",
+    ".claude",
+    ".cursor",
+    ".windsurf",
+    ".zed",
     ".github/copilot",
-    ".continue", ".sourcegraph", ".cody", ".codeium",
-    "judgeval", ".deepeval",
+    ".continue",
+    ".sourcegraph",
+    ".cody",
+    ".codeium",
+    "judgeval",
+    ".deepeval",
 )
 
 
 def _git_shallow_clone(repo_url: str, dest: Path, timeout: float = 60.0) -> None:
     cmd = [
-        "git", "clone",
+        "git",
+        "clone",
         "--depth=1",
         "--filter=blob:limit=100k",
         "--quiet",
@@ -141,7 +170,8 @@ def _api_fetch(owner: str, repo: str, dest: Path, timeout: float = 30.0) -> None
     # Discover default branch.
     r = requests.get(
         f"https://api.github.com/repos/{owner}/{repo}",
-        headers=headers, timeout=timeout,
+        headers=headers,
+        timeout=timeout,
     )
     r.raise_for_status()
     branch = r.json().get("default_branch") or "main"
@@ -149,7 +179,8 @@ def _api_fetch(owner: str, repo: str, dest: Path, timeout: float = 30.0) -> None
     # Fetch flat tree to discover what's actually present (one request).
     tree_r = requests.get(
         f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1",
-        headers=headers, timeout=timeout,
+        headers=headers,
+        timeout=timeout,
     )
     tree_r.raise_for_status()
     tree = tree_r.json().get("tree") or []
@@ -199,7 +230,10 @@ def _fetch_repo(repo_url: str, dest: Path) -> None:
 # Stack assembly + summary
 # ---------------------------------------------------------------------------
 
-def _split_resolved(detected: list[DetectedTool]) -> tuple[list[DetectedTool], list[DetectedTool]]:
+
+def _split_resolved(
+    detected: list[DetectedTool],
+) -> tuple[list[DetectedTool], list[DetectedTool]]:
     resolved = [d for d in detected if d.in_kg]
     unresolved = [d for d in detected if not d.in_kg]
     return resolved, unresolved
@@ -237,9 +271,7 @@ def _build_summary(
         agent_phrase = f" Coding agent(s) detected: {names}."
 
     if n_tools == 0:
-        head = (
-            f"{repo_name} has no SAICA-KG-recognised supervision tools wired in."
-        )
+        head = f"{repo_name} has no SAICA-KG-recognised supervision tools wired in."
     else:
         head = (
             f"{repo_name} has {n_tools} SAICA-KG-recognised supervision tool"
@@ -257,7 +289,10 @@ def _build_summary(
 # Public entrypoints
 # ---------------------------------------------------------------------------
 
-def audit_repo_local(repo_path: str | Path, repo_url: Optional[str] = None) -> AuditReport:
+
+def audit_repo_local(
+    repo_path: str | Path, repo_url: Optional[str] = None
+) -> AuditReport:
     """Audit an already-checked-out local copy of a repo.
 
     Useful for tests and for re-using a previously cloned tree.  ``repo_url``
@@ -266,7 +301,9 @@ def audit_repo_local(repo_path: str | Path, repo_url: Optional[str] = None) -> A
     """
     root = Path(repo_path).resolve()
     if not root.is_dir():
-        raise FileNotFoundError(f"repo path does not exist or is not a directory: {root}")
+        raise FileNotFoundError(
+            f"repo path does not exist or is not a directory: {root}"
+        )
 
     url = repo_url or root.as_uri()
     kg = load_tool_index()

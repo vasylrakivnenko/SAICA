@@ -131,9 +131,7 @@ def _taxonomy_text(doc: Dict) -> str:
 
 
 def _paper_text(doc: Dict) -> str:
-    return _join_nonempty(
-        [doc.get("title"), doc.get("tldr"), doc.get("abstract")]
-    )
+    return _join_nonempty([doc.get("title"), doc.get("tldr"), doc.get("abstract")])
 
 
 TEXT_BUILDERS: Dict[str, Callable[[Dict], str]] = {
@@ -316,8 +314,6 @@ def top_similar(
     out: Dict[str, List[tuple[str, float]]] = {}
     for i, nid in enumerate(store.ids):
         out[nid] = [
-            (store.ids[j], float(sims[i, j]))
-            for j in order[i]
-            if sims[i, j] != -np.inf
+            (store.ids[j], float(sims[i, j])) for j in order[i] if sims[i, j] != -np.inf
         ]
     return out

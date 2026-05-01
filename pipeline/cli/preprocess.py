@@ -22,6 +22,7 @@ def _parse_since(value: Optional[str]) -> Optional[datetime]:
 
 def _cmd_run(args: argparse.Namespace) -> int:
     from pipeline.nlp.pipeline import run
+
     since = _parse_since(args.since)
     summary = run(since=since)
     return 0 if not summary.errors else 1
@@ -29,6 +30,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 def _cmd_stats(_: argparse.Namespace) -> int:
     from pipeline import db
+
     with db.get_conn() as conn, conn.cursor() as cur:
         print("candidate_tools by status:")
         cur.execute(

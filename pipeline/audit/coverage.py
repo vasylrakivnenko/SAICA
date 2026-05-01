@@ -13,6 +13,7 @@ cover at all (severity ``high``) or covers in only one paradigm
 recommendations from the KG, prioritising tools whose integration
 surfaces match what the user's stack already has.
 """
+
 from __future__ import annotations
 
 from typing import Iterable, get_args
@@ -43,6 +44,7 @@ PARADIGMS: tuple[Paradigm, ...] = get_args(Paradigm)  # ("prevention", "detectio
 # ---------------------------------------------------------------------------
 # Coverage grid
 # ---------------------------------------------------------------------------
+
 
 def _detected_kg_ids(detected_tools: Iterable[DetectedTool]) -> list[str]:
     """De-duplicated ordered list of KG-resolved tool ids from the detection list."""
@@ -84,12 +86,14 @@ def build_coverage_grid(
                     contributing.append(tid)
                     if t > tier:
                         tier = t
-            cells.append(CoverageCell(
-                failure_mode=fm,
-                paradigm=paradigm,  # type: ignore[arg-type]
-                tier=tier,  # type: ignore[arg-type]
-                contributing_tools=contributing,
-            ))
+            cells.append(
+                CoverageCell(
+                    failure_mode=fm,
+                    paradigm=paradigm,  # type: ignore[arg-type]
+                    tier=tier,  # type: ignore[arg-type]
+                    contributing_tools=contributing,
+                )
+            )
             if tier > 0:
                 fms_covered.add(fm)
                 paradigm_fms[paradigm].add(fm)
@@ -110,20 +114,34 @@ def build_coverage_grid(
 # Gap analysis + recommendations
 # ---------------------------------------------------------------------------
 
+
 def _stack_surfaces(stack: DetectedStack) -> set[str]:
     """Inferred surfaces the user's stack can integrate with."""
     surfaces: set[str] = set()
     if "github_actions" in stack.ci_providers:
         surfaces.add("ci_app")
-    if any(p in stack.ci_providers for p in ("gitlab_ci", "circle_ci", "azure_pipelines", "jenkins")):
+    if any(
+        p in stack.ci_providers
+        for p in ("gitlab_ci", "circle_ci", "azure_pipelines", "jenkins")
+    ):
         surfaces.add("ci_app")
     if "python" in stack.languages:
         surfaces.update({"library", "cli"})
     if "javascript" in stack.languages or "typescript" in stack.languages:
         surfaces.update({"library", "cli"})
-    if any(a.id in {"claude-code", "cursor", "windsurf", "continue-dev",
-                    "github-copilot", "sourcegraph-cody", "aider"}
-           for a in stack.agents):
+    if any(
+        a.id
+        in {
+            "claude-code",
+            "cursor",
+            "windsurf",
+            "continue-dev",
+            "github-copilot",
+            "sourcegraph-cody",
+            "aider",
+        }
+        for a in stack.agents
+    ):
         # MCP-using agents (Claude Code first) can host mcp_server tools.
         surfaces.add("mcp_server")
     # Always plausible.
@@ -171,7 +189,14 @@ def recommend_for_gap(
         return []
 
     def sort_key(tool: dict) -> tuple:
-        paradigm_bonus = 1 if (preferred_paradigm and tool.get("control_paradigm") == preferred_paradigm) else 0
+        paradigm_bonus = (
+            1
+            if (
+                preferred_paradigm
+                and tool.get("control_paradigm") == preferred_paradigm
+            )
+            else 0
+        )
         surface_fit = _surface_fit_score(tool, stack_surfaces)
         per_fm_tier = cell_tier(tool, fm)
         # `effective_stars` applies the github-trending boost so a trending tool
@@ -185,18 +210,20 @@ def recommend_for_gap(
         tid = str(tool.get("id"))
         surfaces = list(tool.get("integration_surfaces") or [])
         why = _explain_recommendation(tool, fm, stack_surfaces, surfaces)
-        recs.append(Recommendation(
-            tool_id=tid,
-            tool_name=str(tool.get("name") or tid),
-            why=why,
-            paradigm=str(tool.get("control_paradigm") or "detection"),  # type: ignore[arg-type]
-            temporal_phase=str(tool.get("temporal_phase") or "post_generation"),
-            autonomy_level=str(tool.get("autonomy_level") or "fully_autonomous"),
-            integration_surfaces=surfaces,
-            addresses_failure_modes=list(tool.get("addresses_failure_modes") or []),
-            stars=int(tool["stars"]) if tool.get("stars") is not None else None,
-            url=tool_url(tid),
-        ))
+        recs.append(
+            Recommendation(
+                tool_id=tid,
+                tool_name=str(tool.get("name") or tid),
+                why=why,
+                paradigm=str(tool.get("control_paradigm") or "detection"),  # type: ignore[arg-type]
+                temporal_phase=str(tool.get("temporal_phase") or "post_generation"),
+                autonomy_level=str(tool.get("autonomy_level") or "fully_autonomous"),
+                integration_surfaces=surfaces,
+                addresses_failure_modes=list(tool.get("addresses_failure_modes") or []),
+                stars=int(tool["stars"]) if tool.get("stars") is not None else None,
+                url=tool_url(tid),
+            )
+        )
     return recs
 
 
@@ -214,10 +241,7 @@ def _explain_recommendation(
         surface_phrase = f"integrates via {', '.join(tool_surfaces[:2])}"
     else:
         surface_phrase = "general-purpose integration"
-    return (
-        f"Adds {paradigm} coverage for {fm.replace('_', ' ')}; "
-        f"{surface_phrase}."
-    )
+    return f"Adds {paradigm} coverage for {fm.replace('_', ' ')}; " f"{surface_phrase}."
 
 
 def find_gaps(
@@ -268,17 +292,22 @@ def find_gaps(
             continue
 
         recs = recommend_for_gap(
-            fm, stack, kg, top_n=3,
+            fm,
+            stack,
+            kg,
+            top_n=3,
             detected_ids=detected_ids,
             preferred_paradigm=preferred_paradigm,  # type: ignore[arg-type]
         )
-        gaps.append(GapItem(
-            failure_mode=fm,
-            paradigm=missing_paradigm,  # type: ignore[arg-type]
-            severity=severity,
-            rationale=rationale,
-            recommendations=recs,
-        ))
+        gaps.append(
+            GapItem(
+                failure_mode=fm,
+                paradigm=missing_paradigm,  # type: ignore[arg-type]
+                severity=severity,
+                rationale=rationale,
+                recommendations=recs,
+            )
+        )
 
     # Sort: high-severity first, then alphabetical FM for stable output.
     severity_rank = {"high": 0, "medium": 1, "low": 2}
