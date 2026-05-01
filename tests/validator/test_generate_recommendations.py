@@ -15,6 +15,7 @@ import pytest
 from pipeline.mcp.recommender import (
     ALL_FAILURE_MODES,
     CODING_AGENT_IDS,
+    LEVELS,
     RECOMMENDATION_BLOCKLIST,
 )
 from validator.generate_recommendations import (
@@ -36,6 +37,7 @@ def test_payload_top_level_keys(payload: dict) -> None:
         "trending_count",
         "trending_boost",
         "blocklist",
+        "priorities",
         "by_agent",
         "agnostic",
         "by_failure_mode",
@@ -44,24 +46,29 @@ def test_payload_top_level_keys(payload: dict) -> None:
     assert payload["generated_at"] == "2026-04-30"
     assert isinstance(payload["trending_boost"], float)
     assert payload["trending_count"] >= 0
+    assert isinstance(payload["priorities"], dict)
+    assert "scope_creep" in payload["priorities"]
 
 
-def test_payload_has_every_coding_agent(payload: dict) -> None:
+def test_payload_has_every_coding_agent_at_three_levels(payload: dict) -> None:
     assert set(payload["by_agent"].keys()) == set(CODING_AGENT_IDS)
-    for agent_id, block in payload["by_agent"].items():
-        assert block["agent_kind"] == agent_id
-        assert block["mode"] == "full_suite"
-        assert "cover" in block and "pad" in block
-        assert "coverage_complete" in block
-        assert "uncovered_failure_modes" in block
+    for agent_id, levels in payload["by_agent"].items():
+        assert set(levels.keys()) == set(LEVELS)
+        for level, block in levels.items():
+            assert block["agent_kind"] == agent_id
+            assert block["level"] == level
+            assert "tools" in block
+            assert "covered_failure_modes" in block
+            assert "uncovered_failure_modes" in block
 
 
-def test_payload_has_agnostic_block(payload: dict) -> None:
+def test_payload_has_agnostic_block_at_three_levels(payload: dict) -> None:
     agnostic = payload["agnostic"]
-    assert agnostic["agent_kind"] is None
-    assert agnostic["mode"] == "full_suite"
-    assert "cover" in agnostic
-    assert "pad" in agnostic
+    assert set(agnostic.keys()) == set(LEVELS)
+    for level, block in agnostic.items():
+        assert block["agent_kind"] is None
+        assert block["level"] == level
+        assert "tools" in block
 
 
 def test_payload_by_failure_mode_covers_all_eleven(payload: dict) -> None:
@@ -81,32 +88,29 @@ def test_recommendations_json_round_trip(payload: dict) -> None:
     assert reparsed == payload
 
 
-def test_asker_filter_regression(payload: dict) -> None:
-    """A coding agent must never appear in its own cover or pad."""
-    for agent_id, block in payload["by_agent"].items():
-        all_ids = {r["tool_id"] for r in block.get("cover", [])}
-        all_ids |= {r["tool_id"] for r in block.get("pad", [])}
-        assert agent_id not in all_ids, (
-            f"{agent_id} recommended itself; cover+pad ids: {sorted(all_ids)}"
-        )
-        # And no *other* coding-agent peer either — that's the whole
-        # point of the peer filter.
-        peers = (CODING_AGENT_IDS - {agent_id}) & all_ids
-        assert not peers, (
-            f"{agent_id} got coding-agent peers in its recs: {sorted(peers)}"
-        )
+def test_asker_filter_regression_across_levels(payload: dict) -> None:
+    """A coding agent must never appear in its own recs at any level."""
+    for agent_id, levels in payload["by_agent"].items():
+        for level, block in levels.items():
+            all_ids = {r["tool_id"] for r in block["tools"]}
+            assert agent_id not in all_ids, (
+                f"{agent_id}/{level} recommended itself; ids: {sorted(all_ids)}"
+            )
+            peers = (CODING_AGENT_IDS - {agent_id}) & all_ids
+            assert not peers, (
+                f"{agent_id}/{level} got coding-agent peers: {sorted(peers)}"
+            )
 
 
-def test_blocklist_applied_to_agnostic(payload: dict) -> None:
-    """Even with no asker, the blocklist must still apply."""
-    agnostic = payload["agnostic"]
-    ids = {r["tool_id"] for r in agnostic.get("cover", [])}
-    ids |= {r["tool_id"] for r in agnostic.get("pad", [])}
-    assert not (ids & RECOMMENDATION_BLOCKLIST), (
-        f"blocklisted tool leaked into agnostic recs: "
-        f"{sorted(ids & RECOMMENDATION_BLOCKLIST)}"
-    )
-    assert "comfyui" not in ids
+def test_blocklist_applied_to_agnostic_across_levels(payload: dict) -> None:
+    """Even with no asker, the blocklist must apply at every level."""
+    for level, block in payload["agnostic"].items():
+        ids = {r["tool_id"] for r in block["tools"]}
+        assert not (ids & RECOMMENDATION_BLOCKLIST), (
+            f"blocklisted tool leaked into agnostic/{level}: "
+            f"{sorted(ids & RECOMMENDATION_BLOCKLIST)}"
+        )
+        assert "comfyui" not in ids
 
 
 def test_blocklist_applied_to_failure_mode_view(payload: dict) -> None:
@@ -123,12 +127,17 @@ def test_render_markdown_anchors(payload: dict) -> None:
     # At least two specific agent headers.
     assert "If you use **Cursor**" in md
     assert "If you use **Claude Code**" in md
+    # All three tier labels for at least one agent.
+    assert "**Minimum (1 tool — best starter)**" in md
+    assert "**Optimal (3 tools — best responsible kit)**" in md
+    assert "**Full / MECE" in md
     # At least one FM heading (capitalized form).
     assert "### Fabrication" in md
     assert "### Security vulnerability" in md
-    # Methodology + a tool YAML link.
+    # Methodology + a tool YAML link + priority table reference.
     assert "## Methodology" in md
     assert "data/tools/" in md
+    assert "likelihood × impact" in md
 
 
 def test_render_markdown_is_pure(payload: dict) -> None:

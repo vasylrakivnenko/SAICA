@@ -35,6 +35,11 @@ from matplotlib.patches import Patch
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from pipeline.mcp.recommender import (  # noqa: E402
+    recommend_full,
+    recommend_minimum,
+    recommend_optimal,
+)
 from pipeline.shared.trending import TRENDING_BOOST, is_trending  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
@@ -154,60 +159,25 @@ def select_breadth(rows: list[Row], n: int) -> list[Row]:
     )[:n]
 
 
-def select_covering(rows: list[Row], fm_ids: list[str], n: int) -> list[Row]:
-    """Greedy set cover of all FMs, padded to n rows with high-evidence tools.
+def select_by_recommender_level(
+    rows: list[Row], level: str, agent_kind: str | None = None,
+) -> list[Row]:
+    """Use the canonical pipeline.mcp.recommender to pick rows for a level.
 
-    Phase 1 (coverage): at each step pick the tool that adds the most
-    still-uncovered FMs; tiebreak by tier_sum, then stars, then breadth.
-    Stops when every FM is covered or we hit n rows.
-
-    Phase 2 (padding): if coverage used fewer than n tools, fill the
-    remaining row budget with the highest-ranked tools not already picked,
-    using the same (tier_sum, breadth, stars) order as the breadth view
-    so pad rows look like a recognizable "deep bench" beneath the
-    specialists — *not* an arbitrary grab bag.
-
-    Result: every FM column has ≥1 filled cell; rows above the dashed
-    divider are specialists selected to achieve coverage; rows below are
-    pad rows added for depth on the already-covered columns.
+    Single source of truth for selection — the heatmap stays in sync with
+    what `saica_recommend(level=...)` would actually return. ``rows`` is the
+    full corpus indexed by id; we filter to whatever the recommender chose.
     """
+    if level == "minimum":
+        payload = recommend_minimum(agent_kind=agent_kind)
+    elif level == "optimal":
+        payload = recommend_optimal(agent_kind=agent_kind)
+    elif level == "full":
+        payload = recommend_full(agent_kind=agent_kind)
+    else:
+        raise ValueError(f"unknown level: {level!r}")
     by_id = {r.id: r for r in rows}
-    remaining_fms: set[str] = set(fm_ids)
-    selected: list[Row] = []
-    picked_ids: set[str] = set()
-
-    while remaining_fms and len(selected) < n:
-        best: tuple[int, int, float, int] | None = None
-        chosen: Row | None = None
-        for r in rows:
-            if r.id in picked_ids:
-                continue
-            new = len(r.addressed_fms(fm_ids) & remaining_fms)
-            if new == 0:
-                continue
-            # Tiebreak: most-new FMs > tier_sum > effective_stars (trending-boosted) > breadth.
-            key = (new, r.tier_sum, r.effective_stars, r.breadth)
-            if best is None or key > best:
-                best = key
-                chosen = r
-        if chosen is None:
-            break
-        selected.append(chosen)
-        picked_ids.add(chosen.id)
-        remaining_fms -= chosen.addressed_fms(fm_ids)
-
-    if len(selected) < n:
-        pad_pool = sorted(
-            (r for r in rows if r.id not in picked_ids),
-            key=lambda r: (-r.tier_sum, -r.breadth, -r.effective_stars),
-        )
-        for r in pad_pool:
-            if len(selected) >= n:
-                break
-            selected.append(r)
-            picked_ids.add(r.id)
-
-    return selected[:n]
+    return [by_id[t["tool_id"]] for t in payload["tools"] if t["tool_id"] in by_id]
 
 
 def order_columns(selection: list[Row], fm_ids: list[str]) -> list[int]:
@@ -322,59 +292,44 @@ def main() -> None:
     fm_ids = load_fm_ids()
     rows = build_rows(tools, fm_ids)
 
-    # --- breadth view (legacy default) ---
-    breadth_sel = select_breadth(rows, TOP_N)
-    breadth_col_order = order_columns(breadth_sel, fm_ids)
-    fm_ids_breadth = [fm_ids[i] for i in breadth_col_order]
+    # --- minimum view (1 tool) ---
+    minimum_sel = select_by_recommender_level(rows, "minimum")
+    min_col_order = order_columns(minimum_sel, fm_ids) if minimum_sel else list(range(len(fm_ids)))
+    fm_ids_min = [fm_ids[i] for i in min_col_order]
 
+    # --- optimal view (3 tools, weighted set cover) ---
+    optimal_sel = select_by_recommender_level(rows, "optimal")
+    opt_col_order = order_columns(optimal_sel, fm_ids) if optimal_sel else list(range(len(fm_ids)))
+    fm_ids_opt = [fm_ids[i] for i in opt_col_order]
+
+    # --- full view (minimum set covering all 11 FMs, no pad) ---
+    full_sel = select_by_recommender_level(rows, "full")
+    full_col_order = order_columns(full_sel, fm_ids) if full_sel else list(range(len(fm_ids)))
+    fm_ids_full = [fm_ids[i] for i in full_col_order]
+
+    # --- render the FULL view as the canonical paper figure ---
     render_figure(
-        breadth_sel, fm_ids, breadth_col_order,
+        full_sel, fm_ids, full_col_order,
         title=(
-            "Tool × Failure-Mode evidence  (top 11 tools by coverage breadth)\n"
-            "cell = evidence tier: 1 declared · 2 + rationale mention · 3 + external citation"
+            f"Tool × Failure-Mode evidence  ({len(full_sel)} tools — full MECE coverage)\n"
+            "weighted greedy set cover by likelihood × impact × reliability; cell tier: "
+            "1 declared · 2 + rationale · 3 + citation"
         ),
         out_png=OUT_DIR / "tool_fm_heatmap.png",
         out_pdf=OUT_DIR / "tool_fm_heatmap.pdf",
     )
 
-    # --- covering view (every column filled) ---
-    covering_sel = select_covering(rows, fm_ids, TOP_N)
-    # Find the divider: the greedy phase stopped when every FM was covered.
-    # Reconstruct that count by re-running the cover loop count-only.
-    cover_size = 0
-    _covered: set[str] = set()
-    for r in covering_sel:
-        if set(fm_ids) - _covered:
-            cover_size += 1
-            _covered |= r.addressed_fms(fm_ids)
-            if not (set(fm_ids) - _covered):
-                break
-
-    covering_col_order = order_columns(covering_sel, fm_ids)
-    fm_ids_covering = [fm_ids[i] for i in covering_col_order]
-
-    render_figure(
-        covering_sel, fm_ids, covering_col_order,
-        title=(
-            "Tool × Failure-Mode evidence  (11 tools, greedy set-cover + depth pad)\n"
-            "every failure-mode column has ≥1 tool; top rows are specialists that achieve cover, bottom rows pad for depth"
-        ),
-        out_png=OUT_DIR / "tool_fm_heatmap_covering.png",
-        out_pdf=OUT_DIR / "tool_fm_heatmap_covering.pdf",
-        specialist_divider=cover_size,
-    )
-
-    # --- JSON payload (site uses the breadth column order; per-scope lists) ---
-    all_sorted = sorted(rows, key=lambda r: (-r.breadth, -r.tier_sum, -r.stars))
+    # --- JSON payload (site renders all four views) ---
+    all_sorted = sorted(rows, key=lambda r: (-r.breadth, -r.tier_sum, -r.effective_stars))
+    fm_ids_canonical = fm_ids_full  # use the full view's column order as canonical
 
     payload = {
-        "top_n": TOP_N,
-        "failure_modes": fm_ids_breadth,
-        "failure_mode_display": {k: FM_DISPLAY.get(k, k).replace("\n", " ") for k in fm_ids_breadth},
-        "tools_top": [_row_payload(r, fm_ids_breadth, fm_ids) for r in breadth_sel],
-        "tools_covering": [_row_payload(r, fm_ids_breadth, fm_ids) for r in covering_sel],
-        "covering_divider": cover_size,
-        "tools_all": [_row_payload(r, fm_ids_breadth, fm_ids) for r in all_sorted],
+        "failure_modes": fm_ids_canonical,
+        "failure_mode_display": {k: FM_DISPLAY.get(k, k).replace("\n", " ") for k in fm_ids_canonical},
+        "tools_minimum": [_row_payload(r, fm_ids_canonical, fm_ids) for r in minimum_sel],
+        "tools_optimal": [_row_payload(r, fm_ids_canonical, fm_ids) for r in optimal_sel],
+        "tools_full":    [_row_payload(r, fm_ids_canonical, fm_ids) for r in full_sel],
+        "tools_all":     [_row_payload(r, fm_ids_canonical, fm_ids) for r in all_sorted],
         "legend": {
             "0": "not addressed",
             "1": "declared mapping (addresses_failure_modes)",
@@ -382,19 +337,21 @@ def main() -> None:
             "3": "declared + rationale + external citation evidence",
         },
         "selections": {
-            "top":      "breadth desc, tier_sum desc, stars desc; top 11",
-            "covering": "greedy set-cover (max new FMs, tiebreak tier_sum/stars) then pad by tier_sum/breadth/stars to 11",
-            "all":      "every tool with ≥1 declared mapping",
+            "minimum": "1 tool maximising coverage_value × reliability",
+            "optimal": "3 tools, greedy weighted set cover by likelihood × impact × reliability",
+            "full":    "minimum tools needed to cover all 11 failure modes (no pad)",
+            "all":     "every tool with ≥1 declared mapping",
         },
     }
     (OUT_DIR / "tool_fm_heatmap.json").write_text(json.dumps(payload, indent=2))
     (SITE_PUBLIC / "tool_fm_heatmap.json").write_text(json.dumps(payload, indent=2))
 
-    print(f"breadth  view: {OUT_DIR / 'tool_fm_heatmap.png'}")
-    print(f"covering view: {OUT_DIR / 'tool_fm_heatmap_covering.png'}"
-          f"  (specialists above row {cover_size})")
-    print(f"json:          {OUT_DIR / 'tool_fm_heatmap.json'}")
-    print(f"site copy:     {SITE_PUBLIC / 'tool_fm_heatmap.json'}")
+    print(f"minimum view: {len(minimum_sel)} tool")
+    print(f"optimal view: {len(optimal_sel)} tools")
+    print(f"full    view: {len(full_sel)} tools (canonical paper figure)")
+    print(f"png:          {OUT_DIR / 'tool_fm_heatmap.png'}")
+    print(f"json:         {OUT_DIR / 'tool_fm_heatmap.json'}")
+    print(f"site copy:    {SITE_PUBLIC / 'tool_fm_heatmap.json'}")
 
 
 if __name__ == "__main__":

@@ -74,41 +74,55 @@ def saica_lookup(tool_id: str) -> ToolRecord:
 
 @mcp.tool()
 def saica_recommend(
+    level: Optional[str] = None,
     failure_modes: Optional[list[str]] = None,
 ) -> dict[str, Any]:
-    """Recommend supervision tools. Two modes — choose by argument.
+    """Recommend supervision tools. Three coverage tiers + a targeted mode.
 
-    **Mode 1 (targeted):** pass ``failure_modes=["scope_creep", "fabrication"]``
-    and we return up to 3 supervisors per requested mode, ranked by
-    paradigm preference (prevention/detection beats correction/recovery),
-    then by rationale-evidence, then by stars.
+    Picks tools by **likelihood × impact** of each failure mode (per
+    ``data/failure_mode_priorities.yml``) multiplied by tool **reliability**
+    (log-stars + trending boost + citation count + maturity).
 
-    **Mode 2 (full suite, default):** omit ``failure_modes`` (or pass
-    ``None``/empty list) and we return the minimum set of supervisors that
-    *together* cover all 11 failure modes — greedy set-cover, then a
-    small depth pad of high-stars remaining tools.
+    Pass ``level`` for one of three tiers:
 
-    The asking agent's identity is read from ``SAICA_AGENT_KIND`` env var
-    set in your MCP config. If that var matches a known coding agent
-    (cursor, claude-code, windsurf, aider, replit-agent, …), no other
-    coding agent is recommended — only supervisors that compose with it.
+    * ``"minimum"`` — **1 tool**: the single highest-priority × reliability
+      tool. Best starter; covers the most weighted-priority FMs in one pick.
+    * ``"optimal"`` — **3 tools**: greedy weighted set cover capped at 3.
+      Best "responsible kit" — high coverage, low friction.
+    * ``"full"``    — **N tools (typically 4–5)**: minimum weighted set
+      cover until ALL 11 failure modes are covered. The MECE answer.
+
+    Or pass ``failure_modes=[...]`` for the targeted mode (3 supervisors
+    per requested FM).
+
+    Default (no args) → ``"optimal"``. Cannot pass both ``level`` and
+    ``failure_modes`` in the same call.
+
+    The asking agent's identity is read from the ``SAICA_AGENT_KIND`` env
+    var. If that matches a known coding agent (``cursor``, ``claude-code``,
+    ``windsurf``, ``aider``, ``replit-agent``, …), no peer coding agent is
+    recommended — only supervisors that compose with it.
 
     Args:
+        level: One of ``"minimum"``, ``"optimal"``, ``"full"``.
+            Defaults to ``"optimal"`` when both args are omitted.
         failure_modes: Optional list of FM ids from SAICA-KG's 11-mode
             taxonomy (``fabrication``, ``obsolescence``, ``dependency_blindness``,
             ``logic_error``, ``security_vulnerability``, ``scope_creep``,
             ``context_pollution``, ``supply_chain_attack``, ``cascading_failure``,
-            ``incomplete_execution``, ``test_manipulation``). Pass ``None`` for
-            the default full-suite mode.
+            ``incomplete_execution``, ``test_manipulation``).
 
     Returns:
-        Dict shaped per the mode chosen — see ``pipeline.mcp.recommender``
-        for full payload structure.
+        Dict with ``mode``/``level``, ``agent_kind``, ``tools`` (list of
+        recommendations), ``covered_failure_modes``, ``uncovered_failure_modes``,
+        ``coverage_complete``, ``summary``. See ``pipeline.mcp.recommender``
+        for the exact shape per mode.
 
     Raises:
-        ValueError: when any element of ``failure_modes`` is not a known FM id.
+        ValueError: when ``level`` is unknown, ``failure_modes`` contains an
+            unknown FM id, or both args are passed at once.
     """
-    return _recommend(failure_modes, agent_kind=_agent_kind())
+    return _recommend(failure_modes, agent_kind=_agent_kind(), level=level)
 
 
 def main() -> None:  # pragma: no cover - executed only at runtime

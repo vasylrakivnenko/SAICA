@@ -12,10 +12,14 @@ from pipeline.mcp.lookup import saica_lookup
 from pipeline.mcp.recommender import (
     ALL_FAILURE_MODES,
     CODING_AGENT_IDS,
+    DEFAULT_LEVEL,
+    LEVELS,
     RECOMMENDATION_BLOCKLIST,
     recommend,
     recommend_for_failure_modes,
-    recommend_full_suite,
+    recommend_full,
+    recommend_minimum,
+    recommend_optimal,
 )
 
 
@@ -49,7 +53,7 @@ def test_lookup_unknown_tool_raises_clear_error() -> None:
 # ---------------------------------------------------------------------------
 
 def test_recommend_targeted_returns_per_fm_lists() -> None:
-    out = recommend(["scope_creep"], agent_kind=None)
+    out = recommend(failure_modes=["scope_creep"], agent_kind=None)
     assert out["mode"] == "targeted"
     assert "scope_creep" in out["by_failure_mode"]
     recs = out["by_failure_mode"]["scope_creep"]
@@ -63,13 +67,13 @@ def test_recommend_targeted_returns_per_fm_lists() -> None:
 
 def test_recommend_targeted_unknown_fm_raises() -> None:
     with pytest.raises(ValueError) as ei:
-        recommend(["bogus_fm"], agent_kind=None)
+        recommend(failure_modes=["bogus_fm"], agent_kind=None)
     assert "bogus_fm" in str(ei.value)
 
 
 def test_recommend_targeted_filters_coding_agent_peers() -> None:
     """Asking as cursor must never return a coding-agent peer."""
-    out = recommend(["scope_creep"], agent_kind="cursor")
+    out = recommend(failure_modes=["scope_creep"], agent_kind="cursor")
     for r in out["by_failure_mode"]["scope_creep"]:
         assert r["tool_id"] not in CODING_AGENT_IDS, (
             f"coding-agent peer {r['tool_id']} leaked into recs for cursor"
@@ -77,55 +81,84 @@ def test_recommend_targeted_filters_coding_agent_peers() -> None:
         assert r["tool_id"] != "cursor", "must not recommend the asker itself"
 
 
-def test_recommend_targeted_no_filter_when_caller_is_not_an_agent() -> None:
-    """When agent_kind is None or unknown, no peer filter applies."""
-    out = recommend(["scope_creep"], agent_kind=None)
-    # Just check the call works and returns recs.
-    assert out["by_failure_mode"]["scope_creep"]
-
-
 # ---------------------------------------------------------------------------
-# saica_recommend — full-suite mode
+# saica_recommend — three-tier coverage modes
 # ---------------------------------------------------------------------------
 
-def test_recommend_full_suite_covers_all_failure_modes() -> None:
-    out = recommend(None, agent_kind=None)
-    assert out["mode"] == "full_suite"
+def test_recommend_minimum_returns_one_tool() -> None:
+    out = recommend(level="minimum", agent_kind=None)
+    assert out["mode"] == "minimum"
+    assert out["level"] == "minimum"
+    assert len(out["tools"]) == 1
+    assert out["tools"][0]["addresses_failure_modes"], "picked tool must address something"
+
+
+def test_recommend_optimal_returns_at_most_three_tools() -> None:
+    out = recommend(level="optimal", agent_kind=None)
+    assert out["mode"] == "optimal"
+    assert out["level"] == "optimal"
+    assert 1 <= len(out["tools"]) <= 3
+
+
+def test_recommend_full_covers_all_failure_modes() -> None:
+    out = recommend(level="full", agent_kind=None)
+    assert out["mode"] == "full"
     assert out["coverage_complete"], (
-        f"full suite did not cover everything; missing: "
-        f"{out['uncovered_failure_modes']}"
+        f"full did not cover everything; missing: {out['uncovered_failure_modes']}"
     )
     assert out["uncovered_failure_modes"] == []
-    assert out["cover"], "cover must be non-empty"
 
 
-def test_recommend_full_suite_filters_coding_agents_for_known_asker() -> None:
-    out = recommend(None, agent_kind="claude-code")
-    all_ids = {r["tool_id"] for r in out["cover"] + out["pad"]}
+def test_recommend_full_no_pad() -> None:
+    """Unlike the prior covering view, full no longer pads beyond cover."""
+    out = recommend(level="full", agent_kind=None)
+    n = len(out["tools"])
+    # Realistic minimum cover for SAICA's KG is 4-6 tools today; we pin
+    # only that it's strictly less than the old pad target of 11.
+    assert n < 11, f"full should not pad to 11; got {n}"
+
+
+def test_recommend_default_is_optimal() -> None:
+    out = recommend(agent_kind=None)
+    assert out["level"] == "optimal" == DEFAULT_LEVEL
+
+
+def test_recommend_unknown_level_raises() -> None:
+    with pytest.raises(ValueError) as ei:
+        recommend(level="bogus", agent_kind=None)
+    assert "bogus" in str(ei.value)
+
+
+def test_recommend_both_args_raises() -> None:
+    with pytest.raises(ValueError):
+        recommend(level="optimal", failure_modes=["scope_creep"], agent_kind=None)
+
+
+def test_levels_constant_is_complete() -> None:
+    assert set(LEVELS) == {"minimum", "optimal", "full"}
+
+
+def test_full_suite_filters_coding_agents_for_known_asker() -> None:
+    out = recommend(level="full", agent_kind="claude-code")
+    all_ids = {r["tool_id"] for r in out["tools"]}
     leaked = all_ids & CODING_AGENT_IDS
     assert not leaked, f"coding-agent peers leaked: {leaked}"
     assert "claude-code" not in all_ids
 
 
-def test_recommend_full_suite_blocks_blocklisted_tools() -> None:
-    out = recommend(None, agent_kind=None)
-    all_ids = {r["tool_id"] for r in out["cover"] + out["pad"]}
-    leaked = all_ids & RECOMMENDATION_BLOCKLIST
-    assert not leaked, f"blocklisted tools leaked: {leaked}"
+def test_recommend_blocks_blocklisted_tools_across_levels() -> None:
+    for level in ("minimum", "optimal", "full"):
+        out = recommend(level=level, agent_kind=None)
+        all_ids = {r["tool_id"] for r in out["tools"]}
+        leaked = all_ids & RECOMMENDATION_BLOCKLIST
+        assert not leaked, f"blocklisted tool leaked at level={level}: {leaked}"
 
 
-def test_recommend_full_suite_pads_to_eleven() -> None:
-    out = recommend(None, agent_kind=None)
-    total = len(out["cover"]) + len(out["pad"])
-    # Pad target is 11; allow some slack if the eligible pool is unusually small.
-    assert total >= len(out["cover"]), "pad must be additive"
-    assert total <= 11, f"got {total} > pad_to=11"
-
-
-def test_full_suite_summary_is_human_readable() -> None:
-    out = recommend(None, agent_kind="claude-code")
-    assert "specialist tools cover" in out["summary"]
-    assert str(len(out["cover"])) in out["summary"]
+def test_summary_is_human_readable_per_level() -> None:
+    for level in ("minimum", "optimal", "full"):
+        out = recommend(level=level, agent_kind="claude-code")
+        assert "failure modes" in out["summary"]
+        assert str(len(out["tools"])) in out["summary"]
 
 
 # ---------------------------------------------------------------------------

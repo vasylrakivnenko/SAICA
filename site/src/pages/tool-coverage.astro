@@ -42,10 +42,11 @@ const title = "Tool × Failure-Mode Coverage";
 
   <section class="mb-4 flex flex-wrap items-center gap-4 text-sm font-sans">
     <div>
-      <label class="text-xs font-semibold text-ink-faint uppercase tracking-wide mr-2">Show</label>
+      <label for="tc-scope" class="text-xs font-semibold text-ink-faint uppercase tracking-wide mr-2">Show</label>
       <select id="tc-scope" class="border border-ink/15 rounded px-2 py-1 bg-white">
-        <option value="covering" selected>11 tools, every failure mode covered</option>
-        <option value="top">Top 11 by coverage breadth</option>
+        <option value="optimal" selected>Optimal — 3 tools (best responsible kit)</option>
+        <option value="minimum">Minimum — 1 tool (highest priority × reliability)</option>
+        <option value="full">Full / MECE — minimum tools to cover all 11 failure modes</option>
         <option value="all">All tools with ≥1 mapping</option>
       </select>
     </div>
@@ -75,36 +76,40 @@ const title = "Tool × Failure-Mode Coverage";
   </section>
 
   <section class="mt-8 max-w-3xl">
-    <h2>Three views, different questions</h2>
+    <h2>Four views, four questions</h2>
     <ul class="list-disc pl-6 text-sm leading-7 space-y-1">
-      <li><strong>"Every failure mode covered"</strong> (default) — greedy set cover picks the smallest set
-        of tools whose combined declared coverage fills every column, then pads to 11 rows with the highest
-        evidence-tier remaining tools. A dashed divider separates the specialists (above) from the depth pad
-        (below). Answers: <em>"can the KG claim coverage of every failure mode at all?"</em></li>
-      <li><strong>"Top by coverage breadth"</strong> — rank tools by how many FMs each declares. Dominated by
-        evaluation harnesses (promptfoo, giskard, opik, phoenix, Guardrails, NeMo, logfire). Leaves
-        specialist columns (obsolescence, dependency blindness) empty because narrow-but-deep tools get ranked
-        out. Answers: <em>"what does the busy part of the map look like?"</em></li>
+      <li><strong>"Optimal — 3 tools"</strong> (default) — greedy weighted set cover capped at 3, weighted
+        by failure-mode <em>likelihood × impact</em> times tool reliability. Best "responsible kit"; covers
+        most of the high-priority FMs with the smallest practical stack.
+        Answers: <em>"if I install three things, what should they be?"</em></li>
+      <li><strong>"Minimum — 1 tool"</strong> — the single highest-priority × reliability tool.
+        Best starter pick. Answers: <em>"if I install only one thing, what?"</em></li>
+      <li><strong>"Full / MECE"</strong> — minimum number of tools needed to cover all 11 failure modes
+        (no pad). Typically 4–5 tools. Answers: <em>"what's the smallest set that covers everything?"</em></li>
       <li><strong>"All tools with ≥1 mapping"</strong> — every tool that declares any FM. Useful when you're
-        hunting for a specific tool (e.g. Context Hub, Semgrep, Renovate) that doesn't appear in the top
-        views because its breadth is low.</li>
+        hunting for a specific tool (Context Hub, Semgrep, Renovate, etc.) that doesn't make the top views.</li>
     </ul>
     <p class="text-sm leading-7 mt-3">
       <strong>Almost every filled cell is tier 1 right now.</strong> Only a handful of tier-2 cells
-      (rationales that explicitly name the FM they address), no tier-3 cells. This is the KG honestly
-      admitting that it holds declarations more than evidence today — closing that gap is exactly what
-      the citation / crosswalk pipeline is built to do.
+      (rationales that explicitly name the FM), and very few tier-3 (citation-backed) cells. The KG
+      honestly admits that today it holds declarations more than evidence — closing that gap is exactly
+      what the citation / crosswalk pipeline is built to do.
     </p>
   </section>
 
   <section class="mt-10 max-w-3xl">
     <h2>Methodology notes</h2>
     <p class="text-sm leading-7">
-      Tools are ranked by <code>breadth</code> (count of failure modes declared), ties broken by
-      <code>tier_sum</code> (row evidence total) and then by stars. Columns are ordered by how many of the
-      top-N tools address each failure mode, so "most-covered" failure modes sit on the left.
-      The per-mapping <strong>rationale match</strong> (tier 2) uses a conservative keyword set per failure mode,
-      kept intentionally narrow because false positives here silently inflate evidence.
+      Selection is now <strong>likelihood × impact × reliability</strong>. Per-FM likelihood and impact
+      are stored in <code>data/failure_mode_priorities.yml</code> (hybrid: KG tool-coverage prior +
+      editorial calibration against Shah 2026 / DAPLab evidence). Reliability is a bounded combiner of
+      log-stars, github-trending bump, citation count, and maturity status. The greedy set-cover
+      algorithm at every step picks the tool maximising
+      <code>Σ priority(fm)</code> over newly-covered FMs <code>×</code> tool reliability.
+    </p>
+    <p class="text-sm leading-7 mt-3">
+      Coding-agent peers are filtered out per asker (the user has a coding agent already; we recommend
+      supervisors, not peers). The <code>comfyui</code> blocklist excludes role-ambiguous tools.
     </p>
     <p class="text-sm leading-7 mt-3">
       Reproduce with <code>.venv/bin/python research/plot_tool_fm_heatmap.py</code>.
@@ -128,13 +133,12 @@ const title = "Tool × Failure-Mode Coverage";
   }
 
   interface Payload {
-    top_n: number;
     failure_modes: string[];
     failure_mode_display: Record<string, string>;
-    tools_top: ToolRow[];
-    tools_covering: ToolRow[];
+    tools_minimum: ToolRow[];
+    tools_optimal: ToolRow[];
+    tools_full: ToolRow[];
     tools_all: ToolRow[];
-    covering_divider?: number;
     legend: Record<string, string>;
     selections?: Record<string, string>;
   }
@@ -181,16 +185,16 @@ const title = "Tool × Failure-Mode Coverage";
     if (!payload || !HEAD || !BODY || !COUNT || !SCOPE) return;
     const scopeKey = SCOPE.value;
     const scopeToField: Record<string, keyof Payload> = {
-      covering: "tools_covering",
-      top: "tools_top",
-      all: "tools_all",
+      minimum: "tools_minimum",
+      optimal: "tools_optimal",
+      full:    "tools_full",
+      all:     "tools_all",
     };
-    const field = scopeToField[scopeKey] ?? "tools_covering";
+    const field = scopeToField[scopeKey] ?? "tools_optimal";
     const rowsRaw = (payload[field] as unknown as ToolRow[]) ?? [];
     const rows = scopeKey === "all"
       ? rowsRaw.filter((r) => r.breadth > 0)
       : rowsRaw;
-    const divider = scopeKey === "covering" ? (payload.covering_divider ?? 0) : 0;
 
     // head
     HEAD.innerHTML =
@@ -207,9 +211,7 @@ const title = "Tool × Failure-Mode Coverage";
       }).join("");
 
     // body
-    BODY.innerHTML = rows.map((r, rowIdx) => {
-      const isLastSpecialist = divider > 0 && rowIdx === divider - 1;
-      const dividerCls = isLastSpecialist ? " border-b-2 border-dashed border-[#1f4e79]" : "";
+    BODY.innerHTML = rows.map((r) => {
       const cells = payload!.failure_modes.map((fm) => {
         const t = (r.tiers[fm] ?? 0) as Tier;
         const bg = TIER_BG[t];
@@ -227,7 +229,7 @@ const title = "Tool × Failure-Mode Coverage";
       const trendingMark = r.trending
         ? ` <span class="ml-1" title="On github.com/trending — rank tiebreak preferred">🔥</span>`
         : "";
-      return `<tr class="border-t border-ink/10${dividerCls}">`
+      return `<tr class="border-t border-ink/10">`
         + `<td class="px-3 py-1.5 sticky left-0 bg-white z-10 border-r border-ink/10">`
         + `<a href="/tools/${encodeURIComponent(r.id)}" class="text-ink hover:text-accent">${escapeHtml(r.name)}</a>${trendingMark}`
         + `</td>`
@@ -238,8 +240,12 @@ const title = "Tool × Failure-Mode Coverage";
 
     let countText = `${rows.length} tool${rows.length === 1 ? "" : "s"} shown`
       + ` · ${payload.failure_modes.length} failure modes`;
-    if (scopeKey === "covering" && divider > 0) {
-      countText += ` · ${divider} specialist${divider === 1 ? "" : "s"} cover every FM; rows below pad for depth`;
+    if (scopeKey === "full") {
+      const covered = new Set<string>();
+      for (const r of rows) {
+        for (const [fm, t] of Object.entries(r.tiers)) if ((t as number) > 0) covered.add(fm);
+      }
+      countText += ` · all ${covered.size} of ${payload.failure_modes.length} FMs covered`;
     }
     COUNT.textContent = countText;
   }

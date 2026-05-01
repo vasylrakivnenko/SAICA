@@ -1,0 +1,144 @@
+# Per-failure-mode priority weighting used by pipeline.mcp.recommender.
+#
+# priority = likelihood × impact
+#
+# likelihood (0..1): HYBRID source.
+#   1. Start from KG tool-coverage counts as a community-attention prior
+#      (more tools targeting an FM ⇒ more practitioner reports of it).
+#   2. Calibrate with editorial knowledge of Shah 2026's 385-fault corpus
+#      and our crosswalks (data/crosswalks/shah-to-saica.yml,
+#      data/crosswalks/daplab-to-saica.yml) where the prior under-
+#      represents the empirical frequency. Specifically calibrated up:
+#      obsolescence (training-data staleness is real-and-frequent but
+#      under-tooled), cascading_failure (common in retry loops),
+#      dependency_blindness (common; under-tooled ⇒ under-measured).
+#   Source attribution per row in the `source` field; a `justification`
+#   line explains every editorial deviation from the raw prior.
+#
+# impact (1..3): EDITORIAL. Locked 2026-04-30 with explicit rationale.
+#   3 = critical: direct production damage or hidden-bug masking
+#   2 = high:     frequent rework / time loss
+#   1 = medium:   quality drag, recoverable
+#
+# Revisions: bump version + changelog at the bottom; reviewers should
+# ask "what new evidence prompted this?" rather than "does this feel
+# right?".
+
+version: 1
+last_updated: 2026-04-30
+
+priorities:
+
+  scope_creep:
+    likelihood: 0.85
+    impact: 2
+    source: kg-coverage-prior + editorial
+    justification: >
+      Most-cited FM in Shah's coding-agent traces; ranks #1 by KG tool
+      coverage (67 tools target it). Impact = 2 because typically caught
+      in PR review; not 3 because rarely damages production directly.
+
+  fabrication:
+    likelihood: 0.70
+    impact: 2
+    source: kg-coverage-prior + editorial
+    justification: >
+      Second-most-cited (54 KG tools). Spracklen 2024 measured 19.7%
+      hallucinated package install attempts — empirically common.
+      Impact = 2 (caught by tests / language server in most cases).
+
+  security_vulnerability:
+    likelihood: 0.45
+    impact: 3
+    source: kg-coverage-prior + editorial
+    justification: >
+      39 KG tools target it; OWASP LLM Top-10 2025 lists multiple. Impact
+      = 3 because direct production damage path (data leakage, RCE,
+      auth bypass).
+
+  supply_chain_attack:
+    likelihood: 0.20
+    impact: 3
+    source: kg-coverage-prior + editorial
+    justification: >
+      Low base rate (16 KG tools, mostly specialised) but high impact
+      per Spracklen 2024 + slopsquatting incidents. Impact = 3 because
+      compromise propagates into all dependents.
+
+  test_manipulation:
+    likelihood: 0.10
+    impact: 3
+    source: editorial-calibrated-up
+    justification: >
+      Rare in Shah's corpus (3 KG tools target it) but high impact —
+      hides true bug rate, undermines all other supervision. Impact = 3
+      because failure of detection itself (specification gaming).
+
+  cascading_failure:
+    likelihood: 0.25
+    impact: 2
+    source: editorial-calibrated-up
+    justification: >
+      KG-coverage prior says 0.06 but autonomous-loop agents
+      empirically cascade often (Cemri 2025 MAST documents recovery
+      spirals). Calibrated up to 0.25.
+
+  logic_error:
+    likelihood: 0.55
+    impact: 1
+    source: kg-coverage-prior
+    justification: >
+      Common (41 KG tools); impact = 1 because tests + type-checks
+      typically catch the worst cases pre-merge.
+
+  context_pollution:
+    likelihood: 0.45
+    impact: 1
+    source: kg-coverage-prior
+    justification: >
+      Common in long-horizon agents (36 KG tools). Impact = 1 because
+      degrades over time rather than causing immediate production damage.
+
+  obsolescence:
+    likelihood: 0.35
+    impact: 1
+    source: editorial-calibrated-up
+    justification: >
+      KG-coverage prior says 0.09 (only 6 KG tools) but training-data
+      staleness is empirically frequent — Wang 2024's library-evolution
+      study and DAPLab DAP-03 both flag it as common. Calibrated up.
+
+  dependency_blindness:
+    likelihood: 0.20
+    impact: 1
+    source: editorial-calibrated-up
+    justification: >
+      KG-coverage prior says 0.04 (4 KG tools) but Liu 2025's "Code
+      Copycat" + practitioner reports suggest the under-tooling reflects
+      under-measurement, not low frequency. Calibrated up but stays
+      modest because impact is lowest (the code works, just non-idiomatic).
+
+  incomplete_execution:
+    likelihood: 0.15
+    impact: 1
+    source: kg-coverage-prior
+    justification: >
+      Occasional in long-horizon tasks (4 KG tools); impact = 1 because
+      visible in the trace and easily retried.
+
+# ---------------------------------------------------------------------------
+# Resulting priority order (likelihood × impact, descending). Re-derive
+# whenever weights above change. Used as a sanity check by the unit test.
+# ---------------------------------------------------------------------------
+expected_priority_ordering:
+  - scope_creep            # 1.70
+  - fabrication            # 1.40
+  - security_vulnerability # 1.35
+  - supply_chain_attack    # 0.60
+  - logic_error            # 0.55
+  - cascading_failure      # 0.50
+  - context_pollution      # 0.45
+  - obsolescence           # 0.35
+  - test_manipulation      # 0.30
+  - dependency_blindness   # 0.20
+  - incomplete_execution   # 0.15

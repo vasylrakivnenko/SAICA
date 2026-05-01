@@ -6,7 +6,7 @@ The whole server runs locally as a subprocess of your agent — no hosting requi
 | Tool | What it does | When to call it |
 |---|---|---|
 | `saica_lookup(tool_id)` | Returns the full `ToolRecord` for one SAICA-KG tool — facets, surfaces, paradigm, failure-mode coverage, link to the site page. | After `saica_recommend` when you want to show the human the full facets of a recommended tool. |
-| `saica_recommend(failure_modes?)` | **Two modes** — pass `failure_modes=["scope_creep", "fabrication"]` for targeted recs, or omit the argument for the **full-suite** mode that picks the minimum set of supervisors covering all 11 failure modes (greedy set-cover + small depth pad). | Once at session start to set up supervision; or whenever the agent needs guidance on a specific failure category. |
+| `saica_recommend(level?, failure_modes?)` | **Three coverage tiers** picked by likelihood × impact × reliability: `"minimum"` (1 tool — best starter), `"optimal"` (3 tools — best responsible kit, default), `"full"` (~4–5 tools — minimum MECE coverage of all 11 FMs). Or pass `failure_modes=[…]` for the targeted mode (3 supervisors per FM). | Once at session start (level=optimal); minimum to onboard quickly; full when the team wants every-FM coverage; targeted when supervising a specific concern. |
 
 **Coding-agent filter (MECE recommendations).** When the asking agent
 identifies itself via the `SAICA_AGENT_KIND` env var, *no peer coding
@@ -134,26 +134,32 @@ Ranking: prevention/detection paradigm preferred over correction/recovery,
 then rationale-evidence, then GitHub stars. Coding-agent peers are filtered
 out per the asker's `SAICA_AGENT_KIND`.
 
-### 3. Full-suite recommendation — cover everything
+### 3. Full / MECE recommendation — cover every failure mode
 
 ```jsonc
-{ "name": "saica_recommend", "arguments": {} }
+{ "name": "saica_recommend", "arguments": { "level": "full" } }
 ```
 
 Returns:
 
 ```jsonc
 {
-  "mode": "full_suite",
+  "mode": "full",
+  "level": "full",
   "agent_kind": "claude-code",
   "coverage_complete": true,
   "uncovered_failure_modes": [],
-  "cover": [/* the minimum set of specialists; together they declare
+  "tools": [/* the minimum set of supervisors; together they declare
               coverage for all 11 failure modes */],
-  "pad":   [/* a few high-stars depth additions */],
-  "summary": "4 specialist tools cover 11 of 11 failure modes; 7 additional tools included for depth."
+  "covered_failure_modes": [/* all 11 listed alphabetically */],
+  "summary": "5 tools cover 11 of 11 failure modes (minimum weighted set cover)."
 }
 ```
+
+For the smaller tiers: `level="minimum"` returns 1 tool, `level="optimal"`
+returns 3 tools, both with the same payload shape (no `coverage_complete`
+guarantee — `optimal` covers ~9/11 FMs typically). The default
+(no `level`, no `failure_modes`) returns the **optimal** tier.
 
 ---
 

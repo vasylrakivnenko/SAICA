@@ -17,398 +17,449 @@ If you already use one of these coding agents, install the supervisors below for
 
 ### If you use **Aider**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Claude Code**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Cline**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Codex CLI**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Continue.dev**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Cursor**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Devin**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Gemini CLI**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **GitHub Copilot**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **OpenHands**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Replit Agent**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Sourcegraph Cody**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **SWE-agent**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **v0**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Windsurf**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ### If you use **Zed Agent**
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
-Depth pad (additional supervisors for redundancy / observability):
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [activepieces](data/tools/activepieces.yml) | prevention | pre_generation | web_app, http_service | 21,825 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
 | [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  |
-| [Flowise](data/tools/flowise.yml) | prevention | pre_generation | web_app, http_service | 52,185 |  |
-| [CrewAI](data/tools/crewai.yml) | prevention | pre_generation | library | 49,633 |  |
+| [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  |
 
 ---
 
 ## Agnostic baseline (no specific coding agent)
 
-If you don't use one of the listed coding agents — or you're evaluating supervisors without a fixed asker — this is the unfiltered full-suite view. The blocklist still applies.
+If you don't use one of the listed coding agents — or you're evaluating supervisors without a fixed asker — these are the three tiers without a peer-coding-agent filter. The blocklist still applies.
 
-Specialists (4 tools cover all 11 failure modes):
+**Minimum (1 tool — best starter)** — 1 tool covers 5 of 11 failure modes (highest-priority single pick).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  |
-| [Continue](data/tools/continue-dev.yml) | prevention | pre_generation | ide_plugin, library | 32,739 |  |
 
-Depth pad:
+**Optimal (3 tools — best responsible kit)** — 3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3).
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending |
 | --- | --- | --- | --- | ---: | :---: |
-| [Zed Agent](data/tools/zed-agent.yml) | prevention | pre_generation | desktop_app | 79,584 | 🔥 |
-| [Codex CLI](data/tools/codex-cli.yml) | correction | post_generation | cli | 77,172 | 🔥 |
-| [Gemini CLI](data/tools/gemini-cli.yml) | prevention | pre_generation | cli | 102,183 |  |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  |
-| [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [OpenHands](data/tools/openhands.yml) | recovery | post_generation | cli, library | 71,851 |  |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [Cline](data/tools/cline.yml) | prevention | pre_generation | ide_plugin | 60,646 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+
+**Full / MECE (minimum tools to cover all 11 failure modes)** — 5 tools cover 11 of 11 failure modes (minimum weighted set cover).
+
+| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
+| --- | --- | --- | --- | ---: | :---: |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
+| [Cline](data/tools/cline.yml) | prevention | pre_generation | ide_plugin | 60,646 |  |
+| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  |
+| [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  |
+| [Continue](data/tools/continue-dev.yml) | prevention | pre_generation | ide_plugin, library | 32,739 |  |
 
 ---
 
@@ -530,9 +581,31 @@ Top 3 supervisors:
 
 ## Methodology
 
-- Coverage = the tool's `addresses_failure_modes` declares the FM.
-- Greedy set cover prefers tools that cover the most still-uncovered FMs; tiebreak by trending-boosted star count, then breadth.
-- Coding-agent peers are filtered out per asker (the user has a coding agent already; we recommend supervisors, not peers).
-- The blocklist (currently: `comfyui`) excludes tools whose role is too ambiguous.
+Selection is by **likelihood × impact × reliability**. Per-FM likelihood and impact live in `data/failure_mode_priorities.yml` (hybrid: KG tool-coverage prior + editorial calibration against Shah 2026 / DAPLab evidence). Reliability is a bounded combiner of log-stars, github-trending bump, citation count, and maturity.
 
-This file is regenerated from `data/tools/*.yml` by `validator/generate_recommendations.py`.
+Three tiers per asker:
+
+- **Minimum (1 tool)** — single tool maximising Σ priority(fm) over its addressed FMs × its reliability.
+- **Optimal (3 tools)** — greedy weighted set cover capped at 3.
+- **Full / MECE** — greedy weighted set cover until every FM is covered (no pad). Typically 4-5 tools.
+
+Coding-agent peers are filtered out per asker (the user has a coding agent already; we recommend supervisors, not peers).
+The blocklist (currently: `comfyui`) excludes tools whose role is too ambiguous.
+
+Priority order (likelihood × impact, descending):
+
+| Failure mode | priority |
+| --- | ---: |
+| `scope_creep` | 1.70 |
+| `fabrication` | 1.40 |
+| `security_vulnerability` | 1.35 |
+| `supply_chain_attack` | 0.60 |
+| `logic_error` | 0.55 |
+| `cascading_failure` | 0.50 |
+| `context_pollution` | 0.45 |
+| `obsolescence` | 0.35 |
+| `test_manipulation` | 0.30 |
+| `dependency_blindness` | 0.20 |
+| `incomplete_execution` | 0.15 |
+
+This file is regenerated from `data/tools/*.yml` and `data/failure_mode_priorities.yml` by `validator/generate_recommendations.py`.

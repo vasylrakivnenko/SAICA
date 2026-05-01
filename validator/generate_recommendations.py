@@ -34,9 +34,11 @@ from typing import Any
 from pipeline.mcp.recommender import (
     ALL_FAILURE_MODES,
     CODING_AGENT_IDS,
+    LEVELS,
     RECOMMENDATION_BLOCKLIST,
     recommend,
 )
+from pipeline.shared.priorities import all_priorities
 from pipeline.shared.trending import (
     TRENDING_BOOST,
     trending_repository_urls,
@@ -98,7 +100,7 @@ def _kg_version() -> str:
 
 
 def build_payload(*, today: str | None = None) -> dict[str, Any]:
-    """Run the recommender for every agent + agnostic + every FM.
+    """Run the recommender at all three levels for every agent + agnostic + every FM.
 
     Returns the JSON-shape payload documented in this module's docstring.
     All ranking is delegated to ``recommender.recommend``; this function
@@ -107,17 +109,21 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
     if today is None:
         today = _dt.date.today().isoformat()
 
-    by_agent: dict[str, dict[str, Any]] = {}
+    by_agent: dict[str, dict[str, dict[str, Any]]] = {}
     for agent_id in sorted(CODING_AGENT_IDS):
-        by_agent[agent_id] = recommend(None, agent_kind=agent_id)
+        by_agent[agent_id] = {
+            level: recommend(level=level, agent_kind=agent_id) for level in LEVELS
+        }
 
-    agnostic = recommend(None, agent_kind=None)
+    agnostic: dict[str, dict[str, Any]] = {
+        level: recommend(level=level, agent_kind=None) for level in LEVELS
+    }
 
     by_failure_mode: dict[str, list[dict[str, Any]]] = {}
     for fm in ALL_FAILURE_MODES:
-        # Targeted mode with a single FM → use the agnostic pool so the
-        # "by failure mode" tables aren't filtered by any particular asker.
-        targeted = recommend([fm], agent_kind=None)
+        # Targeted with a single FM, agnostic asker so the per-FM tables
+        # aren't filtered by any particular coding-agent peer rule.
+        targeted = recommend(failure_modes=[fm], agent_kind=None)
         by_failure_mode[fm] = targeted["by_failure_mode"][fm]
 
     trending_urls = trending_repository_urls()
@@ -128,6 +134,7 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
         "trending_count": len(trending_urls),
         "trending_boost": TRENDING_BOOST,
         "blocklist": sorted(RECOMMENDATION_BLOCKLIST),
+        "priorities": all_priorities(),
         "by_agent": by_agent,
         "agnostic": agnostic,
         "by_failure_mode": by_failure_mode,
@@ -214,41 +221,40 @@ def _row_with_why(rec: dict[str, Any]) -> str:
     )
 
 
-def _render_agent_section(agent_id: str, payload: dict[str, Any]) -> list[str]:
-    """One ``### If you use **<Agent>**`` block."""
-    lines: list[str] = [f"### If you use **{_agent_display(agent_id)}**", ""]
-    cover = payload.get("cover") or []
-    pad = payload.get("pad") or []
+_LEVEL_HEADINGS: dict[str, str] = {
+    "minimum": "Minimum (1 tool — best starter)",
+    "optimal": "Optimal (3 tools — best responsible kit)",
+    "full":    "Full / MECE (minimum tools to cover all 11 failure modes)",
+}
 
-    if payload.get("coverage_complete"):
-        lines.append(
-            f"Specialists ({len(cover)} tools cover all "
-            f"{len(ALL_FAILURE_MODES)} failure modes):"
-        )
-    else:
+
+def _render_level_block(level: str, payload: dict[str, Any]) -> list[str]:
+    """Render one of the 3 tier blocks (minimum / optimal / full)."""
+    out: list[str] = [f"**{_LEVEL_HEADINGS[level]}** — {payload.get('summary','')}", ""]
+    tools = payload.get("tools") or []
+    if not tools:
+        out.append("_(no eligible tool found at this level)_")
+        out.append("")
+        return out
+    out.extend(_coverage_table_header())
+    out.extend(_row(r) for r in tools)
+    out.append("")
+    if level == "full":
         uncov = payload.get("uncovered_failure_modes") or []
-        lines.append(
-            f"Specialists ({len(cover)} tools cover "
-            f"{len(ALL_FAILURE_MODES) - len(uncov)} of "
-            f"{len(ALL_FAILURE_MODES)} failure modes; "
-            f"uncovered: {', '.join(uncov) or 'none'}):"
-        )
-    lines.append("")
-    if cover:
-        lines.extend(_coverage_table_header())
-        lines.extend(_row(r) for r in cover)
-    else:
-        lines.append("_(no eligible specialists found)_")
-    lines.append("")
+        if uncov:
+            out.append(
+                f"_Uncovered failure modes (no eligible tool declares coverage): "
+                f"`{', '.join(uncov)}`._"
+            )
+            out.append("")
+    return out
 
-    lines.append("Depth pad (additional supervisors for redundancy / observability):")
-    lines.append("")
-    if pad:
-        lines.extend(_coverage_table_header())
-        lines.extend(_row(r) for r in pad)
-    else:
-        lines.append("_(cover already saturates the depth pad)_")
-    lines.append("")
+
+def _render_agent_section(agent_id: str, levels_payload: dict[str, dict[str, Any]]) -> list[str]:
+    """One ``### If you use **<Agent>**`` block, all three tiers."""
+    lines: list[str] = [f"### If you use **{_agent_display(agent_id)}**", ""]
+    for level in LEVELS:
+        lines.extend(_render_level_block(level, levels_payload[level]))
     return lines
 
 
@@ -321,37 +327,13 @@ def render_markdown(payload: dict[str, Any]) -> str:
     out.append("")
     out.append(
         "If you don't use one of the listed coding agents — or you're "
-        "evaluating supervisors without a fixed asker — this is the "
-        "unfiltered full-suite view. The blocklist still applies."
+        "evaluating supervisors without a fixed asker — these are the "
+        "three tiers without a peer-coding-agent filter. The blocklist "
+        "still applies."
     )
     out.append("")
-    agnostic = payload["agnostic"]
-    if agnostic.get("coverage_complete"):
-        out.append(
-            f"Specialists ({len(agnostic.get('cover') or [])} tools cover "
-            f"all {len(ALL_FAILURE_MODES)} failure modes):"
-        )
-    else:
-        uncov = agnostic.get("uncovered_failure_modes") or []
-        out.append(
-            f"Specialists ({len(agnostic.get('cover') or [])} tools cover "
-            f"{len(ALL_FAILURE_MODES) - len(uncov)} of "
-            f"{len(ALL_FAILURE_MODES)} failure modes; "
-            f"uncovered: {', '.join(uncov) or 'none'}):"
-        )
-    out.append("")
-    if agnostic.get("cover"):
-        out.extend(_coverage_table_header())
-        out.extend(_row(r) for r in agnostic["cover"])
-    out.append("")
-    out.append("Depth pad:")
-    out.append("")
-    if agnostic.get("pad"):
-        out.extend(_coverage_table_header())
-        out.extend(_row(r) for r in agnostic["pad"])
-    else:
-        out.append("_(cover already saturates the depth pad)_")
-    out.append("")
+    for level in LEVELS:
+        out.extend(_render_level_block(level, payload["agnostic"][level]))
     out.append("---")
     out.append("")
 
@@ -373,25 +355,47 @@ def render_markdown(payload: dict[str, Any]) -> str:
     out.append("## Methodology")
     out.append("")
     out.append(
-        "- Coverage = the tool's `addresses_failure_modes` declares the FM."
+        "Selection is by **likelihood × impact × reliability**. Per-FM "
+        "likelihood and impact live in `data/failure_mode_priorities.yml` "
+        "(hybrid: KG tool-coverage prior + editorial calibration against "
+        "Shah 2026 / DAPLab evidence). Reliability is a bounded combiner "
+        "of log-stars, github-trending bump, citation count, and maturity."
+    )
+    out.append("")
+    out.append("Three tiers per asker:")
+    out.append("")
+    out.append(
+        "- **Minimum (1 tool)** — single tool maximising "
+        "Σ priority(fm) over its addressed FMs × its reliability."
     )
     out.append(
-        "- Greedy set cover prefers tools that cover the most "
-        "still-uncovered FMs; tiebreak by trending-boosted star count, "
-        "then breadth."
+        "- **Optimal (3 tools)** — greedy weighted set cover capped at 3."
     )
     out.append(
-        "- Coding-agent peers are filtered out per asker (the user has a "
+        "- **Full / MECE** — greedy weighted set cover until every FM is "
+        "covered (no pad). Typically 4-5 tools."
+    )
+    out.append("")
+    out.append(
+        "Coding-agent peers are filtered out per asker (the user has a "
         "coding agent already; we recommend supervisors, not peers)."
     )
     blocklist = ", ".join(f"`{b}`" for b in payload.get("blocklist", []))
     out.append(
-        f"- The blocklist (currently: {blocklist or '_empty_'}) excludes "
+        f"The blocklist (currently: {blocklist or '_empty_'}) excludes "
         "tools whose role is too ambiguous."
     )
     out.append("")
+    out.append("Priority order (likelihood × impact, descending):")
+    out.append("")
+    out.append("| Failure mode | priority |")
+    out.append("| --- | ---: |")
+    for fm, p in payload.get("priorities", {}).items():
+        out.append(f"| `{fm}` | {p:.2f} |")
+    out.append("")
     out.append(
-        "This file is regenerated from `data/tools/*.yml` by "
+        "This file is regenerated from `data/tools/*.yml` and "
+        "`data/failure_mode_priorities.yml` by "
         "`validator/generate_recommendations.py`."
     )
     out.append("")

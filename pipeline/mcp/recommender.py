@@ -31,6 +31,7 @@ from typing import Any
 
 import yaml
 
+from pipeline.shared.priorities import coverage_value, priority, reliability
 from pipeline.shared.trending import effective_stars, is_trending
 
 # Resolve REPO at import time so subprocess invocations from any CWD work.
@@ -214,92 +215,153 @@ def recommend_for_failure_modes(
 
 
 # ---------------------------------------------------------------------------
-# Mode 2: full-suite recommendation (greedy set cover over all 11 FMs)
+# Three-tier coverage modes (replace the prior "full_suite" with-pad design)
+#
+# All three use weighted greedy selection where the score for adding a tool
+# is sum(priority(fm) for fm in newly-covered) * reliability(tool).
+# Eligibility / blocklist / coding-agent-peer filters are applied identically.
+#
+#   minimum (1 tool):  the single highest-scoring tool. Best "starter".
+#   optimal (3 tools): greedy weighted set cover capped at 3. Best
+#                      "responsible kit" — covers the highest-priority FMs
+#                      with the smallest practical stack.
+#   full (variable N): greedy weighted set cover until ALL 11 FMs are
+#                      covered (no pad). Best "MECE coverage" — answers
+#                      "what's the smallest set that addresses every FM
+#                      we know about?". Typically 4-5 tools.
 # ---------------------------------------------------------------------------
 
-def recommend_full_suite(
-    *,
-    agent_kind: str | None = None,
-    pad_to: int = 11,
-) -> dict[str, Any]:
-    """Return a minimum-set of supervisors covering all 11 failure modes.
+LEVELS: tuple[str, ...] = ("minimum", "optimal", "full")
+DEFAULT_LEVEL: str = "optimal"
+OPTIMAL_K: int = 3
 
-    Greedy set cover: at each step pick the eligible tool that covers the
-    most still-uncovered FMs, tiebreak by stars then by breadth. Stops when
-    every FM is covered. If the cover uses fewer than ``pad_to`` tools,
-    pad with the highest-stars remaining eligible tools so the caller gets
-    a recognizable "deep bench" rather than just the bare cover.
 
-    Returns a payload with ``cover`` (the specialists), ``pad`` (the depth
-    additions), and ``coverage_complete`` (True when all 11 FMs are covered).
-    """
-    tools = _load_tools()
-    eligible_pool = [
-        t for t in tools.values()
+def _eligible_pool(agent_kind: str | None) -> list[dict[str, Any]]:
+    """Tools eligible to be recommended given the asker's agent kind."""
+    return [
+        t for t in _load_tools().values()
         if _eligible(t, agent_kind=agent_kind)
         and (t.get("addresses_failure_modes") or [])
     ]
 
-    remaining: set[str] = set(ALL_FAILURE_MODES)
-    cover_ids: list[str] = []
-    cover_set: set[str] = set()
 
-    while remaining:
-        best_id: str | None = None
-        best_key: tuple[int, float, int] | None = None
-        for t in eligible_pool:
-            tid = str(t["id"])
-            if tid in cover_set:
-                continue
-            t_fms = set(t.get("addresses_failure_modes") or [])
-            new = len(t_fms & remaining)
-            if new == 0:
-                continue
-            breadth = len(t_fms)
-            # tiebreak: most-new FMs > effective_stars (trending-boosted) > breadth
-            key = (new, effective_stars(t), breadth)
-            if best_key is None or key > best_key:
-                best_id = tid
-                best_key = key
-        if best_id is None:
-            # No eligible tool covers any remaining FM — coverage incomplete.
-            break
-        cover_ids.append(best_id)
-        cover_set.add(best_id)
-        chosen = next(t for t in eligible_pool if t["id"] == best_id)
-        remaining -= set(chosen.get("addresses_failure_modes") or [])
+def _greedy_weighted_pick(
+    pool: list[dict[str, Any]],
+    *,
+    target_fms: set[str],
+    already_covered: set[str],
+) -> tuple[dict[str, Any] | None, float]:
+    """Pick the tool maximising weighted_coverage * reliability over the
+    FMs in ``target_fms`` not yet in ``already_covered``. Returns (tool, score).
+    """
+    remaining = target_fms - already_covered
+    best: dict[str, Any] | None = None
+    best_score: float = float("-inf")
+    for t in pool:
+        new_value = coverage_value(t, remaining)
+        if new_value <= 0:
+            continue
+        score = new_value * (1.0 + reliability(t))
+        if score > best_score:
+            best, best_score = t, score
+    return best, best_score
 
-    # Pad to pad_to with the highest-effective-stars remaining eligible tools.
-    pad_ids: list[str] = []
-    if len(cover_ids) < pad_to:
-        leftover = [
-            t for t in eligible_pool
-            if t["id"] not in cover_set
-        ]
-        leftover.sort(
-            key=lambda t: (
-                effective_stars(t),
-                len(t.get("addresses_failure_modes") or []),
-            ),
-            reverse=True,
+
+def recommend_minimum(*, agent_kind: str | None = None) -> dict[str, Any]:
+    """Return the single highest-priority * reliability tool. Best starter."""
+    pool = _eligible_pool(agent_kind)
+    chosen, _ = _greedy_weighted_pick(
+        pool, target_fms=set(ALL_FAILURE_MODES), already_covered=set(),
+    )
+    selected = [chosen] if chosen is not None else []
+    covered = set(chosen.get("addresses_failure_modes") or []) if chosen else set()
+    return {
+        "mode": "minimum",
+        "level": "minimum",
+        "agent_kind": agent_kind,
+        "tools": [_to_recommendation_dict(t) for t in selected],
+        "covered_failure_modes": sorted(covered),
+        "uncovered_failure_modes": sorted(set(ALL_FAILURE_MODES) - covered),
+        "coverage_complete": False,
+        "summary": (
+            f"1 tool covers {len(covered)} of {len(ALL_FAILURE_MODES)} "
+            f"failure modes (highest-priority single pick)."
+            if chosen else "No eligible tool found."
+        ),
+    }
+
+
+def recommend_optimal(
+    *, agent_kind: str | None = None, k: int = OPTIMAL_K,
+) -> dict[str, Any]:
+    """Greedy weighted set cover capped at ``k`` tools. Best responsible kit."""
+    pool = _eligible_pool(agent_kind)
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+    covered: set[str] = set()
+
+    while len(selected) < k:
+        # filter out already-picked tools without rebuilding the whole pool
+        candidates = [t for t in pool if t["id"] not in selected_ids]
+        chosen, _ = _greedy_weighted_pick(
+            candidates,
+            target_fms=set(ALL_FAILURE_MODES),
+            already_covered=covered,
         )
-        for t in leftover:
-            if len(cover_ids) + len(pad_ids) >= pad_to:
-                break
-            pad_ids.append(str(t["id"]))
+        if chosen is None:
+            break
+        selected.append(chosen)
+        selected_ids.add(str(chosen["id"]))
+        covered |= set(chosen.get("addresses_failure_modes") or [])
 
     return {
-        "mode": "full_suite",
+        "mode": "optimal",
+        "level": "optimal",
         "agent_kind": agent_kind,
-        "coverage_complete": not remaining,
-        "uncovered_failure_modes": sorted(remaining),
-        "cover": [_to_recommendation_dict(tools[tid]) for tid in cover_ids],
-        "pad": [_to_recommendation_dict(tools[tid]) for tid in pad_ids],
+        "k": k,
+        "tools": [_to_recommendation_dict(t) for t in selected],
+        "covered_failure_modes": sorted(covered),
+        "uncovered_failure_modes": sorted(set(ALL_FAILURE_MODES) - covered),
+        "coverage_complete": covered == set(ALL_FAILURE_MODES),
         "summary": (
-            f"{len(cover_ids)} specialist tools cover "
-            f"{len(ALL_FAILURE_MODES) - len(remaining)} of "
-            f"{len(ALL_FAILURE_MODES)} failure modes; "
-            f"{len(pad_ids)} additional tools included for depth."
+            f"{len(selected)} tools cover {len(covered)} of "
+            f"{len(ALL_FAILURE_MODES)} failure modes "
+            f"(weighted set cover, capped at {k})."
+        ),
+    }
+
+
+def recommend_full(*, agent_kind: str | None = None) -> dict[str, Any]:
+    """Greedy weighted set cover until every FM is covered (no pad). MECE."""
+    pool = _eligible_pool(agent_kind)
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+    covered: set[str] = set()
+    target = set(ALL_FAILURE_MODES)
+
+    while covered != target:
+        candidates = [t for t in pool if t["id"] not in selected_ids]
+        chosen, _ = _greedy_weighted_pick(
+            candidates, target_fms=target, already_covered=covered,
+        )
+        if chosen is None:
+            break  # uncoverable
+        selected.append(chosen)
+        selected_ids.add(str(chosen["id"]))
+        covered |= set(chosen.get("addresses_failure_modes") or [])
+
+    return {
+        "mode": "full",
+        "level": "full",
+        "agent_kind": agent_kind,
+        "tools": [_to_recommendation_dict(t) for t in selected],
+        "covered_failure_modes": sorted(covered),
+        "uncovered_failure_modes": sorted(target - covered),
+        "coverage_complete": covered == target,
+        "summary": (
+            f"{len(selected)} tools cover {len(covered)} of "
+            f"{len(ALL_FAILURE_MODES)} failure modes "
+            f"(minimum weighted set cover)."
         ),
     }
 
@@ -309,25 +371,44 @@ def recommend_full_suite(
 # ---------------------------------------------------------------------------
 
 def recommend(
-    failure_modes: list[str] | None,
+    failure_modes: list[str] | None = None,
     *,
-    agent_kind: str | None,
+    agent_kind: str | None = None,
+    level: str | None = None,
 ) -> dict[str, Any]:
-    """Two-mode dispatcher.
+    """Three-tier dispatcher.
 
-    * ``failure_modes=None`` or empty list → full suite.
-    * Non-empty list → targeted mode for those FMs.
+    Either ``failure_modes`` or ``level`` may be passed (not both).
+      - ``failure_modes`` non-empty list → targeted mode.
+      - ``level`` in ('minimum', 'optimal', 'full') → that tier.
+      - both None → defaults to ``DEFAULT_LEVEL`` ('optimal').
     """
+    if failure_modes and level:
+        raise ValueError("pass either `failure_modes` or `level`, not both")
     if failure_modes:
         return recommend_for_failure_modes(failure_modes, agent_kind=agent_kind)
-    return recommend_full_suite(agent_kind=agent_kind)
+    chosen_level = (level or DEFAULT_LEVEL).strip().lower()
+    if chosen_level not in LEVELS:
+        raise ValueError(
+            f"unknown level: {chosen_level!r}; valid: {list(LEVELS)}"
+        )
+    if chosen_level == "minimum":
+        return recommend_minimum(agent_kind=agent_kind)
+    if chosen_level == "full":
+        return recommend_full(agent_kind=agent_kind)
+    return recommend_optimal(agent_kind=agent_kind)
 
 
 __all__ = [
     "ALL_FAILURE_MODES",
     "CODING_AGENT_IDS",
+    "DEFAULT_LEVEL",
+    "LEVELS",
+    "OPTIMAL_K",
     "RECOMMENDATION_BLOCKLIST",
     "recommend",
     "recommend_for_failure_modes",
-    "recommend_full_suite",
+    "recommend_full",
+    "recommend_minimum",
+    "recommend_optimal",
 ]

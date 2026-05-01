@@ -1,32 +1,31 @@
 {
-  "top_n": 11,
   "failure_modes": [
-    "scope_creep",
     "fabrication",
-    "logic_error",
-    "security_vulnerability",
     "context_pollution",
+    "scope_creep",
     "cascading_failure",
-    "incomplete_execution",
-    "supply_chain_attack",
-    "test_manipulation",
     "dependency_blindness",
-    "obsolescence"
+    "incomplete_execution",
+    "logic_error",
+    "obsolescence",
+    "security_vulnerability",
+    "supply_chain_attack",
+    "test_manipulation"
   ],
   "failure_mode_display": {
-    "scope_creep": "Scope Creep",
     "fabrication": "Fabrication",
-    "logic_error": "Logic Error",
-    "security_vulnerability": "Security Vulnerability",
     "context_pollution": "Context Pollution",
+    "scope_creep": "Scope Creep",
     "cascading_failure": "Cascading Failure",
-    "incomplete_execution": "Incomplete Execution",
-    "supply_chain_attack": "Supply-Chain Attack",
-    "test_manipulation": "Test Manipulation",
     "dependency_blindness": "Dependency Blindness",
-    "obsolescence": "Obsolescence"
+    "incomplete_execution": "Incomplete Execution",
+    "logic_error": "Logic Error",
+    "obsolescence": "Obsolescence",
+    "security_vulnerability": "Security Vulnerability",
+    "supply_chain_attack": "Supply-Chain Attack",
+    "test_manipulation": "Test Manipulation"
   },
-  "tools_top": [
+  "tools_minimum": [
     {
       "id": "promptfoo",
       "name": "promptfoo",
@@ -35,231 +34,21 @@
       "breadth": 5,
       "tier_sum": 5,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
+        "dependency_blindness": 0,
         "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "coze-loop",
-      "name": "coze-loop",
-      "stars": 5427,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 1,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "giskard",
-      "name": "giskard-oss",
-      "stars": 5295,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
         "logic_error": 1,
+        "obsolescence": 0,
         "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
         "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "lmnr",
-      "name": "lmnr",
-      "stars": 2798,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 1,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "openhands",
-      "name": "OpenHands",
-      "stars": 71851,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "opik",
-      "name": "opik",
-      "stars": 18988,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "guardrails-ai",
-      "name": "Guardrails AI",
-      "stars": 6718,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "nemo-guardrails",
-      "name": "NeMo Guardrails",
-      "stars": 6028,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "bifrost",
-      "name": "bifrost",
-      "stars": 4209,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 1,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "logfire",
-      "name": "logfire",
-      "stars": 4191,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "llm-guard",
-      "name": "llm-guard",
-      "stars": 2855,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 1
       }
     }
   ],
-  "tools_covering": [
+  "tools_optimal": [
     {
       "id": "promptfoo",
       "name": "promptfoo",
@@ -268,671 +57,17 @@
       "breadth": 5,
       "tier_sum": 5,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
         "logic_error": 1,
+        "obsolescence": 0,
         "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
         "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "coze-loop",
-      "name": "coze-loop",
-      "stars": 5427,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 1,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "sourcegraph-cody",
-      "name": "Sourcegraph Cody",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 2,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 2,
-        "obsolescence": 1
-      }
-    },
-    {
-      "id": "confident-ai-deepteam",
-      "name": "DeepTeam",
-      "stars": 1566,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 2,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 2,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "giskard",
-      "name": "giskard-oss",
-      "stars": 5295,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "lmnr",
-      "name": "lmnr",
-      "stars": 2798,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 1,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "langsmith",
-      "name": "LangSmith",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 2,
-        "fabrication": 0,
-        "logic_error": 2,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "openhands",
-      "name": "OpenHands",
-      "stars": 71851,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "opik",
-      "name": "opik",
-      "stars": 18988,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "guardrails-ai",
-      "name": "Guardrails AI",
-      "stars": 6718,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "nemo-guardrails",
-      "name": "NeMo Guardrails",
-      "stars": 6028,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    }
-  ],
-  "covering_divider": 4,
-  "tools_all": [
-    {
-      "id": "promptfoo",
-      "name": "promptfoo",
-      "stars": 20465,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "coze-loop",
-      "name": "coze-loop",
-      "stars": 5427,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 1,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "giskard",
-      "name": "giskard-oss",
-      "stars": 5295,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "lmnr",
-      "name": "lmnr",
-      "stars": 2798,
-      "trending": false,
-      "breadth": 5,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 1,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "openhands",
-      "name": "OpenHands",
-      "stars": 71851,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "opik",
-      "name": "opik",
-      "stars": 18988,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "guardrails-ai",
-      "name": "Guardrails AI",
-      "stars": 6718,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "nemo-guardrails",
-      "name": "NeMo Guardrails",
-      "stars": 6028,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "bifrost",
-      "name": "bifrost",
-      "stars": 4209,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 1,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "logfire",
-      "name": "logfire",
-      "stars": 4191,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "llm-guard",
-      "name": "llm-guard",
-      "stars": 2855,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "helm",
-      "name": "helm",
-      "stars": 2758,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "judgeval",
-      "name": "judgeval",
-      "stars": 1024,
-      "trending": false,
-      "breadth": 4,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 1,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "confident-ai-deepteam",
-      "name": "DeepTeam",
-      "stars": 1566,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 2,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 2,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "langsmith",
-      "name": "LangSmith",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 2,
-        "fabrication": 0,
-        "logic_error": 2,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "sourcegraph-cody",
-      "name": "Sourcegraph Cody",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 5,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 2,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 2,
-        "obsolescence": 1
-      }
-    },
-    {
-      "id": "pathway-llm-app",
-      "name": "llm-app",
-      "stars": 59931,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 2
-      }
-    },
-    {
-      "id": "aider",
-      "name": "Aider",
-      "stars": 43788,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 2,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "dependabot",
-      "name": "Dependabot",
-      "stars": 5546,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 4,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 2
-      }
-    },
-    {
-      "id": "gemini-cli",
-      "name": "Gemini CLI",
-      "stars": 102183,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "daytona",
-      "name": "Daytona",
-      "stars": 72378,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 1
       }
     },
     {
@@ -943,1004 +78,124 @@
       "breadth": 3,
       "tier_sum": 3,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 1,
         "cascading_failure": 0,
+        "dependency_blindness": 0,
         "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
         "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 0
       }
     },
     {
-      "id": "langfuse",
-      "name": "Langfuse",
-      "stars": 25839,
+      "id": "coze-loop",
+      "name": "coze-loop",
+      "stars": 5427,
       "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
+      "breadth": 5,
+      "tier_sum": 5,
       "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
+        "fabrication": 1,
         "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "mlflow",
-      "name": "mlflow",
-      "stars": 25505,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
         "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "activepieces",
-      "name": "activepieces",
-      "stars": 21825,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "openai-evals",
-      "name": "evals",
-      "stars": 18262,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "pydantic-ai",
-      "name": "PydanticAI",
-      "stars": 16567,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "ragas",
-      "name": "ragas",
-      "stars": 13605,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "e2b",
-      "name": "E2B",
-      "stars": 11878,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "promptflow",
-      "name": "promptflow",
-      "stars": 11106,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "pr-agent",
-      "name": "pr-agent",
-      "stars": 10968,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "arize-phoenix",
-      "name": "Arize Phoenix",
-      "stars": 9394,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "voltagent",
-      "name": "voltagent",
-      "stars": 8416,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 1,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "garak",
-      "name": "garak",
-      "stars": 7614,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "manifest",
-      "name": "manifest",
-      "stars": 5555,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
         "cascading_failure": 1,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "magic-mcp",
-      "name": "magic-mcp",
-      "stars": 4776,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
+        "incomplete_execution": 1,
         "logic_error": 0,
+        "obsolescence": 0,
         "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
         "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 1
+        "test_manipulation": 0
       }
-    },
+    }
+  ],
+  "tools_full": [
     {
-      "id": "agenta",
-      "name": "agenta",
-      "stars": 4050,
+      "id": "promptfoo",
+      "name": "promptfoo",
+      "stars": 20465,
       "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
+      "breadth": 5,
+      "tier_sum": 5,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
         "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "pyrit",
-      "name": "PyRIT",
-      "stars": 3740,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
+        "obsolescence": 0,
         "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
         "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 1
       }
     },
     {
-      "id": "ai-infra-guard",
-      "name": "AI-Infra-Guard",
-      "stars": 3546,
+      "id": "cline",
+      "name": "Cline",
+      "stars": 60646,
       "trending": false,
       "breadth": 3,
       "tier_sum": 3,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
         "cascading_failure": 0,
+        "dependency_blindness": 0,
         "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
         "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 0
       }
     },
     {
-      "id": "pezzo",
-      "name": "pezzo",
-      "stars": 3227,
+      "id": "coze-loop",
+      "name": "coze-loop",
+      "stars": 5427,
       "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
+      "breadth": 5,
+      "tier_sum": 5,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 1,
+        "dependency_blindness": 0,
+        "incomplete_execution": 1,
         "logic_error": 0,
+        "obsolescence": 0,
         "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
         "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 0
       }
     },
     {
-      "id": "promptbench",
-      "name": "promptbench",
-      "stars": 2801,
+      "id": "pathway-llm-app",
+      "name": "llm-app",
+      "stars": 59931,
       "trending": false,
       "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "openlit",
-      "name": "openlit",
-      "stars": 2388,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "ai-red-teaming-playground-labs",
-      "name": "AI-Red-Teaming-Playground-Labs",
-      "stars": 1915,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "agentic-security",
-      "name": "agentic-security",
-      "stars": 1848,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "safe-rlhf",
-      "name": "safe-rlhf",
-      "stars": 1598,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "promptmap",
-      "name": "promptmap",
-      "stars": 1181,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "agent-governance-toolkit",
-      "name": "agent-governance-toolkit",
-      "stars": 1177,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "braintrust",
-      "name": "Braintrust",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "claude-code",
-      "name": "Claude Code",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "cursor",
-      "name": "Cursor",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "modal",
-      "name": "Modal",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "windsurf",
-      "name": "Windsurf",
-      "stars": 0,
-      "trending": false,
-      "breadth": 3,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "langgraph",
-      "name": "LangGraph",
-      "stars": 30108,
-      "trending": false,
-      "breadth": 2,
       "tier_sum": 4,
       "tiers": {
-        "scope_creep": 2,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 2,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "renovate",
-      "name": "Renovate",
-      "stars": 21353,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 2
-      }
-    },
-    {
-      "id": "deepeval",
-      "name": "DeepEval",
-      "stars": 14938,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 2,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "semgrep",
-      "name": "Semgrep",
-      "stars": 14901,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 2,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "context-hub",
-      "name": "Context Hub",
-      "stars": 13025,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 2
-      }
-    },
-    {
-      "id": "snyk",
-      "name": "Snyk",
-      "stars": 5506,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
+        "context_pollution": 1,
         "scope_creep": 0,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 2,
-        "context_pollution": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "fuzzyai",
-      "name": "FuzzyAI",
-      "stars": 1337,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 2,
-        "context_pollution": 0,
-        "cascading_failure": 0,
         "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "v0",
-      "name": "v0",
-      "stars": 0,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 3,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 2,
         "logic_error": 0,
+        "obsolescence": 2,
         "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
         "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "browser-use",
-      "name": "browser-use",
-      "stars": 89651,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "zed-agent",
-      "name": "Zed Agent",
-      "stars": 79584,
-      "trending": true,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "ragflow",
-      "name": "ragflow",
-      "stars": 78820,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 0,
-        "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "codex-cli",
-      "name": "Codex CLI",
-      "stars": 77172,
-      "trending": true,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "autogen",
-      "name": "AutoGen",
-      "stars": 57354,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "flowise",
-      "name": "Flowise",
-      "stars": 52185,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "crewai",
-      "name": "CrewAI",
-      "stars": 49633,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "litellm",
-      "name": "litellm",
-      "stars": 44383,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
-        "context_pollution": 0,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
-      }
-    },
-    {
-      "id": "agno",
-      "name": "agno",
-      "stars": 39620,
-      "trending": false,
-      "breadth": 2,
-      "tier_sum": 2,
-      "tiers": {
-        "scope_creep": 1,
-        "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
-        "context_pollution": 1,
-        "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
-        "dependency_blindness": 0,
-        "obsolescence": 0
+        "test_manipulation": 0
       }
     },
     {
@@ -1951,17 +206,1489 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 1,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    }
+  ],
+  "tools_all": [
+    {
+      "id": "promptfoo",
+      "name": "promptfoo",
+      "stars": 20465,
+      "trending": false,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1
+      }
+    },
+    {
+      "id": "coze-loop",
+      "name": "coze-loop",
+      "stars": 5427,
+      "trending": false,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 1,
+        "dependency_blindness": 0,
+        "incomplete_execution": 1,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "giskard",
+      "name": "giskard-oss",
+      "stars": 5295,
+      "trending": false,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1
+      }
+    },
+    {
+      "id": "lmnr",
+      "name": "lmnr",
+      "stars": 2798,
+      "trending": false,
+      "breadth": 5,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 1,
+        "dependency_blindness": 0,
+        "incomplete_execution": 1,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "stars": 71851,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "opik",
+      "name": "opik",
+      "stars": 18988,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 1,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "guardrails-ai",
+      "name": "Guardrails AI",
+      "stars": 6718,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "nemo-guardrails",
+      "name": "NeMo Guardrails",
+      "stars": 6028,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "bifrost",
+      "name": "bifrost",
+      "stars": 4209,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 1,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "logfire",
+      "name": "logfire",
+      "stars": 4191,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "llm-guard",
+      "name": "llm-guard",
+      "stars": 2855,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "helm",
+      "name": "helm",
+      "stars": 2758,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "judgeval",
+      "name": "judgeval",
+      "stars": 1024,
+      "trending": false,
+      "breadth": 4,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 1
+      }
+    },
+    {
+      "id": "confident-ai-deepteam",
+      "name": "DeepTeam",
+      "stars": 1566,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 2,
+        "supply_chain_attack": 2,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "langsmith",
+      "name": "LangSmith",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 2,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 2,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "sourcegraph-cody",
+      "name": "Sourcegraph Cody",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 5,
+      "tiers": {
+        "fabrication": 2,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 2,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 1,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "pathway-llm-app",
+      "name": "llm-app",
+      "stars": 59931,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 2,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "stars": 43788,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 2,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "dependabot",
+      "name": "Dependabot",
+      "stars": 5546,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 2,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "stars": 102183,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "daytona",
+      "name": "Daytona",
+      "stars": 72378,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "stars": 60646,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "langfuse",
+      "name": "Langfuse",
+      "stars": 25839,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "mlflow",
+      "name": "mlflow",
+      "stars": 25505,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "activepieces",
+      "name": "activepieces",
+      "stars": 21825,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "openai-evals",
+      "name": "evals",
+      "stars": 18262,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "pydantic-ai",
+      "name": "PydanticAI",
+      "stars": 16567,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "ragas",
+      "name": "ragas",
+      "stars": 13605,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "e2b",
+      "name": "E2B",
+      "stars": 11878,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "promptflow",
+      "name": "promptflow",
+      "stars": 11106,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "pr-agent",
+      "name": "pr-agent",
+      "stars": 10968,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "arize-phoenix",
+      "name": "Arize Phoenix",
+      "stars": 9394,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "voltagent",
+      "name": "voltagent",
+      "stars": 8416,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 1,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "garak",
+      "name": "garak",
+      "stars": 7614,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "manifest",
+      "name": "manifest",
+      "stars": 5555,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 1,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "magic-mcp",
+      "name": "magic-mcp",
+      "stars": 4776,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 1,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "agenta",
+      "name": "agenta",
+      "stars": 4050,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "pyrit",
+      "name": "PyRIT",
+      "stars": 3740,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "ai-infra-guard",
+      "name": "AI-Infra-Guard",
+      "stars": 3546,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "pezzo",
+      "name": "pezzo",
+      "stars": 3227,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "promptbench",
+      "name": "promptbench",
+      "stars": 2801,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "openlit",
+      "name": "openlit",
+      "stars": 2388,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "ai-red-teaming-playground-labs",
+      "name": "AI-Red-Teaming-Playground-Labs",
+      "stars": 1915,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "agentic-security",
+      "name": "agentic-security",
+      "stars": 1848,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "safe-rlhf",
+      "name": "safe-rlhf",
+      "stars": 1598,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "promptmap",
+      "name": "promptmap",
+      "stars": 1181,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "agent-governance-toolkit",
+      "name": "agent-governance-toolkit",
+      "stars": 1177,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "braintrust",
+      "name": "Braintrust",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "modal",
+      "name": "Modal",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "stars": 0,
+      "trending": false,
+      "breadth": 3,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "langgraph",
+      "name": "LangGraph",
+      "stars": 30108,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 4,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 2,
+        "scope_creep": 2,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "renovate",
+      "name": "Renovate",
+      "stars": 21353,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 2,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "deepeval",
+      "name": "DeepEval",
+      "stars": 14938,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 2,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "semgrep",
+      "name": "Semgrep",
+      "stars": 14901,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 2,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "context-hub",
+      "name": "Context Hub",
+      "stars": 13025,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 2,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "snyk",
+      "name": "Snyk",
+      "stars": 5506,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 2,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "fuzzyai",
+      "name": "FuzzyAI",
+      "stars": 1337,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 2,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "v0",
+      "name": "v0",
+      "stars": 0,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 3,
+      "tiers": {
+        "fabrication": 2,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "zed-agent",
+      "name": "Zed Agent",
+      "stars": 79584,
+      "trending": true,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "codex-cli",
+      "name": "Codex CLI",
+      "stars": 77172,
+      "trending": true,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "browser-use",
+      "name": "browser-use",
+      "stars": 89651,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "ragflow",
+      "name": "ragflow",
+      "stars": 78820,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 1,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "autogen",
+      "name": "AutoGen",
+      "stars": 57354,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "flowise",
+      "name": "Flowise",
+      "stars": 52185,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "crewai",
+      "name": "CrewAI",
+      "stars": 49633,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "litellm",
+      "name": "litellm",
+      "stars": 44383,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 0,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "agno",
+      "name": "agno",
+      "stars": 39620,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 0,
+        "context_pollution": 1,
+        "scope_creep": 1,
+        "cascading_failure": 0,
+        "dependency_blindness": 0,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
+      }
+    },
+    {
+      "id": "continue-dev",
+      "name": "Continue",
+      "stars": 32739,
+      "trending": false,
+      "breadth": 2,
+      "tier_sum": 2,
+      "tiers": {
+        "fabrication": 1,
+        "context_pollution": 0,
+        "scope_creep": 0,
+        "cascading_failure": 0,
+        "dependency_blindness": 1,
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -1972,17 +1699,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -1993,17 +1720,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2014,17 +1741,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2035,17 +1762,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2056,17 +1783,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2077,17 +1804,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2098,17 +1825,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2119,17 +1846,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2140,17 +1867,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2161,17 +1888,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2182,17 +1909,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2203,17 +1930,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2224,17 +1951,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2245,17 +1972,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2266,17 +1993,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2287,17 +2014,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2308,17 +2035,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2329,17 +2056,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2350,17 +2077,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 1,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2371,17 +2098,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2392,17 +2119,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2413,17 +2140,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 1,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 1,
+        "test_manipulation": 0
       }
     },
     {
@@ -2434,17 +2161,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 1,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2455,17 +2182,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2476,17 +2203,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 1,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2497,17 +2224,17 @@
       "breadth": 2,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2518,17 +2245,17 @@
       "breadth": 1,
       "tier_sum": 3,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 3,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 3,
+        "test_manipulation": 0
       }
     },
     {
@@ -2539,17 +2266,17 @@
       "breadth": 1,
       "tier_sum": 2,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 2,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2560,17 +2287,17 @@
       "breadth": 1,
       "tier_sum": 1,
       "tiers": {
-        "scope_creep": 1,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 1,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2581,17 +2308,17 @@
       "breadth": 1,
       "tier_sum": 1,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 1,
-        "security_vulnerability": 0,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 1,
+        "obsolescence": 0,
+        "security_vulnerability": 0,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2602,17 +2329,17 @@
       "breadth": 1,
       "tier_sum": 1,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     },
     {
@@ -2623,17 +2350,17 @@
       "breadth": 1,
       "tier_sum": 1,
       "tiers": {
-        "scope_creep": 0,
         "fabrication": 0,
-        "logic_error": 0,
-        "security_vulnerability": 1,
         "context_pollution": 0,
+        "scope_creep": 0,
         "cascading_failure": 0,
-        "incomplete_execution": 0,
-        "supply_chain_attack": 0,
-        "test_manipulation": 0,
         "dependency_blindness": 0,
-        "obsolescence": 0
+        "incomplete_execution": 0,
+        "logic_error": 0,
+        "obsolescence": 0,
+        "security_vulnerability": 1,
+        "supply_chain_attack": 0,
+        "test_manipulation": 0
       }
     }
   ],
@@ -2644,8 +2371,9 @@
     "3": "declared + rationale + external citation evidence"
   },
   "selections": {
-    "top": "breadth desc, tier_sum desc, stars desc; top 11",
-    "covering": "greedy set-cover (max new FMs, tiebreak tier_sum/stars) then pad by tier_sum/breadth/stars to 11",
+    "minimum": "1 tool maximising coverage_value \u00d7 reliability",
+    "optimal": "3 tools, greedy weighted set cover by likelihood \u00d7 impact \u00d7 reliability",
+    "full": "minimum tools needed to cover all 11 failure modes (no pad)",
     "all": "every tool with \u22651 declared mapping"
   }
 }
