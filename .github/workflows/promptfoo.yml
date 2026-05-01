@@ -1,0 +1,87 @@
+# promptfoo — behavioural CI gate for SAICA-KG self-supervision.
+#
+# Rationale: the KG's recommender (saica_recommend(failure_modes=
+# ['fabrication','scope_creep','logic_error','security_vulnerability',
+# 'test_manipulation'])) names promptfoo as the top fit for the CLI +
+# library + ci_app cell — so we install what we recommend on our own
+# repo. Same dogfooding pattern as Semgrep (see semgrep.yml).
+#
+# References:
+#   - data/tools/promptfoo.yml — KG entry (paradigm=detection,
+#     surfaces=cli/library/ci_app, addresses fabrication +
+#     security_vulnerability + logic_error + scope_creep +
+#     test_manipulation)
+#   - promptfooconfig.yaml — top-level config
+#   - evals/ — assertion suite + Python helpers
+#   - pipeline/audit/detectors.py — the audit detector matches us via
+#     the `promptfooconfig.yaml` filename rule (_EVAL_CONFIG_RULES) and
+#     the `npx promptfoo` invocation in the run-step below.
+#
+# Runs on every PR, on push to main, and on a weekly cron (catches drift
+# in the static recommendations.json without waiting for a PR).
+
+name: promptfoo
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Weekly run catches recommendations.json drift if no PRs land for a while.
+    - cron: "37 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    name: behavioural eval
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      # Promptfoo is a Node CLI; no Python pkgs required by the eval suite
+      # (assertion helpers in evals/_assertions.py are stdlib-only). We
+      # still set up Python because the `python:` assertion type spawns
+      # `python3`.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Install promptfoo at run time. We deliberately do NOT add it to a
+      # repo-root package.json so the Node story stays scoped to site/.
+      # `npx promptfoo` is the supervision-tool detector's matching
+      # pattern (pipeline/audit/detectors.py).
+      - name: Run promptfoo eval
+        run: |
+          npx --yes promptfoo@latest eval \
+            --no-cache \
+            --max-concurrency 4 \
+            --output results.json
+        env:
+          # When unset (the default for PR/push runs), evals/ask_probe.yaml
+          # short-circuits each live test with `pass: True, reason:
+          # "skipped: ASK_API unset"` so the suite stays green without a
+          # running backend or a Kimi key. Set this in repo secrets +
+          # `vars` to enable the live probe in cron runs.
+          ASK_API: ${{ vars.ASK_API }}
+
+      - name: Upload results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: promptfoo-results
+          path: results.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,37 @@
+# Higher-level quality guarantees on recommendations.json.
+#
+# Static-data tests as above; failures here typically mean the
+# weighted-set-cover regenerator (validator/generate_recommendations.py)
+# produced a degraded recommendation set — e.g. the "minimum" tier
+# returned 0 or 2+ tools, or "full" stopped covering all 11 FMs.
+#
+# Cited KG nodes:
+#   - data/tools/promptfoo.yml — the CI surface this gate runs on
+#   - data/failure_modes/*.yml (all 11) — coverage targets
+
+- description: optimal tier for claude-code covers ≥ 8 of 11 failure modes
+  vars:
+    question: "quality: claude-code optimal coverage ≥ 8/11"
+  metadata:
+    tags: [static, quality, claude-code]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_optimal_claude_code_coverage
+
+- description: every full tier (agnostic + per-agent) reports coverage_complete=true
+  vars:
+    question: "quality: every full tier MECE-complete"
+  metadata:
+    tags: [static, quality, mece]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_full_tier_coverage_complete
+
+- description: the minimum tier returns exactly one tool per agent
+  vars:
+    question: "quality: minimum tier is exactly 1 tool"
+  metadata:
+    tags: [static, quality]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_minimum_tier_one_tool

@@ -1,0 +1,359 @@
+---
+// /prevention-log — Human-readable view of supervision events.
+//
+// Loads /prevention_log_sample.jsonl (committed sample) at runtime, parses
+// one JSON object per line, and renders a sortable, filterable table.
+//
+// Producer: pipeline/supervision/logger.py emits one JSONL line per
+// prevented event (pre-commit hooks, Claude Code PreToolUse hooks, CI
+// scanners, manual supervisor runs). In production the user points the page
+// at their own .saica/prevention_log/<YYYY-MM-DD>.jsonl — that directory is
+// gitignored so private repo paths never ship to this site. The committed
+// sample exists only so the page renders something out of the box.
+//
+// Mirrors /tool-coverage's fetch + escapeHtml + sticky-thead conventions.
+import BaseLayout from "../layouts/BaseLayout.astro";
+const title = "Prevention log";
+---
+
+<BaseLayout title={title}>
+  <section class="mb-6 max-w-3xl">
+    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+      Supervision Telemetry
+    </p>
+    <h1 class="mt-2">Prevention log</h1>
+    <p class="mt-4 leading-7">
+      Every event below represents a failure that was caught before it landed —
+      a commit blocked, a destructive command denied, a vulnerable dependency
+      flagged. The lines are produced by
+      <code>pipeline/supervision/logger.py</code>, which appends one JSON
+      object per prevented event to a date-stamped JSONL file. This page
+      reads <code>/prevention_log_sample.jsonl</code> (a committed demo
+      slice); production runs read your local
+      <code>.saica/prevention_log/</code> directory.
+    </p>
+  </section>
+
+  <section class="mb-8 max-w-3xl">
+    <details class="card">
+      <summary class="cursor-pointer font-sans text-sm font-semibold">
+        How to wire your own log
+      </summary>
+      <div class="mt-3 text-sm leading-7 text-ink-muted">
+        <p>
+          The supervisor writes to
+          <code>~/.saica/prevention_log/&lt;YYYY-MM-DD&gt;.jsonl</code>
+          (gitignored). To inspect today's events from a shell:
+        </p>
+        <pre class="mt-2 bg-paper-alt border border-ink/10 rounded p-3 text-xs overflow-x-auto"><code>cat ~/.saica/prevention_log/$(date -u +%Y-%m-%d).jsonl | jq .
+ls -la ~/.saica/prevention_log/   # one file per UTC day</code></pre>
+        <p class="mt-3">
+          To preview your local log on this page during development, drop a
+          symlink or copy at
+          <code>site/public/prevention_log_sample.jsonl</code> and reload —
+          the fetch is plain HTTP. The path stays gitignored outside that
+          one symlink.
+        </p>
+      </div>
+    </details>
+  </section>
+
+  <section class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3" id="pl-stats">
+    <div class="card">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">Events</div>
+      <div class="mt-1 text-2xl font-sans font-semibold" id="pl-stat-total">—</div>
+    </div>
+    <div class="card">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">Distinct tools</div>
+      <div class="mt-1 text-2xl font-sans font-semibold" id="pl-stat-tools">—</div>
+    </div>
+    <div class="card">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">Distinct FMs</div>
+      <div class="mt-1 text-2xl font-sans font-semibold" id="pl-stat-fms">—</div>
+    </div>
+    <div class="card">
+      <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">Span</div>
+      <div class="mt-1 text-sm font-sans" id="pl-stat-span">—</div>
+    </div>
+  </section>
+
+  <section class="mb-4 flex flex-wrap items-center gap-4 text-sm font-sans">
+    <div>
+      <label for="pl-filter-tool" class="text-xs font-semibold text-ink-faint uppercase tracking-wide mr-2">Tool</label>
+      <select id="pl-filter-tool" class="border border-ink/15 rounded px-2 py-1 bg-white">
+        <option value="">all</option>
+      </select>
+    </div>
+    <div>
+      <label for="pl-filter-fm" class="text-xs font-semibold text-ink-faint uppercase tracking-wide mr-2">Failure mode</label>
+      <select id="pl-filter-fm" class="border border-ink/15 rounded px-2 py-1 bg-white">
+        <option value="">all</option>
+      </select>
+    </div>
+    <div>
+      <label for="pl-filter-mech" class="text-xs font-semibold text-ink-faint uppercase tracking-wide mr-2">Mechanism</label>
+      <select id="pl-filter-mech" class="border border-ink/15 rounded px-2 py-1 bg-white">
+        <option value="">all</option>
+      </select>
+    </div>
+    <div class="text-xs text-ink-faint" id="pl-count"></div>
+  </section>
+
+  <section class="mb-8">
+    <div class="overflow-x-auto border border-ink/10 rounded bg-white">
+      <table class="text-sm font-sans w-full" id="pl-table">
+        <thead class="bg-paper-alt text-ink-faint text-xs uppercase tracking-wide sticky top-0">
+          <tr>
+            <th class="text-left px-3 py-2 cursor-pointer select-none" data-sort="ts">When <span class="pl-arrow" data-arrow="ts">▾</span></th>
+            <th class="text-left px-3 py-2 cursor-pointer select-none" data-sort="tool_id">Tool <span class="pl-arrow" data-arrow="tool_id"></span></th>
+            <th class="text-left px-3 py-2 cursor-pointer select-none" data-sort="failure_mode">Failure mode <span class="pl-arrow" data-arrow="failure_mode"></span></th>
+            <th class="text-left px-3 py-2">Mechanism</th>
+            <th class="text-left px-3 py-2">Detail</th>
+            <th class="text-left px-3 py-2">Invoked by</th>
+          </tr>
+        </thead>
+        <tbody id="pl-body">
+          <tr><td colspan="6" class="px-3 py-6 text-center text-ink-faint">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <noscript>
+      <p class="mt-2 text-sm text-ink-faint">
+        JavaScript is disabled. Raw events:
+        <a href="/prevention_log_sample.jsonl"><code>/prevention_log_sample.jsonl</code></a>
+      </p>
+    </noscript>
+  </section>
+
+  <section class="mt-10 max-w-3xl">
+    <h2>What "prevention" means here</h2>
+    <p class="text-sm leading-7">
+      A prevented event is one a supervision tool stopped before it could
+      cause harm — a commit rejected, a tool call denied, a PR opened to
+      patch a CVE. Detection-only events (a scanner that warns but doesn't
+      block) are out of scope; this log is deliberately narrow so the
+      headline number is meaningful. The producer module is
+      <code>pipeline/supervision/logger.py</code>; see also
+      <a href="/tool-coverage">/tool-coverage</a> for which tools cover
+      which failure modes in the KG.
+    </p>
+  </section>
+</BaseLayout>
+
+<script>
+  interface Event {
+    ts: string;
+    tool_id: string;
+    failure_mode: string;
+    mechanism: string;
+    detail: string;
+    invoked_by: string;
+  }
+
+  type SortKey = "ts" | "tool_id" | "failure_mode";
+
+  const BODY = document.getElementById("pl-body") as HTMLTableSectionElement | null;
+  const COUNT = document.getElementById("pl-count") as HTMLElement | null;
+  const STAT_TOTAL = document.getElementById("pl-stat-total") as HTMLElement | null;
+  const STAT_TOOLS = document.getElementById("pl-stat-tools") as HTMLElement | null;
+  const STAT_FMS = document.getElementById("pl-stat-fms") as HTMLElement | null;
+  const STAT_SPAN = document.getElementById("pl-stat-span") as HTMLElement | null;
+  const FILTER_TOOL = document.getElementById("pl-filter-tool") as HTMLSelectElement | null;
+  const FILTER_FM = document.getElementById("pl-filter-fm") as HTMLSelectElement | null;
+  const FILTER_MECH = document.getElementById("pl-filter-mech") as HTMLSelectElement | null;
+  const TABLE = document.getElementById("pl-table") as HTMLTableElement | null;
+
+  let events: Event[] = [];
+  let sortKey: SortKey = "ts";
+  let sortDesc = true;
+
+  function escapeHtml(s: string): string {
+    return String(s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function fmtDisplay(s: string): string {
+    if (!s) return "";
+    const t = s.replace(/_/g, " ");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function relTime(iso: string): string {
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return iso;
+    const diffSec = (Date.now() - t) / 1000;
+    if (diffSec < 60) return `${Math.round(diffSec)}s ago`;
+    if (diffSec < 3600) return `${Math.round(diffSec / 60)}m ago`;
+    if (diffSec < 86400) return `${Math.round(diffSec / 3600)}h ago`;
+    if (diffSec < 86400 * 30) return `${Math.round(diffSec / 86400)}d ago`;
+    if (diffSec < 86400 * 365) return `${Math.round(diffSec / 86400 / 30)}mo ago`;
+    return `${Math.round(diffSec / 86400 / 365)}y ago`;
+  }
+
+  function fmtAbs(iso: string): string {
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return iso;
+    return new Date(t).toISOString().replace("T", " ").replace(".000Z", " UTC");
+  }
+
+  function truncate(s: string, n: number): string {
+    if (!s) return "";
+    if (s.length <= n) return s;
+    return s.slice(0, n - 1) + "…";
+  }
+
+  function parseJsonl(text: string): Event[] {
+    const out: Event[] = [];
+    for (const raw of text.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line) continue;
+      try {
+        const obj = JSON.parse(line) as Event;
+        if (obj && typeof obj.ts === "string") out.push(obj);
+      } catch {
+        // skip malformed lines (and keep going — this is a log)
+      }
+    }
+    return out;
+  }
+
+  function uniqueSorted(xs: string[]): string[] {
+    return Array.from(new Set(xs.filter(Boolean))).sort();
+  }
+
+  function populateFilter(sel: HTMLSelectElement | null, values: string[], display: (v: string) => string): void {
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">all</option>`
+      + values.map((v) => `<option value="${escapeHtml(v)}">${escapeHtml(display(v))}</option>`).join("");
+    if (cur && values.includes(cur)) sel.value = cur;
+  }
+
+  function applyFilters(rows: Event[]): Event[] {
+    const tool = FILTER_TOOL?.value || "";
+    const fm = FILTER_FM?.value || "";
+    const mech = FILTER_MECH?.value || "";
+    return rows.filter((e) =>
+      (!tool || e.tool_id === tool)
+      && (!fm || e.failure_mode === fm)
+      && (!mech || e.mechanism === mech),
+    );
+  }
+
+  function sortRows(rows: Event[]): Event[] {
+    const k = sortKey;
+    const dir = sortDesc ? -1 : 1;
+    return [...rows].sort((a, b) => {
+      const av = (a[k] || "") as string;
+      const bv = (b[k] || "") as string;
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }
+
+  function renderArrows(): void {
+    if (!TABLE) return;
+    for (const el of TABLE.querySelectorAll(".pl-arrow")) {
+      const k = el.getAttribute("data-arrow");
+      if (k === sortKey) {
+        el.textContent = sortDesc ? "▾" : "▴";
+      } else {
+        el.textContent = "";
+      }
+    }
+  }
+
+  function renderStats(): void {
+    if (!STAT_TOTAL || !STAT_TOOLS || !STAT_FMS || !STAT_SPAN) return;
+    STAT_TOTAL.textContent = String(events.length);
+    STAT_TOOLS.textContent = String(uniqueSorted(events.map((e) => e.tool_id)).length);
+    STAT_FMS.textContent = String(uniqueSorted(events.map((e) => e.failure_mode)).length);
+    if (!events.length) { STAT_SPAN.textContent = "—"; return; }
+    const sorted = [...events].sort((a, b) => (a.ts < b.ts ? -1 : 1));
+    const oldest = sorted[0].ts;
+    const newest = sorted[sorted.length - 1].ts;
+    STAT_SPAN.textContent = `${fmtAbs(oldest).slice(0, 10)} → ${fmtAbs(newest).slice(0, 10)}`;
+  }
+
+  function renderTable(): void {
+    if (!BODY || !COUNT) return;
+    const filtered = applyFilters(events);
+    const rows = sortRows(filtered);
+    if (!rows.length) {
+      BODY.innerHTML = `<tr><td colspan="6" class="px-3 py-6 text-center text-ink-faint">`
+        + `No events match these filters.</td></tr>`;
+    } else {
+      BODY.innerHTML = rows.map((e) => {
+        const fmDisp = fmtDisplay(e.failure_mode);
+        const detailFull = e.detail || "";
+        const detailShort = truncate(detailFull, 80);
+        return `<tr class="border-t border-ink/10 align-top">`
+          + `<td class="px-3 py-1.5 whitespace-nowrap text-ink-muted" title="${escapeHtml(fmtAbs(e.ts))}">`
+          + `${escapeHtml(relTime(e.ts))}</td>`
+          + `<td class="px-3 py-1.5">`
+          + `<a href="/tools/${encodeURIComponent(e.tool_id)}" class="text-ink hover:text-accent">${escapeHtml(e.tool_id)}</a>`
+          + `</td>`
+          + `<td class="px-3 py-1.5">`
+          + `<a href="/failure-modes/${encodeURIComponent(e.failure_mode)}" class="text-ink hover:text-accent">${escapeHtml(fmDisp)}</a>`
+          + `</td>`
+          + `<td class="px-3 py-1.5 text-ink-muted">${escapeHtml(e.mechanism || "")}</td>`
+          + `<td class="px-3 py-1.5 font-mono text-xs text-ink-muted" title="${escapeHtml(detailFull)}">`
+          + `${escapeHtml(detailShort)}</td>`
+          + `<td class="px-3 py-1.5"><span class="chip">${escapeHtml(e.invoked_by || "")}</span></td>`
+          + `</tr>`;
+      }).join("");
+    }
+    COUNT.textContent = `${rows.length} of ${events.length} event${events.length === 1 ? "" : "s"} shown`;
+    renderArrows();
+  }
+
+  function wireSortHeaders(): void {
+    if (!TABLE) return;
+    for (const th of TABLE.querySelectorAll<HTMLElement>("th[data-sort]")) {
+      th.addEventListener("click", () => {
+        const k = th.getAttribute("data-sort") as SortKey | null;
+        if (!k) return;
+        if (k === sortKey) {
+          sortDesc = !sortDesc;
+        } else {
+          sortKey = k;
+          sortDesc = true;
+        }
+        renderTable();
+      });
+    }
+  }
+
+  function wireFilters(): void {
+    for (const sel of [FILTER_TOOL, FILTER_FM, FILTER_MECH]) {
+      sel?.addEventListener("change", renderTable);
+    }
+  }
+
+  async function init(): Promise<void> {
+    try {
+      const res = await fetch("/prevention_log_sample.jsonl", { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      events = parseJsonl(text);
+    } catch (err) {
+      if (BODY) {
+        BODY.innerHTML = `<tr><td colspan="6" class="px-3 py-6 text-center text-ink-faint">`
+          + `Failed to load /prevention_log_sample.jsonl (${escapeHtml(String(err))}). `
+          + `In production this page reads ~/.saica/prevention_log/&lt;date&gt;.jsonl.</td></tr>`;
+      }
+      return;
+    }
+    populateFilter(FILTER_TOOL, uniqueSorted(events.map((e) => e.tool_id)), (v) => v);
+    populateFilter(FILTER_FM, uniqueSorted(events.map((e) => e.failure_mode)), fmtDisplay);
+    populateFilter(FILTER_MECH, uniqueSorted(events.map((e) => e.mechanism)), (v) => v);
+    renderStats();
+    wireSortHeaders();
+    wireFilters();
+    renderTable();
+  }
+
+  init();
+</script>

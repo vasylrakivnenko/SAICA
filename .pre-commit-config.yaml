@@ -1,0 +1,61 @@
+# SAICA-KG pre-commit configuration
+#
+# This file is the project's first explicit *prevention*-paradigm supervisor.
+# Each hook below maps to one or more SAICA-KG entries; we cite them so the
+# supervision-on-supervision chain is auditable (the same pattern v0.2.5 used
+# for tool YAML headers).
+#
+# - pre-commit framework itself
+#     no entry yet in data/tools/ (this config is the initial KG-driven adoption)
+# - semgrep
+#     data/tools/semgrep.yml — control_paradigm: detection. Wired here it is
+#     *escalated* to prevention because the commit is denied before it lands.
+# - end-of-file-fixer / trailing-whitespace
+#     data/failure_modes/scope_creep.yml — eliminates spurious whitespace
+#     diffs that nudge agents toward unrelated edits.
+# - check-yaml / check-json
+#     data/failure_modes/logic_error.yml — keeps data/*.yml and data/*.json
+#     parseable so downstream loaders don't crash mid-pipeline.
+# - check-added-large-files / detect-private-key
+#     data/failure_modes/security_vulnerability.yml — pre-commit's classic
+#     credential and binary-blob guard.
+# - ruff / black
+#     language hygiene; not in the KG but cheap prevention against
+#     style-drift PR noise that reviewers would otherwise have to flag.
+#
+# Denials should be reflected as JSONL events under .saica/prevention_log/.
+# See CLAUDE.md and pipeline/supervision/cli.py for the wiring.
+
+minimum_pre_commit_version: "3.0"
+default_language_version:
+  python: python3
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # Prevent malformed data/*.yml from being committed.
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=2000"]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.96.0
+    hooks:
+      - id: semgrep
+        args: ["--config=auto", "--error", "--quiet"]

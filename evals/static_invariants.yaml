@@ -1,0 +1,47 @@
+# Static-data invariants over recommendations.json.
+#
+# Each test is a no-op promptfoo case (the echo provider just echoes the
+# `question` var back) whose `python:` assertion walks the on-disk
+# fixtures and returns pass/fail. This keeps the suite hermetic — no
+# network, no Kimi key, no flake.
+#
+# Cited KG nodes:
+#   - data/tools/promptfoo.yml — supervisor we install (paradigm=detection)
+#   - data/failure_modes/fabrication.yml — the FM these tests defend
+#   - data/failure_modes/scope_creep.yml — peer-agent contamination check
+
+- description: every recommendations.json tool_id resolves to data/tools/<id>.yml
+  vars:
+    question: "no-fabrication: tool_ids resolve"
+  metadata:
+    tags: [static, invariant]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_tool_ids_resolve
+
+- description: every failure_mode is one of the 11 canonical SAICA ids
+  vars:
+    question: "no-fabrication: failure_modes are canonical"
+  metadata:
+    tags: [static, invariant]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_failure_modes_canonical
+
+- description: blocklist (e.g. comfyui) never appears as a recommended tool
+  vars:
+    question: "scope_creep: blocklist honoured"
+  metadata:
+    tags: [static, invariant]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_blocklist_honoured
+
+- description: per-agent recommendations never include peer coding agents
+  vars:
+    question: "MECE: no peer-agent contamination"
+  metadata:
+    tags: [static, invariant, mece]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_no_peer_agents_recommended

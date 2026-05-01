@@ -29,6 +29,7 @@ research/cache/
 
 # Postgres Docker volume
 .postgres-data/
+.saica/
 # Per-day API usage counters (Elicit budget, etc.)
 .pipeline/
 # Sentence-transformer weights + encoded vectors

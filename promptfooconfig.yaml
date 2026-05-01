@@ -1,0 +1,53 @@
+# promptfoo configuration for SAICA-KG self-supervision.
+#
+# Why this exists: the KG's recommender (saica_recommend(failure_modes=
+# ['fabrication','scope_creep','logic_error','security_vulnerability',
+# 'test_manipulation'])) names promptfoo as the top fit for the CLI +
+# library + ci_app cell — so we install what we recommend and gate our
+# own /ask backend on it.
+#
+# References:
+#   - data/tools/promptfoo.yml — KG entry (paradigm=detection,
+#     surfaces=cli/library/ci_app, addresses=fabrication +
+#     security_vulnerability + logic_error + scope_creep +
+#     test_manipulation)
+#   - .github/workflows/promptfoo.yml — the runner (mirrors
+#     .github/workflows/semgrep.yml style)
+#   - evals/_assertions.py — stdlib-only Python helpers used by the
+#     `python:` assertion type
+#
+# Test groups (each backed by a YAML file under evals/):
+#   1. static_invariants     — recommendations.json shape + id resolution
+#                              (no LLM call; uses the `echo` provider)
+#   2. recommendations_quality — coverage / size guarantees per tier
+#   3. ask_probe             — live probe of pipeline.ask.server, only
+#                              runs when the ASK_API env var is set;
+#                              otherwise the suite no-ops it gracefully
+
+description: SAICA-KG self-supervision — KG-data invariants + (optional) /ask probe
+
+# A trivial pass-through prompt. The first two test groups assert against
+# fixture data via Python helpers, so the model output is irrelevant —
+# the `echo` provider just echoes the rendered prompt back. The ask_probe
+# group overrides the provider per-test (see evals/ask_probe.yaml).
+prompts:
+  - "{{question}}"
+
+providers:
+  # `echo` is promptfoo's built-in no-op provider: returns the rendered
+  # prompt verbatim. Perfect for static-data tests where the assertion
+  # examines on-disk fixtures rather than an LLM response. No API key,
+  # no network call, no Kimi cost.
+  - id: echo
+
+tests:
+  # Static-data invariants — fast, deterministic, no network.
+  - file://evals/static_invariants.yaml
+
+  # Higher-level coverage/quality guarantees.
+  - file://evals/recommendations_quality.yaml
+
+  # Live /ask probe — gated on ASK_API env var; tests inside this file
+  # use a `skip:` guard so the suite passes cleanly when the var is
+  # unset (e.g. default CI without a Kimi key).
+  - file://evals/ask_probe.yaml

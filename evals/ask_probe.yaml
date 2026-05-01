@@ -1,0 +1,39 @@
+# Live probe of the /ask backend (pipeline.ask.server).
+#
+# Gating: every assertion in this file short-circuits with `pass: True,
+# reason: "skipped: ASK_API unset"` when the ASK_API env var is empty.
+# This lets the default CI run (no Kimi key, no live backend) pass the
+# whole suite cleanly. To exercise the probe locally:
+#
+#     ASK_API=http://localhost:4322/ask \
+#         npx --yes promptfoo@latest eval --no-cache
+#
+# (Start the backend in a second terminal: `.venv/bin/python -m
+# pipeline.ask.server`.)
+#
+# We use the `echo` provider here too — the actual HTTP call to /ask
+# happens inside the Python assertion (see _assertions.py:_ask), so the
+# skip path stays free of spurious network errors. promptfoo has no
+# top-level `skip:` field as of v0.121, hence the assertion-level guard.
+#
+# Cited KG nodes:
+#   - data/tools/promptfoo.yml — supervisor under test (CI gate)
+#   - data/failure_modes/fabrication.yml — the FM these probes defend
+
+- description: /ask recommends a known supervisor for scope_creep + Python + GHA
+  vars:
+    question: "live: scope_creep supervisor recommendation"
+  metadata:
+    tags: [live, ask_probe, scope_creep]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_ask_recommends_supervisor
+
+- description: /ask distinguishes fabrication vs obsolescence without fabricating a third FM
+  vars:
+    question: "live: fabrication vs obsolescence"
+  metadata:
+    tags: [live, ask_probe, fabrication]
+  assert:
+    - type: python
+      value: file://evals/_assertions.py:assert_ask_distinguishes_failure_modes
