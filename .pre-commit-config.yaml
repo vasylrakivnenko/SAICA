@@ -59,3 +59,30 @@ repos:
     hooks:
       - id: semgrep
         args: ["--config=auto", "--error", "--quiet"]
+
+  # Pre-push gate — slow checks that would gum up every commit but must pass
+  # before code reaches the remote. Targets the three high-severity FMs that
+  # tool-shaped supervisors don't cover for this repo's shape:
+  #   - cascading_failure       (pytest catches one fix breaking another)
+  #   - incomplete_execution    (pytest fails if "done" doesn't pass tests)
+  #   - logic_error             (validator/cli.py catches malformed KG nodes)
+  # These run on `git push`, not `git commit`, so day-to-day editing stays
+  # snappy.  Install with:  pre-commit install --hook-type pre-push
+  - repo: local
+    hooks:
+      # Pinned to .venv/bin/python on purpose: the project's deps live there
+      # (validator/requirements.txt + pipeline/requirements.txt). `language:
+      # system` runs from the repo root, so this relative path works.
+      - id: pytest
+        name: pytest (pipeline + tests)
+        entry: .venv/bin/python -m pytest pipeline/ tests/ -q
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: kg-validator
+        name: validator/cli.py — KG schema + cross-node invariants
+        entry: .venv/bin/python validator/cli.py
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

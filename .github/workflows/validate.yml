@@ -39,3 +39,9 @@ jobs:
 
       - name: Check manifest is up to date
         run: python -m validator.generate_manifest --check
+
+      - name: Check SKILLS.md is up to date
+        run: python -m validator.generate_skills --check
+
+      - name: Check RECOMMENDATIONS artifacts are up to date
+        run: python -m validator.generate_recommendations --check
