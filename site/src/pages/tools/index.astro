@@ -1,6 +1,17 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph, facetLabel, FACET_LABELS } from '../../lib/data.ts';
+import maturityData from '../../../public/maturity.json';
+
+const maturityTools = (maturityData as { tools: Record<string, { tier: string; is_override: boolean }> }).tools;
+const TIER_COLORS: Record<string, string> = {
+  '1A': 'bg-emerald-600 text-white',
+  '1B': 'bg-emerald-500 text-white',
+  '2A': 'bg-amber-400 text-stone-900',
+  '2B': 'bg-amber-300 text-stone-900',
+  '3':  'bg-orange-400 text-stone-900',
+  '4':  'bg-stone-400 text-white',
+};
 
 // Default render order: by stars desc (tools without stars last), then by name.
 const tools = Object.values(graph.tools).slice().sort((a, b) => {
@@ -136,6 +147,14 @@ function formatStars(n: number | undefined): string {
             {typeof t.stars === 'number' && (
               <span title={t.stars_updated_at ? `GitHub stars (refreshed ${t.stars_updated_at})` : 'GitHub stars'}>
                 <span aria-hidden="true">★</span> {formatStars(t.stars)}
+              </span>
+            )}
+            {maturityTools[t.id] && (
+              <span
+                class={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold ${TIER_COLORS[maturityTools[t.id].tier] ?? 'bg-stone-300'}`}
+                title={`Maturity tier${maturityTools[t.id].is_override ? ' (curator override)' : ''}`}
+              >
+                {maturityTools[t.id].tier}
               </span>
             )}
             <span>{t.maturity_status}</span>

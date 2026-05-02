@@ -45,3 +45,6 @@ jobs:
 
       - name: Check RECOMMENDATIONS artifacts are up to date
         run: python -m validator.generate_recommendations --check
+
+      - name: Check maturity.json is up to date
+        run: python -m validator.generate_maturity --check

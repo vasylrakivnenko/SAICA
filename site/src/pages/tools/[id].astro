@@ -3,6 +3,30 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph, facetLabel, paperLabel } from '../../lib/data.ts';
 import type { Tool } from '../../lib/types.ts';
+import maturityData from '../../../public/maturity.json';
+
+// Auto-computed maturity tier (Stage 9 of the v2 ingestion pipeline).
+// Source of truth: pipeline/maturity/score.py. Regenerate via:
+//   python -m validator.generate_maturity
+type MaturityRow = {
+  tier: '1A'|'1B'|'2A'|'2B'|'3'|'4';
+  computed_tier: '1A'|'1B'|'2A'|'2B'|'3'|'4';
+  score: number;
+  facets: Record<string, number>;
+  notes: string[];
+  is_override: boolean;
+  override: { tier: string; justification: string; by?: string; at?: string } | null;
+};
+const maturityTools = (maturityData as { tools: Record<string, MaturityRow> }).tools;
+
+const TIER_COLORS: Record<string, string> = {
+  '1A': 'bg-emerald-600 text-white',
+  '1B': 'bg-emerald-500 text-white',
+  '2A': 'bg-amber-400 text-stone-900',
+  '2B': 'bg-amber-300 text-stone-900',
+  '3':  'bg-orange-400 text-stone-900',
+  '4':  'bg-stone-400 text-white',
+};
 
 export function getStaticPaths() {
   // Re-import inside getStaticPaths for type safety.
@@ -15,6 +39,7 @@ export function getStaticPaths() {
 
 interface Props { tool: Tool }
 const { tool } = Astro.props;
+const maturity = maturityTools[tool.id];
 
 const composesWith = tool.composes_with.map((id) => graph.tools[id]).filter(Boolean);
 const feedsInto = tool.feeds_into.map((id) => graph.tools[id]).filter(Boolean);
@@ -52,10 +77,55 @@ const starsLabel = typeof tool.stars === 'number'
     <span class="chip-accent">{facetLabel('temporal_phase', tool.temporal_phase)}</span>
     <span class="chip-accent">{facetLabel('autonomy_level', tool.autonomy_level)}</span>
     <span class="chip">{facetLabel('maturity_status', tool.maturity_status)}</span>
+    {maturity && (
+      <span
+        class={`inline-flex items-center rounded px-2 py-0.5 text-xs font-bold ${TIER_COLORS[maturity.tier] ?? 'bg-stone-300'}`}
+        title={`Maturity tier (auto-computed score=${maturity.score})${maturity.is_override ? ' — curator override' : ''}`}
+      >
+        Tier {maturity.tier}
+        {maturity.is_override && <span class="ml-1 rounded bg-white/30 px-1 text-[10px] uppercase">override</span>}
+      </span>
+    )}
     {tool.locus_of_control.map((l) => (
       <span class="chip" title="Locus of control">{facetLabel('locus_of_control', l)}</span>
     ))}
   </div>
+
+  {maturity && (
+    <details class="mt-3 max-w-3xl rounded border border-ink/10 bg-paper-soft p-3 text-sm">
+      <summary class="cursor-pointer font-semibold">
+        Maturity tier details
+      </summary>
+      <div class="mt-2 space-y-2 leading-6">
+        <p>
+          Computed tier: <strong>{maturity.computed_tier}</strong>
+          (raw score <code>{maturity.score}</code>).
+          Effective tier: <strong>{maturity.tier}</strong>
+          {maturity.is_override && <span> — curator override</span>}.
+        </p>
+        <p class="text-xs text-ink-faint">
+          Facets:
+          {Object.entries(maturity.facets).map(([k, v]) => (
+            <span class="ml-2"><code>{k}</code>={v}</span>
+          ))}
+        </p>
+        {maturity.notes.length > 0 && (
+          <p class="text-xs text-amber-700">{maturity.notes.join(' · ')}</p>
+        )}
+        {maturity.override && (
+          <p class="text-xs text-ink-muted">
+            Override justification: <em>{maturity.override.justification}</em>
+            {maturity.override.by && <span> — {maturity.override.by}</span>}
+            {maturity.override.at && <span> ({maturity.override.at})</span>}
+          </p>
+        )}
+        <p class="text-xs text-ink-faint">
+          Source of truth:
+          <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/pipeline/maturity/score.py" class="ml-1 underline">pipeline/maturity/score.py</a>
+        </p>
+      </div>
+    </details>
+  )}
 
   <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
     <div>
