@@ -380,6 +380,88 @@ def discover(
 
 
 # ---------------------------------------------------------------------------
+# Stage 4 — composite quality gate (optional, kicks in when --enrichment
+# JSON is supplied). See pipeline/discovery/quality_gate.py for the rules.
+# ---------------------------------------------------------------------------
+
+
+def apply_quality_gate(
+    candidates: list[dict[str, Any]],
+    enrichment: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Annotate candidates with a Stage-4 gate verdict + re-sort.
+
+    ``enrichment`` is keyed by ``"owner/repo"`` (lowercase) and carries
+    per-repo signals: ``stars``, ``pushed_at``, ``archived``,
+    ``license_spdx``, etc. Candidates with no enrichment row stay in
+    the queue but are tagged ``gate_decision: "unknown"`` — better to
+    surface them with a warning than to drop them silently.
+
+    Re-sort key after gating:
+      1. Gate-PASS first (rescued from the long tail)
+      2. Within PASS: stars desc, then source_count desc, then name
+      3. Then UNKNOWN (no enrichment) — ordered by source_count desc
+      4. Then FAIL — same secondary order
+
+    The result is the same list of dicts, mutated with new keys, sorted.
+    """
+    from pipeline.discovery.quality_gate import (
+        CandidateSignals,
+        GateDecision,
+        evaluate,
+    )
+
+    for cand in candidates:
+        key = f"{cand['owner']}/{cand['repo']}".lower()
+        enriched = enrichment.get(key)
+        if not enriched:
+            cand["gate_decision"] = "unknown"
+            cand["gate_passed_criteria"] = []
+            cand["gate_explanation"] = "No enrichment data available."
+            cand["stars"] = None
+            continue
+
+        signals = CandidateSignals(
+            stars=enriched.get("stars"),
+            awesome_list_count=cand["source_count"],
+            org=cand["owner"],
+            archived=enriched.get("archived"),
+        )
+        result = evaluate(signals)
+        cand["gate_decision"] = result.decision.value
+        cand["gate_passed_criteria"] = result.passed_criteria
+        cand["gate_explanation"] = result.explanation
+        cand["stars"] = enriched.get("stars")
+        cand["pushed_at"] = enriched.get("pushed_at")
+        cand["archived"] = enriched.get("archived", False)
+        cand["license_spdx"] = enriched.get("license_spdx")
+        cand["language"] = enriched.get("language")
+
+    def sort_key(c: dict[str, Any]) -> tuple[int, int, int, str]:
+        bucket = {"pass": 0, "unknown": 1, "fail": 2}.get(c["gate_decision"], 3)
+        # Negate stars / source_count so higher values sort first.
+        stars = -(c.get("stars") or 0)
+        sc = -c.get("source_count", 0)
+        return (bucket, stars, sc, c["full_name"].lower())
+
+    candidates.sort(key=sort_key)
+    return candidates
+
+
+def load_enrichment(path: Path) -> dict[str, dict[str, Any]]:
+    """Load the enrichment JSON written by the long-tail enrichment
+    runner. Keyed by ``"owner/repo"`` (lowercase) for fast lookup."""
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    out: dict[str, dict[str, Any]] = {}
+    for row in raw.get("candidates", []):
+        owner = (row.get("owner") or "").strip()
+        repo = (row.get("repo") or "").strip()
+        if owner and repo:
+            out[f"{owner}/{repo}".lower()] = row
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
 
@@ -517,6 +599,18 @@ def main(argv: list[str] | None = None) -> int:
         default=str(RESEARCH_DIR),
         help="Output directory (default: research/).",
     )
+    ap.add_argument(
+        "--enrichment",
+        type=Path,
+        default=None,
+        help=(
+            "Path to a per-candidate enrichment JSON (stars, pushed_at, "
+            "archived, license_spdx — produced by the long-tail enrichment "
+            "agent). When supplied, applies the Stage 4 composite quality "
+            "gate (pipeline.discovery.quality_gate) and re-sorts the "
+            "candidates so gate-PASS rows surface first."
+        ),
+    )
     args = ap.parse_args(argv)
 
     if args.sources:
@@ -538,6 +632,21 @@ def main(argv: list[str] | None = None) -> int:
 
     today = dt.date.today()
     candidates, fetch_errors, per_source_counts = discover(sources, since=args.since)
+
+    if args.enrichment is not None:
+        if not args.enrichment.exists():
+            print(f"--enrichment file not found: {args.enrichment}", file=sys.stderr)
+            return 2
+        enrichment = load_enrichment(args.enrichment)
+        candidates = apply_quality_gate(candidates, enrichment)
+        n_pass = sum(1 for c in candidates if c.get("gate_decision") == "pass")
+        n_fail = sum(1 for c in candidates if c.get("gate_decision") == "fail")
+        n_unk = sum(1 for c in candidates if c.get("gate_decision") == "unknown")
+        print(
+            f"Quality gate: {n_pass} PASS, {n_fail} FAIL, "
+            f"{n_unk} UNKNOWN (no enrichment row)."
+        )
+
     md_path, json_path = write_outputs(
         candidates,
         fetch_errors,

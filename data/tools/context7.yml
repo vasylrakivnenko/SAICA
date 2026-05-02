@@ -1,0 +1,76 @@
+id: context7
+name: Context7
+tagline: Up-to-date, version-pinned library documentation for coding agents — delivered as an MCP server.
+description: >
+  Context7 is Upstash's MCP server that fetches current, version-pinned
+  documentation for the libraries an agent is about to use, then injects
+  it into the agent's context window before generation. Targets the same
+  training-data-staleness root cause as Andrew Ng's ContextHub but ships
+  as a hosted service plus open-source MCP client. Practitioners install
+  the MCP server in their coding agent and invoke `use context7` in the
+  prompt to ground generation in real, current API surfaces — guarding
+  against fabricated APIs and obsolete-syntax suggestions.
+
+first_released: 2025-04-01
+last_updated: 2026-05-01
+maturity_status: stable
+
+published_by: upstash
+repository_url: https://github.com/upstash/context7
+documentation_url: https://context7.com
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: pre_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - fabrication
+  - obsolescence
+
+locus_of_control:
+  - context
+
+integration_surfaces:
+  - mcp_server
+  - cli
+
+implements_techniques:
+  - doc-grounded-rag
+  - version-pinned-docs
+  - mcp-context-injection
+
+security_notes: >
+  MCP server fetches docs from Context7's hosted index. Practitioners
+  who can't accept third-party fetches can self-host the server — the
+  source is MIT-licensed. No code execution; documentation strings are
+  inserted into the prompt only.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+  - javascript
+  - typescript
+  - go
+  - rust
+
+inclusion_rationale: >
+  Occupies the same prevention × pre_generation × fully_autonomous cell
+  as ContextHub, with the same locus_of_control (context). Distinct
+  from ContextHub by being a hosted, MCP-native service with broader
+  language coverage; both belong in the catalog because they're
+  structurally different bets on the doc-grounding problem (hosted
+  index vs. self-hosted skill library). Surfaced by the v0.5.1
+  long-tail enrichment pass (54k stars, originally buried at row
+  2,488 of 2,675 candidates because it appeared in only 1 awesome-list).
+
+editorial_notes: >
+  Added 2026-05-01 (v0.5.1) following the Stage 4 quality-gate
+  enrichment pass that surfaced it from the long tail. Motivating
+  example for that workstream.
+stars: 54254
+stars_updated_at: '2026-05-01'

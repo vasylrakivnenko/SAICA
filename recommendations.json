@@ -4679,6 +4679,46 @@
     "fabrication": [
       {
         "addresses_failure_modes": [
+          "logic_error",
+          "fabrication"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "ide_plugin"
+        ],
+        "stars": 18000,
+        "tagline": "Static type checker for Python. Catches mismatched types before runtime.",
+        "temporal_phase": "post_generation",
+        "tool_id": "mypy",
+        "tool_name": "mypy",
+        "trending": false,
+        "url": "/tools/mypy"
+      },
+      {
+        "addresses_failure_modes": [
+          "logic_error",
+          "fabrication"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "ide_plugin"
+        ],
+        "stars": 14000,
+        "tagline": "Microsoft's fast static type checker for Python.",
+        "temporal_phase": "post_generation",
+        "tool_id": "pyright",
+        "tool_name": "Pyright",
+        "trending": false,
+        "url": "/tools/pyright"
+      },
+      {
+        "addresses_failure_modes": [
           "fabrication",
           "context_pollution"
         ],
@@ -4695,47 +4735,30 @@
         "tool_name": "ragflow",
         "trending": false,
         "url": "/tools/ragflow"
-      },
+      }
+    ],
+    "incomplete_execution": [
       {
         "addresses_failure_modes": [
-          "fabrication",
-          "context_pollution",
-          "obsolescence"
-        ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "detection",
-        "integration_surfaces": [
-          "library",
-          "http_service"
-        ],
-        "stars": 59931,
-        "tagline": "Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.",
-        "temporal_phase": "post_generation",
-        "tool_id": "pathway-llm-app",
-        "tool_name": "llm-app",
-        "trending": false,
-        "url": "/tools/pathway-llm-app"
-      },
-      {
-        "addresses_failure_modes": [
-          "logic_error",
-          "fabrication"
+          "incomplete_execution",
+          "test_manipulation",
+          "logic_error"
         ],
         "autonomy_level": "fully_autonomous",
         "control_paradigm": "detection",
         "integration_surfaces": [
-          "library"
+          "cli",
+          "ci_app",
+          "ide_plugin"
         ],
-        "stars": 26835,
-        "tagline": "Minimalist code-agent library that expresses actions as executed Python.",
+        "stars": 12000,
+        "tagline": "Python test framework — discipline gate for \"done means tests pass.\"",
         "temporal_phase": "post_generation",
-        "tool_id": "smolagents",
-        "tool_name": "Smolagents",
+        "tool_id": "pytest",
+        "tool_name": "pytest",
         "trending": false,
-        "url": "/tools/smolagents"
-      }
-    ],
-    "incomplete_execution": [
+        "url": "/tools/pytest"
+      },
       {
         "addresses_failure_modes": [
           "fabrication",
@@ -4775,50 +4798,49 @@
         "tool_name": "voltagent",
         "trending": false,
         "url": "/tools/voltagent"
-      },
-      {
-        "addresses_failure_modes": [
-          "fabrication",
-          "scope_creep",
-          "incomplete_execution",
-          "context_pollution",
-          "cascading_failure"
-        ],
-        "autonomy_level": "full_hitl",
-        "control_paradigm": "detection",
-        "integration_surfaces": [
-          "web_app",
-          "http_service"
-        ],
-        "stars": 5427,
-        "tagline": "Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.",
-        "temporal_phase": "post_generation",
-        "tool_id": "coze-loop",
-        "tool_name": "coze-loop",
-        "trending": false,
-        "url": "/tools/coze-loop"
       }
     ],
     "logic_error": [
       {
         "addresses_failure_modes": [
           "logic_error",
-          "context_pollution",
           "scope_creep"
         ],
         "autonomy_level": "fully_autonomous",
         "control_paradigm": "detection",
         "integration_surfaces": [
-          "http_service",
-          "library"
+          "cli",
+          "ci_app",
+          "ide_plugin"
         ],
-        "stars": null,
-        "tagline": "Hosted LLM observability, tracing, and evaluation platform.",
+        "stars": 30000,
+        "tagline": "Extremely fast Python linter and formatter, written in Rust.",
         "temporal_phase": "post_generation",
-        "tool_id": "langsmith",
-        "tool_name": "LangSmith",
+        "tool_id": "ruff",
+        "tool_name": "Ruff",
         "trending": false,
-        "url": "/tools/langsmith"
+        "url": "/tools/ruff"
+      },
+      {
+        "addresses_failure_modes": [
+          "logic_error",
+          "scope_creep",
+          "security_vulnerability"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "ide_plugin"
+        ],
+        "stars": 25000,
+        "tagline": "Pluggable JavaScript/TypeScript linter and code-quality enforcer.",
+        "temporal_phase": "post_generation",
+        "tool_id": "eslint",
+        "tool_name": "ESLint",
+        "trending": false,
+        "url": "/tools/eslint"
       },
       {
         "addresses_failure_modes": [
@@ -4828,35 +4850,17 @@
         "autonomy_level": "fully_autonomous",
         "control_paradigm": "detection",
         "integration_surfaces": [
-          "library"
+          "cli",
+          "ci_app",
+          "ide_plugin"
         ],
-        "stars": 26835,
-        "tagline": "Minimalist code-agent library that expresses actions as executed Python.",
+        "stars": 18000,
+        "tagline": "Static type checker for Python. Catches mismatched types before runtime.",
         "temporal_phase": "post_generation",
-        "tool_id": "smolagents",
-        "tool_name": "Smolagents",
+        "tool_id": "mypy",
+        "tool_name": "mypy",
         "trending": false,
-        "url": "/tools/smolagents"
-      },
-      {
-        "addresses_failure_modes": [
-          "logic_error",
-          "context_pollution",
-          "scope_creep"
-        ],
-        "autonomy_level": "fully_autonomous",
-        "control_paradigm": "detection",
-        "integration_surfaces": [
-          "http_service",
-          "library"
-        ],
-        "stars": 25839,
-        "tagline": "Open-source LLM engineering platform for tracing, evals, and prompt management.",
-        "temporal_phase": "post_generation",
-        "tool_id": "langfuse",
-        "tool_name": "Langfuse",
-        "trending": false,
-        "url": "/tools/langfuse"
+        "url": "/tools/mypy"
       }
     ],
     "obsolescence": [
@@ -4922,6 +4926,44 @@
     "scope_creep": [
       {
         "addresses_failure_modes": [
+          "scope_creep"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "prevention",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "ide_plugin"
+        ],
+        "stars": 50000,
+        "tagline": "Opinionated code formatter for JS/TS/CSS/HTML. Ends style debates.",
+        "temporal_phase": "post_generation",
+        "tool_id": "prettier",
+        "tool_name": "Prettier",
+        "trending": false,
+        "url": "/tools/prettier"
+      },
+      {
+        "addresses_failure_modes": [
+          "scope_creep"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "prevention",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "ide_plugin"
+        ],
+        "stars": 39000,
+        "tagline": "Opinionated Python code formatter. Removes style argument from PR review.",
+        "temporal_phase": "post_generation",
+        "tool_id": "black",
+        "tool_name": "Black",
+        "trending": false,
+        "url": "/tools/black"
+      },
+      {
+        "addresses_failure_modes": [
           "scope_creep",
           "context_pollution"
         ],
@@ -4937,48 +4979,48 @@
         "tool_name": "LangGraph",
         "trending": false,
         "url": "/tools/langgraph"
-      },
+      }
+    ],
+    "security_vulnerability": [
       {
         "addresses_failure_modes": [
           "logic_error",
-          "context_pollution",
-          "scope_creep"
+          "scope_creep",
+          "security_vulnerability"
         ],
         "autonomy_level": "fully_autonomous",
         "control_paradigm": "detection",
         "integration_surfaces": [
-          "http_service",
-          "library"
+          "cli",
+          "ci_app",
+          "ide_plugin"
         ],
-        "stars": null,
-        "tagline": "Hosted LLM observability, tracing, and evaluation platform.",
+        "stars": 25000,
+        "tagline": "Pluggable JavaScript/TypeScript linter and code-quality enforcer.",
         "temporal_phase": "post_generation",
-        "tool_id": "langsmith",
-        "tool_name": "LangSmith",
+        "tool_id": "eslint",
+        "tool_name": "ESLint",
         "trending": false,
-        "url": "/tools/langsmith"
+        "url": "/tools/eslint"
       },
       {
         "addresses_failure_modes": [
-          "scope_creep",
           "security_vulnerability"
         ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
         "integration_surfaces": [
-          "library",
-          "web_app"
+          "cli",
+          "ci_app"
         ],
-        "stars": 89651,
-        "tagline": "Make websites accessible for AI agents.",
+        "stars": 6000,
+        "tagline": "Security linter for Python. Catches common code-level vulnerabilities.",
         "temporal_phase": "post_generation",
-        "tool_id": "browser-use",
-        "tool_name": "browser-use",
+        "tool_id": "bandit",
+        "tool_name": "Bandit",
         "trending": false,
-        "url": "/tools/browser-use"
-      }
-    ],
-    "security_vulnerability": [
+        "url": "/tools/bandit"
+      },
       {
         "addresses_failure_modes": [
           "security_vulnerability",
@@ -4997,45 +5039,6 @@
         "tool_name": "Snyk",
         "trending": false,
         "url": "/tools/snyk"
-      },
-      {
-        "addresses_failure_modes": [
-          "security_vulnerability",
-          "supply_chain_attack",
-          "fabrication"
-        ],
-        "autonomy_level": "fully_autonomous",
-        "control_paradigm": "detection",
-        "integration_surfaces": [
-          "library",
-          "cli"
-        ],
-        "stars": 1566,
-        "tagline": "Open-source LLM red-teaming framework from Confident AI with 40+ attack vulnerabilities.",
-        "temporal_phase": "post_generation",
-        "tool_id": "confident-ai-deepteam",
-        "tool_name": "DeepTeam",
-        "trending": false,
-        "url": "/tools/confident-ai-deepteam"
-      },
-      {
-        "addresses_failure_modes": [
-          "scope_creep",
-          "security_vulnerability"
-        ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
-        "integration_surfaces": [
-          "library",
-          "web_app"
-        ],
-        "stars": 89651,
-        "tagline": "Make websites accessible for AI agents.",
-        "temporal_phase": "post_generation",
-        "tool_id": "browser-use",
-        "tool_name": "browser-use",
-        "trending": false,
-        "url": "/tools/browser-use"
       }
     ],
     "supply_chain_attack": [
@@ -5102,6 +5105,47 @@
     "test_manipulation": [
       {
         "addresses_failure_modes": [
+          "incomplete_execution",
+          "test_manipulation",
+          "logic_error"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "ide_plugin"
+        ],
+        "stars": 12000,
+        "tagline": "Python test framework — discipline gate for \"done means tests pass.\"",
+        "temporal_phase": "post_generation",
+        "tool_id": "pytest",
+        "tool_name": "pytest",
+        "trending": false,
+        "url": "/tools/pytest"
+      },
+      {
+        "addresses_failure_modes": [
+          "test_manipulation",
+          "incomplete_execution"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "cli",
+          "ci_app",
+          "library"
+        ],
+        "stars": 3000,
+        "tagline": "Code coverage measurement for Python. Detects test-manipulation by surfacing uncovered code.",
+        "temporal_phase": "post_generation",
+        "tool_id": "coverage-py",
+        "tool_name": "Coverage.py",
+        "trending": false,
+        "url": "/tools/coverage-py"
+      },
+      {
+        "addresses_failure_modes": [
           "fabrication",
           "security_vulnerability",
           "logic_error",
@@ -5122,50 +5166,6 @@
         "tool_name": "promptfoo",
         "trending": false,
         "url": "/tools/promptfoo"
-      },
-      {
-        "addresses_failure_modes": [
-          "security_vulnerability",
-          "fabrication",
-          "logic_error",
-          "scope_creep",
-          "test_manipulation"
-        ],
-        "autonomy_level": "full_hitl",
-        "control_paradigm": "detection",
-        "integration_surfaces": [
-          "library",
-          "cli",
-          "ci_app"
-        ],
-        "stars": 5295,
-        "tagline": "Open-source evaluation and testing library for LLM agents and ML models.",
-        "temporal_phase": "post_generation",
-        "tool_id": "giskard",
-        "tool_name": "giskard-oss",
-        "trending": false,
-        "url": "/tools/giskard"
-      },
-      {
-        "addresses_failure_modes": [
-          "fabrication",
-          "scope_creep",
-          "logic_error",
-          "test_manipulation"
-        ],
-        "autonomy_level": "full_hitl",
-        "control_paradigm": "detection",
-        "integration_surfaces": [
-          "library",
-          "cli"
-        ],
-        "stars": 1024,
-        "tagline": "The open source post-building layer for agents: evals, traces, and regressions.",
-        "temporal_phase": "post_generation",
-        "tool_id": "judgeval",
-        "tool_name": "judgeval",
-        "trending": false,
-        "url": "/tools/judgeval"
       }
     ]
   },

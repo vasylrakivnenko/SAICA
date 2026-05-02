@@ -477,9 +477,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
+| [mypy](data/tools/mypy.yml) | detection | post_generation | cli, ci_app, ide_plugin | 18,000 |  | Static type checker for Python. Catches mismatched types before runti… |
+| [Pyright](data/tools/pyright.yml) | detection | post_generation | cli, ci_app, ide_plugin | 14,000 |  | Microsoft's fast static type checker for Python. |
 | [ragflow](data/tools/ragflow.yml) | detection | post_generation | http_service, library | 78,820 |  | Open-source RAG engine based on deep document understanding. |
-| [llm-app](data/tools/pathway-llm-app.yml) | detection | post_generation | library, http_service | 59,931 |  | Ready-to-run cloud templates for RAG, AI pipelines, and enterprise se… |
-| [Smolagents](data/tools/smolagents.yml) | detection | post_generation | library | 26,835 |  | Minimalist code-agent library that expresses actions as executed Pyth… |
 
 ### Obsolescence
 
@@ -507,9 +507,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
-| [LangSmith](data/tools/langsmith.yml) | detection | post_generation | http_service, library | — |  | Hosted LLM observability, tracing, and evaluation platform. |
-| [Smolagents](data/tools/smolagents.yml) | detection | post_generation | library | 26,835 |  | Minimalist code-agent library that expresses actions as executed Pyth… |
-| [Langfuse](data/tools/langfuse.yml) | detection | post_generation | http_service, library | 25,839 |  | Open-source LLM engineering platform for tracing, evals, and prompt m… |
+| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  | Extremely fast Python linter and formatter, written in Rust. |
+| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 25,000 |  | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
+| [mypy](data/tools/mypy.yml) | detection | post_generation | cli, ci_app, ide_plugin | 18,000 |  | Static type checker for Python. Catches mismatched types before runti… |
 
 ### Security vulnerability
 
@@ -517,9 +517,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
+| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 25,000 |  | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
+| [Bandit](data/tools/bandit.yml) | detection | post_generation | cli, ci_app | 6,000 |  | Security linter for Python. Catches common code-level vulnerabilities. |
 | [Snyk](data/tools/snyk.yml) | detection | post_generation | cli, ci_app | 5,506 |  | Vulnerability scanning for code, dependencies, containers, and IaC. |
-| [DeepTeam](data/tools/confident-ai-deepteam.yml) | detection | post_generation | library, cli | 1,566 |  | Open-source LLM red-teaming framework from Confident AI with 40+ atta… |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  | Make websites accessible for AI agents. |
 
 ### Scope creep
 
@@ -527,9 +527,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
+| [Prettier](data/tools/prettier.yml) | prevention | post_generation | cli, ci_app, ide_plugin | 50,000 |  | Opinionated code formatter for JS/TS/CSS/HTML. Ends style debates. |
+| [Black](data/tools/black.yml) | prevention | post_generation | cli, ci_app, ide_plugin | 39,000 |  | Opinionated Python code formatter. Removes style argument from PR rev… |
 | [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  | Graph-structured state machines for stateful multi-agent orchestratio… |
-| [LangSmith](data/tools/langsmith.yml) | detection | post_generation | http_service, library | — |  | Hosted LLM observability, tracing, and evaluation platform. |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  | Make websites accessible for AI agents. |
 
 ### Context pollution
 
@@ -567,9 +567,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
+| [pytest](data/tools/pytest.yml) | detection | post_generation | cli, ci_app, ide_plugin | 12,000 |  | Python test framework — discipline gate for "done means tests pass." |
 | [opik](data/tools/opik.yml) | detection | post_generation | http_service, library | 18,988 |  | Debug, evaluate, and monitor LLM applications, RAG systems, and agent… |
 | [voltagent](data/tools/voltagent.yml) | detection | post_generation | library | 8,416 |  | TypeScript-native AI agent engineering platform with built-in observa… |
-| [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  | Full-lifecycle AI agent management platform with debugging, evaluatio… |
 
 ### Test manipulation
 
@@ -577,9 +577,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
+| [pytest](data/tools/pytest.yml) | detection | post_generation | cli, ci_app, ide_plugin | 12,000 |  | Python test framework — discipline gate for "done means tests pass." |
+| [Coverage.py](data/tools/coverage-py.yml) | detection | post_generation | cli, ci_app, library | 3,000 |  | Code coverage measurement for Python. Detects test-manipulation by su… |
 | [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  | Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnera… |
-| [giskard-oss](data/tools/giskard.yml) | detection | post_generation | library, cli, ci_app | 5,295 |  | Open-source evaluation and testing library for LLM agents and ML mode… |
-| [judgeval](data/tools/judgeval.yml) | detection | post_generation | library, cli | 1,024 |  | The open source post-building layer for agents: evals, traces, and re… |
 
 ---
 
