@@ -131,19 +131,43 @@ Run it locally:
 open http://localhost:4321/leaderboard
 ```
 
-## Claude Code plugin
+## Install in your AI coding agent
 
-[`plugin/`](plugin/) ships SAICA-KG as a Claude Code plugin — one
-install gives the agent both the MCP server (`saica_lookup`,
-`saica_recommend`) and the `saica-supervise` skill. Sideload during
-development:
+The `saica-supervise` skill ships at two install paths so it works
+with both [Claude Code](https://docs.claude.com/en/docs/claude-code)
+plugins and the open agent-skills CLI ([`vercel-labs/skills`](https://github.com/vercel-labs/skills),
+which targets Replit Agent, Cursor, Codex, OpenCode, and 50+ others).
+Both copies are generated from `SKILLS.md` by
+`validator/generate_skills.py`, so they never drift.
+
+### Claude Code (plugin)
+
+Run both inside the Claude Code REPL:
+
+```
+/plugin marketplace add vasylrakivnenko/SAICA
+/plugin install saica-supervise@saica-kg
+```
+
+Or sideload during development:
 
 ```bash
 claude --plugin-dir ./plugin
 ```
 
-See [`plugin/README.md`](plugin/README.md) for prerequisites, install,
-and how the skill stays in sync with `SKILLS.md`.
+See [`plugin/README.md`](plugin/README.md) for prerequisites and how
+the skill stays in sync with `SKILLS.md`.
+
+### Replit Agent / Cursor / Codex / OpenCode / others (`npx skills`)
+
+```bash
+npx skills add vasylrakivnenko/SAICA
+```
+
+Installs `skills/saica-supervise/SKILL.md` into whichever agent
+directory the CLI detects (`.claude/skills/`, `.agents/skills/`,
+`.cursor/rules/`, etc.). Scope flags: `-g` for global,
+`-a <agent>` to target a specific agent.
 
 ## Live site
 

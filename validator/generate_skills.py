@@ -397,15 +397,10 @@ def _render_tiers_section(tiers: dict[str, Any]) -> list[str]:
         "runtime service call is needed."
     )
     out.append("")
+    out.append("- **`minimum`** — the single best tool to start with.")
+    out.append("- **`optimal`** — three tools, the responsible default.")
     out.append(
-        "- **`minimum`** — the single best tool to start with."
-    )
-    out.append(
-        "- **`optimal`** — three tools, the responsible default."
-    )
-    out.append(
-        "- **`full`** — the minimum set that covers all 11 failure "
-        "modes (MECE)."
+        "- **`full`** — the minimum set that covers all 11 failure " "modes (MECE)."
     )
     out.append("")
     for level in ("minimum", "optimal", "full"):
@@ -618,6 +613,9 @@ def _render_text(payload: dict[str, Any]) -> str:
 # below is the SKILLS.md content stripped of its top preamble (which
 # tells humans how to install it; redundant inside a plugin).
 _PLUGIN_SKILL_PATH = REPO_ROOT / "plugin" / "skills" / "saica-supervise" / "SKILL.md"
+# Cross-agent install path — `npx skills add vasylrakivnenko/SAICA` looks
+# here. Same body as the Claude Code plugin SKILL.md.
+_PUBLIC_SKILL_PATH = REPO_ROOT / "skills" / "saica-supervise" / "SKILL.md"
 _PLUGIN_SKILL_FRONTMATTER = """---
 name: saica-supervise
 description: Watch for the 11 known AI-coding-agent failure modes (fabrication, scope_creep, security_vulnerability, etc.) — consult this skill before edits, dependency adds, completion claims, or anything that could trip a known supervision concern. Quote the snake_case failure-mode ids verbatim when flagging risks.
@@ -669,12 +667,15 @@ def _render_plugin_skill(payload: dict[str, Any]) -> str:
 def _write_outputs(payload: dict[str, Any], out_dir: Path) -> Path:
     md_path = out_dir / "SKILLS.md"
     md_path.write_text(_render_text(payload), encoding="utf-8")
+    rendered_skill = _render_plugin_skill(payload)
     # Mirror to the plugin's SKILL.md so the plugin stays in sync
     # with the canonical SKILLS.md without a separate generator run.
     if _PLUGIN_SKILL_PATH.parent.exists():
-        _PLUGIN_SKILL_PATH.write_text(
-            _render_plugin_skill(payload), encoding="utf-8"
-        )
+        _PLUGIN_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
+    # Also mirror to the cross-agent install path (`skills/<name>/SKILL.md`)
+    # so `npx skills add vasylrakivnenko/SAICA` resolves without --full-depth.
+    _PUBLIC_SKILL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _PUBLIC_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
     return md_path
 
 
@@ -688,16 +689,15 @@ def _check_outputs(payload: dict[str, Any], out_dir: Path) -> int:
             "Run `python -m validator.generate_skills` to regenerate.\n"
         )
         return 1
-    # Same drift check for the plugin SKILL.md.
-    if _PLUGIN_SKILL_PATH.parent.exists():
-        plugin_expected = _render_plugin_skill(payload)
-        if (
-            not _PLUGIN_SKILL_PATH.exists()
-            or _PLUGIN_SKILL_PATH.read_text(encoding="utf-8") != plugin_expected
-        ):
+    # Same drift check for the plugin SKILL.md and the public skill mirror.
+    rendered_skill = _render_plugin_skill(payload)
+    for path in (_PLUGIN_SKILL_PATH, _PUBLIC_SKILL_PATH):
+        if path is _PLUGIN_SKILL_PATH and not path.parent.exists():
+            continue
+        if not path.exists() or path.read_text(encoding="utf-8") != rendered_skill:
             sys.stderr.write(
                 "generate_skills --check: out-of-date file:\n  "
-                f"{_PLUGIN_SKILL_PATH}\n"
+                f"{path}\n"
                 "Run `python -m validator.generate_skills` to regenerate.\n"
             )
             return 1
