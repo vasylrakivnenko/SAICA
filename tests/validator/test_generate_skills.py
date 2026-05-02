@@ -160,10 +160,23 @@ def test_pre_action_heuristics_render_for_every_fm(payload: dict) -> None:
 
     Heuristics are the most important content in SKILLS.md — guard
     against silently dropping one when an FM is added.
+
+    Slices the doc to the per-FM section before splitting so the v0.6
+    "Recommended supervision stack" sub-headings (also `### `tier`-
+    shaped) don't get mistaken for FM blocks.
     """
     md = render_markdown(payload)
-    blocks = md.split("### `")
-    # First chunk is preamble; the rest each begin with `<fm_id>` ...
+    fm_section_marker = "## Failure modes — what to watch for and what to do"
+    fm_section_start = md.find(fm_section_marker)
+    assert fm_section_start >= 0, "skill is missing the per-FM section header"
+    fm_section = md[fm_section_start:]
+    # Stop at the next H2 so we don't bleed into the working-agreement section.
+    next_h2 = fm_section.find("\n## ", 1)
+    if next_h2 >= 0:
+        fm_section = fm_section[:next_h2]
+
+    blocks = fm_section.split("### `")
+    # First chunk is the section header; the rest each begin with `<fm_id>`.
     fm_blocks = blocks[1:]
     assert len(fm_blocks) == 11
     for block in fm_blocks:

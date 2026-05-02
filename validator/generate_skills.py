@@ -43,6 +43,9 @@ import yaml
 
 from pipeline.mcp.recommender import (
     recommend_for_failure_modes,
+    recommend_full,
+    recommend_minimum,
+    recommend_optimal,
 )
 from pipeline.shared.priorities import all_priorities
 
@@ -307,6 +310,16 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
             }
         )
 
+    # Three pre-baked recommendation tiers (agnostic, no agent-kind
+    # filter). v0.6: these used to be served by the MCP server's
+    # ``saica_recommend`` tool; baking them into the skill removes the
+    # marketplace plugin's runtime dependency on Python.
+    tiers = {
+        "minimum": recommend_minimum(agent_kind=None),
+        "optimal": recommend_optimal(agent_kind=None),
+        "full": recommend_full(agent_kind=None),
+    }
+
     # Sanity index used by tests — every (incident_id, tool_id) we cite
     # must resolve in the KG. Caller-side asserts use these.
     return {
@@ -314,6 +327,7 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
         "kg_version": _kg_version(),
         "priorities_version": _priorities_version(),
         "failure_modes": fm_blocks,
+        "tiers": tiers,
         "_incident_index_keys": sorted(incident_index.keys()),
     }
 
@@ -336,6 +350,70 @@ def _supervisor_line(rec: dict[str, Any]) -> str:
     return (
         f"- {name_link} — {paradigm}/{phase}, surfaces: {surfaces_str}; " f"{tagline}"
     )
+
+
+def _render_tier(level: str, payload: dict[str, Any]) -> list[str]:
+    """Render one tier (minimum / optimal / full) as a Markdown sub-section.
+
+    Each tier carries a ``summary`` line, the list of recommended
+    supervisors, and (for the ``full`` tier) the union of failure
+    modes covered. Pre-baked into SKILL.md by v0.6 so the agent can
+    consult the recommendation without an MCP roundtrip.
+    """
+    out: list[str] = []
+    out.append(f"### `{level}` tier")
+    out.append("")
+    summary = payload.get("summary")
+    if summary:
+        out.append(f"_{summary}_")
+        out.append("")
+    tools = payload.get("tools") or []
+    if not tools:
+        out.append("- _(no tools — recommender returned empty for this tier)_")
+        out.append("")
+        return out
+    for t in tools:
+        out.append(_supervisor_line(t))
+    out.append("")
+    covered = payload.get("covered_failure_modes") or []
+    if level == "full" and covered:
+        out.append(
+            f"Covers {len(covered)} of 11 failure modes: "
+            + ", ".join(f"`{c}`" for c in covered)
+            + "."
+        )
+        out.append("")
+    return out
+
+
+def _render_tiers_section(tiers: dict[str, Any]) -> list[str]:
+    out: list[str] = []
+    out.append("## Recommended supervision stack — three tiers")
+    out.append("")
+    out.append(
+        "Pre-baked from the SAICA-KG corpus. Pick a tier that matches "
+        "the team's appetite. Same picks the MCP server would return "
+        "from `saica_recommend(level=...)` — embedded here so no "
+        "runtime service call is needed."
+    )
+    out.append("")
+    out.append(
+        "- **`minimum`** — the single best tool to start with."
+    )
+    out.append(
+        "- **`optimal`** — three tools, the responsible default."
+    )
+    out.append(
+        "- **`full`** — the minimum set that covers all 11 failure "
+        "modes (MECE)."
+    )
+    out.append("")
+    for level in ("minimum", "optimal", "full"):
+        body = tiers.get(level)
+        if not isinstance(body, dict):
+            continue
+        out.extend(_render_tier(level, body))
+    return out
 
 
 def _render_failure_mode(fm: dict[str, Any]) -> list[str]:
@@ -460,6 +538,11 @@ def render_markdown(payload: dict[str, Any]) -> str:
     )
     out.append("")
 
+    # ---- Recommended supervision stack (three tiers, pre-baked) -------
+    tiers = payload.get("tiers") or {}
+    if tiers:
+        out.extend(_render_tiers_section(tiers))
+
     # ---- Per-FM sections ------------------------------------------------
     out.append("## Failure modes — what to watch for and what to do")
     out.append("")
@@ -548,11 +631,13 @@ to decide *what to be careful about* when writing or modifying code.
 The failure-mode IDs (snake_case) are the canonical vocabulary —
 quote them verbatim when surfacing concerns.
 
-For structured queries (look up a specific tool, get the recommended
-supervisor stack), use the MCP tools shipped by this same plugin:
-
-  - `saica_lookup(tool_id)` — full facets for one supervisor
-  - `saica_recommend(level | failure_modes)` — the recommended set
+The skill is **self-contained** — three pre-baked recommendation
+tiers (`minimum` / `optimal` / `full`-MECE) appear right below, so
+the agent doesn't need to call out to a service to get the
+recommended stack. For richer / live querying (per-tool facet
+lookup, agent-kind-aware filtering, repo audit), the parent SAICA-KG
+project ships an MCP server separately — see
+https://github.com/vasylrakivnenko/SAICA#claude-code-plugin.
 
 """
 
@@ -560,13 +645,22 @@ supervisor stack), use the MCP tools shipped by this same plugin:
 def _render_plugin_skill(payload: dict[str, Any]) -> str:
     """SKILLS.md text rewrapped as a Claude Code plugin skill.
 
-    Drops the top preamble (the "How to use" block in SKILLS.md is
-    aimed at humans who manually copy the file; inside a plugin it's
-    redundant noise) and prepends YAML frontmatter Claude Code reads.
+    Drops the SKILLS.md "How this file is meant to be used" preamble
+    (humans installing manually need it; plugin users don't) but
+    PRESERVES the v0.6 "Recommended supervision stack" tiers section.
+    Result: frontmatter + a custom plugin preamble + tiers + per-FM
+    sections + working agreement + provenance.
     """
     body = _render_text(payload)
-    marker = "## Failure modes"
+    # Slice from the recommended-stacks header onward — that drops the
+    # SKILLS.md title + "How to use" preamble but keeps everything that
+    # matters (tiers, per-FM sections, working agreement, provenance).
+    marker = "## Recommended supervision stack"
     i = body.find(marker)
+    if i < 0:
+        # Fallback if v0.6 tiers section ever gets removed.
+        marker = "## Failure modes"
+        i = body.find(marker)
     if i < 0:
         return _PLUGIN_SKILL_FRONTMATTER + body
     return _PLUGIN_SKILL_FRONTMATTER + body[i:]

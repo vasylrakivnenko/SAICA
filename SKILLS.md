@@ -10,6 +10,40 @@ service to call. Treat the failure-mode IDs (snake_case) as the canonical vocabu
 - Reload after major project changes (`python -m validator.generate_skills`).
 - Failure-mode IDs in this file (e.g. `scope_creep`) are stable identifiers — quote them verbatim when surfacing supervision concerns.
 
+## Recommended supervision stack — three tiers
+
+Pre-baked from the SAICA-KG corpus. Pick a tier that matches the team's appetite. Same picks the MCP server would return from `saica_recommend(level=...)` — embedded here so no runtime service call is needed.
+
+- **`minimum`** — the single best tool to start with.
+- **`optimal`** — three tools, the responsible default.
+- **`full`** — the minimum set that covers all 11 failure modes (MECE).
+
+### `minimum` tier
+
+_1 tool covers 5 of 11 failure modes (highest-priority single pick)._
+
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+
+### `optimal` tier
+
+_3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3)._
+
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+- [`activepieces`](data/tools/activepieces.yml) — prevention/pre_generation, surfaces: web_app, http_service; AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
+- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
+
+### `full` tier
+
+_5 tools cover 11 of 11 failure modes (minimum weighted set cover)._
+
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+- [`activepieces`](data/tools/activepieces.yml) — prevention/pre_generation, surfaces: web_app, http_service; AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
+- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
+- [`pathway-llm-app`](data/tools/pathway-llm-app.yml) — detection/post_generation, surfaces: library, http_service; Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.
+- [`tree-sitter`](data/tools/tree-sitter.yml) — prevention/pre_generation, surfaces: library; Incremental parser toolkit that powers structural code analysis and symbol discovery.
+
+Covers 11 of 11 failure modes: `cascading_failure`, `context_pollution`, `dependency_blindness`, `fabrication`, `incomplete_execution`, `logic_error`, `obsolescence`, `scope_creep`, `security_vulnerability`, `supply_chain_attack`, `test_manipulation`.
+
 ## Failure modes — what to watch for and what to do
 
 One subsection per failure mode, in priority-descending order (likelihood × impact, see `data/failure_mode_priorities.yml`).

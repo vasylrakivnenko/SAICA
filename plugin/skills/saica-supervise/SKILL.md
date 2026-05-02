@@ -11,11 +11,47 @@ to decide *what to be careful about* when writing or modifying code.
 The failure-mode IDs (snake_case) are the canonical vocabulary —
 quote them verbatim when surfacing concerns.
 
-For structured queries (look up a specific tool, get the recommended
-supervisor stack), use the MCP tools shipped by this same plugin:
+The skill is **self-contained** — three pre-baked recommendation
+tiers (`minimum` / `optimal` / `full`-MECE) appear right below, so
+the agent doesn't need to call out to a service to get the
+recommended stack. For richer / live querying (per-tool facet
+lookup, agent-kind-aware filtering, repo audit), the parent SAICA-KG
+project ships an MCP server separately — see
+https://github.com/vasylrakivnenko/SAICA#claude-code-plugin.
 
-  - `saica_lookup(tool_id)` — full facets for one supervisor
-  - `saica_recommend(level | failure_modes)` — the recommended set
+## Recommended supervision stack — three tiers
+
+Pre-baked from the SAICA-KG corpus. Pick a tier that matches the team's appetite. Same picks the MCP server would return from `saica_recommend(level=...)` — embedded here so no runtime service call is needed.
+
+- **`minimum`** — the single best tool to start with.
+- **`optimal`** — three tools, the responsible default.
+- **`full`** — the minimum set that covers all 11 failure modes (MECE).
+
+### `minimum` tier
+
+_1 tool covers 5 of 11 failure modes (highest-priority single pick)._
+
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+
+### `optimal` tier
+
+_3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3)._
+
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+- [`activepieces`](data/tools/activepieces.yml) — prevention/pre_generation, surfaces: web_app, http_service; AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
+- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
+
+### `full` tier
+
+_5 tools cover 11 of 11 failure modes (minimum weighted set cover)._
+
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+- [`activepieces`](data/tools/activepieces.yml) — prevention/pre_generation, surfaces: web_app, http_service; AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
+- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
+- [`pathway-llm-app`](data/tools/pathway-llm-app.yml) — detection/post_generation, surfaces: library, http_service; Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.
+- [`tree-sitter`](data/tools/tree-sitter.yml) — prevention/pre_generation, surfaces: library; Incremental parser toolkit that powers structural code analysis and symbol discovery.
+
+Covers 11 of 11 failure modes: `cascading_failure`, `context_pollution`, `dependency_blindness`, `fabrication`, `incomplete_execution`, `logic_error`, `obsolescence`, `scope_creep`, `security_vulnerability`, `supply_chain_attack`, `test_manipulation`.
 
 ## Failure modes — what to watch for and what to do
 

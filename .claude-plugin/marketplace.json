@@ -1,0 +1,27 @@
+{
+  "$schema": "https://code.claude.com/marketplace.schema.json",
+  "name": "saica-kg",
+  "owner": {
+    "name": "vasyl rakivnenko",
+    "email": "vasyl@alumni.gsb.stanford.edu",
+    "url": "https://github.com/vasylrakivnenko/SAICA"
+  },
+  "description": "Curated knowledge graph of supervision tools for AI coding agents — failure-mode taxonomy, evidence-tiered tool catalog, ready-to-inject skill files.",
+  "homepage": "https://github.com/vasylrakivnenko/SAICA",
+  "license": "Apache-2.0",
+  "plugins": [
+    {
+      "name": "saica-supervise",
+      "source": "./plugin",
+      "description": "Drop-in skill that distils SAICA-KG: 11 known AI-coding-agent failure modes, what to watch for per failure mode, and three pre-baked supervision-stack tiers (minimum / optimal / full-MECE). Pure markdown — zero runtime dependencies.",
+      "category": "supervision",
+      "keywords": [
+        "supervision",
+        "ai-agents",
+        "coding-agents",
+        "failure-modes",
+        "knowledge-graph"
+      ]
+    }
+  ]
+}

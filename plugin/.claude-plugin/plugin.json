@@ -1,7 +1,7 @@
 {
-  "name": "saica-kg",
-  "displayName": "SAICA-KG",
-  "description": "Curated knowledge graph of supervision tools for AI coding agents. Ships an MCP server (saica_lookup, saica_recommend) plus a per-action skill file so the agent knows which failure mode to watch for and which supervisor to install.",
+  "name": "saica-supervise",
+  "displayName": "SAICA — supervision skill",
+  "description": "Pure-skill plugin distilled from the SAICA-KG corpus: per-failure-mode heuristics for AI coding agents plus three pre-baked supervision-stack tiers (minimum / optimal / full-MECE). Drop-in markdown — zero runtime deps. The full MCP server (saica_lookup, saica_recommend, audit) lives in the parent saicakg repo for power users who want the live API.",
   "homepage": "https://github.com/vasylrakivnenko/SAICA",
   "license": "Apache-2.0",
   "authors": [
@@ -15,7 +15,6 @@
     "ai-agents",
     "coding-agents",
     "failure-modes",
-    "knowledge-graph",
-    "mcp"
+    "knowledge-graph"
   ]
 }

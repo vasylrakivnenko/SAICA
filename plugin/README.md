@@ -1,113 +1,114 @@
-# SAICA-KG — Claude Code plugin
+# SAICA — supervision skill (Claude Code plugin)
 
-A Claude Code plugin that ships:
+A pure-skill plugin distilled from the
+[SAICA-KG](https://github.com/vasylrakivnenko/SAICA) corpus. One file
+of curated guidance the agent reads as context — no MCP server, no
+Python dependency, no `.venv`.
 
-1. **An MCP server** (`saica-kg`) exposing two tools the agent can call:
-   - `saica_lookup(tool_id)` — full facets for one supervisor in the
-     SAICA-KG corpus
-   - `saica_recommend(level | failure_modes)` — minimum / optimal /
-     full / targeted set of recommended supervisors for the asking
-     agent's stack
-2. **A skill** (`saica-supervise`) — per-action heuristics for the 11
-   known AI-coding-agent failure modes (fabrication, scope_creep,
-   security_vulnerability, etc.). The agent reads it like any other
-   skill file; no service call.
+What you get when this plugin is enabled:
 
-The plugin is the *agent-side* surface of SAICA-KG. The web app
-(`/leaderboard`, `/assess`, `/tool-coverage`) remains separate and
-exists for human consumption.
+- **Three pre-baked supervision-stack tiers** at the top of the skill —
+  `minimum` (1 tool), `optimal` (3 tools), `full` (the MECE set
+  covering all 11 failure modes). Same picks the SAICA recommender
+  would return; embedded so no runtime call is needed.
+- **Per-failure-mode pre-action heuristics** — for each of the 11
+  known AI-coding failure modes (`fabrication`, `scope_creep`,
+  `security_vulnerability`, etc.): what it is, detection signals,
+  a real-world incident reference, the top 2 supervisors to install,
+  and a hand-curated rule for the agent to follow before acting.
+- **A cross-cutting working agreement** — plan first, scope-respect,
+  no `--no-verify` bypass, cite incident IDs, ask when in doubt.
+
+The skill is regenerated from the canonical `SKILLS.md` whenever the
+KG corpus changes. CI drift gate keeps them in sync.
 
 ---
 
-## Prerequisites
+## Install (from a marketplace)
 
-- Claude Code (any recent version with plugin support).
-- Python 3.12+ on PATH **or** a project virtualenv at `<repo>/.venv/`.
-- This repo cloned somewhere on disk — the plugin lives at
-  `<repo>/plugin/` and reaches into the parent for the actual MCP
-  server code and KG data.
+```text
+/plugin marketplace add vasylrakivnenko/SAICA
+/plugin install saica-supervise@saica-kg
+```
 
-Install Python deps once:
+That's it. No clone, no venv, no Python.
+
+## Install (sideload, for development)
 
 ```bash
-cd /path/to/saicakg
+git clone https://github.com/vasylrakivnenko/SAICA
+cd SAICA
+claude --plugin-dir ./plugin
+```
+
+---
+
+## What this plugin is NOT
+
+- **It's not the MCP server.** SAICA-KG ships a real MCP server with
+  `saica_lookup`, `saica_recommend(level | failure_modes)`, and audit
+  tools — but that lives in the parent `saicakg` repo
+  (`pipeline/mcp/`) and requires a Python install. We deliberately
+  *don't* ship it via the marketplace because Python-deps inside a
+  marketplace plugin are fragile (no `npm install`-grade UX).
+- **It's not a runtime guard.** This is a context-injection skill.
+  The agent reads it; what it does with the guidance is up to the
+  agent. For runtime enforcement, see the recommended supervisors
+  inside the skill (Dependabot, Semgrep, pre-commit, etc.) and
+  install them in your repo.
+- **It's not the audit (`saica_audit_repo`).** That lives at
+  [`/assess`](https://saica-kg.dev/assess) on the public web app.
+
+---
+
+## What's in the file
+
+After install, the agent has access to a single skill named
+`saica-kg:saica-supervise` — call it explicitly with `/skills` (or
+let the agent auto-invoke based on context). The body covers:
+
+1. The three recommended supervision tiers (minimum / optimal / full)
+2. Per-failure-mode sections (11 of them, priority-descending)
+3. A cross-cutting working agreement
+4. Pointers to the live KG, the audit web page, and the corpus
+
+The skill is ~250 lines — small enough to fit any agent's context
+budget, big enough to be useful per-action.
+
+---
+
+## Power-user setup (live MCP server)
+
+If you want the live `saica_lookup` / `saica_recommend` MCP tools
+(targeted FM queries, agent-kind filtering, etc.):
+
+```bash
+git clone https://github.com/vasylrakivnenko/SAICA
+cd SAICA
 python3 -m venv .venv
 .venv/bin/pip install -r pipeline/requirements.txt
 ```
 
-The `bin/saica-mcp` wrapper prefers `<repo>/.venv/bin/python` if it
-exists, falls back to system `python3` otherwise.
-
----
-
-## Install (sideload, dev / single-user)
-
-```bash
-cd /path/to/saicakg
-claude --plugin-dir ./plugin
-```
-
-Or, for persistent install in your `~/.claude.json`, add:
+Then add to your `~/.claude.json`:
 
 ```jsonc
 {
-  "plugins": [
-    { "path": "/path/to/saicakg/plugin" }
-  ]
+  "mcpServers": {
+    "saica-kg": {
+      "command": "/path/to/SAICA/.venv/bin/python",
+      "args": ["-m", "pipeline.mcp.server"],
+      "cwd": "/path/to/SAICA",
+      "env": { "SAICA_AGENT_KIND": "claude-code" }
+    }
+  }
 }
 ```
 
-(Exact key depends on your Claude Code version — see
-`claude plugin --help` for the canonical syntax.)
+See [`pipeline/mcp/README.md`](../pipeline/mcp/README.md) for the
+full power-user documentation.
 
 ---
 
-## Verify it loaded
+## License
 
-After Claude Code starts with the plugin enabled:
-
-- The MCP server `saica-kg` should appear in `/mcp` (or equivalent
-  command). It exposes `saica_lookup` and `saica_recommend`.
-- The skill `saica-kg:saica-supervise` should be visible. The agent
-  may auto-invoke it, or you can invoke explicitly.
-
-Quick MCP smoke test from the command line:
-
-```bash
-cd /path/to/saicakg
-.venv/bin/python -c "from pipeline.mcp.server import mcp; print(mcp)"
-```
-
----
-
-## What stays in sync, automatically
-
-The skill body (`skills/saica-supervise/SKILL.md`) is regenerated from
-the canonical `SKILLS.md` whenever you run:
-
-```bash
-python -m validator.generate_skills
-```
-
-The CI drift gate (`generate_skills --check`) covers both files, so
-the plugin can't ship a stale skill.
-
----
-
-## Why a plugin (vs just an MCP config + a CLAUDE.md drop)?
-
-- One install — users get the MCP server **and** the skill in one
-  step instead of two manual setups.
-- Namespaced — invocations become `saica-kg:saica-supervise`, no
-  collision with other plugins or local rules.
-- Versioned — `plugin.json` carries identity Claude Code can track.
-- The same wiring works across machines once the parent repo is
-  cloned and `.venv/` is set up.
-
----
-
-## Distribution (future)
-
-For sideload (today): cloners install via `--plugin-dir`. For wider
-distribution, the plugin can be published in a marketplace
-(GitHub repo with a `marketplace.json`); not in this commit.
+Apache-2.0 (code). CC-BY-4.0 (data, including the skill body).
