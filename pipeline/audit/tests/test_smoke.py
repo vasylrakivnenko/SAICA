@@ -259,9 +259,9 @@ def test_pyproject_eslint_in_package_json_devdeps(tmp_path: Path):
 def test_audit_self_repo_smoke():
     """Audit the saica-kg repo using audit_repo_local. Should not crash."""
     report = audit_repo_local(
-        REPO_ROOT, repo_url="https://github.com/saica-kg/saica-kg"
+        REPO_ROOT, repo_url="https://github.com/vasylrakivnenko/SAICA"
     )
-    assert report.repo_url.endswith("saica-kg")
+    assert report.repo_url.endswith("SAICA")
     assert report.audited_at is not None
     assert isinstance(report.markdown, str) and len(report.markdown) > 200
     # Coverage grid has one cell per (FM × paradigm).
@@ -280,7 +280,7 @@ def test_audit_self_repo_smoke():
 
 def test_to_markdown_renders_sections():
     report = audit_repo_local(
-        REPO_ROOT, repo_url="https://github.com/saica-kg/saica-kg"
+        REPO_ROOT, repo_url="https://github.com/vasylrakivnenko/SAICA"
     )
     md = to_markdown(report)
     assert md.startswith("# Audit:")

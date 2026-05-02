@@ -52,7 +52,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CACHE_DIR = REPO_ROOT / ".cache" / "arxiv"
 PAPERS_DIR = REPO_ROOT / "data" / "papers"
 
-USER_AGENT = "SAICA-KG-Arxiv-Bot/0.1 (https://github.com/saica-kg/saica-kg)"
+USER_AGENT = "SAICA-KG-Arxiv-Bot/0.1 (https://github.com/vasylrakivnenko/SAICA)"
 ARXIV_API_BASE = "https://export.arxiv.org/api/query"
 
 # arXiv asks for "be reasonable"; 3s between requests is the conventional

@@ -169,6 +169,9 @@ directory the CLI detects (`.claude/skills/`, `.agents/skills/`,
 `.cursor/rules/`, etc.). Scope flags: `-g` for global,
 `-a <agent>` to target a specific agent.
 
+**On Replit:** run the command in the **Shell** tab (not the Agent
+chat). Confirm with `y` when `npx` asks to fetch the `skills` package.
+
 ## Live site
 
 [https://saica-kg.dev](https://saica-kg.dev) (when deployed) — browse
@@ -188,7 +191,7 @@ chat box. The site is a mirror of `data/`, not the source of truth.
   title        = {{SAICA-KG: A Faceted Knowledge Graph for Supervising AI Coding Agents}},
   author       = {Paskevych, Vasyl and SAICA-KG contributors},
   year         = {2026},
-  howpublished = {\url{https://github.com/saica-kg/saica-kg}},
+  howpublished = {\url{https://github.com/vasylrakivnenko/SAICA}},
   note         = {v0.1, data release 2026.05}
 }
 ```

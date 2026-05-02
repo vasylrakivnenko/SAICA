@@ -296,7 +296,7 @@ export const DISCLAIMER =
 export function rawYamlUrl(kind: string, id: string): string {
   // kind: "tools" | "failure_modes" | "papers" | "taxonomies" | "crosswalks"
   //       | "incidents" | "recipes"
-  return `https://github.com/saica-kg/saica-kg/blob/main/data/${kind}/${id}.yml`;
+  return `https://github.com/vasylrakivnenko/SAICA/blob/main/data/${kind}/${id}.yml`;
 }
 
 export function counts(): {

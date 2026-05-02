@@ -56,7 +56,7 @@ from ruamel.yaml import YAML  # noqa: E402
 PAPERS_DIR = REPO / "data" / "papers"
 S2_RAW = REPO / "research" / "s2_raw"
 
-USER_AGENT = "SAICA-KG-Abstract-Bot/0.1 (+https://github.com/saica-kg/saica-kg)"
+USER_AGENT = "SAICA-KG-Abstract-Bot/0.1 (+https://github.com/vasylrakivnenko/SAICA)"
 ARXIV_REQUEST_GAP_SECONDS = 3.0
 S2_REQUEST_GAP_SECONDS = 1.0
 TIMEOUT_SECONDS = 20.0

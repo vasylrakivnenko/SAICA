@@ -45,19 +45,18 @@ const c = counts();
       instead of papering over them. Multi-valued tags (FailureMode, LocusOfControl)
       live alongside the strict partitions for the many-to-many relations that
       don't fit a clean taxonomy. See
-      <a href="https://github.com/saica-kg/saica-kg/blob/main/EDITORIAL_POLICY.md" rel="noopener">EDITORIAL_POLICY.md</a>
+      <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/EDITORIAL_POLICY.md" rel="noopener">EDITORIAL_POLICY.md</a>
       for the full inclusion criteria and RFC process.
     </p>
   </section>
 
   <section class="mt-10 max-w-3xl leading-7">
-    <h2>Five ways to consume the KG</h2>
+    <h2>Six ways to consume the KG</h2>
     <ol class="mt-2 list-decimal pl-6 space-y-2">
       <li>
         <strong>Browse</strong> — this website renders one page per node with
         facet-filtered search at <a href="/tools">/tools</a>,
-        <a href="/failure-modes">/failure-modes</a>, <a href="/taxonomies">/taxonomies</a>,
-        <a href="/papers">/papers</a>, plus an interactive Cytoscape graph at
+        <a href="/failure-modes">/failure-modes</a>, plus an interactive Cytoscape graph at
         <a href="/graph">/graph</a>.
       </li>
       <li>
@@ -80,8 +79,7 @@ const c = counts();
         <strong>Ingestion pipeline</strong> — the <code>pipeline/</code> tree drives
         automated discovery (Perplexity / Elicit / Semantic Scholar / GitHub /
         awesome-lists), Postgres staging, NLP preprocess, Cohere Rerank semantic
-        filtering, and Azure Kimi-K2.5 structured extraction. See
-        <a href="/pipeline">/pipeline</a> for the flow.
+        filtering, and Azure Kimi-K2.5 structured extraction.
       </li>
       <li>
         <strong>CI / validator</strong> — <code>validator/cli.py</code> enforces
@@ -106,11 +104,11 @@ const c = counts();
     <div class="card">
       <h3 class="!mt-0">Project</h3>
       <ul class="mt-2 list-disc pl-5 text-sm">
-        <li><a href="https://github.com/saica-kg/saica-kg" rel="noopener">GitHub repository</a></li>
-        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/EDITORIAL_POLICY.md" rel="noopener">Editorial policy</a></li>
-        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a></li>
-        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/LICENSE" rel="noopener">License (code: Apache-2.0)</a></li>
-        <li><a href="https://github.com/saica-kg/saica-kg/blob/main/LICENSE-DATA" rel="noopener">License (data: CC-BY-4.0)</a></li>
+        <li><a href="https://github.com/vasylrakivnenko/SAICA" rel="noopener">GitHub repository</a></li>
+        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/EDITORIAL_POLICY.md" rel="noopener">Editorial policy</a></li>
+        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a></li>
+        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/LICENSE" rel="noopener">License (code: Apache-2.0)</a></li>
+        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/LICENSE-DATA" rel="noopener">License (data: CC-BY-4.0)</a></li>
       </ul>
     </div>
     <div class="card">
