@@ -1,0 +1,68 @@
+id: ruff
+name: Ruff
+tagline: Extremely fast Python linter and formatter, written in Rust.
+description: >
+  Ruff is a Rust-based linter and formatter for Python that consolidates
+  the rule sets of flake8, isort, pydocstyle, pyupgrade, and many other
+  legacy tools into a single binary that runs orders of magnitude faster.
+  It runs from the CLI, in pre-commit, in CI, and as a language-server
+  inside editors, surfacing logic errors, dead code, import ordering
+  issues, and stylistic drift before review. Configuration lives in
+  `pyproject.toml [tool.ruff]`, which is exactly the surface the audit
+  detector now parses.
+
+first_released: 2022-08-30
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: astral-sh
+repository_url: https://github.com/astral-sh/ruff
+documentation_url: https://docs.astral.sh/ruff/
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - lint-rule-engine
+  - code-formatting
+  - ast-walking
+  - import-sorting
+
+security_notes: >
+  Standard dev-tool security posture; runs offline against local source
+  with no network calls. Rule definitions ship with the binary, so
+  supply-chain risk is bounded to the pinned Ruff version itself.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for logic_error
+  and scope_creep in the Python lane. Mature workhorse rather than novel
+  research, but missing it leaves the audit detector blind to the most
+  common `pyproject.toml [tool.ruff]` configuration in modern Python
+  repos (e.g. openai-python).
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports ruff as an unknown tool.
+stars: 30000
+stars_updated_at: '2026-04-23'

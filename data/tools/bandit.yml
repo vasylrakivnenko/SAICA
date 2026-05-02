@@ -1,0 +1,65 @@
+id: bandit
+name: Bandit
+tagline: Security linter for Python. Catches common code-level vulnerabilities.
+description: >
+  Bandit is a Python security linter from PyCQA: it walks the AST
+  looking for common insecure patterns — hardcoded passwords, use of
+  `eval`/`exec`, weak crypto primitives, shell-injection-prone
+  subprocess calls, insecure deserialization, and so on. It runs from
+  the CLI and in CI as a post_generation security gate.
+  Configuration lives in `pyproject.toml [tool.bandit]`, which the
+  audit detector now recognises.
+
+first_released: 2014-09-15
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: pycqa
+repository_url: https://github.com/PyCQA/bandit
+documentation_url: https://bandit.readthedocs.io/
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - security_vulnerability
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+
+implements_techniques:
+  - ast-walking
+  - security-rule-engine
+  - pattern-matching
+
+security_notes: >
+  Standard dev-tool security posture; Bandit runs locally against
+  source and does not execute target code. Like all rule-based scanners
+  it produces both false positives and false negatives — pair it with
+  a complementary scanner (e.g. semgrep) on regulated codepaths.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for
+  security_vulnerability in the Python lane. Distinct from Semgrep
+  because Bandit is Python-specific with hand-tuned rules covering
+  Python's standard library footguns; including it lets the audit
+  detector resolve `[tool.bandit]` blocks.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports bandit as an unknown tool.
+stars: 6000
+stars_updated_at: '2026-04-23'

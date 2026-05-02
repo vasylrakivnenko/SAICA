@@ -1,0 +1,66 @@
+id: mypy
+name: mypy
+tagline: Static type checker for Python. Catches mismatched types before runtime.
+description: >
+  mypy is the original gradual-typing checker for Python, reading PEP 484
+  type hints across a project and reporting type-incompatibility,
+  missing-attribute, and contract-mismatch errors before code runs. It
+  guards against logic errors caused by silent type drift and against
+  fabricated APIs (calls to attributes that do not exist). Configuration
+  lives in `pyproject.toml [tool.mypy]`, which the audit detector now
+  recognises.
+
+first_released: 2012-04-01
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: python
+repository_url: https://github.com/python/mypy
+documentation_url: https://mypy.readthedocs.io/
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - fabrication
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - static-type-checking
+  - gradual-typing
+  - type-inference
+  - stub-resolution
+
+security_notes: >
+  Standard dev-tool security posture; no special considerations. mypy
+  runs locally and does not execute target code, only parses and walks
+  its AST.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for logic_error
+  and fabrication in the Python lane. The reference implementation of
+  PEP 484; missing it leaves the audit detector unable to recognise the
+  most widely-deployed Python type-checking gate.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports mypy as an unknown tool.
+stars: 18000
+stars_updated_at: '2026-04-23'

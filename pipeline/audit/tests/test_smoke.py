@@ -152,6 +152,105 @@ def test_detect_supervision_tools_js_dep(tmp_path: Path):
     assert "instructor" in ids
 
 
+def test_detect_supervision_tools_pyproject_tool_sections(tmp_path: Path):
+    """Repos in the wild (openai-python, anthropic-sdk-python, fastapi)
+    declare ruff/mypy/pyright/pytest in [tool.<x>] sections. Detector
+    must pick all of them up from one pyproject.toml."""
+    (tmp_path / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+        [project]
+        name = "demo"
+
+        [tool.ruff]
+        line-length = 100
+
+        [tool.ruff.lint]
+        select = ["E", "F"]
+
+        [tool.mypy]
+        strict = true
+
+        [tool.pyright]
+        pythonVersion = "3.12"
+
+        [tool.pytest.ini_options]
+        addopts = "-q"
+
+        [tool.coverage.run]
+        branch = true
+
+        [tool.black]
+        line-length = 100
+
+        [tool.isort]
+        profile = "black"
+        """
+        ).strip()
+    )
+    detected = detect_supervision_tools(tmp_path)
+    ids = {d.id for d in detected if d.in_kg}
+    for expected in (
+        "ruff",
+        "mypy",
+        "pyright",
+        "pytest",
+        "coverage-py",
+        "black",
+        "isort",
+    ):
+        assert expected in ids, f"missing {expected} from {ids}"
+
+
+def test_pyproject_build_only_sections_are_ignored(tmp_path: Path):
+    """[tool.poetry], [tool.hatch], [tool.uv] etc. are build/packaging,
+    not supervisors — must NOT be emitted as detected supervision."""
+    (tmp_path / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+        [project]
+        name = "demo"
+
+        [tool.poetry]
+        name = "demo"
+
+        [tool.hatch.build]
+        include = ["x/**"]
+
+        [tool.uv]
+        dev-dependencies = []
+
+        [tool.pdm]
+        version = "0.1"
+
+        [tool.rye]
+        managed = true
+        """
+        ).strip()
+    )
+    detected = detect_supervision_tools(tmp_path)
+    ids = {d.id for d in detected if d.in_kg}
+    assert ids == set(), f"build-only sections leaked into detection: {ids}"
+
+
+def test_pyproject_eslint_in_package_json_devdeps(tmp_path: Path):
+    """JS analogue: eslint/prettier in devDependencies should resolve."""
+    (tmp_path / "package.json").write_text(
+        json.dumps(
+            {
+                "devDependencies": {
+                    "eslint": "^9",
+                    "prettier": "^3",
+                },
+            }
+        )
+    )
+    detected = detect_supervision_tools(tmp_path)
+    ids = {d.id for d in detected if d.in_kg}
+    assert "eslint" in ids
+    assert "prettier" in ids
+
+
 # ---------------------------------------------------------------------------
 # End-to-end on the saica-kg repo itself
 # ---------------------------------------------------------------------------

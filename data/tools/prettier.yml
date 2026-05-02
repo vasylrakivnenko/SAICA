@@ -1,0 +1,70 @@
+id: prettier
+name: Prettier
+tagline: Opinionated code formatter for JS/TS/CSS/HTML. Ends style debates.
+description: >
+  Prettier is an opinionated multi-language formatter covering
+  JavaScript, TypeScript, JSX, CSS, HTML, JSON, Markdown, and more. By
+  collapsing the design space of "how should this look" into a small
+  fixed set of options, Prettier prevents scope creep in code review
+  (style nits) and removes a whole class of agent-introduced cosmetic
+  diffs. Configuration lives in `.prettierrc` or `package.json`
+  `prettier`, which the audit detector now recognises.
+
+first_released: 2017-01-22
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: prettier
+repository_url: https://github.com/prettier/prettier
+documentation_url: https://prettier.io/docs/en/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - code-formatting
+  - ast-rewriting
+  - deterministic-style
+
+security_notes: >
+  Standard dev-tool security posture; Prettier runs locally and
+  rewrites source from its parsed AST without executing it. Plugin
+  ecosystem is sizeable — pin plugin versions in `package.json`.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - javascript
+  - typescript
+  - css
+  - html
+  - json
+  - markdown
+
+inclusion_rationale: >
+  Occupies prevention × post_generation × fully_autonomous for
+  scope_creep across the JS/TS/CSS/HTML lanes. Mature workhorse;
+  including it lets the audit detector resolve `prettier` blocks in
+  package.json and credit projects for having a deterministic-style
+  gate in place.
+editorial_notes: >
+  Added 2026-05-01 to fill the package.json detection path so the
+  audit no longer reports prettier as an unknown tool.
+stars: 50000
+stars_updated_at: '2026-04-23'

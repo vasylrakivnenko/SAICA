@@ -1,0 +1,63 @@
+id: black
+name: Black
+tagline: Opinionated Python code formatter. Removes style argument from PR review.
+description: >
+  Black is the canonical opinionated Python formatter: it rewrites source
+  to a single, deterministic style with no user-tunable formatting
+  options. By collapsing the design space of "how should this look,"
+  Black prevents scope creep in code review (style nits) and removes a
+  whole class of agent-introduced cosmetic diffs. Configuration lives
+  in `pyproject.toml [tool.black]`, which the audit detector now
+  recognises.
+
+first_released: 2018-03-22
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: psf
+repository_url: https://github.com/psf/black
+documentation_url: https://black.readthedocs.io/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - code-formatting
+  - ast-rewriting
+  - deterministic-style
+
+security_notes: >
+  Standard dev-tool security posture; no special considerations. Black
+  runs locally, parses the AST, and rewrites source — no network access.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies prevention × post_generation × fully_autonomous for scope_creep
+  in the Python lane. Mature workhorse; including it lets the audit
+  detector resolve `[tool.black]` blocks and credit projects for having
+  a deterministic-style gate in place.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports black as an unknown tool.
+stars: 39000
+stars_updated_at: '2026-04-23'

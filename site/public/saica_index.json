@@ -1,20 +1,560 @@
 {
   "version": 1,
-  "generated_at": "2026-05-01T21:56:19+00:00",
+  "generated_at": "2026-05-02T01:36:29+00:00",
   "boards": {
     "popular_oss": [
+      {
+        "name": "crewAIInc/crewAI",
+        "url": "https://github.com/crewAIInc/crewAI",
+        "category": "agent_framework",
+        "note": null,
+        "score": 0.6391,
+        "grade": "B",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 8,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.8,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "crewAI has 6 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 6 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "joaomdmoura/crewAI",
+        "url": "https://github.com/joaomdmoura/crewAI",
+        "category": "agent_framework",
+        "note": null,
+        "score": 0.6391,
+        "grade": "B",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 8,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.8,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "crewAI has 6 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 6 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "pandas-dev/pandas",
+        "url": "https://github.com/pandas-dev/pandas",
+        "category": "data_lib",
+        "note": null,
+        "score": 0.5854,
+        "grade": "C",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 8,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "pandas has 8 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 6 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "pydantic/pydantic",
+        "url": "https://github.com/pydantic/pydantic",
+        "category": "data_lib",
+        "note": null,
+        "score": 0.5854,
+        "grade": "C",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 8,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "pydantic has 6 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 6 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "tiangolo/fastapi",
+        "url": "https://github.com/tiangolo/fastapi",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.5854,
+        "grade": "C",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 8,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "fastapi has 6 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 6 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "sqlalchemy/sqlalchemy",
+        "url": "https://github.com/sqlalchemy/sqlalchemy",
+        "category": "data_lib",
+        "note": null,
+        "score": 0.5629,
+        "grade": "C",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 7,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "sqlalchemy has 8 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 7 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "BerriAI/litellm",
+        "url": "https://github.com/BerriAI/litellm",
+        "category": "ai_tooling",
+        "note": null,
+        "score": 0.5623,
+        "grade": "C",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 9,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.7,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.4,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.7
+        },
+        "summary": "litellm has 6 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 8 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "run-llama/llama_index",
+        "url": "https://github.com/run-llama/llama_index",
+        "category": "ai_tooling",
+        "note": null,
+        "score": 0.5437,
+        "grade": "C",
+        "fms_covered": 7,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 6,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.0
+        },
+        "summary": "llama_index has 4 SAICA-KG-recognised supervision tools covering 7 of 11 failure modes. 4 high-severity and 4 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "7/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "encode/httpx",
+        "url": "https://github.com/encode/httpx",
+        "category": "data_lib",
+        "note": null,
+        "score": 0.5159,
+        "grade": "C",
+        "fms_covered": 8,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 8,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.7,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.7
+        },
+        "summary": "httpx has 5 SAICA-KG-recognised supervision tools covering 8 of 11 failure modes. 3 high-severity and 8 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "8/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "SWE-agent/SWE-agent",
+        "url": "https://github.com/SWE-agent/SWE-agent",
+        "category": "agent_framework",
+        "note": null,
+        "score": 0.5113,
+        "grade": "C",
+        "fms_covered": 9,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 7,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.4,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "SWE-agent has 5 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 7 medium-severity gaps identified. Coding agent(s) detected: Cursor.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "pallets/flask",
+        "url": "https://github.com/pallets/flask",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.5033,
+        "grade": "C",
+        "fms_covered": 7,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.8,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "flask has 6 SAICA-KG-recognised supervision tools covering 7 of 11 failure modes. 4 high-severity and 5 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "7/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "All-Hands-AI/OpenHands",
+        "url": "https://github.com/All-Hands-AI/OpenHands",
+        "category": "agent_framework",
+        "note": null,
+        "score": 0.4205,
+        "grade": "C",
+        "fms_covered": 7,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 2,
+          "detection": 7,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.5,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.4
+        },
+        "summary": "OpenHands has 5 SAICA-KG-recognised supervision tools covering 7 of 11 failure modes. 4 high-severity and 5 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "7/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "grafana/grafana",
+        "url": "https://github.com/grafana/grafana",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.4205,
+        "grade": "C",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "grafana has 3 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "prisma/prisma",
+        "url": "https://github.com/prisma/prisma",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.4205,
+        "grade": "C",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "prisma has 3 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "supabase/supabase",
+        "url": "https://github.com/supabase/supabase",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.4205,
+        "grade": "C",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "supabase has 3 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: Claude Code, Cursor, GitHub Copilot.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
       {
         "name": "instructor-ai/instructor",
         "url": "https://github.com/instructor-ai/instructor",
         "category": "ai_tooling",
         "note": null,
-        "score": 0.3285,
+        "score": 0.3993,
         "grade": "D",
-        "fms_covered": 6,
+        "fms_covered": 9,
         "fms_total": 11,
         "paradigm_counts": {
           "prevention": 4,
-          "detection": 3,
+          "detection": 6,
           "correction": 0,
           "recovery": 0
         },
@@ -24,19 +564,415 @@
           "fabrication": 0.4,
           "security_vulnerability": 0.5,
           "supply_chain_attack": 0.4,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.4,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.7
+        },
+        "summary": "instructor has 4 SAICA-KG-recognised supervision tools covering 9 of 11 failure modes. 2 high-severity and 8 medium-severity gaps identified. Coding agent(s) detected: Claude Code, Cursor.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "9/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "microsoft/TypeScript",
+        "url": "https://github.com/microsoft/TypeScript",
+        "category": "language_runtime",
+        "note": null,
+        "score": 0.398,
+        "grade": "D",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "TypeScript has 2 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 5 medium-severity gaps identified. Coding agent(s) detected: Claude Code, GitHub Copilot.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "astral-sh/ruff",
+        "url": "https://github.com/astral-sh/ruff",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.3874,
+        "grade": "D",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 2,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.4,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.0
+        },
+        "summary": "ruff has 3 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "anthropics/anthropic-sdk-python",
+        "url": "https://github.com/anthropics/anthropic-sdk-python",
+        "category": "ai_tooling",
+        "note": null,
+        "score": 0.3801,
+        "grade": "D",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.7,
+          "security_vulnerability": 0.0,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.7
+        },
+        "summary": "anthropic-sdk-python has 4 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 5 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "openai/openai-python",
+        "url": "https://github.com/openai/openai-python",
+        "category": "ai_tooling",
+        "note": null,
+        "score": 0.3801,
+        "grade": "D",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.7,
+          "security_vulnerability": 0.0,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.7,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.7
+        },
+        "summary": "openai-python has 4 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 5 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "sveltejs/svelte",
+        "url": "https://github.com/sveltejs/svelte",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.3563,
+        "grade": "D",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "svelte has 2 SAICA-KG-recognised supervision tools covering 3 of 11 failure modes. 8 high-severity and 2 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "vercel/next.js",
+        "url": "https://github.com/vercel/next.js",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.3563,
+        "grade": "D",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "next.js has 2 SAICA-KG-recognised supervision tools covering 3 of 11 failure modes. 8 high-severity and 2 medium-severity gaps identified. Coding agent(s) detected: Claude Code, Cursor.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "vuejs/core",
+        "url": "https://github.com/vuejs/core",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.3563,
+        "grade": "D",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "core has 2 SAICA-KG-recognised supervision tools covering 3 of 11 failure modes. 8 high-severity and 2 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "withastro/astro",
+        "url": "https://github.com/withastro/astro",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.3563,
+        "grade": "D",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.8,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "astro has 2 SAICA-KG-recognised supervision tools covering 3 of 11 failure modes. 8 high-severity and 2 medium-severity gaps identified. Coding agent(s) detected: Zed Agent.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "langfuse/langfuse",
+        "url": "https://github.com/langfuse/langfuse",
+        "category": "ai_tooling",
+        "note": null,
+        "score": 0.347,
+        "grade": "D",
+        "fms_covered": 4,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.4,
           "test_manipulation": 0.0,
           "cascading_failure": 0.0,
           "logic_error": 0.0,
           "context_pollution": 0.0,
           "obsolescence": 0.7,
-          "dependency_blindness": 0.4,
+          "dependency_blindness": 0.0,
           "incomplete_execution": 0.0
         },
-        "summary": "instructor has 3 SAICA-KG-recognised supervision tools covering 6 of 11 failure modes. 5 high-severity and 5 medium-severity gaps identified. Coding agent(s) detected: Claude Code, Cursor.",
+        "summary": "langfuse has 3 SAICA-KG-recognised supervision tools covering 4 of 11 failure modes. 7 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
         "audited_at": "2026-05-01",
         "score_notes": [
-          "6/11 failure modes guarded by at least one detected tool.",
+          "4/11 failure modes guarded by at least one detected tool.",
           "No coverage in paradigm(s): correction, recovery."
+        ]
+      },
+      {
+        "name": "nodejs/node",
+        "url": "https://github.com/nodejs/node",
+        "category": "language_runtime",
+        "note": null,
+        "score": 0.3444,
+        "grade": "D",
+        "fms_covered": 5,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 5,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "node has 2 SAICA-KG-recognised supervision tools covering 5 of 11 failure modes. 6 high-severity and 5 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "5/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "vitejs/vite",
+        "url": "https://github.com/vitejs/vite",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.3338,
+        "grade": "D",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.7,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.7,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "vite has 1 SAICA-KG-recognised supervision tool covering 3 of 11 failure modes. 8 high-severity and 3 medium-severity gaps identified. Coding agent(s) detected: GitHub Copilot.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
         ]
       },
       {
@@ -76,9 +1012,9 @@
         ]
       },
       {
-        "name": "run-llama/llama_index",
-        "url": "https://github.com/run-llama/llama_index",
-        "category": "ai_tooling",
+        "name": "python/cpython",
+        "url": "https://github.com/python/cpython",
+        "category": "language_runtime",
         "note": null,
         "score": 0.3285,
         "grade": "D",
@@ -104,7 +1040,7 @@
           "dependency_blindness": 0.4,
           "incomplete_execution": 0.0
         },
-        "summary": "llama_index has 2 SAICA-KG-recognised supervision tools covering 6 of 11 failure modes. 5 high-severity and 5 medium-severity gaps identified.",
+        "summary": "cpython has 2 SAICA-KG-recognised supervision tools covering 6 of 11 failure modes. 5 high-severity and 5 medium-severity gaps identified.",
         "audited_at": "2026-05-01",
         "score_notes": [
           "6/11 failure modes guarded by at least one detected tool.",
@@ -112,75 +1048,147 @@
         ]
       },
       {
-        "name": "BerriAI/litellm",
-        "url": "https://github.com/BerriAI/litellm",
-        "category": "ai_tooling",
+        "name": "django/django",
+        "url": "https://github.com/django/django",
+        "category": "web_framework",
         "note": null,
-        "score": 0.2788,
+        "score": 0.3139,
         "grade": "D",
-        "fms_covered": 6,
+        "fms_covered": 4,
         "fms_total": 11,
         "paradigm_counts": {
-          "prevention": 0,
-          "detection": 6,
+          "prevention": 4,
+          "detection": 0,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.4,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.4,
+          "incomplete_execution": 0.0
+        },
+        "summary": "django has 3 SAICA-KG-recognised supervision tools covering 4 of 11 failure modes. 7 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: GitHub Copilot.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "4/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): detection, correction, recovery."
+        ]
+      },
+      {
+        "name": "astral-sh/uv",
+        "url": "https://github.com/astral-sh/uv",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.2464,
+        "grade": "D",
+        "fms_covered": 4,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 4,
+          "detection": 0,
           "correction": 0,
           "recovery": 0
         },
         "is_balanced": false,
         "per_fm": {
           "scope_creep": 0.4,
-          "fabrication": 0.0,
+          "fabrication": 0.4,
           "security_vulnerability": 0.4,
-          "supply_chain_attack": 0.4,
+          "supply_chain_attack": 0.0,
           "test_manipulation": 0.0,
           "cascading_failure": 0.0,
-          "logic_error": 0.4,
-          "context_pollution": 0.4,
-          "obsolescence": 0.7,
-          "dependency_blindness": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.4,
           "incomplete_execution": 0.0
         },
-        "summary": "litellm has 2 SAICA-KG-recognised supervision tools covering 6 of 11 failure modes. 5 high-severity and 6 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "summary": "uv has 1 SAICA-KG-recognised supervision tool covering 4 of 11 failure modes. 7 high-severity and 4 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
         "audited_at": "2026-05-01",
         "score_notes": [
-          "6/11 failure modes guarded by at least one detected tool.",
-          "No coverage in paradigm(s): prevention, correction, recovery."
+          "4/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): detection, correction, recovery."
         ]
       },
       {
-        "name": "langfuse/langfuse",
-        "url": "https://github.com/langfuse/langfuse",
-        "category": "ai_tooling",
+        "name": "oven-sh/bun",
+        "url": "https://github.com/oven-sh/bun",
+        "category": "language_runtime",
         "note": null,
-        "score": 0.1894,
+        "score": 0.1576,
         "grade": "F",
-        "fms_covered": 3,
+        "fms_covered": 1,
         "fms_total": 11,
         "paradigm_counts": {
-          "prevention": 0,
-          "detection": 3,
+          "prevention": 1,
+          "detection": 0,
           "correction": 0,
           "recovery": 0
         },
         "is_balanced": false,
         "per_fm": {
-          "scope_creep": 0.0,
+          "scope_creep": 0.7,
           "fabrication": 0.0,
-          "security_vulnerability": 0.7,
-          "supply_chain_attack": 0.4,
+          "security_vulnerability": 0.0,
+          "supply_chain_attack": 0.0,
           "test_manipulation": 0.0,
           "cascading_failure": 0.0,
           "logic_error": 0.0,
           "context_pollution": 0.0,
-          "obsolescence": 0.7,
+          "obsolescence": 0.0,
           "dependency_blindness": 0.0,
           "incomplete_execution": 0.0
         },
-        "summary": "langfuse has 2 SAICA-KG-recognised supervision tools covering 3 of 11 failure modes. 8 high-severity and 3 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "summary": "bun has 1 SAICA-KG-recognised supervision tool covering 1 of 11 failure modes. 10 high-severity and 1 medium-severity gaps identified. Coding agent(s) detected: Claude Code, Cursor.",
         "audited_at": "2026-05-01",
         "score_notes": [
-          "3/11 failure modes guarded by at least one detected tool.",
-          "No coverage in paradigm(s): prevention, correction, recovery."
+          "1/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): detection, correction, recovery."
+        ]
+      },
+      {
+        "name": "remix-run/remix",
+        "url": "https://github.com/remix-run/remix",
+        "category": "web_framework",
+        "note": null,
+        "score": 0.1576,
+        "grade": "F",
+        "fms_covered": 1,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 1,
+          "detection": 0,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.7,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.0,
+          "supply_chain_attack": 0.0,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.0,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "remix has 1 SAICA-KG-recognised supervision tool covering 1 of 11 failure modes. 10 high-severity and 1 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "1/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): detection, correction, recovery."
         ]
       },
       {
@@ -220,9 +1228,189 @@
         ]
       },
       {
-        "name": "anthropics/anthropic-sdk-python",
-        "url": "https://github.com/anthropics/anthropic-sdk-python",
-        "category": "ai_tooling",
+        "name": "numpy/numpy",
+        "url": "https://github.com/numpy/numpy",
+        "category": "data_lib",
+        "note": null,
+        "score": 0.1358,
+        "grade": "F",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.0,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "numpy has 1 SAICA-KG-recognised supervision tool covering 3 of 11 failure modes. 8 high-severity and 3 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "pola-rs/polars",
+        "url": "https://github.com/pola-rs/polars",
+        "category": "data_lib",
+        "note": null,
+        "score": 0.1358,
+        "grade": "F",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.0,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "polars has 1 SAICA-KG-recognised supervision tool covering 3 of 11 failure modes. 8 high-severity and 3 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "redis/redis",
+        "url": "https://github.com/redis/redis",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.1358,
+        "grade": "F",
+        "fms_covered": 3,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 3,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.0,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.4,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "redis has 1 SAICA-KG-recognised supervision tool covering 3 of 11 failure modes. 8 high-severity and 3 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "3/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "PostgREST/postgrest",
+        "url": "https://github.com/PostgREST/postgrest",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.0642,
+        "grade": "F",
+        "fms_covered": 2,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 2,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.0,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.0,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "postgrest has 1 SAICA-KG-recognised supervision tool covering 2 of 11 failure modes. 9 high-severity and 2 medium-severity gaps identified.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "2/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "elastic/elasticsearch",
+        "url": "https://github.com/elastic/elasticsearch",
+        "category": "infra_tool",
+        "note": null,
+        "score": 0.0642,
+        "grade": "F",
+        "fms_covered": 2,
+        "fms_total": 11,
+        "paradigm_counts": {
+          "prevention": 0,
+          "detection": 2,
+          "correction": 0,
+          "recovery": 0
+        },
+        "is_balanced": false,
+        "per_fm": {
+          "scope_creep": 0.0,
+          "fabrication": 0.0,
+          "security_vulnerability": 0.0,
+          "supply_chain_attack": 0.4,
+          "test_manipulation": 0.0,
+          "cascading_failure": 0.0,
+          "logic_error": 0.0,
+          "context_pollution": 0.0,
+          "obsolescence": 0.7,
+          "dependency_blindness": 0.0,
+          "incomplete_execution": 0.0
+        },
+        "summary": "elasticsearch has 1 SAICA-KG-recognised supervision tool covering 2 of 11 failure modes. 9 high-severity and 2 medium-severity gaps identified. Coding agent(s) detected: Claude Code.",
+        "audited_at": "2026-05-01",
+        "score_notes": [
+          "2/11 failure modes guarded by at least one detected tool.",
+          "No coverage in paradigm(s): prevention, correction, recovery."
+        ]
+      },
+      {
+        "name": "denoland/deno",
+        "url": "https://github.com/denoland/deno",
+        "category": "language_runtime",
         "note": null,
         "score": 0.0,
         "grade": "F",
@@ -248,7 +1436,7 @@
           "dependency_blindness": 0.0,
           "incomplete_execution": 0.0
         },
-        "summary": "anthropic-sdk-python has no SAICA-KG-recognised supervision tools wired in. 11 high-severity and 0 medium-severity gaps identified.",
+        "summary": "deno has no SAICA-KG-recognised supervision tools wired in. 11 high-severity and 0 medium-severity gaps identified. Coding agent(s) detected: Claude Code, GitHub Copilot.",
         "audited_at": "2026-05-01",
         "score_notes": [
           "0/11 failure modes guarded by at least one detected tool.",
@@ -256,9 +1444,9 @@
         ]
       },
       {
-        "name": "openai/openai-python",
-        "url": "https://github.com/openai/openai-python",
-        "category": "ai_tooling",
+        "name": "microsoft/autogen",
+        "url": "https://github.com/microsoft/autogen",
+        "category": "agent_framework",
         "note": null,
         "score": 0.0,
         "grade": "F",
@@ -284,7 +1472,7 @@
           "dependency_blindness": 0.0,
           "incomplete_execution": 0.0
         },
-        "summary": "openai-python has no SAICA-KG-recognised supervision tools wired in. 11 high-severity and 0 medium-severity gaps identified.",
+        "summary": "autogen has no SAICA-KG-recognised supervision tools wired in. 11 high-severity and 0 medium-severity gaps identified. Coding agent(s) detected: GitHub Copilot.",
         "audited_at": "2026-05-01",
         "score_notes": [
           "0/11 failure modes guarded by at least one detected tool.",

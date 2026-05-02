@@ -1,25 +1,19 @@
 ---
-// /leaderboard — SAICA Index.
+// /leaderboard — SAICA Supervision Index.
 //
-// Reads /saica_index.json (produced by `python -m pipeline.saica_index.runner`,
-// regenerated weekly by `.github/workflows/saica-index.yml`) and renders one
-// board:
-//   * popular_oss  — curated list of well-known repos AI agents touch a lot
+// APEX-inspired layout: hero on top (title + plain-English explainer +
+// quick links), two-column body below (left = "what we measure" copy,
+// right = horizontal-bar leaderboard with score %s and grade pills).
+// Technical methodology is in a collapsible footer block so the
+// landing page reads cleanly for non-technical visitors.
 //
-// (The kg_tools board was removed in v0.3.1.1 — its "supervisors
-// supervising themselves" framing promised something the score didn't
-// deliver, and self-evaluating the catalog conflicts with "SAICA helps
-// tools, doesn't evaluate them" from v0.3.1.)
-//
-// Static page — no backend, no JS dependency. Sorting is server-side
-// (rows arrive pre-sorted by score desc); a tiny inline script lets the
-// user re-sort by name / grade / FMs covered.
-//
-// The scoring formula is documented in pipeline/saica_index/score.py.
+// Reads /saica_index.json (regenerated weekly by
+// .github/workflows/saica-index.yml). Scoring: pipeline/saica_index/score.py.
 
 import BaseLayout from "../layouts/BaseLayout.astro";
+import snapshot from "../../public/saica_index.json";
 
-const title = "SAICA Index — Supervision leaderboard";
+const title = "SAICA Supervision Index";
 
 type Row = {
   name: string;
@@ -45,134 +39,264 @@ type Snapshot = {
   errors: { url: string; board: string; error: string }[];
 };
 
-// Load the JSON at build time. Astro inlines it; no fetch at runtime.
-import snapshot from "../../public/saica_index.json";
 const data = snapshot as Snapshot;
-
-const boardLabels: Record<string, string> = {
-  popular_oss: "Popular OSS — repos AI coding agents touch a lot",
-};
-
-const gradeColors: Record<string, string> = {
-  A: "bg-emerald-600 text-white",
-  B: "bg-emerald-400 text-white",
-  C: "bg-amber-400 text-stone-900",
-  D: "bg-orange-500 text-white",
-  F: "bg-red-600 text-white",
-};
+const rows: Row[] = data.boards.popular_oss ?? [];
 
 const generated = new Date(data.generated_at).toLocaleString("en-US", {
   dateStyle: "long",
-  timeStyle: "short",
   timeZone: "UTC",
 });
+
+// Bar gradient per (under-the-hood) grade. Grade pills no longer
+// rendered on rows — top 3 get a podium medal instead, the rest just
+// show the score % + a coloured bar.
+const barGradient: Record<string, string> = {
+  A: "from-emerald-500 to-emerald-600",
+  B: "from-emerald-400 to-lime-400",
+  C: "from-amber-300 to-amber-500",
+  D: "from-amber-500 to-orange-500",
+  F: "from-orange-500 to-red-600",
+};
+
+// 🥇🥈🥉 for the podium; nothing for everyone else.
+const podiumMedal: Record<number, string> = {
+  0: "🥇",
+  1: "🥈",
+  2: "🥉",
+};
+
+// Helper: nice display name. "tiangolo/fastapi" → "tiangolo / fastapi"
+function displayName(repo: string): string {
+  const parts = repo.split("/");
+  if (parts.length === 2) return `${parts[0]} / ${parts[1]}`;
+  return repo;
+}
 ---
 
 <BaseLayout title={title}>
-  <section class="mb-6 max-w-3xl">
-    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-      Leaderboard
+  {/* ──────────────  Hero  ────────────── */}
+  <section class="mx-auto max-w-3xl text-center pt-6 pb-10">
+    <h1 class="!mb-4 text-4xl md:text-5xl font-semibold tracking-tight">
+      SAICA Supervision Index
+    </h1>
+    <p class="mx-auto max-w-2xl leading-7 text-ink-muted">
+      How well do popular open-source projects guard against the ways
+      AI coding agents break things — fabricated APIs, vulnerable
+      code, runaway loops, broken tests, and seven other common
+      failure modes? We audit each repo weekly and grade A–F.
     </p>
-    <h1 class="mt-2">SAICA Index</h1>
-    <p class="mt-4 leading-7">
-      How well do popular open-source projects supervise their AI-coding
-      workflows? We audit each repo with the same analyzer that powers
-      <a href="/assess" class="underline">/assess</a>, score it against the
-      11 SAICA failure modes weighted by likelihood × impact, and assign a
-      letter grade. Rankings are regenerated weekly.
-    </p>
-    <p class="mt-2 text-sm text-ink-faint">
-      Last updated: <strong>{generated} UTC</strong> · {data.boards.popular_oss?.length ?? 0} repos audited
+
+    <div class="mt-6 flex justify-center gap-2 text-sm">
+      <a
+        href="#methodology"
+        class="rounded bg-stone-900 px-4 py-1.5 font-medium text-white no-underline hover:bg-stone-800"
+      >Methodology</a>
+      <a
+        href="https://github.com/vasylrakivnenko/SAICA/blob/main/data/saica_index/seed_repos.yml"
+        rel="noopener"
+        class="rounded border border-ink/20 px-4 py-1.5 font-medium no-underline hover:bg-paper-soft"
+      >Add a repo</a>
+      <a
+        href="https://github.com/vasylrakivnenko/SAICA/blob/main/pipeline/saica_index/score.py"
+        rel="noopener"
+        class="rounded border border-ink/20 px-4 py-1.5 font-medium no-underline hover:bg-paper-soft"
+      >Code</a>
+    </div>
+
+    <p class="mt-4 text-xs text-ink-faint">
+      Last updated <strong>{generated}</strong> · {rows.length} repos audited
       {data.errors.length > 0 && (
-        <span class="text-amber-700"> · {data.errors.length} repos errored (see footer)</span>
+        <span class="text-amber-700"> · {data.errors.length} errored</span>
       )}
     </p>
   </section>
 
-  <section class="mb-8 max-w-3xl">
-    <details class="rounded border border-ink/10 bg-paper-soft p-3">
-      <summary class="cursor-pointer text-sm font-semibold">How the score works</summary>
+  {/* ──────────────  Two-column body  ────────────── */}
+  <section class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+    {/* ──── Left column — plain-English explainer ──── */}
+    <div class="space-y-5 leading-7">
+      <h2 class="!mt-0 text-xl">What this measures</h2>
+      <p>
+        For each repo, we look at <strong>what supervision tools are
+        already installed</strong> — Dependabot, Semgrep, pre-commit hooks,
+        evaluation suites, observability stacks, sandboxes, and so on —
+        and check which of the <strong>11 known AI-coding failure modes</strong>
+        they actually defend against.
+      </p>
+      <p>
+        A high grade means the repo has <em>layered, evidence-backed</em>
+        defenses across the failure modes that matter most. A low grade
+        doesn't mean the project is bad — it means an AI agent let loose
+        on its codebase has fewer guardrails than it should.
+      </p>
+
+      <h3 class="!mt-6 text-base font-semibold">How rows are ranked</h3>
+      <p class="text-sm">
+        Repos are sorted by their supervision-coverage score
+        (higher = more failure modes guarded, weighted by severity).
+        The top three earn a 🥇 / 🥈 / 🥉 — the rest show the raw
+        percentage and a colored bar. No school-style A-F grades:
+        AI-coding supervision is a brand-new discipline and the bar
+        is rising fast. A leader today might be a baseline tomorrow.
+      </p>
+
+      <p class="text-sm text-ink-faint">
+        The full methodology — exactly how we map evidence to scores —
+        is at the bottom of the page.
+      </p>
+    </div>
+
+    {/* ──── Right column — the leaderboard bars ──── */}
+    <div>
+      {rows.length === 0 ? (
+        <p class="text-sm text-ink-faint">No rows yet.</p>
+      ) : (
+        <div class="rounded-xl border border-ink/10 bg-white p-5">
+          <div class="mb-4 flex items-baseline justify-between border-b border-ink/10 pb-3">
+            <span class="text-sm font-semibold uppercase tracking-wider text-ink-faint">
+              Repo
+            </span>
+            <span class="text-sm font-semibold uppercase tracking-wider text-ink-faint">
+              Score
+            </span>
+          </div>
+
+          <ul class="space-y-4">
+            {rows.map((row, i) => {
+              const pct = (row.score * 100).toFixed(1);
+              const widthPct = Math.max(2, row.score * 100);
+              const gradient = barGradient[row.grade] ?? barGradient.F;
+              const medal = podiumMedal[i];
+              return (
+                <li>
+                  <div class="mb-1 flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex items-center gap-2">
+                      {medal ? (
+                        <span class="shrink-0 text-lg leading-none" aria-label={`Rank ${i + 1}`}>
+                          {medal}
+                        </span>
+                      ) : (
+                        <span class="shrink-0 w-5 text-right text-xs tabular-nums text-ink-faint">
+                          {i + 1}
+                        </span>
+                      )}
+                      <a
+                        href={row.url}
+                        rel="noopener"
+                        target="_blank"
+                        class="truncate text-sm font-medium no-underline hover:underline"
+                      >
+                        {displayName(row.name)}
+                      </a>
+                      {row.is_balanced && (
+                        <span class="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-700" title="All four control paradigms (prevention/detection/correction/recovery) covered">
+                          balanced
+                        </span>
+                      )}
+                    </div>
+                    <span class="shrink-0 text-sm font-semibold tabular-nums">
+                      {pct}%
+                    </span>
+                  </div>
+                  <div class="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
+                    <div
+                      class={`h-full rounded-full bg-gradient-to-r ${gradient}`}
+                      style={`width:${widthPct}%`}
+                    ></div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between text-[11px] text-ink-faint">
+                    <span>{row.category.replace(/_/g, " ")}</span>
+                    <span>{row.fms_covered}/{row.fms_total} failure modes guarded</span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p class="mt-5 border-t border-ink/10 pt-3 text-xs text-ink-faint text-center">
+            Scale: 0% (no supervision detected) → 100% (every priority
+            failure mode covered with strong evidence).
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* ──────────────  Methodology (moved down, plain English first) ────────────── */}
+  <section id="methodology" class="mt-16 max-w-3xl">
+    <h2>How we score a repo</h2>
+    <p class="leading-7">
+      Three steps. None involve us looking at code quality — only what
+      <strong>defenses you've installed</strong> against AI-coding-agent
+      failures.
+    </p>
+
+    <ol class="mt-4 space-y-4 leading-7">
+      <li>
+        <strong>Detect what's already there.</strong> We scan the repo for
+        roughly two dozen common supervisors — Dependabot, Semgrep,
+        pre-commit hooks, GitHub Actions security workflows, evaluation
+        configs (promptfoo, deepeval, ragas), observability libraries
+        (langfuse, helicone, opik), sandboxes (e2b, daytona), and others.
+        Each detection comes with the file we matched on, so it's auditable.
+      </li>
+      <li>
+        <strong>Map detections to failure modes.</strong> Each tool in our
+        knowledge graph declares which of the 11 failure modes it
+        defends against (e.g. Dependabot → <em>dependency_blindness</em>;
+        Semgrep → <em>security_vulnerability</em>). We give partial
+        credit for "declared coverage," more for "rationale-backed,"
+        most for "citation-backed in a paper or independent eval."
+      </li>
+      <li>
+        <strong>Weight, sum, grade.</strong> Failure modes aren't equal.
+        <em>scope_creep</em> is the most-reported issue (high weight);
+        <em>obsolescence</em> is real but lower-impact. Each repo's
+        per-failure-mode score is multiplied by that weight, summed,
+        and normalized to a percentage. We add a small bonus when
+        <strong>two or more control paradigms</strong>
+        (prevention + detection, e.g.) cover the same failure mode —
+        layered defense beats single-layer.
+      </li>
+    </ol>
+
+    <p class="mt-6 text-sm text-ink-faint">
+      Grades thresholds: <strong>A</strong> ≥ 80% · <strong>B</strong> ≥ 60% ·
+      <strong>C</strong> ≥ 40% · <strong>D</strong> ≥ 20% · <strong>F</strong> &lt; 20%.
+      Calibrated to be slightly punishing — most production repos today
+      land in C/D, an A should feel earned.
+    </p>
+
+    <details class="mt-6 rounded border border-ink/10 bg-paper-soft p-4">
+      <summary class="cursor-pointer text-sm font-semibold">
+        Technical formula (for the curious)
+      </summary>
       <div class="mt-3 space-y-2 text-sm leading-6">
         <p>
-          For each of the 11 failure modes we take the best evidence tier
-          across detected supervisors:
-          <code>tier 1 → 0.40</code>, <code>tier 2 → 0.70</code>,
-          <code>tier 3 → 1.00</code>. We add <code>+0.10</code> when ≥2
-          control paradigms (prevention/detection/correction/recovery)
-          cover the same FM — layered defense matters.
+          Per failure mode <code>f</code>, the coverage score is
+          <code>c(f) ∈ [0, 1]</code>:
+          tier 1 → 0.40, tier 2 → 0.70, tier 3 → 1.00, plus
+          <code>+0.10</code> when ≥2 control paradigms cover the same FM
+          (capped at 1.0).
         </p>
         <p>
-          Then we weight by per-FM priority (likelihood × impact, see
-          <code>data/failure_mode_priorities.yml</code>) and sum to a
-          score in <code>[0, 1]</code>:
+          Aggregate, weighted by per-FM priority
+          (likelihood × impact, see <code>data/failure_mode_priorities.yml</code>):
         </p>
         <pre class="rounded bg-stone-900 px-3 py-2 text-xs text-stone-100 overflow-x-auto">score = Σ priority(f) × c(f)  /  Σ priority(f)</pre>
-        <p>
-          Grades are deliberately harsh: <strong>A ≥ 0.80</strong>,
-          <strong>B ≥ 0.60</strong>, <strong>C ≥ 0.40</strong>,
-          <strong>D ≥ 0.20</strong>, <strong>F &lt; 0.20</strong>.
-          A freshly-init'd repo should land at F; an A should feel earned.
-        </p>
         <p class="text-ink-faint">
-          Source of truth: <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/pipeline/saica_index/score.py" class="underline">pipeline/saica_index/score.py</a>
+          Source of truth:
+          <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/pipeline/saica_index/score.py" class="underline">pipeline/saica_index/score.py</a>.
+          Per-FM priorities:
+          <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/data/failure_mode_priorities.yml" class="underline">data/failure_mode_priorities.yml</a>.
         </p>
       </div>
     </details>
   </section>
 
-  {Object.entries(data.boards).map(([boardKey, rows]) => (
-    <section class="mb-12">
-      <h2 class="mb-3 text-xl">{boardLabels[boardKey] ?? boardKey}</h2>
-
-      {rows.length === 0 ? (
-        <p class="text-sm text-ink-faint">No rows yet for this board.</p>
-      ) : (
-        <div class="overflow-x-auto rounded border border-ink/10">
-          <table class="leaderboard-table w-full text-sm">
-            <thead class="bg-paper-soft text-left text-xs uppercase tracking-wider text-ink-faint">
-              <tr>
-                <th class="px-3 py-2 cursor-pointer" data-sort="rank">#</th>
-                <th class="px-3 py-2 cursor-pointer" data-sort="name">Repo</th>
-                <th class="px-3 py-2 cursor-pointer" data-sort="grade">Grade</th>
-                <th class="px-3 py-2 cursor-pointer text-right" data-sort="score">Score</th>
-                <th class="px-3 py-2 cursor-pointer text-right" data-sort="fms">FMs</th>
-                <th class="px-3 py-2">Paradigms (P · D · C · R)</th>
-                <th class="px-3 py-2">Category</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => (
-                <tr class="border-t border-ink/10 hover:bg-paper-soft">
-                  <td class="px-3 py-2 text-ink-faint" data-rank={i + 1}>{i + 1}</td>
-                  <td class="px-3 py-2">
-                    <a href={row.url} class="underline" rel="noopener" target="_blank">{row.name}</a>
-                    {row.note && <div class="text-xs text-ink-faint">{row.note}</div>}
-                  </td>
-                  <td class="px-3 py-2">
-                    <span class={`inline-block rounded px-2 py-0.5 text-xs font-bold ${gradeColors[row.grade] ?? "bg-stone-300"}`}>
-                      {row.grade}
-                    </span>
-                    {row.is_balanced && (
-                      <span title="All four paradigms covered" class="ml-1 inline-block rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] uppercase text-indigo-700">balanced</span>
-                    )}
-                  </td>
-                  <td class="px-3 py-2 text-right tabular-nums">{row.score.toFixed(3)}</td>
-                  <td class="px-3 py-2 text-right tabular-nums" data-fms={row.fms_covered}>{row.fms_covered}/{row.fms_total}</td>
-                  <td class="px-3 py-2 text-xs tabular-nums text-ink-faint">
-                    {row.paradigm_counts.prevention ?? 0} · {row.paradigm_counts.detection ?? 0} · {row.paradigm_counts.correction ?? 0} · {row.paradigm_counts.recovery ?? 0}
-                  </td>
-                  <td class="px-3 py-2 text-xs text-ink-faint">{row.category}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  ))}
-
+  {/* ──────────────  Errors (kept, but pushed to the bottom) ────────────── */}
   {data.errors.length > 0 && (
-    <section class="mb-8 max-w-3xl">
+    <section class="mt-12 max-w-3xl">
       <details class="rounded border border-amber-200 bg-amber-50 p-3 text-sm">
         <summary class="cursor-pointer font-semibold text-amber-900">
           {data.errors.length} repos errored during this run
@@ -185,57 +309,4 @@ const generated = new Date(data.generated_at).toLocaleString("en-US", {
       </details>
     </section>
   )}
-
-  <section class="max-w-3xl text-xs text-ink-faint">
-    <p>
-      Scoring formula: <code>pipeline/saica_index/score.py</code>.
-      Seed list (popular OSS): <code>data/saica_index/seed_repos.yml</code>.
-      Cron: <code>.github/workflows/saica-index.yml</code>.
-      Want to add a repo? Open a PR against the seed YAML.
-    </p>
-  </section>
-
-  <script is:inline>
-    // Lightweight column sorter — no framework. Click a sortable header
-    // to toggle asc/desc on that column. Sort key is read from
-    // `data-sort`, value is read from per-row `data-rank` / `data-fms` /
-    // textContent.
-    document.querySelectorAll(".leaderboard-table").forEach((table) => {
-      const tbody = table.querySelector("tbody");
-      if (!tbody) return;
-      const headers = table.querySelectorAll("thead th[data-sort]");
-      let active = { key: "rank", dir: 1 };
-      const valueOf = (row, key) => {
-        const cells = row.children;
-        switch (key) {
-          case "rank": return Number(cells[0].dataset.rank ?? 0);
-          case "name": return (cells[1].textContent ?? "").trim().toLowerCase();
-          case "grade": return -("ABCDF".indexOf(cells[2].textContent.trim()[0]));
-          case "score": return parseFloat(cells[3].textContent ?? "0");
-          case "fms": return Number(cells[4].dataset.fms ?? 0);
-          default: return 0;
-        }
-      };
-      headers.forEach((th) => {
-        th.addEventListener("click", () => {
-          const key = th.dataset.sort;
-          if (!key) return;
-          if (active.key === key) {
-            active.dir = -active.dir;
-          } else {
-            active = { key, dir: key === "name" ? 1 : -1 };
-          }
-          const rows = Array.from(tbody.querySelectorAll("tr"));
-          rows.sort((a, b) => {
-            const av = valueOf(a, key);
-            const bv = valueOf(b, key);
-            if (av < bv) return -1 * active.dir;
-            if (av > bv) return 1 * active.dir;
-            return 0;
-          });
-          rows.forEach((r) => tbody.appendChild(r));
-        });
-      });
-    });
-  </script>
 </BaseLayout>

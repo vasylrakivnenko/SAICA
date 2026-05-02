@@ -1,0 +1,71 @@
+id: eslint
+name: ESLint
+tagline: Pluggable JavaScript/TypeScript linter and code-quality enforcer.
+description: >
+  ESLint is the canonical JavaScript and TypeScript linter: it parses
+  source to an AST and runs configurable rule plugins covering logic
+  bugs (unused vars, unreachable code, mistaken equality), style
+  consistency (scope_creep on review), and a growing set of security
+  rules (eslint-plugin-security, no-eval). It runs from the CLI, in
+  pre-commit, in CI, and as a language-server in editors. Configuration
+  lives in `eslint.config.js` or `package.json` `eslintConfig`, which
+  the audit detector now recognises.
+
+first_released: 2013-06-21
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: eslint
+repository_url: https://github.com/eslint/eslint
+documentation_url: https://eslint.org/docs/latest/
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - scope_creep
+  - security_vulnerability
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - lint-rule-engine
+  - ast-walking
+  - plugin-architecture
+  - autofix
+
+security_notes: >
+  Standard dev-tool security posture; ESLint executes plugin code
+  loaded from `node_modules`, so a malicious lint plugin can run with
+  developer privileges — pin plugin versions and prefer audited
+  configurations (e.g. `eslint:recommended`, `@typescript-eslint`).
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - javascript
+  - typescript
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for
+  logic_error, scope_creep, and security_vulnerability in the JS/TS
+  lane. Mature workhorse; missing it leaves the audit detector unable
+  to recognise the single most common JavaScript linting gate present
+  in nearly every modern Node project.
+editorial_notes: >
+  Added 2026-05-01 to fill the package.json detection path so the
+  audit no longer reports eslint as an unknown tool.
+stars: 25000
+stars_updated_at: '2026-04-23'

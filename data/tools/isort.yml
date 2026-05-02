@@ -1,0 +1,63 @@
+id: isort
+name: isort
+tagline: Sorts and groups Python imports automatically.
+description: >
+  isort rewrites Python import statements into a canonical order
+  (stdlib, third-party, first-party, local) with consistent grouping
+  and spacing. By making import layout deterministic it eliminates a
+  common source of cosmetic diffs and prevents reviewers from chasing
+  style nits — a small but real check on scope creep in PR review.
+  Configuration lives in `pyproject.toml [tool.isort]`, which the audit
+  detector now recognises.
+
+first_released: 2013-09-15
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: timothycrosley
+repository_url: https://github.com/PyCQA/isort
+documentation_url: https://pycqa.github.io/isort/
+license: MIT
+
+control_paradigm: prevention
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - scope_creep
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - import-sorting
+  - ast-rewriting
+  - deterministic-style
+
+security_notes: >
+  Standard dev-tool security posture; no special considerations. isort
+  runs locally and rewrites import blocks based on AST inspection only.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies prevention × post_generation × fully_autonomous for scope_creep
+  in the Python lane, alongside Black on a narrower formatting surface.
+  Including it lets the audit detector resolve `[tool.isort]` blocks
+  in legacy configs that have not yet migrated to Ruff's import sorter.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports isort as an unknown tool.
+stars: 6000
+stars_updated_at: '2026-04-23'

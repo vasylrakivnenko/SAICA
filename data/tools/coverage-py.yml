@@ -1,0 +1,70 @@
+id: coverage-py
+name: Coverage.py
+tagline: Code coverage measurement for Python. Detects test-manipulation by surfacing uncovered code.
+description: >
+  Coverage.py instruments Python execution to record which lines and
+  branches are exercised by a test run, then reports per-file and
+  per-line coverage. By surfacing uncovered code it makes
+  test_manipulation (deleted tests, skipped assertions, "tests pass but
+  exercise nothing") visible, and exposes incomplete_execution where new
+  code ships without any tests at all. Configuration lives in
+  `pyproject.toml [tool.coverage.*]`, which the audit detector now
+  recognises.
+
+first_released: 2004-12-12
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: nedbat
+repository_url: https://github.com/nedbat/coveragepy
+documentation_url: https://coverage.readthedocs.io/
+license: Apache-2.0
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - test_manipulation
+  - incomplete_execution
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - library
+
+implements_techniques:
+  - line-coverage-instrumentation
+  - branch-coverage-instrumentation
+  - trace-hooking
+  - coverage-reporting
+
+security_notes: >
+  Standard dev-tool security posture; Coverage.py uses sys.settrace /
+  sys.monitoring to instrument the Python interpreter, so it should not
+  be enabled in production paths. Output reports may include source
+  snippets — treat coverage artefacts with the same access controls as
+  the source repo.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for
+  test_manipulation in the Python lane — distinct from pytest because
+  the signal is "what was *not* run," not "what failed." Including it
+  lets the audit detector resolve `[tool.coverage.*]` blocks and credit
+  projects with a coverage-gating discipline.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports coverage.py as an unknown tool.
+stars: 3000
+stars_updated_at: '2026-04-23'

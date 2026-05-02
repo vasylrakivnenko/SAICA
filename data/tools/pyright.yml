@@ -1,0 +1,68 @@
+id: pyright
+name: Pyright
+tagline: Microsoft's fast static type checker for Python.
+description: >
+  Pyright is Microsoft's TypeScript-implemented static type checker for
+  Python, designed for low-latency incremental analysis of large
+  codebases. It powers the Pylance language server in VS Code and runs
+  from the CLI in CI, catching type incompatibilities and references to
+  non-existent attributes (the fabrication failure mode) before code
+  ships. Configuration lives in `pyproject.toml [tool.pyright]` or in a
+  dedicated `pyrightconfig.json`.
+
+first_released: 2019-03-29
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: microsoft
+repository_url: https://github.com/microsoft/pyright
+documentation_url: https://microsoft.github.io/pyright/
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - logic_error
+  - fabrication
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - static-type-checking
+  - incremental-analysis
+  - type-inference
+  - language-server-protocol
+
+security_notes: >
+  Standard dev-tool security posture; Pyright runs locally and analyses
+  source statically without executing it. Released under the MIT license
+  with public source on GitHub.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for logic_error
+  and fabrication in the Python lane, alongside mypy. Distinct because
+  Pyright targets editor-grade incremental performance and ships the
+  language server most agentic IDE integrations rely on; missing it
+  leaves the audit detector blind to a major slice of real Python
+  configurations.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports pyright as an unknown tool.
+stars: 14000
+stars_updated_at: '2026-04-23'

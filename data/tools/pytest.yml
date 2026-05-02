@@ -1,0 +1,70 @@
+id: pytest
+name: pytest
+tagline: Python test framework — discipline gate for "done means tests pass."
+description: >
+  pytest is the de facto Python test framework: it discovers and runs
+  unit, integration, and functional tests, reporting failures in
+  human-readable form. It is the canonical discipline gate for the
+  "done means tests pass" rule — surfacing incomplete execution
+  (skipped/never-written tests), test_manipulation (xfail/skip abuse),
+  and logic errors that only show up under exercise. Configuration lives
+  in `pyproject.toml [tool.pytest.ini_options]`, which the audit detector
+  now recognises.
+
+first_released: 2004-11-29
+last_updated: 2026-04-15
+maturity_status: stable
+
+published_by: python
+repository_url: https://github.com/pytest-dev/pytest
+documentation_url: https://docs.pytest.org/
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - incomplete_execution
+  - test_manipulation
+  - logic_error
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - ci_app
+  - ide_plugin
+
+implements_techniques:
+  - test-discovery
+  - fixture-injection
+  - parametrized-testing
+  - assertion-introspection
+
+security_notes: >
+  Standard dev-tool security posture; pytest executes user-authored test
+  code with full developer privileges, so test files should be reviewed
+  with the same scrutiny as production code. Plugin ecosystem is large
+  and worth pinning by version.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+supervises_targets:
+  - python
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for the
+  incomplete_execution and test_manipulation failure modes in the Python
+  lane. Mature workhorse; missing it leaves the audit detector unable
+  to recognise the single most common testing configuration in Python
+  repos.
+editorial_notes: >
+  Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
+  the audit no longer reports pytest as an unknown tool.
+stars: 12000
+stars_updated_at: '2026-04-23'

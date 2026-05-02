@@ -373,6 +373,35 @@ _JS_PKG_TO_TOOL: dict[str, tuple[str, str]] = {
     "litellm": ("litellm", "LiteLLM"),
     "@instructor-ai/instructor": ("instructor", "Instructor"),
     "promptfoo": ("promptfoo", "promptfoo"),
+    # Plain dev-tool deps (added in v0.4.2 to lift detection floor on
+    # well-maintained JS/TS projects whose pyproject analogue is
+    # package.json `devDependencies`).
+    "eslint": ("eslint", "ESLint"),
+    "prettier": ("prettier", "Prettier"),
+}
+
+# pyproject.toml `[tool.<name>]` second-component → KG tool id.
+#
+# Added in v0.4.2 after surveying openai-python, anthropic-sdk-python,
+# fastapi, pydantic, httpx, ruff: every well-maintained Python repo in
+# 2026 declares its dev-tooling here rather than via .pre-commit-config
+# or a custom CI step. Scanning only `.pre-commit-config.yaml` /
+# action `uses:` refs missed all of them — this rule closes that gap.
+#
+# Match is on the SECOND path component (`tool.<X>` or `tool.<X>.<...>`),
+# so `[tool.ruff]`, `[tool.ruff.lint]`, `[tool.pytest.ini_options]`,
+# `[tool.coverage.run]` all hit the same KG id once. Build/packaging
+# sections (poetry, hatch, uv, pdm, rye, maturin) are deliberately
+# omitted — they're not supervisors.
+_PYPROJECT_TOOL_TO_KG: dict[str, tuple[str, str]] = {
+    "ruff": ("ruff", "Ruff"),
+    "mypy": ("mypy", "mypy"),
+    "pyright": ("pyright", "Pyright"),
+    "pytest": ("pytest", "pytest"),
+    "black": ("black", "Black"),
+    "isort": ("isort", "isort"),
+    "coverage": ("coverage-py", "Coverage.py"),
+    "bandit": ("bandit", "Bandit"),
 }
 
 # Eval / config files → KG tool id.
@@ -516,6 +545,36 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
     return packages
 
 
+def _pyproject_tool_sections(repo_root: Path) -> dict[str, str]:
+    """Return ``{tool_name: pyproject_path}`` for every ``[tool.<name>]``
+    section declared in the repo's ``pyproject.toml``.
+
+    Match is on the SECOND path component, so ``[tool.ruff]``,
+    ``[tool.ruff.lint]``, ``[tool.pytest.ini_options]`` etc. all
+    collapse to ``ruff`` / ``pytest`` (one entry per distinct tool).
+    Returns an empty dict when no pyproject.toml exists or when it
+    lacks a ``[tool]`` table.
+
+    Used by Stage-9 supervision detection (v0.4.2): well-maintained
+    Python repos declare their dev-tooling here rather than via
+    ``.pre-commit-config.yaml`` or named GitHub Actions, so scanning
+    only those misses ruff/mypy/pyright/pytest in basically every
+    SDK and framework repo we audit.
+    """
+    pyproject = repo_root / "pyproject.toml"
+    if not pyproject.exists():
+        return {}
+    try:
+        doc = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError, ValueError):
+        return {}
+    tool_table = doc.get("tool")
+    if not isinstance(tool_table, dict):
+        return {}
+    rel_path = _rel(repo_root, pyproject)
+    return {str(name): rel_path for name in tool_table.keys()}
+
+
 def _js_packages_from_package_json(repo_root: Path) -> dict[str, list[str]]:
     pkg_path = repo_root / "package.json"
     if not pkg_path.exists():
@@ -656,6 +715,23 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
         if key in _JS_PKG_TO_TOOL:
             kg_id, display = _JS_PKG_TO_TOOL[key]
             emit(kg_id, display, "dep_file", paths, 1.0)
+
+    # --- pyproject.toml `[tool.<name>]` sections --------------------------
+    # Lifts detection floor on well-maintained Python repos (openai-python,
+    # anthropic-sdk-python, fastapi, pydantic, ruff itself) that declare
+    # ruff / mypy / pyright / pytest etc. here rather than via pre-commit
+    # or named GH Actions. See `_PYPROJECT_TOOL_TO_KG`.
+    for tool_name, src in _pyproject_tool_sections(repo_root).items():
+        if tool_name in _PYPROJECT_TOOL_TO_KG:
+            kg_id, display = _PYPROJECT_TOOL_TO_KG[tool_name]
+            emit(
+                kg_id,
+                display,
+                "dep_file",
+                [src],
+                0.9,
+                note=f"Declared via [tool.{tool_name}] in pyproject.toml",
+            )
 
     # --- Eval configs ------------------------------------------------------
     for kg_id, name, candidates in _EVAL_CONFIG_RULES:
