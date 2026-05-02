@@ -166,61 +166,72 @@ function displayName(repo: string): string {
             </span>
           </div>
 
-          <ul class="space-y-4">
-            {rows.map((row, i) => {
-              const pct = (row.score * 100).toFixed(1);
-              const widthPct = Math.max(2, row.score * 100);
-              const gradient = barGradient[row.grade] ?? barGradient.F;
-              const medal = podiumMedal[i];
-              return (
-                <li>
-                  <div class="mb-1 flex items-center justify-between gap-3">
-                    <div class="min-w-0 flex items-center gap-2">
-                      {medal ? (
-                        <span class="shrink-0 text-lg leading-none" aria-label={`Rank ${i + 1}`}>
-                          {medal}
-                        </span>
-                      ) : (
-                        <span class="shrink-0 w-5 text-right text-xs tabular-nums text-ink-faint">
-                          {i + 1}
-                        </span>
-                      )}
-                      <a
-                        href={row.url}
-                        rel="noopener"
-                        target="_blank"
-                        class="truncate text-sm font-medium no-underline hover:underline"
-                      >
-                        {displayName(row.name)}
-                      </a>
-                      {row.is_balanced && (
-                        <span class="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-700" title="All four control paradigms (prevention/detection/correction/recovery) covered">
-                          balanced
-                        </span>
-                      )}
+          {/* Top 10 stay flush in the page; ranks 11+ live inside an
+              inset scroll panel so the leaderboard never dominates the
+              viewport regardless of how many repos we audit. */}
+          <div
+            class="max-h-[44rem] overflow-y-auto pr-2 -mr-2"
+            style="scrollbar-gutter: stable;"
+          >
+            <ul class="space-y-4">
+              {rows.map((row, i) => {
+                const pct = (row.score * 100).toFixed(1);
+                const widthPct = Math.max(2, row.score * 100);
+                const gradient = barGradient[row.grade] ?? barGradient.F;
+                const medal = podiumMedal[i];
+                return (
+                  <li>
+                    <div class="mb-1 flex items-center justify-between gap-3">
+                      <div class="min-w-0 flex items-center gap-2">
+                        {medal ? (
+                          <span class="shrink-0 text-lg leading-none" aria-label={`Rank ${i + 1}`}>
+                            {medal}
+                          </span>
+                        ) : (
+                          <span class="shrink-0 w-5 text-right text-xs tabular-nums text-ink-faint">
+                            {i + 1}
+                          </span>
+                        )}
+                        <a
+                          href={row.url}
+                          rel="noopener"
+                          target="_blank"
+                          class="truncate text-sm font-medium no-underline hover:underline"
+                        >
+                          {displayName(row.name)}
+                        </a>
+                        {row.is_balanced && (
+                          <span class="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-700" title="All four control paradigms (prevention/detection/correction/recovery) covered">
+                            balanced
+                          </span>
+                        )}
+                      </div>
+                      <span class="shrink-0 text-sm font-semibold tabular-nums">
+                        {pct}%
+                      </span>
                     </div>
-                    <span class="shrink-0 text-sm font-semibold tabular-nums">
-                      {pct}%
-                    </span>
-                  </div>
-                  <div class="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
-                    <div
-                      class={`h-full rounded-full bg-gradient-to-r ${gradient}`}
-                      style={`width:${widthPct}%`}
-                    ></div>
-                  </div>
-                  <div class="mt-1 flex items-center justify-between text-[11px] text-ink-faint">
-                    <span>{row.category.replace(/_/g, " ")}</span>
-                    <span>{row.fms_covered}/{row.fms_total} failure modes guarded</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                    <div class="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
+                      <div
+                        class={`h-full rounded-full bg-gradient-to-r ${gradient}`}
+                        style={`width:${widthPct}%`}
+                      ></div>
+                    </div>
+                    <div class="mt-1 flex items-center justify-between text-[11px] text-ink-faint">
+                      <span>{row.category.replace(/_/g, " ")}</span>
+                      <span>{row.fms_covered}/{row.fms_total} failure modes guarded</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
           <p class="mt-5 border-t border-ink/10 pt-3 text-xs text-ink-faint text-center">
-            Scale: 0% (no supervision detected) → 100% (every priority
-            failure mode covered with strong evidence).
+            {rows.length > 10 ? (
+              <>Showing all <strong>{rows.length}</strong> repos — scroll within the panel for ranks 11+. Scale: 0% (no supervision detected) → 100% (every priority failure mode covered with strong evidence).</>
+            ) : (
+              <>Scale: 0% (no supervision detected) → 100% (every priority failure mode covered with strong evidence).</>
+            )}
           </p>
         </div>
       )}
