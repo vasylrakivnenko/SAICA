@@ -530,9 +530,57 @@ def _render_text(payload: dict[str, Any]) -> str:
     return text
 
 
+# Plugin SKILL.md frontmatter — must stay in sync with whatever Claude
+# Code expects (see plugin/.claude-plugin/plugin.json). The body
+# below is the SKILLS.md content stripped of its top preamble (which
+# tells humans how to install it; redundant inside a plugin).
+_PLUGIN_SKILL_PATH = REPO_ROOT / "plugin" / "skills" / "saica-supervise" / "SKILL.md"
+_PLUGIN_SKILL_FRONTMATTER = """---
+name: saica-supervise
+description: Watch for the 11 known AI-coding-agent failure modes (fabrication, scope_creep, security_vulnerability, etc.) — consult this skill before edits, dependency adds, completion claims, or anything that could trip a known supervision concern. Quote the snake_case failure-mode ids verbatim when flagging risks.
+---
+
+# SAICA supervision skill
+
+This skill encodes per-action heuristics distilled from the SAICA-KG
+corpus (https://github.com/vasylrakivnenko/SAICA). Use it as context
+to decide *what to be careful about* when writing or modifying code.
+The failure-mode IDs (snake_case) are the canonical vocabulary —
+quote them verbatim when surfacing concerns.
+
+For structured queries (look up a specific tool, get the recommended
+supervisor stack), use the MCP tools shipped by this same plugin:
+
+  - `saica_lookup(tool_id)` — full facets for one supervisor
+  - `saica_recommend(level | failure_modes)` — the recommended set
+
+"""
+
+
+def _render_plugin_skill(payload: dict[str, Any]) -> str:
+    """SKILLS.md text rewrapped as a Claude Code plugin skill.
+
+    Drops the top preamble (the "How to use" block in SKILLS.md is
+    aimed at humans who manually copy the file; inside a plugin it's
+    redundant noise) and prepends YAML frontmatter Claude Code reads.
+    """
+    body = _render_text(payload)
+    marker = "## Failure modes"
+    i = body.find(marker)
+    if i < 0:
+        return _PLUGIN_SKILL_FRONTMATTER + body
+    return _PLUGIN_SKILL_FRONTMATTER + body[i:]
+
+
 def _write_outputs(payload: dict[str, Any], out_dir: Path) -> Path:
     md_path = out_dir / "SKILLS.md"
     md_path.write_text(_render_text(payload), encoding="utf-8")
+    # Mirror to the plugin's SKILL.md so the plugin stays in sync
+    # with the canonical SKILLS.md without a separate generator run.
+    if _PLUGIN_SKILL_PATH.parent.exists():
+        _PLUGIN_SKILL_PATH.write_text(
+            _render_plugin_skill(payload), encoding="utf-8"
+        )
     return md_path
 
 
@@ -546,6 +594,19 @@ def _check_outputs(payload: dict[str, Any], out_dir: Path) -> int:
             "Run `python -m validator.generate_skills` to regenerate.\n"
         )
         return 1
+    # Same drift check for the plugin SKILL.md.
+    if _PLUGIN_SKILL_PATH.parent.exists():
+        plugin_expected = _render_plugin_skill(payload)
+        if (
+            not _PLUGIN_SKILL_PATH.exists()
+            or _PLUGIN_SKILL_PATH.read_text(encoding="utf-8") != plugin_expected
+        ):
+            sys.stderr.write(
+                "generate_skills --check: out-of-date file:\n  "
+                f"{_PLUGIN_SKILL_PATH}\n"
+                "Run `python -m validator.generate_skills` to regenerate.\n"
+            )
+            return 1
     return 0
 
 

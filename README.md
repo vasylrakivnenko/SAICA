@@ -131,6 +131,20 @@ Run it locally:
 open http://localhost:4321/leaderboard
 ```
 
+## Claude Code plugin
+
+[`plugin/`](plugin/) ships SAICA-KG as a Claude Code plugin — one
+install gives the agent both the MCP server (`saica_lookup`,
+`saica_recommend`) and the `saica-supervise` skill. Sideload during
+development:
+
+```bash
+claude --plugin-dir ./plugin
+```
+
+See [`plugin/README.md`](plugin/README.md) for prerequisites, install,
+and how the skill stays in sync with `SKILLS.md`.
+
 ## Live site
 
 [https://saica-kg.dev](https://saica-kg.dev) (when deployed) — browse

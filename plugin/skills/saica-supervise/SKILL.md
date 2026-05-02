@@ -1,14 +1,21 @@
-# SAICA-KG — Agent skills file
+---
+name: saica-supervise
+description: Watch for the 11 known AI-coding-agent failure modes (fabrication, scope_creep, security_vulnerability, etc.) — consult this skill before edits, dependency adds, completion claims, or anything that could trip a known supervision concern. Quote the snake_case failure-mode ids verbatim when flagging risks.
+---
 
-You are reading this because a human dropped this file into your skills / rules / context directory. It distils the SAICA-KG corpus
-(https://github.com/vasylrakivnenko/SAICA) into actionable guidance for when you're writing or modifying code. Use it as context, not as a
-service to call. Treat the failure-mode IDs (snake_case) as the canonical vocabulary.
+# SAICA supervision skill
 
-## How this file is meant to be used
+This skill encodes per-action heuristics distilled from the SAICA-KG
+corpus (https://github.com/vasylrakivnenko/SAICA). Use it as context
+to decide *what to be careful about* when writing or modifying code.
+The failure-mode IDs (snake_case) are the canonical vocabulary —
+quote them verbatim when surfacing concerns.
 
-- Drop into `.claude/skills/saica-kg.md`, `.cursor/rules/saica-kg.md`, Replit's skills directory, or any equivalent context-injection spot.
-- Reload after major project changes (`python -m validator.generate_skills`).
-- Failure-mode IDs in this file (e.g. `scope_creep`) are stable identifiers — quote them verbatim when surfacing supervision concerns.
+For structured queries (look up a specific tool, get the recommended
+supervisor stack), use the MCP tools shipped by this same plugin:
+
+  - `saica_lookup(tool_id)` — full facets for one supervisor
+  - `saica_recommend(level | failure_modes)` — the recommended set
 
 ## Failure modes — what to watch for and what to do
 
@@ -246,6 +253,6 @@ Stable across projects. Distilled from this repo's own `CLAUDE.md` plus general 
 
 ## Provenance
 
-- Generated from KG version 2026.05 on 2026-05-01 by `validator/generate_skills.py`.
+- Generated from KG version 2026.05 on 2026-04-23 by `validator/generate_skills.py`.
 - Priorities: `data/failure_mode_priorities.yml` v1.
 - Re-run after `data/*` changes.
