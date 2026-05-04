@@ -156,8 +156,8 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "Across 15+ applications built with Claude Code, Cline, Cursor, v0, and Replit, DAPLab observed agents' fix attempts introduced new errors, producing expanding cascades of regression." — In the DAPLab "9 Critical Failure Patterns of Coding Agents" empirical study (Reya Vir et al., January 2026), the "Cascading Error Recovery" pattern (DAP-04) was observed across five state-of-the-art coding agents: Clau… [`daplab-cascading-recovery-observation-2026`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['cascading_failure'])`):**
+- [`sentrux`](data/tools/sentrux.yml) — detection/post_generation, surfaces: cli, mcp_server, library; Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent write…
 - [`manifest`](data/tools/manifest.yml) — prevention/in_generation, surfaces: library; Smart model routing for personal AI agents.
-- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
 
 **Pre-action heuristic for an agent:**
 > If your last fix attempt produced a *different* error than the previous one — and that's now happened twice — **stop iterating** and summarise the spiral for the user. Recovery loops compound; the third attempt rarely converges. Revert to a known-good state instead of layering more changes.
@@ -280,6 +280,6 @@ Stable across projects. Distilled from this repo's own `CLAUDE.md` plus general 
 
 ## Provenance
 
-- Generated from KG version 2026.05 on 2026-05-01 by `validator/generate_skills.py`.
+- Generated from KG version 2026.05 on 2026-05-03 by `validator/generate_skills.py`.
 - Priorities: `data/failure_mode_priorities.yml` v1.
 - Re-run after `data/*` changes.

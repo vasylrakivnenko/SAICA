@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-02T04:33:28Z",
+  "generated_at": "2026-05-04T02:25:44Z",
   "kg_version": "2026.05",
   "counts": {
-    "tools": 98,
+    "tools": 99,
     "failure_modes": 11,
     "papers": 55,
     "taxonomies": 6,
@@ -101,6 +101,7 @@
       "ruff": "https://github.com/astral-sh/ruff",
       "safe-rlhf": "https://github.com/pku-alignment/safe-rlhf",
       "semgrep": "https://github.com/semgrep/semgrep",
+      "sentrux": "https://github.com/sentrux/sentrux",
       "skyvern": "https://github.com/skyvern-ai/skyvern",
       "smolagents": "https://github.com/huggingface/smolagents",
       "snyk": "https://github.com/snyk/snyk",

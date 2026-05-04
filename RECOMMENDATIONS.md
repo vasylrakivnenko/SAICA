@@ -5,7 +5,7 @@
 > `.claude/skills/`, `.cursor/rules/`, or equivalent skills directory).
 
 Pre-computed from the KG. Regenerate with `python -m validator.generate_recommendations`.
-Last regenerated: 2026-05-01 from KG version 2026.05.
+Last regenerated: 2026-05-03 from KG version 2026.05.
 
 > 🔥 marks repos currently on github.com/trending. Trending tools win ties
 > against non-trending peers with up to ~+30% more raw stars (boost = 1.43×; see
@@ -499,7 +499,7 @@ Top 3 supervisors:
 | --- | --- | --- | --- | ---: | :---: | --- |
 | [tree-sitter](data/tools/tree-sitter.yml) | prevention | pre_generation | library | 24,948 |  | Incremental parser toolkit that powers structural code analysis and s… |
 | [Semgrep](data/tools/semgrep.yml) | detection | post_generation | cli, ci_app, library | 14,901 |  | Fast, rule-based static analysis with a pattern syntax that mirrors s… |
-| [pre-commit](data/tools/pre-commit.yml) | prevention | post_generation | cli, ci_app | — |  | Multi-language framework that runs configurable hooks before commits… |
+| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  | Real-time architectural sensor that scores codebase modularity, acycl… |
 
 ### Logic error
 
@@ -557,9 +557,9 @@ Top 3 supervisors:
 
 | Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
 | --- | --- | --- | --- | ---: | :---: | --- |
+| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  | Real-time architectural sensor that scores codebase modularity, acycl… |
 | [manifest](data/tools/manifest.yml) | prevention | in_generation | library | 5,555 |  | Smart model routing for personal AI agents. |
 | [coze-loop](data/tools/coze-loop.yml) | detection | post_generation | web_app, http_service | 5,427 |  | Full-lifecycle AI agent management platform with debugging, evaluatio… |
-| [bifrost](data/tools/bifrost.yml) | prevention | in_generation | proxy_gateway, http_service | 4,209 |  | Fastest enterprise AI gateway with adaptive load balancing, failover,… |
 
 ### Incomplete execution
 

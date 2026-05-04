@@ -4496,6 +4496,26 @@
     "cascading_failure": [
       {
         "addresses_failure_modes": [
+          "cascading_failure",
+          "dependency_blindness"
+        ],
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
+        "integration_surfaces": [
+          "cli",
+          "mcp_server",
+          "library"
+        ],
+        "stars": 1975,
+        "tagline": "Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent writes.",
+        "temporal_phase": "post_generation",
+        "tool_id": "sentrux",
+        "tool_name": "sentrux",
+        "trending": false,
+        "url": "/tools/sentrux"
+      },
+      {
+        "addresses_failure_modes": [
           "scope_creep",
           "context_pollution",
           "cascading_failure"
@@ -4534,27 +4554,6 @@
         "tool_name": "coze-loop",
         "trending": false,
         "url": "/tools/coze-loop"
-      },
-      {
-        "addresses_failure_modes": [
-          "security_vulnerability",
-          "scope_creep",
-          "supply_chain_attack",
-          "cascading_failure"
-        ],
-        "autonomy_level": "fully_autonomous",
-        "control_paradigm": "prevention",
-        "integration_surfaces": [
-          "proxy_gateway",
-          "http_service"
-        ],
-        "stars": 4209,
-        "tagline": "Fastest enterprise AI gateway with adaptive load balancing, failover, and guardrails.",
-        "temporal_phase": "in_generation",
-        "tool_id": "bifrost",
-        "tool_name": "bifrost",
-        "trending": false,
-        "url": "/tools/bifrost"
       }
     ],
     "context_pollution": [
@@ -4656,24 +4655,23 @@
       },
       {
         "addresses_failure_modes": [
-          "scope_creep",
-          "security_vulnerability",
-          "dependency_blindness",
-          "fabrication"
+          "cascading_failure",
+          "dependency_blindness"
         ],
-        "autonomy_level": "graduated_hitl",
-        "control_paradigm": "prevention",
+        "autonomy_level": "fully_autonomous",
+        "control_paradigm": "detection",
         "integration_surfaces": [
           "cli",
-          "ci_app"
+          "mcp_server",
+          "library"
         ],
-        "stars": null,
-        "tagline": "Multi-language framework that runs configurable hooks before commits land — denies the commit on hook failure.",
+        "stars": 1975,
+        "tagline": "Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent writes.",
         "temporal_phase": "post_generation",
-        "tool_id": "pre-commit",
-        "tool_name": "pre-commit",
+        "tool_id": "sentrux",
+        "tool_name": "sentrux",
         "trending": false,
-        "url": "/tools/pre-commit"
+        "url": "/tools/sentrux"
       }
     ],
     "fabrication": [
@@ -5169,7 +5167,7 @@
       }
     ]
   },
-  "generated_at": "2026-05-01",
+  "generated_at": "2026-05-03",
   "kg_version": "2026.05",
   "priorities": {
     "cascading_failure": 0.5,
