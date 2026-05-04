@@ -71,6 +71,32 @@ function displayName(repo: string): string {
   if (parts.length === 2) return `${parts[0]} / ${parts[1]}`;
   return repo;
 }
+
+// Category labels for the segregated leaderboard. A repo's `category`
+// describes what kind of project it is, NOT what kind of supervision
+// tool it is — these are audit targets, not recommendations.
+const categoryLabels: Record<string, string> = {
+  agent_framework: "Agent frameworks",
+  data_lib: "Data & ORM libraries",
+  web_framework: "Web frameworks",
+  ai_tooling: "AI / ML tooling",
+  infra_tool: "Infra & DevOps",
+  language_runtime: "Language runtimes",
+};
+
+// Group rows by category, preserving the score-descending order they
+// already arrived in. Then order the categories themselves by their
+// strongest entry, so the agent-framework leader (today, crewAI)
+// shows first.
+const grouped = new Map<string, Row[]>();
+for (const row of rows) {
+  const list = grouped.get(row.category) ?? [];
+  list.push(row);
+  grouped.set(row.category, list);
+}
+const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
+  (a, b) => (b[1][0]?.score ?? 0) - (a[1][0]?.score ?? 0),
+);
 ---
 
 <BaseLayout title={title}>
@@ -137,12 +163,22 @@ function displayName(repo: string): string {
 
       <h3 class="!mt-6 text-base font-semibold">How rows are ranked</h3>
       <p class="text-sm">
-        Repos are sorted by their supervision-coverage score
-        (higher = more failure modes guarded, weighted by severity).
-        The top three earn a 🥇 / 🥈 / 🥉 — the rest show the raw
-        percentage and a colored bar. No school-style A-F grades:
-        AI-coding supervision is a brand-new discipline and the bar
-        is rising fast. A leader today might be a baseline tomorrow.
+        Repos are <strong>grouped by category</strong> — agent
+        frameworks, web frameworks, data libraries, AI/ML tooling, and
+        so on — because the categories aren't comparable head-to-head
+        (a RAG framework and a web framework face different failure
+        modes). Within each category, repos are sorted by their
+        supervision-coverage score (higher = more failure modes
+        guarded, weighted by severity). The top three in each category
+        earn a 🥇 / 🥈 / 🥉.
+      </p>
+      <p class="text-sm">
+        These are <em>audit targets</em>, not <em>recommended
+        supervision tools</em>. A repo's position reflects how well
+        its own development workflow defends against AI-coding
+        failure modes — not whether the repo itself supervises other
+        agents. For supervision tools, see
+        <a href="/tool-coverage" class="underline">Tool Coverage</a>.
       </p>
 
       <p class="text-sm text-ink-faint">
@@ -151,87 +187,84 @@ function displayName(repo: string): string {
       </p>
     </div>
 
-    {/* ──── Right column — the leaderboard bars ──── */}
+    {/* ──── Right column — per-category leaderboard cards ──── */}
     <div>
       {rows.length === 0 ? (
         <p class="text-sm text-ink-faint">No rows yet.</p>
       ) : (
-        <div class="rounded-xl border border-ink/10 bg-white p-5">
-          <div class="mb-4 flex items-baseline justify-between border-b border-ink/10 pb-3">
-            <span class="text-sm font-semibold uppercase tracking-wider text-ink-faint">
-              Repo
-            </span>
-            <span class="text-sm font-semibold uppercase tracking-wider text-ink-faint">
-              Score
-            </span>
-          </div>
+        <div class="space-y-6">
+          {categories.map(([cat, catRows]) => (
+            <div class="rounded-xl border border-ink/10 bg-white p-5">
+              <div class="mb-4 flex items-baseline justify-between gap-3 border-b border-ink/10 pb-3">
+                <h3 class="!my-0 text-base font-semibold tracking-tight">
+                  {categoryLabels[cat] ?? cat.replace(/_/g, " ")}
+                  <span class="ml-2 text-xs font-normal text-ink-faint">
+                    {catRows.length} repos
+                  </span>
+                </h3>
+                <span class="shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+                  Score
+                </span>
+              </div>
 
-          {/* Top 10 stay flush in the page; ranks 11+ live inside an
-              inset scroll panel so the leaderboard never dominates the
-              viewport regardless of how many repos we audit. */}
-          <div
-            class="max-h-[44rem] overflow-y-auto pr-2 -mr-2"
-            style="scrollbar-gutter: stable;"
-          >
-            <ul class="space-y-4">
-              {rows.map((row, i) => {
-                const pct = (row.score * 100).toFixed(1);
-                const widthPct = Math.max(2, row.score * 100);
-                const gradient = barGradient[row.grade] ?? barGradient.F;
-                const medal = podiumMedal[i];
-                return (
-                  <li>
-                    <div class="mb-1 flex items-center justify-between gap-3">
-                      <div class="min-w-0 flex items-center gap-2">
-                        {medal ? (
-                          <span class="shrink-0 text-lg leading-none" aria-label={`Rank ${i + 1}`}>
-                            {medal}
-                          </span>
-                        ) : (
-                          <span class="shrink-0 w-5 text-right text-xs tabular-nums text-ink-faint">
-                            {i + 1}
-                          </span>
-                        )}
-                        <a
-                          href={row.url}
-                          rel="noopener"
-                          target="_blank"
-                          class="truncate text-sm font-medium no-underline hover:underline"
-                        >
-                          {displayName(row.name)}
-                        </a>
-                        {row.is_balanced && (
-                          <span class="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-700" title="All four control paradigms (prevention/detection/correction/recovery) covered">
-                            balanced
-                          </span>
-                        )}
+              <ul class="space-y-4">
+                {catRows.map((row, i) => {
+                  const pct = (row.score * 100).toFixed(1);
+                  const widthPct = Math.max(2, row.score * 100);
+                  const gradient = barGradient[row.grade] ?? barGradient.F;
+                  const medal = podiumMedal[i];
+                  return (
+                    <li>
+                      <div class="mb-1 flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex items-center gap-2">
+                          {medal ? (
+                            <span class="shrink-0 text-lg leading-none" aria-label={`Category rank ${i + 1}`}>
+                              {medal}
+                            </span>
+                          ) : (
+                            <span class="shrink-0 w-5 text-right text-xs tabular-nums text-ink-faint">
+                              {i + 1}
+                            </span>
+                          )}
+                          <a
+                            href={row.url}
+                            rel="noopener"
+                            target="_blank"
+                            class="truncate text-sm font-medium no-underline hover:underline"
+                          >
+                            {displayName(row.name)}
+                          </a>
+                          {row.is_balanced && (
+                            <span class="shrink-0 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-700" title="All four control paradigms (prevention/detection/correction/recovery) covered">
+                              balanced
+                            </span>
+                          )}
+                        </div>
+                        <span class="shrink-0 text-sm font-semibold tabular-nums">
+                          {pct}%
+                        </span>
                       </div>
-                      <span class="shrink-0 text-sm font-semibold tabular-nums">
-                        {pct}%
-                      </span>
-                    </div>
-                    <div class="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
-                      <div
-                        class={`h-full rounded-full bg-gradient-to-r ${gradient}`}
-                        style={`width:${widthPct}%`}
-                      ></div>
-                    </div>
-                    <div class="mt-1 flex items-center justify-between text-[11px] text-ink-faint">
-                      <span>{row.category.replace(/_/g, " ")}</span>
-                      <span>{row.fms_covered}/{row.fms_total} failure modes guarded</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+                      <div class="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
+                        <div
+                          class={`h-full rounded-full bg-gradient-to-r ${gradient}`}
+                          style={`width:${widthPct}%`}
+                        ></div>
+                      </div>
+                      <div class="mt-1 flex items-center justify-between text-[11px] text-ink-faint">
+                        <span>{row.fms_covered}/{row.fms_total} failure modes guarded</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
 
-          <p class="mt-5 border-t border-ink/10 pt-3 text-xs text-ink-faint text-center">
-            {rows.length > 10 ? (
-              <>Showing all <strong>{rows.length}</strong> repos — scroll within the panel for ranks 11+. Scale: 0% (no supervision detected) → 100% (every priority failure mode covered with strong evidence).</>
-            ) : (
-              <>Scale: 0% (no supervision detected) → 100% (every priority failure mode covered with strong evidence).</>
-            )}
+          <p class="text-xs text-ink-faint text-center">
+            <strong>{rows.length}</strong> repos audited across <strong>{categories.length}</strong> categories.
+            Top three in each category get a 🥇 / 🥈 / 🥉. Scale: 0%
+            (no supervision detected) → 100% (every priority failure
+            mode covered with strong evidence).
           </p>
         </div>
       )}
