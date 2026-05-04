@@ -668,14 +668,15 @@ def _write_outputs(payload: dict[str, Any], out_dir: Path) -> Path:
     md_path = out_dir / "SKILLS.md"
     md_path.write_text(_render_text(payload), encoding="utf-8")
     rendered_skill = _render_plugin_skill(payload)
-    # Mirror to the plugin's SKILL.md so the plugin stays in sync
-    # with the canonical SKILLS.md without a separate generator run.
-    if _PLUGIN_SKILL_PATH.parent.exists():
-        _PLUGIN_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
-    # Also mirror to the cross-agent install path (`skills/<name>/SKILL.md`)
-    # so `npx skills add vasylrakivnenko/SAICA` resolves without --full-depth.
-    _PUBLIC_SKILL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _PUBLIC_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
+    # Mirror to the in-repo SKILL.md copies — but only when this run is
+    # writing the canonical SKILLS.md location at the repo root. Tests
+    # call ``_write_outputs(payload, tmp_path)`` and must not stamp the
+    # real repo files with the test's mocked date.
+    if md_path.resolve() == DEFAULT_MD_PATH.resolve():
+        if _PLUGIN_SKILL_PATH.parent.exists():
+            _PLUGIN_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
+        _PUBLIC_SKILL_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _PUBLIC_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
     return md_path
 
 
