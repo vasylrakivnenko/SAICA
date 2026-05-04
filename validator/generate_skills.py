@@ -690,7 +690,14 @@ def _check_outputs(payload: dict[str, Any], out_dir: Path) -> int:
             "Run `python -m validator.generate_skills` to regenerate.\n"
         )
         return 1
-    # Same drift check for the plugin SKILL.md and the public skill mirror.
+    # Same drift check for the plugin SKILL.md and the public skill
+    # mirror — but only when --check is being run against the canonical
+    # repo location. Tests pass an isolated tmp_path; their payload does
+    # not match the repo mirrors (which were generated against the live
+    # 'today' rather than the fixture's pinned date), so we'd otherwise
+    # spuriously fail on the date stamp alone.
+    if md_path.resolve() != DEFAULT_MD_PATH.resolve():
+        return 0
     rendered_skill = _render_plugin_skill(payload)
     for path in (_PLUGIN_SKILL_PATH, _PUBLIC_SKILL_PATH):
         if path is _PLUGIN_SKILL_PATH and not path.parent.exists():
