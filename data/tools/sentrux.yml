@@ -1,0 +1,91 @@
+id: sentrux
+name: sentrux
+tagline: Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent writes.
+description: >
+  Pure-Rust CLI plus MCP server that watches a codebase's structural
+  health in real time and emits a single 0–10000 quality signal
+  computed from five root-cause metrics (modularity, acyclicity,
+  depth, equality, redundancy). Ships an interactive treemap GUI, a
+  CI-friendly rules engine (`.sentrux/rules.toml` declares
+  max-cycles, layer order, forbidden boundaries, god-file thresholds)
+  and a session-baseline gate (`sentrux gate`) that flags
+  architectural regression between agent runs. MCP integration
+  exposes nine tools (scan, health, session_start/end, rescan,
+  check_rules, evolution, dsm, test_gaps), letting Claude Code,
+  Cursor, Windsurf, and OpenCode read the sensor signal and
+  self-correct without a human in the loop. 52 languages via
+  tree-sitter plugins.
+
+first_released: 2026-03-11
+last_updated: 2026-03-19
+maturity_status: experimental
+
+published_by: sentrux
+repository_url: https://github.com/sentrux/sentrux
+documentation_url: https://github.com/sentrux/sentrux#readme
+license: MIT
+
+control_paradigm: detection
+temporal_phase: post_generation
+autonomy_level: fully_autonomous
+
+addresses_failure_modes:
+  - cascading_failure
+  - dependency_blindness
+
+locus_of_control:
+  - environment
+
+integration_surfaces:
+  - cli
+  - mcp_server
+  - library
+
+implements_techniques:
+  - architectural-metrics
+  - dependency-cycle-detection
+  - cross-session-drift-tracking
+  - structural-rules-engine
+  - ci-gating
+
+security_notes: >
+  Pure Rust, single binary, runs fully local. Reads source files
+  read-only; the MCP server exposes scan/session/rules tools but no
+  filesystem write capability. Rules and constraints live as a
+  human-authored `.sentrux/rules.toml` in the repo. No telemetry is
+  documented in the README; verify before shipping into a regulated
+  environment.
+signed_manifest: false
+openssf_scorecard_score:
+
+cited_in: []
+documented_in: []
+
+inclusion_rationale: >
+  Occupies detection × post_generation × fully_autonomous for
+  cascading_failure (continuous architectural metrics let an agent
+  detect that its own session regressed quality before the next
+  edit) and dependency_blindness (the redundancy metric flags
+  scattered re-implementations of the same concept across files).
+  Distinct from langfuse / helicone (LLM-call observability) by
+  observing the *codebase structure* rather than the model trace,
+  and from semgrep / tree-sitter (rule-or-pattern static analysis)
+  by emitting a continuous live score plus session-baseline diff
+  rather than discrete pass/fail findings. The CI-gate mode shifts
+  the same binary toward prevention and graduated_hitl; if that
+  use-case grows we may split it into a second Tool node per the
+  MECE policy.
+
+stars: 1975
+stars_updated_at: '2026-05-03'
+
+provenance:
+  source: manual
+  ingested_at: '2026-05-03'
+  reviewer: vasylrakivnenko
+  review_date: '2026-05-03'
+  discovery_sources:
+    - manual
+  failure_mode_hits:
+    - cascading_failure
+    - dependency_blindness

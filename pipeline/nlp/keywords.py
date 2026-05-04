@@ -37,6 +37,14 @@ FAILURE_MODE_KEYWORDS: dict[str, list[str]] = {
         "reimplementing",
         "ecosystem duplication",
         "ignores existing",
+        # Structural-duplication framing — sentrux et al. surface this
+        # as a "redundancy" metric across files rather than as a
+        # per-call reinvention. The first three terms are how those
+        # tools talk about it; the last is the canonical compsci name.
+        "redundant implementation",
+        "scattered responsibilities",
+        "duplicated functionality",
+        "code duplication",
     ],
     "logic_error": [
         "incorrect logic",
@@ -70,6 +78,26 @@ FAILURE_MODE_KEYWORDS: dict[str, list[str]] = {
         "trajectory drift",
         "long-context degradation",
         "memory poisoning",
+    ],
+    "cascading_failure": [
+        # Generic regression-cascade vocabulary used by DAPLab and
+        # follow-on writeups.
+        "cascading failure",
+        "cascading error",
+        "regression cascade",
+        "recovery loop",
+        "fix introduced new",
+        "spiral",
+        # Architectural-decay framing — the way sentrux et al. describe
+        # the same compounding-quality-loss pattern at codebase rather
+        # than agent-action granularity. Picked up via Stage 0b synonym
+        # queries against discovery sources.
+        "architectural decay",
+        "structural drift",
+        "modularity degradation",
+        "dependency cycle",
+        "circular dependency",
+        "session-over-session degradation",
     ],
     "supply_chain_attack": [
         "slopsquatting",
@@ -166,6 +194,14 @@ TOOL_SHAPE_SIGNALS: list[str] = [
     "policy engine",
     "allow-list",
     "deny-list",
+    # architectural / structural-health sensors (sentrux-class)
+    "architectural sensor",
+    "structural health",
+    "modularity score",
+    "dependency graph",
+    "treemap",
+    "code health",
+    "quality signal",
 ]
 
 PAPER_SIGNALS: list[str] = [
