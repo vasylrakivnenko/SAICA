@@ -54,7 +54,7 @@ jobs:
         run: python validator/cli.py
 
       - name: Open pull request if stars changed
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore: refresh GitHub stars"
           title: "chore: refresh GitHub stars"
