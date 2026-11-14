@@ -1,0 +1,1 @@
+- [Astro runtime compatibility](astro-runtime.md) — approved major upgrade; agent auto-backgrounding and bundled data paths need care.

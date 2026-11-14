@@ -143,7 +143,7 @@ export interface Tool {
    */
   provenance?: {
     /**
-     * Where this node came from (e.g. 'manual', 'pipeline-v0.1', 'import-from-awesome-list').
+     * Where this node came from (e.g. 'manual', 'pipeline-v0.1', 'import-from-awesome-list'). Single-valued for backwards compatibility; v2 nodes additionally populate ``discovery_sources`` with the full multi-source list.
      */
     source: string;
     /**
@@ -174,6 +174,43 @@ export interface Tool {
      * Date the merge was accepted.
      */
     review_date?: string;
+    /**
+     * Multi-source attribution from Stage 1 discovery. Values are short source identifiers (e.g. 's2', 'github', 'arxiv', 'elicit', 'perplexity', 'awesome-list'). When the same candidate is surfaced by several sources, all are listed — useful for the corroboration signal at Stage 4.
+     */
+    discovery_sources?: string[];
+    /**
+     * FM ids whose Stage 0b synonym queries surfaced this candidate. Used by per-FM coverage metrics (Stage 14) and to flag candidates whose discovery FM hits don't match their final ``addresses_failure_modes``.
+     */
+    failure_mode_hits?: string[];
+    /**
+     * Pinned identifier of the Kimi extraction prompt (e.g. 'kimi-extract-v0.4.2'). Lets us bulk re-run extraction against newer prompts and diff vs the live YAML.
+     */
+    prompt_version?: string;
+    /**
+     * Schema version this node was extracted/validated against (e.g. '0.1'). Distinct from the runtime Pydantic schema — this is the contract version captured at extraction time.
+     */
+    schema_version?: string;
+  };
+  /**
+   * Curator override for the auto-computed maturity tier (Stage 9 of the v2 ingestion pipeline). When present, downstream consumers use ``override.tier`` instead of ``compute_maturity(tool).tier``. Required to carry a justification — overrides are auditable, not invisible.
+   */
+  maturity_override?: {
+    /**
+     * One of the six tiers: 1A, 1B, 2A, 2B, 3, 4.
+     */
+    tier: string;
+    /**
+     * Why the auto-tier is wrong. Required so future readers (or new curators) can reproduce or revisit the decision.
+     */
+    justification: string;
+    /**
+     * GitHub handle of the curator who set the override.
+     */
+    by?: string;
+    /**
+     * Date the override was set (YYYY-MM-DD).
+     */
+    at?: string;
   };
 }
 

@@ -5,7 +5,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 import type {
   Tool,
@@ -20,11 +19,11 @@ import type {
 
 const DATA_VERSION = '2026.04';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// site/src/lib -> site/src -> site -> repo root
-const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
-const DATA_DIR = path.join(REPO_ROOT, 'data');
+// Resolve in astro.config.mjs before bundling changes this module's location.
+const DATA_DIR = import.meta.env.KG_DATA_DIR as string;
+if (!DATA_DIR || !fs.existsSync(DATA_DIR)) {
+  throw new Error('Catalog data directory is missing; check astro.config.mjs.');
+}
 
 function readYamlDir(subdir: string): Record<string, any>[] {
   const dir = path.join(DATA_DIR, subdir);
