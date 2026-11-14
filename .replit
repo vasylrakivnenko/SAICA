@@ -35,7 +35,9 @@ localPort = 5000
 externalPort = 80
 
 [deployment]
-deploymentTarget = "cloudrun"
+deploymentTarget = "static"
+build = ["sh", "-c", "npm --prefix site ci --no-audit --no-fund && npm --prefix site run build"]
+publicDir = "site/dist"
 
 [deployment.run]
 args = ["sh", "-c", "/nix/store/hkbylipx1iiawqdcjv858p501wv81bpm-bash-interactive-5.3p3/bin/bash $file"]

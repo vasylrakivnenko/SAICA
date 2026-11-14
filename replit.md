@@ -16,6 +16,14 @@
 - Astro configuration resolves the catalog's absolute data path before bundling,
   so both development and production builds load the original YAML corpus.
 
+## Publishing
+
+- Use Static publishing for the catalog (explicitly chosen by the user).
+- Build command:
+  `npm --prefix site ci --no-audit --no-fund && npm --prefix site run build`.
+- Public directory: `site/dist`. No production run command is needed.
+- Publishing settings take effect only when the user publishes again.
+
 ## Optional backend is not configured
 
 The static catalog, graph, recipes, and precomputed recommendations need no
