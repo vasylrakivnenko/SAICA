@@ -7,6 +7,11 @@ export default defineConfig({
   site: 'https://saica-kg.dev',
   integrations: [tailwind({ applyBaseStyles: false })],
   trailingSlash: 'ignore',
+  server: {
+    host: '0.0.0.0',
+    port: 5000,
+    allowedHosts: true,
+  },
   build: {
     format: 'directory',
   },
