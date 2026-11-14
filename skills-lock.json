@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "skills": {
+    "specdriven": {
+      "source": "vasylrakivnenko/specdriven",
+      "sourceType": "github",
+      "skillPath": "skills/specdriven/SKILL.md",
+      "computedHash": "41ea130f6f7442ec0721e91be8d499d2fc89ef2509b003cab7eb2d80d118fbf7"
+    }
+  }
+}
