@@ -16,20 +16,28 @@
 - Astro configuration resolves the catalog's absolute data path before bundling,
   so both development and production builds load the original YAML corpus.
 
+## Ask / Assess backend
+
+- `python3 -m pipeline.webapp` runs the FastAPI backend from `pipeline/ask/`
+  under `/api` (`/api/ask`, `/api/assess`, `/api/health`). It is started by the
+  **Ask backend** workflow, which the **Run** button starts alongside the website.
+- In development it listens on `127.0.0.1:4322`; Astro's dev server proxies
+  `/api` to it (`site/astro.config.mjs`), so the pages call it same-origin.
+- LLM: if `HYPERBOLIC_API_KEY` is set (Replit Secret), the backend uses
+  Hyperbolic's OpenAI-compatible API with `ASK_MODEL` (default
+  `deepseek-v4.1-flash`). Explicit `AZURE_KIMI_*` variables take precedence.
+- Retrieval uses a local sentence-transformers index in `.cache/embeddings/`,
+  built automatically on startup when missing or older than `data/`.
+- Python deps: `pip install torch --index-url https://download.pytorch.org/whl/cpu`
+  then `pip install -r pipeline/requirements-web.txt`.
+- `SAICA_ASK_BUDGET` caps LLM calls per server process (default 50; resets on restart).
+
 ## Publishing
 
-- Use Static publishing for the catalog (explicitly chosen by the user).
-- Build command:
-  `npm --prefix site ci --no-audit --no-fund && npm --prefix site run build`.
-- Public directory: `site/dist`. No production run command is needed.
+- Autoscale deployment (switched from Static so /ask and /assess work in
+  production). One process, `pipeline.webapp` with `SERVE_STATIC=1`, serves the
+  built site and `/api` on port 5000.
+- Build: installs CPU-only torch and `pipeline/requirements-web.txt`, builds the
+  site, and builds the embeddings index. See `[deployment]` in `.replit`.
+- `HYPERBOLIC_API_KEY` must be available to the deployment (Replit Secrets).
 - Publishing settings take effect only when the user publishes again.
-
-## Optional backend is not configured
-
-The static catalog, graph, recipes, and precomputed recommendations need no
-secrets. The Ask and repository-audit pages render, but their submission forms
-require the separate Python service described in `pipeline/ask/README.md`.
-Ask additionally needs an AI service and semantic-retrieval prerequisites.
-No credentials or replacement service values have been invented.
-The imported forms still default to a local backend address and will need
-same-origin routing when that service is enabled on Replit.

@@ -10,11 +10,11 @@
 // read directly here; changing field names there will break the renderer.
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// Override at build time with PUBLIC_ASSESS_API. Default keeps dev working
-// without extra config (Astro on :4323, FastAPI on :4322).
+// Override at build time with PUBLIC_ASSESS_API. The same-origin default is
+// served by `pipeline/webapp.py` (in dev, Astro proxies /api to it).
 const ASSESS_API =
   (import.meta.env.PUBLIC_ASSESS_API as string | undefined) ??
-  'http://localhost:4322/assess';
+  '/api/assess';
 
 const examples: { label: string; slug: string }[] = [
   { label: 'BerriAI/litellm', slug: 'BerriAI/litellm' },
@@ -99,7 +99,7 @@ const examples: { label: string; slug: string }[] = [
       <div id="assess-error-detail" class="text-sm"></div>
       <div class="text-sm mt-2">
         The backend is a separate FastAPI service. Start it with
-        <code>.venv/bin/python -m pipeline.ask.server</code> and try again.
+        <code>python -m pipeline.webapp</code> and try again.
       </div>
     </div>
   </section>

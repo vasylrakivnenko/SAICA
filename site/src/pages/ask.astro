@@ -2,16 +2,17 @@
 // /ask — Retrieval-augmented Q&A over SAICA-KG.
 //
 // Page is fully static. Submit-time retrieval + Kimi synthesis happens in
-// the FastAPI backend at `pipeline/ask/server.py` (localhost:4322 by
-// default; override at build time with PUBLIC_ASK_API). If the backend is
-// down the page still renders — only submit fails.
+// the FastAPI backend at `pipeline/ask/server.py`, served same-origin under
+// /api by `pipeline/webapp.py` (in dev, Astro proxies /api to it; see
+// astro.config.mjs). Override at build time with PUBLIC_ASK_API. If the
+// backend is down the page still renders — only submit fails.
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 // PUBLIC_ prefix is Astro's convention for env vars that may be exposed to
-// the client bundle. Default keeps dev working without extra config.
+// the client bundle. Same-origin default works in dev and production.
 const ASK_API =
   (import.meta.env.PUBLIC_ASK_API as string | undefined) ??
-  'http://localhost:4322/ask';
+  '/api/ask';
 
 const examples: string[] = [
   'What tools prevent package hallucination in Python coding agents?',
@@ -123,7 +124,7 @@ const examples: string[] = [
       <div id="ask-error-detail" class="text-sm"></div>
       <div class="text-sm mt-2">
         The backend is a separate FastAPI service. Start it with
-        <code>.venv/bin/python -m pipeline.ask.server</code> and try again.
+        <code>python -m pipeline.webapp</code> and try again.
       </div>
     </div>
   </section>

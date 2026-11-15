@@ -7,6 +7,14 @@ export default defineConfig({
   site: 'https://saica-kg.dev',
   trailingSlash: 'ignore',
   vite: {
+    server: {
+      // Dev only: forward /api/* (ask, assess, health) to the Python backend
+      // started by `python -m pipeline.webapp`. In production the same process
+      // serves both the built site and /api, so no proxy is needed.
+      proxy: {
+        '/api': 'http://127.0.0.1:4322',
+      },
+    },
     define: {
       'import.meta.env.KG_DATA_DIR': JSON.stringify(
         fileURLToPath(new URL('../data/', import.meta.url)),
