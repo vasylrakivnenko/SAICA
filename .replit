@@ -55,6 +55,10 @@ externalPort = 3000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 5099
+externalPort = 3002
+
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "pip install -q torch --index-url https://download.pytorch.org/whl/cpu && pip install -q -r pipeline/requirements-web.txt && npm --prefix site ci --no-audit --no-fund && npm --prefix site run build && python3 -c 'from pipeline.webapp import ensure_embeddings; ensure_embeddings()'"]
