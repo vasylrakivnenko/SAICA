@@ -7,8 +7,8 @@ Wraps :mod:`pipeline.ask.server` without modifying it:
   if ``HYPERBOLIC_API_KEY`` is set and ``AZURE_KIMI_API_KEY`` is not, the
   backend talks to ``https://api.hyperbolic.ai/inference/v1`` using ``ASK_MODEL``
   (default: ``deepseek-v4.1-flash``). Explicit ``AZURE_KIMI_*`` vars always win.
-* Builds the semantic-retrieval index (``.cache/embeddings/``) on startup if
-  it is missing, so a fresh checkout or deployment works without a manual step.
+* Prepares semantic retrieval on the first Ask request, not before opening the
+  HTTP port. Cold model downloads must not block publishing health checks.
 * Mounts the API under ``/api`` (``/api/ask``, ``/api/assess``,
   ``/api/health``) so the site can call it same-origin.
 * With ``SERVE_STATIC=1``, also serves ``site/dist`` at ``/`` — one process,
@@ -25,6 +25,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+from threading import Lock
 
 log = logging.getLogger("pipeline.webapp")
 
@@ -78,7 +79,25 @@ def build_app():
     from fastapi import FastAPI
 
     # Import after configure_provider() so the server reads the final env.
-    from pipeline.ask.server import app as api_app
+    from pipeline.ask.server import create_app
+
+    retrieval_lock = Lock()
+    retrieval_ready = False
+
+    def retrieve(question: str, k: int, *, node_type: str | None = None):
+        # Ask handlers run in worker threads. Serialize the initial index/model
+        # setup so simultaneous first questions cannot write the same cache.
+        nonlocal retrieval_ready
+        with retrieval_lock:
+            from pipeline.embeddings.query import find_similar
+
+            if not retrieval_ready:
+                ensure_embeddings()
+            hits = list(find_similar(question, k=k, node_type=node_type))
+            retrieval_ready = True
+            return hits
+
+    api_app = create_app(find_similar=retrieve)
 
     root = FastAPI(title="SAICA-KG")
     root.mount("/api", api_app)
@@ -99,7 +118,6 @@ def main() -> None:
 
     logging.basicConfig(level=logging.INFO)
     provider = configure_provider()
-    ensure_embeddings()
     app = build_app()
     host = os.environ.get("ASK_HOST", "127.0.0.1")
     port = int(os.environ.get("ASK_PORT", "4322"))
