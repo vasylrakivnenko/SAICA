@@ -82,6 +82,9 @@ function hydrateTool(raw: Record<string, any>): Tool {
     implements_techniques: Array.isArray(raw.implements_techniques)
       ? raw.implements_techniques
       : [],
+    integration_surfaces: Array.isArray(raw.integration_surfaces)
+      ? raw.integration_surfaces
+      : [],
     composes_with: Array.isArray(raw.composes_with) ? raw.composes_with : [],
     feeds_into: Array.isArray(raw.feeds_into) ? raw.feeds_into : [],
     supersedes: Array.isArray(raw.supersedes) ? raw.supersedes : [],
