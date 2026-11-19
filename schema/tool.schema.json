@@ -14,6 +14,7 @@
     "control_paradigm",
     "temporal_phase",
     "autonomy_level",
+    "implementation",
     "addresses_failure_modes"
   ],
   "properties": {
@@ -90,6 +91,16 @@
         "fully_autonomous",
         "graduated_hitl",
         "full_hitl"
+      ],
+      "type": "string"
+    },
+    "implementation": {
+      "description": "How the supervising check itself is carried out (strict partition).\n\ndeterministic: a program, no model calls. llm_based: a model makes the\ndecision. hybrid: deterministic core plus shipped model-based checks.\nprompt_artifact: not a program; skills/rules/docs the agent reads.",
+      "enum": [
+        "deterministic",
+        "llm_based",
+        "hybrid",
+        "prompt_artifact"
       ],
       "type": "string"
     },

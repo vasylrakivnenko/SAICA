@@ -22,6 +22,7 @@ license: AGPL-3.0
 control_paradigm: detection
 temporal_phase: post_generation
 autonomy_level: graduated_hitl
+implementation: deterministic
 
 addresses_failure_modes:
   - obsolescence

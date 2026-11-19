@@ -10,6 +10,7 @@ license: Apache-2.0
 control_paradigm: detection
 temporal_phase: pre_generation
 autonomy_level: fully_autonomous
+implementation: hybrid
 addresses_failure_modes:
   - security_vulnerability
 locus_of_control:

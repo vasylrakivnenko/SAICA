@@ -14,6 +14,7 @@ license: MIT
 control_paradigm: prevention
 temporal_phase: post_generation
 autonomy_level: fully_autonomous
+implementation: hybrid
 addresses_failure_modes:
   - scope_creep
   - security_vulnerability

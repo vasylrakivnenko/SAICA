@@ -77,6 +77,9 @@ repos:
       - id: semgrep
         args: ["--config=auto", "--error", "--quiet"]
         stages: [pre-commit]
+        # semgrep's protobuf dependency crashes on Python 3.14; pin its env.
+        language_version: python3.12
+        additional_dependencies: ["setuptools<81"]
 
   # Pre-push gate — slow checks that would gum up every commit but must pass
   # before code reaches the remote. Targets the three high-severity FMs that

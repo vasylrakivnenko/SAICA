@@ -19,6 +19,7 @@ license: Apache-2.0
 control_paradigm: prevention
 temporal_phase: pre_generation
 autonomy_level: fully_autonomous
+implementation: prompt_artifact
 
 addresses_failure_modes:
   - fabrication

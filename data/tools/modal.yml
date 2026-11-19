@@ -20,6 +20,7 @@ license: proprietary
 control_paradigm: recovery
 temporal_phase: post_generation
 autonomy_level: fully_autonomous
+implementation: deterministic
 
 addresses_failure_modes:
   - supply_chain_attack

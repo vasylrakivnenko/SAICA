@@ -72,6 +72,11 @@ PROVENANCE_SOURCE = "pipeline-v0.1"
 PROVENANCE_EXTRACTOR_MODEL = "Kimi-K2.5"
 
 _KIND_TABLE = {"tool": "candidate_tools", "paper": "candidate_papers"}
+# Fixed query per kind (no string building around the table name).
+_KIND_FETCH_SQL = {
+    "tool": "SELECT * FROM candidate_tools WHERE id = %s",
+    "paper": "SELECT * FROM candidate_papers WHERE id = %s",
+}
 _KIND_DATA_DIR = {"tool": "tools", "paper": "papers"}
 
 
@@ -104,6 +109,12 @@ TOOL_FIELDS = [
         "autonomy_level",
         True,
         "one of fully_autonomous|graduated_hitl|full_hitl",
+    ),
+    (
+        "implementation",
+        "implementation",
+        True,
+        "one of deterministic|llm_based|hybrid|prompt_artifact",
     ),
     (
         "addresses_failure_modes",
@@ -147,10 +158,8 @@ def _make_yaml() -> YAML:
 
 
 def _fetch_candidate(kind: str, candidate_id: int) -> Optional[dict]:
-    table = _KIND_TABLE[kind]
-    sql = f"SELECT * FROM {table} WHERE id = %s"
     with db.get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
-        cur.execute(sql, (candidate_id,))
+        cur.execute(_KIND_FETCH_SQL[kind], (candidate_id,))
         return cur.fetchone()
 
 
@@ -360,7 +369,11 @@ def _build_tool_yaml(
     for field, yaml_key, required, hint in TOOL_FIELDS:
         if yaml_key == "id":
             continue
-        d = decisions[field]
+        # Extractions made before a field existed (e.g. ``implementation``)
+        # have no decision for it: treat as not accepted -> REVIEW_REQUIRED.
+        d = decisions.get(field) or Decision(
+            None, 0.0, accepted=False, reason="not extracted"
+        )
         if d.accepted and d.value not in (None, "", []):
             doc[yaml_key] = d.value
             continue
@@ -502,7 +515,6 @@ def _build_paper_yaml(
     today: dt.date,
 ) -> tuple[str, CommentedMap]:
     # Derive paper id — prefer doi -> arxiv -> slugified title.
-    doi = decisions.get("doi")
     arxiv = decisions.get("arxiv_id")
     year_d = decisions.get("year")
     title_d = decisions.get("title")

@@ -25,6 +25,7 @@ license: MIT
 control_paradigm: prevention
 temporal_phase: post_generation
 autonomy_level: graduated_hitl
+implementation: deterministic
 
 addresses_failure_modes:
   - scope_creep

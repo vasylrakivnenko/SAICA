@@ -28,6 +28,7 @@ license: MIT
 control_paradigm: detection
 temporal_phase: post_generation
 autonomy_level: fully_autonomous
+implementation: deterministic
 
 addresses_failure_modes:
   - cascading_failure

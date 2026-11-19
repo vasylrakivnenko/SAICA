@@ -23,6 +23,7 @@ license: proprietary
 control_paradigm: detection
 temporal_phase: post_generation
 autonomy_level: fully_autonomous
+implementation: hybrid
 
 addresses_failure_modes:
   - security_vulnerability

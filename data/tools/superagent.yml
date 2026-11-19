@@ -10,6 +10,7 @@ license: MIT
 control_paradigm: prevention
 temporal_phase: in_generation
 autonomy_level: fully_autonomous
+implementation: llm_based
 addresses_failure_modes:
   - security_vulnerability
 locus_of_control:

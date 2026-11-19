@@ -45,6 +45,20 @@ class TemporalPhase(str, Enum):
     POST_GENERATION = "post_generation"
 
 
+class Implementation(str, Enum):
+    """How the supervising check itself is carried out (strict partition).
+
+    deterministic: a program, no model calls. llm_based: a model makes the
+    decision. hybrid: deterministic core plus shipped model-based checks.
+    prompt_artifact: not a program; skills/rules/docs the agent reads.
+    """
+
+    DETERMINISTIC = "deterministic"
+    LLM_BASED = "llm_based"
+    HYBRID = "hybrid"
+    PROMPT_ARTIFACT = "prompt_artifact"
+
+
 class AutonomyLevel(str, Enum):
     FULLY_AUTONOMOUS = "fully_autonomous"
     GRADUATED_HITL = "graduated_hitl"
@@ -276,6 +290,8 @@ class Tool(BaseModel):
     control_paradigm: ControlParadigm
     temporal_phase: TemporalPhase
     autonomy_level: AutonomyLevel
+    # deterministic | llm_based | hybrid | prompt_artifact; see schema/enums.yml
+    implementation: Implementation
 
     addresses_failure_modes: list[FailureModeId] = Field(min_length=1)
     locus_of_control: Optional[list[LocusOfControl]] = None

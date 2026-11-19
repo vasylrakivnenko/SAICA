@@ -38,6 +38,7 @@ def _base_tool_kwargs() -> dict:
         "control_paradigm": "prevention",
         "temporal_phase": "pre_generation",
         "autonomy_level": "fully_autonomous",
+        "implementation": "deterministic",
         "addresses_failure_modes": ["fabrication"],
     }
 

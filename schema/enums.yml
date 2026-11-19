@@ -47,6 +47,26 @@ TemporalPhase:
         - "Liu 2025: Phase 3 (validation)"
         - "Lindner 2025: async"
 
+Implementation:
+  description: >
+    Strict partition over how a Tool's supervising check is carried out.
+    Classified by the mechanism that makes the supervision decision, not by
+    whether the product is used alongside LLMs. Every Tool has exactly one.
+  partition: true
+  values:
+    deterministic:
+      label: Deterministic
+      description: A program (rules, parsers, type checks, tests, sandboxes, proxies, grammars); same input, same output; no model calls.
+    llm_based:
+      label: LLM-based
+      description: A model makes the supervising decision (LLM-as-judge, AI reviewer, model-generated attacks).
+    hybrid:
+      label: Hybrid
+      description: A deterministic core plus model-based checks shipped in the product (optional LLM judges, ML classifiers next to rules).
+    prompt_artifact:
+      label: Prompt artifact
+      description: Not a program; skills, rules or docs that the coding agent itself reads.
+
 AutonomyLevel:
   description: >
     Strict partition over the operational autonomy at which a supervision tool

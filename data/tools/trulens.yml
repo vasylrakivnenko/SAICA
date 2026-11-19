@@ -10,6 +10,7 @@ license: MIT
 control_paradigm: detection
 temporal_phase: post_generation
 autonomy_level: graduated_hitl
+implementation: llm_based
 addresses_failure_modes:
   - fabrication
   - context_pollution

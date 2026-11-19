@@ -122,6 +122,17 @@ class ToolExtraction(BaseModel):
     autonomy_level: ConfidenceField = Field(
         description="One of fully_autonomous|graduated_hitl|full_hitl, or null."
     )
+    implementation: Optional[ConfidenceField] = Field(
+        default=None,
+        description=(
+            "How the supervising check itself works. One of deterministic"
+            " (a program: rules, parsers, type checks, tests, sandboxes; no"
+            " model calls) | llm_based (a model makes the decision, e.g."
+            " LLM-as-judge or an AI reviewer) | hybrid (deterministic core plus"
+            " shipped model-based checks) | prompt_artifact (not a program:"
+            " skills/rules/docs the agent reads), or null."
+        ),
+    )
     addresses_failure_modes: ConfidenceField = Field(
         description=(
             "list[FailureModeId] — subset of the 8 canonical ids (fabrication,"

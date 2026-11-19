@@ -14,6 +14,7 @@ license: Apache-2.0
 control_paradigm: prevention
 temporal_phase: pre_generation
 autonomy_level: graduated_hitl
+implementation: deterministic
 addresses_failure_modes:
   - scope_creep
   - context_pollution

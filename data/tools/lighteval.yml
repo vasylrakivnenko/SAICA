@@ -15,6 +15,7 @@ license: MIT
 control_paradigm: detection
 temporal_phase: post_generation
 autonomy_level: full_hitl
+implementation: deterministic
 addresses_failure_modes:
   - fabrication
   - logic_error

@@ -73,6 +73,14 @@ export interface Tool {
   temporal_phase: TemporalPhase;
   autonomy_level: AutonomyLevel;
   /**
+   * How the supervising check itself is carried out (strict partition).
+   *
+   * deterministic: a program, no model calls. llm_based: a model makes the
+   * decision. hybrid: deterministic core plus shipped model-based checks.
+   * prompt_artifact: not a program; skills/rules/docs the agent reads.
+   */
+  implementation: 'deterministic' | 'llm_based' | 'hybrid' | 'prompt_artifact';
+  /**
    * @minItems 1
    */
   addresses_failure_modes: (
