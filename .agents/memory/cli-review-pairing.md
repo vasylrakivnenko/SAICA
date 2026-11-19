@@ -19,8 +19,7 @@ inspect its diff; a written change may still contain unresolved helper calls.
 For CAO pilots, a healthy HTTP server does not prove that its process can
 find tmux. Check the server log on session-creation errors; a separate
 loopback-only instance started with the workspace PATH can test the setup
-without changing the user's running server. With Codex's advisory reader-only
-profile, supply the actual diff as input if no file-reading tool is available.
+without changing the user's running server.
 
 An opt-in CAO instance must isolate both its persisted state and its tmux
 socket and clear an inherited tmux pane context. **Why:** CAO startup
@@ -28,3 +27,15 @@ reconciles sessions against tmux; a different HTTP port alone does not keep
 that reconciliation away from an existing tmux server. **How to apply:** use
 a private `TMUX_TMPDIR` with a separate CAO home and verify that a test
 session and an unrelated same-named session can coexist.
+
+CAO's Codex allowlist is advisory: name a native read-only Codex config and
+never select unrestricted tools. Use the actual `cao-` session name for status
+and cleanup. Prefer a bounded inline diff when Codex cannot read the frozen
+patch in its shell sandbox.
+
+**Why:** Without a named native config, CAO 2.5.4 launches Codex with its
+sandbox bypassed. A local shell sandbox probe can also fail on this runtime's
+Bubblewrap capabilities independently of CAO or provider login.
+
+**How to apply:** Pass the exact small patch as named-session input rather
+than weakening the sandbox or attempting handoff outside a CAO supervisor.
