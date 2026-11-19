@@ -45,40 +45,106 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_DELETED: ${{ github.event.deleted }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MAX_COMMITS: "50"
         run: |
-          set -u
+          set -eu
+
+          # A branch/tag deletion push introduces no commits: successful no-op.
+          if [ "$EVENT_NAME" = "push" ] && [ "${PUSH_DELETED:-}" = "true" ]; then
+            echo "::notice title=SAICA CI::Ref '$GITHUB_REF' was deleted; nothing to check."
+            echo "blocked=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          fail() {
+            echo "::error title=SAICA CI::$*"
+            exit 1
+          }
+
+          # resolve LABEL SHA: the commit must exist locally (one fetch attempt
+          # if it does not, e.g. the old tip of a force-push); otherwise fail.
+          resolve() {
+            [ -n "$2" ] || fail "$1 SHA is empty; cannot determine the commit range."
+            if ! git cat-file -e "$2^{commit}" 2>/dev/null; then
+              git fetch --quiet --no-tags origin "$2" 2>/dev/null || true
+            fi
+            git cat-file -e "$2^{commit}" 2>/dev/null \
+              || fail "$1 SHA $2 cannot be resolved to a commit; cannot determine the commit range (no commits were checked)."
+          }
+
           # Copy the runner + config out of the tree so each commit can be
           # checked out (and its tools run against its own files).
           kit="$RUNNER_TEMP/saica"
           mkdir -p "$kit"
           cp .saica/saica_check.py .saica/checks.json "$kit/"
-          [ -f .saica/dashboard.template.html ] && cp .saica/dashboard.template.html "$kit/"
+          if [ -f .saica/dashboard.template.html ]; then
+            cp .saica/dashboard.template.html "$kit/"
+          fi
 
-          range=""
-          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$PR_BASE" ]; then
-            range="$PR_BASE..$PR_HEAD"
-          elif [ -n "$PUSH_BEFORE" ] && ! echo "$PUSH_BEFORE" | grep -qE '^0+$' \
-               && git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then
-            range="$PUSH_BEFORE..$GITHUB_SHA"
+          # Build the rev-list arguments ("$@") for the commits this event
+          # introduced. Merge commits are included. There is no HEAD fallback:
+          # anything that cannot be resolved fails the step.
+          case "$EVENT_NAME" in
+            pull_request)
+              resolve "pull request base" "$PR_BASE"
+              resolve "pull request head" "$PR_HEAD"
+              set -- "$PR_HEAD" "^$PR_BASE"
+              ;;
+            push)
+              resolve "pushed commit" "$GITHUB_SHA"
+              [ -n "$PUSH_BEFORE" ] || fail "push event has no 'before' SHA; cannot determine the commit range."
+              if [ -n "${PUSH_BEFORE//0/}" ]; then
+                # Existing ref updated: everything new since the old tip.
+                resolve "push 'before'" "$PUSH_BEFORE"
+                set -- "$GITHUB_SHA" "^$PUSH_BEFORE"
+              elif [ -z "$DEFAULT_BRANCH" ]; then
+                fail "new ref pushed but the default branch name is unknown; cannot determine a baseline."
+              elif [ "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH" ]; then
+                # Newly created default branch: there is no baseline, so its
+                # whole history is new.
+                echo "::notice title=SAICA CI::Default branch '$DEFAULT_BRANCH' was just created; checking its full history."
+                set -- "$GITHUB_SHA"
+              else
+                # New branch or tag: baseline is the default branch history.
+                base=$(git rev-parse --verify --quiet "refs/remotes/origin/$DEFAULT_BRANCH^{commit}") \
+                  || fail "new ref pushed but origin/$DEFAULT_BRANCH cannot be resolved; cannot determine a baseline."
+                set -- "$GITHUB_SHA" "^$base"
+              fi
+              ;;
+            *)
+              fail "unsupported event '$EVENT_NAME'; cannot determine the commit range."
+              ;;
+          esac
+
+          total=$(git rev-list --count "$@") || fail "git rev-list failed for: $*"
+          if [ "$total" -gt "$MAX_COMMITS" ]; then
+            fail "$total commits in range ($*), more than MAX_COMMITS=$MAX_COMMITS; no commits were checked. Raise MAX_COMMITS in saica-ci.yml or push in smaller batches."
           fi
-          commits=""
-          if [ -n "$range" ]; then
-            commits=$(git rev-list --reverse --no-merges --max-count="$MAX_COMMITS" "$range" || true)
+          commits=$(git rev-list --reverse --topo-order "$@") || fail "git rev-list failed for: $*"
+          if [ -z "$commits" ]; then
+            echo "::notice title=SAICA CI::No new commits in range ($*); nothing to check."
+            echo "blocked=0" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-          [ -z "$commits" ] && commits=$(git rev-parse HEAD)   # fallback: HEAD only
+          echo "Checking $total commit(s): $*"
 
           start=$(git rev-parse HEAD)
           blocked=0
           for sha in $commits; do
-            git checkout --quiet --detach "$sha"
+            if ! git checkout --quiet --detach "$sha"; then
+              git checkout --quiet --detach "$start" || true
+              fail "could not check out $sha; this commit and any after it were not checked."
+            fi
             python3 "$kit/saica_check.py" --config "$kit/checks.json" \
               run --commit "$sha" --source ci || blocked=1
           done
-          git checkout --quiet --detach "$start"
           echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
+          git checkout --quiet --detach "$start" \
+            || fail "could not restore the original checkout ($start) after the checks."
 
       - name: Build dashboard
         if: always()

@@ -1,0 +1,17 @@
+---
+name: External CLI review pairing
+description: Run a requested Codex and Claude Code cross-review without mixing workspace edits or losing partial progress.
+---
+
+When asked to use Codex and Claude Code together, confirm both versions and
+paths, review a clean local clone of the exact commit, and run changes in
+small edit batches before integrating the verified patch.
+
+**Why:** In this workspace a stale Nix Codex executable shadowed a newer
+standalone executable on PATH. Broad CLI edit and review runs also timed out
+after making partial changes, while narrowly scoped batches completed.
+
+**How to apply:** Check the standalone executable if the PATH version cannot
+run the requested CLI mode. Save reviewer outputs, give reviewers read-only
+access, and use bounded write batches for implementers. If a batch times out,
+inspect its diff; a written change may still contain unresolved helper calls.

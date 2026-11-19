@@ -70,10 +70,14 @@ CI, the self-test and the dashboard.
 }
 ```
 
-- `command` runs through the shell from the repo root.
-  `{files}` is replaced by the shell-quoted list of changed files
-  (staged files in pre-commit, the commit's files in CI). If the list is
-  empty the check is recorded as `skipped`.
+- `command` runs through the shell. Pre-commit runs tools in a temporary
+  checkout of the staged files; unstaged changes and untracked dependencies
+  are not included. Configure tools to be available on `PATH`. The runner
+  reads the original checkout's `checks.json`, so use a trusted configuration.
+  CI runs commands against the checked-out commit.
+  On POSIX, `{files}` expands to the shell-quoted list of changed files.
+  An empty list is recorded as `skipped`; native Windows reports an error
+  for commands using `{files}`.
 - Exit code `0` → `pass`; non-zero → `caught`; command not found
   (exit 127) or timeout → `error`.
 - `metric.regex` is applied to stdout+stderr; group 1 is parsed as a float.
@@ -123,8 +127,10 @@ day one. Tool ids are prefixed `saica:`.
     or built-in covers (`tool_id: null`). This is what makes gaps
     visible without the dashboard reading `checks.json`.
 - `commit`: full sha; `"staged"` while pending (pre-commit, before
-  `stamp`). Events that are never stamped (commit aborted) are discarded
-  on the next run.
+  `stamp`). Pending results are stamped only if the checked tree and base
+  match the new commit. An amend that changes the expected parent is not
+  stamped; use `run --commit HEAD` from a clean checkout to check the
+  amended commit explicitly.
 - `agent`: detected from the commit author / `Co-Authored-By` trailers:
   `claude`, `copilot`, `cursor`, `devin`, `codex`, `aider`, other bots
   → `"bot"`, otherwise `null` (human).
@@ -143,9 +149,11 @@ python .saica/saica_check.py dashboard               # writes .saica/dashboard.h
 python .saica/saica_check.py install-hooks           # installs hooks/pre-commit + post-commit into .git/hooks
 ```
 
-`install-hooks` refuses to overwrite a foreign existing hook unless
-`--force`; if the repo uses the `pre-commit` framework, add a `local`
-hook running `python .saica/saica_check.py run --staged` instead.
+`install-hooks` refuses to overwrite a custom existing hook unless
+`--force`, which saves the old hook to a new backup. If the repo uses the
+`pre-commit` framework, configure local entries for both stages with
+`pass_filenames: false`. The install self-test uses PyYAML when verifying
+framework configuration; the runner and direct Git hooks do not require it.
 
 ### Dashboard embedding
 

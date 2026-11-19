@@ -529,7 +529,7 @@
         catchCommits[e.commit] = 1;
         if (e.blocking) blocked[e.commit] = 1;
       }
-      if (e.outcome === 'pass' || e.outcome === 'caught' || e.outcome === 'error' || e.outcome === 'skipped') covered[e.fm] = 1;
+      if (e.outcome === 'pass' || e.outcome === 'caught') covered[e.fm] = 1;
     });
     var ag = D.commits.filter(function (c) { return c.agent; }), hu = D.commits.filter(function (c) { return !c.agent; });
     var agC = ag.filter(function (c) { return catchCommits[c.sha]; }).length, huC = hu.filter(function (c) { return catchCommits[c.sha]; }).length;
@@ -539,7 +539,7 @@
     k.appendChild(kpi('Catches', String(nCatches), Object.keys(catchCommits).length + ' commits with ≥ 1 catch'));
     k.appendChild(kpi('Catch rate · agent', pct(agC, ag.length), agC + ' of ' + ag.length + ' agent commits', ag.length ? 100 * agC / ag.length : 0));
     k.appendChild(kpi('Catch rate · human', pct(huC, hu.length), huC + ' of ' + hu.length + ' human commits', hu.length ? 100 * huC / hu.length : 0));
-    k.appendChild(kpi('Failure modes covered', nCovered + '/' + FMS.length, 'with a check that actually ran', 100 * nCovered / FMS.length));
+    k.appendChild(kpi('Failure modes covered', nCovered + '/' + FMS.length, 'with a check that completed (pass or caught)', 100 * nCovered / FMS.length));
     k.appendChild(kpi('Blocking catches', String(Object.keys(blocked).length), 'commits where a blocking check caught'));
   }
 
@@ -601,18 +601,18 @@
     if (focusPos.r >= rows.length) focusPos.r = 0;
     if (focusPos.c >= commits.length) focusPos.c = commits.length - 1;
     rows.forEach(function (r, ri) {
-      // Gap = row has events but none that ran.
+      // Gap = row has events but none that completed (pass or caught); error/skipped do not count.
       var ran = 0, caught = 0, gapKind = null, any = 0;
       D.events.forEach(function (e) {
         if (rowKey(e) !== r) return;
         any++;
-        if (e.outcome === 'pass' || e.outcome === 'caught' || e.outcome === 'error' || e.outcome === 'skipped') ran++;
+        if (e.outcome === 'pass' || e.outcome === 'caught') ran++;
         if (e.outcome === 'caught') caught++;
         if (e.outcome === 'not_covered') gapKind = 'not covered';
         else if (e.outcome === 'not_runnable' && gapKind !== 'not covered') gapKind = 'not runnable';
       });
       var isGap = view === 'fm' ? ran === 0 : (r === NO_TOOL || (any > 0 && ran === 0));
-      var kind = gapKind || (any ? '' : 'no data');
+      var kind = gapKind || (any ? 'no completed run' : 'no data');
       var rl = el('div', { class: 'rl' }, [el('span', { class: 'txt', text: rowLabel(r) })]);
       if (isGap) rl.appendChild(el('span', { class: 'gaptag' }, ['gap', kind ? el('span', { class: 'gapkind', text: ' · ' + kind }) : null]));
       else if (caught) rl.appendChild(el('span', { class: 'rowcount', title: caught + ' catches', text: caught + '×' }));

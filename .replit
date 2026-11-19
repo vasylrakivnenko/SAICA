@@ -2,6 +2,10 @@ modules = ["python-3.12", "bash", "nodejs-22"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["tmux"]
+
+[env]
+PATH = "/home/runner/workspace/.config/npm/node_global/bin:/home/runner/workspace/.local/bin:$PATH"
 
 [agent]
 expertMode = true
@@ -65,5 +69,13 @@ externalPort = 3003
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "pip install -q torch --index-url https://download.pytorch.org/whl/cpu && pip install -q -r pipeline/requirements-web.txt && npm --prefix site ci --no-audit --no-fund && npm --prefix site run build && python3 -c 'from pipeline.webapp import ensure_embeddings; ensure_embeddings()'"]
-run = ["sh", "-c", "SERVE_STATIC=1 ASK_HOST=0.0.0.0 ASK_PORT=5000 python3 -m pipeline.webapp"]
+build = [
+  "sh",
+  "-c",
+  "pip install -q torch --index-url https://download.pytorch.org/whl/cpu && pip install -q -r pipeline/requirements-web.txt && npm --prefix site ci --no-audit --no-fund && npm --prefix site run build && python3 -c 'from pipeline.webapp import ensure_embeddings; ensure_embeddings()'",
+]
+run = [
+  "sh",
+  "-c",
+  "SERVE_STATIC=1 ASK_HOST=0.0.0.0 ASK_PORT=5000 python3 -m pipeline.webapp",
+]

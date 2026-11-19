@@ -517,11 +517,50 @@ def test_run_staged_blocks_and_discards_stale_pending(repo):
     gitc(repo, "add", "BAD")
     assert sc.main(["run", "--staged"]) == 1
     assert sc.main(["run", "--staged", "--no-block"]) == 0
+    # Deleting BAD from the working tree does not unstage it: the check looks
+    # at the index snapshot, so the commit stays blocked.
     os.remove(repo / "BAD")
+    assert sc.main(["run", "--staged"]) == 1
+    pending = sc.read_jsonl(repo / ".saica" / "pending.jsonl")
+    gate = [e for e in pending if e["tool_id"] == "gate"]
+    assert [e["outcome"] for e in gate] == ["caught"]
+    # Only removing it from the index clears the gate.
+    gitc(repo, "rm", "--cached", "-q", "BAD")
     assert sc.main(["run", "--staged"]) == 0
     pending = sc.read_jsonl(repo / ".saica" / "pending.jsonl")
     gate = [e for e in pending if e["tool_id"] == "gate"]
     assert [e["outcome"] for e in gate] == ["pass"]  # earlier runs discarded
+
+
+def test_stamp_discards_pending_from_different_staged_tree(repo, capsys):
+    _write_cfg(
+        repo, [{"id": "ok", "failure_modes": ["logic_error"], "command": "exit 0"}]
+    )
+    pending_path = repo / ".saica" / "pending.jsonl"
+    events_path = repo / ".saica" / "events.jsonl"
+    meta_path = repo / ".git" / sc.PENDING_META_NAME
+    (repo / "a.py").write_text("x = 1\n")
+    gitc(repo, "add", "a.py")
+    assert sc.main(["run", "--staged"]) == 0
+    assert sc.read_jsonl(pending_path)
+    assert meta_path.is_file()
+    # The index changes after the check, and the commit is made without
+    # re-running it: the pending results describe a tree that was never committed.
+    (repo / "b.py").write_text("y = 2  # TODO\n")
+    gitc(repo, "add", "b.py")
+    gitc(repo, "commit", "-q", "-m", "a and unchecked b")
+    capsys.readouterr()
+    assert sc.main(["stamp"]) == 0
+    assert "NOT stamped" in capsys.readouterr().err
+    assert not pending_path.exists()
+    assert not meta_path.exists()
+    assert sc.read_jsonl(events_path) == []
+    # Nothing is left behind for a later commit to pick up.
+    (repo / "c.py").write_text("z = 3\n")
+    gitc(repo, "add", "c.py")
+    gitc(repo, "commit", "-q", "-m", "c")
+    assert sc.main(["stamp"]) == 0
+    assert sc.read_jsonl(events_path) == []
 
 
 def test_run_commit_and_replay(repo):

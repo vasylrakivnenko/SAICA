@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import hashlib
 import json
 import os
 import re
@@ -42,6 +43,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
@@ -109,14 +111,21 @@ def _warn(msg: str) -> None:
     print("saica: " + msg, file=sys.stderr)
 
 
-def git(args: List[str], cwd: Path, check: bool = True) -> str:
+def git(
+    args: List[str],
+    cwd: Path,
+    check: bool = True,
+    env: Optional[Dict[str, str]] = None,
+) -> str:
     """Run ``git`` and return stdout (decoded, errors replaced)."""
     try:
         proc = subprocess.run(
             ["git"] + args,
             cwd=str(cwd),
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            env=env,
         )
     except FileNotFoundError:
         raise SaicaError("git is not installed or not on PATH")
@@ -345,11 +354,73 @@ def parse_unified_diff(text: str) -> Dict[str, FileDiff]:
 _DIFF_FLAGS = ["-U0", "--no-color", "--no-ext-diff", "--no-renames"]
 
 
-def staged_changeset(root: Path) -> ChangeSet:
-    names = git(["diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"], root)
+def head_commit(root: Path) -> Optional[str]:
+    """Full sha of HEAD, or None on an unborn branch (before the first commit)."""
+    out = git(["rev-parse", "--verify", "--quiet", "HEAD^{commit}"], root, check=False)
+    return out.strip() or None
+
+
+def staged_snapshot(root: Path) -> Tuple[str, Optional[str]]:
+    """Freeze the index as a tree object. Returns (tree sha, HEAD sha or None).
+
+    Everything a staged run looks at is derived from this immutable tree, so
+    a concurrent ``git add`` cannot make the diff, the dependency manifests and
+    the tool checkout disagree with each other.
+    """
+    head = head_commit(root)
+    try:
+        tree = git(["write-tree"], root).strip()
+    except SaicaError as exc:
+        raise SaicaError(
+            "cannot snapshot the index (unresolved merge conflicts?): %s" % exc
+        )
+    if not tree:
+        raise SaicaError("cannot snapshot the index: git write-tree printed nothing")
+    return tree, head
+
+
+def staged_changeset(
+    root: Path, snapshot: Optional[Tuple[str, Optional[str]]] = None
+) -> ChangeSet:
+    """Diff of the staged snapshot against HEAD (or the empty tree)."""
+    tree, head = snapshot if snapshot is not None else staged_snapshot(root)
+    # ``git mktree`` with empty input yields the repo's own empty-tree id.
+    base = head or git(["mktree"], root).strip()
+    names = git(["diff", "--name-only", "--diff-filter=ACMR", "-z", base, tree], root)
     files = [n for n in names.split("\0") if n]
-    text = git(["diff", "--cached"] + _DIFF_FLAGS, root)
+    text = git(["diff"] + _DIFF_FLAGS + [base, tree], root)
     return ChangeSet(files, parse_unified_diff(text))
+
+
+def checkout_tree(root: Path, tree: str) -> Tuple[Path, Path, Dict[str, str]]:
+    """Materialise ``tree`` in a temp directory, leaving the real index alone.
+
+    Returns (temp base to delete afterwards, checkout dir, environment for
+    tools). The environment points git at the temp index and checkout, so a
+    tool that calls git sees the snapshot rather than the working tree.
+    """
+    base = Path(tempfile.mkdtemp(prefix="saica-staged-"))
+    try:
+        index_file = base / "index"
+        work = base / "tree"
+        work.mkdir()
+        env = dict(os.environ)
+        env["GIT_INDEX_FILE"] = str(index_file)
+        git(["read-tree", tree], root, env=env)
+        git(
+            ["checkout-index", "--all", "--force", "--prefix=" + work.as_posix() + "/"],
+            root,
+            env=env,
+        )
+        tool_env = dict(env)
+        tool_env["GIT_DIR"] = git(["rev-parse", "--absolute-git-dir"], root).strip()
+        tool_env["GIT_WORK_TREE"] = str(work)
+        tool_env.pop("GIT_PREFIX", None)
+        tool_env["SAICA_REPO_ROOT"] = str(root)
+    except BaseException:
+        shutil.rmtree(str(base), ignore_errors=True)
+        raise
+    return base, work, tool_env
 
 
 def resolve_commit(root: Path, ref: str) -> str:
@@ -697,14 +768,25 @@ def _parse_package_json(text: str) -> Set[str]:
 
 
 class RepoIndex:
-    """Local module names and declared dependencies of the repository."""
+    """Local module names and declared dependencies of the repository.
 
-    def __init__(self, root: Path) -> None:
+    With ``tree`` (a tree or commit sha) the tracked paths and the manifest
+    contents are read from that Git object; without it they come from the
+    index listing and the working-tree files.
+    """
+
+    def __init__(self, root: Path, tree: Optional[str] = None) -> None:
         self.root = root
-        try:
-            listed = git(["ls-files", "-z", "--cached"], root)
-        except SaicaError:
-            listed = ""
+        self.tree = tree
+        if tree:
+            listed = git(
+                ["ls-tree", "-r", "-z", "--name-only", "--full-tree", tree], root
+            )
+        else:
+            try:
+                listed = git(["ls-files", "-z", "--cached"], root)
+            except SaicaError:
+                listed = ""
         self.paths = [p for p in listed.split("\0") if p]
         self.local: Set[str] = set()
         py_manifests: List[str] = []
@@ -756,6 +838,11 @@ class RepoIndex:
         self._pkg_dists = None
 
     def _read(self, rel: str) -> str:
+        if self.tree:
+            try:
+                return git(["cat-file", "blob", "%s:%s" % (self.tree, rel)], self.root)
+            except SaicaError:
+                return ""
         try:
             return (self.root / rel).read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -881,8 +968,13 @@ def check_phantom_imports(cs: ChangeSet, index: RepoIndex) -> List[str]:
     return hits
 
 
-def run_builtins(cs: ChangeSet, root: Path) -> List[Tuple[str, str, str, str]]:
-    """Return [(tool_id, failure_mode, outcome, detail)] for the built-ins."""
+def run_builtins(
+    cs: ChangeSet, root: Path, tree: Optional[str] = None
+) -> List[Tuple[str, str, str, str]]:
+    """Return [(tool_id, failure_mode, outcome, detail)] for the built-ins.
+
+    ``tree`` selects the Git tree the dependency lookups read from (see RepoIndex).
+    """
     if not cs.diffs and not cs.files:
         return [(tid, fm, "skipped", "no changed files") for tid, fm in BUILTIN_CHECKS]
     results = []
@@ -895,7 +987,7 @@ def run_builtins(cs: ChangeSet, root: Path) -> List[Tuple[str, str, str, str]]:
                 hits = check_test_weakening(cs)
             else:
                 if index is None:
-                    index = RepoIndex(root)
+                    index = RepoIndex(root, tree)
                 hits = check_phantom_imports(cs, index)
         except Exception as exc:  # noqa: BLE001 - a heuristic must never crash a commit
             results.append((tid, fm, "error", _truncate("internal error: %r" % exc)))
@@ -919,14 +1011,27 @@ def _summarise_output(out: str) -> str:
 
 
 def run_tool(
-    tool: dict, files: List[str], root: Path
+    tool: dict, files: List[str], root: Path, env: Optional[Dict[str, str]] = None
 ) -> Tuple[str, str, Optional[float]]:
-    """Execute one tool. Returns (outcome, detail, metric)."""
+    """Execute one tool in ``root``. Returns (outcome, detail, metric)."""
     command = tool["command"] or ""
     if "{files}" in command:
+        if os.name == "nt":
+            # shlex.quote produces POSIX quoting, which cmd.exe does not honour.
+            return (
+                "error",
+                "configuration error: {files} is not supported on native Windows "
+                "(file names cannot be quoted safely for cmd.exe); remove {files} "
+                "from this tool's command or run the kit under WSL or another POSIX shell",
+                None,
+            )
         if not files:
             return "skipped", "no changed files for {files}", None
-        command = command.replace("{files}", " ".join(shlex.quote(f) for f in files))
+        # A leading "-" would be parsed as an option by the tool; anchor it to the cwd.
+        command = command.replace(
+            "{files}",
+            " ".join(shlex.quote("./" + f if f.startswith("-") else f) for f in files),
+        )
     try:
         proc = subprocess.run(
             command,
@@ -935,6 +1040,7 @@ def run_tool(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             timeout=tool["timeout_s"],
+            env=env,
         )
     except subprocess.TimeoutExpired:
         return "error", "timeout after %gs" % tool["timeout_s"], None
@@ -1035,11 +1141,20 @@ def evaluate(
     run_tools: bool = True,
     files_for_tools: Optional[List[str]] = None,
     verbose: bool = True,
+    tree: Optional[str] = None,
+    tool_root: Optional[Path] = None,
+    tool_env: Optional[Dict[str, str]] = None,
 ) -> List[dict]:
+    """Run built-ins and tools for one change set.
+
+    ``tree`` is the Git tree the built-in dependency lookups read from
+    (default: index listing + working-tree files). ``tool_root`` / ``tool_env``
+    are where and how external tools run (default: ``root``, inherited env).
+    """
     kit = config["kit"]
     events: List[dict] = []
     if config["builtin"]["enabled"]:
-        for tid, fm, outcome, detail in run_builtins(cs, root):
+        for tid, fm, outcome, detail in run_builtins(cs, root, tree):
             events.append(
                 make_event(
                     meta=meta,
@@ -1070,7 +1185,9 @@ def evaluate(
         else:
             if verbose:
                 print("saica: running %s ..." % tool["id"], file=sys.stderr)
-            outcome, detail, metric = run_tool(tool, files, root)
+            outcome, detail, metric = run_tool(
+                tool, files, tool_root or root, env=tool_env
+            )
         for fm in tool["failure_modes"]:
             events.append(
                 make_event(
@@ -1165,24 +1282,88 @@ class Ctx:
     def config(self) -> dict:
         return load_config(self.config_path)
 
+    def pending_meta_path(self) -> Path:
+        """Sidecar for pending.jsonl (snapshot tree + old HEAD), kept in the git dir.
+
+        It lives outside the work tree so it needs no .gitignore entry, and
+        outside pending.jsonl so pending lines stay plain contract events.
+        """
+        p = Path(git(["rev-parse", "--git-path", PENDING_META_NAME], self.root).strip())
+        return p if p.is_absolute() else self.root / p
+
+
+PENDING_META_NAME = "saica-pending.json"
+
+
+def _file_digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _discard(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
 
 def cmd_run(args: argparse.Namespace) -> int:
     ctx = Ctx(args)
     if args.staged:
-        if ctx.pending_path.exists():
-            ctx.pending_path.unlink()  # leftovers from an aborted commit
-        config = ctx.config()
+        meta_path = ctx.pending_meta_path()
+        _discard(ctx.pending_path)  # leftovers from an aborted commit
+        _discard(meta_path)
+        config = ctx.config()  # always the original repo's config
         source = args.source or "pre-commit"
-        cs = staged_changeset(ctx.root)
-        events = evaluate(config, cs, ctx.root, {"commit": STAGED}, source)
+        snapshot = staged_snapshot(ctx.root)
+        tree, old_head = snapshot
+        cs = staged_changeset(ctx.root, snapshot)
+        tmp_base: Optional[Path] = None
+        tool_root: Optional[Path] = None
+        tool_env: Optional[Dict[str, str]] = None
+        try:
+            if any(t["runs_per_commit"] for t in config["tools"]):
+                tmp_base, tool_root, tool_env = checkout_tree(ctx.root, tree)
+            events = evaluate(
+                config,
+                cs,
+                ctx.root,
+                {"commit": STAGED},
+                source,
+                tree=tree,
+                tool_root=tool_root,
+                tool_env=tool_env,
+            )
+        finally:
+            if tmp_base is not None:
+                shutil.rmtree(str(tmp_base), ignore_errors=True)
+        if staged_snapshot(ctx.root) != snapshot:
+            raise SaicaError(
+                "the index or HEAD changed while the checks were running; "
+                "results were discarded. Run the checks again."
+            )
         append_jsonl(ctx.pending_path, events)
+        meta_path.parent.mkdir(parents=True, exist_ok=True)
+        meta_path.write_text(
+            json.dumps(
+                {
+                    "v": CONTRACT_VERSION,
+                    "tree": tree,
+                    "head": old_head or "",
+                    "pending_sha256": _file_digest(ctx.pending_path),
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         label = "staged changes"
     else:
         config = ctx.config()
         sha = resolve_commit(ctx.root, args.commit)
         source = args.source or "manual"
         cs = commit_changeset(ctx.root, sha)
-        events = evaluate(config, cs, ctx.root, commit_info(ctx.root, sha), source)
+        events = evaluate(
+            config, cs, ctx.root, commit_info(ctx.root, sha), source, tree=sha
+        )
         append_jsonl(ctx.events_path, events)
         label = sha[:12]
     print_summary(events, "saica: checks for %s (%s)" % (label, source))
@@ -1202,8 +1383,43 @@ def cmd_stamp(args: argparse.Namespace) -> int:
     ctx = Ctx(args)
     if not ctx.pending_path.is_file():
         return 0
+    meta_path = ctx.pending_meta_path()
+    reason = None
+    snap: object = None
+    try:
+        snap = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        reason = "no staged snapshot was recorded for them"
+    if reason is None and not (
+        isinstance(snap, dict)
+        and isinstance(snap.get("tree"), str)
+        and snap["tree"]
+        and isinstance(snap.get("head"), str)
+    ):
+        reason = "the recorded staged snapshot is malformed"
+    head = resolve_commit(ctx.root, "HEAD")
+    if reason is None:
+        assert isinstance(snap, dict)
+        parents = git(["rev-list", "--parents", "-n", "1", head], ctx.root).split()
+        first_parent = parents[1] if len(parents) > 1 else ""  # "" = root commit
+        commit_tree = git(["rev-parse", "--verify", head + "^{tree}"], ctx.root).strip()
+        if snap.get("pending_sha256") != _file_digest(ctx.pending_path):
+            reason = "pending.jsonl does not belong to the recorded staged snapshot"
+        elif snap["tree"] != commit_tree:
+            reason = "HEAD's tree is not the tree that was checked"
+        elif snap["head"] != first_parent:
+            reason = "HEAD's first parent is not the commit the check was based on"
+    if reason is not None:
+        # Results for some other change set must never be attributed to HEAD.
+        _discard(ctx.pending_path)
+        _discard(meta_path)
+        _warn(
+            "pending events NOT stamped with %s: %s; they were discarded"
+            % (head[:12], reason)
+        )
+        return 0
     pending = read_jsonl(ctx.pending_path)
-    meta = commit_info(ctx.root, resolve_commit(ctx.root, "HEAD"))
+    meta = commit_info(ctx.root, head)
     stamped = []
     for ev in pending:
         if ev.get("commit") != STAGED:
@@ -1211,7 +1427,8 @@ def cmd_stamp(args: argparse.Namespace) -> int:
         ev.update(meta)
         stamped.append(ev)
     append_jsonl(ctx.events_path, stamped)
-    ctx.pending_path.unlink()
+    _discard(ctx.pending_path)
+    _discard(meta_path)
     print(
         "saica: stamped %d events with %s" % (len(stamped), meta["commit"][:12]),
         file=sys.stderr,
@@ -1246,6 +1463,7 @@ def cmd_replay(args: argparse.Namespace) -> int:
             run_tools=args.with_tools,
             files_for_tools=files_now,
             verbose=False,
+            tree=sha,
         )
         append_jsonl(ctx.events_path, events)
         caught = sum(1 for e in events if e["outcome"] == "caught")
@@ -1359,7 +1577,39 @@ def _hook_source(name: str) -> str:
     candidate = here / "hooks" / name
     if candidate.is_file():
         return candidate.read_text(encoding="utf-8")
+    return _builtin_hook(name)
+
+
+def _builtin_hook(name: str) -> str:
     return PRE_COMMIT_HOOK if name == "pre-commit" else POST_COMMIT_HOOK
+
+
+def _is_exact_hook(existing: bytes, candidates: List[str]) -> bool:
+    """True only if the file is byte-for-byte a kit hook (LF or CRLF line endings)."""
+    for text in candidates:
+        lf = text.replace("\r\n", "\n").encode("utf-8")
+        if existing == lf or existing == lf.replace(b"\n", b"\r\n"):
+            return True
+    return False
+
+
+def _backup_hook(target: Path, name: str, data: bytes) -> Path:
+    """Save the hook being replaced under a new name; never overwrites an earlier backup."""
+    n = 0
+    while True:
+        suffix = ".saica-backup" if n == 0 else ".saica-backup.%d" % n
+        backup = target.with_name(name + suffix)
+        try:
+            with open(str(backup), "xb") as fh:  # exclusive create
+                fh.write(data)
+        except FileExistsError:
+            n += 1
+            continue
+        try:
+            shutil.copymode(str(target), str(backup))
+        except OSError:
+            pass
+        return backup
 
 
 def cmd_install_hooks(args: argparse.Namespace) -> int:
@@ -1374,11 +1624,14 @@ def cmd_install_hooks(args: argparse.Namespace) -> int:
         target = hooks_dir / name
         content = _hook_source(name)
         if target.exists():
-            existing = target.read_text(encoding="utf-8", errors="replace")
-            if HOOK_MARKER not in existing and not args.force:
+            existing_bytes = target.read_bytes()
+            existing = existing_bytes.decode("utf-8", "replace")
+            identical = _is_exact_hook(existing_bytes, [content])
+            is_kit = _is_exact_hook(existing_bytes, [content, _builtin_hook(name)])
+            if not is_kit and not args.force:
                 print(
-                    "saica: refusing to overwrite existing %s (not ours). Use --force."
-                    % target,
+                    "saica: refusing to overwrite existing %s (not an exact kit hook). "
+                    "Use --force (a backup copy is kept)." % target,
                     file=sys.stderr,
                 )
                 if uses_framework and "pre-commit" in existing:
@@ -1395,9 +1648,8 @@ def cmd_install_hooks(args: argparse.Namespace) -> int:
                     )
                 rc = 1
                 continue
-            if HOOK_MARKER not in existing:
-                backup = target.with_name(name + ".saica-backup")
-                shutil.copy2(str(target), str(backup))
+            if args.force and not identical:
+                backup = _backup_hook(target, name, existing_bytes)
                 print("saica: backed up %s -> %s" % (target, backup), file=sys.stderr)
         target.write_text(content, encoding="utf-8")
         mode = target.stat().st_mode
@@ -1430,9 +1682,12 @@ def build_parser() -> argparse.ArgumentParser:
         "run",
         help="check staged changes or a commit",
         description=(
-            "Run built-in checks and configured tools. Tools always run against the "
-            "current working tree (with {files} = the staged files or the commit's files); "
-            "for --commit, check the commit out first if it is not HEAD (saica-ci.yml does)."
+            "Run built-in checks and configured tools. With --staged, tools run in a "
+            "temporary checkout of the index (unstaged and untracked files are not there; "
+            "SAICA_REPO_ROOT points at the real repository) with {files} = the staged files. "
+            "With --commit, tools run against the current working tree with {files} = the "
+            "commit's files; check the commit out first if it is not HEAD (saica-ci.yml does). "
+            "Built-in dependency lookups always read the checked tree itself."
         ),
     )
     g = r.add_mutually_exclusive_group(required=True)
@@ -1457,7 +1712,13 @@ def build_parser() -> argparse.ArgumentParser:
     r.set_defaults(func=cmd_run)
 
     s = sub.add_parser(
-        "stamp", help="post-commit: move pending events to events.jsonl with HEAD sha"
+        "stamp",
+        help="post-commit: move pending events to events.jsonl with HEAD sha",
+        description=(
+            "Stamp pending events with HEAD, but only if HEAD's tree is the staged tree "
+            "that was checked and HEAD's first parent is the commit it was checked against "
+            "(none for a root commit). Otherwise the pending events are discarded with a warning."
+        ),
     )
     s.set_defaults(func=cmd_stamp)
 
@@ -1504,7 +1765,7 @@ def build_parser() -> argparse.ArgumentParser:
     ih.add_argument(
         "--force",
         action="store_true",
-        help="overwrite foreign hooks (a .saica-backup copy is kept)",
+        help="overwrite hooks that are not exact kit hooks (a new .saica-backup copy is kept)",
     )
     ih.set_defaults(func=cmd_install_hooks)
     return p

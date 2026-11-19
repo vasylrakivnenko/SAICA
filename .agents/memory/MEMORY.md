@@ -1,2 +1,3 @@
 - [Astro runtime compatibility](astro-runtime.md) — approved major upgrade; agent auto-backgrounding and bundled data paths need care.
 - [Publishing startup budget](publishing-startup.md) — search-model preparation must stay outside HTTP startup so cold instances pass readiness checks.
+- [External CLI review pairing](cli-review-pairing.md) — verify which CLI is on PATH and use small, isolated edit batches with bounded reviews.
