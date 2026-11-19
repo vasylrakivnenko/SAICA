@@ -100,15 +100,28 @@ def build_app():
     api_app = create_app(find_similar=retrieve)
 
     root = FastAPI(title="SAICA-KG")
-    root.mount("/api", api_app)
+    serve_static = os.environ.get("SERVE_STATIC") == "1"
 
-    if os.environ.get("SERVE_STATIC") == "1":
+    if serve_static:
         from fastapi.staticfiles import StaticFiles
 
         if not SITE_DIST.is_dir():
             raise RuntimeError(
                 f"SERVE_STATIC=1 but {SITE_DIST} does not exist; build the site first"
             )
+        # Astro prerenders the published graph API (snapshot.json and sibling
+        # routes) into site/dist/api/v1. Starlette matches mounts in order, so
+        # this must be registered before the dynamic /api mount, which would
+        # otherwise swallow every /api/v1/* request and answer 404.
+        static_api_v1 = SITE_DIST / "api" / "v1"
+        if static_api_v1.is_dir():
+            root.mount(
+                "/api/v1", StaticFiles(directory=static_api_v1), name="site-api-v1"
+            )
+
+    root.mount("/api", api_app)
+
+    if serve_static:
         root.mount("/", StaticFiles(directory=SITE_DIST, html=True), name="site")
     return root
 

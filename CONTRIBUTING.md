@@ -17,6 +17,10 @@ SAICA-KG is navigational, not evaluative. Contributions extend the graph with we
 4. Open a PR with (a) the `inclusion_rationale`, (b) any COI disclosure (see below), (c) the external source URLs.
 5. A maintainer reviews within two weeks. Routine additions are typically merged; schema or enum changes follow the RFC process in `EDITORIAL_POLICY.md`.
 
+For an optional Claude edit and independent Codex review, see the
+[on-demand patch review runbook](scripts/review/README.md). It keeps tests,
+integration, commits, pushes, and publishing under supervisor control.
+
 ## AI assistance and attribution
 
 If an AI tool helped implement a change, you can credit it with the matching co-author trailer. For Codex, use `Co-authored-by: Codex <noreply@openai.com>`. Preserve the trailer in a squash commit only when that commit includes work the tool helped implement.

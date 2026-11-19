@@ -8,11 +8,10 @@ export default defineConfig({
   trailingSlash: 'ignore',
   vite: {
     server: {
-      // Dev only: forward /api/* (ask, assess, health) to the Python backend
-      // started by `python -m pipeline.webapp`. In production the same process
-      // serves both the built site and /api, so no proxy is needed.
+      // Dev only: forward the dynamic endpoints to the Python backend, but
+      // let Astro serve its own /api/v1 catalog routes.
       proxy: {
-        '/api': 'http://127.0.0.1:4322',
+        '^/api/(ask|assess|health)/?(?:\\?|$)': 'http://127.0.0.1:4322',
       },
     },
     define: {
