@@ -21,6 +21,12 @@ For an optional Claude edit and independent Codex review, see the
 [on-demand patch review runbook](scripts/review/README.md). It keeps tests,
 integration, commits, pushes, and publishing under supervisor control.
 
+## AI assistance and attribution
+
+If an AI tool helped implement a change, you can credit it with the matching co-author trailer. For Codex, use `Co-authored-by: Codex <noreply@openai.com>`. Preserve the trailer in a squash commit only when that commit includes work the tool helped implement.
+
+If the tool only reviewed the change, you can describe its help in the PR description. As the human contributor, you remain accountable for the changes and for testing them.
+
 ## Conflict-of-interest disclosure
 
 If you author, maintain, or are employed by the organization behind a Tool you are adding, say so explicitly in the PR description. COI does not disqualify a contribution but must be visible.
