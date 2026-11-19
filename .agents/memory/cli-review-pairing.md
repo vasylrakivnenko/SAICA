@@ -3,6 +3,11 @@ name: External CLI review pairing
 description: Run a requested Codex and Claude Code cross-review without mixing workspace edits or losing partial progress.
 ---
 
+For this project's CAO reviews, read [the review guide](../../scripts/review/README.md)
+first. It documents the launcher and signed-in procedure verified end to end:
+Claude edits a disposable checkout, Codex reviews the frozen patch under its
+native read-only profile, and the supervisor decides whether to apply it.
+
 When asked to use Codex and Claude Code together, confirm both versions and
 paths, review a clean local clone of the exact commit, and run changes in
 small edit batches before integrating the verified patch.

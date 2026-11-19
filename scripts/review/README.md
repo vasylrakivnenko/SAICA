@@ -8,8 +8,8 @@ pushes, or publishes. Run the commands from the main repository root in Bash.
 ## One-time setup
 
 1. Check `command -v claude codex cao cao-server tmux`, `claude --version`,
-   `codex --version`, and `cao --version`. The examples use CAO 2.5.4 and Codex
-   0.170.0. If a stale Codex shadows the intended binary, fix `PATH` **before**
+   `codex --version`, and `bash scripts/cao-local.sh client --version`. The
+   examples use CAO 2.5.4 and Codex 0.170.0. If a stale Codex shadows the intended binary, fix `PATH` **before**
    starting CAO; the server/tmux must see the same tools. Use authenticated
    provider CLIs with a trusted configuration (no writable MCP servers, hooks,
    or sandbox overrides for the reviewer). Never forward app secrets to agents.
@@ -19,8 +19,8 @@ pushes, or publishes. Run the commands from the main repository root in Bash.
    codex_home="${CODEX_HOME:-$HOME/.codex}"
    mkdir -p "$codex_home"
    cp -i scripts/review/saica-review-read-only.config.toml "$codex_home/"
-   cao profile validate scripts/review/saica-patch-reviewer.md
-   cao install scripts/review/saica-patch-reviewer.md --provider codex
+   bash scripts/cao-local.sh client profile validate scripts/review/saica-patch-reviewer.md
+   bash scripts/cao-local.sh client install scripts/review/saica-patch-reviewer.md --provider codex
    ```
 
    Do not reuse a conflicting config. Check that the installed profile names
@@ -29,17 +29,21 @@ pushes, or publishes. Run the commands from the main repository root in Bash.
    Codex: it does **not** replace the native sandbox. Never use `--yolo`,
    `--allowed-tools '*'`, or a generic CAO reviewer profile; they can cause
    Codex to launch with its sandbox disabled.
-3. Use a running local CAO server; `cao session list` checks connectivity.
-   If none is running, start it in a separate terminal with the verified
-   `PATH` and provider configuration, without the application's secrets:
+3. Start the project's isolated CAO server in a separate workspace Shell
+   from the repository root, without the application's secrets:
 
    ```bash
    env -u HYPERBOLIC_API_KEY -u SESSION_SECRET \
-     cao-server --host 127.0.0.1 --port 9889
+     bash scripts/cao-local.sh serve
    ```
 
-   Do not expose the server publicly. If session creation fails despite a
-   responsive server, check its log and verify it can find `tmux` and Codex.
+   Leave that Shell open. In another Shell, check connectivity with
+   `curl --fail --noproxy '*' http://127.0.0.1:9897/health` and
+   `bash scripts/cao-local.sh client session list`. Use the `client` wrapper
+   for all CAO commands in this guide so they use this instance's profiles
+   and sessions, not the default server. Do not expose the server publicly.
+   If session creation fails despite a responsive server, check its log and
+   verify it can find `tmux` and Codex.
 
 ## 1. Give Claude one small edit batch
 
@@ -83,7 +87,8 @@ terminal: that was refused in the pilot.
 
 ```bash
 PROMPT=$(python3 scripts/review_batch.py prompt "$REVIEW") || exit 1
-timeout 360s cao launch --agents saica-patch-reviewer --provider codex \
+timeout 360s bash scripts/cao-local.sh client launch \
+  --agents saica-patch-reviewer --provider codex \
   --session-name "$SESSION" --working-directory "$REVIEW" --headless \
   -- "$PROMPT" \
   2>&1 | tee "$RUN/$SESSION.log"
@@ -108,12 +113,19 @@ Launch confirmation is not a completed review. Accept only a successful,
 complete reply with the expected SHA-256 (an identifier for inline input, a
 computed hash for file input) and findings (or explicit no
 findings). If `review_status` is nonzero or the reply is missing, inspect
-`cao session status "$SESSION"` and `tmux attach-session -t "$SESSION"` before
-retrying, and save the final reply in the run log if needed. An expired CLI
+`bash scripts/cao-local.sh client session status "$SESSION"` before retrying.
+To attach from a separate Shell, use the launcher's tmux socket:
+
+```bash
+env -u TMUX -u TMUX_PANE TMUX_TMPDIR="$PWD/.local/state/cao-swarm/tmux" \
+  tmux attach-session -t "$SESSION"
+```
+
+Save the final reply in the run log if needed. An expired CLI
 wait may leave the session running. Never substitute a truncated copy. If
 the patch is too large for a complete review, split the work into smaller
 batches and review each new snapshot. After saving the reply, stop only this
-session with `cao shutdown --session "$SESSION"`.
+session with `bash scripts/cao-local.sh client shutdown --session "$SESSION"`.
 
 ## 3. Test and approve manually
 
