@@ -32,6 +32,29 @@
   then `pip install -r pipeline/requirements-web.txt`.
 - `SAICA_ASK_BUDGET` caps LLM calls per server process (default 50; resets on restart).
 
+## Local CAO swarm
+
+- CAO is opt-in: start it from the workspace **Shell**, not with **Run** or
+  publishing. The launcher uses the shell's `tmux` and looks for CAO in
+  `.local/bin` and on `PATH`. If CAO is missing, the tested upstream revision
+  can be installed as a standalone CLI tool:
+  `uv tool install git+https://github.com/awslabs/cli-agent-orchestrator.git@b2b366688e22918409b9e92b48096120eafa1e69`.
+- Start the foreground server from the repository root:
+  `bash scripts/cao-local.sh serve`. Leave that shell open. In another shell,
+  check it with `curl --fail --noproxy '*' http://127.0.0.1:9897/health`,
+  then run `bash scripts/cao-local.sh client --help` for CAO commands. Use the
+  `client` wrapper instead of bare `cao` to target this instance. Real workers
+  still need their own provider CLI and credentials.
+- The server binds only to `127.0.0.1:9897`. Do not forward this port or add
+  it to Replit's port mappings. This instance stores its own profiles and
+  sessions under the ignored `.local/state/cao-swarm/` directory and uses a
+  separate tmux socket; it does not import or change existing CAO sessions.
+  To see its tmux sessions from the repository root:
+  `env -u TMUX -u TMUX_PANE TMUX_TMPDIR="$PWD/.local/state/cao-swarm/tmux" tmux list-sessions`.
+- Press Ctrl+C in the server shell to stop the API. tmux sessions are separate
+  from the API process; use the `client` wrapper to delete only the sessions
+  you no longer need while the API is running.
+
 ## Publishing
 
 - Autoscale deployment (switched from Static so /ask and /assess work in

@@ -21,3 +21,10 @@ find tmux. Check the server log on session-creation errors; a separate
 loopback-only instance started with the workspace PATH can test the setup
 without changing the user's running server. With Codex's advisory reader-only
 profile, supply the actual diff as input if no file-reading tool is available.
+
+An opt-in CAO instance must isolate both its persisted state and its tmux
+socket and clear an inherited tmux pane context. **Why:** CAO startup
+reconciles sessions against tmux; a different HTTP port alone does not keep
+that reconciliation away from an existing tmux server. **How to apply:** use
+a private `TMUX_TMPDIR` with a separate CAO home and verify that a test
+session and an unrelated same-named session can coexist.
