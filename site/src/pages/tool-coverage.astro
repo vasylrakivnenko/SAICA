@@ -86,8 +86,10 @@ const toolMetaJson = JSON.stringify(toolMeta).replace(/</g, "\\u003c");
     </div>
     <p class="mt-2 text-xs text-ink-faint max-w-3xl">
       Generates instructions for your coding agent (Claude Code, Cursor, Replit Agent, …) to integrate
-      exactly the tools in the selected view. The agent inspects your repo and proposes a plan before
-      changing anything. Coverage shown here is <em>declared</em>, not verified protection.
+      exactly the tools in the selected view, then wire them into <a href="/kit/README.md">SAICA's commit checks</a>:
+      a git hook and a CI job run them on every commit, and a local dashboard shows what they catch over time.
+      The agent inspects your repo and proposes a plan before changing anything. Coverage shown here is
+      <em>declared</em>, not verified protection.
     </p>
     <div id="tc-prompt-panel" class="mt-3" hidden>
       <pre id="tc-prompt" class="whitespace-pre-wrap text-xs font-mono bg-white border border-ink/10 rounded p-3 max-h-96 overflow-auto"></pre>
@@ -417,8 +419,20 @@ const toolMetaJson = JSON.stringify(toolMeta).replace(/</g, "\\u003c");
     }
     steps.push(
       "Verify each integration actually runs (e.g. a local hook run, a CI dry run, or a minimal sample eval) and show the output. Use only credentials I provide, keep paid API calls minimal, and do not run red-team or attack scans against live or third-party endpoints.",
-      "Report per tool: configured / not configured / blocked, and which of the listed failure modes are actually exercised. Do not claim protection merely because a package is installed.",
     );
+
+    const kit = `${origin}/kit`;
+    const kitSteps = [
+      `Download these files exactly as published — do not rewrite or regenerate them: ${kit}/saica_check.py → .saica/saica_check.py, ${kit}/checks.example.json → .saica/checks.json, ${kit}/selftest.py → .saica/selftest.py, ${kit}/dashboard.html → .saica/dashboard.template.html, ${kit}/hooks/pre-commit and ${kit}/hooks/post-commit → .saica/hooks/, ${kit}/saica-ci.yml → .github/workflows/saica-ci.yml. The file formats are documented in ${kit}/README.md; read it first.`,
+      `Adapt only .saica/checks.json: set "kit" to "${scopeKey}", and add one entry per tool above with its real per-commit command (from its docs), the failure modes listed for it above, and whether a failure should block the commit. Tools that can't run on a commit (services, platforms) get "runs_per_commit": false. Remove example entries for tools I don't have. Keep "builtin" enabled.`,
+      "Install the hooks with `python3 .saica/saica_check.py install-hooks`. If the repo already uses the pre-commit framework or has its own hooks, don't overwrite them — add a local hook that runs `python3 .saica/saica_check.py run --staged --source pre-commit` and a post-commit step that runs `python3 .saica/saica_check.py stamp`.",
+      "In .github/workflows/saica-ci.yml, add only the install steps the configured tools need. If the repo doesn't use GitHub Actions, port the same steps to its CI and tell me.",
+      "Add .saica/events.jsonl, .saica/pending.jsonl and .saica/dashboard.html to .gitignore. Commit the rest of .saica/ and the workflow.",
+      "Run `python3 .saica/selftest.py` and show me the full output. Every check must PASS (warnings about missing optional tools are OK if you explain them). If something fails, fix the setup, not the self-test.",
+      "Run `python3 .saica/saica_check.py replay --last 30`, then `python3 .saica/saica_check.py dashboard`, and tell me to open .saica/dashboard.html.",
+    ];
+
+    const report = "Report per tool: configured / not configured / blocked, which of the listed failure modes are actually exercised per commit, and the self-test result. Do not claim protection merely because a package is installed.";
 
     return [
       `# Set up the SAICA-KG "${label}" supervision kit`,
@@ -438,6 +452,16 @@ const toolMetaJson = JSON.stringify(toolMeta).replace(/</g, "\\u003c");
       "## Process",
       "",
       steps.map((s, i) => `${i + 1}. ${s}`).join("\n"),
+      "",
+      "## Check every commit and show results on a dashboard",
+      "",
+      "Include this part in the plan you show me before changing anything. After I approve, wire the tools into SAICA's commit checks: a git hook runs them on every commit (blocking ones can stop it), a CI job runs them again on every push as a backup, and every result is logged to .saica/events.jsonl for a local dashboard.",
+      "",
+      kitSteps.map((s, i) => `${steps.length + i + 1}. ${s}`).join("\n"),
+      "",
+      "## Report",
+      "",
+      report,
       "",
     ].join("\n");
   }

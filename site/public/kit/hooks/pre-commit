@@ -1,0 +1,29 @@
+#!/bin/sh
+# SAICA supervision kit: pre-commit hook (runs .saica/saica_check.py).
+# Installed by: python3 .saica/saica_check.py install-hooks
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$root" || exit 0
+runner=".saica/saica_check.py"
+warn() {
+  echo "" >&2
+  echo "##################################################################" >&2
+  echo "## SAICA WARNING: $1" >&2
+  echo "## This commit was NOT checked by the SAICA supervision kit." >&2
+  echo "##################################################################" >&2
+  echo "" >&2
+}
+if [ ! -f "$runner" ]; then
+  warn "$runner is missing."
+  exit 0
+fi
+PY=""
+if command -v python3 >/dev/null 2>&1; then
+  PY=python3
+elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
+  PY=python
+fi
+if [ -z "$PY" ]; then
+  warn "python3 not found on PATH."
+  exit 0
+fi
+exec "$PY" "$runner" run --staged --source pre-commit

@@ -1,0 +1,119 @@
+# SAICA supervision kit: CI backstop (contract v1).
+#
+# Install at .github/workflows/saica-ci.yml. Runs the same checks as the
+# pre-commit hook on every commit of a push / pull request, so commits made
+# with `git commit --no-verify` (or without the hooks installed) are still
+# checked and logged.
+#
+# IMPORTANT: this template does not install your supervision tools. Your
+# coding agent must add the install steps for every tool in
+# .saica/checks.json (see "Install supervision tools" below), otherwise those
+# checks are recorded as `error` (exit 127, command not found).
+#
+# Actions are pinned to major tags for readability. For stronger supply-chain
+# protection, pin each `uses:` to a full commit SHA (keep the tag as a
+# comment) and remove the `nosemgrep` markers.
+name: saica-ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  saica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4  # nosemgrep: github-actions-mutable-action-tag
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5  # nosemgrep: github-actions-mutable-action-tag
+        with:
+          python-version: "3.12"
+
+      # --- Install supervision tools (ADD YOURS HERE) ----------------------
+      # Your agent adds one step per runnable tool in .saica/checks.json, e.g.:
+      # - name: Install semgrep
+      #   run: python -m pip install semgrep
+      # ----------------------------------------------------------------------
+
+      - name: Run SAICA checks for each commit
+        id: checks
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          MAX_COMMITS: "50"
+        run: |
+          set -u
+          # Copy the runner + config out of the tree so each commit can be
+          # checked out (and its tools run against its own files).
+          kit="$RUNNER_TEMP/saica"
+          mkdir -p "$kit"
+          cp .saica/saica_check.py .saica/checks.json "$kit/"
+          [ -f .saica/dashboard.template.html ] && cp .saica/dashboard.template.html "$kit/"
+
+          range=""
+          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$PR_BASE" ]; then
+            range="$PR_BASE..$PR_HEAD"
+          elif [ -n "$PUSH_BEFORE" ] && ! echo "$PUSH_BEFORE" | grep -qE '^0+$' \
+               && git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then
+            range="$PUSH_BEFORE..$GITHUB_SHA"
+          fi
+          commits=""
+          if [ -n "$range" ]; then
+            commits=$(git rev-list --reverse --no-merges --max-count="$MAX_COMMITS" "$range" || true)
+          fi
+          [ -z "$commits" ] && commits=$(git rev-parse HEAD)   # fallback: HEAD only
+
+          start=$(git rev-parse HEAD)
+          blocked=0
+          for sha in $commits; do
+            git checkout --quiet --detach "$sha"
+            python3 "$kit/saica_check.py" --config "$kit/checks.json" \
+              run --commit "$sha" --source ci || blocked=1
+          done
+          git checkout --quiet --detach "$start"
+          echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
+
+      - name: Build dashboard
+        if: always()
+        run: |
+          template=".saica/dashboard.template.html"
+          [ -f "$RUNNER_TEMP/saica/dashboard.template.html" ] && template="$RUNNER_TEMP/saica/dashboard.template.html"
+          python3 .saica/saica_check.py dashboard --template "$template" || true
+
+      - name: Upload events and dashboard
+        if: always()
+        uses: actions/upload-artifact@v4  # nosemgrep: github-actions-mutable-action-tag
+        with:
+          name: saica-results
+          path: |
+            .saica/events.jsonl
+            .saica/dashboard.html
+          if-no-files-found: warn
+
+      # --- Optional: publish the dashboard to GitHub Pages ------------------
+      # Requires Pages enabled with "GitHub Actions" as the source, and adds
+      # `pages: write` + `id-token: write` permissions. Note that a public
+      # Pages site exposes commit subjects and check details.
+      # - name: Prepare Pages content
+      #   if: always() && github.ref == 'refs/heads/main'
+      #   run: mkdir -p _site && cp .saica/dashboard.html _site/index.html
+      # - uses: actions/upload-pages-artifact@v3
+      #   if: always() && github.ref == 'refs/heads/main'
+      #   with:
+      #     path: _site
+      # - uses: actions/deploy-pages@v4
+      #   if: always() && github.ref == 'refs/heads/main'
+      # ----------------------------------------------------------------------
+
+      - name: Fail if a blocking check caught something
+        if: steps.checks.outputs.blocked == '1'
+        run: |
+          echo "A blocking SAICA check caught a problem; see the step log and the saica-results artifact."
+          exit 1

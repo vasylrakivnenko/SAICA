@@ -1,0 +1,20 @@
+#!/bin/sh
+# SAICA supervision kit: post-commit hook (stamps pending results with the new sha).
+# Installed by: python3 .saica/saica_check.py install-hooks
+# Never fails: the commit already exists.
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$root" || exit 0
+runner=".saica/saica_check.py"
+[ -f "$runner" ] || exit 0
+PY=""
+if command -v python3 >/dev/null 2>&1; then
+  PY=python3
+elif command -v python >/dev/null 2>&1; then
+  PY=python
+fi
+if [ -z "$PY" ]; then
+  echo "SAICA WARNING: python3 not found; results were not stamped." >&2
+  exit 0
+fi
+"$PY" "$runner" stamp || echo "SAICA WARNING: stamp failed; see message above." >&2
+exit 0
