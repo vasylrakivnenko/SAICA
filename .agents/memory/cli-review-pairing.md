@@ -15,3 +15,9 @@ after making partial changes, while narrowly scoped batches completed.
 run the requested CLI mode. Save reviewer outputs, give reviewers read-only
 access, and use bounded write batches for implementers. If a batch times out,
 inspect its diff; a written change may still contain unresolved helper calls.
+
+For CAO pilots, a healthy HTTP server does not prove that its process can
+find tmux. Check the server log on session-creation errors; a separate
+loopback-only instance started with the workspace PATH can test the setup
+without changing the user's running server. With Codex's advisory reader-only
+profile, supply the actual diff as input if no file-reading tool is available.
