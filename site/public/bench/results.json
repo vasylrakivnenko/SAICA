@@ -598,6 +598,209 @@
      "cost_note": "Azure list price x tokens; 14 answers unreadable (Azure timeouts), counted as not flagged"
     }
    ]
+  },
+  {
+   "id": "security",
+   "name": "Security vulnerability",
+   "n": 1702,
+   "n_pos": 1243,
+   "n_neg": 459,
+   "pos_label": "vulnerable patches",
+   "dataset": "SusVibes (LeiLiLab, MIT): AI agents' patches for 166 real feature tasks, with hidden CVE tests",
+   "summary": "The agent's code change introduces a security vulnerability.",
+   "setup": [
+    "1243 vulnerable vs 459 secure patches, written by 26 agent runs (Claude, Gemini, GLM, Kimi, Qwen with SWE-agent, OpenHands, CLIs). Both kinds pass the task's functional tests; vulnerable ones fail the hidden CVE security test. Identical patches kept once; patches over 60k characters left out.",
+    "AI tools see the task text and the agent's diff. bandit and semgrep run on the patched files and flag a patch when a finding lands on a line it added.",
+    "Same review prompt for every model; temperature 0 (gpt-6-luna: its default). Answers cut off by the token limit are re-run at 32k. Run 2026-11-19/20.",
+    "Still running, added when done: ultramarine-1-flash, giskard, promptfoo, pr-agent, and a Muse Glimmer 30B fine-tuned on a project-level split."
+   ],
+   "caveats": [
+    "Every tool scores close to chance: telling these vulnerable patches from secure ones by reading the change is beyond them.",
+    "'Secure' means the patch passed one CVE-specific test; it may still contain other flaws, which inflates every tool's FPR.",
+    "51 patches could not be rebuilt as files (binary or missing vendored files); the static tools count them as not flagged."
+   ],
+   "rows": [
+    {
+     "key": "plain_llm_ds41",
+     "tool": "deepseek-v4.1-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.07244227806434994,
+     "catch": 0.43845534995977475,
+     "catch_ci": [
+      0.41110169945947667,
+      0.4661882465930131
+     ],
+     "fa": 0.3660130718954248,
+     "fa_ci": [
+      0.32322484405491625,
+      0.4110254912649859
+     ],
+     "cost": 23.39,
+     "cost_note": "API-reported; re-runs of cut-off answers still in progress, so cost and score may change slightly"
+    },
+    {
+     "key": "plain_llm",
+     "tool": "deepseek-v4-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.05373358783041238,
+     "catch": 0.3805309734513274,
+     "catch_ci": [
+      0.3539467710326267,
+      0.40785135953985335
+     ],
+     "fa": 0.32679738562091504,
+     "fa_ci": [
+      0.28547891191245595,
+      0.3709910337449786
+     ],
+     "cost": 2.79,
+     "cost_note": "API-reported; re-runs of cut-off answers still in progress, so cost and score may change slightly"
+    },
+    {
+     "key": "plain_llm_mimo",
+     "tool": "mimo-v2.6-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.0462126032141649,
+     "catch": 0.251005631536605,
+     "catch_ci": [
+      0.22769305011592658,
+      0.2758525486193097
+     ],
+     "fa": 0.2047930283224401,
+     "fa_ci": [
+      0.1703964457135864,
+      0.2440900654383931
+     ],
+     "cost": 1.19,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_minimax",
+     "tool": "minimax-m3, asked directly",
+     "type": "baseline_model",
+     "j": -0.0011182447413577157,
+     "catch": 0.21238938053097345,
+     "catch_ci": [
+      0.19055579573848724,
+      0.2359952593434093
+     ],
+     "fa": 0.21350762527233116,
+     "fa_ci": [
+      0.17847678790770757,
+      0.25329425428037583
+     ],
+     "cost": 5.78,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_luna",
+     "tool": "gpt-6-luna, asked directly",
+     "type": "baseline_model",
+     "j": 0.05204570431014999,
+     "catch": 0.5945293644408689,
+     "catch_ci": [
+      0.5669834019617078,
+      0.6214928246896968
+     ],
+     "fa": 0.5424836601307189,
+     "fa_ci": [
+      0.4967421483806809,
+      0.5875199404203256
+     ],
+     "cost": 1.54,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "j": -0.03454114281808196,
+     "catch": 0.4883346741753821,
+     "catch_ci": [
+      0.4606244761043204,
+      0.5161167555003999
+     ],
+     "fa": 0.5228758169934641,
+     "fa_ci": [
+      0.47718099593628444,
+      0.5681908980334884
+     ],
+     "cost": 0.85,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_gptoss",
+     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+     "type": "baseline_model",
+     "j": 0.08228037795971163,
+     "catch": 0.27835880933226065,
+     "catch_ci": [
+      0.2541544377965622,
+      0.3039289626931231
+     ],
+     "fa": 0.19607843137254902,
+     "fa_ci": [
+      0.162342042740243,
+      0.23485993737563254
+     ],
+     "cost": 1.69,
+     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted)"
+    },
+    {
+     "key": "plain_llm_qwen",
+     "tool": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+     "type": "baseline_model",
+     "j": 0.03286552844074969,
+     "catch": 0.18101367658889783,
+     "catch_ci": [
+      0.16060194330974803,
+      0.20339104505380995
+     ],
+     "fa": 0.14814814814814814,
+     "fa_ci": [
+      0.11857245426613204,
+      0.18356460515117184
+     ],
+     "cost": 0.52,
+     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted)"
+    },
+    {
+     "key": "semgrep",
+     "tool": "semgrep (p/python + p/security-audit)",
+     "type": "deterministic",
+     "j": 0.026054401379752762,
+     "catch": 0.11102172164119067,
+     "catch_ci": [
+      0.0947409211962638,
+      0.12969945679561584
+     ],
+     "fa": 0.08496732026143791,
+     "fa_ci": [
+      0.0627766532161789,
+      0.11404755618937151
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    },
+    {
+     "key": "bandit",
+     "tool": "bandit",
+     "type": "deterministic",
+     "j": -0.07043539682790073,
+     "catch": 0.18664521319388577,
+     "catch_ci": [
+      0.16596201145125344,
+      0.20925934786174993
+     ],
+     "fa": 0.2570806100217865,
+     "fa_ci": [
+      0.21923095219018188,
+      0.29896274517842125
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    }
+   ]
   }
  ]
 }
