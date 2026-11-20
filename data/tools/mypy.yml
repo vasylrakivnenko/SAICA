@@ -25,8 +25,8 @@ autonomy_level: fully_autonomous
 implementation: deterministic
 
 addresses_failure_modes:
-  - logic_error
   - fabrication
+  - obsolescence
 
 locus_of_control:
   - environment

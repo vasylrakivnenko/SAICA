@@ -25,7 +25,6 @@ implementation: deterministic
 addresses_failure_modes:
   - supply_chain_attack
   - security_vulnerability
-  - logic_error
 
 locus_of_control:
   - environment

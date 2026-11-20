@@ -27,6 +27,7 @@ implementation: hybrid
 
 addresses_failure_modes:
   - supply_chain_attack
+  - obsolescence
 
 locus_of_control:
   - environment

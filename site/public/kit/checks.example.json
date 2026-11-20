@@ -1,11 +1,16 @@
 {
   "version": 1,
   "kit": "optimal",
-  "builtin": { "enabled": true, "blocking": false },
+  "builtin": {
+    "enabled": true,
+    "blocking": false
+  },
   "tools": [
     {
       "id": "semgrep",
-      "failure_modes": ["security_vulnerability"],
+      "failure_modes": [
+        "security_vulnerability"
+      ],
       "runs_per_commit": true,
       "command": "semgrep scan --config auto --error --quiet {files}",
       "blocking": true,
@@ -13,25 +18,27 @@
     },
     {
       "id": "sentrux",
-      "failure_modes": ["cascading_failure", "dependency_blindness"],
+      "failure_modes": [
+        "cascading_failure",
+        "dependency_blindness"
+      ],
       "runs_per_commit": true,
       "command": "sentrux gate",
       "blocking": false,
-      "metric": { "name": "quality", "regex": "quality[^0-9]*([0-9]+(?:\\.[0-9]+)?)" }
+      "metric": {
+        "name": "quality",
+        "regex": "quality[^0-9]*([0-9]+(?:\\.[0-9]+)?)"
+      }
     },
     {
       "id": "pytest",
-      "failure_modes": ["test_manipulation", "logic_error", "incomplete_execution"],
+      "failure_modes": [
+        "logic_error"
+      ],
       "runs_per_commit": true,
       "command": "python3 -m pytest -q -x",
       "blocking": true,
       "timeout_s": 600
-    },
-    {
-      "id": "activepieces",
-      "failure_modes": ["context_pollution", "scope_creep", "supply_chain_attack"],
-      "runs_per_commit": false,
-      "note": "Workflow platform; not a per-commit check."
     }
   ]
 }

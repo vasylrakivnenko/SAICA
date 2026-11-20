@@ -20,6 +20,7 @@ addresses_failure_modes:
   - security_vulnerability
   - scope_creep
   - supply_chain_attack
+  - cascading_failure
 locus_of_control:
   - environment
   - human

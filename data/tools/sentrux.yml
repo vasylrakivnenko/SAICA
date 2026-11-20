@@ -31,7 +31,6 @@ autonomy_level: fully_autonomous
 implementation: deterministic
 
 addresses_failure_modes:
-  - cascading_failure
   - dependency_blindness
 
 locus_of_control:

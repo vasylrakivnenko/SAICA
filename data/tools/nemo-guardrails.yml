@@ -26,8 +26,6 @@ implementation: hybrid
 addresses_failure_modes:
   - scope_creep
   - security_vulnerability
-  - context_pollution
-  - fabrication
 
 locus_of_control:
   - prompt

@@ -239,6 +239,11 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
         for fm in tool.get("addresses_failure_modes", []):
             if fm not in known_modes:
                 err.append(f"[tools] {tid} addresses unknown FailureMode '{fm}'")
+        for fm in tool.get("records_failure_modes", []) or []:
+            if fm not in known_modes:
+                err.append(f"[tools] {tid} records unknown FailureMode '{fm}'")
+            if fm in tool.get("addresses_failure_modes", []):
+                err.append(f"[tools] {tid} lists '{fm}' in both addresses_ and records_failure_modes")
         for other in tool.get("composes_with", []) or []:
             composes[tid].add(other)
             if other not in tools:

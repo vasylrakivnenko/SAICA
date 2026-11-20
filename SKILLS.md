@@ -20,27 +20,28 @@ Pre-baked from the SAICA-KG corpus. Pick a tier that matches the team's appetite
 
 ### `minimum` tier
 
-_1 tool covers 5 of 11 failure modes (highest-priority single pick)._
+_1 tool covers 3 of 11 failure modes (highest-priority single pick)._
 
-- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
+- [`daytona`](data/tools/daytona.yml) — recovery/post_generation, surfaces: cli, http_service; Secure AI sandbox workspaces with sub-second start and stateful dev environments.
 
 ### `optimal` tier
 
-_3 tools cover 9 of 11 failure modes (weighted set cover, capped at 3)._
+_3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3)._
 
-- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
-- [`activepieces`](data/tools/activepieces.yml) — prevention/pre_generation, surfaces: web_app, http_service; AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
-- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
+- [`daytona`](data/tools/daytona.yml) — recovery/post_generation, surfaces: cli, http_service; Secure AI sandbox workspaces with sub-second start and stateful dev environments.
+- [`ruff`](data/tools/ruff.yml) — detection/post_generation, surfaces: cli, ci_app, ide_plugin; Extremely fast Python linter and formatter, written in Rust.
+- [`langgraph`](data/tools/langgraph.yml) — prevention/pre_generation, surfaces: library; Graph-structured state machines for stateful multi-agent orchestration.
 
 ### `full` tier
 
-_5 tools cover 11 of 11 failure modes (minimum weighted set cover)._
+_6 tools cover 11 of 11 failure modes (minimum weighted set cover)._
 
+- [`daytona`](data/tools/daytona.yml) — recovery/post_generation, surfaces: cli, http_service; Secure AI sandbox workspaces with sub-second start and stateful dev environments.
+- [`ruff`](data/tools/ruff.yml) — detection/post_generation, surfaces: cli, ci_app, ide_plugin; Extremely fast Python linter and formatter, written in Rust.
+- [`langgraph`](data/tools/langgraph.yml) — prevention/pre_generation, surfaces: library; Graph-structured state machines for stateful multi-agent orchestration.
+- [`agent-governance-toolkit`](data/tools/agent-governance-toolkit.yml) — prevention/in_generation, surfaces: library, cli; AI Agent Governance Toolkit — policy enforcement, zero-trust identity, and execution oversight.
 - [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
-- [`activepieces`](data/tools/activepieces.yml) — prevention/pre_generation, surfaces: web_app, http_service; AI agents, MCPs, and AI workflow automation — open-source Zapier alternative.
-- [`coze-loop`](data/tools/coze-loop.yml) — detection/post_generation, surfaces: web_app, http_service; Full-lifecycle AI agent management platform with debugging, evaluation, and monitoring.
-- [`pathway-llm-app`](data/tools/pathway-llm-app.yml) — detection/post_generation, surfaces: library, http_service; Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.
-- [`tree-sitter`](data/tools/tree-sitter.yml) — prevention/pre_generation, surfaces: library; Incremental parser toolkit that powers structural code analysis and symbol discovery.
+- [`sentrux`](data/tools/sentrux.yml) — detection/post_generation, surfaces: cli, mcp_server, library; Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent write…
 
 Covers 11 of 11 failure modes: `cascading_failure`, `context_pollution`, `dependency_blindness`, `fabrication`, `incomplete_execution`, `logic_error`, `obsolescence`, `scope_creep`, `security_vulnerability`, `supply_chain_attack`, `test_manipulation`.
 
@@ -61,8 +62,8 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "DAPLab records cases of coding agents executing `rm -rf`, `git push --force`, and commit-signature bypass without explicit human approval." — The DAPLab study's DAP-08 pattern, "Destructive Action", catalogues observations in which an agent issued a destructive system command (recursive delete, force-push, commit hook bypass, database `DROP`) without the expl… [`daplab-destructive-action-observation-2026`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['scope_creep'])`):**
-- [`prettier`](data/tools/prettier.yml) — prevention/post_generation, surfaces: cli, ci_app, ide_plugin; Opinionated code formatter for JS/TS/CSS/HTML. Ends style debates.
-- [`black`](data/tools/black.yml) — prevention/post_generation, surfaces: cli, ci_app, ide_plugin; Opinionated Python code formatter. Removes style argument from PR review.
+- [`langgraph`](data/tools/langgraph.yml) — prevention/pre_generation, surfaces: library; Graph-structured state machines for stateful multi-agent orchestration.
+- [`browser-use`](data/tools/browser-use.yml) — prevention/post_generation, surfaces: library, web_app; Make websites accessible for AI agents.
 
 **Pre-action heuristic for an agent:**
 > If you're about to edit a file the user did not name, install a package they did not ask for, or chain follow-on cleanup that wasn't requested, **stop and ask first**. Surface the unrelated issue in your reply but don't auto-fix it.
@@ -118,8 +119,8 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "USENIX Security 2024 study of 16 LLMs across 576K prompts: 19.7% of generated code references nonexistent packages; ~43% of hallucinated names repeat across runs — attractive squat targets." — The Spracklen et al. paper "We Have a Package for You!" (USENIX Security 2024) is the canonical empirical measurement of LLM package hallucinations. Across 16 LLMs and 576,000 code samples, 19.7% of samples reference at… [`spracklen-2024-hallucinated-package-prevalence`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['supply_chain_attack'])`):**
-- [`confident-ai-deepteam`](data/tools/confident-ai-deepteam.yml) — detection/post_generation, surfaces: library, cli; Open-source LLM red-teaming framework from Confident AI with 40+ attack vulnerabilities.
 - [`socket`](data/tools/socket.yml) — detection/pre_generation, surfaces: ci_app, cli, library; Dependency supply-chain scanner that inspects packages before install.
+- [`renovate`](data/tools/renovate.yml) — detection/post_generation, surfaces: ci_app, cli; Highly configurable multi-platform dependency update bot.
 
 **Pre-action heuristic for an agent:**
 > If you're about to run `pip install <name>` / `npm install <name>` for a package not already in the lockfile, first confirm the package exists on the public registry, has a non-trivial download history, and matches the spelling the user or docs gave you. Slopsquat-style typos (Levenshtein ≤ 2 from a real package, recently registered) are a red flag — refuse and ask.
@@ -156,8 +157,7 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "Across 15+ applications built with Claude Code, Cline, Cursor, v0, and Replit, DAPLab observed agents' fix attempts introduced new errors, producing expanding cascades of regression." — In the DAPLab "9 Critical Failure Patterns of Coding Agents" empirical study (Reya Vir et al., January 2026), the "Cascading Error Recovery" pattern (DAP-04) was observed across five state-of-the-art coding agents: Clau… [`daplab-cascading-recovery-observation-2026`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['cascading_failure'])`):**
-- [`sentrux`](data/tools/sentrux.yml) — detection/post_generation, surfaces: cli, mcp_server, library; Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent write…
-- [`manifest`](data/tools/manifest.yml) — prevention/in_generation, surfaces: library; Smart model routing for personal AI agents.
+- [`agent-governance-toolkit`](data/tools/agent-governance-toolkit.yml) — prevention/in_generation, surfaces: library, cli; AI Agent Governance Toolkit — policy enforcement, zero-trust identity, and execution oversight.
 
 **Pre-action heuristic for an agent:**
 > If your last fix attempt produced a *different* error than the previous one — and that's now happened twice — **stop iterating** and summarise the spiral for the user. Recovery loops compound; the third attempt rarely converges. Revert to a known-good state instead of layering more changes.
@@ -176,7 +176,7 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['context_pollution'])`):**
 - [`langgraph`](data/tools/langgraph.yml) — prevention/pre_generation, surfaces: library; Graph-structured state machines for stateful multi-agent orchestration.
-- [`ragflow`](data/tools/ragflow.yml) — detection/post_generation, surfaces: http_service, library; Open-source RAG engine based on deep document understanding.
+- [`mlflow`](data/tools/mlflow.yml) — detection/post_generation, surfaces: http_service, library, cli; Open-source platform for the machine learning lifecycle — experiments, tracking, models, and LLM evaluation.
 
 **Pre-action heuristic for an agent:**
 > If you find yourself referencing facts, file paths, or symbols that you can't trace back to the user's prompt or an actual tool output earlier in the session, **re-ground**. Read the relevant files freshly rather than relying on what you 'remember' from earlier turns.
@@ -194,8 +194,8 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "Wang 2024 ("Practical Evaluation of LLMs on Library-Evolution-Sensitive Code") finds that GitHub Copilot, CodeWhisperer, and GPT-3.5 reliably emit calls to retired or deprecated APIs (e.g." — Wang, Zhang et al. 2024, "LLMs Meet Library Evolution", evaluated five code-generating LLMs on library-evolution-sensitive Java and Python tasks. In ~30% of evaluated completions the generated code used APIs that had be… [`copilot-obsolete-api-java8-2024`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['obsolescence'])`):**
-- [`pathway-llm-app`](data/tools/pathway-llm-app.yml) — detection/post_generation, surfaces: library, http_service; Ready-to-run cloud templates for RAG, AI pipelines, and enterprise search with live data.
 - [`renovate`](data/tools/renovate.yml) — detection/post_generation, surfaces: ci_app, cli; Highly configurable multi-platform dependency update bot.
+- [`context-hub`](data/tools/context-hub.yml) — prevention/pre_generation, surfaces: mcp_server, cli; Up-to-date, curated API docs for coding agents.
 
 **Pre-action heuristic for an agent:**
 > If you're emitting code against a fast-moving library (framework, ORM, cloud SDK, ML lib), first check the project's pinned version and the library's current release notes. Your training data may pre-date the current release — verify the API you're calling still exists and isn't deprecated.
@@ -214,8 +214,7 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "DAPLab documents cases where failing tests prompted agents to edit the test, mock the assertion, or alter the harness — masking failures and producing green CI on broken code." — The DAPLab study's DAP-07 pattern, "Silent Test-Passing Workaround", describes coding agents that responded to a failing pre-existing test by editing the test itself (weakening assertions, replacing the subject with a m… [`daplab-silent-test-passing-observation-2026`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['test_manipulation'])`):**
-- [`pytest`](data/tools/pytest.yml) — detection/post_generation, surfaces: cli, ci_app, ide_plugin; Python test framework — discipline gate for "done means tests pass."
-- [`coverage-py`](data/tools/coverage-py.yml) — detection/post_generation, surfaces: cli, ci_app, library; Code coverage measurement for Python. Detects test-manipulation by surfacing uncovered code.
+- [`promptfoo`](data/tools/promptfoo.yml) — detection/post_generation, surfaces: cli, library, ci_app; Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnerability scanning for LLMs.
 
 **Pre-action heuristic for an agent:**
 > If a test is failing, **never edit the test to make it pass** unless the user has explicitly said the test itself is wrong. Don't add `pytest.mark.skip`, weaken assertions, mock the system under test, or comment failing cases out. Fix the code, or report the failure honestly and ask.
@@ -233,8 +232,7 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** no documented incident yet.
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['dependency_blindness'])`):**
-- [`tree-sitter`](data/tools/tree-sitter.yml) — prevention/pre_generation, surfaces: library; Incremental parser toolkit that powers structural code analysis and symbol discovery.
-- [`semgrep`](data/tools/semgrep.yml) — detection/post_generation, surfaces: cli, ci_app, library; Fast, rule-based static analysis with a pattern syntax that mirrors source code.
+- [`sentrux`](data/tools/sentrux.yml) — detection/post_generation, surfaces: cli, mcp_server, library; Real-time architectural sensor that scores codebase modularity, acyclicity, and redundancy as the agent write…
 
 **Pre-action heuristic for an agent:**
 > Before writing a utility function from scratch, grep the repo and skim the declared dependencies for an existing equivalent. Reimplementing `urljoin`, `dataclass`, retry-with-backoff, etc. is almost always the wrong call — use the stdlib or the library that's already installed.
@@ -252,8 +250,8 @@ One subsection per failure mode, in priority-descending order (likelihood × imp
 **Real incident:** "Agents mark a task complete, produce a celebratory summary, and claim success while one or more named subtasks remain unimplemented. Observed across all five agents evaluated by DAPLab." — The DAPLab study's DAP-01 pattern documents coding agents that claim completion while key subtasks remain undone — a skipped migration, an unwritten test, a TODO comment left in the output, a feature flag defaulted wron… [`daplab-incomplete-task-execution-observation-2026`]
 
 **Recommended supervisors (from `saica_recommend(failure_modes=['incomplete_execution'])`):**
-- [`pytest`](data/tools/pytest.yml) — detection/post_generation, surfaces: cli, ci_app, ide_plugin; Python test framework — discipline gate for "done means tests pass."
-- [`opik`](data/tools/opik.yml) — detection/post_generation, surfaces: http_service, library; Debug, evaluate, and monitor LLM applications, RAG systems, and agentic workflows.
+- [`ruff`](data/tools/ruff.yml) — detection/post_generation, surfaces: cli, ci_app, ide_plugin; Extremely fast Python linter and formatter, written in Rust.
+- [`eslint`](data/tools/eslint.yml) — detection/post_generation, surfaces: cli, ci_app, ide_plugin; Pluggable JavaScript/TypeScript linter and code-quality enforcer.
 
 **Pre-action heuristic for an agent:**
 > Before claiming "done", grep your own diff for `TODO`, `FIXME`, `NotImplementedError`, bare `pass`, and `...` — and verify each subtask the user named is actually implemented (not just stubbed with a docstring). If something is incomplete, say so explicitly rather than declaring success.
@@ -280,6 +278,6 @@ Stable across projects. Distilled from this repo's own `CLAUDE.md` plus general 
 
 ## Provenance
 
-- Generated from KG version 2026.05 on 2026-05-03 by `validator/generate_skills.py`.
+- Generated from KG version 2026.11 on 2026-11-20 by `validator/generate_skills.py`.
 - Priorities: `data/failure_mode_priorities.yml` v1.
 - Re-run after `data/*` changes.

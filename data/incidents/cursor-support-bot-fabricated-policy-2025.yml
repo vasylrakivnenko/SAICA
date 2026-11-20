@@ -33,7 +33,6 @@ documented_by: []
 
 mitigated_by:
 - guardrails-ai
-- rebuff
 
 notes: >
   Not strictly a coding-agent incident, but the supplier is a coding-agent

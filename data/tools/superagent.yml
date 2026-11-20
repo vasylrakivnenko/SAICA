@@ -12,7 +12,7 @@ temporal_phase: in_generation
 autonomy_level: fully_autonomous
 implementation: llm_based
 addresses_failure_modes:
-  - security_vulnerability
+  - supply_chain_attack
 locus_of_control:
   - prompt
   - environment

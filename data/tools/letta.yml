@@ -17,7 +17,6 @@ temporal_phase: pre_generation
 autonomy_level: fully_autonomous
 implementation: hybrid
 addresses_failure_modes:
-  - context_pollution
   - scope_creep
 locus_of_control:
   - context

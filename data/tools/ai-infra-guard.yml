@@ -17,9 +17,7 @@ temporal_phase: pre_generation
 autonomy_level: full_hitl
 implementation: hybrid
 addresses_failure_modes:
-  - security_vulnerability
   - supply_chain_attack
-  - scope_creep
 locus_of_control:
   - environment
 integration_surfaces:

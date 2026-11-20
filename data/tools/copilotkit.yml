@@ -18,7 +18,6 @@ autonomy_level: graduated_hitl
 implementation: deterministic
 addresses_failure_modes:
   - scope_creep
-  - context_pollution
 locus_of_control:
   - environment
   - human

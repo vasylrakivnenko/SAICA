@@ -27,8 +27,9 @@ implementation: deterministic
 
 addresses_failure_modes:
   - logic_error
-  - scope_creep
   - security_vulnerability
+  - fabrication
+  - incomplete_execution
 
 locus_of_control:
   - environment

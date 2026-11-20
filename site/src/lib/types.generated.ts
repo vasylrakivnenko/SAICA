@@ -96,6 +96,22 @@ export interface Tool {
       | 'incomplete_execution'
       | 'test_manipulation'
     )[];
+  /**
+   * FMs the tool only records evidence of (tracing or configurable judges only) without detecting or preventing them; disjoint from addresses_failure_modes.
+   */
+  records_failure_modes?: (
+    | 'fabrication'
+    | 'obsolescence'
+    | 'dependency_blindness'
+    | 'logic_error'
+    | 'security_vulnerability'
+    | 'scope_creep'
+    | 'context_pollution'
+    | 'supply_chain_attack'
+    | 'cascading_failure'
+    | 'incomplete_execution'
+    | 'test_manipulation'
+  )[];
   locus_of_control?: LocusOfControl[];
   /**
    * How this tool is deployed / consumed. Multi-valued — a tool can ship as several surfaces (e.g. cli + ci_app + library).

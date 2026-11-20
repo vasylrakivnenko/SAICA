@@ -34,7 +34,6 @@ source_urls:
 documented_by: []
 
 mitigated_by:
-- rebuff
 - guardrails-ai
 - nemo-guardrails
 

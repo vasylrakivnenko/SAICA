@@ -294,6 +294,13 @@ class Tool(BaseModel):
     implementation: Implementation
 
     addresses_failure_modes: list[FailureModeId] = Field(min_length=1)
+    records_failure_modes: Optional[list[FailureModeId]] = Field(
+        default=None,
+        description=(
+            "FMs the tool only records evidence of (tracing or configurable judges only)"
+            " without detecting or preventing them; disjoint from addresses_failure_modes."
+        ),
+    )
     locus_of_control: Optional[list[LocusOfControl]] = None
     integration_surfaces: Optional[list[IntegrationSurface]] = Field(
         default=None,

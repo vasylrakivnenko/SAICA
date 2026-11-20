@@ -24,9 +24,7 @@ implementation: hybrid
 
 addresses_failure_modes:
   - fabrication
-  - logic_error
   - security_vulnerability
-  - scope_creep
 
 locus_of_control:
   - environment

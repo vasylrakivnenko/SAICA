@@ -26,6 +26,9 @@ autonomy_level: fully_autonomous
 implementation: hybrid
 
 addresses_failure_modes:
+  - incomplete_execution
+
+records_failure_modes:
   - logic_error
   - context_pollution
   - fabrication

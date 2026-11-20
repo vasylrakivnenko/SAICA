@@ -33,7 +33,6 @@ documented_by:
 - spracklen-2024-we-have-a-package
 
 mitigated_by:
-- tree-sitter
 - semgrep
 - e2b
 

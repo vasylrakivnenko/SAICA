@@ -17,9 +17,8 @@ temporal_phase: post_generation
 autonomy_level: full_hitl
 implementation: llm_based
 addresses_failure_modes:
-  - security_vulnerability
   - fabrication
-  - scope_creep
+  - supply_chain_attack
 locus_of_control:
   - environment
 integration_surfaces:

@@ -17,8 +17,10 @@ temporal_phase: post_generation
 autonomy_level: graduated_hitl
 implementation: llm_based
 addresses_failure_modes:
-  - fabrication
   - logic_error
+
+records_failure_modes:
+  - fabrication
 locus_of_control:
   - model
   - environment

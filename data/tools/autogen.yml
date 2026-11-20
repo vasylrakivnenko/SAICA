@@ -27,6 +27,8 @@ implementation: hybrid
 
 addresses_failure_modes:
   - scope_creep
+
+records_failure_modes:
   - context_pollution
 
 locus_of_control:

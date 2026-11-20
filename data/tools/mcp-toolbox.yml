@@ -17,7 +17,6 @@ temporal_phase: post_generation
 autonomy_level: fully_autonomous
 implementation: deterministic
 addresses_failure_modes:
-  - security_vulnerability
   - scope_creep
 locus_of_control:
   - environment

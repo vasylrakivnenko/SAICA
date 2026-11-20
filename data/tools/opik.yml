@@ -17,10 +17,13 @@ temporal_phase: post_generation
 autonomy_level: full_hitl
 implementation: hybrid
 addresses_failure_modes:
+  - incomplete_execution
+  - context_pollution
+
+records_failure_modes:
   - fabrication
   - logic_error
   - scope_creep
-  - incomplete_execution
 locus_of_control:
   - environment
 integration_surfaces:

@@ -27,8 +27,8 @@ autonomy_level: fully_autonomous
 implementation: deterministic
 
 addresses_failure_modes:
-  - dependency_blindness
   - security_vulnerability
+  - supply_chain_attack
 
 locus_of_control:
   - environment

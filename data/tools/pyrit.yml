@@ -18,8 +18,6 @@ autonomy_level: full_hitl
 implementation: llm_based
 addresses_failure_modes:
   - security_vulnerability
-  - fabrication
-  - scope_creep
 locus_of_control:
   - environment
 integration_surfaces:

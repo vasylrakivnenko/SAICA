@@ -17,11 +17,14 @@ temporal_phase: post_generation
 autonomy_level: full_hitl
 implementation: hybrid
 addresses_failure_modes:
-  - fabrication
   - security_vulnerability
-  - logic_error
   - scope_creep
   - test_manipulation
+  - supply_chain_attack
+
+records_failure_modes:
+  - fabrication
+  - logic_error
 locus_of_control:
   - prompt
   - environment
