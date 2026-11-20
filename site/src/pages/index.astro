@@ -31,7 +31,7 @@ import results from '../../public/bench/results.json';
             <th class="num"><button class="sort" data-k="j" type="button">J</button></th>
             <th class="num"><button class="sort" data-k="catch" type="button">Catches</button></th>
             <th class="num"><button class="sort" data-k="fa" type="button">False alarms</button></th>
-            <th class="num"><button class="sort" data-k="cost" type="button">Cost</button></th>
+            <th class="num"><button class="sort" data-k="cost" type="button">Cost / 1k reviews</button></th>
             <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
           </tr>
         </thead>
@@ -39,8 +39,10 @@ import results from '../../public/bench/results.json';
       </table>
     </div>
     <p class="fine">
-      Brackets in tooltips are 95% confidence intervals. Cost is what the model API reported for the whole run (Azure: list
-      price × tokens; self-hosted: GPU time while requests ran). Stars are a popularity reference only, not part of the score.
+      <b>Cost / 1k reviews</b>: what the tool costs to review 1,000 items of this mode (code changes or agent sessions), averaged
+      over our run. API models: price reported by the API (Azure: list price × tokens). Self-hosted: GPU time at $0.89/h while
+      requests ran. Free programs: $0. Hover a number for the run total and its 95% confidence interval. Stars are a popularity
+      reference only, not part of the score.
     </p>
 
     <h2>Quality vs cost</h2>
@@ -86,7 +88,7 @@ function renderTable(m) {
     el('td', { class: 'num j' }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j)),
     el('td', { class: 'num', title: `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
     el('td', { class: 'num', title: `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
-    el('td', { class: 'num', title: r.cost_note || '', text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost) }),
+    el('td', { class: 'num', title: `${money(r.cost)} for all ${m.n} reviews in this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost / m.n * 1000) }),
     el('td', { class: 'num col-stars', title: r.stars_updated_at ? `as of ${r.stars_updated_at}` : '', text: r.stars ? r.stars.toLocaleString('en-US') : '—' }))));
   document.querySelectorAll('#lb-table .sort').forEach((b) => b.toggleAttribute('aria-pressed', b.dataset.k === state.key));
   document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
@@ -121,7 +123,7 @@ function renderChart(m) {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · catches ${pct(r.catch)} · false alarms ${pct(r.fa)}`, el('br'), `${money(r.cost)} total`);
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · catches ${pct(r.catch)} · false alarms ${pct(r.fa)}`, el('br'), `${money(r.cost / m.n * 1000)} per 1,000 reviews`);
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));

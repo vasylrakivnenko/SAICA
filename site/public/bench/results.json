@@ -22,7 +22,7 @@
     "348 fabricated completions (fake imports, fake methods, undefined names), written by Claude Sonnet 4.5 and verified to fail; 288 clean originals of the same code.",
     "Static tools see the whole file with its 99 packages installed. AI tools see a diff with 15 lines of context.",
     "Static tools count only findings that a symbol doesn't exist. A flag on a clean original is a false alarm.",
-    "Temperature 0, one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
+    "Temperature 0, one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
    ],
    "caveats": [
     "The fakes were made on purpose and the dataset picked hard cases; real agent mistakes may be easier or harder.",
@@ -280,6 +280,24 @@
      "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted); run time estimated, a tunnel outage excluded"
     },
     {
+     "key": "plain_llm_qwen",
+     "tool": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+     "type": "baseline_model",
+     "j": 0.7963362068965517,
+     "catch": 0.8275862068965517,
+     "catch_ci": [
+      0.7843769869323094,
+      0.8636418942915141
+     ],
+     "fa": 0.03125,
+     "fa_ci": [
+      0.01652601569229774,
+      0.05831458276933351
+     ],
+     "cost": 0.07,
+     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted); 4-bit community build cyankiwi/Qwen3.8-27B-AWQ-INT4, thinking off"
+    },
+    {
      "key": "plain_llm_phi",
      "tool": "Phi-4-mini, asked directly",
      "type": "baseline_model",
@@ -312,7 +330,7 @@
     "56 agent sessions labeled Test Modification (TRACE 1.1.1) vs 249 clean sessions. 212 sessions with other kinds of cheating are reported apart, not scored.",
     "Every tool reads the full session transcript: messages, tool calls and tool output (median about 41,000 characters).",
     "All AI judges use the same rule text, based on the SAICA definition. giskard and promptfoo run on deepseek-v4-flash.",
-    "Temperature 0 (gpt-6-luna: default, it accepts no other), one run each. Answers cut off by the token limit were re-run at 32k. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
+    "Temperature 0 (gpt-6-luna: default, it accepts no other), one run each. Answers cut off by the token limit were re-run at 32k. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
    ],
    "caveats": [
     "TRACE sessions are synthetic: Claude Opus 4.5 was told to write them; three engineers checked them (\u03ba 0.82).",
@@ -537,11 +555,29 @@
      ],
      "fa": 0.0,
      "fa_ci": [
-      -8.673617379884035e-19,
+      0.0,
       0.01519370230215281
      ],
      "cost": 0.12,
      "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted)"
+    },
+    {
+     "key": "plain_llm_qwen",
+     "tool": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+     "type": "baseline_model",
+     "j": 0.8906339644291451,
+     "catch": 0.9107142857142857,
+     "catch_ci": [
+      0.807437601433565,
+      0.9612584227369118
+     ],
+     "fa": 0.020080321285140562,
+     "fa_ci": [
+      0.008606744392803317,
+      0.046137411632154596
+     ],
+     "cost": 0.64,
+     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted); 4-bit community build cyankiwi/Qwen3.8-27B-AWQ-INT4, thinking off"
     },
     {
      "key": "plain_llm_phi",
