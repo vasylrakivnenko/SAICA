@@ -28,10 +28,10 @@ import results from '../../public/bench/results.json';
             <th class="num">#</th>
             <th>Tool</th>
             <th>Type</th>
-            <th class="num"><button class="sort" data-k="j" type="button" title="J = TPR − FPR. 0% = no better than chance, 100% = flags every bad sample and no clean one">J</button></th>
-            <th class="num"><button class="sort" data-k="catch" type="button" title="True positive rate (recall)">TPR</button></th>
-            <th class="num"><button class="sort" data-k="fa" type="button" title="False positive rate">FPR</button></th>
-            <th class="num"><button class="sort" data-k="cost" type="button" title="Cost per 1,000 reviews, averaged over our run">Cost</button></th>
+            <th class="num"><button class="sort" data-k="j" type="button" data-tip="J = TPR − FPR. 0% = no better than chance, 100% = flags every bad sample and no clean one">J</button></th>
+            <th class="num"><button class="sort" data-k="catch" type="button" data-tip="True positive rate (recall)">TPR</button></th>
+            <th class="num"><button class="sort" data-k="fa" type="button" data-tip="False positive rate">FPR</button></th>
+            <th class="num"><button class="sort" data-k="cost" type="button" data-tip="Cost per 1,000 reviews, averaged over our run">Cost</button></th>
             <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
           </tr>
         </thead>
@@ -86,10 +86,10 @@ function renderTable(m) {
     el('td', {}, r.repository_url ? el('a', { href: r.repository_url, rel: 'noopener', text: r.tool }) : r.tool),
     el('td', {}, el('span', { class: 'pill', style: `color:${col(r.type)}`, text: TYPE_LABEL[r.type] })),
     el('td', { class: 'num j' }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j)),
-    el('td', { class: 'num', title: `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
-    el('td', { class: 'num', title: `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
-    el('td', { class: 'num', title: `${money(r.cost)} for all ${m.n} reviews in this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost / m.n * 1000) }),
-    el('td', { class: 'num col-stars', title: r.stars_updated_at ? `as of ${r.stars_updated_at}` : '', text: r.stars ? r.stars.toLocaleString('en-US') : '—' }))));
+    el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
+    el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
+    el('td', { class: 'num', 'data-tip': `${money(r.cost)} for all ${m.n} reviews in this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost / m.n * 1000) }),
+    el('td', { class: 'num col-stars', 'data-tip': r.stars_updated_at ? `as of ${r.stars_updated_at}` : '', text: r.stars ? r.stars.toLocaleString('en-US') : '—' }))));
   document.querySelectorAll('#lb-table .sort').forEach((b) => b.toggleAttribute('aria-pressed', b.dataset.k === state.key));
   document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
   document.getElementById('lb-note').textContent = `${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`;
@@ -196,6 +196,13 @@ syncTypes();
   .lb .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
   .lb .sort[aria-pressed]::after { content: " ↓"; }
   .lb table.no-stars .col-stars { display: none; }
+  .lb .sort[data-tip], .lb td[data-tip] { position: relative; }
+  .lb td[data-tip]:not([data-tip=""]) { cursor: help; }
+  .lb .sort[data-tip]:hover::before, .lb .sort[data-tip]:focus-visible::before, .lb td[data-tip]:not([data-tip=""]):hover::before {
+    content: attr(data-tip); position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; width: 230px; white-space: normal;
+    text-align: left; text-transform: none; letter-spacing: 0; font: 400 12.5px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418;
+    background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 7px 9px; box-shadow: 0 6px 18px rgb(0 0 0 / .12); pointer-events: none; }
+  .lb .tbl-wrap { padding-bottom: 4px; }
   .lb .fine { font: 13px ui-sans-serif, system-ui, sans-serif; color: #7a8192; margin-top: .6rem; max-width: 80ch; }
   .lb .chart { position: relative; min-height: 280px; margin-top: .5rem; }
   .lb .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
