@@ -16,7 +16,7 @@ import results from '../../public/bench/results.json';
     <div class="tabs" role="tablist" id="lb-tabs"></div>
 
     <div class="controls">
-      <label><input type="checkbox" id="lb-models" checked /> Show model baselines</label>
+      <div class="types" id="lb-types" role="group" aria-label="Filter by type"></div>
       <label><input type="checkbox" id="lb-stars" checked /> Show GitHub stars</label>
       <span class="mode-note" id="lb-note"></span>
     </div>
@@ -64,12 +64,14 @@ const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag)
   kids.flat().forEach((k) => k != null && e.append(k)); return e; };
 const svgEl = (tag, attrs = {}) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
-const state = { mode: DATA[0].id, key: 'j', models: true, stars: true };
+const ALL_TYPES = Object.keys(TYPE_LABEL).filter((t) => DATA.some((m) => m.rows.some((r) => r.type === t)));
+const state = { mode: DATA[0].id, key: 'j', types: new Set(ALL_TYPES), stars: true };
 const store = (k, v) => { try { localStorage.setItem('saica-lb-' + k, JSON.stringify(v)); } catch (e) {} };
 const load = (k, d) => { try { const v = localStorage.getItem('saica-lb-' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
-state.models = load('models', true); state.stars = load('stars', true);
+state.stars = load('stars', true);
+const savedTypes = load('types', null); if (Array.isArray(savedTypes) && savedTypes.length) state.types = new Set(savedTypes.filter((t) => ALL_TYPES.includes(t)));
 
-function rowsFor(m) { return m.rows.filter((r) => state.models || !isBaseline(r)); }
+function rowsFor(m) { return m.rows.filter((r) => state.types.has(r.type)); }
 function pareto(rows) { return rows.filter((r) => !rows.some((o) => o !== r && o.cost <= r.cost && o.j > r.j)).sort((a, b) => a.cost - b.cost); }
 
 function renderTable(m) {
@@ -147,13 +149,20 @@ function render() {
 const tabs = document.getElementById('lb-tabs');
 DATA.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => { state.mode = m.id; history.replaceState(null, '', '#' + m.id); render(); }); tabs.append(b); });
 document.querySelectorAll('#lb-table .sort').forEach((b) => b.addEventListener('click', () => { state.key = b.dataset.k; render(); }));
-const cm = document.getElementById('lb-models'), cs = document.getElementById('lb-stars');
-cm.checked = state.models; cs.checked = state.stars;
-cm.addEventListener('change', () => { state.models = cm.checked; store('models', cm.checked); render(); });
+const cs = document.getElementById('lb-stars'); cs.checked = state.stars;
+const typesBox = document.getElementById('lb-types');
+const allBtn = el('button', { type: 'button', class: 'chip', text: 'All types' });
+allBtn.addEventListener('click', () => { state.types = new Set(ALL_TYPES); syncTypes(); });
+typesBox.append(allBtn);
+ALL_TYPES.forEach((t) => { const b = el('button', { type: 'button', class: 'chip', 'data-t': t }, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t]);
+  b.addEventListener('click', () => { if (state.types.size === ALL_TYPES.length) state.types = new Set([t]); else if (state.types.has(t)) { state.types.delete(t); if (!state.types.size) state.types = new Set(ALL_TYPES); } else state.types.add(t); syncTypes(); });
+  typesBox.append(b); });
+function syncTypes() { typesBox.querySelectorAll('.chip[data-t]').forEach((b) => b.setAttribute('aria-pressed', String(state.types.has(b.dataset.t) && state.types.size < ALL_TYPES.length)));
+  allBtn.setAttribute('aria-pressed', String(state.types.size === ALL_TYPES.length)); store('types', [...state.types]); render(); }
 cs.addEventListener('change', () => { state.stars = cs.checked; store('stars', cs.checked); render(); });
 const h = location.hash.slice(1); if (DATA.some((d) => d.id === h)) state.mode = h;
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 100); });
-render();
+syncTypes();
 </script>
 
 <style is:global>
@@ -166,6 +175,11 @@ render();
   .lb .tabs button[aria-selected="true"] { color: #1f3a93; border-bottom-color: #1f3a93; }
   .lb .controls { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: center; font: 14px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-bottom: .6rem; }
   .lb .controls label { display: inline-flex; gap: .4rem; align-items: center; cursor: pointer; }
+  .lb .types { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lb .chip { display: inline-flex; align-items: center; gap: 6px; font: 13px ui-sans-serif, system-ui, sans-serif; color: #4a5160; background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+  .lb .chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .lb .chip[aria-pressed="true"] { border-color: #1f3a93; background: #e4ebf7; color: #1f3a93; }
+  .lb .chip:focus-visible, .lb .tabs button:focus-visible, .lb .sort:focus-visible { outline: 2px solid #1f3a93; outline-offset: 2px; }
   .lb .mode-note { color: #7a8192; font-size: 13px; }
   .lb .tbl-wrap { overflow-x: auto; }
   .lb table { width: 100%; border-collapse: collapse; font: 14px ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
