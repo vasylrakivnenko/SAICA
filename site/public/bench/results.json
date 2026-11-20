@@ -1233,6 +1233,181 @@
      "cost_note": "estimated Fireworks sampling charge; the fine-tune itself was free (promotion)"
     }
    ]
+  },
+  {
+   "id": "logic_error",
+   "name": "Logic error",
+   "n": 2440,
+   "n_pos": 1536,
+   "n_neg": 904,
+   "pos_label": "wrong functions",
+   "dataset": "Collu-Bench (lt-asset, BSD-3-Clause-Clear): MBPP and HumanEval functions written by 11 code models",
+   "summary": "The code runs but computes the wrong result.",
+   "setup": [
+    "1536 functions that run but fail a test assertion vs 904 correct solutions, across 379 tasks. Code by 11 models (CodeLlama, DeepSeek-Coder, StarCoder2, Llama 3, gpt-4o-mini).",
+    "Every label re-checked by running the code against its tests: crashes, timeouts, 'wrong' outputs that actually pass and reference solutions that fail were dropped.",
+    "Reviewers see the task description and the function, not the tests. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20."
+   ],
+   "caveats": [
+    "Short, self-contained functions from two famous public problem sets: models may know the right answers, so these scores are an upper bound for real agent code.",
+    "The correct functions are reference solutions, the wrong ones model-written: style differs between the two classes.",
+    "Type checkers and linters look for a different kind of bug; they are here as a floor, not as fair competitors."
+   ],
+   "rows": [
+    {
+     "key": "plain_llm_mimo",
+     "tool": "mimo-v2.6-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.7429134402654867,
+     "catch": 0.88671875,
+     "catch_ci": [
+      0.8698942593306715,
+      0.9016136671989143
+     ],
+     "fa": 0.14380530973451328,
+     "fa_ci": [
+      0.12243712915506252,
+      0.16818801954929294
+     ],
+     "cost": 0.488417107,
+     "cost_note": "API-reported (Hyperbolic)"
+    },
+    {
+     "key": "plain_llm_deepseek",
+     "tool": "deepseek-v4-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.6919074944690266,
+     "catch": 0.904296875,
+     "catch_ci": [
+      0.888559772158585,
+      0.9180166964859822
+     ],
+     "fa": 0.21238938053097345,
+     "fa_ci": [
+      0.1869729953034868,
+      0.24023985768760767
+     ],
+     "cost": 0.6243148404,
+     "cost_note": "API-reported (Hyperbolic)"
+    },
+    {
+     "key": "plain_llm_luna",
+     "tool": "gpt-6-luna, asked directly",
+     "type": "baseline_model",
+     "j": 0.6901444966814159,
+     "catch": 0.892578125,
+     "catch_ci": [
+      0.8761014017337462,
+      0.9070960388341668
+     ],
+     "fa": 0.20243362831858408,
+     "fa_ci": [
+      0.17752428470030857,
+      0.22986132089432382
+     ],
+     "cost": 0.3717164,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "j": 0.11963034660766969,
+     "catch": 0.9348958333333334,
+     "catch_ci": [
+      0.9214405334096285,
+      0.9461811752128688
+     ],
+     "fa": 0.8152654867256637,
+     "fa_ci": [
+      0.7886512384085482,
+      0.839211595812752
+     ],
+     "cost": 0.3426325,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_phi",
+     "tool": "Phi-4-mini, asked directly",
+     "type": "baseline_model",
+     "j": 0.19894220132743362,
+     "catch": 0.54296875,
+     "catch_ci": [
+      0.517979714312121,
+      0.5677433886356107
+     ],
+     "fa": 0.3440265486725664,
+     "fa_ci": [
+      0.3137772616560708,
+      0.3755958624660227
+     ],
+     "cost": 0.167414925,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "pyright",
+     "tool": "pyright",
+     "type": "deterministic",
+     "j": 0.00280581674041298,
+     "catch": 0.014973958333333334,
+     "catch_ci": [
+      0.009998383056836951,
+      0.022369621548312048
+     ],
+     "fa": 0.012168141592920354,
+     "fa_ci": [
+      0.00680780502167515,
+      0.021657072551681256
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/microsoft/pyright",
+     "stars": 14000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "mypy",
+     "tool": "mypy (--check-untyped-defs)",
+     "type": "deterministic",
+     "j": -0.007144174041297937,
+     "catch": 0.026041666666666668,
+     "catch_ci": [
+      0.019182018705688135,
+      0.03526617908296754
+     ],
+     "fa": 0.033185840707964605,
+     "fa_ci": [
+      0.023342985565377533,
+      0.046979414289398905
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/python/mypy",
+     "stars": 18000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "ruff",
+     "tool": "ruff (pyflakes + bugbear rules)",
+     "type": "deterministic",
+     "j": -0.031146294247787615,
+     "catch": 0.04296875,
+     "catch_ci": [
+      0.033916190307623405,
+      0.05430171470286598
+     ],
+     "fa": 0.07411504424778761,
+     "fa_ci": [
+      0.05878166154823983,
+      0.09305275538088084
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/astral-sh/ruff",
+     "stars": 30000,
+     "stars_updated_at": "2026-04-23"
+    }
+   ]
   }
  ]
 }
