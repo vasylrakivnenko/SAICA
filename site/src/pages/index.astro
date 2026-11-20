@@ -28,10 +28,10 @@ import results from '../../public/bench/results.json';
             <th class="num">#</th>
             <th>Tool</th>
             <th>Type</th>
-            <th class="num"><button class="sort" data-k="j" type="button">J</button></th>
+            <th class="num"><button class="sort" data-k="j" type="button" title="J = TPR − FPR. 0% = no better than chance, 100% = flags every bad sample and no clean one">J</button></th>
             <th class="num"><button class="sort" data-k="catch" type="button" title="True positive rate (recall)">TPR</button></th>
             <th class="num"><button class="sort" data-k="fa" type="button" title="False positive rate">FPR</button></th>
-            <th class="num"><button class="sort" data-k="cost" type="button">Cost / 1k reviews</button></th>
+            <th class="num"><button class="sort" data-k="cost" type="button" title="Cost per 1,000 reviews, averaged over our run">Cost</button></th>
             <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
           </tr>
         </thead>
