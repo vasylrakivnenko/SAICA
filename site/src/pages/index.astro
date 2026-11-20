@@ -9,8 +9,8 @@ import results from '../../public/bench/results.json';
   <div class="lb">
     <h1>Leaderboard</h1>
     <p class="lead">
-      How often each supervision tool catches a failure of an AI coding agent, and how often it raises a false alarm.
-      Each entry reports <b>J</b> = catch rate − false-alarm rate (0% = chance, 100% = perfect).
+      How often each supervision tool flags a real failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often
+      it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).
     </p>
 
     <div class="tabs" role="tablist" id="lb-tabs"></div>
@@ -29,8 +29,8 @@ import results from '../../public/bench/results.json';
             <th>Tool</th>
             <th>Type</th>
             <th class="num"><button class="sort" data-k="j" type="button">J</button></th>
-            <th class="num"><button class="sort" data-k="catch" type="button">Catches</button></th>
-            <th class="num"><button class="sort" data-k="fa" type="button">False alarms</button></th>
+            <th class="num"><button class="sort" data-k="catch" type="button" title="True positive rate (recall)">TPR</button></th>
+            <th class="num"><button class="sort" data-k="fa" type="button" title="False positive rate">FPR</button></th>
             <th class="num"><button class="sort" data-k="cost" type="button">Cost / 1k reviews</button></th>
             <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
           </tr>
@@ -123,7 +123,7 @@ function renderChart(m) {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · catches ${pct(r.catch)} · false alarms ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost / m.n * 1000)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)} for ${m.n} reviews)`);
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · TPR ${pct(r.catch)} · FPR ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost / m.n * 1000)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)} for ${m.n} reviews)`);
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));

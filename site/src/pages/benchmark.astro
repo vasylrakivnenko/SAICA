@@ -11,8 +11,9 @@ const planned = ['Obsolescence', 'Dependency blindness', 'Incomplete execution',
   <p class="mt-3 max-w-3xl">
     Each failure mode is tested on a public dataset whose labels were confirmed by execution, construction or expert
     review. A tool sees the agent's change (or full session), and we record whether it flags it. Bad and clean samples are
-    mixed, so every tool gets a catch rate and a false-alarm rate. The headline score is <strong>J</strong> = catch rate −
-    false-alarm rate, which does not depend on the mix and compares across modes.
+    mixed, so every tool gets a true positive rate (TPR: share of bad samples it flags) and a false positive rate (FPR: share
+    of clean samples it flags). The headline score is <strong>J = TPR − FPR</strong>, which does not depend on the mix and
+    compares across modes.
   </p>
 
   <div class="mt-8 grid gap-5">
