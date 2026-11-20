@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
-  site: 'https://saica-kg.dev',
+  site: 'https://saica.ai',
   trailingSlash: 'ignore',
   vite: {
     server: {

@@ -1,134 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { graph, counts } from '../lib/data.ts';
-
-const c = counts();
 ---
 
-<BaseLayout
-  title="About"
-  description="About SAICA-KG — a faceted knowledge graph of supervision tools for AI coding agents."
->
-  <h1>About SAICA-KG</h1>
-  <p class="mt-3 text-lg text-ink-muted max-w-3xl">
-    A faceted knowledge graph of supervision tools for AI coding agents.
+<BaseLayout title="About" description="About SAICA-Bench.">
+  <h1>About</h1>
+  <p class="mt-3 max-w-3xl">
+    SAICA-Bench tests whether supervision tools catch typical failures of AI coding agents: fabricated code, test
+    manipulation, obsolescence, scope creep and more. It compares free programs (type checkers, linters), AI code
+    reviewers, evaluation frameworks and plain models on the same samples, with cost.
+  </p>
+  <p class="mt-3 max-w-3xl">
+    Data comes from public datasets with confirmed labels:
+    <a href="https://huggingface.co/datasets/microsoft/delulu" rel="noopener">Delulu</a> (fabricated code) and
+    <a href="https://huggingface.co/datasets/PatronusAI/trace-dataset" rel="noopener">Patronus TRACE</a> (test
+    manipulation). The failure-mode taxonomy and tool list come from our knowledge graph of supervision tools
+    (<a href="/graph">graph</a>). Code and results are on
+    <a href="https://github.com/vasylrakivnenko/SAICA" rel="noopener">GitHub</a>.
   </p>
 
-  <section class="mt-8 max-w-3xl leading-7">
-    <p>
-      SAICA-KG classifies supervision tools along three orthogonal strict partitions —
-      <strong>ControlParadigm</strong> (prevention / detection / correction / recovery),
-      <strong>TemporalPhase</strong> (pre_generation / in_generation / post_generation),
-      and <strong>AutonomyLevel</strong> (fully_autonomous / graduated_hitl / full_hitl) —
-      plus multi-valued <strong>FailureMode</strong> tags.
-    </p>
-    <p class="mt-4">
-      It absorbs existing failure-mode taxonomies (OWASP Agentic Top 10, MAST, DAPLab
-      9 Patterns, Microsoft AIRT) as first-class data with explicit crosswalks into our
-      facets. Queries like <em>"which supervisors cover OWASP ASI04 at post-generation
-      in graduated-HITL?"</em> resolve against the graph with explicit citations.
-    </p>
-    <p class="mt-4">
-      <strong>Navigational, not evaluative.</strong> SAICA-KG returns ranked sets with
-      explicit criteria, not endorsed winners.
-    </p>
-  </section>
-
-  <section class="mt-10 max-w-3xl leading-7">
-    <h2>Design principle: honest MECE</h2>
-    <p class="mt-2">
-      The partitions are strict — every Tool fits exactly one cell on each of
-      ControlParadigm, TemporalPhase, and AutonomyLevel. Tools that legitimately
-      span cells are <em>split</em> into multiple Tool nodes rather than dual-tagged,
-      so facet counts stay truthful. MECE cells with no tools are visible as gaps
-      rather than silently hidden — the coverage report flags under-filled cells
-      instead of papering over them. Multi-valued tags (FailureMode, LocusOfControl)
-      live alongside the strict partitions for the many-to-many relations that
-      don't fit a clean taxonomy. See
-      <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/EDITORIAL_POLICY.md" rel="noopener">EDITORIAL_POLICY.md</a>
-      for the full inclusion criteria and RFC process.
-    </p>
-  </section>
-
-  <section class="mt-10 max-w-3xl leading-7">
-    <h2>Six ways to consume the KG</h2>
-    <ol class="mt-2 list-decimal pl-6 space-y-2">
-      <li>
-        <strong>Browse</strong> — this website renders one page per node with
-        facet-filtered search at <a href="/tools">/tools</a>,
-        <a href="/failure-modes">/failure-modes</a>, plus an interactive Cytoscape graph at
-        <a href="/graph">/graph</a>.
-      </li>
-      <li>
-        <strong>Ask</strong> — natural-language Q&amp;A at
-        <a href="/ask">/ask</a>. Type a question, get a synthesized answer
-        with inline citations to the KG nodes that support it. Retrieval is
-        semantic-embedding-based; answer synthesis runs through Kimi-K2.5
-        with a strict "cite node ids or say you don't know" system prompt.
-      </li>
-      <li>
-        <strong>JSON API</strong> — machine-readable endpoints at
-        <a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> and
-        per-collection / per-node JSON. Fetched over standard HTTP, no auth.
-      </li>
-      <li>
-        <strong>GitHub YAML</strong> — clone the repo and read
-        <code>data/**/*.yml</code> directly. One file per node, CC-BY-4.0.
-      </li>
-      <li>
-        <strong>Ingestion pipeline</strong> — the <code>pipeline/</code> tree drives
-        automated discovery (Perplexity / Elicit / Semantic Scholar / GitHub /
-        awesome-lists), Postgres staging, NLP preprocess, Cohere Rerank semantic
-        filtering, and Azure Kimi-K2.5 structured extraction.
-      </li>
-      <li>
-        <strong>CI / validator</strong> — <code>validator/cli.py</code> enforces
-        cross-node invariants and is the gate between human-reviewed YAML and the
-        canonical corpus. Every change passes through it.
-      </li>
-    </ol>
-  </section>
-
-  <section class="mt-10 max-w-3xl">
-    <h2>Current corpus (v{graph.kgVersion})</h2>
-    <div class="mt-2 grid grid-cols-2 sm:grid-cols-5 gap-3">
-      <div class="card"><div class="text-2xl font-sans font-semibold">{c.tools}</div><div class="text-sm text-ink-muted font-sans">Tools</div></div>
-      <div class="card"><div class="text-2xl font-sans font-semibold">{c.failure_modes}</div><div class="text-sm text-ink-muted font-sans">Failure modes</div></div>
-      <div class="card"><div class="text-2xl font-sans font-semibold">{c.taxonomies}</div><div class="text-sm text-ink-muted font-sans">Taxonomies</div></div>
-      <div class="card"><div class="text-2xl font-sans font-semibold">{c.papers}</div><div class="text-sm text-ink-muted font-sans">Papers</div></div>
-      <div class="card"><div class="text-2xl font-sans font-semibold">{c.crosswalks}</div><div class="text-sm text-ink-muted font-sans">Crosswalk edges</div></div>
-    </div>
-  </section>
-
-  <section class="mt-10 grid gap-6 md:grid-cols-2 max-w-3xl">
-    <div class="card">
-      <h3 class="!mt-0">Project</h3>
-      <ul class="mt-2 list-disc pl-5 text-sm">
-        <li><a href="https://github.com/vasylrakivnenko/SAICA" rel="noopener">GitHub repository</a></li>
-        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/EDITORIAL_POLICY.md" rel="noopener">Editorial policy</a></li>
-        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a></li>
-        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/LICENSE" rel="noopener">License (code: Apache-2.0)</a></li>
-        <li><a href="https://github.com/vasylrakivnenko/SAICA/blob/main/LICENSE-DATA" rel="noopener">License (data: CC-BY-4.0)</a></li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3 class="!mt-0">Machine-readable</h3>
-      <ul class="mt-2 list-disc pl-5 text-sm">
-        <li><a href="/api/v1/snapshot.json"><code>/api/v1/snapshot.json</code></a> — full graph</li>
-        <li><a href="/api/v1/tools.json"><code>/api/v1/tools.json</code></a></li>
-        <li><a href="/api/v1/failure_modes.json"><code>/api/v1/failure_modes.json</code></a></li>
-        <li><a href="/api/v1/taxonomies.json"><code>/api/v1/taxonomies.json</code></a></li>
-        <li><a href="/api/v1/papers.json"><code>/api/v1/papers.json</code></a></li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="mt-10 max-w-3xl">
-    <h2>Citation</h2>
-    <p>
-      When citing SAICA-KG in user-facing output, use the phrase
-      <em>"according to SAICA-KG (v{graph.kgVersion})"</em>. A full BibTeX block will ship
-      with v0.1.
-    </p>
-  </section>
+  <h2 id="contact">Contact</h2>
+  <p class="max-w-3xl">
+    Questions, corrections or a tool to add: <a href="https://github.com/vasylrakivnenko/SAICA/issues" rel="noopener">open
+    an issue</a> or email Vasyl Rakivnenko at <a href="mailto:vasyl@stanford.edu">vasyl@stanford.edu</a>.
+  </p>
 </BaseLayout>

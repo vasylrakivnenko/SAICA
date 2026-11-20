@@ -1,146 +1,199 @@
 ---
-// / — SAICA-KG landing.
-//
-// Reframed: SAICA-KG is a *curated reference + one-shot setup tooling +
-// skill-file generator*, not a runtime per-action service. Three first-class
-// consumption paths — /assess, /tool-coverage, SKILLS.md — sit above the
-// reference layer (tools, failure modes, taxonomies, papers, etc.).
+// SAICA-Bench home: the leaderboard. Data: /bench/results.json, written by
+// bench/build_report.py from each failure mode's results. One tab per mode.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { graph, counts } from '../lib/data.ts';
-
-const c = counts();
-const SKILLS_URL = 'https://github.com/vasylrakivnenko/SAICA/blob/main/SKILLS.md';
+import results from '../../public/bench/results.json';
 ---
 
-<BaseLayout title="SAICA-KG">
-  <!-- Hero ------------------------------------------------------------- -->
-  <section class="max-w-3xl">
-    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-      Knowledge Graph &middot; v{graph.kgVersion}
+<BaseLayout title="SAICA-Bench">
+  <div class="lb">
+    <h1>Leaderboard</h1>
+    <p class="lead">
+      How often each supervision tool catches a failure of an AI coding agent, and how often it raises a false alarm.
+      Each entry reports <b>J</b> = catch rate − false-alarm rate (0% = chance, 100% = perfect).
     </p>
-    <h1 class="mt-2 text-4xl leading-tight">SAICA-KG</h1>
-    <p class="mt-4 text-lg text-ink-muted">
-      A curated knowledge graph of failure modes for AI coding agents and the
-      supervision tools that address them.
-    </p>
-    <p class="mt-4 text-sm text-ink-faint leading-7">
-      Reference + one-shot setup tooling + skill-file generator. Not a runtime
-      service. Read once, integrate the artifact, don't poll per-task.
-    </p>
-  </section>
 
-  <!-- Three first-class consumption paths ----------------------------- -->
-  <section class="mt-10">
-    <h2>Use it three ways</h2>
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-      <a href="/assess" class="card no-underline text-ink hover:border-accent/50">
-        <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
-          Step 1
-        </div>
-        <h3 class="!mt-1 !mb-2 text-lg">Audit your repo</h3>
-        <p class="text-sm leading-6 text-ink-muted">
-          Paste a GitHub URL, get a coverage report: which supervisors you
-          have, which failure modes are unguarded, what to add.
-        </p>
-        <p class="mt-3 text-xs text-ink-faint">One-shot. Public repos only.</p>
-      </a>
+    <div class="tabs" role="tablist" id="lb-tabs"></div>
 
-      <a href="/tool-coverage" class="card no-underline text-ink hover:border-accent/50">
-        <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
-          Step 2
-        </div>
-        <h3 class="!mt-1 !mb-2 text-lg">Pick a supervision stack</h3>
-        <p class="text-sm leading-6 text-ink-muted">
-          Three-tier ranked recommendations (minimum / optimal / full) weighted
-          by failure-mode priority &times; tool reliability.
-        </p>
-        <p class="mt-3 text-xs text-ink-faint">
-          Browse the matrix or pull <code>recommendations.json</code>.
-        </p>
-      </a>
-
-      <a href={SKILLS_URL} rel="noopener" class="card no-underline text-ink hover:border-accent/50">
-        <div class="text-xs font-sans uppercase tracking-widest text-ink-faint">
-          Step 3
-        </div>
-        <h3 class="!mt-1 !mb-2 text-lg">Drop the skill file</h3>
-        <p class="text-sm leading-6 text-ink-muted">
-          SKILLS.md distills the corpus into agent-readable context. Drop it
-          into <code>.claude/skills/</code>, <code>.cursor/rules/</code>, or
-          your equivalent.
-        </p>
-        <p class="mt-3 text-xs text-ink-faint">
-          No service call. Regenerated from the KG.
-        </p>
-      </a>
+    <div class="controls">
+      <label><input type="checkbox" id="lb-models" checked /> Show model baselines</label>
+      <label><input type="checkbox" id="lb-stars" checked /> Show GitHub stars</label>
+      <span class="mode-note" id="lb-note"></span>
     </div>
-  </section>
 
-  <!-- What's in the KG (counts) --------------------------------------- -->
-  <section class="mt-12">
-    <h2>In the corpus</h2>
-    <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-      <a href="/tools" class="card no-underline hover:border-accent/50 text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.tools}</div>
-        <div class="text-sm text-ink-muted font-sans">Tools</div>
-      </a>
-      <a href="/failure-modes" class="card no-underline hover:border-accent/50 text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.failure_modes}</div>
-        <div class="text-sm text-ink-muted font-sans">Failure modes</div>
-      </a>
-      <a href="/taxonomies" class="card no-underline hover:border-accent/50 text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.taxonomies}</div>
-        <div class="text-sm text-ink-muted font-sans">Taxonomies</div>
-      </a>
-      <a href="/papers" class="card no-underline hover:border-accent/50 text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.papers}</div>
-        <div class="text-sm text-ink-muted font-sans">Papers</div>
-      </a>
-      <a href="/incidents" class="card no-underline hover:border-accent/50 text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.incidents}</div>
-        <div class="text-sm text-ink-muted font-sans">Incidents</div>
-      </a>
-      <a href="/recipes" class="card no-underline hover:border-accent/50 text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.recipes}</div>
-        <div class="text-sm text-ink-muted font-sans">Recipes</div>
-      </a>
-      <div class="card text-ink">
-        <div class="text-3xl font-sans font-semibold">{c.crosswalks}</div>
-        <div class="text-sm text-ink-muted font-sans">Crosswalk edges</div>
-      </div>
+    <div class="tbl-wrap">
+      <table id="lb-table">
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>Tool</th>
+            <th>Type</th>
+            <th class="num"><button class="sort" data-k="j" type="button">J</button></th>
+            <th class="num"><button class="sort" data-k="catch" type="button">Catches</button></th>
+            <th class="num"><button class="sort" data-k="fa" type="button">False alarms</button></th>
+            <th class="num"><button class="sort" data-k="cost" type="button">Cost</button></th>
+            <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-  </section>
-
-  <!-- Honest scope ---------------------------------------------------- -->
-  <section class="mt-12 max-w-3xl">
-    <h2>What this is NOT</h2>
-    <ul class="mt-3 list-disc pl-6 space-y-2 leading-7">
-      <li><strong>Not an LLM.</strong> SAICA-KG indexes and ranks; it doesn't reason.</li>
-      <li><strong>Not a per-tool-call runtime API.</strong> Read at setup;
-        integrate the artifact (SKILLS.md / recommendations.json); don't poll.</li>
-      <li><strong>Not a replacement for your agent's judgment</strong> — it's
-        context the agent reads to ground its supervision concerns.</li>
-    </ul>
-  </section>
-
-  <!-- Reference layer ------------------------------------------------- -->
-  <section class="mt-12 max-w-3xl">
-    <h2>Browse the reference layer</h2>
-    <p class="mt-3 leading-7 text-ink-muted">
-      Three-axis facet grid (control_paradigm &times; temporal_phase &times;
-      autonomy_level), six external taxonomies crosswalked.
+    <p class="fine">
+      Brackets in tooltips are 95% confidence intervals. Cost is what the model API reported for the whole run (Azure: list
+      price × tokens; self-hosted: GPU time while requests ran). Stars are a popularity reference only, not part of the score.
     </p>
-    <ul class="mt-4 grid gap-2 sm:grid-cols-2 text-sm font-sans">
-      <li><a href="/tools">Tools catalog &rarr;</a> {c.tools} supervision tools</li>
-      <li><a href="/failure-modes">Failure modes &rarr;</a> the {c.failure_modes}-mode taxonomy</li>
-      <li><a href="/taxonomies">Source taxonomies &rarr;</a> OWASP, MAST, Shah, DAPLab, MSFT AIRT, Swiss Cheese</li>
-      <li><a href="/papers">Papers &rarr;</a> {c.papers} primary sources</li>
-      <li><a href="/incidents">Incidents &rarr;</a> {c.incidents} documented real-world cases</li>
-      <li><a href="/recipes">Recipes &rarr;</a> {c.recipes} composed supervision stacks</li>
-      <li><a href="/graph">Graph view &rarr;</a> the whole KG visualised</li>
-      <li><a href="/taxonomy-study">Cluster study &rarr;</a> does the taxonomy carve real structure?</li>
-      <li><a href="/prevention-log">Prevention log &rarr;</a> observe live supervision events</li>
-      <li><a href="/ask">Ask &rarr;</a> chat-style browse the corpus</li>
-    </ul>
-  </section>
+
+    <h2>Quality vs cost</h2>
+    <p class="fine">Up is better, left is cheaper. The dashed line is the Pareto frontier: nothing cheaper scores higher.</p>
+    <div class="chart" id="lb-chart"></div>
+    <div class="legend" id="lb-legend"></div>
+
+    <p class="more"><a href="/benchmark">How each failure mode is tested →</a> · <a href="/graph">Knowledge graph of supervision tools →</a></p>
+  </div>
 </BaseLayout>
+
+<script is:inline define:vars={{ results }}>
+const DATA = results.modes, TYPE_LABEL = results.type_label;
+const TYPE_VAR = {deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule'};
+const isBaseline = (r) => r.type === 'baseline_model' || r.type === 'baseline_rule';
+const pct = (x) => (x * 100).toFixed(1) + '%';
+const money = (c) => (c === 0 ? '$0' : '$' + c.toFixed(2));
+const col = (t) => `var(${TYPE_VAR[t]})`;
+const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'text') e.textContent = v; else if (k === 'style') e.style.cssText = v; else e.setAttribute(k, v); }
+  kids.flat().forEach((k) => k != null && e.append(k)); return e; };
+const svgEl = (tag, attrs = {}) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+const state = { mode: DATA[0].id, key: 'j', models: true, stars: true };
+const store = (k, v) => { try { localStorage.setItem('saica-lb-' + k, JSON.stringify(v)); } catch (e) {} };
+const load = (k, d) => { try { const v = localStorage.getItem('saica-lb-' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
+state.models = load('models', true); state.stars = load('stars', true);
+
+function rowsFor(m) { return m.rows.filter((r) => state.models || !isBaseline(r)); }
+function pareto(rows) { return rows.filter((r) => !rows.some((o) => o !== r && o.cost <= r.cost && o.j > r.j)).sort((a, b) => a.cost - b.cost); }
+
+function renderTable(m) {
+  const asc = state.key === 'fa' || state.key === 'cost';
+  const rows = [...rowsFor(m)].sort((a, b) => {
+    const av = a[state.key] ?? -1, bv = b[state.key] ?? -1; return asc ? av - bv : bv - av; });
+  const tb = document.querySelector('#lb-table tbody');
+  tb.replaceChildren(...rows.map((r, i) => el('tr', { class: isBaseline(r) ? 'baseline' : '' },
+    el('td', { class: 'num rank', text: String(i + 1) }),
+    el('td', {}, r.repository_url ? el('a', { href: r.repository_url, rel: 'noopener', text: r.tool }) : r.tool),
+    el('td', {}, el('span', { class: 'pill', style: `color:${col(r.type)}`, text: TYPE_LABEL[r.type] })),
+    el('td', { class: 'num j' }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j)),
+    el('td', { class: 'num', title: `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
+    el('td', { class: 'num', title: `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
+    el('td', { class: 'num', title: r.cost_note || '', text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost) }),
+    el('td', { class: 'num col-stars', title: r.stars_updated_at ? `as of ${r.stars_updated_at}` : '', text: r.stars ? r.stars.toLocaleString('en-US') : '—' }))));
+  document.querySelectorAll('#lb-table .sort').forEach((b) => b.toggleAttribute('aria-pressed', b.dataset.k === state.key));
+  document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
+  document.getElementById('lb-note').textContent = `${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`;
+}
+
+function renderChart(m) {
+  const box = document.getElementById('lb-chart'); box.replaceChildren();
+  const rows = rowsFor(m); if (!rows.length) return;
+  const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.48)));
+  const narrow = W < 560, M = { l: 46, r: 16, t: 12, b: 44 }, freeW = 54;
+  const per1k = (r) => r.cost / m.n * 1000; const paid = rows.filter((r) => r.cost > 0);
+  const lo = paid.length ? Math.min(...paid.map(per1k)) : 0.1, hi = paid.length ? Math.max(...paid.map(per1k)) : 1;
+  const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi)));
+  const x0 = M.l + freeW + 14, x1 = W - M.r, L = (v) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
+  const xs = (r) => (r.cost === 0 ? M.l + freeW / 2 : x0 + L(per1k(r)) * (x1 - x0));
+  const jmin = Math.max(0, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10 - 0.05);
+  const ys = (j) => M.t + (1 - (j - jmin) / (1 - jmin)) * (H - M.t - M.b);
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${m.name}: J versus cost per 1,000 reviews` });
+  svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
+  for (let j = Math.ceil(jmin * 10) / 10; j <= 1.0001; j += 0.1) { const y = ys(j);
+    svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
+    const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
+  for (let v = xmin; v <= xmax * 1.0001; v *= 10) { const x = x0 + L(v) * (x1 - x0);
+    const t = svgEl('text', { x, y: H - M.b + 17, 'text-anchor': 'middle' }); t.textContent = '$' + (v < 1 ? v.toFixed(v < 0.1 ? 2 : 1) : v.toFixed(0)); svg.append(t); }
+  const tf = svgEl('text', { x: M.l + freeW / 2, y: H - M.b + 17, 'text-anchor': 'middle' }); tf.textContent = 'free'; svg.append(tf);
+  svg.append(svgEl('line', { class: 'axis', x1: M.l, x2: x1, y1: H - M.b, y2: H - M.b }));
+  const xl = svgEl('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle' }); xl.textContent = 'Cost per 1,000 reviews (log scale)'; svg.append(xl);
+  const front = pareto(rows);
+  if (front.length > 1) { let d = ''; front.forEach((r, i) => { d += i === 0 ? `M${xs(r)},${ys(r.j)}` : `H${xs(r)}V${ys(r.j)}`; }); svg.append(svgEl('path', { class: 'front', d })); }
+  const tip = el('div', { class: 'tip', hidden: '' }); const placed = [];
+  for (const r of [...rows].sort((a, b) => b.j - a.j)) {
+    const x = xs(r), y = ys(r.j), onF = front.includes(r);
+    const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · catches ${pct(r.catch)} · false alarms ${pct(r.fa)}`, el('br'), `${money(r.cost)} total`);
+      const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
+    c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
+    c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
+    svg.append(c);
+    if (!narrow || onF) {
+      const short = r.tool.replace(', asked directly', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)');
+      const label = svgEl('text', { class: 'lbl' }); label.textContent = short; svg.append(label);
+      const w = short.length * 6.3; let lx = x + 9, anchor = 'start'; if (lx + w > W - 2) { lx = x - 9; anchor = 'end'; }
+      let ly = y + 4; const span = () => (anchor === 'start' ? [lx, lx + w] : [lx - w, lx]);
+      for (let k = 0; k < 8 && placed.some((p) => { const [a, b] = span(); return a < p.b && b > p.a && Math.abs(ly - p.y) < 13; }); k++) ly += 13;
+      label.setAttribute('x', lx); label.setAttribute('y', ly); label.setAttribute('text-anchor', anchor); const [a, b] = span(); placed.push({ a, b, y: ly });
+    }
+  }
+  box.append(svg, tip);
+  const types = [...new Set(rows.map((r) => r.type))];
+  document.getElementById('lb-legend').replaceChildren(...types.map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
+    el('span', {}, el('i', { class: 'fl' }), 'Pareto frontier'));
+}
+
+function render() {
+  const m = DATA.find((d) => d.id === state.mode);
+  document.querySelectorAll('#lb-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.id === state.mode)));
+  renderTable(m); renderChart(m);
+}
+const tabs = document.getElementById('lb-tabs');
+DATA.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => { state.mode = m.id; history.replaceState(null, '', '#' + m.id); render(); }); tabs.append(b); });
+document.querySelectorAll('#lb-table .sort').forEach((b) => b.addEventListener('click', () => { state.key = b.dataset.k; render(); }));
+const cm = document.getElementById('lb-models'), cs = document.getElementById('lb-stars');
+cm.checked = state.models; cs.checked = state.stars;
+cm.addEventListener('change', () => { state.models = cm.checked; store('models', cm.checked); render(); });
+cs.addEventListener('change', () => { state.stars = cs.checked; store('stars', cs.checked); render(); });
+const h = location.hash.slice(1); if (DATA.some((d) => d.id === h)) state.mode = h;
+let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 100); });
+render();
+</script>
+
+<style is:global>
+  .lb { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; --frontier: #b5532a; }
+  .lb h1 { margin: 0; }
+  .lb h2 { font-size: 1.15rem; margin-top: 2.2rem; }
+  .lb .lead { margin-top: .5rem; color: #4a5160; max-width: 70ch; }
+  .lb .tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid rgb(17 20 24 / .12); margin: 1.4rem 0 .9rem; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .lb .tabs button { background: none; border: 0; padding: .55rem .9rem; font-weight: 500; color: #4a5160; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .lb .tabs button[aria-selected="true"] { color: #1f3a93; border-bottom-color: #1f3a93; }
+  .lb .controls { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: center; font: 14px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-bottom: .6rem; }
+  .lb .controls label { display: inline-flex; gap: .4rem; align-items: center; cursor: pointer; }
+  .lb .mode-note { color: #7a8192; font-size: 13px; }
+  .lb .tbl-wrap { overflow-x: auto; }
+  .lb table { width: 100%; border-collapse: collapse; font: 14px ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .lb th, .lb td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); white-space: nowrap; }
+  .lb th { font-size: 12px; font-weight: 600; color: #4a5160; text-transform: uppercase; letter-spacing: .04em; }
+  .lb .num { text-align: right; }
+  .lb td.rank { color: #7a8192; }
+  .lb td.j { font-weight: 600; }
+  .lb tr.baseline td:nth-child(2) { color: #4a5160; }
+  .lb .bar { display: inline-block; height: 6px; border-radius: 3px; background: #1f3a93; opacity: .75; vertical-align: middle; margin-right: 8px; }
+  .lb .pill { font-size: 12px; font-weight: 500; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; }
+  .lb .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
+  .lb .sort[aria-pressed]::after { content: " ↓"; }
+  .lb table.no-stars .col-stars { display: none; }
+  .lb .fine { font: 13px ui-sans-serif, system-ui, sans-serif; color: #7a8192; margin-top: .6rem; max-width: 80ch; }
+  .lb .chart { position: relative; min-height: 280px; margin-top: .5rem; }
+  .lb .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .lb .chart text { font: 11.5px ui-sans-serif, system-ui, sans-serif; fill: #7a8192; }
+  .lb .chart .lbl { fill: #111418; font-size: 12px; }
+  .lb .chart .grid { stroke: rgb(17 20 24 / .08); }
+  .lb .chart .axis { stroke: rgb(17 20 24 / .3); }
+  .lb .chart .band { fill: #e4ebf7; }
+  .lb .chart .front { stroke: var(--frontier); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+  .lb .tip { position: absolute; pointer-events: none; background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 6px 9px; font: 12.5px ui-sans-serif, system-ui, sans-serif; box-shadow: 0 6px 18px rgb(0 0 0 / .12); max-width: 230px; }
+  .lb .tip b { display: block; }
+  .lb .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font: 12.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-top: .4rem; }
+  .lb .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .lb .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .lb .legend i.fl { width: 18px; height: 0; border-top: 2px dashed var(--frontier); border-radius: 0; }
+  .lb .more { margin-top: 2rem; font: 14px ui-sans-serif, system-ui, sans-serif; }
+</style>

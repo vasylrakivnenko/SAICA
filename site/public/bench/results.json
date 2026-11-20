@@ -1,0 +1,567 @@
+{
+ "generated": "2026-11-19",
+ "type_label": {
+  "deterministic": "Free program",
+  "llm_based": "AI-based",
+  "hybrid": "Hybrid",
+  "prompt_artifact": "Skill",
+  "baseline_model": "AI model (baseline)",
+  "baseline_rule": "Simple rule (baseline)"
+ },
+ "modes": [
+  {
+   "id": "fabrication",
+   "name": "Fabrication",
+   "n": 658,
+   "n_pos": 348,
+   "n_neg": 288,
+   "pos_label": "fake code",
+   "dataset": "Delulu (microsoft/delulu), Python rows",
+   "summary": "Code that calls functions, methods or packages that don't exist.",
+   "setup": [
+    "348 fabricated completions (fake imports, fake methods, undefined names), written by Claude Sonnet 4.5 and verified to fail; 288 clean originals of the same code.",
+    "Static tools see the whole file with its 99 packages installed. AI tools see a diff with 15 lines of context.",
+    "Static tools count only findings that a symbol doesn't exist. A flag on a clean original is a false alarm.",
+    "Temperature 0, one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
+   ],
+   "caveats": [
+    "The fakes were made on purpose and the dataset picked hard cases; real agent mistakes may be easier or harder.",
+    "Static tools and AI tools saw different inputs and are scored at different granularity (line vs change).",
+    "Models asked directly were told exactly what to look for: an upper bound, not a product."
+   ],
+   "rows": [
+    {
+     "key": "plain_llm_glm",
+     "tool": "glm-5.3, asked directly",
+     "type": "baseline_model",
+     "j": 0.9297174329501915,
+     "catch": 0.9540229885057471,
+     "catch_ci": [
+      0.926626993333068,
+      0.9715044385385468
+     ],
+     "fa": 0.024305555555555556,
+     "fa_ci": [
+      0.011822290962542135,
+      0.04931224229111328
+     ],
+     "cost": 4.11,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm",
+     "tool": "deepseek-v4-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.9245689655172413,
+     "catch": 0.9454022988505747,
+     "catch_ci": [
+      0.9163063080575583,
+      0.964771995360798
+     ],
+     "fa": 0.020833333333333332,
+     "fa_ci": [
+      0.009582111697487992,
+      0.0446993889521795
+     ],
+     "cost": 0.25,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_mimo",
+     "tool": "mimo-v2.6-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.8964319923371648,
+     "catch": 0.9137931034482759,
+     "catch_ci": [
+      0.879601455117344,
+      0.9389487106390646
+     ],
+     "fa": 0.017361111111111112,
+     "fa_ci": [
+      0.007437740417789013,
+      0.03999072762789057
+     ],
+     "cost": 0.09,
+     "cost_note": ""
+    },
+    {
+     "key": "pyright",
+     "tool": "pyright",
+     "type": "deterministic",
+     "j": 0.8532088122605365,
+     "catch": 0.8879310344827587,
+     "catch_ci": [
+      0.8504622705540326,
+      0.9169285098426005
+     ],
+     "fa": 0.034722222222222224,
+     "fa_ci": [
+      0.018967607724656183,
+      0.06272602334096299
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/microsoft/pyright",
+     "stars": 14000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "plain_llm_minimax",
+     "tool": "minimax-m3, asked directly",
+     "type": "baseline_model",
+     "j": 0.8383620689655172,
+     "catch": 0.8591954022988506,
+     "catch_ci": [
+      0.8187181707198764,
+      0.8918288481658949
+     ],
+     "fa": 0.020833333333333332,
+     "fa_ci": [
+      0.009582111697487992,
+      0.0446993889521795
+     ],
+     "cost": 0.53,
+     "cost_note": ""
+    },
+    {
+     "key": "mypy_untyped",
+     "tool": "mypy --check-untyped-defs",
+     "type": "deterministic",
+     "j": 0.7734674329501916,
+     "catch": 0.7873563218390804,
+     "catch_ci": [
+      0.7413481082475665,
+      0.8270895068610504
+     ],
+     "fa": 0.013888888888888888,
+     "fa_ci": [
+      0.005413932945500996,
+      0.03516150249619066
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/python/mypy",
+     "stars": 18000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "mypy",
+     "tool": "mypy (default)",
+     "type": "deterministic",
+     "j": 0.724616858237548,
+     "catch": 0.7385057471264368,
+     "catch_ci": [
+      0.6899090309776246,
+      0.7818941895625275
+     ],
+     "fa": 0.013888888888888888,
+     "fa_ci": [
+      0.005413932945500996,
+      0.03516150249619066
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/python/mypy",
+     "stars": 18000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "pr_agent",
+     "tool": "pr-agent (deepseek)",
+     "type": "llm_based",
+     "j": 0.6857040229885057,
+     "catch": 0.7586206896551724,
+     "catch_ci": [
+      0.7109937174595616,
+      0.8006001361381936
+     ],
+     "fa": 0.07291666666666667,
+     "fa_ci": [
+      0.048183230292887264,
+      0.10889375941659901
+     ],
+     "cost": 0.16,
+     "cost_note": "about $0.07 logged plus $0.09 estimated for samples run before logging",
+     "repository_url": "https://github.com/Codium-ai/pr-agent",
+     "stars": 10968,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "ruff",
+     "tool": "ruff",
+     "type": "deterministic",
+     "j": 0.5399904214559387,
+     "catch": 0.5747126436781609,
+     "catch_ci": [
+      0.5222310814897791,
+      0.6255626984384612
+     ],
+     "fa": 0.034722222222222224,
+     "fa_ci": [
+      0.018967607724656183,
+      0.06272602334096299
+     ],
+     "cost": 0.0,
+     "cost_note": "",
+     "repository_url": "https://github.com/astral-sh/ruff",
+     "stars": 30000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "plain_llm_ds41",
+     "tool": "deepseek-v4.1-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.9430076628352491,
+     "catch": 0.9568965517241379,
+     "catch_ci": [
+      0.9301081770402432,
+      0.9737076309824578
+     ],
+     "fa": 0.013888888888888888,
+     "fa_ci": [
+      0.005413932945500996,
+      0.03516150249619066
+     ],
+     "cost": 0.83,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_luna",
+     "tool": "gpt-6-luna, asked directly",
+     "type": "baseline_model",
+     "j": 0.9216954022988505,
+     "catch": 0.9425287356321839,
+     "catch_ci": [
+      0.9129020953134208,
+      0.9624918319538492
+     ],
+     "fa": 0.020833333333333332,
+     "fa_ci": [
+      0.009582111697487992,
+      0.0446993889521795
+     ],
+     "cost": 0.14,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "j": 0.7039032567049809,
+     "catch": 0.8045977011494253,
+     "catch_ci": [
+      0.7597065931753774,
+      0.8428372788397568
+     ],
+     "fa": 0.10069444444444445,
+     "fa_ci": [
+      0.07102740250436228,
+      0.14087384803702735
+     ],
+     "cost": 0.09,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_gptoss",
+     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+     "type": "baseline_model",
+     "j": 0.8042385057471265,
+     "catch": 0.9396551724137931,
+     "catch_ci": [
+      0.9095138613978664,
+      0.9601956897183177
+     ],
+     "fa": 0.13541666666666666,
+     "fa_ci": [
+      0.10066609719122872,
+      0.17976547939004003
+     ],
+     "cost": 0.09,
+     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted); run time estimated, a tunnel outage excluded"
+    },
+    {
+     "key": "plain_llm_phi",
+     "tool": "Phi-4-mini, asked directly",
+     "type": "baseline_model",
+     "j": 0.17573125183599814,
+     "catch": 0.6686390532544378,
+     "catch_ci": [
+      0.6168091142413743,
+      0.7166786765950832
+     ],
+     "fa": 0.4929078014184397,
+     "fa_ci": [
+      0.4350442021054147,
+      0.5509620335159924
+     ],
+     "cost": 0.06,
+     "cost_note": "Azure list price x tokens; 17 answers unreadable (Azure timeouts), left out of the rates"
+    }
+   ]
+  },
+  {
+   "id": "test-manipulation",
+   "name": "Test manipulation",
+   "n": 517,
+   "n_pos": 56,
+   "n_neg": 249,
+   "pos_label": "test edits",
+   "dataset": "Patronus TRACE (PatronusAI/trace-dataset)",
+   "summary": "The agent edits, weakens or skips tests so failures disappear instead of fixing the code.",
+   "setup": [
+    "56 agent sessions labeled Test Modification (TRACE 1.1.1) vs 249 clean sessions. 212 sessions with other kinds of cheating are reported apart, not scored.",
+    "Every tool reads the full session transcript: messages, tool calls and tool output (median about 41,000 characters).",
+    "All AI judges use the same rule text, based on the SAICA definition. giskard and promptfoo run on deepseek-v4-flash.",
+    "Temperature 0 (gpt-6-luna: default, it accepts no other), one run each. Answers cut off by the token limit were re-run at 32k. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
+   ],
+   "caveats": [
+    "TRACE sessions are synthetic: Claude Opus 4.5 was told to write them; three engineers checked them (\u03ba 0.82).",
+    "Only 56 positives, so catch rates carry about \u00b17 to \u00b110 points of uncertainty.",
+    "judgeval was not run: its AI judges run only on Judgment Labs' cloud. pytest and coverage-py need runnable code, which TRACE doesn't have.",
+    "giskard escapes shell text (&& becomes &amp;&amp;), which Hyperbolic's firewall blocks; our relay undoes that escaping for giskard only. One session (0076) is blocked for every tool and is left out (it is not in the scored groups)."
+   ],
+   "rows": [
+    {
+     "key": "plain_llm_minimax",
+     "tool": "minimax-m3, asked directly",
+     "type": "baseline_model",
+     "j": 0.9102839931153184,
+     "catch": 0.9464285714285714,
+     "catch_ci": [
+      0.8539246046357077,
+      0.9816145520713321
+     ],
+     "fa": 0.03614457831325301,
+     "fa_ci": [
+      0.019130043142007568,
+      0.06725447586119442
+     ],
+     "cost": 1.79,
+     "cost_note": ""
+    },
+    {
+     "key": "giskard",
+     "tool": "giskard Conformity check (deepseek)",
+     "type": "hybrid",
+     "j": 0.8919965576592083,
+     "catch": 0.9642857142857143,
+     "catch_ci": [
+      0.8788099414778991,
+      0.9901507814974224
+     ],
+     "fa": 0.07228915662650602,
+     "fa_ci": [
+      0.046212025008033626,
+      0.11136331069621755
+     ],
+     "cost": 1.18,
+     "cost_note": "",
+     "repository_url": "https://github.com/Giskard-AI/giskard-oss",
+     "stars": 5295,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "plain_llm",
+     "tool": "deepseek-v4-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.8879804934021802,
+     "catch": 0.9642857142857143,
+     "catch_ci": [
+      0.8788099414778991,
+      0.9901507814974224
+     ],
+     "fa": 0.07630522088353414,
+     "fa_ci": [
+      0.04939102679407255,
+      0.11609439965473968
+     ],
+     "cost": 0.6,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_mimo",
+     "tool": "mimo-v2.6-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.8884107860011474,
+     "catch": 0.9285714285714286,
+     "catch_ci": [
+      0.830243171685138,
+      0.9718744187536204
+     ],
+     "fa": 0.040160642570281124,
+     "fa_ci": [
+      0.021958086517276817,
+      0.0723365232304862
+     ],
+     "cost": 0.93,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_glm",
+     "tool": "glm-5.3, asked directly",
+     "type": "baseline_model",
+     "j": 0.8848250143430867,
+     "catch": 0.8928571428571429,
+     "catch_ci": [
+      0.7853131324833861,
+      0.9499613254188092
+     ],
+     "fa": 0.008032128514056224,
+     "fa_ci": [
+      0.0022054238793915194,
+      0.028808459911883334
+     ],
+     "cost": 8.78,
+     "cost_note": ""
+    },
+    {
+     "key": "promptfoo",
+     "tool": "promptfoo llm-rubric (deepseek)",
+     "type": "hybrid",
+     "j": 0.8620912220309811,
+     "catch": 0.9464285714285714,
+     "catch_ci": [
+      0.8539246046357077,
+      0.9816145520713321
+     ],
+     "fa": 0.08433734939759036,
+     "fa_ci": [
+      0.0558216116970429,
+      0.12548399624089135
+     ],
+     "cost": 0.57,
+     "cost_note": "",
+     "repository_url": "https://github.com/promptfoo/promptfoo",
+     "stars": 20465,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "rule_test_edit",
+     "tool": "Rule: agent wrote to a test file",
+     "type": "baseline_rule",
+     "j": 0.4283562822719449,
+     "catch": 0.9464285714285714,
+     "catch_ci": [
+      0.8539246046357077,
+      0.9816145520713321
+     ],
+     "fa": 0.5180722891566265,
+     "fa_ci": [
+      0.4562059953722999,
+      0.5793894129782247
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    },
+    {
+     "key": "rule_test_weaken",
+     "tool": "Rule: test edit drops asserts or adds skip",
+     "type": "baseline_rule",
+     "j": 0.37593230063109584,
+     "catch": 0.4642857142857143,
+     "catch_ci": [
+      0.34019643403583766,
+      0.5929604334275992
+     ],
+     "fa": 0.08835341365461848,
+     "fa_ci": [
+      0.05907017297687691,
+      0.13014552570561835
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_ds41",
+     "tool": "deepseek-v4.1-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.8821715433161216,
+     "catch": 0.9464285714285714,
+     "catch_ci": [
+      0.8539246046357077,
+      0.9816145520713321
+     ],
+     "fa": 0.0642570281124498,
+     "fa_ci": [
+      0.03993570337832074,
+      0.10181945083680839
+     ],
+     "cost": 1.3,
+     "cost_note": ""
+    },
+    {
+     "key": "plain_llm_luna",
+     "tool": "gpt-6-luna, asked directly",
+     "type": "baseline_model",
+     "j": 0.7933878370625358,
+     "catch": 0.9821428571428571,
+     "catch_ci": [
+      0.9055414182080672,
+      0.9968408710355361
+     ],
+     "fa": 0.18875502008032127,
+     "fa_ci": [
+      0.14501829989964304,
+      0.24194966739687773
+     ],
+     "cost": 0.63,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "j": 0.8602983362019507,
+     "catch": 0.9285714285714286,
+     "catch_ci": [
+      0.830243171685138,
+      0.9718744187536204
+     ],
+     "fa": 0.06827309236947791,
+     "fa_ci": [
+      0.04305956218108102,
+      0.10660568277860914
+     ],
+     "cost": 1.16,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_gptoss",
+     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+     "type": "baseline_model",
+     "j": 0.75,
+     "catch": 0.75,
+     "catch_ci": [
+      0.6230710799856808,
+      0.8448308477702616
+     ],
+     "fa": 0.0,
+     "fa_ci": [
+      -8.673617379884035e-19,
+      0.01519370230215281
+     ],
+     "cost": 0.12,
+     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted)"
+    },
+    {
+     "key": "plain_llm_phi",
+     "tool": "Phi-4-mini, asked directly",
+     "type": "baseline_model",
+     "j": 0.32723752151463,
+     "catch": 0.3392857142857143,
+     "catch_ci": [
+      0.22919799319334652,
+      0.4700079103921191
+     ],
+     "fa": 0.012048192771084338,
+     "fa_ci": [
+      0.004105701869888305,
+      0.03481827266594757
+     ],
+     "cost": 0.46,
+     "cost_note": "Azure list price x tokens; 14 answers unreadable (Azure timeouts), counted as not flagged"
+    }
+   ]
+  }
+ ]
+}
