@@ -612,12 +612,14 @@
     "1243 vulnerable vs 459 secure patches, written by 26 agent runs (Claude, Gemini, GLM, Kimi, Qwen with SWE-agent, OpenHands, CLIs). Both kinds pass the task's functional tests; vulnerable ones fail the hidden CVE security test. Identical patches kept once; patches over 60k characters left out.",
     "AI tools see the task text and the agent's diff. bandit and semgrep run on the patched files and flag a patch when a finding lands on a line it added. giskard and promptfoo wrap the same review in their own judge template, with deepseek-v4-flash as the judge.",
     "Same review prompt for every model; temperature 0 (gpt-6-luna: its default). Answers cut off by the token limit are re-run at 32k. Run 2026-11-19/20.",
-    "Opus, Kimi and Muse Glimmer (base and fine-tuned) ran only on a 417-patch held-out set: see the next tab. pr-agent is still running and will be added."
+    "Also tried on a 417-patch held-out subset (projects kept apart): claude-opus-4-8 at low effort J -2.8% (flags almost nothing), Kimi-K2.6 +6.1%, Muse Glimmer 30B +5.0% before and -1.7% after fine-tuning on the other 682 patches."
    ],
    "caveats": [
     "Every tool scores close to chance: telling these vulnerable patches from secure ones by reading the change is beyond them.",
     "Check of the setup: with the vulnerable and the fixed version of the same code side by side (the CVE fix reverted), the best models reach only J +10 to +15%. So the low scores are not a scoring bug.",
-    "'Secure' means the patch passed one CVE-specific test; it may still contain other flaws, which inflates every tool's FPR.",
+    "Label check: Opus (medium effort), shown the CWE, the real CVE fix and the security test, agreed with 78% of a sample of 'vulnerable' labels and 80% of 'secure' ones. About 20% label noise each way shrinks every J by about 40%.",
+    "Without such hints even Opus at medium effort tells apart only 6 of 50 vulnerable/fixed versions of the same code (J +10%): these flaws are mostly missing checks that don't show in a diff.",
+    "Dropping tasks with over-strict security tests (exact error-message checks, or no agent ever passing) raises J by only 1\u20135 points.",
     "Unreadable answers (no verdict) count as not flagged: ultramarine 383, promptfoo 322, deepseek-v4.1 169 of 1,702.",
     "51 patches could not be rebuilt as files (binary or missing vendored files); the static tools count them as not flagged."
    ],
@@ -845,6 +847,27 @@
      "stars_updated_at": "2026-04-23"
     },
     {
+     "key": "pr_agent",
+     "tool": "pr-agent review (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": -0.01440397380012165,
+     "catch": 0.41914722445695896,
+     "catch_ci": [
+      0.3920067979676308,
+      0.446785876258189
+     ],
+     "fa": 0.4335511982570806,
+     "fa_ci": [
+      0.3889511605164935,
+      0.4792542903332142
+     ],
+     "cost": 2.35,
+     "cost_note": "API-reported deepseek cost",
+     "repository_url": "https://github.com/Codium-ai/pr-agent",
+     "stars": 10968,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
      "key": "semgrep",
      "tool": "semgrep (p/python + p/security-audit)",
      "type": "deterministic",
@@ -879,358 +902,6 @@
      ],
      "cost": 0.0,
      "cost_note": ""
-    }
-   ]
-  },
-  {
-   "id": "security-heldout",
-   "name": "Security \u00b7 held-out 417",
-   "n": 417,
-   "n_pos": 299,
-   "n_neg": 118,
-   "pos_label": "vulnerable patches",
-   "dataset": "SusVibes (LeiLiLab, MIT): AI agents' patches for 166 real feature tasks, with hidden CVE tests; 417-patch test split",
-   "summary": "Same task as Security, on 417 patches from projects that no fine-tuning data came from. Adds Claude Opus, Kimi and a fine-tuned Muse Glimmer.",
-   "setup": [
-    "The 1,702 patches were split by project: 682 (balanced) to fine-tune on, 417 from other projects held out (299 vulnerable, 118 secure). Splitting by project stops a model from scoring by recognising a codebase.",
-    "Muse Glimmer 30B was fine-tuned on Fireworks (LoRA rank 16, 2 epochs) to answer the same review prompt, then both base and fine-tuned models were scored here at temperature 0.",
-    "claude-opus-4-8 (adaptive thinking, low effort) and Kimi-K2.6 (low reasoning) ran on this split only, to keep cost down. Other tools' rows are their full-run answers on these 417 patches."
-   ],
-   "caveats": [
-    "With 118 secure patches, FPR intervals are about \u00b18 points wide: differences of a few points in J are noise.",
-    "Fine-tuning did not help (J +5.0% base, -1.7% fine-tuned). The tuned model learned the answer format (0 unreadable vs 132) and the label mix, not how to spot the flaws.",
-    "Opus at low effort almost never flags a patch (TPR 4%): it does not call these vulnerable from the diff alone."
-   ],
-   "rows": [
-    {
-     "key": "plain_llm_ds41",
-     "tool": "deepseek-v4.1-flash, asked directly",
-     "type": "baseline_model",
-     "j": 0.029136670256788177,
-     "catch": 0.3511705685618729,
-     "catch_ci": [
-      0.29926370272765546,
-      0.4068532904463339
-     ],
-     "fa": 0.3220338983050847,
-     "fa_ci": [
-      0.2444870818355514,
-      0.41080306537197037
-     ],
-     "cost": 5.730687426556992,
-     "cost_note": "API-reported, including re-runs of cut-off answers. Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm",
-     "tool": "deepseek-v4-flash, asked directly",
-     "type": "baseline_model",
-     "j": 0.042061107646958806,
-     "catch": 0.3979933110367893,
-     "catch_ci": [
-      0.3441422456020146,
-      0.4544323227531916
-     ],
-     "fa": 0.3559322033898305,
-     "fa_ci": [
-      0.2753359444678161,
-      0.44561322231922534
-     ],
-     "cost": 0.7570681551116334,
-     "cost_note": "API-reported, including re-runs of cut-off answers. Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
-     "type": "baseline_model",
-     "j": 0.010656992234000323,
-     "catch": 0.2140468227424749,
-     "catch_ci": [
-      0.17133635013923693,
-      0.26401203000404594
-     ],
-     "fa": 0.2033898305084746,
-     "fa_ci": [
-      0.14065893187319645,
-      0.28482464680600666
-     ],
-     "cost": 0.29645710928319624,
-     "cost_note": "API-reported, including re-runs. Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_minimax",
-     "tool": "minimax-m3, asked directly",
-     "type": "baseline_model",
-     "j": -0.01028853239612268,
-     "catch": 0.13377926421404682,
-     "catch_ci": [
-      0.09980398997113318,
-      0.1770456898614922
-     ],
-     "fa": 0.1440677966101695,
-     "fa_ci": [
-      0.09193471746292615,
-      0.21864557695211762
-     ],
-     "cost": 1.4283842538190366,
-     "cost_note": "API-reported, including re-runs. Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
-     "type": "baseline_model",
-     "j": -0.024885210588968865,
-     "catch": 0.5852842809364549,
-     "catch_ci": [
-      0.5287028784306501,
-      0.6397019906494236
-     ],
-     "fa": 0.6101694915254238,
-     "fa_ci": [
-      0.5200255656951949,
-      0.6933662479382441
-     ],
-     "cost": 0.37730904817861344,
-     "cost_note": "Azure list price x tokens (Azure reports no cost). Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
-     "type": "baseline_model",
-     "j": -0.08573776996768895,
-     "catch": 0.44816053511705684,
-     "catch_ci": [
-      0.39280350499903327,
-      0.5048327510503339
-     ],
-     "fa": 0.5338983050847458,
-     "fa_ci": [
-      0.4442446506155119,
-      0.6214143689640078
-     ],
-     "cost": 0.20580493537015274,
-     "cost_note": "Azure list price x tokens (Azure reports no cost). Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_gpt41",
-     "tool": "gpt-4.1, asked directly",
-     "type": "baseline_model",
-     "j": 0.038744969106059735,
-     "catch": 0.26755852842809363,
-     "catch_ci": [
-      0.2205609110062566,
-      0.3204532693441312
-     ],
-     "fa": 0.2288135593220339,
-     "fa_ci": [
-      0.16228575133845904,
-      0.31244209202538376
-     ],
-     "cost": 1.9796474735605172,
-     "cost_note": "Azure list price x tokens (Azure reports no cost). Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_ultra",
-     "tool": "ultramarine-1-flash (Fireworks), asked directly",
-     "type": "baseline_model",
-     "j": -0.008049430304404526,
-     "catch": 0.09364548494983277,
-     "catch_ci": [
-      0.06558513650788506,
-      0.1320151931694116
-     ],
-     "fa": 0.1016949152542373,
-     "fa_ci": [
-      0.05913498018835978,
-      0.16937153975228444
-     ],
-     "cost": 1.8718448883666272,
-     "cost_note": "Fireworks list price x tokens. Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_gptoss",
-     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
-     "type": "baseline_model",
-     "j": 0.11056629442775352,
-     "catch": 0.22073578595317725,
-     "catch_ci": [
-      0.17743231951259172,
-      0.2711242856565793
-     ],
-     "fa": 0.11016949152542373,
-     "fa_ci": [
-      0.06552230309963664,
-      0.1793989717358875
-     ],
-     "cost": 0.4140599294947121,
-     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted). Pro-rated from the full run"
-    },
-    {
-     "key": "plain_llm_qwen",
-     "tool": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
-     "type": "baseline_model",
-     "j": -0.006717306275154461,
-     "catch": 0.12040133779264214,
-     "catch_ci": [
-      0.08824894012221352,
-      0.16218428965863563
-     ],
-     "fa": 0.1271186440677966,
-     "fa_ci": [
-      0.07857021672279302,
-      0.1991805679024909
-     ],
-     "cost": 0.1274030552291422,
-     "cost_note": "GPU time while requests ran, on a RunPod RTX 4090 at $0.89/h (setup and model loading not counted). Pro-rated from the full run"
-    },
-    {
-     "key": "giskard",
-     "tool": "giskard Conformity check (deepseek-v4-flash judge)",
-     "type": "llm_based",
-     "j": 0.11787880505640269,
-     "catch": 0.431438127090301,
-     "catch_ci": [
-      0.37651876507987064,
-      0.4880969284047762
-     ],
-     "fa": 0.3135593220338983,
-     "fa_ci": [
-      0.23684863800621475,
-      0.40202675430642715
-     ],
-     "cost": 0.8085193889541715,
-     "cost_note": "API-reported deepseek cost. Pro-rated from the full run",
-     "repository_url": "https://github.com/Giskard-AI/giskard-oss",
-     "stars": 5295,
-     "stars_updated_at": "2026-04-23"
-    },
-    {
-     "key": "promptfoo",
-     "tool": "promptfoo llm-rubric (deepseek-v4-flash judge)",
-     "type": "llm_based",
-     "j": 0.11365568845303553,
-     "catch": 0.36789297658862874,
-     "catch_ci": [
-      0.3152298597753907,
-      0.42390769596331895
-     ],
-     "fa": 0.2542372881355932,
-     "fa_ci": [
-      0.18428115742871232,
-      0.33969095061977017
-     ],
-     "cost": 0.2866568742655699,
-     "cost_note": "API-reported deepseek cost. Pro-rated from the full run",
-     "repository_url": "https://github.com/promptfoo/promptfoo",
-     "stars": 20465,
-     "stars_updated_at": "2026-04-23"
-    },
-    {
-     "key": "semgrep",
-     "tool": "semgrep (p/python + p/security-audit)",
-     "type": "deterministic",
-     "j": 0.02942010090130945,
-     "catch": 0.0802675585284281,
-     "catch_ci": [
-      0.054530254266440856,
-      0.11665362535907957
-     ],
-     "fa": 0.05084745762711865,
-     "fa_ci": [
-      0.023509310875761358,
-      0.1065086796956034
-     ],
-     "cost": 0.0,
-     "cost_note": ""
-    },
-    {
-     "key": "bandit",
-     "tool": "bandit",
-     "type": "deterministic",
-     "j": 0.01757269996031971,
-     "catch": 0.2040133779264214,
-     "catch_ci": [
-      0.16222608496108953,
-      0.25330995764336117
-     ],
-     "fa": 0.1864406779661017,
-     "fa_ci": [
-      0.12646899188610022,
-      0.2661850770033431
-     ],
-     "cost": 0.0,
-     "cost_note": ""
-    },
-    {
-     "key": "plain_llm_opus",
-     "tool": "claude-opus-4-8 (low effort), asked directly",
-     "type": "baseline_model",
-     "j": -0.027662830905277477,
-     "catch": 0.04013377926421405,
-     "catch_ci": [
-      0.0231045994433325,
-      0.06882993002685919
-     ],
-     "fa": 0.06779661016949153,
-     "fa_ci": [
-      0.034750758644526016,
-      0.1280967417165986
-     ],
-     "cost": 9.09,
-     "cost_note": "Azure list price x tokens (Azure reports no cost)"
-    },
-    {
-     "key": "plain_llm_kimi",
-     "tool": "Kimi-K2.6 (low reasoning), asked directly",
-     "type": "baseline_model",
-     "j": 0.061476106796666874,
-     "catch": 0.3411371237458194,
-     "catch_ci": [
-      0.2897181181660101,
-      0.39658653746914707
-     ],
-     "fa": 0.2796610169491525,
-     "fa_ci": [
-      0.20660883500092977,
-      0.36660753773219246
-     ],
-     "cost": 11.79,
-     "cost_note": "Azure list price x tokens (Azure reports no cost)"
-    },
-    {
-     "key": "glimmer_base",
-     "tool": "Muse Glimmer 30B, asked directly",
-     "type": "baseline_model",
-     "j": 0.05028059633807602,
-     "catch": 0.5418060200668896,
-     "catch_ci": [
-      0.48515613774645955,
-      0.5973952686653412
-     ],
-     "fa": 0.4915254237288136,
-     "fa_ci": [
-      0.4030222879867755,
-      0.5805629571183447
-     ],
-     "cost": 2.5,
-     "cost_note": "estimated Fireworks sampling charge"
-    },
-    {
-     "key": "glimmer_tuned",
-     "tool": "Muse Glimmer 30B fine-tuned on the 682 training patches",
-     "type": "baseline_model",
-     "j": -0.01745932770251124,
-     "catch": 0.28762541806020064,
-     "catch_ci": [
-      0.23926638331158434,
-      0.3413724721164678
-     ],
-     "fa": 0.3050847457627119,
-     "fa_ci": [
-      0.22924088369362033,
-      0.3932197537241417
-     ],
-     "cost": 2.5,
-     "cost_note": "estimated Fireworks sampling charge; the fine-tune itself was free (promotion)"
     }
    ]
   },
