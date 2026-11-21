@@ -1999,6 +1999,10 @@
  "overview": {
   "modes": [
    {
+    "id": "scope_creep",
+    "name": "Scope creep"
+   },
+   {
     "id": "fabrication",
     "name": "Fabrication"
    },
@@ -2007,20 +2011,8 @@
     "name": "Test manipulation"
    },
    {
-    "id": "security",
-    "name": "Security vulnerability"
-   },
-   {
-    "id": "logic_error",
-    "name": "Logic error"
-   },
-   {
-    "id": "incomplete_execution",
-    "name": "Incomplete execution"
-   },
-   {
-    "id": "scope_creep",
-    "name": "Scope creep"
+    "id": "dependency_blindness",
+    "name": "Dependency blindness"
    },
    {
     "id": "obsolescence",
@@ -2031,8 +2023,16 @@
     "name": "Supply chain"
    },
    {
-    "id": "dependency_blindness",
-    "name": "Dependency blindness"
+    "id": "logic_error",
+    "name": "Logic error"
+   },
+   {
+    "id": "incomplete_execution",
+    "name": "Incomplete execution"
+   },
+   {
+    "id": "security",
+    "name": "Security vulnerability"
    }
   ],
   "rows": [
