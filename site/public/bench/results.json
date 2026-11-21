@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-19",
+ "generated": "2026-11-20",
  "type_label": {
   "deterministic": "Free program",
   "llm_based": "AI-based",
@@ -1969,5 +1969,700 @@
     }
    ]
   }
- ]
+ ],
+ "overview": {
+  "modes": [
+   {
+    "id": "fabrication",
+    "name": "Fabrication"
+   },
+   {
+    "id": "test-manipulation",
+    "name": "Test manipulation"
+   },
+   {
+    "id": "security",
+    "name": "Security vulnerability"
+   },
+   {
+    "id": "logic_error",
+    "name": "Logic error"
+   },
+   {
+    "id": "incomplete_execution",
+    "name": "Incomplete execution"
+   },
+   {
+    "id": "scope_creep",
+    "name": "Scope creep"
+   },
+   {
+    "id": "obsolescence",
+    "name": "Obsolescence"
+   },
+   {
+    "id": "supply_chain",
+    "name": "Supply chain"
+   },
+   {
+    "id": "dependency_blindness",
+    "name": "Dependency blindness"
+   }
+  ],
+  "rows": [
+   {
+    "tool": "gpt-6-luna",
+    "type": "baseline_model",
+    "cells": {
+     "fabrication": {
+      "j": 0.9216954022988505,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.020833333333333332,
+      "cost1k": 0.21276595744680854
+     },
+     "test-manipulation": {
+      "j": 0.7933878370625358,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.18875502008032127,
+      "cost1k": 1.2185686653771761
+     },
+     "security": {
+      "j": 0.05204570431014999,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.5424836601307189,
+      "cost1k": 0.9048178613396005
+     },
+     "logic_error": {
+      "j": 0.6901444966814159,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.20243362831858408,
+      "cost1k": 0.1523427868852459
+     },
+     "incomplete_execution": {
+      "j": 0.19,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.40166666666666667,
+      "cost1k": 1.044785125
+     },
+     "scope_creep": {
+      "j": 0.88,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.12,
+      "cost1k": 0.32654428571428573
+     },
+     "obsolescence": {
+      "j": 0.8967741935483872,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.07741935483870968,
+      "cost1k": 0.16770193548387097
+     },
+     "supply_chain": {
+      "j": 0.7702702702702703,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.21621621621621623,
+      "cost1k": 0.5153543918918919
+     },
+     "dependency_blindness": {
+      "j": 0.8999999999999999,
+      "tool": "gpt-6-luna, asked directly",
+      "short": "gpt-6-luna",
+      "fa": 0.06,
+      "cost1k": 0.23801150000000001
+     }
+    },
+    "avg": 0.6771464337968456,
+    "n_modes": 9
+   },
+   {
+    "tool": "deepseek-v4-flash",
+    "type": "baseline_model",
+    "cells": {
+     "fabrication": {
+      "j": 0.9245689655172413,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.020833333333333332,
+      "cost1k": 0.3799392097264438
+     },
+     "test-manipulation": {
+      "j": 0.8879804934021802,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.07630522088353414,
+      "cost1k": 1.1605415860735009
+     },
+     "security": {
+      "j": 0.05156019679705259,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.3812636165577342,
+      "cost1k": 1.8155111633372503
+     },
+     "logic_error": {
+      "j": 0.6919074944690266,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.21238938053097345,
+      "cost1k": 0.25586673786885245
+     },
+     "incomplete_execution": {
+      "j": 0.16666666666666669,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.36666666666666664,
+      "cost1k": 3.799623755
+     },
+     "scope_creep": {
+      "j": 0.8971428571428571,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.09142857142857143,
+      "cost1k": 0.4287887668571429
+     },
+     "obsolescence": {
+      "j": 0.8774193548387097,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.08387096774193549,
+      "cost1k": 0.4041073187096774
+     },
+     "supply_chain": {
+      "j": 0.6959459459459459,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.20945945945945946,
+      "cost1k": 0.7552126358108108
+     },
+     "dependency_blindness": {
+      "j": 0.86,
+      "tool": "deepseek-v4-flash, asked directly",
+      "short": "deepseek-v4-flash",
+      "fa": 0.02,
+      "cost1k": 0.405680926
+     }
+    },
+    "avg": 0.6725768860866311,
+    "n_modes": 9
+   },
+   {
+    "tool": "mimo-v2.6-flash",
+    "type": "baseline_model",
+    "cells": {
+     "fabrication": {
+      "j": 0.8964319923371648,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.017361111111111112,
+      "cost1k": 0.13677811550151975
+     },
+     "test-manipulation": {
+      "j": 0.8884107860011474,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.040160642570281124,
+      "cost1k": 1.7988394584139267
+     },
+     "security": {
+      "j": 0.04782161367273288,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.2047930283224401,
+      "cost1k": 0.7109283196239718
+     },
+     "logic_error": {
+      "j": 0.7429134402654867,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.14380530973451328,
+      "cost1k": 0.20017094549180328
+     },
+     "incomplete_execution": {
+      "j": 0.17500000000000002,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.20833333333333334,
+      "cost1k": 3.2953469425
+     },
+     "scope_creep": {
+      "j": 0.9485714285714286,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.045714285714285714,
+      "cost1k": 0.43594283657142857
+     },
+     "obsolescence": {
+      "j": 0.8838709677419355,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.03225806451612903,
+      "cost1k": 0.2484033361290323
+     },
+     "supply_chain": {
+      "j": 0.6486486486486487,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.3108108108108108,
+      "cost1k": 0.5942946648648648
+     },
+     "dependency_blindness": {
+      "j": 0.86,
+      "tool": "mimo-v2.6-flash, asked directly",
+      "short": "mimo-v2.6-flash",
+      "fa": 0.02,
+      "cost1k": 0.3164622
+     }
+    },
+    "avg": 0.6768520974709493,
+    "n_modes": 9
+   },
+   {
+    "tool": "grok-4.1-fast",
+    "type": "baseline_model",
+    "cells": {
+     "fabrication": {
+      "j": 0.7039032567049809,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.10069444444444445,
+      "cost1k": 0.13677811550151975
+     },
+     "test-manipulation": {
+      "j": 0.8602983362019507,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.06827309236947791,
+      "cost1k": 2.243713733075435
+     },
+     "security": {
+      "j": -0.03454114281808196,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.5228758169934641,
+      "cost1k": 0.49353701527614574
+     },
+     "logic_error": {
+      "j": 0.11963034660766969,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.8152654867256637,
+      "cost1k": 0.14042315573770492
+     },
+     "incomplete_execution": {
+      "j": 0.030000000000000027,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.9266666666666666,
+      "cost1k": 0.7476999166666666
+     },
+     "scope_creep": {
+      "j": 0.5371428571428571,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.41714285714285715,
+      "cost1k": 0.5284651428571429
+     },
+     "obsolescence": {
+      "j": 0.5290322580645161,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.3741935483870968,
+      "cost1k": 0.12415806451612904
+     },
+     "supply_chain": {
+      "j": 0.17567567567567577,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.6891891891891891,
+      "cost1k": 0.5728804054054054
+     },
+     "dependency_blindness": {
+      "j": 0.6399999999999999,
+      "tool": "grok-4.1-fast (no reasoning), asked directly",
+      "short": "grok-4.1-fast",
+      "fa": 0.3,
+      "cost1k": 0.52575
+     }
+    },
+    "avg": 0.395682398619952,
+    "n_modes": 9
+   },
+   {
+    "tool": "Phi-4-mini",
+    "type": "baseline_model",
+    "cells": {
+     "fabrication": {
+      "j": 0.17573125183599814,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.4929078014184397,
+      "cost1k": 0.0911854103343465
+     },
+     "test-manipulation": {
+      "j": 0.32723752151463,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.012048192771084338,
+      "cost1k": 0.8897485493230174
+     },
+     "logic_error": {
+      "j": 0.19894220132743362,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.3440265486725664,
+      "cost1k": 0.06861267418032788
+     },
+     "incomplete_execution": {
+      "j": 0.0,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.005,
+      "cost1k": 0.26348875
+     },
+     "scope_creep": {
+      "j": -0.06285714285714289,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.52,
+      "cost1k": 0.17587864285714283
+     },
+     "obsolescence": {
+      "j": 0.12903225806451615,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.0064516129032258064,
+      "cost1k": 0.03154669354838709
+     },
+     "supply_chain": {
+      "j": 0.0,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.0,
+      "cost1k": 0.18585861486486488
+     },
+     "dependency_blindness": {
+      "j": -0.020000000000000018,
+      "tool": "Phi-4-mini, asked directly",
+      "short": "Phi-4-mini",
+      "fa": 0.38,
+      "cost1k": 0.166914
+     }
+    },
+    "avg": 0.09351076123567938,
+    "n_modes": 8
+   },
+   {
+    "tool": "pyright",
+    "type": "deterministic",
+    "cells": {
+     "fabrication": {
+      "j": 0.8532088122605365,
+      "tool": "pyright",
+      "short": "pyright",
+      "fa": 0.034722222222222224,
+      "cost1k": 0.0
+     },
+     "logic_error": {
+      "j": 0.00280581674041298,
+      "tool": "pyright",
+      "short": "pyright",
+      "fa": 0.012168141592920354,
+      "cost1k": 0.0
+     },
+     "obsolescence": {
+      "j": 0.567741935483871,
+      "tool": "pyright against the latest libraries (deprecated, missing attribute or import)",
+      "short": "pyright (latest libraries)",
+      "fa": 0.03870967741935484,
+      "cost1k": 0.0
+     }
+    },
+    "avg": 0.47458552149494015,
+    "n_modes": 3
+   },
+   {
+    "tool": "mypy",
+    "type": "deterministic",
+    "cells": {
+     "fabrication": {
+      "j": 0.7734674329501916,
+      "tool": "mypy --check-untyped-defs",
+      "short": "mypy --check-untyped-defs",
+      "fa": 0.013888888888888888,
+      "cost1k": 0.0
+     },
+     "logic_error": {
+      "j": -0.007144174041297937,
+      "tool": "mypy (--check-untyped-defs)",
+      "short": "mypy",
+      "fa": 0.033185840707964605,
+      "cost1k": 0.0
+     },
+     "obsolescence": {
+      "j": 0.14193548387096774,
+      "tool": "mypy against the latest libraries (deprecated, missing attribute or import)",
+      "short": "mypy (latest libraries)",
+      "fa": 0.012903225806451613,
+      "cost1k": 0.0
+     }
+    },
+    "avg": 0.3027529142599538,
+    "n_modes": 3
+   },
+   {
+    "tool": "ruff",
+    "type": "deterministic",
+    "cells": {
+     "fabrication": {
+      "j": 0.5399904214559387,
+      "tool": "ruff",
+      "short": "ruff",
+      "fa": 0.034722222222222224,
+      "cost1k": 0.0
+     },
+     "logic_error": {
+      "j": -0.031146294247787615,
+      "tool": "ruff (pyflakes + bugbear rules)",
+      "short": "ruff",
+      "fa": 0.07411504424778761,
+      "cost1k": 0.0
+     },
+     "incomplete_execution": {
+      "j": 0.005,
+      "tool": "ruff FIX rules (TODO / FIXME / XXX / HACK comments)",
+      "short": "ruff FIX rules",
+      "fa": 0.0,
+      "cost1k": 0.0
+     },
+     "obsolescence": {
+      "j": 0.07741935483870968,
+      "tool": "ruff NumPy 2 rules (NPY201)",
+      "short": "ruff NumPy 2 rules",
+      "fa": 0.0,
+      "cost1k": 0.0
+     }
+    },
+    "avg": 0.14781587051171519,
+    "n_modes": 4
+   },
+   {
+    "tool": "PR-Agent",
+    "type": "llm_based",
+    "cells": {
+     "fabrication": {
+      "j": 0.6857040229885057,
+      "tool": "pr-agent (deepseek)",
+      "short": "pr-agent",
+      "fa": 0.07291666666666667,
+      "cost1k": 0.24316109422492402
+     },
+     "security": {
+      "j": -0.01440397380012165,
+      "tool": "pr-agent review (deepseek-v4-flash)",
+      "short": "pr-agent review",
+      "fa": 0.4335511982570806,
+      "cost1k": 1.3807285546415982
+     },
+     "logic_error": {
+      "j": 0.284044293879056,
+      "tool": "PR-Agent review: flags a 'possible issue' (deepseek-v4-flash)",
+      "short": "PR-Agent review",
+      "fa": 0.24004424778761063,
+      "cost1k": 1.2838253912295081
+     },
+     "incomplete_execution": {
+      "j": 0.07333333333333333,
+      "tool": "PR-Agent review + TODO scan: flags a 'possible issue' or a TODO (deepseek-v4-flash)",
+      "short": "PR-Agent review + TODO scan",
+      "fa": 0.24666666666666667,
+      "cost1k": 14.124194013333332
+     }
+    },
+    "avg": 0.25716941910019336,
+    "n_modes": 4
+   },
+   {
+    "tool": "promptfoo",
+    "type": "llm_based",
+    "cells": {
+     "test-manipulation": {
+      "j": 0.8620912220309811,
+      "tool": "promptfoo llm-rubric (deepseek)",
+      "short": "promptfoo llm-rubric",
+      "fa": 0.08433734939759036,
+      "cost1k": 1.1025145067698257
+     },
+     "security": {
+      "j": 0.021488527474992858,
+      "tool": "promptfoo llm-rubric (deepseek-v4-flash judge)",
+      "short": "promptfoo llm-rubric",
+      "fa": 0.3485838779956427,
+      "cost1k": 0.6874265569917744
+     }
+    },
+    "avg": 0.441789874752987,
+    "n_modes": 2
+   },
+   {
+    "tool": "giskard",
+    "type": "llm_based",
+    "cells": {
+     "test-manipulation": {
+      "j": 0.8919965576592083,
+      "tool": "giskard Conformity check (deepseek)",
+      "short": "giskard Conformity check",
+      "fa": 0.07228915662650602,
+      "cost1k": 2.2823984526112184
+     },
+     "security": {
+      "j": 0.06054471489140928,
+      "tool": "giskard Conformity check (deepseek-v4-flash judge)",
+      "short": "giskard Conformity check",
+      "fa": 0.3899782135076253,
+      "cost1k": 1.9388954171562867
+     }
+    },
+    "avg": 0.47627063627530875,
+    "n_modes": 2
+   },
+   {
+    "tool": "Best simple rule",
+    "type": "baseline_rule",
+    "cells": {
+     "test-manipulation": {
+      "j": 0.4283562822719449,
+      "tool": "Rule: agent wrote to a test file",
+      "short": "a test-edit rule",
+      "fa": 0.5180722891566265,
+      "cost1k": 0.0
+     },
+     "incomplete_execution": {
+      "j": 0.02500000000000001,
+      "tool": "Stub rule: TODO / FIXME / pass / ... / NotImplementedError added to a source file",
+      "short": "a stub rule",
+      "fa": 0.075,
+      "cost1k": 0.0
+     },
+     "scope_creep": {
+      "j": 0.0,
+      "tool": "Rule: more than one non-test source file changed",
+      "short": "a file-count rule",
+      "fa": 0.28,
+      "cost1k": 0.0
+     },
+     "supply_chain": {
+      "j": 0.8378378378378378,
+      "tool": "Rule: name looks like a typo or 'popular name + word' and is not in PyPI's top 15,000",
+      "short": "a typosquat rule",
+      "fa": 0.16216216216216217,
+      "cost1k": 0.0
+     },
+     "dependency_blindness": {
+      "j": 0.12000000000000001,
+      "tool": "Rule: a function the patch adds has the same body as one in the shown code (stand-in for sentrux)",
+      "short": "a duplicate-body rule",
+      "fa": 0.02,
+      "cost1k": 0.0
+     }
+    },
+    "avg": 0.28223882402195655,
+    "n_modes": 5
+   }
+  ],
+  "best": {
+   "fabrication": {
+    "j": 0.9430076628352491,
+    "tool": "deepseek-v4.1-flash, asked directly",
+    "short": "deepseek-v4.1-flash",
+    "type": "baseline_model"
+   },
+   "test-manipulation": {
+    "j": 0.9102839931153184,
+    "tool": "minimax-m3, asked directly",
+    "short": "minimax-m3",
+    "type": "baseline_model"
+   },
+   "security": {
+    "j": 0.08228037795971163,
+    "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+    "short": "gpt-oss-20b on one RTX 4090",
+    "type": "baseline_model"
+   },
+   "logic_error": {
+    "j": 0.7429134402654867,
+    "tool": "mimo-v2.6-flash, asked directly",
+    "short": "mimo-v2.6-flash",
+    "type": "baseline_model"
+   },
+   "incomplete_execution": {
+    "j": 0.19,
+    "tool": "gpt-6-luna, asked directly",
+    "short": "gpt-6-luna",
+    "type": "baseline_model"
+   },
+   "scope_creep": {
+    "j": 0.9485714285714286,
+    "tool": "mimo-v2.6-flash, asked directly",
+    "short": "mimo-v2.6-flash",
+    "type": "baseline_model"
+   },
+   "obsolescence": {
+    "j": 0.8967741935483872,
+    "tool": "gpt-6-luna, asked directly",
+    "short": "gpt-6-luna",
+    "type": "baseline_model"
+   },
+   "supply_chain": {
+    "j": 0.8378378378378378,
+    "tool": "Rule: name looks like a typo or 'popular name + word' and is not in PyPI's top 15,000",
+    "short": "a typosquat rule",
+    "type": "baseline_rule"
+   },
+   "dependency_blindness": {
+    "j": 0.8999999999999999,
+    "tool": "gpt-6-luna, asked directly",
+    "short": "gpt-6-luna",
+    "type": "baseline_model"
+   }
+  },
+  "findings": [
+   [
+    "A cheap model asked directly is the best reviewer in 8 of 9 modes.",
+    " The exception is Supply chain, where a typosquat rule wins."
+   ],
+   [
+    "The three strongest cheap models are close: within 10 points of each other in 8 of 9 modes.",
+    " Average J: gpt-6-luna +68%, deepseek-v4-flash +67%, mimo-v2.6-flash +68%. None costs more than $3.80 per 1,000 reviews in any mode."
+   ],
+   [
+    "Two modes nobody handles yet: Security vulnerability (best J +8%) and Incomplete execution (best J +19%).",
+    " No model, program or judge we ran reaches J 25% there."
+   ],
+   [
+    "Free programs pay off where the failure is a checkable fact: pyright on Fabrication (+85%); pyright (latest libraries) on Obsolescence (+57%); a typosquat rule on Supply chain (+84%).",
+    " The best free option scores J under 15% on Security vulnerability, Logic error, Incomplete execution, Scope creep, Dependency blindness."
+   ],
+   [
+    "Wrapping the model in a review tool did not help: PR-Agent runs on deepseek-v4-flash, yet scores below deepseek-v4-flash asked directly in 4 of 4 modes.",
+    " Fabrication +69% vs +92%; Security vulnerability -1% vs +5%; Logic error +28% vs +69%; Incomplete execution +7% vs +17%."
+   ],
+   [
+    "Small and non-reasoning models fall short: Phi-4-mini scores J under 20% in 7 of 8 modes,",
+    " and grok-4.1-fast (no reasoning) flags 47% of clean samples on average, against 16% for the three models above."
+   ]
+  ],
+  "caveats": [
+   "J compares tools within a mode. Across modes it only roughly reflects difficulty: each dataset was built differently (real agent runs, execution-checked model code, synthetic injections, hand-built pairs), so a high J on a hand-built synthetic mode is not as hard-won as a low one on real agent runs.",
+   "Averages weight every mode equally and cover only the modes a tool ran (the number is in brackets).",
+   "mypy, ruff and the simple rules show the best configuration we ran in each mode; hover a cell to see which. pyright and mypy on Obsolescence ran with the latest libraries installed.",
+   "Same prompt style for every model, temperature 0, one run each; no tool was tuned per mode. Findings above are computed from the table, so they update with it."
+  ]
+ }
 }
