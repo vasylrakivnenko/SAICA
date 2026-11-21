@@ -345,6 +345,11 @@ render();
   .kb-inline { flex-direction: row; flex-wrap: wrap; gap: .2rem .9rem; }
   .kb-row { display: flex; align-items: center; gap: .45rem; font-size: 14px; color: #111418; cursor: pointer; margin: .12rem 0; line-height: 1.4; }
   .kb-row > span { min-width: 0; }
+  /* option cards: every checkbox / radio row is a small white card (no fill when ticked; only the box itself turns blue) */
+  .kb-row:has(> input[type="checkbox"]), .kb-row:has(> input[type="radio"]) { padding: .42rem .7rem; border: 1px solid rgb(17 20 24 / .12); border-radius: 8px; background: #fff; margin: 0; transition: border-color .15s; }
+  .kb-row:has(> input[type="checkbox"]):hover, .kb-row:has(> input[type="radio"]):hover { border-color: rgb(31 58 147 / .55); }
+  .kb-checks { gap: .4rem; }
+  .kb-box > .kb-row { margin-top: .4rem; }
   .kb-row input { flex: none; align-self: flex-start; margin-top: 2px !important; }
   .kb-inline label { display: inline-flex; align-items: center; gap: .35rem; font-size: 14px; cursor: pointer; }
   .kb input[type="checkbox"], .kb input[type="radio"] { accent-color: #1f3a93; width: 15px; height: 15px; margin: 0; cursor: pointer; }

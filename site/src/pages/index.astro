@@ -436,11 +436,10 @@ syncTypes();
   .lb .findings, .lb .ov-caveats { font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; max-width: 78ch; padding-left: 1.2rem; }
   .lb .findings li, .lb .ov-caveats li { margin: .45rem 0; }
   .lb .ov-caveats { font-size: 14px; color: #4a5160; }
-  /* mode checkboxes: an even 3-column grid of small cards (2 on phones); a ticked card turns light blue */
+  /* mode checkboxes: an even 3-column grid of small cards (2 on phones); only the box itself turns blue when ticked */
   .lb .ov-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem .55rem; max-width: 48rem; margin: .7rem 0 .8rem; font: 13.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
   .lb .ov-modes label { display: flex; align-items: center; gap: .55rem; padding: .45rem .7rem; border: 1px solid rgb(17 20 24 / .12); border-radius: 8px; background: #fff; cursor: pointer; transition: background-color .15s, border-color .15s; }
   .lb .ov-modes label:hover { border-color: rgb(31 58 147 / .55); }
-  .lb .ov-modes label:has(input:checked) { background: #e4ebf7; border-color: rgb(31 58 147 / .35); color: #111418; }
   .lb .ov-modes input { accent-color: #1f3a93; width: 15px; height: 15px; margin: 0; cursor: pointer; flex: none; }
   @media (max-width: 640px) { .lb .ov-modes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
