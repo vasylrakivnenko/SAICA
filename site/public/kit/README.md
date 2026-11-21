@@ -1,12 +1,13 @@
 # SAICA supervision kit
 
 Drop-in files that make every commit in a repository get checked by the
-supervision tools you installed from a SAICA-KG coverage level
-(`minimum` / `optimal` / `full`), log what each check caught, and
+supervision tools and LLM reviewers you picked in the kit builder at
+<https://saica.ai/tool-coverage>, log what each check caught, and
 visualise it over time.
 
 Your coding agent copies these files into your repo and adapts them;
-the copied setup prompt on `/tool-coverage` walks it through the steps.
+the setup prompt copied from <https://saica.ai/tool-coverage> walks it
+through the steps.
 
 | File | Installed at | Purpose |
 |---|---|---|
@@ -44,7 +45,7 @@ CI, the self-test and the dashboard.
 ```json
 {
   "version": 1,
-  "kit": "optimal",
+  "kit": "custom",
   "builtin": { "enabled": true, "blocking": false },
   "tools": [
     {
@@ -111,7 +112,7 @@ day one. Tool ids are prefixed `saica:`.
   "commit_ts": "2026-11-19T10:02:09Z",
   "subject": "Add retry to fetcher",
   "agent": "claude",
-  "kit": "optimal",
+  "kit": "custom",
   "source": "pre-commit",
   "tool_id": "semgrep",
   "failure_mode": "security_vulnerability",
