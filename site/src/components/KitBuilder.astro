@@ -106,6 +106,7 @@ function choose(m) {
   const cands = m.rows.filter(fits).sort((a, b) => b.j - a.j || a.cost1k - b.cost1k);
   if (!cands.length) return { kind: 'none', top };
   const best = cands[0];
+  if (best.j < kit.floor) return { kind: 'weak', top, best }; // the best tool that fits is below the reliability floor
   // Pairs: only the two kinds that hold up in pairs.json: better beyond noise (robust_pair), or as good for less (cheaper_pair).
   let pair = null;
   if (state.pairs) {
@@ -182,14 +183,16 @@ function render() {
         c.note ? el('div', { class: 'kb-fine', text: c.note }) : null)));
     } else if (c.kind === 'unreliable') {
       body.append(el('tr', { class: 'kb-muted' }, mode, el('td', { colspan: '4', text: `No reliable tool yet: the best we measured, ${c.top.tool}, reaches only J ${pct(c.top.j)}. Not included in the prompt.` })));
+    } else if (c.kind === 'weak') {
+      body.append(el('tr', { class: 'kb-muted' }, mode, el('td', { colspan: '4', text: `Nothing reliable fits these constraints: the best that fits, ${c.best.tool}, reaches only J ${pct(c.best.j)} (best overall: ${c.top.tool}, J ${pct(c.top.j)}, ${money(c.top.cost1k)}/1k). Not included in the prompt.` })));
     } else {
-      body.append(el('tr', { class: 'kb-muted' }, mode, el('td', { colspan: '4', text: `Nothing we measured fits these constraints (best overall: ${c.top.tool}, J ${pct(c.top.j)}, ${money(c.top.cost1k)}/1k).` })));
+      body.append(el('tr', { class: 'kb-muted' }, mode, el('td', { colspan: '4', text: `Nothing we measured fits these constraints (best overall: ${c.top.tool}, J ${pct(c.top.j)}, ${money(c.top.cost1k)}/1k${c.top.why_not ? `; not offered: ${c.top.why_not}` : ''}).` })));
     }
   }
   if (!sel.length) body.append(el('tr', {}, el('td', { colspan: '5', class: 'kb-muted', text: 'Tick at least one failure mode.' })));
   document.getElementById('kb-table').replaceChildren(head, body);
   document.getElementById('kb-summary').textContent = n
-    ? `${n} failure mode${n === 1 ? '' : 's'} covered by measured picks, about ${money(cost)} per 1,000 reviews in total if every check runs on every change.`
+    ? `${n} failure mode${n === 1 ? '' : 's'} covered by measured picks; ${cost === 0 ? 'all of them free' : `about ${money(cost)} per 1,000 reviews in total if every check runs on every change`}.`
     : '';
   if (!document.getElementById('kb-out').hidden) document.getElementById('kb-out').textContent = buildPrompt();
   if (!document.getElementById('kb-checks-out').hidden) document.getElementById('kb-checks-out').textContent = JSON.stringify(buildChecks(), null, 2);
@@ -250,7 +253,8 @@ function buildPrompt() {
         'Evaluate whether any of them fits this repository and propose it; do not install any of them without my approval.', '');
       continue;
     }
-    if (c.kind !== 'pick') { lines.push(`### ${++i}. ${m.name}`, '', c.kind === 'unreliable' ? `Skip: no tool we measured is reliable for this (best J ${pct(c.top.j)}).` : 'Skip: nothing measured fits the selected constraints.', ''); continue; }
+    if (c.kind !== 'pick') { lines.push(`### ${++i}. ${m.name}`, '', c.kind === 'unreliable' ? `Skip: no tool we measured is reliable for this (best J ${pct(c.top.j)}).`
+      : c.kind === 'weak' ? `Skip: the best tool that fits the selected constraints reaches only J ${pct(c.best.j)}.` : 'Skip: nothing measured fits the selected constraints.', ''); continue; }
     const parts = c.pair ? c.pair.tools : [c.tool];
     lines.push(`### ${++i}. ${m.name}: ${parts.map((r) => r.tool).join(c.pair && c.pair.rule === 'and' ? ' AND ' : ' + ')}`, '',
       `- Measured: J ${pct(c.pair ? c.pair.j : c.tool.j)} (TPR ${pct(c.pair ? c.pair.tpr : c.tool.tpr)}, FPR ${pct(c.pair ? c.pair.fpr : c.tool.fpr)}) on SAICA-Bench; details ${origin}/#${m.id}`);
@@ -266,7 +270,8 @@ function buildPrompt() {
         if (r.category === 'rule' && rc.kit_builtin) { lines.push(`- ${r.tool}: covered by the kit's built-in check \`${rc.kit_builtin}\` (keep "builtin" enabled).`); continue; }
         lines.push(`- ${r.tool}: free program${r.repository_url ? ` (${r.repository_url})` : ''}. Install it from its official docs and pin the version.${rc.command ? ` Our benchmark ran: \`${rc.command}\`. Keep those flags; adapt paths and use {files} for the changed files.` : ''}${rc.needs && rc.needs.length ? ` It needs: ${rc.needs.join(', ')}.` : ''}`);
       } else {
-        lines.push(`- ${r.tool}: hybrid tool${r.repository_url ? ` (${r.repository_url})` : ''}. Install it from its official docs and configure it with the same model and settings we measured${rc.model ? ` (model \`${rc.model}\` on ${kit.providers[r.provider] || r.provider})` : ''}.${rc.config ? ` Our configuration: ${typeof rc.config === 'string' ? rc.config : JSON.stringify(rc.config)}` : ''}${rc.flag_rule ? ` It counts as flagged when: ${rc.flag_rule}` : ''}`);
+        lines.push(`- ${r.tool}: hybrid tool${r.repository_url ? ` (${r.repository_url})` : ''}. Install it from its official docs and configure it with the same model and settings we measured${rc.model ? ` (model \`${rc.model}\` on ${kit.providers[r.provider] || r.provider})` : ''}.${rc.flag_rule ? ` It counts as flagged when: ${rc.flag_rule}` : ''}${rc.command ? ` Our command: \`${rc.command}\`.` : ''}`);
+        if (rc.config) lines.push('  Our configuration:', '  ```json', ...JSON.stringify(rc.config, null, 2).split('\n').map((x) => '  ' + x), '  ```');
       }
     }
     lines.push('');
