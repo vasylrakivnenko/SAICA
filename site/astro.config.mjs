@@ -4,6 +4,9 @@ import { fileURLToPath } from 'node:url';
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
+  // Astro's HTML compression drops a line break between a word and an inline tag on the next line
+  // ("on\n<a>GitHub</a>" -> "onGitHub"), gluing words to links site-wide. Keep the whitespace.
+  compressHTML: false,
   site: 'https://saica.ai',
   trailingSlash: 'ignore',
   vite: {
