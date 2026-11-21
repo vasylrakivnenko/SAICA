@@ -21,7 +21,8 @@ import results from '../../public/bench/results.json';
       <div class="tbl-wrap"><table class="ov" id="lb-ov-table"></table></div>
       <div class="legend" id="lb-ov-legend"></div>
       <h2>Average quality vs average cost</h2>
-      <p class="fine">One point per reviewer in the grid: its average J against its average cost per 1,000 reviews, over the modes it ran. Darker blue = higher J, as in the grid. The dashed line is the Pareto frontier: nothing cheaper scores higher on average. Tools run on fewer than 8 modes show the count; their averages cover different modes, so compare them with care.</p>
+      <p class="fine">One point per reviewer in the grid: its average J against its average cost per 1,000 reviews, over the checked modes it ran. Darker blue = higher J, as in the grid. The dashed line is the Pareto frontier: nothing cheaper scores higher on average. Security and Incomplete execution start unchecked because no tool we ran handles them (best J under 25%). A tool that ran on only some of the checked modes shows how many; its average covers those modes only, so compare it with care.</p>
+      <div class="ov-modes" id="lb-ov-modes" role="group" aria-label="Failure modes included in the averages"></div>
       <div class="chart" id="lb-ov-chart"></div>
       <h2>What the grid says</h2>
       <ul class="findings" id="lb-ov-findings"></ul>
@@ -185,10 +186,25 @@ function renderOverview() {
   document.getElementById('lb-ov-caveats').replaceChildren(...OV.caveats.map((c) => el('li', { text: c })));
 }
 
+const OV_DEFAULT_OFF = ['security', 'incomplete_execution'];
+const ovSel = new Set(OV ? (() => { const saved = load('ovModes', null); const ids = OV.modes.map((m) => m.id);
+  return Array.isArray(saved) ? saved.filter((id) => ids.includes(id)) : ids.filter((id) => !OV_DEFAULT_OFF.includes(id)); })() : []);
+function renderOvModes() {
+  const box = document.getElementById('lb-ov-modes');
+  box.replaceChildren(...OV.modes.map((m) => { const cb = el('input', { type: 'checkbox', value: m.id });
+    cb.checked = ovSel.has(m.id);
+    cb.addEventListener('change', () => { if (cb.checked) ovSel.add(m.id); else ovSel.delete(m.id); store('ovModes', [...ovSel]); renderOvChart(); });
+    return el('label', {}, cb, m.name); }));
+}
 function renderOvChart() {
   const BLUE = '#1f3a93';
   const box = document.getElementById('lb-ov-chart'); box.replaceChildren();
-  const rows = OV.rows.map((r) => ({ ...r, j: r.avg, c: r.avg_cost1k }));
+  const sel = OV.modes.map((m) => m.id).filter((id) => ovSel.has(id));
+  if (!sel.length) { box.append(el('p', { class: 'fine', text: 'Check at least one failure mode to draw the chart.' })); return; }
+  const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  const rows = OV.rows.map((r) => { const cs = sel.map((id) => r.cells[id]).filter(Boolean);
+    return cs.length ? { ...r, j: mean(cs.map((c) => c.j)), c: mean(cs.map((c) => c.cost1k)), n: cs.length } : null; }).filter(Boolean);
+  if (!rows.length) { box.append(el('p', { class: 'fine', text: 'No reviewer in the grid ran on the checked modes.' })); return; }
   const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.48)));
   const narrow = W < 560, M = { l: 46, r: 16, t: 12, b: 44 }, freeW = 54;
   const paid = rows.filter((r) => r.c > 0);
@@ -217,14 +233,14 @@ function renderOvChart() {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 7 : 5.5, tabindex: 0, style: `fill:${shade(r.j)};stroke:${BLUE};stroke-width:${onF ? 2.5 : 1.25};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `Average J ${pct(r.j)} over ${r.n_modes} mode${r.n_modes === 1 ? '' : 's'}`, el('br'),
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `Average J ${pct(r.j)} over ${r.n} of the ${sel.length} checked mode${sel.length === 1 ? '' : 's'}`, el('br'),
         r.c === 0 ? 'Free: $0' : `Average cost: ${money(r.c)} per 1,000 reviews`, el('br'), onF ? 'On the frontier' : '');
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
     svg.append(c);
     if (!narrow || onF) {
-      const short = r.tool + (r.n_modes < 8 ? ` (${r.n_modes} modes)` : '');
+      const short = r.tool + (r.n < sel.length ? ` (${r.n} of ${sel.length})` : '');
       const label = svgEl('text', { class: 'lbl' }); label.textContent = short; svg.append(label);
       const w = short.length * 6.3; let lx = x + 10, anchor = 'start'; if (lx + w > W - 2) { lx = x - 10; anchor = 'end'; }
       let ly = y + 4; const span = () => (anchor === 'start' ? [lx, lx + w] : [lx - w, lx]);
@@ -248,7 +264,7 @@ function go(id) { state.mode = id; history.replaceState(null, '', '#' + id); ren
 const tabs = document.getElementById('lb-tabs');
 const tabDefs = (OV ? [{ id: 'overview', name: 'Overview' }] : []).concat(DATA);
 tabDefs.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => go(m.id)); tabs.append(b); });
-if (OV) renderOverview();
+if (OV) { renderOverview(); renderOvModes(); }
 document.querySelectorAll('#lb-table .sort').forEach((b) => b.addEventListener('click', () => { state.key = b.dataset.k; render(); }));
 const cs = document.getElementById('lb-stars'); cs.checked = state.stars;
 const typesBox = document.getElementById('lb-types');
@@ -335,4 +351,7 @@ syncTypes();
   .lb .findings, .lb .ov-caveats { font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; max-width: 78ch; padding-left: 1.2rem; }
   .lb .findings li, .lb .ov-caveats li { margin: .45rem 0; }
   .lb .ov-caveats { font-size: 14px; color: #4a5160; }
+  .lb .ov-modes { display: flex; flex-wrap: wrap; gap: .35rem 1rem; margin: .5rem 0 .4rem; font: 13.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .lb .ov-modes label { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
+  .lb .ov-modes input { accent-color: #1f3a93; width: 15px; height: 15px; margin: 0; cursor: pointer; }
 </style>
