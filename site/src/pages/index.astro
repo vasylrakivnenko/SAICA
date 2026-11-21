@@ -20,6 +20,9 @@ import results from '../../public/bench/results.json';
       <p class="fine ov-intro">J for each reviewer that ran on several failure modes. The bottom row names the best tool in each mode, of any type. Hover a cell for the exact tool, its false positive rate and cost; click a mode to open its tab.</p>
       <div class="tbl-wrap"><table class="ov" id="lb-ov-table"></table></div>
       <div class="legend" id="lb-ov-legend"></div>
+      <h2>Average quality vs average cost</h2>
+      <p class="fine">One point per reviewer in the grid: its average J against its average cost per 1,000 reviews, over the modes it ran. Darker blue = higher J, as in the grid. The dashed line is the Pareto frontier: nothing cheaper scores higher on average. Tools run on fewer than 8 modes show the count; their averages cover different modes, so compare them with care.</p>
+      <div class="chart" id="lb-ov-chart"></div>
       <h2>What the grid says</h2>
       <ul class="findings" id="lb-ov-findings"></ul>
       <h2>Read before citing</h2>
@@ -182,12 +185,62 @@ function renderOverview() {
   document.getElementById('lb-ov-caveats').replaceChildren(...OV.caveats.map((c) => el('li', { text: c })));
 }
 
+function renderOvChart() {
+  const BLUE = '#1f3a93';
+  const box = document.getElementById('lb-ov-chart'); box.replaceChildren();
+  const rows = OV.rows.map((r) => ({ ...r, j: r.avg, c: r.avg_cost1k }));
+  const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.48)));
+  const narrow = W < 560, M = { l: 46, r: 16, t: 12, b: 44 }, freeW = 54;
+  const paid = rows.filter((r) => r.c > 0);
+  const lo = paid.length ? Math.min(...paid.map((r) => r.c)) : 0.1, hi = paid.length ? Math.max(...paid.map((r) => r.c)) : 1;
+  const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi)));
+  const x0 = M.l + freeW + 14, x1 = W - M.r, L = (v) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
+  const xs = (r) => (r.c === 0 ? M.l + freeW / 2 : x0 + L(r.c) * (x1 - x0));
+  const jlo = Math.max(0, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10), jhi = Math.min(1, Math.ceil(Math.max(...rows.map((r) => r.j)) * 10) / 10 + 0.05);
+  const ys = (j) => M.t + (1 - (j - jlo) / (jhi - jlo)) * (H - M.t - M.b);
+  const shade = (j) => `color-mix(in srgb, ${BLUE} ${Math.round(Math.max(0, j) * 85)}%, #fff)`;
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Average J versus average cost per 1,000 reviews for each reviewer, with the Pareto frontier' });
+  svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
+  for (let j = Math.ceil(jlo * 10) / 10; j <= jhi + 0.0001; j += 0.1) { const y = ys(j);
+    svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
+    const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
+  for (let v = xmin; v <= xmax * 1.0001; v *= 10) { const x = x0 + L(v) * (x1 - x0);
+    const t = svgEl('text', { x, y: H - M.b + 17, 'text-anchor': 'middle' }); t.textContent = '$' + (v < 1 ? v.toFixed(v < 0.1 ? 2 : 1) : v.toFixed(0)); svg.append(t); }
+  const tf = svgEl('text', { x: M.l + freeW / 2, y: H - M.b + 17, 'text-anchor': 'middle' }); tf.textContent = 'free'; svg.append(tf);
+  svg.append(svgEl('line', { class: 'axis', x1: M.l, x2: x1, y1: H - M.b, y2: H - M.b }));
+  const xl = svgEl('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle' }); xl.textContent = 'Average cost per 1,000 reviews (log scale)'; svg.append(xl);
+  const yl = svgEl('text', { x: 12, y: (M.t + H - M.b) / 2, transform: `rotate(-90 12 ${(M.t + H - M.b) / 2})`, 'text-anchor': 'middle' }); yl.textContent = 'Average J'; svg.append(yl);
+  const front = rows.filter((r) => !rows.some((o) => o !== r && o.c <= r.c && o.j > r.j)).sort((a, b) => a.c - b.c);
+  if (front.length > 1) { let d = ''; front.forEach((r, i) => { d += i === 0 ? `M${xs(r)},${ys(r.j)}` : `H${xs(r)}V${ys(r.j)}`; });
+    svg.append(svgEl('path', { d, fill: 'none', stroke: BLUE, 'stroke-width': 2, 'stroke-dasharray': '5 4', opacity: 0.7 })); }
+  const tip = el('div', { class: 'tip', hidden: '' }); const placed = [];
+  for (const r of [...rows].sort((a, b) => b.j - a.j)) {
+    const x = xs(r), y = ys(r.j), onF = front.includes(r);
+    const c = svgEl('circle', { cx: x, cy: y, r: onF ? 7 : 5.5, tabindex: 0, style: `fill:${shade(r.j)};stroke:${BLUE};stroke-width:${onF ? 2.5 : 1.25};cursor:pointer` });
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `Average J ${pct(r.j)} over ${r.n_modes} mode${r.n_modes === 1 ? '' : 's'}`, el('br'),
+        r.c === 0 ? 'Free: $0' : `Average cost: ${money(r.c)} per 1,000 reviews`, el('br'), onF ? 'On the frontier' : '');
+      const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
+    c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
+    c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
+    svg.append(c);
+    if (!narrow || onF) {
+      const short = r.tool + (r.n_modes < 8 ? ` (${r.n_modes} modes)` : '');
+      const label = svgEl('text', { class: 'lbl' }); label.textContent = short; svg.append(label);
+      const w = short.length * 6.3; let lx = x + 10, anchor = 'start'; if (lx + w > W - 2) { lx = x - 10; anchor = 'end'; }
+      let ly = y + 4; const span = () => (anchor === 'start' ? [lx, lx + w] : [lx - w, lx]);
+      for (let k = 0; k < 8 && placed.some((p) => { const [a, b] = span(); return a < p.b && b > p.a && Math.abs(ly - p.y) < 13; }); k++) ly += 13;
+      label.setAttribute('x', lx); label.setAttribute('y', ly); label.setAttribute('text-anchor', anchor); const [a, b] = span(); placed.push({ a, b, y: ly });
+    }
+  }
+  box.append(svg, tip);
+}
+
 function render() {
   const ov = state.mode === 'overview';
   document.querySelectorAll('#lb-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.id === state.mode)));
   document.getElementById('lb-ov').hidden = !ov;
   document.getElementById('lb-mode').hidden = ov;
-  if (ov) return;
+  if (ov) { renderOvChart(); return; }
   const m = DATA.find((d) => d.id === state.mode);
   renderTable(m); renderChart(m);
 }
