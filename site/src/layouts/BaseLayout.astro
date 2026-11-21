@@ -43,8 +43,8 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
       class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white p-2 border border-ink/20 rounded"
       >Skip to main content</a
     >
-    <div class="mx-auto max-w-prose-wide px-5 md:flex md:gap-7">
-      <aside class="bg-accent-soft -mx-5 px-5 md:mx-0 md:w-40 md:shrink-0 md:sticky md:top-6 md:self-start md:my-6 md:h-[calc(100vh-3rem)] md:overflow-y-auto md:rounded-xl md:px-4 border-b md:border md:border-accent/10 border-ink/10 py-4 md:py-6 font-sans">
+    <!-- md+: full-height light-blue rail fixed to the left edge; content and footer start to its right (md:ml-48) -->
+    <aside class="bg-accent-soft border-b border-accent/15 px-5 py-4 md:fixed md:inset-y-0 md:left-0 md:z-30 md:w-48 md:border-b-0 md:border-r md:px-6 md:py-10 md:overflow-y-auto font-sans">
         <a href="/" class="no-underline text-ink hover:text-accent font-semibold tracking-tight text-lg">SAICA-Bench</a>
         <nav aria-label="Primary" class="mt-5 md:mt-6 text-sm">
           <ul class="flex flex-wrap md:flex-col gap-x-5 gap-y-1 md:gap-y-2">
@@ -62,15 +62,16 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
             </li>
           </ul>
         </nav>
-      </aside>
+    </aside>
 
-      <main id="main" class="min-w-0 flex-1 py-8 md:py-10">
+    <div class="md:ml-48">
+      <main id="main" class="mx-auto max-w-prose-wide min-w-0 px-5 md:px-8 py-8 md:py-10">
         <slot />
       </main>
     </div>
 
-    <footer class="border-t border-ink/10 mt-16 bg-paper-alt">
-      <div class="mx-auto max-w-prose-wide px-5 py-6 text-xs text-ink-faint font-sans flex flex-wrap justify-between gap-4">
+    <footer class="border-t border-ink/10 mt-16 bg-paper-alt md:ml-48">
+      <div class="mx-auto max-w-prose-wide px-5 md:px-8 py-6 text-xs text-ink-faint font-sans flex flex-wrap justify-between gap-4">
         <div>SAICA-Bench · Code Apache-2.0 · Data CC-BY-4.0</div>
         <div>
           <a href="/bench/results.json">Results JSON</a>
