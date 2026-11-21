@@ -922,7 +922,8 @@
    "caveats": [
     "Short, self-contained functions from two famous public problem sets: models may know the right answers, so these scores are an upper bound for real agent code.",
     "The correct functions are reference solutions, the wrong ones model-written: style differs between the two classes.",
-    "Type checkers and linters look for a different kind of bug; they are here as a floor, not as fair competitors."
+    "Type checkers and linters look for a different kind of bug; they are here as a floor, not as fair competitors.",
+    "KG tools run through their own built-in check, with deepseek-v4-flash as their model: uqlm re-solves the task 5 times and flags code that disagrees with most re-solves; it was run on the first 300 + 300 functions only (it makes 10 model calls per review), and 62 of its answers were unreadable (counted as not flagged)."
    ],
    "rows": [
     {
@@ -1077,6 +1078,48 @@
      "repository_url": "https://github.com/astral-sh/ruff",
      "stars": 30000,
      "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_uqlm_codegen",
+     "tool": "uqlm CodeGenUQ: 5 fresh solutions, functional-equivalence rate < 0.5 (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": 0.5933333333333333,
+     "catch": 0.9466666666666667,
+     "catch_ci": [
+      0.9151301612527315,
+      0.966908374615958
+     ],
+     "fa": 0.35333333333333333,
+     "fa_ci": [
+      0.30140739106432274,
+      0.4089680150683464
+     ],
+     "cost": 6.372799916986666,
+     "cost_note": "estimated: run on the first 300 + 300 samples only (our cost $1.57), scaled to all 2440; rates are on those 600. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "repository_url": "https://github.com/cvs-health/uqlm",
+     "stars": 1146,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_pr_agent",
+     "tool": "PR-Agent review: flags a 'possible issue' (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": 0.284044293879056,
+     "catch": 0.5240885416666666,
+     "catch_ci": [
+      0.499083375894529,
+      0.5489735151519266
+     ],
+     "fa": 0.24004424778761063,
+     "fa_ci": [
+      0.213338754085203,
+      0.2689497861182863
+     ],
+     "cost": 3.1325339546,
+     "cost_note": "API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "repository_url": "https://github.com/Codium-ai/pr-agent",
+     "stars": 10968,
+     "stars_updated_at": "2026-04-23"
     }
    ]
   },
@@ -1097,7 +1140,8 @@
     "'Not done' here means the hidden tests fail: that includes wrong fixes as well as unfinished ones, so this mode overlaps with logic error.",
     "The KG's stub signal (TODO, pass, NotImplementedError in the diff) does not define the label: across 60,739 finished runs, stub markers appear about as often in passing runs (2,092) as in failing ones (2,208).",
     "All runs come from one agent (Qwen3-Coder-480B with OpenHands).",
-    "Unreadable answers count as not flagged: deepseek-v4-flash 373 of 1,200 (mostly thinking past 32k tokens without answering), mimo 121, Phi 25. Phi almost never calls a run incomplete."
+    "Unreadable answers count as not flagged: deepseek-v4-flash 373 of 1,200 (mostly thinking past 32k tokens without answering), mimo 121, Phi 25. Phi almost never calls a run incomplete.",
+    "The KG's task-completion judges (Phoenix, Opik, DeepEval; each through its own built-in check, with deepseek-v4-flash as its model) almost never call a finished run incomplete (they flag 2-13% of failing runs): given the agent's own 'done' message, they believe it. PR-Agent's review flags about a third of failing runs but a quarter of passing ones too. Opik and PR-Agent were run on the first 150 + 150 runs only (PR-Agent takes about 4 minutes per review). Not runnable on a finished patch: PR-Agent ticket compliance (needs a linked GitHub or Jira ticket), TruLens Plan Adherence and DeepEval Step Efficiency (need the agent's step traces)."
    ],
    "rows": [
     {
@@ -1207,6 +1251,111 @@
      ],
      "cost": 0.0,
      "cost_note": ""
+    },
+    {
+     "key": "kg_phoenix_compl",
+     "tool": "Arize Phoenix CompletenessEvaluator (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": 0.065,
+     "catch": 0.13,
+     "catch_ci": [
+      0.10542668790624253,
+      0.1592811427566333
+     ],
+     "fa": 0.065,
+     "fa_ci": [
+      0.04791032067033881,
+      0.08762456132520441
+     ],
+     "cost": 0.9870845326,
+     "cost_note": "API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "repository_url": "https://github.com/Arize-ai/phoenix",
+     "stars": 9394,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_opik_tc",
+     "tool": "Opik AgentTaskCompletionJudge, score < 0.5 (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": 0.026666666666666672,
+     "catch": 0.10666666666666667,
+     "catch_ci": [
+      0.06672979536363804,
+      0.16624750076432737
+     ],
+     "fa": 0.08,
+     "fa_ci": [
+      0.0463531819392169,
+      0.13462257494318683
+     ],
+     "cost": 2.4807568847999995,
+     "cost_note": "estimated: run on the first 150 + 150 samples only (our cost $0.62), scaled to all 1200; rates are on those 300. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "repository_url": "https://github.com/comet-ml/opik",
+     "stars": 18988,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_deepeval_tc",
+     "tool": "DeepEval TaskCompletionMetric (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": 0.008333333333333333,
+     "catch": 0.018333333333333333,
+     "catch_ci": [
+      0.010267199437239104,
+      0.03252812966893709
+     ],
+     "fa": 0.01,
+     "fa_ci": [
+      0.004590859523391853,
+      0.021643835138254512
+     ],
+     "cost": 0.5461761704,
+     "cost_note": "API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "repository_url": "https://github.com/confident-ai/deepeval",
+     "stars": 14938,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_pr_agent",
+     "tool": "PR-Agent review + TODO scan: flags a 'possible issue' or a TODO (deepseek-v4-flash)",
+     "type": "llm_based",
+     "j": 0.07333333333333333,
+     "catch": 0.32,
+     "catch_ci": [
+      0.25064412359702404,
+      0.39834548649543466
+     ],
+     "fa": 0.24666666666666667,
+     "fa_ci": [
+      0.18458062005199127,
+      0.3214047571151728
+     ],
+     "cost": 16.949032816,
+     "cost_note": "estimated: run on the first 150 + 150 samples only (our cost $4.24), scaled to all 1200; rates are on those 300. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "repository_url": "https://github.com/Codium-ai/pr-agent",
+     "stars": 10968,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_ruff_fix",
+     "tool": "ruff FIX rules (TODO / FIXME / XXX / HACK comments)",
+     "type": "deterministic",
+     "j": 0.005,
+     "catch": 0.005,
+     "catch_ci": [
+      0.0017018468527197168,
+      0.014596467142208754
+     ],
+     "fa": 0.0,
+     "fa_ci": [
+      0.0,
+      0.006361933328210577
+     ],
+     "cost": 0,
+     "cost_note": "",
+     "repository_url": "https://github.com/astral-sh/ruff",
+     "stars": 30000,
+     "stars_updated_at": "2026-04-23"
     }
    ]
   },
@@ -1345,127 +1494,129 @@
   {
    "id": "obsolescence",
    "name": "Obsolescence",
-   "n": 302,
-   "n_pos": 151,
-   "n_neg": 151,
+   "n": 310,
+   "n_pos": 155,
+   "n_neg": 155,
    "pos_label": "solutions calling a deprecated API",
    "dataset": "Wang et al. (ICSE'25) deprecated-API map (65 pairs, 8 libraries) + solutions written by 5 models, deprecated call swapped in",
    "summary": "The code uses a deprecated or removed library API.",
    "setup": [
-    "151 solutions with the modern API swapped back to its deprecated twin vs 151 untouched solutions, all written by the same 5 models (gpt-6-luna, grok-4.1-fast, Phi-4-mini, deepseek-v4-flash, mimo) for the same tasks, across numpy, pandas, scipy, scikit-learn, seaborn, PyTorch, TensorFlow and transformers.",
+    "155 solutions with the modern API swapped back to its deprecated twin vs 155 untouched solutions, all written by the same 5 models (gpt-6-luna, grok-4.1-fast, Phi-4-mini, deepseek-v4-flash, mimo) for the same tasks, across numpy, pandas, scipy, scikit-learn, seaborn, PyTorch, TensorFlow and transformers.",
     "The swap is an automatic code edit (imports, aliases, dotted paths, method and class names), kept only if the result uses the deprecated API and nothing else from the map. Run with the latest libraries, 77 swapped solutions fail on load (ImportError, DeprecationWarning, ...) and 129 of 131 untouched ones run clean (TensorFlow not checked).",
+    "Plus 4 hand-written pairs for LLM SDKs. Anthropic: a call that names Claude 3.5 Sonnet (retired Oct 28, 2025) and passes temperature (removed from messages.create in SDK 1.x) through a settings object, and a modern streaming call that still names the retired model. Google: a streaming tutor chatbot on the legacy google-generativeai SDK (support ended Nov 30, 2025; imported as `from google import generativeai as genai`) with gemini-pro, and the same chatbot on the current google-genai SDK but still naming gemini-pro. Clean twins use claude-sonnet-5-5 / gemini-3.8-flash on the current SDKs.",
     "Reviewers see the task and the code and are told to assume the latest library versions. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20."
    ],
    "caveats": [
+    "The LLM-SDK pairs are the hard ones: only the legacy Google SDK was caught (gpt-6-luna and mimo, and pyright with the current google-genai installed). Nobody caught a retired model ID inside otherwise current code (Claude 3.5 Sonnet, gemini-pro), nor temperature hidden in a settings object; grok flagged all eight samples, clean twins included. Retirements newer than a model's training need current documentation.",
     "Synthetic: the deprecated calls were swapped in; models writing freely today rarely use these APIs (49 of 956 solutions).",
     "53 positives use APIs that are deprecated but still present (mostly PyTorch); on removed APIs only, J is about the same for the top three.",
-    "No KG tool can review code for this mode (the ones tagged obsolescence work before generation or bump dependencies); the two ruff rule sets are outside baselines and cover only NumPy 2 and Python-syntax upgrades."
+    "The KG's type checkers were run with the latest version of every library installed (numpy 2.5, pandas 3.1, scipy 1.18, scikit-learn 1.9, PyTorch 2.15, transformers 5.23, current Anthropic and Google SDKs): they catch removed APIs (missing attribute or import) and APIs marked @deprecated, so pyright beats most models for free; mypy finds far fewer because many libraries ship no type information for it. They cannot see a retired model name. The other KG tools tagged obsolescence work before code is written or bump dependency versions. The two ruff rule sets are outside baselines and cover only NumPy 2 and Python-syntax upgrades."
    ],
    "rows": [
     {
      "key": "plain_llm_luna",
      "tool": "gpt-6-luna, asked directly",
      "type": "baseline_model",
-     "j": 0.9139072847682119,
-     "catch": 0.9933774834437086,
+     "j": 0.8967741935483872,
+     "catch": 0.9741935483870968,
      "catch_ci": [
-      0.9634436690411698,
-      0.9988300351830177
+      0.9355304684162196,
+      0.9899197914653228
      ],
-     "fa": 0.07947019867549669,
+     "fa": 0.07741935483870968,
      "fa_ci": [
-      0.04604220934704814,
-      0.13376476758938236
+      0.044838963095826766,
+      0.13044005700973751
      ],
-     "cost": 0.049866,
+     "cost": 0.0519876,
      "cost_note": "Azure list price x tokens (Azure reports no cost)"
     },
     {
      "key": "plain_llm_mimo",
      "tool": "mimo-v2.6-flash, asked directly",
      "type": "baseline_model",
-     "j": 0.9006622516556291,
-     "catch": 0.9337748344370861,
+     "j": 0.8838709677419355,
+     "catch": 0.9161290322580645,
      "catch_ci": [
-      0.882392181938275,
-      0.963633692245407
+      0.8617976747543339,
+      0.9503321451417135
      ],
-     "fa": 0.033112582781456956,
+     "fa": 0.03225806451612903,
      "fa_ci": [
-      0.014224835577160273,
-      0.07516716243887676
+      0.013855672768474356,
+      0.0732852273483716
      ],
-     "cost": 0.0759756742,
+     "cost": 0.0770050342,
      "cost_note": "API-reported (Hyperbolic)"
     },
     {
      "key": "plain_llm_deepseek",
      "tool": "deepseek-v4-flash, asked directly",
      "type": "baseline_model",
-     "j": 0.9006622516556292,
-     "catch": 0.9867549668874173,
+     "j": 0.8774193548387097,
+     "catch": 0.9612903225806452,
      "catch_ci": [
-      0.952997015273051,
-      0.9963602633910805
+      0.9181273811193313,
+      0.9821405587654344
      ],
-     "fa": 0.08609271523178808,
+     "fa": 0.08387096774193549,
      "fa_ci": [
-      0.051001900671616,
-      0.1417215018248707
+      0.04966785485828647,
+      0.13820232524566617
      ],
-     "cost": 0.0942286728,
+     "cost": 0.1252732688,
      "cost_note": "API-reported (Hyperbolic)"
     },
     {
      "key": "plain_llm_grok",
      "tool": "grok-4.1-fast (no reasoning), asked directly",
      "type": "baseline_model",
-     "j": 0.5430463576158941,
-     "catch": 0.9006622516556292,
+     "j": 0.5290322580645161,
+     "catch": 0.9032258064516129,
      "catch_ci": [
-      0.8425706088232716,
-      0.9388731375601294
+      0.8464727202835498,
+      0.9404747796157209
      ],
-     "fa": 0.3576158940397351,
+     "fa": 0.3741935483870968,
      "fa_ci": [
-      0.28557084895621565,
-      0.4367260015025757
+      0.3019185376858631,
+      0.4525538423455644
      ],
-     "cost": 0.0372923,
+     "cost": 0.038489,
      "cost_note": "Azure list price x tokens (Azure reports no cost)"
     },
     {
      "key": "plain_llm_phi",
      "tool": "Phi-4-mini, asked directly",
      "type": "baseline_model",
-     "j": 0.1324503311258278,
-     "catch": 0.1390728476821192,
+     "j": 0.12903225806451615,
+     "catch": 0.13548387096774195,
      "catch_ci": [
-      0.09279417711003801,
-      0.2032606298668984
+      0.09035094342918003,
+      0.19824851666187926
      ],
-     "fa": 0.006622516556291391,
+     "fa": 0.0064516129032258064,
      "fa_ci": [
-      0.0011699648169822205,
-      0.036556330958829965
+      0.0011397480503407414,
+      0.03563651207295189
      ],
-     "cost": 0.009504,
+     "cost": 0.009779475,
      "cost_note": "Azure list price x tokens (Azure reports no cost)"
     },
     {
      "key": "ruff_npy",
      "tool": "ruff NumPy 2 rules (NPY201)",
      "type": "deterministic",
-     "j": 0.07947019867549669,
-     "catch": 0.07947019867549669,
+     "j": 0.07741935483870968,
+     "catch": 0.07741935483870968,
      "catch_ci": [
-      0.04604220934704814,
-      0.13376476758938236
+      0.044838963095826766,
+      0.13044005700973751
      ],
      "fa": 0.0,
      "fa_ci": [
       0.0,
-      0.02480987021575597
+      0.024185100124904303
      ],
      "cost": 0.0,
      "cost_note": ""
@@ -1474,19 +1625,61 @@
      "key": "ruff_up",
      "tool": "ruff pyupgrade rules (UP)",
      "type": "deterministic",
-     "j": 0.01324503311258278,
-     "catch": 0.0728476821192053,
+     "j": 0.012903225806451611,
+     "catch": 0.07096774193548387,
      "catch_ci": [
-      0.04116064625333085,
-      0.12572990512304344
+      0.04008595030813807,
+      0.12260190979903787
      ],
-     "fa": 0.059602649006622516,
+     "fa": 0.05806451612903226,
      "fa_ci": [
-      0.031670396806447315,
-      0.10938730344981454
+      0.03084505141348033,
+      0.10666048869691895
      ],
      "cost": 0.0,
      "cost_note": ""
+    },
+    {
+     "key": "kg_pyright_libs",
+     "tool": "pyright against the latest libraries (deprecated, missing attribute or import)",
+     "type": "deterministic",
+     "j": 0.567741935483871,
+     "catch": 0.6064516129032258,
+     "catch_ci": [
+      0.5278583942780153,
+      0.6798957456953922
+     ],
+     "fa": 0.03870967741935484,
+     "fa_ci": [
+      0.017859441234565628,
+      0.08187261888066868
+     ],
+     "cost": 0,
+     "cost_note": "",
+     "repository_url": "https://github.com/microsoft/pyright",
+     "stars": 14000,
+     "stars_updated_at": "2026-04-23"
+    },
+    {
+     "key": "kg_mypy_libs",
+     "tool": "mypy against the latest libraries (deprecated, missing attribute or import)",
+     "type": "deterministic",
+     "j": 0.14193548387096774,
+     "catch": 0.15483870967741936,
+     "catch_ci": [
+      0.1063126061404117,
+      0.22006033394581254
+     ],
+     "fa": 0.012903225806451613,
+     "fa_ci": [
+      0.003545617390420284,
+      0.045821802731260686
+     ],
+     "cost": 0,
+     "cost_note": "",
+     "repository_url": "https://github.com/python/mypy",
+     "stars": 18000,
+     "stars_updated_at": "2026-04-23"
     }
    ]
   },
@@ -1503,7 +1696,7 @@
     "148 pairs of correct agent patches where the agent also adds 2-3 dependencies to the repo's own manifest (requirements files, setup.py, setup.cfg, pyproject, tox.ini). The two patches of a pair are identical except one dependency line: in one it is a known-malicious PyPI package (each has an OpenSSF/OSV record), in the other a genuine package.",
     "Malicious names: 82 subtle typos of popular packages (plural, doubled/dropped/swapped letter, keyboard slip, digit, py- prefix; e.g. coloramas, urllib33) and 66 'popular name + word' combosquats (e.g. httpx-utils, twilio-rest).",
     "Genuine names, all checked on PyPI (3+ releases, first release before Nov 2024, mature version): 53 real plugin-style packages (e.g. dask-awkward, pytest-enabler), 44 real packages one letter away from a famous one (e.g. pep257, pyqrcode), 51 obscure real packages from the repos' environments. 66 of 148 are outside PyPI's top 15,000, so popularity alone does not vouch for them.",
-    "The other added dependencies are packages actually installed in that repo's environment, at their real versions. Reviewers see the issue and the patch. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. No model generated the cases."
+    "The other added dependencies are packages actually installed in that repo's environment, at their real versions. Reviewers see the issue and the patch. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The cases were designed by Claude (the coding assistant building this benchmark), not generated by any reviewed model."
    ],
    "caveats": [
     "The typosquat rule wins because it knows PyPI download ranks: on pairs whose genuine package is popular (top 15,000) it scores J +99%, on pairs whose genuine package is obscure only +65%. The best model (gpt-6-luna) is steadier: +73% and +82%.",
@@ -1636,6 +1829,140 @@
      "fa_ci": [
       0.6246923922718681,
       0.7704562362989584
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    }
+   ]
+  },
+  {
+   "id": "dependency_blindness",
+   "name": "Dependency blindness",
+   "n": 100,
+   "n_pos": 50,
+   "n_neg": 50,
+   "pos_label": "patches that re-implement something already available",
+   "dataset": "Hand-built on SWE-rebench-OpenHands-Trajectories (Nebius, CC-BY-4.0): correct agent patches, one call re-implemented by hand",
+   "summary": "The agent writes its own version of something the codebase, the standard library or an installed package already provides.",
+   "setup": [
+    "50 pairs. Each starts from one correct agent patch (Qwen3-Coder-480B in OpenHands, hidden tests pass) that uses an existing function. In the positive, that use is replaced by a hand-written re-implementation; the two patches of a pair are identical everywhere else.",
+    "What is re-implemented: 30 of the repository's own helpers (e.g. PyJWT's base64url decoding, MONAI's ensure_tuple, oauthlib's raise_from_error, MetPy's check_units decorator), 17 standard-library functions (e.g. shlex.split, fnmatch, os.makedirs(exist_ok=True), csv.writer, functools.wraps, uuid4) and 3 NumPy functions (np.where, np.isclose, np.setdiff1d). How: 33 inline (the call replaced by a few lines), 11 rewritten helpers, 6 copies of the helper's body pasted into the patch.",
+    "Each edit was checked: the file still parses, no undefined name is added (ruff F821), the original call is gone and the re-implementation is there. Seven hand-rolled helpers were extracted from the positive patches and run against the function they replace; they agree on the kind of input the patch passes (e.g. shlex.split 6 of 6, fnmatch 36 of 36, fountain's stringify 7 of 8: -0.0 differs). Others differ on edge cases, as hand-rolled code does (time-zone-aware indexes, error classes).",
+    "Reviewers see the issue, the patch and, when the re-implemented function is the repository's own, the module that defines it (both patches of a pair see the same files). Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The pairs were written by Claude (the coding assistant building this benchmark), not by any reviewed model."
+   ],
+   "caveats": [
+    "Hand-built: every re-implementation was written on purpose. Natural dependency blindness is often larger (whole helpers rebuilt) or subtler.",
+    "The clean side can already be blind: 8 of 58 drafted pairs were dropped because the agent's own patch already re-implemented something (e.g. sorting version tags as strings although pre_commit.util.parse_version exists). Found by reading every base patch and by checking every clean patch the strong models flagged. Some may remain, which would inflate FPR.",
+    "Showing the module that defines the helper makes the task easier than real review, where the reviewer must know or find it; read the scores as an upper bound.",
+    "sentrux, the KG's redundancy checker, was not run: its macOS release binary needs a Gatekeeper quarantine override to start, which was not approved for this run. The rule here is a simple stand-in for its documented duplicate-body check and only catches copied bodies.",
+    "Unreadable answers count as not flagged: Phi-4-mini 18 of 100 (15 Azure connection failures after retries, 3 malformed), deepseek-v4-flash 1.",
+    "50 pairs: confidence intervals are about +/-10 points."
+   ],
+   "rows": [
+    {
+     "key": "plain_llm_luna",
+     "tool": "gpt-6-luna, asked directly",
+     "type": "baseline_model",
+     "j": 0.8999999999999999,
+     "catch": 0.96,
+     "catch_ci": [
+      0.8653966212204534,
+      0.9889613473391734
+     ],
+     "fa": 0.06,
+     "fa_ci": [
+      0.020614596364630478,
+      0.16217343370877002
+     ],
+     "cost": 0.02380115,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_deepseek",
+     "tool": "deepseek-v4-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.86,
+     "catch": 0.88,
+     "catch_ci": [
+      0.7619492111337642,
+      0.9438247628937535
+     ],
+     "fa": 0.02,
+     "fa_ci": [
+      0.0035391680889764604,
+      0.10495686471836953
+     ],
+     "cost": 0.0405680926,
+     "cost_note": "API-reported (Hyperbolic)"
+    },
+    {
+     "key": "plain_llm_mimo",
+     "tool": "mimo-v2.6-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.86,
+     "catch": 0.88,
+     "catch_ci": [
+      0.7619492111337642,
+      0.9438247628937535
+     ],
+     "fa": 0.02,
+     "fa_ci": [
+      0.0035391680889764604,
+      0.10495686471836953
+     ],
+     "cost": 0.03164622,
+     "cost_note": "API-reported (Hyperbolic)"
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "j": 0.6399999999999999,
+     "catch": 0.94,
+     "catch_ci": [
+      0.8378265662912299,
+      0.9793854036353695
+     ],
+     "fa": 0.3,
+     "fa_ci": [
+      0.1910338908960936,
+      0.4375061227736339
+     ],
+     "cost": 0.052575000000000004,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_phi",
+     "tool": "Phi-4-mini, asked directly",
+     "type": "baseline_model",
+     "j": -0.020000000000000018,
+     "catch": 0.36,
+     "catch_ci": [
+      0.24138562967182875,
+      0.49859237989698046
+     ],
+     "fa": 0.38,
+     "fa_ci": [
+      0.2586259584257722,
+      0.5184980497760643
+     ],
+     "cost": 0.0166914,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "rule_dup_body",
+     "tool": "Rule: a function the patch adds has the same body as one in the shown code (stand-in for sentrux)",
+     "type": "baseline_rule",
+     "j": 0.12000000000000001,
+     "catch": 0.14,
+     "catch_ci": [
+      0.06950745262022862,
+      0.2618645719852809
+     ],
+     "fa": 0.02,
+     "fa_ci": [
+      0.0035391680889764604,
+      0.10495686471836953
      ],
      "cost": 0.0,
      "cost_note": ""
