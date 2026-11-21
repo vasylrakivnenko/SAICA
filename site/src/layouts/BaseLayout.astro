@@ -44,9 +44,14 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
       >Skip to main content</a
     >
     <div class="mx-auto max-w-prose-wide px-5 md:flex md:gap-10">
-      <aside class="md:w-44 md:shrink-0 md:sticky md:top-0 md:self-start md:max-h-screen md:overflow-y-auto border-b md:border-b-0 border-ink/10 py-4 md:py-10 font-sans">
+      <aside class="md:w-56 md:shrink-0 md:sticky md:top-0 md:self-start md:max-h-screen md:overflow-y-auto border-b md:border-b-0 border-ink/10 py-4 md:py-10 font-sans">
         <a href="/" class="no-underline text-ink hover:text-accent font-semibold tracking-tight text-lg">SAICA-Bench</a>
-        <nav aria-label="Primary" class="mt-3 md:mt-6 text-sm">
+        <p class="mt-1 text-sm leading-snug text-ink">Can Language Models catch coding agents' failures?</p>
+        <p class="mt-1.5 text-xs text-ink-muted">Vasyl Rakivnenko, Stanford University</p>
+        <p class="mt-4 text-xs leading-relaxed text-ink-muted text-left">
+          How often each supervision tool flags a real failure of an AI coding agent (<b class="font-semibold text-ink">true positive rate</b>, TPR) and how often it flags clean work (<b class="font-semibold text-ink">false positive rate</b>, FPR). Each entry reports <b class="font-semibold text-ink">J = TPR − FPR</b> (0% = chance, 100% = perfect).
+        </p>
+        <nav aria-label="Primary" class="mt-5 md:mt-6 text-sm">
           <ul class="flex flex-wrap md:flex-col gap-x-5 gap-y-1 md:gap-y-2">
             {nav.map((n) => (
               <li>
