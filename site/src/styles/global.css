@@ -93,3 +93,36 @@
     @apply text-ink;
   }
 }
+
+/* Option cards: every label that wraps a checkbox or radio is a small white card; only the box itself turns blue
+   when ticked (same look as the kit builder and the Overview chart). */
+label:has(> input[type="checkbox"]),
+label:has(> input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgb(17 20 24 / 0.12);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  transition: border-color 0.15s;
+}
+label:has(> input[type="checkbox"]):hover,
+label:has(> input[type="radio"]):hover {
+  border-color: rgb(31 58 147 / 0.55);
+}
+label:has(> input[type="checkbox"]) + label:has(> input[type="checkbox"]),
+label:has(> input[type="radio"]) + label:has(> input[type="radio"]) {
+  margin-top: 0.35rem;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #1f3a93;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex: none;
+  cursor: pointer;
+}
