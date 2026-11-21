@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph } from '../../lib/data.ts';
+import { breadcrumbs, clip, fmUrl } from '../../lib/seo.ts';
 import type { Taxonomy } from '../../lib/types.ts';
 
 export function getStaticPaths() {
@@ -16,12 +17,20 @@ const { taxonomy } = Astro.props;
 
 const byCategory = graph.failureModesByTaxonomyCategory[taxonomy.id] ?? {};
 const paper = taxonomy.paper_id ? graph.papers[taxonomy.paper_id] : undefined;
-const desc = taxonomy.scope ?? `External taxonomy: ${taxonomy.name}.`;
+const desc = clip(taxonomy.scope ?? `${taxonomy.name}, an external failure taxonomy, mapped to SAICA's coding-agent failure modes.`, 155);
+// A taxonomy published in a paper can share the paper's title; keep the two <title>s distinct.
+const sameTitleAsPaper = Object.values(graph.papers).some((p) => p.title.trim().toLowerCase() === taxonomy.name.trim().toLowerCase());
+const title = sameTitleAsPaper ? `${taxonomy.name} (taxonomy crosswalk)` : taxonomy.name;
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Taxonomies', '/taxonomies/'],
+  [clip(taxonomy.name, 80), `/taxonomies/${taxonomy.id}/`],
+]);
 ---
 
-<BaseLayout title={taxonomy.name} description={desc.slice(0, 160)}>
+<BaseLayout title={title} description={desc} jsonld={jsonld}>
   <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-    <a href="/taxonomies" class="no-underline hover:underline">Taxonomies</a>
+    <a href="/taxonomies/" class="no-underline hover:underline">Taxonomies</a>
   </p>
   <h1 class="mt-1">{taxonomy.name}</h1>
   <p class="mt-2 text-ink-muted font-sans text-sm">
@@ -42,7 +51,7 @@ const desc = taxonomy.scope ?? `External taxonomy: ${taxonomy.name}.`;
     )}
     {taxonomy.license && <span class="chip">License: {taxonomy.license}</span>}
     {paper && (
-      <a class="chip" href={`/papers/${paper.id}`}>Paper &rarr;</a>
+      <a class="chip" href={`/papers/${paper.id}/`}>Paper &rarr;</a>
     )}
   </div>
 
@@ -74,7 +83,7 @@ const desc = taxonomy.scope ?? `External taxonomy: ${taxonomy.name}.`;
               <ul class="mt-1 flex flex-wrap gap-1.5">
                 {fmIds.map((fmId) => (
                   <li>
-                    <a class="chip-accent" href={`/failure-modes/${fmId}`}>
+                    <a class="chip-accent" href={fmUrl(fmId)}>
                       {graph.failureModes[fmId]?.name ?? fmId}
                     </a>
                   </li>

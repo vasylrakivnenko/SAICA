@@ -1,29 +1,36 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph } from '../../lib/data.ts';
+import { breadcrumbs, clip } from '../../lib/seo.ts';
 
 const taxonomies = Object.values(graph.taxonomies)
   .slice()
   .sort((a, b) => a.name.localeCompare(b.name));
+const description = clip(
+  'MAST, OWASP Agentic Top 10, Microsoft AIRT, DAPLab and other AI agent failure taxonomies, mapped category by category to coding-agent failure modes.',
+  155,
+);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Taxonomies', '/taxonomies/'],
+]);
 ---
 
-<BaseLayout
-  title="Taxonomies"
-  description="External failure-mode and risk taxonomies ingested by SAICA-KG, with crosswalks into the KG's own FailureMode facet."
->
-  <h1>External taxonomies</h1>
+<BaseLayout title="AI agent failure taxonomies and crosswalks" description={description} jsonld={jsonld}>
+  <h1>AI agent failure taxonomies</h1>
   <p class="text-ink-muted mt-2 max-w-3xl">
-    SAICA-KG absorbs existing failure-mode taxonomies as first-class data and publishes
-    explicit crosswalks from them into the KG's FailureMode facet.
+    {taxonomies.length} published taxonomies of AI agent failures and risks, kept as first-class data, with explicit
+    crosswalks from each category into SAICA's <a href="/failure-modes/">coding-agent failure modes</a>. The
+    <a href="/taxonomy-study/">cluster study</a> compares them side by side.
   </p>
 
   <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
     {taxonomies.map((t) => (
       <li class="py-4">
         <div class="flex items-baseline justify-between gap-4">
-          <h3 class="!mt-0">
-            <a href={`/taxonomies/${t.id}`}>{t.name}</a>
-          </h3>
+          <h2 class="!mt-0 mb-2 text-lg">
+            <a href={`/taxonomies/${t.id}/`}>{t.name}</a>
+          </h2>
           <span class="font-sans text-xs text-ink-faint">
             v{t.version} · {t.categories.length} categories
           </span>

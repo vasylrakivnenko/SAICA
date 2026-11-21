@@ -1,30 +1,38 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph, failureModeLabel } from '../../lib/data.ts';
+import { breadcrumbs, clip, fmUrl } from '../../lib/seo.ts';
+import { andList, fmPhrase } from '../../lib/catalog.ts';
 
 const recipes = Object.values(graph.recipes)
   .slice()
   .sort((a, b) => a.name.localeCompare(b.name));
+const targets = [...new Set(recipes.flatMap((r) => r.targets_failure_modes))];
+const description = clip(
+  `Stacks of supervision tools that guard an AI coding agent against ${andList(targets.map((t) => fmPhrase(t, true)))}.`,
+  155,
+);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Recipes', '/recipes/'],
+]);
 ---
 
-<BaseLayout
-  title="Recipes"
-  description="Prescriptive compositions of supervision tools that target specific FailureModes — the flip-side of Incidents."
->
-  <h1>Recipes</h1>
+<BaseLayout title="Supervision recipes for AI coding agents" description={description} jsonld={jsonld}>
+  <h1>Supervision recipes for AI coding agents</h1>
   <p class="text-ink-muted mt-2 max-w-3xl">
-    {recipes.length} ordered compositions of Tools that address one or more
-    FailureModes. Recipes are the prescriptive flip-side of Incidents: patterns
-    that have worked, or plausibly could, in practice.
+    {recipes.length} ordered compositions of <a href="/tools/">tools</a> that address one or more
+    <a href="/failure-modes/">failure modes</a>. Recipes are the prescriptive flip side of
+    <a href="/incidents/">incidents</a>: patterns that have worked, or plausibly could, in practice.
   </p>
 
   <ul class="mt-6 grid gap-4 md:grid-cols-2">
     {recipes.map((r) => (
       <li class="card">
         <div class="flex items-baseline justify-between gap-2">
-          <h3 class="!mt-0">
-            <a href={`/recipes/${r.id}`}>{r.name}</a>
-          </h3>
+          <h2 class="!mt-0 mb-2 text-lg">
+            <a href={`/recipes/${r.id}/`}>{r.name}</a>
+          </h2>
           <span class="font-sans text-xs text-ink-faint">
             {r.stack.length} tool{r.stack.length === 1 ? '' : 's'}
           </span>
@@ -36,7 +44,7 @@ const recipes = Object.values(graph.recipes)
         </div>
         <div class="mt-2 flex flex-wrap gap-1.5">
           {r.targets_failure_modes.map((fm) => (
-            <span class="chip" title="Targets failure mode">{failureModeLabel(fm)}</span>
+            <a class="chip no-underline hover:text-accent" href={fmUrl(fm)} title="Targets failure mode">{failureModeLabel(fm)}</a>
           ))}
         </div>
       </li>

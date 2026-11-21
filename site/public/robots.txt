@@ -1,0 +1,6 @@
+# SAICA-Bench: everything public may be crawled, including by AI search crawlers.
+User-agent: *
+Allow: /
+Disallow: /kit/__pycache__/
+
+Sitemap: https://saica.ai/sitemap.xml

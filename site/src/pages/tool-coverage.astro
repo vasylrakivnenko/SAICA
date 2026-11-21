@@ -5,9 +5,15 @@
 // /tool_fm_heatmap.json is still published. Untested catalog tools are hidden here until they can be scored.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import KitBuilder from "../components/KitBuilder.astro";
-const title = "Coverage: build your supervision kit";
+import { SUMMARIES, pct } from "../components/home/bench";
+import { breadcrumbs } from "../lib/seo";
+const title = "Build a Supervision Kit for Your AI Coding Agent";
+// One measured example for the snippet: the best free program in any mode.
+const free = SUMMARIES.filter((s) => s.free && s.free.type === "deterministic").sort((a, b) => b.free!.j - a.free!.j)[0];
+const example = free ? ` (${free.free!.tool.split(" (")[0]}: J ${pct(free.free!.j, 0)} on ${free.m.name.toLowerCase()}, free)` : "";
+const description = `Pick the failure modes you care about; get the best-measured tool for each${example} and one setup prompt for your AI coding agent.`;
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} description={description} jsonld={breadcrumbs([["SAICA-Bench", "/"], ["Supervision kit", "/tool-coverage/"]])}>
   <KitBuilder />
 </BaseLayout>

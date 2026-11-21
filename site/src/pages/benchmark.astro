@@ -1,12 +1,59 @@
 ---
 // SAICA-Bench overview: one block per failure mode (what it tests, data, counts, caveats).
+// SEO: each card links to its failure-mode page; the page carries the benchmark's schema.org Dataset (Google Dataset Search).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BenchSchema from '../components/BenchSchema.astro';
 import results from '../../public/bench/results.json';
+import { SUMMARIES, STAR_MODES, TOTAL_SAMPLES, SOURCES, GENERATED, AUTHOR, andList } from '../components/home/bench';
+import { abs, fmUrl, breadcrumbs } from '../lib/seo';
 const modes = results.modes;
+const best = Object.fromEntries(SUMMARIES.map((s) => [s.m.id, s.best.j]));
+const names = SUMMARIES.map((s) => s.m.name.toLowerCase());
+
+const title = 'SAICA-Bench Methodology: Coding Agent Failure Datasets and Scoring';
+const description =
+  `How SAICA-Bench tests supervision tools and LLMs on ${SUMMARIES.length} failure modes of AI coding agents: ` +
+  `${TOTAL_SAMPLES.toLocaleString('en-US')} labelled samples, scored by J = TPR − FPR and cost.`;
+
+const dataset = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'SAICA-Bench: detection of AI coding agent failures',
+  alternateName: 'SAICA-Bench',
+  description:
+    `SAICA-Bench measures how well supervision tools and language models catch the typical failures of AI coding agents. ` +
+    `It has ${TOTAL_SAMPLES.toLocaleString('en-US')} labelled samples (patches, functions and agent sessions, each bad or clean) across ` +
+    `${SUMMARIES.length} failure modes: ${andList(names)}. Free programs, AI code reviewers, evaluation frameworks and plain ` +
+    `language models review the same samples without seeing the labels; each tool is reported with its true positive rate, ` +
+    `false positive rate, Youden's J (TPR − FPR) and cost per 1,000 reviews.`,
+  url: abs('/benchmark/'),
+  license: 'https://creativecommons.org/licenses/by/4.0/',
+  isAccessibleForFree: true,
+  creator: AUTHOR,
+  dateModified: GENERATED,
+  keywords: [
+    ...new Map(
+      [
+        'AI coding agents', 'coding agent failure modes', 'AI code review benchmark', 'LLM-as-judge', 'code hallucination',
+        'reward hacking', 'slopsquatting', 'supervision tools', "Youden's J", ...SUMMARIES.map((s) => s.m.name),
+      ].map((k) => [k.toLowerCase(), k]),
+    ).values(),
+  ],
+  variableMeasured: [
+    { '@type': 'PropertyValue', name: 'TPR', alternateName: 'True positive rate', description: 'Share of bad samples (containing the failure) that the tool flags.' },
+    { '@type': 'PropertyValue', name: 'FPR', alternateName: 'False positive rate', description: 'Share of clean samples that the tool flags.' },
+    { '@type': 'PropertyValue', name: 'J', alternateName: "Youden's J", description: 'J = TPR − FPR. 0% is chance, 100% flags every bad sample and no clean one.' },
+    { '@type': 'PropertyValue', name: 'Cost per 1,000 reviews', unitText: 'USD', description: 'API price, GPU time for self-hosted models, $0 for free programs.' },
+  ],
+  measurementTechnique:
+    'Each tool reviews every sample of a failure mode once, without seeing its label (same prompt or configuration for every sample, temperature 0 for models); its verdicts are compared with labels from public datasets confirmed by execution or expert review, or from matched pairs that differ only in the failure.',
+  isBasedOn: SOURCES.filter((s) => s.modes.length).map((s) => ({ '@type': 'Dataset', name: s.name, url: s.url })),
+  distribution: [{ '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: abs('/bench/results.json') }],
+};
+const jsonld = [dataset, breadcrumbs([['SAICA-Bench', '/'], ['Benchmark', '/benchmark/']])];
 ---
 
-<BaseLayout title="Benchmark" description="What SAICA-Bench tests, on which data, and how it is scored.">
+<BaseLayout title={title} rawTitle description={description} jsonld={jsonld}>
   <h1>SAICA-Bench</h1>
 
   <h2 class="mt-6">Overview</h2>
@@ -20,7 +67,7 @@ const modes = results.modes;
   <div class="mt-4 grid gap-5 max-w-4xl">
     {modes.map((m) => (
       <section class="card p-5 border border-ink/10 rounded-lg bg-white" id={m.id}>
-        <div class="font-sans text-xs uppercase tracking-wide text-ink-faint">{m.n_pos} {m.pos_label} · {m.n_neg} clean · {m.rows.length} tools</div>
+        <div class="font-sans text-xs uppercase tracking-wide text-ink-faint">{m.n_pos} {m.pos_label} · {m.n_neg} clean · {m.rows.length} tools · best J {Math.round(best[m.id] * 100)}%</div>
         <h2 class="mt-1 mb-1">{m.name}</h2>
         <p class="text-ink-muted">{m.summary}</p>
         <p class="mt-2 font-mono text-xs text-ink-faint">Data: {m.dataset}</p>
@@ -31,12 +78,12 @@ const modes = results.modes;
             {m.caveats.map((s) => <li>{s}</li>)}
           </ul>
         </details>
-        <p class="mt-3 font-sans text-sm"><a href={`/#${m.id}`}>Leaderboard →</a></p>
+        <p class="mt-3 font-sans text-sm"><a href={`/#${m.id}`}>Leaderboard →</a> · <a href={fmUrl(m.id)}>What {m.name.toLowerCase()} is →</a></p>
       </section>
     ))}
   </div>
 
   <p class="mt-8 text-sm text-ink-muted max-w-4xl">
-    Not benchmarked yet: Cascading failure and Context pollution, for which no dataset with confirmed labels exists; the leaderboard lists their catalog tools by GitHub stars instead. Several sets are synthetic or hand-built pairs; each mode's setup and caveats say how its samples were made.
+    Not benchmarked yet: {STAR_MODES.map((m, i) => <>{i > 0 && (i === STAR_MODES.length - 1 ? ' and ' : ', ')}<a href={fmUrl(m.id)}>{m.name}</a></>)}, for which no dataset with confirmed labels exists; the leaderboard lists their catalog tools by GitHub stars instead. Several sets are synthetic or hand-built pairs; each mode's setup and caveats say how its samples were made. A summary of what the results show is in the <a href="/findings/">findings report</a>.
   </p>
 </BaseLayout>

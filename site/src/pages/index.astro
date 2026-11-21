@@ -3,10 +3,49 @@
 // bench/build_report.py from each failure mode's results. An Overview tab (results.overview: reviewer x mode
 // grid, best tool per mode, findings) and one tab per mode.
 import BaseLayout from '../layouts/BaseLayout.astro';
+import BestPerMode from '../components/home/BestPerMode.astro';
 import results from '../../public/bench/results.json';
+import { OVERVIEW as OV, MODES, SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, GENERATED_LONG, AUTHOR, pct, money, toolPage } from '../components/home/bench';
+import { SITE_NAME, abs, fmUrl } from '../lib/seo';
+
+// SEO: the Overview tab (grid, legend, findings, caveats) and the best-per-mode table are rendered here at build time,
+// so the page has its results in static HTML; the inline script below re-renders them identically and adds the rest.
+const hi = [...SUMMARIES].sort((a, b) => b.best.j - a.best.j);
+const title = 'SAICA-Bench: AI Code Review Benchmark for Coding Agent Failures';
+const description = `Which LLMs, AI code reviewers and free tools catch coding agent failures? Measured on ${MODES.length} failure modes: best J ${Math.round(hi[0].best.j * 100)}% on ${hi[0].m.name.toLowerCase()}, ${Math.round(hi[hi.length - 1].best.j * 100)}% on ${hi[hi.length - 1].m.name.toLowerCase()}.`;
+const jsonld = [
+  { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: abs('/'), description, inLanguage: 'en', creator: AUTHOR },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Failure modes of AI coding agents measured on SAICA-Bench',
+    numberOfItems: SUMMARIES.length,
+    itemListElement: SUMMARIES.map((s, i) => ({ '@type': 'ListItem', position: i + 1, name: s.m.name, url: abs(s.url) })),
+  },
+];
+
+// Links the inline script cannot compute itself (it has no imports): failure-mode page per tab, tool page per catalog id
+// (only ids the catalog has a page for), and the catalog id behind each Overview grid row (the grid carries names only).
+const FM_URL = Object.fromEntries([...MODES, ...STAR_MODES].map((m) => [m.id, fmUrl(m.id)]));
+const ids = new Set([...MODES.flatMap((m) => m.rows.map((r) => r.kg_id)), ...STAR_MODES.flatMap((m) => m.tools.map((t) => t.id))]);
+const TOOL_URL = Object.fromEntries([...ids].map((id) => [id, toolPage(id)]).filter(([, u]) => u));
+const OV_KG: Record<string, string> = {};
+for (const r of OV.rows)
+  for (const [mid, c] of Object.entries(r.cells)) {
+    const kg = MODES.find((m) => m.id === mid)?.rows.find((x) => x.tool === c.tool)?.kg_id;
+    if (kg && TOOL_URL[kg]) { OV_KG[r.tool] = kg; break; }
+  }
+
+// Static copy of the Overview grid: same markup and inline styles as renderOverview() in the script.
+const short = (t: string) => t.replace(', asked directly', '').split(' (')[0].split(':')[0];
+const fill = (j: number) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
+const col = (t: string) => `var(${TYPE_VAR[t]})`;
+const cellTip = (name: string, c: { tool: string; j: number; fa: number; cost1k: number }) =>
+  `${name} · ${c.tool}: J ${pct(c.j)}, FPR ${pct(c.fa)}, ` + (c.cost1k === 0 ? 'free' : `${money(c.cost1k)} per 1,000 reviews`);
+const ovTypes = [...new Set(OV.rows.map((r) => r.type))];
 ---
 
-<BaseLayout title="SAICA-Bench">
+<BaseLayout title={title} rawTitle description={description} jsonld={jsonld}>
   <div class="lb">
     <h1>Leaderboard</h1>
     <p class="tagline">Can Language Models catch coding agents' failures?</p>
@@ -15,18 +54,22 @@ import results from '../../public/bench/results.json';
 
     <div class="tabs" role="tablist" id="lb-tabs"></div>
 
-    <section id="lb-ov" hidden>
+    <section id="lb-ov">
       <p class="fine ov-intro">J for each reviewer that ran on several failure modes. The bottom row names the best tool in each mode, of any type. Hover a cell for the exact tool, its false positive rate and cost; click a mode to open its tab.</p>
-      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"></table></div>
-      <div class="legend" id="lb-ov-legend"></div>
+      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Reviewer</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the tool ran (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i>{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={`${b.tool}: J ${pct(b.j)}`}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}</td>; })}<td></td></tr></tbody></table></div>
+      <div class="legend" id="lb-ov-legend">{ovTypes.map((t) => <span><i style={`background:${col(t)}`}></i>{TYPE_LABEL[t]}</span>)}<span>Darker cell = higher J · “·” = not run</span></div>
       <h2>Average quality vs average cost</h2>
       <p class="fine">Each point is one reviewer’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the tool ran on only 3 of them.</p>
       <div class="ov-modes" id="lb-ov-modes" role="group" aria-label="Failure modes included in the averages"></div>
       <div class="chart" id="lb-ov-chart"></div>
       <h2>What the grid says</h2>
-      <ul class="findings" id="lb-ov-findings"></ul>
+      <ul class="findings" id="lb-ov-findings">{OV.findings.map(([lead, rest]) => <li><b>{lead}</b>{rest}</li>)}</ul>
+      <h2>Best tool per failure mode</h2>
+      <p class="fine ov-intro">The top entry in each mode with its true and false positive rates and its cost per 1,000 reviews, next to the best free option (a free program or a simple rule). A mode's name opens what it is and how to catch it; “All →” opens its tab.</p>
+      <BestPerMode />
+      <p class="fine">Results as of {GENERATED_LONG} · <a href="/findings/">All findings in one page →</a></p>
       <h2>Read before citing</h2>
-      <ul class="ov-caveats" id="lb-ov-caveats"></ul>
+      <ul class="ov-caveats" id="lb-ov-caveats">{OV.caveats.map((c) => <li>{c}</li>)}</ul>
     </section>
 
     <section id="lb-star" hidden>
@@ -35,7 +78,7 @@ import results from '../../public/bench/results.json';
       <p class="fine" id="lb-star-note"></p>
     </section>
 
-    <div id="lb-mode">
+    <div id="lb-mode" hidden>
     <div class="controls">
       <div class="types" id="lb-types" role="group" aria-label="Filter by type"></div>
       <label><input type="checkbox" id="lb-stars" checked /> Show GitHub stars</label>
@@ -72,11 +115,11 @@ import results from '../../public/bench/results.json';
     <div class="legend" id="lb-legend"></div>
     </div>
 
-    <p class="more"><a href="/benchmark">How each failure mode is tested →</a> · <a href="/graph">Knowledge graph of supervision tools →</a></p>
+    <p class="more"><a href="/benchmark/">How each failure mode is tested →</a> · <a href="/findings/">Findings report →</a> · <a href="/graph/">Knowledge graph of supervision tools →</a></p>
   </div>
 </BaseLayout>
 
-<script is:inline define:vars={{ results }}>
+<script is:inline define:vars={{ results, FM_URL, TOOL_URL, OV_KG }}>
 const DATA = results.modes, TYPE_LABEL = results.type_label, OV = results.overview, STAR = results.star_modes || [];
 const TYPE_VAR = {deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule'};
 const isBaseline = (r) => r.type === 'baseline_model' || r.type === 'baseline_rule';
@@ -88,6 +131,10 @@ const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag)
   kids.flat().forEach((k) => k != null && e.append(k)); return e; };
 const svgEl = (tag, attrs = {}) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+// Tool name -> its page on this site when the catalog has one, else its GitHub repo; GitHub stays one click away in the stars cell.
+const toolLink = (kgId, repo, text) => kgId && TOOL_URL[kgId] ? el('a', { href: TOOL_URL[kgId], text }) : repo ? el('a', { href: repo, rel: 'noopener', text }) : text;
+const starsCell = (n, repo) => { if (!n) return '—'; const t = n.toLocaleString('en-US'); return repo ? el('a', { href: repo, rel: 'noopener', class: 'gh', text: t }) : t; };
+const fmLink = (m, sep) => FM_URL[m.id] ? [sep, el('a', { href: FM_URL[m.id], text: `About ${m.name.toLowerCase()} →` })] : [];
 const ALL_TYPES = Object.keys(TYPE_LABEL).filter((t) => DATA.some((m) => m.rows.some((r) => r.type === t)));
 const state = { mode: OV ? 'overview' : DATA[0].id, key: 'j', types: new Set(ALL_TYPES), stars: true };
 const store = (k, v) => { try { localStorage.setItem('saica-lb-' + k, JSON.stringify(v)); } catch (e) {} };
@@ -105,16 +152,16 @@ function renderTable(m) {
   const tb = document.querySelector('#lb-table tbody');
   tb.replaceChildren(...rows.map((r, i) => el('tr', { class: isBaseline(r) ? 'baseline' : '' },
     el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', {}, r.repository_url ? el('a', { href: r.repository_url, rel: 'noopener', text: r.tool }) : r.tool),
+    el('td', {}, toolLink(r.kg_id, r.repository_url, r.tool)),
     el('td', {}, el('span', { class: 'pill', style: `color:${col(r.type)}`, text: TYPE_LABEL[r.type] })),
     el('td', { class: 'num j' }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j)),
     el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
     el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
     el('td', { class: 'num', 'data-tip': `${money(r.cost)} for all ${m.n} reviews in this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost / m.n * 1000) }),
-    el('td', { class: 'num col-stars', 'data-tip': r.stars_updated_at ? `as of ${r.stars_updated_at}` : '', text: r.stars ? r.stars.toLocaleString('en-US') : '—' }))));
+    el('td', { class: 'num col-stars', 'data-tip': r.stars_updated_at ? `as of ${r.stars_updated_at}` : '' }, starsCell(r.stars, r.repository_url)))));
   document.querySelectorAll('#lb-table .sort').forEach((b) => b.toggleAttribute('aria-pressed', b.dataset.k === state.key));
   document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
-  document.getElementById('lb-note').textContent = `${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`;
+  document.getElementById('lb-note').replaceChildren(`${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`, ...fmLink(m, ' · '));
 }
 
 function renderChart(m) {
@@ -172,7 +219,7 @@ function renderOverview() {
     OV.modes.map((m) => el('th', { class: 'mcol' }, el('button', { type: 'button', class: 'mlink', text: m.name, 'data-id': m.id }))),
     el('th', { class: 'num', 'data-tip': 'Mean J over the modes the tool ran (number of modes in brackets)' }, 'Average')));
   const body = OV.rows.map((r) => el('tr', {},
-    el('td', { class: 'rname' }, el('i', { class: 'dot', style: `background:${col(r.type)}` }), r.tool),
+    el('td', { class: 'rname' }, el('i', { class: 'dot', style: `background:${col(r.type)}` }), OV_KG[r.tool] ? el('a', { href: TOOL_URL[OV_KG[r.tool]], text: r.tool }) : r.tool),
     OV.modes.map((m) => { const c = r.cells[m.id];
       if (!c) return el('td', { class: 'na', 'data-tip': 'not run on this mode', text: '·' });
       return el('td', { class: 'cell' + (c.j < 0.05 ? ' low' : ''), style: `background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`,
@@ -259,7 +306,7 @@ function renderOvChart() {
 function renderStar(m) {
   const MECH = { detects: 'Detects', prevents: 'Prevents', records: 'Records only' };
   const fin = (v) => (v === true ? 'yes' : v === false ? 'no' : 'unclear');
-  document.getElementById('lb-star-intro').textContent = `Not benchmarked yet: no public dataset with confirmed labels exists for ${m.name.toLowerCase()}, so these are the SAICA catalog's tools tagged for it, ranked by GitHub stars. Stars measure popularity, not how well a tool catches the failure. ${m.description || ''}`;
+  document.getElementById('lb-star-intro').replaceChildren(`Not benchmarked yet: no public dataset with confirmed labels exists for ${m.name.toLowerCase()}, so these are the SAICA catalog's tools tagged for it, ranked by GitHub stars. Stars measure popularity, not how well a tool catches the failure. ${m.description || ''}`, ...fmLink(m, ' '));
   const head = el('thead', {}, el('tr', {}, el('th', { class: 'num', text: '#' }), el('th', { text: 'Tool' }), el('th', { text: 'How it addresses this' }),
     el('th', { 'data-tip': 'Detects = flags it after the fact; Prevents = stops it during a run; Records only = keeps traces you could inspect', text: 'Mechanism' }),
     el('th', { 'data-tip': 'Can it check a finished change or saved session, rather than only working inside a run or an agent built with it?', text: 'On a finished change' }),
@@ -267,11 +314,11 @@ function renderStar(m) {
   const tools = [...m.tools].sort((a, b) => (b.stars || 0) - (a.stars || 0));
   const body = el('tbody', {}, tools.map((t, i) => el('tr', { class: t.mechanism === 'records' ? 'baseline' : '' },
     el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', {}, t.repository_url ? el('a', { href: t.repository_url, rel: 'noopener', text: t.name }) : t.name),
+    el('td', {}, toolLink(t.id, t.repository_url, t.name)),
     el('td', { class: 'how', text: t.how || '' }),
     el('td', {}, el('span', { class: 'pill', style: 'color:#1f3a93', text: MECH[t.mechanism] || t.mechanism })),
     el('td', { text: fin(t.runs_on_finished_change) }),
-    el('td', { class: 'num', 'data-tip': t.stars_updated_at ? `as of ${t.stars_updated_at}` : '', text: t.stars ? t.stars.toLocaleString('en-US') : '—' }))));
+    el('td', { class: 'num', 'data-tip': t.stars_updated_at ? `as of ${t.stars_updated_at}` : '' }, starsCell(t.stars, t.repository_url)))));
   document.getElementById('lb-star-table').replaceChildren(head, body);
   document.getElementById('lb-star-note').textContent = m.note || '';
 }
@@ -304,7 +351,10 @@ ALL_TYPES.forEach((t) => { const b = el('button', { type: 'button', class: 'chip
 function syncTypes() { typesBox.querySelectorAll('.chip[data-t]').forEach((b) => b.setAttribute('aria-pressed', String(state.types.has(b.dataset.t) && state.types.size < ALL_TYPES.length)));
   allBtn.setAttribute('aria-pressed', String(state.types.size === ALL_TYPES.length)); store('types', [...state.types]); render(); }
 cs.addEventListener('change', () => { state.stars = cs.checked; store('stars', cs.checked); render(); });
-const h = location.hash.slice(1); if (DATA.some((d) => d.id === h) || STAR.some((d) => d.id === h) || (OV && h === 'overview')) state.mode = h;
+const validTab = (id) => DATA.some((d) => d.id === id) || STAR.some((d) => d.id === id) || (OV && id === 'overview');
+const h = location.hash.slice(1); if (validTab(h)) state.mode = h;
+window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (!validTab(id) || id === state.mode) return;
+  state.mode = id; render(); tabs.scrollIntoView({ block: 'start' }); });
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 100); });
 syncTypes();
 </script>
@@ -376,6 +426,10 @@ syncTypes();
   .lb table.ov td.na { text-align: center; color: #9a9fab; }
   .lb table.ov td.avg { color: #4a5160; }
   .lb table.ov .nm { color: #7a8192; font-size: 12px; }
+  .lb table.ov td.rname a { color: inherit; text-decoration: none; }
+  .lb table.ov td.rname a:hover, .lb table.ov td.rname a:focus-visible { color: #1f3a93; text-decoration: underline; }
+  .lb td a.gh { color: inherit; }
+  .lb td a.gh:hover { color: #1f3a93; }
   .lb table.ov .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
   .lb table.ov tr.best td { border-top: 2px solid rgb(17 20 24 / .12); font-size: 12.5px; vertical-align: top; }
   .lb table.ov tr.best td.cell { font-weight: 500; white-space: normal; line-height: 1.3; }

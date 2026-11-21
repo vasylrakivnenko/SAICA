@@ -3,13 +3,27 @@
 // Loads /embeddings.json at runtime and renders with raw SVG (no chart lib).
 // Consistent with /graph: tool blue, failure_mode rose, taxonomy violet, paper slate.
 import BaseLayout from "../layouts/BaseLayout.astro";
-const title = "Explore";
+import { breadcrumbs } from "../lib/seo";
+const title = "Semantic map of AI coding agent failures, tools and papers";
+const description =
+  "A 2D map of the AI coding agent failure modes, supervision tools, taxonomies and papers in the SAICA catalog, placed by how similar their descriptions are.";
+const jsonld = breadcrumbs([
+  ["SAICA-Bench", "/"],
+  ["Semantic map", "/explore/"],
+]);
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} description={description} jsonld={jsonld}>
   <section class="mb-4">
-    <h1>Explore embeddings</h1>
-    <p class="text-sm text-ink-muted">
+    <h1>Semantic map of failures, tools and papers</h1>
+    <p class="text-sm text-ink-muted max-w-3xl">
+      This map places the catalog's <a href="/failure-modes/">AI coding agent failure modes</a>,
+      <a href="/tools/">supervision tools</a>, <a href="/taxonomies/">failure taxonomies</a> and
+      <a href="/papers/">research papers</a> by how similar their descriptions are, so tools that talk about
+      the same failures sit near them. For the explicit links between them (which tool addresses which failure,
+      which paper defines it) see the <a href="/graph/">knowledge graph</a>.
+    </p>
+    <p class="mt-2 text-sm text-ink-muted max-w-3xl">
       Each dot is a KG node projected from a 384-dim sentence-transformer
       embedding down to 2D via UMAP. Nearby points share vocabulary — not
       necessarily facet labels. Hover to identify, click to open.
@@ -84,6 +98,8 @@ const title = "Explore";
 </BaseLayout>
 
 <script>
+  import { fmUrl, toolUrl } from "../lib/seo";
+
   type Facet = { control_paradigm: string; temporal_phase: string; autonomy_level: string } | null;
   interface Row {
     id: string; name: string; type: string;
@@ -104,8 +120,8 @@ const title = "Explore";
     paper: "#64748b",
   };
   const NODE_URL: Record<string, (id: string) => string> = {
-    tool: (id) => `/tools/${id}/`,
-    failure_mode: (id) => `/failure-modes/${id}/`,
+    tool: (id) => toolUrl(id),
+    failure_mode: (id) => fmUrl(id),
     taxonomy: (id) => `/taxonomies/${id}/`,
     paper: (id) => `/papers/${id}/`,
   };

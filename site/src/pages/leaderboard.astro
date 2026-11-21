@@ -99,7 +99,7 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
 );
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} noindex>
   {/* ──────────────  Hero  ────────────── */}
   <section class="mx-auto max-w-3xl text-center pt-6 pb-10">
     <h1 class="!mb-4 text-4xl md:text-5xl font-semibold tracking-tight">
@@ -111,10 +111,14 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
       code, runaway loops, broken tests, and seven other common
       failure modes? We audit each repo weekly and grade A–F.
     </p>
+    <p class="mx-auto mt-3 max-w-2xl text-sm text-ink-muted">
+      An older, separate index. For how well supervision tools and LLMs catch coding agents' failures, see the
+      <a href="/" class="underline">SAICA-Bench leaderboard</a>.
+    </p>
     <p class="mx-auto mt-3 max-w-2xl text-sm text-ink-faint">
       <strong>This page lists repos we audit.</strong> For the catalog
       of supervision tools you can install in your own stack, see
-      <a href="/tool-coverage" class="underline">Tool Coverage</a>.
+      <a href="/tool-coverage/" class="underline">Tool Coverage</a>.
     </p>
 
     <div class="mt-6 flex justify-center gap-2 text-sm">
@@ -178,7 +182,7 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
         its own development workflow defends against AI-coding
         failure modes — not whether the repo itself supervises other
         agents. For supervision tools, see
-        <a href="/tool-coverage" class="underline">Tool Coverage</a>.
+        <a href="/tool-coverage/" class="underline">Tool Coverage</a>.
       </p>
 
       <p class="text-sm text-ink-faint">

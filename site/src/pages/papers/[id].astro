@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph } from '../../lib/data.ts';
+import { abs, breadcrumbs, clip, fmUrl, toolUrl } from '../../lib/seo.ts';
+import { paperDuplicates } from '../../lib/catalog.ts';
 import type { Paper } from '../../lib/types.ts';
 
 export function getStaticPaths() {
@@ -14,30 +16,62 @@ export function getStaticPaths() {
 interface Props { paper: Paper }
 const { paper } = Astro.props;
 
+// Ids that stand for this paper: itself plus any duplicate records of it (see paperDuplicates).
+const ids = [paper.id, ...Object.keys(paperDuplicates).filter((d) => paperDuplicates[d] === paper.id)];
+const cites = (list: string[]) => ids.some((id) => list.includes(id));
 // Reverse-lookup: which FailureModes cite this paper in prior_work?
-const citingFailureModes = Object.values(graph.failureModes).filter((fm) =>
-  fm.prior_work.includes(paper.id),
-);
+const citingFailureModes = Object.values(graph.failureModes).filter((fm) => cites(fm.prior_work));
 // Which Taxonomies point to this paper via paper_id?
-const citingTaxonomies = Object.values(graph.taxonomies).filter(
-  (t) => t.paper_id === paper.id,
-);
+const citingTaxonomies = Object.values(graph.taxonomies).filter((t) => !!t.paper_id && ids.includes(t.paper_id));
 // Which Tools point to this paper?
 const citingTools = Object.values(graph.tools).filter(
-  (t) =>
-    t.cited_in.includes(paper.id) ||
-    t.documented_in.includes(paper.id) ||
-    t.evaluated_on.includes(paper.id),
+  (t) => cites(t.cited_in) || cites(t.documented_in) || cites(t.evaluated_on),
 );
 
-const desc = paper.tldr ?? paper.title;
+const desc = clip(paper.tldr ?? paper.title, 155);
+const pagePath = `/papers/${paper.id}/`;
+// Same work recorded twice in the KG: keep the page (other pages link to it) but keep it out of search results.
+const primary = paperDuplicates[paper.id] ? graph.papers[paperDuplicates[paper.id]] : undefined;
+const sameAs = [
+  paper.arxiv_id ? `https://arxiv.org/abs/${paper.arxiv_id}` : null,
+  paper.doi ? `https://doi.org/${paper.doi}` : null,
+  paper.semantic_scholar_id ? `https://www.semanticscholar.org/paper/${paper.semantic_scholar_id}` : null,
+].filter((u): u is string => !!u && u !== paper.url);
+const jsonld = [
+  ...(primary
+    ? []
+    : [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'ScholarlyArticle',
+          name: paper.title,
+          headline: clip(paper.title, 110),
+          ...(paper.authors.length ? { author: paper.authors.map((name) => ({ '@type': 'Person', name })) } : {}),
+          ...(Number.isFinite(paper.year) ? { datePublished: String(paper.year) } : {}),
+          description: desc,
+          ...(paper.url ? { url: paper.url } : {}),
+          ...(sameAs.length ? { sameAs } : {}),
+          mainEntityOfPage: abs(pagePath),
+        },
+      ]),
+  breadcrumbs([
+    ['SAICA-Bench', '/'],
+    ['Papers', '/papers/'],
+    [clip(paper.title, 80), pagePath],
+  ]),
+];
 ---
 
-<BaseLayout title={paper.title} description={desc.slice(0, 160)}>
+<BaseLayout title={paper.title} description={desc} jsonld={jsonld} ogType="article" noindex={!!primary}>
   <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-    <a href="/papers" class="no-underline hover:underline">Papers</a>
+    <a href="/papers/" class="no-underline hover:underline">Papers</a>
   </p>
   <h1 class="mt-1">{paper.title}</h1>
+  {primary && (
+    <p class="mt-2 rounded border border-ink/10 bg-paper-alt px-3 py-2 font-sans text-sm">
+      Duplicate record of the same paper: see <a href={`/papers/${primary.id}/`}>{primary.title}</a>.
+    </p>
+  )}
   <p class="mt-2 text-ink-muted font-sans">
     {paper.authors.join(', ')} · {paper.year}{paper.venue && ` · ${paper.venue}`}
   </p>
@@ -92,7 +126,7 @@ const desc = paper.tldr ?? paper.title;
           <h3>Failure modes</h3>
           <ul class="list-disc pl-5">
             {citingFailureModes.map((fm) => (
-              <li><a href={`/failure-modes/${fm.id}`}>{fm.name}</a></li>
+              <li><a href={fmUrl(fm.id)}>{fm.name}</a></li>
             ))}
           </ul>
         </>
@@ -102,7 +136,7 @@ const desc = paper.tldr ?? paper.title;
           <h3>Taxonomies</h3>
           <ul class="list-disc pl-5">
             {citingTaxonomies.map((t) => (
-              <li><a href={`/taxonomies/${t.id}`}>{t.name}</a></li>
+              <li><a href={`/taxonomies/${t.id}/`}>{t.name}</a></li>
             ))}
           </ul>
         </>
@@ -112,7 +146,7 @@ const desc = paper.tldr ?? paper.title;
           <h3>Tools</h3>
           <ul class="list-disc pl-5">
             {citingTools.map((t) => (
-              <li><a href={`/tools/${t.id}`}>{t.name}</a></li>
+              <li><a href={toolUrl(t.id)}>{t.name}</a></li>
             ))}
           </ul>
         </>

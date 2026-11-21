@@ -2,6 +2,7 @@
 // Runtime: fetches /api/v1/snapshot.json and renders into #cy.
 import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions, NodeSingular, EventObjectNode, Stylesheet } from "cytoscape";
+import { fmUrl, toolUrl } from "../lib/seo";
 
 // ---------- Types ----------
 interface Tool {
@@ -407,17 +408,18 @@ function renderSidebar(sidebar: HTMLElement, n: NodeSingular): void {
     if (p) body = `<p>${escapeHtml(p.title ?? "")}</p>
       <p style="color:#6b7280;font-size:12px">${escapeHtml(formatAuthors(p.authors))}${p.year ? ` (${escapeHtml(String(p.year))})` : ""}</p>`;
   }
-  const routeType = type === "tool" ? "tools"
-    : type === "failure_mode" ? "failure-modes"
-    : type === "taxonomy" ? "taxonomies"
-    : "papers";
+  // Canonical page URLs (hyphenated failure-mode slugs, trailing slash); see lib/seo.ts.
+  const pageUrl = type === "tool" ? toolUrl(encodeURIComponent(id))
+    : type === "failure_mode" ? fmUrl(encodeURIComponent(id))
+    : type === "taxonomy" ? `/taxonomies/${encodeURIComponent(id)}/`
+    : `/papers/${encodeURIComponent(id)}/`;
   sidebar.innerHTML = `
     <div style="padding:16px;font-size:13px;line-height:1.5">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6b7280">${escapeHtml(type.replace("_", " "))}</div>
       <div style="font-size:18px;font-weight:600;margin:2px 0">${escapeHtml(label)}</div>
       <div style="font-size:11px;color:#9ca3af;font-family:ui-monospace,monospace;margin-bottom:10px">${escapeHtml(id)}</div>
       ${body}
-      <a style="display:inline-block;margin-top:12px;color:#2563eb" href="/${routeType}/${encodeURIComponent(id)}">View full page →</a>
+      <a style="display:inline-block;margin-top:12px;color:#2563eb" href="${pageUrl}">View full page →</a>
     </div>`;
 }
 

@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph, facetLabel, paperLabel } from '../../lib/data.ts';
+import { abs, breadcrumbs, fmUrl, leaderboardUrl, toolUrl } from '../../lib/seo.ts';
+import { benchGenerated, fmName, fmPhrase, measuredFor, money, pct, toolDescription, toolTitle } from '../../lib/catalog.ts';
 import type { Tool } from '../../lib/types.ts';
 import maturityData from '../../../public/maturity.json';
 
@@ -47,15 +49,33 @@ const supersedes = tool.supersedes.map((id) => graph.tools[id]).filter(Boolean);
 const citedIn = tool.cited_in.map((id) => graph.papers[id]).filter(Boolean);
 const documentedIn = tool.documented_in.map((id) => graph.papers[id]).filter(Boolean);
 const evaluatedOn = tool.evaluated_on.map((id) => graph.papers[id]).filter(Boolean);
-const desc = tool.tagline ?? tool.description.slice(0, 160);
+const desc = toolDescription(tool.id);
+const measured = measuredFor(tool.id);
+const measuredModes = [...new Set(measured.map((r) => r.modeId))];
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.name,
+    url: abs(toolUrl(tool.id)),
+    description: desc,
+    applicationCategory: 'DeveloperApplication',
+    ...(tool.repository_url ? { sameAs: tool.repository_url } : {}),
+  },
+  breadcrumbs([
+    ['SAICA-Bench', '/'],
+    ['Tools', '/tools/'],
+    [tool.name, toolUrl(tool.id)],
+  ]),
+];
 const starsLabel = typeof tool.stars === 'number'
   ? tool.stars.toLocaleString('en-US')
   : null;
 ---
 
-<BaseLayout title={tool.name} description={desc}>
+<BaseLayout title={toolTitle(tool.id)} description={desc} jsonld={jsonld}>
   <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-    <a href="/tools" class="no-underline hover:underline">Tools</a>
+    <a href="/tools/" class="no-underline hover:underline">Tools</a>
   </p>
   <div class="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
     <h1 class="!mb-0">{tool.name}</h1>
@@ -127,6 +147,56 @@ const starsLabel = typeof tool.stars === 'number'
     </details>
   )}
 
+  {measured.length > 0 && (
+    <section class="mt-8" aria-labelledby="measured">
+      <h2 id="measured" class="!mt-0">Measured on SAICA-Bench</h2>
+      <p class="max-w-3xl leading-7">
+        How well {tool.name} catches AI coding agent failures, measured on matched sets of faulty and clean
+        samples (<a href="/benchmark/">how we test</a>). J = TPR &minus; FPR: the share of faulty samples it flags
+        minus the share of clean ones it wrongly flags, so 0 is no better than chance. Results as of {benchGenerated}.
+      </p>
+      <div class="mt-3 overflow-x-auto rounded border border-ink/10">
+        <table class="w-full font-sans text-sm">
+          <thead class="bg-paper-alt text-xs uppercase tracking-wide text-ink-faint">
+            <tr>
+              <th scope="col" class="px-3 py-2 text-left">Failure mode</th>
+              <th scope="col" class="px-3 py-2 text-left">Configuration</th>
+              <th scope="col" class="px-3 py-2 text-right">J</th>
+              <th scope="col" class="px-3 py-2 text-right">TPR</th>
+              <th scope="col" class="px-3 py-2 text-right">FPR</th>
+              <th scope="col" class="px-3 py-2 text-right">Cost per 1,000 reviews</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ink/10 bg-white">
+            {measured.map((r) => (
+              <tr>
+                <td class="px-3 py-2 align-top">
+                  <a href={fmUrl(r.fmId)}>{fmName(r.fmId)}</a>
+                  <div class="text-xs text-ink-faint">{fmPhrase(r.fmId)}</div>
+                </td>
+                <td class="px-3 py-2 align-top">
+                  {r.config}
+                  <div class="text-xs text-ink-faint">{r.typeLabel}</div>
+                </td>
+                <td class="px-3 py-2 text-right align-top font-semibold tabular-nums">{pct(r.j)}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{pct(r.tpr)}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{pct(r.fpr)}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{money(r.cost1k, r.estimated)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-2 font-sans text-sm text-ink-muted">
+        {measured.some((r) => r.estimated) && <>~ estimated from a subset of the samples. </>}
+        Compare with every tool and model we measured:
+        {measuredModes.map((m, i) => (
+          <>{i > 0 && ', '}<a href={leaderboardUrl(m)}>{fmName(m)} leaderboard</a></>
+        ))}.
+      </p>
+    </section>
+  )}
+
   <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
     <div>
       <h2 class="!mt-0">Description</h2>
@@ -155,7 +225,7 @@ const starsLabel = typeof tool.stars === 'number'
               return (
                 <li>
                   {node ? (
-                    <a href={`/failure-modes/${fm}`}>{node.name}</a>
+                    <a href={fmUrl(fm)}>{node.name}</a>
                   ) : (
                     <span>{fm}</span>
                   )}
@@ -175,7 +245,7 @@ const starsLabel = typeof tool.stars === 'number'
               <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Composes with:</span>{' '}
               {composesWith.map((t, i) => (
                 <>
-                  <a href={`/tools/${t.id}`}>{t.name}</a>{i < composesWith.length - 1 ? ', ' : ''}
+                  <a href={toolUrl(t.id)}>{t.name}</a>{i < composesWith.length - 1 ? ', ' : ''}
                 </>
               ))}
             </p>
@@ -185,7 +255,7 @@ const starsLabel = typeof tool.stars === 'number'
               <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Feeds into:</span>{' '}
               {feedsInto.map((t, i) => (
                 <>
-                  <a href={`/tools/${t.id}`}>{t.name}</a>{i < feedsInto.length - 1 ? ', ' : ''}
+                  <a href={toolUrl(t.id)}>{t.name}</a>{i < feedsInto.length - 1 ? ', ' : ''}
                 </>
               ))}
             </p>
@@ -195,7 +265,7 @@ const starsLabel = typeof tool.stars === 'number'
               <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Supersedes:</span>{' '}
               {supersedes.map((t, i) => (
                 <>
-                  <a href={`/tools/${t.id}`}>{t.name}</a>{i < supersedes.length - 1 ? ', ' : ''}
+                  <a href={toolUrl(t.id)}>{t.name}</a>{i < supersedes.length - 1 ? ', ' : ''}
                 </>
               ))}
             </p>
@@ -222,7 +292,7 @@ const starsLabel = typeof tool.stars === 'number'
               <h3 class="!mt-3">Cited in</h3>
               <ul class="list-disc pl-5">
                 {citedIn.map((p) => (
-                  <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+                  <li><a href={`/papers/${p.id}/`}>{paperLabel(p.id)}</a></li>
                 ))}
               </ul>
             </>
@@ -232,7 +302,7 @@ const starsLabel = typeof tool.stars === 'number'
               <h3 class="!mt-3">Documented in</h3>
               <ul class="list-disc pl-5">
                 {documentedIn.map((p) => (
-                  <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+                  <li><a href={`/papers/${p.id}/`}>{paperLabel(p.id)}</a></li>
                 ))}
               </ul>
             </>
@@ -242,7 +312,7 @@ const starsLabel = typeof tool.stars === 'number'
               <h3 class="!mt-3">Evaluated on</h3>
               <ul class="list-disc pl-5">
                 {evaluatedOn.map((p) => (
-                  <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+                  <li><a href={`/papers/${p.id}/`}>{paperLabel(p.id)}</a></li>
                 ))}
               </ul>
             </>

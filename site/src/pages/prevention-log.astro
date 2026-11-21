@@ -16,7 +16,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const title = "Prevention log";
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} noindex>
   <section class="mb-6 max-w-3xl">
     <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
       Supervision Telemetry
@@ -134,7 +134,7 @@ ls -la ~/.saica/prevention_log/   # one file per UTC day</code></pre>
       block) are out of scope; this log is deliberately narrow so the
       headline number is meaningful. The producer module is
       <code>pipeline/supervision/logger.py</code>; see also
-      <a href="/tool-coverage">/tool-coverage</a> for which tools cover
+      <a href="/tool-coverage/">/tool-coverage</a> for which tools cover
       which failure modes in the KG.
     </p>
   </section>
@@ -296,7 +296,7 @@ ls -la ~/.saica/prevention_log/   # one file per UTC day</code></pre>
           + `<a href="/tools/${encodeURIComponent(e.tool_id)}" class="text-ink hover:text-accent">${escapeHtml(e.tool_id)}</a>`
           + `</td>`
           + `<td class="px-3 py-1.5">`
-          + `<a href="/failure-modes/${encodeURIComponent(e.failure_mode)}" class="text-ink hover:text-accent">${escapeHtml(fmDisp)}</a>`
+          + `<a href="/failure-modes/${encodeURIComponent(String(e.failure_mode).replace(/_/g, "-"))}/" class="text-ink hover:text-accent">${escapeHtml(fmDisp)}</a>`
           + `</td>`
           + `<td class="px-3 py-1.5 text-ink-muted">${escapeHtml(e.mechanism || "")}</td>`
           + `<td class="px-3 py-1.5 font-mono text-xs text-ink-muted" title="${escapeHtml(detailFull)}">`

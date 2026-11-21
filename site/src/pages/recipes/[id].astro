@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph } from '../../lib/data.ts';
+import { breadcrumbs, clip, fmUrl, toolUrl } from '../../lib/seo.ts';
+import { fit } from '../../lib/catalog.ts';
 import type { Recipe } from '../../lib/types.ts';
 
 export function getStaticPaths() {
@@ -22,12 +24,18 @@ const stack = recipe.stack.map((id) => ({
   tool: graph.tools[id],
 }));
 
-const desc = recipe.tagline ?? recipe.description.slice(0, 160);
+const desc = clip(recipe.tagline ?? recipe.description, 155);
+const title = fit([`${recipe.name}: supervision stack for AI coding agents`, `${recipe.name}: supervision recipe`, recipe.name]);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Recipes', '/recipes/'],
+  [recipe.name, `/recipes/${recipe.id}/`],
+]);
 ---
 
-<BaseLayout title={recipe.name} description={desc}>
+<BaseLayout title={title} description={desc} jsonld={jsonld}>
   <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-    <a href="/recipes" class="no-underline hover:underline">Recipes</a>
+    <a href="/recipes/" class="no-underline hover:underline">Recipes</a>
   </p>
   <h1 class="mt-1">{recipe.name}</h1>
   {recipe.tagline && <p class="mt-2 text-lg text-ink-muted">{recipe.tagline}</p>}
@@ -54,7 +62,7 @@ const desc = recipe.tagline ?? recipe.description.slice(0, 160);
                 Stage {idx + 1}
               </div>
               {stage.tool ? (
-                <a href={`/tools/${stage.tool.id}`} class="font-sans font-semibold no-underline hover:underline">
+                <a href={toolUrl(stage.tool.id)} class="font-sans font-semibold no-underline hover:underline">
                   {stage.tool.name}
                 </a>
               ) : (
@@ -80,7 +88,7 @@ const desc = recipe.tagline ?? recipe.description.slice(0, 160);
           return (
             <li>
               {node ? (
-                <a href={`/failure-modes/${fm}`}>{node.name}</a>
+                <a href={fmUrl(fm)}>{node.name}</a>
               ) : (
                 <span>{fm}</span>
               )}

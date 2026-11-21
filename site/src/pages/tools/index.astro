@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph, facetLabel, FACET_LABELS } from '../../lib/data.ts';
+import { breadcrumbs, clip, toolUrl } from '../../lib/seo.ts';
+import { measuredFor } from '../../lib/catalog.ts';
 import maturityData from '../../../public/maturity.json';
 
 const maturityTools = (maturityData as { tools: Record<string, { tier: string; is_override: boolean }> }).tools;
@@ -30,21 +32,31 @@ const cpValues = Object.keys(FACET_LABELS.control_paradigm);
 const tpValues = Object.keys(FACET_LABELS.temporal_phase);
 const alValues = Object.keys(FACET_LABELS.autonomy_level);
 
+const measuredIds = new Set(tools.filter((t) => measuredFor(t.id).length > 0).map((t) => t.id));
+const description = clip(
+  `${tools.length} supervision tools for AI coding agents: linters, type checkers, AI code reviewers, eval frameworks, sandboxes, guardrails. ${measuredIds.size} measured on SAICA-Bench.`,
+  155,
+);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Tools', '/tools/'],
+]);
+
 function formatStars(n: number | undefined): string {
   if (typeof n !== 'number') return '';
   return n.toLocaleString('en-US');
 }
 ---
 
-<BaseLayout
-  title="Tools"
-  description="Browse supervision tools for AI coding agents, filtered by control paradigm, temporal phase, autonomy level, and failure mode."
->
-  <h1>Tools</h1>
+<BaseLayout title="Supervision tools for AI coding agents" description={description} jsonld={jsonld}>
+  <h1>Supervision tools for AI coding agents</h1>
   <p class="text-ink-muted mt-2 max-w-3xl">
-    {tools.length} supervision tools, classified along three strict partitions
-    (ControlParadigm &times; TemporalPhase &times; AutonomyLevel) plus multi-valued
-    FailureMode tags. Filters and sorting are keyboard-accessible and client-side.
+    {tools.length} tools, most of them open source, that can supervise an AI coding agent: linters and type checkers, AI code
+    reviewers, LLM eval frameworks, sandboxes and guardrails. Each is classified by control paradigm (prevent, detect,
+    correct or recover), when it acts (before, during or after generation) and how much human review it needs, and
+    tagged with the <a href="/failure-modes/">failure modes</a> it addresses. {measuredIds.size} of them are measured
+    on the <a href="/">SAICA-Bench leaderboard</a>; their pages show the numbers. Filters and sorting are
+    keyboard-accessible and client-side.
   </p>
 
   <form
@@ -140,9 +152,9 @@ function formatStars(n: number | undefined): string {
         data-last-updated={t.last_updated ?? ''}
       >
         <div class="flex items-baseline justify-between gap-2">
-          <h3 class="m-0">
-            <a href={`/tools/${t.id}`}>{t.name}</a>
-          </h3>
+          <h2 class="m-0 text-lg">
+            <a href={toolUrl(t.id)}>{t.name}</a>
+          </h2>
           <span class="text-xs font-sans text-ink-faint flex items-center gap-2">
             {typeof t.stars === 'number' && (
               <span title={t.stars_updated_at ? `GitHub stars (refreshed ${t.stars_updated_at})` : 'GitHub stars'}>
@@ -160,8 +172,11 @@ function formatStars(n: number | undefined): string {
             <span>{t.maturity_status}</span>
           </span>
         </div>
-        <p class="mt-1 text-sm text-ink-muted">{t.tagline ?? t.description.slice(0, 160)}</p>
+        <p class="mt-1 text-sm text-ink-muted">{t.tagline ?? clip(t.description, 160)}</p>
         <div class="mt-3 flex flex-wrap gap-1.5">
+          {measuredIds.has(t.id) && (
+            <a class="chip-accent font-semibold no-underline" href={`${toolUrl(t.id)}#measured`}>Measured on SAICA-Bench</a>
+          )}
           <span class="chip-accent">{facetLabel('control_paradigm', t.control_paradigm)}</span>
           <span class="chip-accent">{facetLabel('temporal_phase', t.temporal_phase)}</span>
           <span class="chip-accent">{facetLabel('autonomy_level', t.autonomy_level)}</span>

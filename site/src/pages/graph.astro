@@ -1,8 +1,10 @@
 ---
 // /graph — Interactive Cytoscape.js knowledge-graph visualization for SAICA-KG.
-// Fetches /api/v1/snapshot.json at runtime; no data loaded at build time.
+// Fetches /api/v1/snapshot.json at runtime; at build time only node counts (for the meta description) are read.
 // Attempts to use site's BaseLayout if present; otherwise falls back to a
 // minimal self-contained shell so the page builds independently.
+import { counts } from "../lib/data.ts";
+import { breadcrumbs } from "../lib/seo";
 
 let Layout: any = null;
 try {
@@ -15,12 +17,27 @@ try {
   }
 }
 
-const title = "Knowledge Graph";
+const n = counts();
+const title = "Knowledge graph of AI coding agent failures and tools";
+const description = `Interactive knowledge graph linking ${n.failure_modes} AI coding agent failure modes to the ${n.tools} supervision tools that address them, plus ${n.taxonomies} taxonomies and ${n.papers} papers.`;
+const jsonld = breadcrumbs([
+  ["SAICA-Bench", "/"],
+  ["Knowledge graph", "/graph/"],
+]);
 ---
 
 {Layout ? (
-  <Layout title={title}>
+  <Layout title={title} description={description} jsonld={jsonld}>
     <section class="px-3 py-2">
+      <h1 class="text-2xl">Knowledge graph of AI coding agent failures and tools</h1>
+      <p class="mt-1 mb-3 max-w-3xl text-sm text-ink-muted">
+        Every <a href="/failure-modes/">AI coding agent failure mode</a> (red diamonds) and the
+        <a href="/tools/">supervision tools</a> that address it (blue), with the external
+        <a href="/taxonomies/">failure taxonomies</a> that map onto them (purple) and, when switched on in Filters,
+        the <a href="/papers/">research papers</a> behind them. Edges show which tool addresses which failure, how tools
+        compose or feed into each other, and how other taxonomies crosswalk to ours. Click a node for details and a link
+        to its page.
+      </p>
       <noscript>
         <div class="p-3 bg-yellow-50 border border-yellow-200 rounded mb-2 text-sm">
           The interactive graph requires JavaScript. You can still view the raw
@@ -30,8 +47,6 @@ const title = "Knowledge Graph";
 
       {/* Toolbar: thin horizontal bar above the canvas */}
       <div class="flex flex-wrap items-center gap-2 mb-2 p-2 bg-white border border-gray-200 rounded">
-        <h1 class="text-base font-semibold text-gray-800 mr-2">Knowledge Graph</h1>
-
         <input id="kg-search" type="search" placeholder="Search name or id…"
                class="flex-1 min-w-[180px] max-w-xs border border-gray-300 rounded px-2 py-1 text-sm"
                aria-label="Search nodes" />
@@ -235,9 +250,9 @@ const title = "Knowledge Graph";
       <nav class="kg-nav">
         <a href="/"><strong>SAICA-Bench</strong></a>
         <a href="/">Leaderboard</a>
-        <a href="/benchmark">Benchmark</a>
-        <a href="/graph"><strong>Graph</strong></a>
-        <a href="/about">About</a>
+        <a href="/benchmark/">Benchmark</a>
+        <a href="/graph/"><strong>Graph</strong></a>
+        <a href="/about/">About</a>
       </nav>
 
       <section class="kg-wrap">

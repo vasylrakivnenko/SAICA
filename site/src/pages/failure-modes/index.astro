@@ -1,39 +1,252 @@
 ---
+// Hub for "AI coding agent failure modes": a definition, every mode with its one-line definition, other names and
+// best measured detection score (static HTML from public/bench/results.json), the three "how solved" tiers and a
+// compact crosswalk to other taxonomies. Copy and data joins live in src/components/fm/fm.ts.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph } from '../../lib/data.ts';
+import { abs, breadcrumbs, fmUrl, toolUrl } from '../../lib/seo.ts';
+import {
+  FLOOR,
+  GENERATED,
+  TIER_LABEL,
+  altNames,
+  WELL,
+  copyFor,
+  crosswalksFor,
+  int,
+  measured,
+  pct,
+  pct0,
+  proseName,
+  text,
+  tier,
+  type Tier,
+} from '../../components/fm/fm.ts';
 
 const modes = Object.values(graph.failureModes)
-  .slice()
-  .sort((a, b) => a.name.localeCompare(b.name));
+  .map((fm) => ({ fm, c: copyFor(fm.id), m: measured(fm.id), tier: tier(fm.id) }))
+  .sort((a, b) => (b.m?.best.j ?? -9) - (a.m?.best.j ?? -9) || a.fm.name.localeCompare(b.fm.name));
+const total = modes.length;
+const benched = modes.filter((x) => x.m);
+const unbenched = modes.filter((x) => !x.m);
+
+const tiers: Tier[] = ['well', 'partly', 'not-yet', 'unmeasured'];
+const tierText: Record<Tier, string> = {
+  well: `best J ${pct0(WELL)} or more`,
+  partly: `best J ${pct0(FLOOR)} to ${pct0(WELL)}`,
+  'not-yet': `best J under ${pct0(FLOOR)}`,
+  unmeasured: 'no labelled dataset yet',
+};
+
+// Compact crosswalk: exact and partial mappings to the four agent-failure taxonomies closest to ours.
+const XTAX = [
+  { id: 'daplab-9-patterns', short: 'DAPLab 9 patterns' },
+  { id: 'mast', short: 'MAST' },
+  { id: 'owasp-agentic-top-10-2026', short: 'OWASP Agentic Top 10' },
+  { id: 'microsoft-airt-2025', short: 'Microsoft AIRT' },
+].filter((t) => graph.taxonomies[t.id]);
+const xrows = modes.map(({ fm, c }) => {
+  const xw = crosswalksFor(fm.id).filter((x) => x.confidence !== 'related');
+  return { fm, c, cells: XTAX.map((t) => xw.filter((x) => x.taxonomy === t.id)) };
+});
+
+const js = benched.map((x) => x.m!.best.j);
+const description = `The ${total} ways AI coding agents fail, from code hallucination to reward hacking and scope creep, and how well tools catch each: best J from ${pct0(Math.min(...js))} to ${pct0(Math.max(...js))}.`;
+
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    '@id': abs('/failure-modes/'),
+    name: 'AI coding agent failure modes',
+    description: `The ${total} failure modes of AI coding agents that SAICA-Bench defines and measures detectors on.`,
+    url: abs('/failure-modes/'),
+    dateModified: GENERATED,
+    hasDefinedTerm: modes.map(({ fm, c }) => ({
+      '@type': 'DefinedTerm',
+      '@id': abs(fmUrl(fm.id)),
+      name: fm.name,
+      alternateName: altNames(fm),
+      description: text(c.definition),
+      termCode: fm.id,
+      url: abs(fmUrl(fm.id)),
+      inDefinedTermSet: abs('/failure-modes/'),
+    })),
+  },
+  breadcrumbs([
+    ['SAICA-Bench', '/'],
+    ['Failure modes', '/failure-modes/'],
+  ]),
+];
+const th = 'py-2 px-2 font-semibold';
 ---
 
-<BaseLayout
-  title="Failure modes"
-  description="The canonical supervision-addressable failure modes SAICA-KG uses to tag tools, with crosswalks to external taxonomies."
->
-  <h1>Failure modes</h1>
-  <p class="text-ink-muted mt-2 max-w-3xl">
-    Supervision-addressable failure classes. Multi-valued by design — a single tool
-    may address several, and a single real-world fault may exhibit multiple modes.
+<BaseLayout title={`AI Coding Agent Failure Modes: ${total} Types, Measured`} description={description} jsonld={jsonld}>
+  <nav aria-label="Breadcrumb" class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/" class="no-underline hover:underline">SAICA-Bench</a>
+    <span aria-hidden="true"> › </span>
+    <span aria-current="page">Failure modes</span>
+  </nav>
+  <h1 class="mt-2">AI Coding Agent Failure Modes</h1>
+
+  <div class="max-w-3xl">
+    <p class="mt-4 text-lg leading-8">
+      An AI coding agent failure mode is a recurring way an agent’s work goes wrong that a reviewer, a program or a
+      test could catch: code that calls APIs that don’t exist, tests edited until they pass, changes nobody asked for,
+      a “done” for work that isn’t. SAICA-Bench defines {total} of them, each with a plain definition, the other names
+      it goes by and the signals that point to it.
+    </p>
+    <p class="mt-3 leading-7">
+      For {benched.length} of the {total} we measured how well supervision tools and language models catch each one, on
+      labelled samples of real or carefully built agent output: see <a href="/benchmark/">how the benchmark works</a>
+      and the <a href="/">full leaderboard</a>. The table is sorted from the best-caught mode to the least; the
+      {unbenched.length} modes without a labelled dataset come last. Terms are defined in the <a href="/glossary/">glossary</a>.
+    </p>
+  </div>
+
+  <h2>All {total} failure modes</h2>
+  <div class="mt-3 overflow-x-auto">
+    <table class="w-full border-collapse font-sans text-sm">
+      <caption class="sr-only">AI coding agent failure modes with their best measured detection score, best-caught first</caption>
+      <thead>
+        <tr class="border-b border-ink/20 text-left text-xs uppercase tracking-wide text-ink-faint align-bottom">
+          <th scope="col" class={`${th} pl-0`}>Failure mode</th>
+          <th scope="col" class={th}>What it is</th>
+          <th scope="col" class={th}>Also called</th>
+          <th scope="col" class={`${th} text-right`}>Best J (tool)</th>
+          <th scope="col" class={`${th} text-right`}>Best free option</th>
+          <th scope="col" class={`${th} pr-0 text-right`}>Samples</th>
+        </tr>
+      </thead>
+      <tbody>
+        {modes.map(({ fm, c, m, tier: t }) => (
+          <tr class="border-b border-ink/10 align-top">
+            <th scope="row" class="py-2 pr-2 text-left font-normal min-w-[9rem]">
+              <a href={fmUrl(fm.id)} class="font-semibold">{fm.name}</a>
+              <div class={`mt-0.5 text-[11px] ${t === 'not-yet' ? 'text-[#8a1f1f]' : 'text-ink-faint'}`}>{TIER_LABEL[t]}</div>
+            </th>
+            <td class="py-2 px-2 font-serif text-[15px] leading-6 min-w-[14rem]">{c.short}</td>
+            <td class="py-2 px-2 text-ink-muted min-w-[9rem]">{c.aka.join(', ')}</td>
+            <td class="py-2 px-2 text-right tabular-nums min-w-[8rem]">
+              {m ? (
+                <>
+                  <span class="font-semibold">{pct(m.best.j)}</span>
+                  <div class="text-xs text-ink-faint">{m.best.short}</div>
+                </>
+              ) : (
+                <span class="text-ink-faint">not measured</span>
+              )}
+            </td>
+            <td class="py-2 px-2 text-right tabular-nums min-w-[8rem]">
+              {m?.bestFree ? (
+                <>
+                  <span>{pct(m.bestFree.j)}</span>
+                  <div class="text-xs text-ink-faint">
+                    {m.bestFree.kgId ? <a href={toolUrl(m.bestFree.kgId)} class="text-ink-faint">{m.bestFree.short}</a> : m.bestFree.short}
+                  </div>
+                </>
+              ) : (
+                <span class="text-ink-faint">—</span>
+              )}
+            </td>
+            <td class="py-2 pl-2 text-right tabular-nums text-ink-muted whitespace-nowrap">
+              {m ? (
+                <span title={`${int(m.nPos)} ${m.posLabel} vs ${int(m.nNeg)} clean`}>{int(m.nPos + m.nNeg)}</span>
+              ) : (
+                '—'
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-2 font-sans text-xs text-ink-faint leading-5 max-w-3xl">
+    J = TPR − FPR: the share of bad samples a tool flags minus the share of clean samples it flags (0% = chance, 100% =
+    perfect). “Best free option” covers free programs (type checkers, linters, scanners) and simple rules written for the
+    benchmark, all at $0. Samples = bad plus clean samples scored. Results from {GENERATED}; per-tool tables are on each
+    mode’s page and on the <a href="/">leaderboard</a>.
   </p>
 
-  <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
-    {modes.map((fm) => {
-      const toolIds = graph.toolsByFailureMode[fm.id] ?? [];
-      return (
-        <li class="py-4">
-          <div class="flex items-baseline justify-between gap-4">
-            <h3 class="!mt-0">
-              <a href={`/failure-modes/${fm.id}`}>{fm.name}</a>
-            </h3>
-            <span class="font-sans text-xs text-ink-faint">
-              {toolIds.length} tool{toolIds.length === 1 ? '' : 's'}
-              {fm.crosswalks.length > 0 && ` · ${fm.crosswalks.length} crosswalk${fm.crosswalks.length === 1 ? '' : 's'}`}
-            </span>
-          </div>
-          {fm.tagline && <p class="mt-1 text-ink-muted">{fm.tagline}</p>}
-        </li>
+  <h2>Which failures can be caught today</h2>
+  <div class="mt-3 grid gap-4 sm:grid-cols-2 max-w-4xl">
+    {tiers.map((t) => {
+      const list = modes.filter((x) => x.tier === t);
+      return list.length === 0 ? null : (
+        <div class="card !p-4">
+          <h3 class="!mt-0 !mb-1 text-base">{TIER_LABEL[t]} <span class="font-normal text-sm text-ink-faint">({tierText[t]})</span></h3>
+          <ul class="mt-2 space-y-1.5 text-sm leading-6">
+            {list.map(({ fm, c, m }) => (
+              <li>
+                <a href={fmUrl(fm.id)} class="font-sans font-semibold">{fm.name}</a>
+                <span class="text-ink-muted">
+                  {m
+                    ? ` — ${m.best.short} J ${pct0(m.best.j)}` + (m.bestFree && m.bestFree.key !== m.best.key ? `; free: ${proseName(m.bestFree)} J ${pct0(m.bestFree.j)}` : '')
+                    : ` — ${c.short}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       );
     })}
+  </div>
+  <p class="mt-3 text-sm text-ink-muted max-w-3xl">
+    J compares tools within a mode. Across modes it only roughly reflects difficulty: each dataset was built
+    differently (real agent runs, execution-checked model code, synthetic injections, hand-built pairs), so a high J on
+    a synthetic mode is not as hard-won as a low one on real agent runs. The tier lines ({pct0(FLOOR)} and {pct0(WELL)})
+    are ours.
+  </p>
+
+  {XTAX.length > 0 && (
+    <>
+      <h2>How these map to other taxonomies</h2>
+      <p class="max-w-3xl text-ink-muted">
+        Each mode is cross-walked to published agent-failure taxonomies. Bold = the same failure (exact match), plain =
+        partial overlap; looser “related” links are on each mode’s page and on the <a href="/taxonomies/">taxonomy pages</a>.
+      </p>
+      <div class="mt-3 overflow-x-auto">
+        <table class="w-full border-collapse font-sans text-sm">
+          <caption class="sr-only">SAICA-Bench failure modes mapped to DAPLab, MAST, OWASP Agentic Top 10 and Microsoft AIRT categories</caption>
+          <thead>
+            <tr class="border-b border-ink/20 text-left text-xs uppercase tracking-wide text-ink-faint align-bottom">
+              <th scope="col" class={`${th} pl-0`}>SAICA-Bench</th>
+              {XTAX.map((t) => (
+                <th scope="col" class={th}><a href={`/taxonomies/${t.id}/`} class="text-ink-faint">{t.short}</a></th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {xrows.map(({ fm, cells }) => (
+              <tr class="border-b border-ink/10 align-top">
+                <th scope="row" class="py-2 pr-2 text-left font-normal whitespace-nowrap"><a href={fmUrl(fm.id)}>{fm.name}</a></th>
+                {cells.map((list) => (
+                  <td class="py-2 px-2 leading-5 min-w-[9rem]">
+                    {list.length === 0 ? (
+                      <span class="text-ink-faint">—</span>
+                    ) : (
+                      list.map((x) => (
+                        <div class={x.confidence === 'exact' ? 'font-semibold' : 'text-ink-muted'}>
+                          <span class="text-xs text-ink-faint">{x.externalId}</span> {x.label}
+                        </div>
+                      ))
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+
+  <h2>Where to go next</h2>
+  <ul class="list-disc pl-5 leading-7 max-w-3xl">
+    <li><a href="/">Leaderboard</a>: every tool and model on every measured mode, with cost per 1,000 reviews.</li>
+    <li><a href="/benchmark/">Benchmark method</a>: datasets, labels and scoring for each mode.</li>
+    <li><a href="/tool-coverage/">Supervision kit builder</a>: pick the modes you care about and get the best-measured tool for each.</li>
+    <li><a href="/glossary/">Glossary</a>: the failure modes, their other names and the metrics used here.</li>
+    <li><a href="/tools/">Tool catalog</a> and <a href="/incidents/">incidents</a> behind each mode.</li>
   </ul>
 </BaseLayout>

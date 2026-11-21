@@ -1,0 +1,51 @@
+# SAICA-Bench
+
+> SAICA-Bench (https://saica.ai) measures whether supervision tools and language models catch the typical failures of AI coding agents. Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad if it contains the failure and clean if it does not. Every reviewer sees the same samples without the labels: free programs (type checkers, linters, simple rules), AI code reviewers and evaluation frameworks, and plain language models asked directly with one fixed prompt. The score is J = TPR − FPR (share of bad samples flagged minus share of clean samples flagged; 0% = chance, 100% = perfect), reported with the cost per 1,000 reviews. By Vasyl Rakivnenko, Stanford University. Code Apache-2.0, data CC-BY-4.0.
+
+The benchmark covers 11 failure modes of AI coding agents; 9 are measured on labelled data (93 tool configurations, results of 2026-11-20) and 2 (cascading failure, context pollution) have no dataset with confirmed labels yet. The failure-mode taxonomy and tool catalog come from SAICA-KG, a knowledge graph of supervision tools, papers, incidents and external taxonomies (OWASP Agentic Top 10, MAST, DAPLab, Microsoft AIRT) with crosswalks between them.
+
+Main findings (computed from https://saica.ai/bench/results.json):
+
+- A cheap model asked directly is the best reviewer in 8 of 9 measured modes. The exception is supply chain, where a typosquat rule wins (J +84%).
+- The three strongest cheap models (gpt-6-luna, deepseek-v4-flash, mimo-v2.6-flash) are within 10 points of each other in 8 of 9 modes, average J +67% to +68%, under $3.80 per 1,000 reviews in every mode.
+- Two modes nobody handles yet: security vulnerability (best J +8%) and incomplete execution (best J +19%).
+- Free programs pay off where the failure is a checkable fact: pyright on fabrication (J +85%), pyright with the latest libraries on obsolescence (+57%).
+- Wrapping a model in a review tool did not help: PR-Agent on deepseek-v4-flash scores below deepseek-v4-flash asked directly in 4 of 4 modes.
+- J compares tools within a mode; datasets differ in how they were built (real agent runs, execution-checked model code, synthetic injections, hand-built pairs), so J across modes only roughly reflects difficulty.
+
+## Failure modes
+
+- [Failure modes of AI coding agents (overview)](https://saica.ai/failure-modes/): all 11 modes with definitions and measured results.
+- [Scope creep](https://saica.ai/failure-modes/scope-creep/): the agent acts beyond the stated task: edits files not in the request, installs packages, changes configs or chains unrequested work. Best measured J +95% (mimo-v2.6-flash asked directly).
+- [Test manipulation](https://saica.ai/failure-modes/test-manipulation/): the agent games its own evaluation, editing or skipping tests or weakening asserts so failures disappear without fixing the bug (reward hacking). Best J +91% (minimax-m3 asked directly); best product: giskard (+89%).
+- [Security vulnerability](https://saica.ai/failure-modes/security-vulnerability/): the agent writes code with injection flaws, weak cryptography, leaked secrets or insecure deserialization. Best J +8%: unsolved by every tool and model tested.
+- [Supply-chain attack](https://saica.ai/failure-modes/supply-chain-attack/): the agent is led to install or invoke malicious code: slopsquatting (hallucinated package names), typosquatting, compromised MCP servers. Best J +84% (a typosquat-name rule).
+- [Dependency blindness](https://saica.ai/failure-modes/dependency-blindness/): the agent reimplements something that already exists in its dependencies, the standard library or the codebase. Best J +90% (gpt-6-luna asked directly).
+- [Incomplete execution](https://saica.ai/failure-modes/incomplete-execution/): the agent says it is done while subtasks are skipped, stubbed or silently dropped (TODOs, `pass` bodies, partial features). Best J +19%: largely unsolved.
+- [Logic error](https://saica.ai/failure-modes/logic-error/): real, current APIs used correctly, but the logic is wrong for the task ("passes type check, fails correctness"). Best J +74% (mimo-v2.6-flash asked directly).
+- [Cascading failure](https://saica.ai/failure-modes/cascading-failure/): each attempted fix introduces new errors, spiralling away from a working state. Not benchmarked yet.
+- [Context pollution](https://saica.ai/failure-modes/context-pollution/): the working context degrades over a session (dropped facts, off-task material, earlier hallucinations treated as truth). Not benchmarked yet.
+- [Fabrication](https://saica.ai/failure-modes/fabrication/): code that references APIs, packages, functions or symbols that do not exist (code hallucination). Best J +94% (deepseek-v4.1-flash asked directly); best free program: pyright (+85%).
+- [Obsolescence](https://saica.ai/failure-modes/obsolescence/): code that uses deprecated or removed APIs or outdated library versions, often because the model's training data predates current releases. Best J +90% (gpt-6-luna asked directly); pyright with the latest libraries +57%.
+
+## Key pages
+
+- [Leaderboard](https://saica.ai/): reviewer x failure-mode grid of J, best tool per mode, one table per mode with TPR, FPR, confidence intervals and cost.
+- [Findings](https://saica.ai/findings/): what the results say, with the caveats to read before citing them.
+- [Benchmark](https://saica.ai/benchmark/): datasets, how samples were built, setup and caveats per failure mode, scoring.
+- [Glossary](https://saica.ai/glossary/): definitions of the terms used on the site (J, TPR, FPR, failure-mode names).
+- [Tool coverage](https://saica.ai/tool-coverage/): build a supervision kit: which measured tools cover which failure modes.
+- [Tools](https://saica.ai/tools/): catalog of supervision tools for AI coding agents, with measured results where a tool was benchmarked.
+- [About](https://saica.ai/about/): scope, data sources, contact.
+
+## Data
+
+- [Benchmark results (JSON)](https://saica.ai/bench/results.json): every mode's rows (tool, type, J, catch rate and false-alarm rate with 95% intervals, cost per 1,000 reviews), the overview grid, best tool per mode, findings and caveats. CC-BY-4.0.
+- [Knowledge-graph snapshot (JSON)](https://saica.ai/api/v1/snapshot.json): all SAICA-KG nodes and edges; per-type lists at /api/v1/tools.json, /api/v1/failure_modes.json, /api/v1/papers.json, /api/v1/incidents.json, /api/v1/taxonomies.json, /api/v1/recipes.json.
+- [Source code and YAML data](https://github.com/vasylrakivnenko/SAICA): benchmark harness (bench/), knowledge graph (data/, one YAML file per node), site and scoring code. Cite with CITATION.cff in the repository.
+
+## Optional
+
+- [Knowledge graph explorer](https://saica.ai/graph/): interactive graph of tools, failure modes, papers and taxonomies.
+- [Papers](https://saica.ai/papers/), [Incidents](https://saica.ai/incidents/), [Taxonomies](https://saica.ai/taxonomies/), [Recipes](https://saica.ai/recipes/): the rest of the SAICA-KG catalog.
+- License: code Apache-2.0, data CC-BY-4.0. When citing numbers, name SAICA-Bench and the results date (2026-11-20).

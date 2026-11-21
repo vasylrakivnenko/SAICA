@@ -1,31 +1,41 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph } from '../../lib/data.ts';
+import { breadcrumbs, clip } from '../../lib/seo.ts';
+import { paperDuplicates } from '../../lib/catalog.ts';
 
+// Duplicate records of the same paper are listed once (under the most complete record).
 const papers = Object.values(graph.papers)
-  .slice()
+  .filter((p) => !paperDuplicates[p.id])
   .sort((a, b) => {
     if (b.year !== a.year) return b.year - a.year;
     return (a.authors[0] ?? '').localeCompare(b.authors[0] ?? '');
   });
+const description = clip(
+  `${papers.length} research papers on AI coding agent failures: failure taxonomies, benchmarks, code hallucination, MCP and supply-chain security, supervision.`,
+  155,
+);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Papers', '/papers/'],
+]);
 ---
 
-<BaseLayout
-  title="Papers"
-  description="Academic and gray-literature references grounding SAICA-KG's tool, failure-mode, and taxonomy nodes."
->
-  <h1>Papers</h1>
+<BaseLayout title="Research papers on AI coding agent failures" description={description} jsonld={jsonld}>
+  <h1>Research papers on AI coding agent failures</h1>
   <p class="text-ink-muted mt-2 max-w-3xl">
-    Academic and gray-literature references grounding SAICA-KG nodes. Each Tool,
-    FailureMode, and Taxonomy that relies on a paper carries an explicit link.
+    {papers.length} academic and gray-literature references behind the SAICA catalog: taxonomies of agent failures,
+    benchmarks, empirical studies and work on supervising coding agents. Every
+    <a href="/failure-modes/">failure mode</a>, <a href="/tools/">tool</a> and
+    <a href="/taxonomies/">taxonomy</a> that relies on a paper links to it.
   </p>
 
   <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
     {papers.map((p) => (
       <li class="py-4">
-        <h3 class="!mt-0">
-          <a href={`/papers/${p.id}`}>{p.title}</a>
-        </h3>
+        <h2 class="!mt-0 mb-2 text-lg">
+          <a href={`/papers/${p.id}/`}>{p.title}</a>
+        </h2>
         <p class="mt-1 text-sm font-sans text-ink-muted">
           {p.authors.join(', ')} · {p.year}{p.venue && ` · ${p.venue}`}
         </p>

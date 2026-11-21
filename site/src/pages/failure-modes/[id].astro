@@ -1,125 +1,264 @@
 ---
+// One page per failure mode at /failure-modes/<hyphen-slug>/ (scope_creep -> scope-creep). Built to answer
+// "<mode> in AI coding agents": a plain definition, why it matters, measured detection results from
+// public/bench/results.json (static HTML), detection signals, incidents, catalog tools, taxonomy crosswalks,
+// related modes, prior work and an FAQ. Copy and data joins live in src/components/fm/fm.ts.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
+import MeasuredResults from '../../components/fm/MeasuredResults.astro';
+import NotMeasured from '../../components/fm/NotMeasured.astro';
 import { graph, paperLabel } from '../../lib/data.ts';
+import { abs, breadcrumbs, clip, fmSlug, fmUrl, toolUrl, SITE_NAME } from '../../lib/seo.ts';
 import type { FailureMode } from '../../lib/types.ts';
+import {
+  GENERATED,
+  altNames,
+  copyFor,
+  crosswalksFor,
+  faqFor,
+  html,
+  incidentsFor,
+  measured,
+  otherNames,
+  pct,
+  proseName,
+  sameAsName,
+  starMode,
+  text,
+} from '../../components/fm/fm.ts';
 
 export function getStaticPaths() {
   return Object.values(graph.failureModes).map((fm) => ({
-    params: { id: fm.id },
+    params: { id: fmSlug(fm.id) },
     props: { fm },
   }));
 }
 
-interface Props { fm: FailureMode }
+interface Props {
+  fm: FailureMode;
+}
 const { fm } = Astro.props;
-
+const c = copyFor(fm.id);
+const m = measured(fm.id);
+const s = m ? null : starMode(fm.id);
+const url = fmUrl(fm.id);
+const names = otherNames(fm);
+const description = clip(c.description(m, s), 155);
+const faq = faqFor(fm);
+const incidents = incidentsFor(fm.id);
 const priorWork = fm.prior_work.map((id) => graph.papers[id]).filter(Boolean);
-const relatedModes = fm.related_modes.map((id) => graph.failureModes[id]).filter(Boolean);
-const mitigatingTools = (graph.toolsByFailureMode[fm.id] ?? [])
+const related = fm.related_modes.map((id) => graph.failureModes[id]).filter(Boolean);
+
+// Catalog tools tagged with this mode, most-starred first, with this mode's measured J where we ran them.
+const measuredJ = new Map<string, number>();
+for (const r of m?.rows ?? []) if (r.kgId && !measuredJ.has(r.kgId)) measuredJ.set(r.kgId, r.j);
+const tools = (graph.toolsByFailureMode[fm.id] ?? [])
   .map((id) => graph.tools[id])
-  .filter(Boolean);
+  .filter(Boolean)
+  .sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0) || a.name.localeCompare(b.name));
 
-// Expanded crosswalks with taxonomy + external_label resolved.
-const crosswalks = fm.crosswalks.map((cw) => {
-  const tax = graph.taxonomies[cw.taxonomy];
-  const cat = tax?.categories.find((c) => c.external_id === cw.external_id);
-  return {
-    ...cw,
-    taxonomyName: tax?.name ?? cw.taxonomy,
-    taxonomyId: tax?.id ?? cw.taxonomy,
-    externalLabel: cat?.label ?? cw.external_id,
-    externalDescription: cat?.description,
-  };
-});
+// Crosswalks grouped by taxonomy: exact/partial with their notes, related ones as a compact list.
+const xw = crosswalksFor(fm.id);
+const taxa = [...new Set(xw.map((x) => x.taxonomy))].map((t) => ({
+  id: t,
+  name: xw.find((x) => x.taxonomy === t)!.taxonomyName,
+  strong: xw.filter((x) => x.taxonomy === t && x.confidence !== 'related'),
+  related: xw.filter((x) => x.taxonomy === t && x.confidence === 'related'),
+}));
+taxa.sort((a, b) => b.strong.length - a.strong.length || a.name.localeCompare(b.name));
 
-const desc = fm.tagline ?? fm.description.slice(0, 160);
+const atAGlance = m
+  ? `On SAICA-Bench the best detector, ${proseName(m.best)}, scores J ${pct(m.best.j)}` +
+    (m.bestFree && m.bestFree.key !== m.best.key ? `; the best free option, ${proseName(m.bestFree)}, scores J ${pct(m.bestFree.j)}.` : '.')
+  : 'Not benchmarked yet (no dataset with confirmed labels exists); the tools below are listed by GitHub stars, not measured.';
+
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: c.title,
+    description,
+    url: abs(url),
+    inLanguage: 'en',
+    dateModified: GENERATED,
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: abs('/') },
+    about: {
+      '@type': 'DefinedTerm',
+      name: fm.name,
+      alternateName: altNames(fm),
+      description: text(c.definition),
+      termCode: fm.id,
+      url: abs(url),
+      inDefinedTermSet: abs('/failure-modes/'),
+    },
+    ...(priorWork.length
+      ? { citation: priorWork.map((p) => ({ '@type': 'ScholarlyArticle', name: p.title, ...(p.url ? { url: p.url } : {}) })) }
+      : {}),
+  },
+  breadcrumbs([
+    ['SAICA-Bench', '/'],
+    ['Failure modes', '/failure-modes/'],
+    [fm.name, url],
+  ]),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((x) => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })),
+  },
+];
+const conf = (x: string) => (x === 'exact' ? 'chip-accent' : 'chip');
 ---
 
-<BaseLayout title={fm.name} description={desc}>
-  <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-    <a href="/failure-modes" class="no-underline hover:underline">Failure modes</a>
-  </p>
-  <h1 class="mt-1">{fm.name}</h1>
-  {fm.tagline && <p class="mt-2 text-lg text-ink-muted">{fm.tagline}</p>}
+<BaseLayout title={c.title} rawTitle description={description} ogType="article" jsonld={jsonld}>
+  <nav aria-label="Breadcrumb" class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/" class="no-underline hover:underline">SAICA-Bench</a>
+    <span aria-hidden="true"> › </span>
+    <a href="/failure-modes/" class="no-underline hover:underline">Failure modes</a>
+    <span aria-hidden="true"> › </span>
+    <span aria-current="page">{fm.name}</span>
+  </nav>
+  <h1 class="mt-2 max-w-4xl">{c.h1}</h1>
 
-  {fm.aliases.length > 0 && (
-    <div class="mt-3 flex flex-wrap gap-1.5">
-      {fm.aliases.map((a) => <span class="chip" title="Alias">a.k.a. {a}</span>)}
-    </div>
-  )}
+  <div class="max-w-3xl">
+    <p class="mt-4 text-lg leading-8"><Fragment set:html={html(c.definition)} /> <Fragment set:html={html(c.detail)} /></p>
+    <p class="mt-3 leading-7"><Fragment set:html={html(c.why)} /></p>
+    <p class="mt-3 font-sans text-sm text-ink-muted">
+      <strong class="text-ink">At a glance:</strong> {atAGlance}
+      <a href="#caught">Results ↓</a>
+    </p>
 
-  <h2>Description</h2>
-  <p class="whitespace-pre-line leading-7">{fm.description}</p>
+    {names.length > 0 && (
+      <div class="mt-4">
+        <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Also called</span>
+        <ul class="mt-1.5 flex flex-wrap gap-1.5">
+          {names.map((n) => <li class="chip">{n}</li>)}
+        </ul>
+      </div>
+    )}
+  </div>
+
+  {m ? <MeasuredResults m={m} subject={c.subject} note={c.measuredNote} /> : <NotMeasured s={s} subject={c.subject} fmId={fm.id} />}
 
   {fm.detection_signals.length > 0 && (
-    <>
-      <h2>Detection signals</h2>
-      <ul class="list-disc pl-5">
-        {fm.detection_signals.map((s) => <li>{s}</li>)}
+    <section aria-labelledby="detect" class="max-w-3xl">
+      <h2 id="detect">How to detect it</h2>
+      <p class="text-ink-muted">Signals that point to {fm.name.toLowerCase()}, from the SAICA knowledge graph:</p>
+      <ul class="mt-2 list-disc pl-5 leading-7">
+        {fm.detection_signals.map((x) => <li set:html={html(x)} />)}
       </ul>
-    </>
+    </section>
   )}
 
-  {priorWork.length > 0 && (
-    <>
-      <h2>Prior work</h2>
-      <ul class="list-disc pl-5">
-        {priorWork.map((p) => (
-          <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
-        ))}
-      </ul>
-    </>
-  )}
-
-  {crosswalks.length > 0 && (
-    <>
-      <h2>Crosswalks</h2>
-      <ul class="mt-2 space-y-2">
-        {crosswalks.map((cw) => (
-          <li class="card">
-            <div class="flex flex-wrap items-baseline gap-2">
-              <a href={`/taxonomies/${cw.taxonomyId}`} class="font-sans font-semibold">
-                {cw.taxonomyName}
-              </a>
-              <span class="text-ink-faint font-sans text-xs">&rarr;</span>
-              <span class="font-sans"><code>{cw.external_id}</code> — {cw.externalLabel}</span>
-              <span class="chip ml-auto" title="Confidence">{cw.confidence}</span>
-            </div>
-            {cw.externalDescription && (
-              <p class="mt-2 text-sm text-ink-muted">{cw.externalDescription}</p>
-            )}
-            {cw.note && <p class="mt-2 text-sm">{cw.note}</p>}
+  {incidents.length > 0 && (
+    <section aria-labelledby="incidents" class="max-w-3xl">
+      <h2 id="incidents">Real-world incidents</h2>
+      <ul class="mt-2 space-y-3">
+        {incidents.map((i) => (
+          <li>
+            <a href={`/incidents/${i.id}/`} class="font-sans font-semibold">{i.title}</a>
+            <span class="ml-1 font-sans text-xs text-ink-faint">{i.date}{i.harm && ` · ${i.harm.replace(/_/g, ' ')}`}</span>
+            <p class="mt-0.5 text-sm leading-6 text-ink-muted" set:html={html(i.summary)} />
           </li>
         ))}
       </ul>
-    </>
+    </section>
   )}
 
-  {relatedModes.length > 0 && (
-    <>
-      <h2>Related failure modes</h2>
-      <ul class="list-disc pl-5">
-        {relatedModes.map((m) => (
-          <li><a href={`/failure-modes/${m.id}`}>{m.name}</a>{m.tagline && <span class="text-ink-muted"> — {m.tagline}</span>}</li>
+  <section aria-labelledby="tools" class="max-w-3xl">
+    <h2 id="tools">Tools in the catalog that address it</h2>
+    {tools.length === 0 ? (
+      <p class="text-ink-muted">No tool in the catalog is tagged with this failure mode yet.</p>
+    ) : (
+      <>
+        <p class="text-sm text-ink-muted">
+          {tools.length} tool{tools.length === 1 ? ' is' : 's are'} tagged with {fm.name.toLowerCase()} in the
+          catalog, most-starred first. A tag says what a tool is for, not how well it works; the measured J is shown
+          where SAICA-Bench ran the tool on this mode.
+        </p>
+        <ul class="mt-3 divide-y divide-ink/10 border-y border-ink/10">
+          {tools.map((t) => (
+            <li class="py-2 flex flex-wrap items-baseline gap-x-2">
+              <a href={toolUrl(t.id)} class="font-sans font-semibold">{t.name}</a>
+              {measuredJ.has(t.id) && <span class="chip-accent">measured J {pct(measuredJ.get(t.id)!)}</span>}
+              {t.tagline && <span class="text-sm text-ink-muted">{t.tagline}</span>}
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+  </section>
+
+  {taxa.length > 0 && (
+    <section aria-labelledby="taxonomies" class="max-w-3xl">
+      <h2 id="taxonomies">In other taxonomies</h2>
+      <p class="text-sm text-ink-muted">
+        How {fm.name.toLowerCase()} maps to other failure taxonomies. “Exact” means the same failure, “partial” an
+        overlap, “related” a neighbouring category.
+      </p>
+      <ul class="mt-3 space-y-3">
+        {taxa.map((t) => (
+          <li class="card !p-4">
+            <a href={`/taxonomies/${t.id}/`} class="font-sans font-semibold">{t.name}</a>
+            {t.strong.length > 0 && (
+              <ul class="mt-2 space-y-1.5">
+                {t.strong.map((x) => (
+                  <li class="text-sm leading-6">
+                    <span class={conf(x.confidence)}>{x.confidence}</span>
+                    <span class="font-sans"> <code>{x.externalId}</code> {x.label}</span>
+                    {x.note && <span class="text-ink-muted"> — {x.note}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {t.related.length > 0 && (
+              <p class="mt-2 text-sm text-ink-muted">
+                <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Related:</span>{' '}
+                {t.related.map((x, i) => <>{i > 0 && '; '}<code>{x.externalId}</code> {x.label}</>)}
+              </p>
+            )}
+          </li>
         ))}
       </ul>
-    </>
+    </section>
   )}
 
-  <h2>Mitigating tools</h2>
-  {mitigatingTools.length === 0 ? (
-    <p class="text-ink-muted">No tools currently indexed address this mode.</p>
-  ) : (
-    <ul class="list-disc pl-5">
-      {mitigatingTools.map((t) => (
-        <li>
-          <a href={`/tools/${t.id}`}>{t.name}</a>
-          {t.tagline && <span class="text-ink-muted"> — {t.tagline}</span>}
-        </li>
+  {related.length > 0 && (
+    <section aria-labelledby="related" class="max-w-3xl">
+      <h2 id="related">Related failure modes</h2>
+      <ul class="mt-2 space-y-2">
+        {related.map((r) => (
+          <li>
+            <a href={fmUrl(r.id)} class="font-sans font-semibold">{copyFor(r.id).term}</a>
+            {!sameAsName(copyFor(r.id).term, r.name) && <span class="font-sans text-sm text-ink-faint"> ({r.name.toLowerCase()})</span>}
+            <span class="text-ink-muted"> — {copyFor(r.id).short}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-3 font-sans text-sm"><a href="/failure-modes/">All 11 AI coding agent failure modes →</a> · <a href={`/glossary/#${fmSlug(fm.id)}`}>Glossary</a></p>
+    </section>
+  )}
+
+  {priorWork.length > 0 && (
+    <section aria-labelledby="research" class="max-w-3xl">
+      <h2 id="research">Research</h2>
+      <ul class="list-disc pl-5 leading-7">
+        {priorWork.map((p) => <li><a href={`/papers/${p.id}/`}>{paperLabel(p.id)}</a></li>)}
+      </ul>
+    </section>
+  )}
+
+  <section aria-labelledby="faq" class="max-w-3xl">
+    <h2 id="faq">Questions and answers</h2>
+    <div class="mt-2 space-y-5">
+      {faq.map((x) => (
+        <div>
+          <h3 class="!mt-0 !mb-1 text-base">{x.q}</h3>
+          <p class="leading-7">{x.a}</p>
+        </div>
       ))}
-    </ul>
-  )}
+    </div>
+  </section>
 
+  <p class="mt-8 font-sans text-xs text-ink-faint">Benchmark results from {GENERATED}. The definition, detection signals and tags come from the SAICA knowledge graph.</p>
   <RawYamlLink kind="failure_modes" id={fm.id} />
 </BaseLayout>

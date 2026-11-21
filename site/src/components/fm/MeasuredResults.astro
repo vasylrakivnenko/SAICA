@@ -1,0 +1,142 @@
+---
+// "How well can it be caught?" for one benchmarked failure mode, rendered at build time from results.json:
+// best overall / best free option / best hybrid tool, the full results table (sorted by J), dataset, setup, caveats.
+import { toolUrl, leaderboardUrl } from '../../lib/seo.ts';
+import { CAT_LABEL, FLOOR, WELL, int, money, pct, pct0, proseName, type Measured, type MRow } from './fm.ts';
+
+interface Props {
+  m: Measured;
+  /** Noun phrase for the heading: "How well can <subject> be caught?" */
+  subject: string;
+  /** What the benchmark set does and does not test, when that needs saying up front. */
+  note?: string;
+}
+const { m, subject, note } = Astro.props;
+const scored = m.nPos + m.nNeg;
+const verdict =
+  m.best.j >= WELL
+    ? { label: 'Caught well', cls: 'bg-accent-soft text-accent border-accent/30' }
+    : m.best.j >= FLOOR
+      ? { label: 'Caught partly', cls: 'bg-paper-alt text-ink border-ink/15' }
+      : { label: 'Not caught yet', cls: 'bg-[#fbeaea] text-[#8a1f1f] border-[#8a1f1f]/25' };
+
+const cards: Array<{ label: string; hint: string; row: MRow | null; empty: string }> = [
+  { label: 'Best overall', hint: 'any type', row: m.best, empty: '' },
+  {
+    label: 'Best free option',
+    hint: 'free programs and simple rules, $0',
+    row: m.bestFree,
+    empty: 'No free program or rule was run on this mode.',
+  },
+  {
+    label: 'Best hybrid tool',
+    hint: 'a packaged tool that wraps a model',
+    row: m.bestHybrid,
+    empty: 'No hybrid tool was run on this mode; see the caveats below.',
+  },
+];
+const cost = (r: MRow) => (r.cost === 0 ? '$0' : (r.estimated ? '~' : '') + money(r.cost1k));
+const subsets = m.rows.filter((r) => r.subset);
+const anyEstimated = m.rows.some((r) => r.estimated);
+const barW = (j: number) => `${Math.round(Math.max(0, j) * 56)}px`;
+---
+
+<section aria-labelledby="caught">
+  <h2 id="caught">How well can {subject} be caught?</h2>
+  <p class="leading-7">
+    <span class={`inline-block align-middle mr-1 rounded-full border px-2.5 py-0.5 font-sans text-xs font-semibold ${verdict.cls}`}>{verdict.label}</span>
+    SAICA-Bench ran {m.rows.length} tools and models on the same {int(m.nPos)} bad samples ({m.posLabel}) and
+    {int(m.nNeg)} clean ones, each without seeing the labels.{note && ` ${note}`} The best, {proseName(m.best)}, scores <strong>J {pct(m.best.j)}</strong>: it flags
+    {pct0(m.best.tpr)} of the bad samples and {pct0(m.best.fpr)} of the clean ones.
+    {m.best.j < FLOOR && <> No model, program or judge we ran reaches J {pct0(FLOOR)} here, so none of the reviewers tested is a reliable check for it.</>}
+  </p>
+
+  <div class="mt-5 grid gap-4 sm:grid-cols-3">
+    {cards.map((c) => (
+      <div class="card !p-4 flex flex-col">
+        <h3 class="!mt-0 !mb-0 text-xs uppercase tracking-wide text-ink-faint font-semibold">{c.label}</h3>
+        <p class="font-sans text-[11px] text-ink-faint">{c.hint}</p>
+        {c.row ? (
+          <>
+            <p class="mt-2 font-sans font-semibold leading-snug">
+              {c.row.kgId ? <a href={toolUrl(c.row.kgId)}>{c.row.short}</a> : c.row.short}
+              <span class="ml-1 font-normal text-xs text-ink-faint">{CAT_LABEL[c.row.cat]}</span>
+            </p>
+            <p class="mt-1 font-sans text-3xl font-semibold tabular-nums text-ink">J {pct(c.row.j)}</p>
+            <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 font-sans text-xs tabular-nums text-ink-muted">
+              <dt>TPR</dt><dd>{pct(c.row.tpr)} <span class="text-ink-faint">(95% CI {pct0(c.row.tprCi[0])}–{pct0(c.row.tprCi[1])})</span></dd>
+              <dt>FPR</dt><dd>{pct(c.row.fpr)} <span class="text-ink-faint">(95% CI {pct0(c.row.fprCi[0])}–{pct0(c.row.fprCi[1])})</span></dd>
+              <dt>Cost</dt><dd>{c.row.cost === 0 ? 'free' : `${cost(c.row)} per 1,000 reviews`}</dd>
+              <dt>Samples</dt><dd>{c.row.subset ? `${int(c.row.subset)} (a subset)` : int(scored)}</dd>
+            </dl>
+          </>
+        ) : (
+          <p class="mt-3 text-sm text-ink-muted">{c.empty}</p>
+        )}
+      </div>
+    ))}
+  </div>
+
+  <h3>All results on this mode</h3>
+  <p class="text-sm text-ink-muted">
+    {m.n !== scored ? `${int(scored)} scored samples` : `${int(m.n)} samples`}: {int(m.nPos)} {m.posLabel} vs {int(m.nNeg)} clean ·
+    Data: {m.dataset}
+  </p>
+  <div class="mt-3 overflow-x-auto">
+    <table class="w-full border-collapse font-sans text-sm tabular-nums">
+      <caption class="sr-only">{m.name}: every tool and model SAICA-Bench ran, sorted by J</caption>
+      <thead>
+        <tr class="border-b border-ink/20 text-left text-xs uppercase tracking-wide text-ink-faint">
+          <th scope="col" class="py-2 pr-2 font-semibold text-right">#</th>
+          <th scope="col" class="py-2 px-2 font-semibold">Tool or model</th>
+          <th scope="col" class="py-2 px-2 font-semibold">Type</th>
+          <th scope="col" class="py-2 px-2 font-semibold text-right" title="J = TPR − FPR">J</th>
+          <th scope="col" class="py-2 px-2 font-semibold text-right" title="Share of bad samples flagged">TPR</th>
+          <th scope="col" class="py-2 px-2 font-semibold text-right" title="Share of clean samples flagged">FPR</th>
+          <th scope="col" class="py-2 pl-2 font-semibold text-right">Cost / 1k reviews</th>
+        </tr>
+      </thead>
+      <tbody>
+        {m.rows.map((r, i) => (
+          <tr class="border-b border-ink/10 align-top">
+            <td class="py-1.5 pr-2 text-right text-ink-faint">{i + 1}</td>
+            <td class="py-1.5 px-2">
+              {r.kgId ? <a href={toolUrl(r.kgId)}>{r.tool}</a> : <span>{r.tool}</span>}
+              {r.subset && <span class="text-ink-faint" title={`Rates on ${int(r.subset)} of ${int(m.n)} samples`}> †</span>}
+            </td>
+            <td class="py-1.5 px-2 whitespace-nowrap text-ink-muted">{CAT_LABEL[r.cat]}</td>
+            <td class="py-1.5 px-2 text-right whitespace-nowrap font-semibold">
+              <span class="inline-block h-1.5 mr-1.5 align-middle rounded-sm bg-accent/70" style={`width:${barW(r.j)}`} aria-hidden="true"></span>{pct(r.j)}
+            </td>
+            <td class="py-1.5 px-2 text-right">{pct(r.tpr)}</td>
+            <td class="py-1.5 px-2 text-right">{pct(r.fpr)}</td>
+            <td class="py-1.5 pl-2 text-right whitespace-nowrap" title={r.costNote || undefined}>{cost(r)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-2 font-sans text-xs text-ink-faint leading-5">
+    J = TPR − FPR (0% = chance, 100% = every bad sample flagged and no clean one). TPR = share of bad samples flagged,
+    FPR = share of clean samples flagged. Cost per 1,000 reviews from the provider's reported price, or GPU time for
+    self-hosted models; free programs and rules cost $0.
+    {anyEstimated && ' ~ = cost estimated from a partial run.'}
+    {subsets.length > 0 && ` † = rates on a subset: ${subsets.map((r) => `${r.short} on ${int(r.subset!)} of ${int(m.n)}`).join('; ')}.`}
+    Tool names link to their catalog page where one exists. <a href="/glossary/#j">Metric definitions</a>.
+  </p>
+
+  <h3>How it was tested</h3>
+  <ul class="list-disc pl-5 text-sm leading-6 space-y-1">
+    {m.setup.map((s) => <li>{s}</li>)}
+  </ul>
+  <h3>Caveats</h3>
+  <ul class="list-disc pl-5 text-sm leading-6 space-y-1">
+    {m.caveats.map((s) => <li>{s}</li>)}
+  </ul>
+
+  <p class="mt-5 font-sans text-sm flex flex-wrap gap-x-5 gap-y-1">
+    <a href={leaderboardUrl(m.benchId)}>{m.name} on the leaderboard →</a>
+    <a href="/benchmark/">How SAICA-Bench works →</a>
+    <a href="/tool-coverage/">Build a supervision kit →</a>
+  </p>
+</section>

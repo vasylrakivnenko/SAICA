@@ -12,7 +12,13 @@ Wraps :mod:`pipeline.ask.server` without modifying it:
 * Mounts the API under ``/api`` (``/api/ask``, ``/api/assess``,
   ``/api/health``) so the site can call it same-origin.
 * With ``SERVE_STATIC=1``, also serves ``site/dist`` at ``/`` — one process,
-  one port, for production.
+  one port, for production. Every page answers at both ``/x`` and ``/x/``
+  with 200 (no slash redirect; pages carry a canonical tag), old underscore
+  failure-mode URLs 301 to the hyphenated ones, and ``/x/index.html`` 301s
+  to ``/x/``.
+* Responses are gzipped; data files (``/api/*``, ``/kit/*``, ``*.json`` …)
+  carry ``X-Robots-Tag: noindex`` so they stay fetchable but out of search
+  results; hashed ``/_astro/*`` assets are cached for a year.
 
 Run::
 
@@ -34,6 +40,115 @@ SITE_DIST = REPO_ROOT / "site" / "dist"
 
 HYPERBOLIC_ENDPOINT = "https://api.hyperbolic.ai/inference/v1"
 DEFAULT_MODEL = "deepseek-v4.1-flash"
+
+# Data files: fetchable (the /graph page reads /api/v1/*.json at runtime, so
+# robots.txt must not block them) but kept out of search results.
+NOINDEX_PREFIXES = ("/api/", "/kit/")
+NOINDEX_SUFFIXES = (".json", ".jsonl", ".pyc", ".py", ".md", ".yml", ".yaml")
+# Astro writes content-hashed file names here, so they never change in place.
+IMMUTABLE_PREFIX = "/_astro/"
+
+
+def extra_headers(path: str, status: int) -> list[tuple[str, str]]:
+    """Headers the site adds to a response for ``path`` (pure; unit-tested)."""
+    out: list[tuple[str, str]] = []
+    lower = path.lower()
+    if (
+        path == "/api"
+        or lower.startswith(NOINDEX_PREFIXES)
+        or lower.endswith(NOINDEX_SUFFIXES)
+    ):
+        out.append(("x-robots-tag", "noindex"))
+    if path.startswith(IMMUTABLE_PREFIX) and status in (200, 304):
+        out.append(("cache-control", "public, max-age=31536000, immutable"))
+    return out
+
+
+class SiteHeaders:
+    """ASGI middleware that applies :func:`extra_headers` to every HTTP response."""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        path = scope["path"]
+
+        async def send_with_headers(message) -> None:
+            if message["type"] == "http.response.start":
+                from starlette.datastructures import MutableHeaders
+
+                headers = MutableHeaders(scope=message)
+                for key, value in extra_headers(path, message["status"]):
+                    headers[key] = value
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
+def permanent_redirect(scope, path: str):
+    """301 to ``path`` on the same origin, keeping the query string.
+
+    The Location is relative on purpose: the client resolves it against the URL
+    it actually requested (https://saica.ai/...), so the redirect stays on the
+    https canonical behind Replit's TLS proxy without trusting any forwarded
+    header (an absolute URL built from X-Forwarded-* would let a client poison
+    a cached 301).
+    """
+    from starlette.responses import RedirectResponse
+
+    query = scope.get("query_string", b"").decode("latin-1")
+    return RedirectResponse(path + (f"?{query}" if query else ""), status_code=301)
+
+
+def site_files(directory: Path):
+    """``StaticFiles(html=True)`` that serves ``/x`` like ``/x/`` instead of redirecting."""
+    import os.path
+    import stat
+
+    import anyio
+    from fastapi.staticfiles import StaticFiles
+
+    class SiteFiles(StaticFiles):
+        async def _page(self, path: str):
+            """(full_path, stat) of ``<path>/index.html`` if it exists, else None."""
+            try:
+                full, st = await anyio.to_thread.run_sync(
+                    self.lookup_path, os.path.join(path, "index.html")
+                )
+            except (OSError, ValueError):
+                return None
+            return (full, st) if st is not None and stat.S_ISREG(st.st_mode) else None
+
+        async def get_response(self, path: str, scope):
+            # ``path`` is Starlette's normalised, relative file path ("about",
+            # "." for the root). Redirect targets are built from it, never from
+            # the raw request path, so "//host/%2e%2e/x" cannot become an
+            # off-site "//host/..." Location.
+            if scope["method"] in ("GET", "HEAD"):
+                rel = path.replace(os.sep, "/")
+                # Failure-mode slugs moved from scope_creep to scope-creep.
+                if rel.startswith("failure-modes/") and "_" in rel:
+                    new_dir = rel.replace("_", "-")
+                    if await self._page(new_dir) is not None:
+                        return permanent_redirect(scope, f"/{new_dir}/")
+                # /x/index.html duplicates /x/: send it to the canonical form.
+                if rel == "index.html" or rel.endswith("/index.html"):
+                    parent = rel[: -len("index.html")].rstrip("/")
+                    if await self._page(parent or ".") is not None:
+                        return permanent_redirect(
+                            scope, f"/{parent}/" if parent else "/"
+                        )
+                # /x -> serve x/index.html directly (Starlette would 307 to /x/).
+                elif rel != "." and not scope["path"].endswith("/"):
+                    page = await self._page(rel)
+                    if page is not None:
+                        return self.file_response(*page, scope)
+            return await super().get_response(path, scope)
+
+    return SiteFiles(directory=directory, html=True)
 
 
 def configure_provider() -> str:
@@ -122,7 +237,13 @@ def build_app():
     root.mount("/api", api_app)
 
     if serve_static:
-        root.mount("/", StaticFiles(directory=SITE_DIST, html=True), name="site")
+        root.mount("/", site_files(SITE_DIST), name="site")
+
+    from starlette.middleware.gzip import GZipMiddleware
+
+    # Inner -> outer: headers are set on the uncompressed response, then gzip.
+    root.add_middleware(SiteHeaders)
+    root.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=6)
     return root
 
 
@@ -141,7 +262,17 @@ def main() -> None:
         provider,
         "on" if os.environ.get("SERVE_STATIC") == "1" else "off",
     )
-    uvicorn.run(app, host=host, port=port, log_level="info")
+    # Behind Replit's TLS proxy: take scheme/client from X-Forwarded-* so any
+    # absolute URL the app builds (e.g. FastAPI's slash redirects under /api)
+    # says https. The deployment is reachable only through that proxy.
+    uvicorn.run(
+        app,
+        host=host,
+        port=port,
+        log_level="info",
+        proxy_headers=True,
+        forwarded_allow_ips=os.environ.get("FORWARDED_ALLOW_IPS", "*"),
+    )
 
 
 if __name__ == "__main__":

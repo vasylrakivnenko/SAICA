@@ -1,21 +1,43 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { MODES, SOURCES, AUTHOR } from '../components/home/bench';
+import { fmUrl, breadcrumbs } from '../lib/seo';
+
+const description =
+  "SAICA-Bench, by Vasyl Rakivnenko (Stanford University), measures how well supervision tools and LLMs catch AI coding agents' failures. Open data, CC-BY-4.0.";
+const jsonld = [
+  { '@context': 'https://schema.org', ...AUTHOR, sameAs: ['https://www.linkedin.com/in/rakivnenkov', 'https://github.com/vasylrakivnenko'] },
+  breadcrumbs([['SAICA-Bench', '/'], ['About', '/about/']]),
+];
 ---
 
-<BaseLayout title="About" description="About SAICA-Bench.">
+<BaseLayout title="About SAICA-Bench: Author, Data Sources and License" rawTitle description={description} jsonld={jsonld}>
   <h1>About</h1>
   <p class="mt-3 max-w-3xl">
     SAICA-Bench tests whether supervision tools catch typical failures of AI coding agents: fabricated code, test
     manipulation, obsolescence, scope creep and more. It compares free programs (type checkers, linters), AI code
-    reviewers, evaluation frameworks and plain models on the same samples, with cost.
+    reviewers, evaluation frameworks and plain models on the same samples, with cost. It is built by Vasyl Rakivnenko
+    (Stanford University).
   </p>
   <p class="mt-3 max-w-3xl">
-    Data comes from public datasets with confirmed labels:
-    <a href="https://huggingface.co/datasets/microsoft/delulu" rel="noopener">Delulu</a> (fabricated code) and
-    <a href="https://huggingface.co/datasets/PatronusAI/trace-dataset" rel="noopener">Patronus TRACE</a> (test
-    manipulation). The failure-mode taxonomy and tool list come from our knowledge graph of supervision tools
-    (<a href="/graph">graph</a>). Code and results are on
+    Data comes from public datasets with confirmed labels, and from matched pairs built on real agent runs (listed
+    below). The failure-mode taxonomy and tool list come from our knowledge graph of supervision tools
+    (<a href="/graph/">graph</a>). How each mode is tested is on the <a href="/benchmark/">benchmark</a> page, and what
+    the results show is in the <a href="/findings/">findings report</a>. Code and results are on
     <a href="https://github.com/vasylrakivnenko/SAICA" rel="noopener">GitHub</a>.
+  </p>
+
+  <h2 id="data">Data sources</h2>
+  <p class="max-w-3xl">
+    The samples come from {SOURCES.filter((s) => s.modes.length).map((s, i, all) => (
+      <>{i > 0 && (i === all.length - 1 ? ' and ' : ', ')}<a href={s.url} rel="noopener">{s.name}</a>{s.by && !s.name.includes(s.by) ? ` (${s.by})` : ''}</>
+    ))}. Per failure mode:
+  </p>
+  <ul class="mt-2 max-w-3xl list-disc pl-5 text-sm leading-6">
+    {MODES.map((m) => <li><a href={fmUrl(m.id)}>{m.name}</a>: {m.dataset}.</li>)}
+  </ul>
+  <p class="mt-3 max-w-3xl">
+    Code is Apache-2.0 and the results data CC-BY-4.0; the source datasets keep their own licenses.
   </p>
 
   <h2 id="contact">Contact</h2>

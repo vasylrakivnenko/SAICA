@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev --ignore-lock",
     "start": "astro dev --ignore-lock",
-    "build": "npm run gen-types && astro build",
+    "build": "npm run gen-types && astro build && node scripts/gen-sitemap.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "gen-types": "node scripts/gen-types.mjs"

@@ -103,7 +103,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/microsoft/pyright",
      "stars": 14000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pyright"
     },
     {
      "key": "plain_llm_minimax",
@@ -142,7 +143,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/python/mypy",
      "stars": 18000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "mypy"
     },
     {
      "key": "mypy",
@@ -163,7 +165,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/python/mypy",
      "stars": 18000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "mypy"
     },
     {
      "key": "pr_agent",
@@ -184,7 +187,8 @@
      "cost_note": "about $0.07 logged plus $0.09 estimated for samples run before logging",
      "repository_url": "https://github.com/Codium-ai/pr-agent",
      "stars": 10968,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pr-agent"
     },
     {
      "key": "ruff",
@@ -205,7 +209,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/astral-sh/ruff",
      "stars": 30000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "ruff"
     },
     {
      "key": "plain_llm_ds41",
@@ -448,7 +453,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/promptfoo/promptfoo",
      "stars": 20465,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "promptfoo"
     },
     {
      "key": "rule_test_edit",
@@ -838,7 +844,8 @@
      "cost_note": "API-reported deepseek cost",
      "repository_url": "https://github.com/promptfoo/promptfoo",
      "stars": 20465,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "promptfoo"
     },
     {
      "key": "pr_agent",
@@ -859,7 +866,8 @@
      "cost_note": "API-reported deepseek cost",
      "repository_url": "https://github.com/Codium-ai/pr-agent",
      "stars": 10968,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pr-agent"
     },
     {
      "key": "semgrep",
@@ -880,7 +888,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/semgrep/semgrep",
      "stars": 14901,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "semgrep"
     },
     {
      "key": "bandit",
@@ -901,7 +910,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/PyCQA/bandit",
      "stars": 6000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "bandit"
     }
    ]
   },
@@ -1035,7 +1045,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/microsoft/pyright",
      "stars": 14000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pyright"
     },
     {
      "key": "mypy",
@@ -1056,7 +1067,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/python/mypy",
      "stars": 18000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "mypy"
     },
     {
      "key": "ruff",
@@ -1077,7 +1089,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/astral-sh/ruff",
      "stars": 30000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "ruff"
     },
     {
      "key": "kg_uqlm_codegen",
@@ -1098,7 +1111,8 @@
      "cost_note": "estimated: run on the first 300 + 300 samples only (our cost $1.57), scaled to all 2440; rates are on those 600. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/cvs-health/uqlm",
      "stars": 1146,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "uqlm"
     },
     {
      "key": "kg_pr_agent",
@@ -1119,7 +1133,8 @@
      "cost_note": "API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/Codium-ai/pr-agent",
      "stars": 10968,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pr-agent"
     }
    ]
   },
@@ -1271,7 +1286,8 @@
      "cost_note": "API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/Arize-ai/phoenix",
      "stars": 9394,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "arize-phoenix"
     },
     {
      "key": "kg_opik_tc",
@@ -1292,7 +1308,8 @@
      "cost_note": "estimated: run on the first 150 + 150 samples only (our cost $0.62), scaled to all 1200; rates are on those 300. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/comet-ml/opik",
      "stars": 18988,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "opik"
     },
     {
      "key": "kg_deepeval_tc",
@@ -1313,7 +1330,8 @@
      "cost_note": "API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/confident-ai/deepeval",
      "stars": 14938,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "deepeval"
     },
     {
      "key": "kg_pr_agent",
@@ -1334,7 +1352,8 @@
      "cost_note": "estimated: run on the first 150 + 150 samples only (our cost $4.24), scaled to all 1200; rates are on those 300. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/Codium-ai/pr-agent",
      "stars": 10968,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pr-agent"
     },
     {
      "key": "kg_ruff_fix",
@@ -1355,7 +1374,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/astral-sh/ruff",
      "stars": 30000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "ruff"
     }
    ]
   },
@@ -1658,7 +1678,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/microsoft/pyright",
      "stars": 14000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "pyright"
     },
     {
      "key": "kg_mypy_libs",
@@ -1679,7 +1700,8 @@
      "cost_note": "",
      "repository_url": "https://github.com/python/mypy",
      "stars": 18000,
-     "stars_updated_at": "2026-04-23"
+     "stars_updated_at": "2026-04-23",
+     "kg_id": "mypy"
     }
    ]
   },

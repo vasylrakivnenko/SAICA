@@ -24,6 +24,7 @@ const examples: { label: string; slug: string }[] = [
 ---
 
 <BaseLayout
+  noindex
   title="Assess"
   description="Paste a public GitHub repo URL and SAICA-KG returns a coverage report — what supervision tools you have, which failure modes you're missing, and ranked recommendations."
 >
@@ -170,7 +171,7 @@ const examples: { label: string; slug: string }[] = [
           Rows are the supervision tools we detected in your repo. Columns are
           the 11 failure modes from SAICA-KG. Cell color uses the same
           per-mapping evidence tier as
-          <a href="/tool-coverage">/tool-coverage</a>: 0 (not addressed),
+          <a href="/tool-coverage/">/tool-coverage</a>: 0 (not addressed),
           1 (declared), 2 (rationale discusses FM), 3 (external citation).
         </p>
       </div>
@@ -411,7 +412,7 @@ const examples: { label: string; slug: string }[] = [
       + fms.map((fm) => {
         const disp = fmtDisplay(fm);
         return `<th class="px-2 py-2 align-bottom" style="min-width:3rem">`
-          + `<a href="/failure-modes/${encodeURIComponent(fm)}" class="block text-ink hover:text-accent" title="${escapeHtml(disp)}">`
+          + `<a href="/failure-modes/${encodeURIComponent(String(fm).replace(/_/g, "-"))}/" class="block text-ink hover:text-accent" title="${escapeHtml(disp)}">`
           + `<div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;" class="text-xs normal-case tracking-normal">${escapeHtml(disp)}</div>`
           + `</a></th>`;
       }).join('');
@@ -483,7 +484,7 @@ const examples: { label: string; slug: string }[] = [
       card.innerHTML =
         `<header class="flex flex-wrap items-baseline justify-between gap-2">`
         + `<h3 class="!mt-0 !mb-0 text-base">`
-        + `<a href="/failure-modes/${encodeURIComponent(g.failure_mode)}" class="text-ink hover:text-accent">${escapeHtml(fmDisp)}</a>`
+        + `<a href="/failure-modes/${encodeURIComponent(String(g.failure_mode).replace(/_/g, "-"))}/" class="text-ink hover:text-accent">${escapeHtml(fmDisp)}</a>`
         + `</h3>`
         + `<span class="inline-block text-xs font-sans uppercase tracking-wide rounded-full border px-2 py-0.5 ${sevCls}">${escapeHtml(sev)}</span>`
         + `</header>`

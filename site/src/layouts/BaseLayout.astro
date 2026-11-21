@@ -1,30 +1,52 @@
 ---
-// SAICA-Bench site layout. Structure follows swebench.com: a short sidebar
-// (Leaderboard, Benchmark, About, Contact) and one content column.
-// Pages not in the sidebar (tools, failure modes, ask, ...) still build and
-// stay reachable by URL; they are just not linked.
+// SAICA-Bench site layout: a fixed sidebar rail and one content column.
+// SEO: every page gets a canonical URL (https://saica.ai + trailing slash), Open Graph / Twitter tags, optional
+// JSON-LD (`jsonld` prop, one object or a list) and optional `noindex` (duplicates, utility pages).
+// Helpers live in ../lib/seo.ts; the sitemap is written after the build by scripts/gen-sitemap.mjs.
 import '../styles/global.css';
+import { SITE_NAME, OG_IMAGE, abs, clip, jsonLd } from '../lib/seo';
 
 interface Props {
   title: string;
   description?: string;
+  /** Exclude from search results (and from the sitemap). */
+  noindex?: boolean;
+  /** schema.org JSON-LD object(s) for this page. */
+  jsonld?: unknown;
+  /** Open Graph type: "website" (default) or "article". */
+  ogType?: string;
+  /** Use the title as-is instead of appending " · SAICA-Bench". */
+  rawTitle?: boolean;
 }
 
-const { title, description } = Astro.props;
-const fullTitle = title === 'SAICA-Bench' ? 'SAICA-Bench' : `${title} · SAICA-Bench`;
-const desc =
+const { title, description, noindex = false, jsonld, ogType = 'website', rawTitle = false } = Astro.props;
+const fullTitle = rawTitle || title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
+const desc = clip(
   description ??
-  'SAICA-Bench measures how well supervision tools catch typical failures of AI coding agents.';
+    'SAICA-Bench measures how well supervision tools and LLMs catch the typical failures of AI coding agents.',
+  160,
+);
+const canonical = abs(Astro.url.pathname);
+const ogImage = abs(OG_IMAGE);
+const ld = jsonld == null ? [] : Array.isArray(jsonld) ? jsonld : [jsonld];
+const gscToken = import.meta.env.PUBLIC_GSC_VERIFICATION; // Google Search Console HTML-tag verification (optional)
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const nav = [
   { href: '/', label: 'Leaderboard' },
-  { href: '/benchmark', label: 'Benchmark' },
-  { href: '/graph', label: 'Graph' },
-  { href: '/tool-coverage', label: 'Coverage' },
-  { href: '/about', label: 'About' },
-  { href: '/about#contact', label: 'Contact' },
+  { href: '/benchmark/', label: 'Benchmark' },
+  { href: '/failure-modes/', label: 'Failure modes' },
+  { href: '/tools/', label: 'Tools' },
+  { href: '/graph/', label: 'Graph' },
+  { href: '/tool-coverage/', label: 'Coverage' },
+  { href: '/about/', label: 'About' },
+  { href: '/about/#contact', label: 'Contact' },
 ];
-const isActive = (href: string) => (href === '/' ? path === '/' : path === href);
+const norm = (href: string) => href.split('#')[0].replace(/\/$/, '') || '/';
+const isActive = (href: string) => {
+  if (href.includes('#')) return false;
+  const h = norm(href);
+  return h === '/' ? path === '/' : path === h || path.startsWith(h + '/');
+};
 ---
 
 <!doctype html>
@@ -35,7 +57,24 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {gscToken && <meta name="google-site-verification" content={gscToken} />}
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={desc} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    {ld.map((d) => <script type="application/ld+json" set:html={jsonLd(d)} />)}
   </head>
   <body class="min-h-screen bg-paper text-ink">
     <a
@@ -73,11 +112,16 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
     <footer class="border-t border-ink/10 mt-16 bg-paper-alt md:ml-48">
       <div class="mx-auto max-w-prose-wide px-5 md:px-8 py-6 text-xs text-ink-faint font-sans flex flex-wrap justify-between gap-4">
         <div>SAICA-Bench · Code Apache-2.0 · Data CC-BY-4.0</div>
-        <div>
+        <nav aria-label="Footer" class="flex flex-wrap gap-x-3 gap-y-1">
+          <a href="/findings/">Findings</a>
+          <a href="/failure-modes/">Failure modes</a>
+          <a href="/glossary/">Glossary</a>
+          <a href="/tools/">Tools</a>
+          <a href="/recipes/">Recipes</a>
+          <a href="/explore/">Explore</a>
           <a href="/bench/results.json">Results JSON</a>
-          &middot;
           <a href="https://github.com/vasylrakivnenko/SAICA" rel="noopener">GitHub</a>
-        </div>
+        </nav>
       </div>
     </footer>
   </body>

@@ -1,0 +1,242 @@
+---
+// /glossary/: short definitions, each with an anchor, of the 11 failure modes, the other names people search for
+// (only those the knowledge graph supports) and the metric and benchmark terms used on the site. DefinedTermSet JSON-LD.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { graph } from '../lib/data.ts';
+import { abs, breadcrumbs, fmSlug, fmUrl } from '../lib/seo.ts';
+import { copyFor, html, measured, pct0, sameAsName, text } from '../components/fm/fm.ts';
+
+interface Term {
+  id: string;
+  name: string;
+  /** Definition in link markup ([text](/path/) or [text](fm:id)); 2-3 sentences. */
+  def: string;
+  /** Page the term belongs to. */
+  more?: { href: string; label: string };
+}
+
+const firstSentence = (s: string) => {
+  const m = s.match(/^.*?[.!?](?=\s+[A-Z“"]|$)/);
+  return m ? m[0] : s;
+};
+
+const modes: Term[] = Object.values(graph.failureModes)
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((fm) => {
+    const c = copyFor(fm.id);
+    const m = measured(fm.id);
+    const score = m
+      ? ` Best measured detector on SAICA-Bench: ${m.best.short}, J ${pct0(m.best.j)}.`
+      : ' Not benchmarked yet.';
+    return {
+      id: fmSlug(fm.id),
+      name: sameAsName(c.term, fm.name) ? fm.name : `${fm.name} (${c.term.replace(/^[A-Z]/, (x) => x.toLowerCase())})`,
+      def: `${c.definition} ${firstSentence(c.detail)}${score}`,
+      more: { href: fmUrl(fm.id), label: `${fm.name}: results, incidents and tools` },
+    };
+  });
+
+const fm = (id: string) => ({ href: fmUrl(id), label: graph.failureModes[id]?.name ?? id });
+const synonyms: Term[] = [
+  {
+    id: 'code-hallucination',
+    name: 'Code hallucination',
+    def: 'Code that refers to functions, methods, classes or packages that do not exist. API hallucination and phantom imports are the same failure; SAICA-Bench files all of them under [fabrication](fm:fabrication).',
+    more: fm('fabrication'),
+  },
+  {
+    id: 'package-hallucination',
+    name: 'Package hallucination',
+    def: 'A model suggests importing or installing a package that does not exist. It is a form of [fabrication](fm:fabrication); once an attacker registers the made-up name it becomes [slopsquatting](#slopsquatting).',
+    more: fm('fabrication'),
+  },
+  {
+    id: 'slopsquatting',
+    name: 'Slopsquatting',
+    def: 'Registering a package name that AI models hallucinate, so that an agent which installs it runs the attacker’s code. One of the [supply-chain attacks](fm:supply_chain_attack) on coding agents; the best-known case is [huggingface-cli](/incidents/huggingface-cli-slopsquat-lanyado-2024/).',
+    more: fm('supply_chain_attack'),
+  },
+  {
+    id: 'typosquatting',
+    name: 'Typosquatting',
+    def: 'Publishing a malicious package under a near-miss of a popular name (a doubled, dropped or swapped letter, a plural, a py- prefix) or a popular name plus a word, and waiting for a person or an agent to install it. A [supply-chain attack](fm:supply_chain_attack); SAICA-Bench tests reviewers on known-malicious lookalike names.',
+    more: fm('supply_chain_attack'),
+  },
+  {
+    id: 'reward-hacking',
+    name: 'Reward hacking',
+    def: 'Optimising the signal you are judged by instead of the goal behind it. In coding agents the usual form is making failing tests pass by changing the tests, which SAICA-Bench calls [test manipulation](fm:test_manipulation).',
+    more: fm('test_manipulation'),
+  },
+  {
+    id: 'premature-completion',
+    name: 'Premature completion (false completion)',
+    def: 'An agent declaring a task finished while parts are skipped, stubbed or not working. SAICA-Bench’s term is [incomplete execution](fm:incomplete_execution).',
+    more: fm('incomplete_execution'),
+  },
+  {
+    id: 'deprecated-api-usage',
+    name: 'Deprecated API usage',
+    def: 'Code that calls a library API that has been deprecated or removed, usually because the model learned an older version of the library. SAICA-Bench’s term is [obsolescence](fm:obsolescence); training-data staleness is its usual cause.',
+    more: fm('obsolescence'),
+  },
+  {
+    id: 'reinvention',
+    name: 'Reinvention (reinventing existing code)',
+    def: 'Hand-writing a function the standard library, a dependency or the codebase already provides. SAICA-Bench’s term is [dependency blindness](fm:dependency_blindness).',
+    more: fm('dependency_blindness'),
+  },
+  {
+    id: 'context-rot',
+    name: 'Context rot',
+    def: 'A common name for a model becoming less reliable as its context grows long. SAICA-Bench does not treat it as a separate mode: a session longer than the model can reliably attend over is one of the signals of [context pollution](fm:context_pollution).',
+    more: fm('context_pollution'),
+  },
+  {
+    id: 'context-poisoning',
+    name: 'Context poisoning',
+    def: 'Deliberately planting false or malicious content in an agent’s memory or context; OWASP lists it as Memory & Context Poisoning (ASI06). [Context pollution](fm:context_pollution) covers this and accidental drift as well.',
+    more: fm('context_pollution'),
+  },
+  {
+    id: 'recovery-spiral',
+    name: 'Recovery spiral',
+    def: 'A run of fix attempts in which each one introduces new errors. SAICA-Bench’s term is [cascading failure](fm:cascading_failure); error cascade and fix regression are other names for it.',
+    more: fm('cascading_failure'),
+  },
+];
+
+const metrics: Term[] = [
+  {
+    id: 'j',
+    name: 'J (J = TPR − FPR)',
+    def: 'The headline score on SAICA-Bench: the share of bad samples a tool flags minus the share of clean samples it flags. 0% is no better than chance (flagging everything scores 100% − 100% = 0%) and 100% flags every bad sample and no clean one; it does not depend on the mix of bad and clean samples. In statistics it is known as Youden’s J.',
+    more: { href: '/benchmark/', label: 'How SAICA-Bench is scored' },
+  },
+  {
+    id: 'tpr',
+    name: 'TPR (true positive rate)',
+    def: 'The share of bad samples a tool flags, also called recall or catch rate. A tool that flags everything has a TPR of 100% and is useless, which is why J subtracts the FPR.',
+  },
+  {
+    id: 'fpr',
+    name: 'FPR (false positive rate)',
+    def: 'The share of clean samples a tool flags: its false-alarm rate. On a mode where most changes are clean, the FPR decides how much reviewer time a tool wastes.',
+  },
+  {
+    id: 'confidence-interval',
+    name: '95% confidence interval',
+    def: 'The range that the true TPR or FPR lies in with 95% confidence, given how many samples were scored. Small sets give wide ranges: with 50 pairs, about ±10 points.',
+  },
+  {
+    id: 'cost-per-1000-reviews',
+    name: 'Cost per 1,000 reviews',
+    def: 'What a tool costs to review 1,000 samples of a mode, averaged over our run: the provider’s reported price (for Azure, list price × tokens), GPU time at $0.89 an hour for self-hosted models, and $0 for free programs. A “~” marks a cost scaled up from a partial run.',
+  },
+  {
+    id: 'sample',
+    name: 'Sample (bad or clean)',
+    def: 'One item to review: a task plus what an agent produced for it, such as a patch, a function or a whole session. It is labelled bad if it contains the failure and clean if it does not; tools never see the label.',
+    more: { href: '/benchmark/', label: 'Datasets and labels' },
+  },
+  {
+    id: 'paired-samples',
+    name: 'Paired samples (matched pairs)',
+    def: 'A bad and a clean sample built to differ only in the failure, for example the same patch with and without a hand-rolled copy of `shlex.split`. Pairing stops a tool from scoring on size, style or file count instead of the failure itself.',
+  },
+  {
+    id: 'free-program',
+    name: 'Free program',
+    def: 'A deterministic tool that needs no language model, such as a type checker, linter or security scanner (pyright, mypy, ruff, semgrep, bandit). It costs nothing to run and gives the same answer every time.',
+  },
+  {
+    id: 'hybrid-tool',
+    name: 'Hybrid tool',
+    def: 'A packaged supervision tool that wraps a language model in its own review logic or judge template, such as PR-Agent, promptfoo, giskard, DeepEval, uqlm, Arize Phoenix or Opik. On SAICA-Bench they run on deepseek-v4-flash, which is also tested on its own, so the effect of the wrapper can be read off directly.',
+  },
+  {
+    id: 'llm-reviewer',
+    name: 'LLM reviewer (asked directly)',
+    def: 'A language model given the sample and one fixed prompt per mode that names the failure to look for. Because it is told exactly what to look for, its score is an upper bound for that model, not a product.',
+  },
+  {
+    id: 'simple-rule',
+    name: 'Simple rule',
+    def: 'A few lines of logic written for the benchmark as a baseline, for example flagging a patch that edits a test file or adds a package whose name looks like a typo of a popular one. Rules are not packaged tools.',
+  },
+  {
+    id: 'supervision-tool',
+    name: 'Supervision tool',
+    def: 'Any tool that checks, constrains or records what a coding agent does: a reviewer, linter, scanner, sandbox, approval gate or tracer. Tools that detect a failure can be scored on SAICA-Bench; tools that prevent it or only record traces cannot be scored on a finished change.',
+    more: { href: '/tools/', label: 'Tool catalog' },
+  },
+];
+
+const groups = [
+  { id: 'failure-modes', title: 'Failure modes', intro: 'The modes SAICA-Bench defines, each linked to its page with measured results.', terms: modes },
+  { id: 'other-names', title: 'Other names people use', intro: 'Common names for the same failures, and which mode each belongs to.', terms: synonyms },
+  { id: 'metrics', title: 'Metrics and benchmark terms', intro: 'How detection is scored and what the tool types mean.', terms: metrics },
+];
+
+const description = `Plain definitions of the ${modes.length} AI coding agent failure modes, names like code hallucination, slopsquatting and context rot, and the J, TPR and FPR metrics.`;
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    '@id': abs('/glossary/'),
+    name: 'SAICA-Bench glossary: AI coding agent failures and benchmark terms',
+    url: abs('/glossary/'),
+    hasDefinedTerm: groups.flatMap((g) =>
+      g.terms.map((t) => ({
+        '@type': 'DefinedTerm',
+        '@id': abs(`/glossary/#${t.id}`),
+        name: t.name,
+        description: text(t.def),
+        url: abs(`/glossary/#${t.id}`),
+        inDefinedTermSet: abs('/glossary/'),
+      })),
+    ),
+  },
+  breadcrumbs([
+    ['SAICA-Bench', '/'],
+    ['Glossary', '/glossary/'],
+  ]),
+];
+---
+
+<BaseLayout title="Glossary of AI Coding Agent Failures and Metrics" description={description} jsonld={jsonld}>
+  <nav aria-label="Breadcrumb" class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href="/" class="no-underline hover:underline">SAICA-Bench</a>
+    <span aria-hidden="true"> › </span>
+    <span aria-current="page">Glossary</span>
+  </nav>
+  <h1 class="mt-2">Glossary: AI coding agent failures and benchmark terms</h1>
+  <p class="mt-4 max-w-3xl text-lg leading-8">
+    Short definitions of the failure modes on this site, the other names they go by and the terms used to score
+    detectors. Each entry has its own link; failure modes point to their full pages on the
+    <a href="/failure-modes/">AI coding agent failure modes</a> hub.
+  </p>
+  <ul class="mt-4 flex flex-wrap gap-x-5 gap-y-1 font-sans text-sm">
+    {groups.map((g) => <li><a href={`#${g.id}`}>{g.title}</a></li>)}
+  </ul>
+
+  {groups.map((g) => (
+    <section aria-labelledby={g.id} class="max-w-3xl">
+      <h2 id={g.id}>{g.title}</h2>
+      <p class="text-sm text-ink-muted">{g.intro}</p>
+      <dl class="mt-4 space-y-5">
+        {g.terms.map((t) => (
+          <div id={t.id} class="scroll-mt-6">
+            <dt class="font-sans font-semibold">
+              <a href={`#${t.id}`} class="text-ink no-underline hover:underline">{t.name}</a>
+            </dt>
+            <dd class="mt-1 leading-7">
+              <Fragment set:html={html(t.def)} />
+              {t.more && <> <a href={t.more.href} class="font-sans text-sm whitespace-nowrap">{t.more.label} →</a></>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  ))}
+</BaseLayout>

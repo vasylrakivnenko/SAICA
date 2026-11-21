@@ -1,0 +1,67 @@
+---
+// "How well can it be caught?" for a failure mode with no benchmark yet: says so, and lists the catalog tools that
+// address it by GitHub stars (results.json star_modes), clearly labelled as not measured.
+import { toolUrl, leaderboardUrl } from '../../lib/seo.ts';
+import { int, type StarMode } from './fm.ts';
+
+interface Props {
+  s: StarMode | null;
+  /** Noun phrase for the heading: "How well can <subject> be caught?" */
+  subject: string;
+  fmId: string;
+}
+const { s, subject, fmId } = Astro.props;
+const MECH: Record<string, string> = { detects: 'Detects', prevents: 'Prevents', records: 'Records' };
+const IMPL: Record<string, string> = { deterministic: 'Free program', hybrid: 'Hybrid', llm_based: 'LLM-based' };
+const lower = subject;
+---
+
+<section aria-labelledby="caught">
+  <h2 id="caught">How well can {lower} be caught?</h2>
+  <p class="leading-7">
+    <span class="inline-block align-middle mr-1 rounded-full border border-ink/15 bg-paper-alt px-2.5 py-0.5 font-sans text-xs font-semibold text-ink-muted">Not measured</span>
+    We don't know yet. SAICA-Bench has not benchmarked {lower}: no dataset with confirmed labels exists for it,
+    so no detector has a measured score. {s?.note}
+  </p>
+
+  {s && s.tools.length > 0 && (
+    <>
+      <h3>Catalog tools that address it, by GitHub stars (not measured)</h3>
+      <p class="text-sm text-ink-muted">
+        Stars show popularity, not quality. “Detects” tools flag the failure, “prevents” tools make it less likely, and
+        “records” tools only keep traces for a human to inspect.
+      </p>
+      <div class="mt-3 overflow-x-auto">
+        <table class="w-full border-collapse font-sans text-sm">
+          <caption class="sr-only">Catalog tools that address {lower}, ranked by GitHub stars; none has been measured</caption>
+          <thead>
+            <tr class="border-b border-ink/20 text-left text-xs uppercase tracking-wide text-ink-faint">
+              <th scope="col" class="py-2 pr-2 font-semibold">Tool</th>
+              <th scope="col" class="py-2 px-2 font-semibold text-right">Stars</th>
+              <th scope="col" class="py-2 px-2 font-semibold">What it does</th>
+              <th scope="col" class="py-2 pl-2 font-semibold">How (not measured)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {s.tools.map((t) => (
+              <tr class="border-b border-ink/10 align-top">
+                <td class="py-1.5 pr-2 whitespace-nowrap">{t.inKg ? <a href={toolUrl(t.id)}>{t.name}</a> : t.name}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums text-ink-muted">{t.stars == null ? '—' : int(t.stars)}</td>
+                <td class="py-1.5 px-2 whitespace-nowrap text-ink-muted">
+                  {MECH[t.mechanism] ?? t.mechanism}{t.implementation && IMPL[t.implementation] ? ` · ${IMPL[t.implementation]}` : ''}
+                </td>
+                <td class="py-1.5 pl-2 leading-5 text-ink-muted font-serif">{t.how}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+
+  <p class="mt-5 font-sans text-sm flex flex-wrap gap-x-5 gap-y-1">
+    <a href={leaderboardUrl(fmId)}>Leaderboard →</a>
+    <a href="/benchmark/">How SAICA-Bench works →</a>
+    <a href="/tool-coverage/">Build a supervision kit →</a>
+  </p>
+</section>

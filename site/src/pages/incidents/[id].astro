@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph, paperLabel } from '../../lib/data.ts';
+import { breadcrumbs, clip, fmUrl, toolUrl } from '../../lib/seo.ts';
 import type { Incident } from '../../lib/types.ts';
 
 export function getStaticPaths() {
@@ -21,7 +22,12 @@ const mitigatedByTools = (incident.mitigated_by ?? [])
   .map((id) => graph.tools[id])
   .filter(Boolean);
 const affected = incident.affected_systems ?? [];
-const desc = incident.tagline ?? incident.description.slice(0, 160);
+const desc = clip(incident.tagline ?? incident.description, 155);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Incidents', '/incidents/'],
+  [clip(incident.title, 80), `/incidents/${incident.id}/`],
+]);
 
 function prettyDomain(url: string): string {
   try {
@@ -32,9 +38,9 @@ function prettyDomain(url: string): string {
 }
 ---
 
-<BaseLayout title={incident.title} description={desc}>
+<BaseLayout title={clip(incident.title, 60)} description={desc} jsonld={jsonld} ogType="article">
   <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-    <a href="/incidents" class="no-underline hover:underline">Incidents</a>
+    <a href="/incidents/" class="no-underline hover:underline">Incidents</a>
   </p>
   <h1 class="mt-1">{incident.title}</h1>
   {incident.tagline && <p class="mt-2 text-lg text-ink-muted">{incident.tagline}</p>}
@@ -59,7 +65,7 @@ function prettyDomain(url: string): string {
               return (
                 <li>
                   {node ? (
-                    <a href={`/failure-modes/${fm}`}>{node.name}</a>
+                    <a href={fmUrl(fm)}>{node.name}</a>
                   ) : (
                     <span>{fm}</span>
                   )}
@@ -87,7 +93,7 @@ function prettyDomain(url: string): string {
         <ul class="list-disc pl-5">
           {mitigatedByTools.map((t) => (
             <li>
-              <a href={`/tools/${t.id}`}>{t.name}</a>
+              <a href={toolUrl(t.id)}>{t.name}</a>
               {t.tagline && <span class="text-ink-muted"> — {t.tagline}</span>}
             </li>
           ))}
@@ -99,7 +105,7 @@ function prettyDomain(url: string): string {
           <h2>Documented by</h2>
           <ul class="list-disc pl-5">
             {documentedByPapers.map((p) => (
-              <li><a href={`/papers/${p.id}`}>{paperLabel(p.id)}</a></li>
+              <li><a href={`/papers/${p.id}/`}>{paperLabel(p.id)}</a></li>
             ))}
           </ul>
         </>

@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use SAICA-Bench, its results or the SAICA-KG data, please cite it as below."
+title: SAICA-Bench
+abstract: >-
+  SAICA-Bench measures whether supervision tools and language models catch
+  the typical failures of AI coding agents (fabrication, test manipulation,
+  security vulnerabilities, logic errors, incomplete execution, scope creep,
+  obsolescence, supply-chain attacks, dependency blindness). Every reviewer
+  sees the same labelled samples and is scored J = TPR - FPR, with the cost
+  per 1,000 reviews. The repository also holds SAICA-KG, a knowledge graph of
+  failure modes, supervision tools, papers, incidents and external taxonomies.
+type: software
+authors:
+  - given-names: Vasyl
+    family-names: Rakivnenko
+    affiliation: Stanford University
+url: "https://saica.ai"
+repository-code: "https://github.com/vasylrakivnenko/SAICA"
+license:
+  - Apache-2.0
+  - CC-BY-4.0
+keywords:
+  - AI coding agents
+  - benchmark
+  - code review
+  - LLM-as-a-judge
+  - failure modes
+  - supervision
+  - knowledge graph

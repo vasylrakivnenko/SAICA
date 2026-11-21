@@ -1,31 +1,37 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph, failureModeLabel } from '../../lib/data.ts';
+import { breadcrumbs, clip, fmUrl } from '../../lib/seo.ts';
 
 // Newest incidents first.
 const incidents = Object.values(graph.incidents)
   .slice()
   .sort((a, b) => b.incident_date.localeCompare(a.incident_date));
+const description = clip(
+  `${incidents.length} real incidents where AI coding agents caused harm (deleted databases, hallucinated packages, prompt injection, leaked secrets), by failure mode.`,
+  155,
+);
+const jsonld = breadcrumbs([
+  ['SAICA-Bench', '/'],
+  ['Incidents', '/incidents/'],
+]);
 ---
 
-<BaseLayout
-  title="Incidents"
-  description="Documented failure events where AI coding agents produced harm. Anchors SAICA-KG's FailureMode claims in ground truth."
->
-  <h1>Incidents</h1>
+<BaseLayout title="AI coding agent incidents: real-world failures" description={description} jsonld={jsonld}>
+  <h1>AI coding agent incidents</h1>
   <p class="text-ink-muted mt-2 max-w-3xl">
     {incidents.length} documented failure events where AI coding agents (or analogous
-    systems) produced harm. Each incident is tagged with the FailureModes it exhibited
-    and the Tools whose supervision would plausibly prevent recurrence.
+    systems) produced harm. Each incident is tagged with the <a href="/failure-modes/">failure modes</a> it exhibited
+    and the <a href="/tools/">tools</a> whose supervision would plausibly prevent recurrence.
   </p>
 
   <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
     {incidents.map((inc) => (
       <li class="py-4">
         <div class="flex items-baseline justify-between gap-4">
-          <h3 class="!mt-0">
-            <a href={`/incidents/${inc.id}`}>{inc.title}</a>
-          </h3>
+          <h2 class="!mt-0 mb-2 text-lg">
+            <a href={`/incidents/${inc.id}/`}>{inc.title}</a>
+          </h2>
           <span class="font-sans text-xs text-ink-faint whitespace-nowrap">
             {inc.incident_date}
           </span>
@@ -35,7 +41,7 @@ const incidents = Object.values(graph.incidents)
           <span class="chip-accent" title="Harm class">{inc.harm_class.replace(/_/g, ' ')}</span>
           <span class="chip-accent" title="Reproducibility">{inc.reproducibility}</span>
           {inc.exhibited_failure_modes.map((fm) => (
-            <span class="chip" title="Failure mode">{failureModeLabel(fm)}</span>
+            <a class="chip no-underline hover:text-accent" href={fmUrl(fm)} title="Failure mode">{failureModeLabel(fm)}</a>
           ))}
         </div>
       </li>
