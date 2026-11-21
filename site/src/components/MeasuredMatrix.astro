@@ -1,0 +1,133 @@
+---
+// Measured coverage matrix (top of /tool-coverage). Data: kit.json "matrix", written by bench/build_report.py:
+// one row per tool or model we ran on SAICA-Bench, one cell per failure mode = its measured J (best configuration).
+// A mode counts as covered when the rounded J % reaches the slider's threshold (70-100, default 90).
+import kit from '../../public/bench/kit.json';
+const matrix = kit.matrix;
+---
+
+<section class="mm" aria-labelledby="mm-title">
+  <p class="mm-eyebrow">Coverage matrix</p>
+  <h1 id="mm-title">Which tools cover which failure modes, measured</h1>
+  <p class="mm-lead">
+    Each cell is a tool's measured J on <a href="/">SAICA-Bench</a> (J = share of bad samples caught minus share of clean ones
+    flagged). A failure mode counts as covered when J reaches the threshold you set. Only the tools and models we have
+    actually tested are shown; catalog tools we can't score on a finished change yet are hidden for now.
+  </p>
+
+  <div class="mm-controls">
+    <label for="mm-th">Covered at J ≥ <output id="mm-th-out" for="mm-th">90%</output></label>
+    <input type="range" id="mm-th" min="70" max="100" step="1" value="90" aria-describedby="mm-summary" />
+    <span class="mm-scale"><span>70%</span><span>100%</span></span>
+  </div>
+  <p class="mm-summary" id="mm-summary" role="status" aria-live="polite"></p>
+
+  <div class="mm-wrap"><table class="mm-table" id="mm-table"></table></div>
+  <div class="mm-legend">
+    <span><i class="mm-sw mm-sw-on"></i>covered (darker = higher J)</span>
+    <span><i class="mm-sw"></i>tested, below the threshold</span>
+    <span>· not tested</span>
+  </div>
+</section>
+
+<script is:inline define:vars={{ matrix }}>
+(() => {
+const BLUE = '#1f3a93';
+const CAT = { program: 'Free program', hybrid: 'Hybrid tool', llm: 'LLM reviewer' };
+const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'text') e.textContent = v; else if (k === 'class') e.className = v; else e.setAttribute(k, v); }
+  kids.flat(Infinity).forEach((k) => k != null && e.append(k)); return e; };
+const pc = (j) => Math.round(j * 100);
+const money = (c) => (c === 0 ? 'free' : '$' + c.toFixed(2) + ' per 1,000 reviews');
+const load = () => { try { const v = Number(localStorage.getItem('saica-mm-th')); return v >= 70 && v <= 100 ? v : 90; } catch (e) { return 90; } };
+const save = (v) => { try { localStorage.setItem('saica-mm-th', String(v)); } catch (e) {} };
+const slider = document.getElementById('mm-th'), out = document.getElementById('mm-th-out');
+slider.value = String(load());
+
+function render() {
+  const th = Number(slider.value);
+  out.textContent = th + '%';
+  const modes = matrix.modes, bench = modes.filter((m) => m.benchmarked);
+  const covered = (r) => bench.filter((m) => r.cells[m.id] && pc(r.cells[m.id].j) >= th).length;
+  const avg = (r) => { const js = Object.values(r.cells).map((c) => c.j); return js.reduce((a, b) => a + b, 0) / js.length; };
+  const rows = [...matrix.rows].sort((a, b) => covered(b) - covered(a) || avg(b) - avg(a));
+  const head = el('thead', {}, el('tr', {}, el('th', { class: 'mm-tool', text: 'Tool or model' }),
+    modes.map((m) => el('th', { class: 'mm-mode' + (m.benchmarked ? '' : ' mm-nb'), 'data-tip': m.benchmarked ? '' : 'Not benchmarked yet: no dataset with confirmed labels' },
+      m.benchmarked ? el('a', { href: '/#' + m.id, text: m.name }) : m.name)),
+    el('th', { class: 'mm-num', 'data-tip': `Benchmarked failure modes where J ≥ ${th}%`, text: 'Covered' })));
+  const body = el('tbody', {}, rows.map((r) => el('tr', {},
+    el('td', { class: 'mm-tool' }, r.repository_url ? el('a', { href: r.repository_url, rel: 'noopener', text: r.name }) : r.name,
+      el('span', { class: 'mm-pill', text: CAT[r.category] || r.category })),
+    modes.map((m) => {
+      const c = r.cells[m.id];
+      if (!m.benchmarked) return el('td', { class: 'mm-na mm-nb' }, '·');
+      if (!c) return el('td', { class: 'mm-na', 'data-tip': 'not tested on this mode' }, '·');
+      const on = pc(c.j) >= th;
+      const tip = `${r.name} · ${m.name}: J ${pc(c.j)}% (TPR ${pc(c.tpr)}%, FPR ${pc(c.fpr)}%), ${c.estimated ? '~' : ''}${money(c.cost1k)}` + (c.config !== r.name ? `. Measured as: ${c.config}` : '');
+      return el('td', { class: 'mm-cell' + (on ? ' mm-on' : ''), 'data-tip': tip,
+        style: on ? `background:color-mix(in srgb, ${BLUE} ${Math.round(Math.max(0.25, c.j) * 85)}%, transparent);${c.j > 0.55 ? 'color:#fff' : ''}` : '' }, pc(c.j) + '%');
+    }),
+    el('td', { class: 'mm-num mm-count' }, `${covered(r)} / ${bench.length}`,
+      Object.keys(r.cells).length < bench.length ? el('span', { class: 'mm-tested', text: ` (tested on ${Object.keys(r.cells).length})` }) : null))));
+  const foot = el('tr', { class: 'mm-foot' }, el('td', { class: 'mm-tool' }, el('b', { text: 'Tools covering it' })),
+    modes.map((m) => { if (!m.benchmarked) return el('td', { class: 'mm-na mm-nb' }, '—');
+      const n = rows.filter((r) => r.cells[m.id] && pc(r.cells[m.id].j) >= th).length;
+      return el('td', { class: 'mm-num' + (n ? '' : ' mm-none'), text: String(n) }); }), el('td', {}));
+  body.append(foot);
+  document.getElementById('mm-table').replaceChildren(head, body);
+  const anyCov = bench.filter((m) => rows.some((r) => r.cells[m.id] && pc(r.cells[m.id].j) >= th));
+  const top = rows[0], topN = top ? covered(top) : 0;
+  const none = bench.filter((m) => !anyCov.includes(m)).map((m) => m.name);
+  document.getElementById('mm-summary').textContent =
+    `At J ≥ ${th}%: ${anyCov.length} of ${bench.length} benchmarked failure modes are covered by at least one tool; ` +
+    (topN ? `the broadest, ${top.name}, covers ${topN}.` : 'no tool covers any.') + (none.length ? ` Not covered: ${none.join(', ')}.` : '') +
+    ` ${modes.length - bench.length} failure modes have no benchmark yet.`;
+}
+slider.addEventListener('input', () => { save(slider.value); render(); });
+render();
+})();
+</script>
+
+<style>
+  .mm { margin-bottom: 3rem; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .mm-eyebrow { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #7a8192; margin: 0; }
+  .mm h1 { margin: .3rem 0 0; }
+  .mm-lead { max-width: 72ch; color: #4a5160; margin-top: .6rem; }
+  .mm-lead a, .mm a { color: #1f3a93; }
+  .mm-controls { display: grid; grid-template-columns: auto minmax(160px, 340px); grid-template-rows: auto auto; gap: .1rem 1rem; align-items: center; margin-top: 1.2rem; font-size: 14px; }
+  .mm-controls label { font-weight: 600; color: #111418; grid-row: 1 / span 2; }
+  .mm-controls output { color: #1f3a93; font-variant-numeric: tabular-nums; display: inline-block; min-width: 3.2ch; }
+  .mm-controls input[type="range"] { accent-color: #1f3a93; width: 100%; margin: 0; cursor: pointer; }
+  .mm-controls input:focus-visible { outline: 2px solid #1f3a93; outline-offset: 3px; }
+  .mm-scale { display: flex; justify-content: space-between; font-size: 11.5px; color: #7a8192; }
+  .mm-summary { font-size: 14px; color: #4a5160; margin: .7rem 0 .8rem; max-width: 80ch; }
+  .mm-wrap { overflow-x: auto; padding-bottom: 4px; }
+  .mm-table { border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; width: 100%; }
+  .mm-table th, .mm-table td { border-bottom: 1px solid rgb(17 20 24 / .08); padding: .45rem .4rem; }
+  .mm-table th { font-size: 12.5px; font-weight: 600; color: #4a5160; vertical-align: bottom; line-height: 1.25; }
+  .mm-table th.mm-mode { text-align: center; min-width: 66px; }
+  .mm-table th.mm-mode a { color: inherit; text-decoration: none; border-bottom: 1px dotted #7a8192; }
+  .mm-table th.mm-mode a:hover { color: #1f3a93; }
+  .mm-table .mm-tool { position: sticky; left: 0; background: #fff; z-index: 2; text-align: left; white-space: nowrap; min-width: 170px; }
+  .mm-pill { margin-left: .5rem; font-size: 11px; color: #1f3a93; border: 1px solid #1f3a93; border-radius: 999px; padding: 0 6px; white-space: nowrap; }
+  .mm-cell { text-align: center; color: #9a9fab; }
+  .mm-cell.mm-on { font-weight: 600; color: #111418; }
+  .mm-na { text-align: center; color: #c3c7cf; }
+  .mm-nb { background: #f3f1ec; color: #9a9fab; }
+  .mm-num { text-align: right; white-space: nowrap; }
+  .mm-count { font-weight: 600; color: #1f3a93; }
+  .mm-tested { font-weight: 400; color: #7a8192; font-size: 12px; }
+  .mm-foot td { border-top: 2px solid rgb(17 20 24 / .12); font-size: 12.5px; }
+  .mm-foot .mm-num { text-align: center; font-weight: 600; color: #1f3a93; }
+  .mm-foot .mm-none { color: #b5532a; }
+  .mm-legend { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; font-size: 12.5px; color: #4a5160; margin-top: .5rem; }
+  .mm-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+  .mm-sw { width: 14px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid rgb(17 20 24 / .15); }
+  .mm-sw-on { background: color-mix(in srgb, #1f3a93 75%, transparent); border-color: transparent; }
+  .mm [data-tip] { position: relative; }
+  .mm td[data-tip]:not([data-tip=""]) { cursor: help; }
+  .mm [data-tip]:not([data-tip=""]):hover::before { content: attr(data-tip); position: absolute; top: calc(100% + 6px); right: 0; z-index: 20;
+    width: 240px; white-space: normal; text-align: left; font: 400 12.5px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418;
+    background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 7px 9px; box-shadow: 0 6px 18px rgb(0 0 0 / .12); pointer-events: none; }
+  @media (max-width: 560px) { .mm-controls { grid-template-columns: 1fr; } .mm-controls label { grid-row: auto; } }
+</style>

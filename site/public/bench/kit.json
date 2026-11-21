@@ -5151,5 +5151,976 @@
   "self_hosted_gpu": "Self-hosted GPU"
  },
  "recipes_missing": false,
- "pairs_missing": false
+ "pairs_missing": false,
+ "matrix": {
+  "modes": [
+   {
+    "id": "fabrication",
+    "name": "Fabrication",
+    "benchmarked": true
+   },
+   {
+    "id": "test-manipulation",
+    "name": "Test manipulation",
+    "benchmarked": true
+   },
+   {
+    "id": "security",
+    "name": "Security vulnerability",
+    "benchmarked": true
+   },
+   {
+    "id": "logic_error",
+    "name": "Logic error",
+    "benchmarked": true
+   },
+   {
+    "id": "incomplete_execution",
+    "name": "Incomplete execution",
+    "benchmarked": true
+   },
+   {
+    "id": "scope_creep",
+    "name": "Scope creep",
+    "benchmarked": true
+   },
+   {
+    "id": "obsolescence",
+    "name": "Obsolescence",
+    "benchmarked": true
+   },
+   {
+    "id": "supply_chain",
+    "name": "Supply chain",
+    "benchmarked": true
+   },
+   {
+    "id": "dependency_blindness",
+    "name": "Dependency blindness",
+    "benchmarked": true
+   },
+   {
+    "id": "cascading_failure",
+    "name": "Cascading failure",
+    "benchmarked": false
+   },
+   {
+    "id": "context_pollution",
+    "name": "Context pollution",
+    "benchmarked": false
+   }
+  ],
+  "rows": [
+   {
+    "id": "plain_llm_ds41",
+    "name": "deepseek-v4.1-flash",
+    "category": "llm",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.9430076628352491,
+      "tpr": 0.9568965517241379,
+      "fpr": 0.013888888888888888,
+      "cost1k": 1.2613981762917932,
+      "config": "deepseek-v4.1-flash, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.8821715433161216,
+      "tpr": 0.9464285714285714,
+      "fpr": 0.0642570281124498,
+      "cost1k": 2.514506769825919,
+      "config": "deepseek-v4.1-flash, asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.07244227806434994,
+      "tpr": 0.43845534995977475,
+      "fpr": 0.3660130718954248,
+      "cost1k": 13.742655699177439,
+      "config": "deepseek-v4.1-flash, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "plain_llm_glm",
+    "name": "glm-5.3",
+    "category": "llm",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.9297174329501915,
+      "tpr": 0.9540229885057471,
+      "fpr": 0.024305555555555556,
+      "cost1k": 6.246200607902736,
+      "config": "glm-5.3, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.8848250143430867,
+      "tpr": 0.8928571428571429,
+      "fpr": 0.008032128514056224,
+      "cost1k": 16.982591876208897,
+      "config": "glm-5.3, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "plain_llm_deepseek",
+    "name": "deepseek-v4-flash",
+    "category": "llm",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.9245689655172413,
+      "tpr": 0.9454022988505747,
+      "fpr": 0.020833333333333332,
+      "cost1k": 0.3799392097264438,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.8879804934021802,
+      "tpr": 0.9642857142857143,
+      "fpr": 0.07630522088353414,
+      "cost1k": 1.1605415860735009,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.05156019679705259,
+      "tpr": 0.4328238133547868,
+      "fpr": 0.3812636165577342,
+      "cost1k": 1.8155111633372503,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.6919074944690266,
+      "tpr": 0.904296875,
+      "fpr": 0.21238938053097345,
+      "cost1k": 0.25586673786885245,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.16666666666666669,
+      "tpr": 0.5333333333333333,
+      "fpr": 0.36666666666666664,
+      "cost1k": 3.799623755,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "scope_creep": {
+      "j": 0.8971428571428571,
+      "tpr": 0.9885714285714285,
+      "fpr": 0.09142857142857143,
+      "cost1k": 0.4287887668571429,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.8774193548387097,
+      "tpr": 0.9612903225806452,
+      "fpr": 0.08387096774193549,
+      "cost1k": 0.4041073187096774,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "supply_chain": {
+      "j": 0.6959459459459459,
+      "tpr": 0.9054054054054054,
+      "fpr": 0.20945945945945946,
+      "cost1k": 0.7552126358108108,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     },
+     "dependency_blindness": {
+      "j": 0.86,
+      "tpr": 0.88,
+      "fpr": 0.02,
+      "cost1k": 0.405680926,
+      "config": "deepseek-v4-flash, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "plain_llm_luna",
+    "name": "gpt-6-luna",
+    "category": "llm",
+    "provider": "azure",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.9216954022988505,
+      "tpr": 0.9425287356321839,
+      "fpr": 0.020833333333333332,
+      "cost1k": 0.21276595744680854,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.7933878370625358,
+      "tpr": 0.9821428571428571,
+      "fpr": 0.18875502008032127,
+      "cost1k": 1.2185686653771761,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.05204570431014999,
+      "tpr": 0.5945293644408689,
+      "fpr": 0.5424836601307189,
+      "cost1k": 0.9048178613396005,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.6901444966814159,
+      "tpr": 0.892578125,
+      "fpr": 0.20243362831858408,
+      "cost1k": 0.1523427868852459,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.19,
+      "tpr": 0.5916666666666667,
+      "fpr": 0.40166666666666667,
+      "cost1k": 1.044785125,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "scope_creep": {
+      "j": 0.88,
+      "tpr": 1.0,
+      "fpr": 0.12,
+      "cost1k": 0.32654428571428573,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.8967741935483872,
+      "tpr": 0.9741935483870968,
+      "fpr": 0.07741935483870968,
+      "cost1k": 0.16770193548387097,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "supply_chain": {
+      "j": 0.7702702702702703,
+      "tpr": 0.9864864864864865,
+      "fpr": 0.21621621621621623,
+      "cost1k": 0.5153543918918919,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     },
+     "dependency_blindness": {
+      "j": 0.8999999999999999,
+      "tpr": 0.96,
+      "fpr": 0.06,
+      "cost1k": 0.23801150000000001,
+      "config": "gpt-6-luna, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "plain_llm_mimo",
+    "name": "mimo-v2.6-flash",
+    "category": "llm",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.8964319923371648,
+      "tpr": 0.9137931034482759,
+      "fpr": 0.017361111111111112,
+      "cost1k": 0.13677811550151975,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.8884107860011474,
+      "tpr": 0.9285714285714286,
+      "fpr": 0.040160642570281124,
+      "cost1k": 1.7988394584139267,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.04782161367273288,
+      "tpr": 0.252614641995173,
+      "fpr": 0.2047930283224401,
+      "cost1k": 0.7109283196239718,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.7429134402654867,
+      "tpr": 0.88671875,
+      "fpr": 0.14380530973451328,
+      "cost1k": 0.20017094549180328,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.17500000000000002,
+      "tpr": 0.38333333333333336,
+      "fpr": 0.20833333333333334,
+      "cost1k": 3.2953469425,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "scope_creep": {
+      "j": 0.9485714285714286,
+      "tpr": 0.9942857142857143,
+      "fpr": 0.045714285714285714,
+      "cost1k": 0.43594283657142857,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.8838709677419355,
+      "tpr": 0.9161290322580645,
+      "fpr": 0.03225806451612903,
+      "cost1k": 0.2484033361290323,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "supply_chain": {
+      "j": 0.6486486486486487,
+      "tpr": 0.9594594594594594,
+      "fpr": 0.3108108108108108,
+      "cost1k": 0.5942946648648648,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     },
+     "dependency_blindness": {
+      "j": 0.86,
+      "tpr": 0.88,
+      "fpr": 0.02,
+      "cost1k": 0.3164622,
+      "config": "mimo-v2.6-flash, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "pyright",
+    "name": "pyright",
+    "category": "program",
+    "provider": null,
+    "local_only": true,
+    "cells": {
+     "fabrication": {
+      "j": 0.8532088122605365,
+      "tpr": 0.8879310344827587,
+      "fpr": 0.034722222222222224,
+      "cost1k": 0.0,
+      "config": "pyright",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.00280581674041298,
+      "tpr": 0.014973958333333334,
+      "fpr": 0.012168141592920354,
+      "cost1k": 0.0,
+      "config": "pyright",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.567741935483871,
+      "tpr": 0.6064516129032258,
+      "fpr": 0.03870967741935484,
+      "cost1k": 0.0,
+      "config": "pyright against the latest libraries (deprecated, missing attribute or import)",
+      "estimated": false
+     }
+    },
+    "stars": 14000,
+    "repository_url": "https://github.com/microsoft/pyright"
+   },
+   {
+    "id": "plain_llm_minimax",
+    "name": "minimax-m3",
+    "category": "llm",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.8383620689655172,
+      "tpr": 0.8591954022988506,
+      "fpr": 0.020833333333333332,
+      "cost1k": 0.8054711246200608,
+      "config": "minimax-m3, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.9102839931153184,
+      "tpr": 0.9464285714285714,
+      "fpr": 0.03614457831325301,
+      "cost1k": 3.4622823984526114,
+      "config": "minimax-m3, asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.004748158314009432,
+      "tpr": 0.22043443282381336,
+      "fpr": 0.21568627450980393,
+      "cost1k": 3.4253819036427733,
+      "config": "minimax-m3, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "plain_llm_gptoss",
+    "name": "gpt-oss-20b on one RTX 4090",
+    "category": "llm",
+    "provider": "self_hosted_gpu",
+    "local_only": true,
+    "cells": {
+     "fabrication": {
+      "j": 0.8042385057471265,
+      "tpr": 0.9396551724137931,
+      "fpr": 0.13541666666666666,
+      "cost1k": 0.13677811550151975,
+      "config": "gpt-oss-20b on one RTX 4090, asked directly",
+      "estimated": true
+     },
+     "test-manipulation": {
+      "j": 0.75,
+      "tpr": 0.75,
+      "fpr": 0.0,
+      "cost1k": 0.23210831721470018,
+      "config": "gpt-oss-20b on one RTX 4090, asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.08228037795971163,
+      "tpr": 0.27835880933226065,
+      "fpr": 0.19607843137254902,
+      "cost1k": 0.9929494712103408,
+      "config": "gpt-oss-20b on one RTX 4090, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "plain_llm_qwen",
+    "name": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+    "category": "llm",
+    "provider": "self_hosted_gpu",
+    "local_only": true,
+    "cells": {
+     "fabrication": {
+      "j": 0.7963362068965517,
+      "tpr": 0.8275862068965517,
+      "fpr": 0.03125,
+      "cost1k": 0.10638297872340427,
+      "config": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.8906339644291451,
+      "tpr": 0.9107142857142857,
+      "fpr": 0.020080321285140562,
+      "cost1k": 1.2379110251450676,
+      "config": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.03286552844074969,
+      "tpr": 0.18101367658889783,
+      "fpr": 0.14814814814814814,
+      "cost1k": 0.30552291421856637,
+      "config": "Qwen3.8-27B (4-bit) on one RTX 4090, thinking off",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "mypy",
+    "name": "mypy",
+    "category": "program",
+    "provider": null,
+    "local_only": true,
+    "cells": {
+     "fabrication": {
+      "j": 0.7734674329501916,
+      "tpr": 0.7873563218390804,
+      "fpr": 0.013888888888888888,
+      "cost1k": 0.0,
+      "config": "mypy --check-untyped-defs",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": -0.007144174041297937,
+      "tpr": 0.026041666666666668,
+      "fpr": 0.033185840707964605,
+      "cost1k": 0.0,
+      "config": "mypy (--check-untyped-defs --ignore-missing-imports)",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.14193548387096774,
+      "tpr": 0.15483870967741936,
+      "fpr": 0.012903225806451613,
+      "cost1k": 0.0,
+      "config": "mypy against the latest libraries (deprecated, missing attribute or import)",
+      "estimated": false
+     }
+    },
+    "stars": 18000,
+    "repository_url": "https://github.com/python/mypy"
+   },
+   {
+    "id": "plain_llm_grok",
+    "name": "grok-4.1-fast (no reasoning)",
+    "category": "llm",
+    "provider": "azure",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.7039032567049809,
+      "tpr": 0.8045977011494253,
+      "fpr": 0.10069444444444445,
+      "cost1k": 0.13677811550151975,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.8602983362019507,
+      "tpr": 0.9285714285714286,
+      "fpr": 0.06827309236947791,
+      "cost1k": 2.243713733075435,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "security": {
+      "j": -0.03454114281808196,
+      "tpr": 0.4883346741753821,
+      "fpr": 0.5228758169934641,
+      "cost1k": 0.49353701527614574,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.11963034660766969,
+      "tpr": 0.9348958333333334,
+      "fpr": 0.8152654867256637,
+      "cost1k": 0.14042315573770492,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.030000000000000027,
+      "tpr": 0.9566666666666667,
+      "fpr": 0.9266666666666666,
+      "cost1k": 0.7476999166666666,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "scope_creep": {
+      "j": 0.5371428571428571,
+      "tpr": 0.9542857142857143,
+      "fpr": 0.41714285714285715,
+      "cost1k": 0.5284651428571429,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.5290322580645161,
+      "tpr": 0.9032258064516129,
+      "fpr": 0.3741935483870968,
+      "cost1k": 0.12415806451612904,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "supply_chain": {
+      "j": 0.17567567567567577,
+      "tpr": 0.8648648648648649,
+      "fpr": 0.6891891891891891,
+      "cost1k": 0.5728804054054054,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     },
+     "dependency_blindness": {
+      "j": 0.6399999999999999,
+      "tpr": 0.94,
+      "fpr": 0.3,
+      "cost1k": 0.52575,
+      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "pr_agent",
+    "name": "PR-Agent",
+    "category": "hybrid",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.6857040229885057,
+      "tpr": 0.7586206896551724,
+      "fpr": 0.07291666666666667,
+      "cost1k": 0.24316109422492402,
+      "config": "pr-agent (deepseek)",
+      "estimated": true
+     },
+     "security": {
+      "j": -0.01440397380012165,
+      "tpr": 0.41914722445695896,
+      "fpr": 0.4335511982570806,
+      "cost1k": 1.3807285546415982,
+      "config": "pr-agent review (deepseek-v4-flash)",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.284044293879056,
+      "tpr": 0.5240885416666666,
+      "fpr": 0.24004424778761063,
+      "cost1k": 1.2838253912295081,
+      "config": "PR-Agent review: flags a 'possible issue' (deepseek-v4-flash)",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.07333333333333333,
+      "tpr": 0.32,
+      "fpr": 0.24666666666666667,
+      "cost1k": 14.124194013333332,
+      "config": "PR-Agent review + TODO scan: flags a 'possible issue' or a TODO (deepseek-v4-flash)",
+      "estimated": true
+     }
+    },
+    "stars": 10968,
+    "repository_url": "https://github.com/Codium-ai/pr-agent"
+   },
+   {
+    "id": "ruff",
+    "name": "ruff",
+    "category": "program",
+    "provider": null,
+    "local_only": true,
+    "cells": {
+     "fabrication": {
+      "j": 0.5399904214559387,
+      "tpr": 0.5747126436781609,
+      "fpr": 0.034722222222222224,
+      "cost1k": 0.0,
+      "config": "ruff",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": -0.031146294247787615,
+      "tpr": 0.04296875,
+      "fpr": 0.07411504424778761,
+      "cost1k": 0.0,
+      "config": "ruff (pyflakes + bugbear rules)",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.005,
+      "tpr": 0.005,
+      "fpr": 0.0,
+      "cost1k": 0.0,
+      "config": "ruff FIX rules (TODO / FIXME / XXX / HACK comments)",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.07741935483870968,
+      "tpr": 0.07741935483870968,
+      "fpr": 0.0,
+      "cost1k": 0.0,
+      "config": "ruff NumPy rules (NPY)",
+      "estimated": false
+     }
+    },
+    "stars": 30000,
+    "repository_url": "https://github.com/astral-sh/ruff"
+   },
+   {
+    "id": "plain_llm_phi",
+    "name": "Phi-4-mini",
+    "category": "llm",
+    "provider": "azure",
+    "local_only": false,
+    "cells": {
+     "fabrication": {
+      "j": 0.17573125183599814,
+      "tpr": 0.6686390532544378,
+      "fpr": 0.4929078014184397,
+      "cost1k": 0.0911854103343465,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "test-manipulation": {
+      "j": 0.32723752151463,
+      "tpr": 0.3392857142857143,
+      "fpr": 0.012048192771084338,
+      "cost1k": 0.8897485493230174,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "logic_error": {
+      "j": 0.19894220132743362,
+      "tpr": 0.54296875,
+      "fpr": 0.3440265486725664,
+      "cost1k": 0.06861267418032788,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "incomplete_execution": {
+      "j": 0.0,
+      "tpr": 0.005,
+      "fpr": 0.005,
+      "cost1k": 0.26348875,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "scope_creep": {
+      "j": -0.06285714285714289,
+      "tpr": 0.45714285714285713,
+      "fpr": 0.52,
+      "cost1k": 0.17587864285714283,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "obsolescence": {
+      "j": 0.12903225806451615,
+      "tpr": 0.13548387096774195,
+      "fpr": 0.0064516129032258064,
+      "cost1k": 0.03154669354838709,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "supply_chain": {
+      "j": 0.0,
+      "tpr": 0.0,
+      "fpr": 0.0,
+      "cost1k": 0.18585861486486488,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     },
+     "dependency_blindness": {
+      "j": -0.020000000000000018,
+      "tpr": 0.36,
+      "fpr": 0.38,
+      "cost1k": 0.166914,
+      "config": "Phi-4-mini, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "promptfoo",
+    "name": "promptfoo",
+    "category": "hybrid",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "test-manipulation": {
+      "j": 0.8620912220309811,
+      "tpr": 0.9464285714285714,
+      "fpr": 0.08433734939759036,
+      "cost1k": 1.1025145067698257,
+      "config": "promptfoo llm-rubric (deepseek)",
+      "estimated": false
+     },
+     "security": {
+      "j": 0.021488527474992858,
+      "tpr": 0.3700724054706356,
+      "fpr": 0.3485838779956427,
+      "cost1k": 0.6874265569917744,
+      "config": "promptfoo llm-rubric (deepseek-v4-flash judge)",
+      "estimated": false
+     }
+    },
+    "stars": 20465,
+    "repository_url": "https://github.com/promptfoo/promptfoo"
+   },
+   {
+    "id": "plain_llm_ultra",
+    "name": "ultramarine-1-flash (Fireworks)",
+    "category": "llm",
+    "provider": "fireworks",
+    "local_only": false,
+    "cells": {
+     "security": {
+      "j": 0.03192606263923284,
+      "tpr": 0.17135961383748993,
+      "fpr": 0.1394335511982571,
+      "cost1k": 4.488836662749706,
+      "config": "ultramarine-1-flash (Fireworks), asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "semgrep",
+    "name": "semgrep",
+    "category": "program",
+    "provider": null,
+    "local_only": true,
+    "cells": {
+     "security": {
+      "j": 0.026054401379752762,
+      "tpr": 0.11102172164119067,
+      "fpr": 0.08496732026143791,
+      "cost1k": 0.0,
+      "config": "semgrep (p/python + p/security-audit)",
+      "estimated": false
+     }
+    },
+    "stars": 14901,
+    "repository_url": "https://github.com/semgrep/semgrep"
+   },
+   {
+    "id": "plain_llm_gpt41",
+    "name": "gpt-4.1",
+    "category": "llm",
+    "provider": "azure",
+    "local_only": false,
+    "cells": {
+     "security": {
+      "j": -0.022794314829713058,
+      "tpr": 0.31053901850362026,
+      "fpr": 0.3333333333333333,
+      "cost1k": 4.7473560517038775,
+      "config": "gpt-4.1, asked directly",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "bandit",
+    "name": "bandit",
+    "category": "program",
+    "provider": null,
+    "local_only": true,
+    "cells": {
+     "security": {
+      "j": -0.07043539682790073,
+      "tpr": 0.18664521319388577,
+      "fpr": 0.2570806100217865,
+      "cost1k": 0.0,
+      "config": "bandit",
+      "estimated": false
+     }
+    },
+    "stars": 6000,
+    "repository_url": "https://github.com/PyCQA/bandit"
+   },
+   {
+    "id": "uqlm",
+    "name": "uqlm",
+    "category": "hybrid",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "logic_error": {
+      "j": 0.5933333333333333,
+      "tpr": 0.9466666666666667,
+      "fpr": 0.35333333333333333,
+      "cost1k": 2.6118032446666666,
+      "config": "uqlm CodeGenUQ: 5 fresh solutions, functional-equivalence rate < 0.5 (deepseek-v4-flash)",
+      "estimated": true
+     }
+    },
+    "stars": 1146,
+    "repository_url": "https://github.com/cvs-health/uqlm"
+   },
+   {
+    "id": "phoenix",
+    "name": "Arize Phoenix",
+    "category": "hybrid",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "incomplete_execution": {
+      "j": 0.065,
+      "tpr": 0.13,
+      "fpr": 0.065,
+      "cost1k": 0.8225704438333332,
+      "config": "Arize Phoenix CompletenessEvaluator (deepseek-v4-flash)",
+      "estimated": false
+     }
+    },
+    "stars": 9394,
+    "repository_url": "https://github.com/Arize-ai/phoenix"
+   },
+   {
+    "id": "opik",
+    "name": "Opik",
+    "category": "hybrid",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "incomplete_execution": {
+      "j": 0.026666666666666672,
+      "tpr": 0.10666666666666667,
+      "fpr": 0.08,
+      "cost1k": 2.0672974039999996,
+      "config": "Opik AgentTaskCompletionJudge, score < 0.5 (deepseek-v4-flash)",
+      "estimated": true
+     }
+    },
+    "stars": 18988,
+    "repository_url": "https://github.com/comet-ml/opik"
+   },
+   {
+    "id": "deepeval",
+    "name": "DeepEval",
+    "category": "hybrid",
+    "provider": "hyperbolic",
+    "local_only": false,
+    "cells": {
+     "incomplete_execution": {
+      "j": 0.008333333333333333,
+      "tpr": 0.018333333333333333,
+      "fpr": 0.01,
+      "cost1k": 0.4551468086666666,
+      "config": "DeepEval TaskCompletionMetric (deepseek-v4-flash)",
+      "estimated": false
+     }
+    },
+    "stars": 14938,
+    "repository_url": "https://github.com/confident-ai/deepeval"
+   }
+  ],
+  "default_threshold": 0.9
+ }
 }
