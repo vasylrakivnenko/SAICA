@@ -1,15 +1,13 @@
 ---
-// /tool-coverage: measured coverage matrix (tools and models we ran on SAICA-Bench, J per failure mode, threshold slider)
-// and the kit builder. Data: /bench/kit.json, written by bench/build_report.py.
+// /tool-coverage: the kit builder. The measured coverage matrix (components/MeasuredMatrix.astro, kit.json "matrix") is
+// hidden for now (user, 2026-11-20); re-add <MeasuredMatrix /> to bring it back. Data: /bench/kit.json, written by bench/build_report.py.
 // The earlier declared-coverage heatmap (catalog tags, research/plot_tool_fm_heatmap.py) is in git history; its data file
 // /tool_fm_heatmap.json is still published. Untested catalog tools are hidden here until they can be scored.
 import BaseLayout from "../layouts/BaseLayout.astro";
-import MeasuredMatrix from "../components/MeasuredMatrix.astro";
 import KitBuilder from "../components/KitBuilder.astro";
-const title = "Coverage: measured tools by failure mode";
+const title = "Coverage: build your supervision kit";
 ---
 
 <BaseLayout title={title}>
-  <MeasuredMatrix />
   <KitBuilder />
 </BaseLayout>
