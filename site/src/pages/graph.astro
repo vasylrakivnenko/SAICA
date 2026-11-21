@@ -28,8 +28,8 @@ const jsonld = breadcrumbs([
 
 {Layout ? (
   <Layout title={title} description={description} jsonld={jsonld}>
-    <section class="px-3 py-2">
-      <h1 class="text-2xl">Knowledge graph of AI coding agent failures and tools</h1>
+    <section>
+      <h1>Knowledge graph of AI coding agent failures and tools</h1>
       <p class="mt-1 mb-3 max-w-3xl text-sm text-ink-muted">
         Every <a href="/failure-modes/">AI coding agent failure mode</a> (red diamonds) and the
         <a href="/tools/">supervision tools</a> that address it (blue), with the external
@@ -87,7 +87,7 @@ const jsonld = breadcrumbs([
 
         {/* Filters drawer — overlay from left, starts hidden */}
         <aside id="kg-filters-drawer"
-               class="hidden absolute top-0 left-0 h-full w-72 bg-white border-r border-gray-200 shadow-lg overflow-y-auto z-20"
+               class="ui hidden absolute top-0 left-0 h-full w-72 bg-white border-r border-gray-200 shadow-lg overflow-y-auto z-20"
                aria-hidden="true" aria-label="Graph filters" role="dialog" aria-modal="false">
           <div class="flex items-center justify-between p-3 border-b border-gray-200 sticky top-0 bg-white">
             <div class="text-sm font-semibold text-gray-700">Filters</div>
@@ -116,8 +116,8 @@ const jsonld = breadcrumbs([
 
             <fieldset class="mb-3">
               <legend class="text-xs font-semibold text-gray-600 mb-1">Tool facets</legend>
-              <label class="block text-xs text-gray-600 mt-1">control_paradigm</label>
-              <select name="control_paradigm" class="w-full border border-gray-300 rounded px-2 py-1">
+              <label for="kg-f-cp" class="block text-xs text-gray-600 mt-1">control_paradigm</label>
+              <select id="kg-f-cp" name="control_paradigm" class="w-full border border-gray-300 rounded px-2 py-1">
                 <option value="">any</option>
                 <option value="prevention">prevention</option>
                 <option value="detection">detection</option>
@@ -125,16 +125,16 @@ const jsonld = breadcrumbs([
                 <option value="recovery">recovery</option>
               </select>
 
-              <label class="block text-xs text-gray-600 mt-2">temporal_phase</label>
-              <select name="temporal_phase" class="w-full border border-gray-300 rounded px-2 py-1">
+              <label for="kg-f-tp" class="block text-xs text-gray-600 mt-2">temporal_phase</label>
+              <select id="kg-f-tp" name="temporal_phase" class="w-full border border-gray-300 rounded px-2 py-1">
                 <option value="">any</option>
                 <option value="pre_generation">pre_generation</option>
                 <option value="in_generation">in_generation</option>
                 <option value="post_generation">post_generation</option>
               </select>
 
-              <label class="block text-xs text-gray-600 mt-2">autonomy_level</label>
-              <select name="autonomy_level" class="w-full border border-gray-300 rounded px-2 py-1">
+              <label for="kg-f-al" class="block text-xs text-gray-600 mt-2">autonomy_level</label>
+              <select id="kg-f-al" name="autonomy_level" class="w-full border border-gray-300 rounded px-2 py-1">
                 <option value="">any</option>
                 <option value="fully_autonomous">fully_autonomous</option>
                 <option value="graduated_hitl">graduated_hitl</option>
@@ -146,7 +146,7 @@ const jsonld = breadcrumbs([
 
         {/* Legend popover — floats near the Legend button, starts hidden */}
         <div id="kg-legend-popover"
-             class="hidden absolute top-2 right-2 w-64 bg-white/95 backdrop-blur border border-gray-200 rounded shadow-lg p-3 text-xs z-20"
+             class="ui hidden absolute top-2 right-2 w-64 bg-white/95 backdrop-blur border border-gray-200 rounded shadow-lg p-3 text-xs z-20"
              aria-hidden="true" role="dialog" aria-label="Graph legend">
           <div class="flex items-center justify-between mb-2">
             <div class="font-semibold text-gray-700">Legend</div>
@@ -178,7 +178,7 @@ const jsonld = breadcrumbs([
 
         {/* Node-detail floating card — shown when a node is clicked */}
         <aside id="kg-sidebar-card"
-               class="hidden absolute top-2 right-2 w-80 max-h-[calc(88vh-1rem)] overflow-y-auto bg-white border border-gray-200 rounded shadow-lg z-10"
+               class="ui hidden absolute top-2 right-2 w-80 max-w-[calc(100%-1rem)] max-h-[calc(88vh-1rem)] overflow-y-auto bg-white border border-gray-200 rounded shadow-lg z-10"
                aria-hidden="true" aria-label="Node details">
           <div class="flex items-center justify-between p-2 border-b border-gray-200 sticky top-0 bg-white">
             <div class="text-xs font-semibold text-gray-600">Details</div>

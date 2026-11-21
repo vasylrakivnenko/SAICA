@@ -15,7 +15,10 @@ export type FailureModeId =
   | 'security_vulnerability'
   | 'scope_creep'
   | 'context_pollution'
-  | 'supply_chain_attack';
+  | 'supply_chain_attack'
+  | 'cascading_failure'
+  | 'incomplete_execution'
+  | 'test_manipulation';
 export type CrosswalkConfidence = 'exact' | 'partial' | 'broader' | 'narrower' | 'related';
 export type SaicaAxis =
   | 'failure_mode'
@@ -83,35 +86,11 @@ export interface Tool {
   /**
    * @minItems 1
    */
-  addresses_failure_modes: (
-      | 'fabrication'
-      | 'obsolescence'
-      | 'dependency_blindness'
-      | 'logic_error'
-      | 'security_vulnerability'
-      | 'scope_creep'
-      | 'context_pollution'
-      | 'supply_chain_attack'
-      | 'cascading_failure'
-      | 'incomplete_execution'
-      | 'test_manipulation'
-    )[];
+  addresses_failure_modes: FailureModeId[];
   /**
    * FMs the tool only records evidence of (tracing or configurable judges only) without detecting or preventing them; disjoint from addresses_failure_modes.
    */
-  records_failure_modes?: (
-    | 'fabrication'
-    | 'obsolescence'
-    | 'dependency_blindness'
-    | 'logic_error'
-    | 'security_vulnerability'
-    | 'scope_creep'
-    | 'context_pollution'
-    | 'supply_chain_attack'
-    | 'cascading_failure'
-    | 'incomplete_execution'
-    | 'test_manipulation'
-  )[];
+  records_failure_modes?: FailureModeId[];
   locus_of_control?: LocusOfControl[];
   /**
    * How this tool is deployed / consumed. Multi-valued — a tool can ship as several surfaces (e.g. cli + ci_app + library).
@@ -402,19 +381,7 @@ export interface Incident {
   /**
    * @minItems 1
    */
-  exhibited_failure_modes: (
-      | 'fabrication'
-      | 'obsolescence'
-      | 'dependency_blindness'
-      | 'logic_error'
-      | 'security_vulnerability'
-      | 'scope_creep'
-      | 'context_pollution'
-      | 'supply_chain_attack'
-      | 'cascading_failure'
-      | 'incomplete_execution'
-      | 'test_manipulation'
-    )[];
+  exhibited_failure_modes: FailureModeId[];
   /**
    * Free-form tool / product / system names involved.
    */
@@ -447,19 +414,7 @@ export interface Recipe {
   /**
    * @minItems 1
    */
-  targets_failure_modes: (
-      | 'fabrication'
-      | 'obsolescence'
-      | 'dependency_blindness'
-      | 'logic_error'
-      | 'security_vulnerability'
-      | 'scope_creep'
-      | 'context_pollution'
-      | 'supply_chain_attack'
-      | 'cascading_failure'
-      | 'incomplete_execution'
-      | 'test_manipulation'
-    )[];
+  targets_failure_modes: FailureModeId[];
   /**
    * Ordered list of Tool ids that compose the recipe.
    *

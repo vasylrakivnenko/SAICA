@@ -237,7 +237,8 @@ python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.
   only when the prompt is unchanged and the model, provider and settings
   match the recipe published with that prompt: `--temperature` (not sent by
   default; the benchmark used 0, except for gpt-6-luna, which accepts only
-  its default), `--max-tokens` (default 16384, as in the benchmark),
+  its default), `--max-tokens` (default 16384, the benchmark's most common
+  setting; other recipes used 1024 to 32768, so use the recipe's value),
   `--stream` (used for Hyperbolic), `--extra-body` (e.g.
   `'{"reasoning_effort": "low"}'`), and a real task description. Cutting the
   diff (`--max-diff-chars`, default 100000) also breaks comparability.

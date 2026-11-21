@@ -12,7 +12,7 @@ interface Props {
 }
 const { s, subject, fmId } = Astro.props;
 const MECH: Record<string, string> = { detects: 'Detects', prevents: 'Prevents', records: 'Records' };
-const IMPL: Record<string, string> = { deterministic: 'Free program', hybrid: 'Hybrid', llm_based: 'LLM-based' };
+const IMPL: Record<string, string> = { deterministic: 'Free program', hybrid: 'Hybrid', llm_based: 'AI-based' };
 const lower = subject;
 ---
 
@@ -50,7 +50,7 @@ const lower = subject;
                 <td class="py-1.5 px-2 whitespace-nowrap text-ink-muted">
                   {MECH[t.mechanism] ?? t.mechanism}{t.implementation && IMPL[t.implementation] ? ` · ${IMPL[t.implementation]}` : ''}
                 </td>
-                <td class="py-1.5 pl-2 leading-5 text-ink-muted font-serif">{t.how}</td>
+                <td class="py-1.5 pl-2 leading-5 text-ink-muted font-serif min-w-[16rem]">{t.how}</td>
               </tr>
             ))}
           </tbody>

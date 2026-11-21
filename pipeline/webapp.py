@@ -16,6 +16,8 @@ Wraps :mod:`pipeline.ask.server` without modifying it:
   with 200 (no slash redirect; pages carry a canonical tag), old underscore
   failure-mode URLs 301 to the hyphenated ones, and ``/x/index.html`` 301s
   to ``/x/``.
+* Every response carries nosniff / referrer-policy / x-frame-options, plus
+  HSTS on https requests.
 * Responses are gzipped; data files (``/api/*``, ``/kit/*``, ``*.json`` …)
   carry ``X-Robots-Tag: noindex`` so they stay fetchable but out of search
   results; hashed ``/_astro/*`` assets are cached for a year.
@@ -47,6 +49,15 @@ NOINDEX_PREFIXES = ("/api/", "/kit/")
 NOINDEX_SUFFIXES = (".json", ".jsonl", ".pyc", ".py", ".md", ".yml", ".yaml")
 # Astro writes content-hashed file names here, so they never change in place.
 IMMUTABLE_PREFIX = "/_astro/"
+# Baseline hardening on every response. No CSP yet: the pages ship inline
+# scripts/styles, so a policy needs nonces or hashes first. HSTS is added only
+# for https requests (see SiteHeaders), never on the plain-http dev server.
+SECURITY_HEADERS = (
+    ("x-content-type-options", "nosniff"),
+    ("referrer-policy", "strict-origin-when-cross-origin"),
+    ("x-frame-options", "SAMEORIGIN"),
+)
+HSTS_HEADER = ("strict-transport-security", "max-age=31536000")
 
 
 def extra_headers(path: str, status: int) -> list[tuple[str, str]]:
@@ -83,6 +94,12 @@ class SiteHeaders:
                 headers = MutableHeaders(scope=message)
                 for key, value in extra_headers(path, message["status"]):
                     headers[key] = value
+                for key, value in SECURITY_HEADERS:
+                    headers.setdefault(key, value)
+                # scope["scheme"] is "https" behind Replit's TLS proxy because
+                # uvicorn runs with proxy_headers=True (see main()).
+                if scope.get("scheme") == "https":
+                    headers.setdefault(*HSTS_HEADER)
             await send(message)
 
         await self.app(scope, receive, send_with_headers)
@@ -132,6 +149,9 @@ def site_files(directory: Path):
                 # Failure-mode slugs moved from scope_creep to scope-creep.
                 if rel.startswith("failure-modes/") and "_" in rel:
                     new_dir = rel.replace("_", "-")
+                    # .../scope_creep/index.html -> /failure-modes/scope-creep/
+                    if new_dir.endswith("/index.html"):
+                        new_dir = new_dir[: -len("/index.html")]
                     if await self._page(new_dir) is not None:
                         return permanent_redirect(scope, f"/{new_dir}/")
                 # /x/index.html duplicates /x/: send it to the canonical form.

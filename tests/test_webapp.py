@@ -194,6 +194,11 @@ def test_index_html_and_old_slugs_redirect_permanently(monkeypatch, tmp_path):
                 301,
                 "/failure-modes/scope-creep/",
             )
+        r = client.get("/failure-modes/scope_creep/index.html")
+        assert (r.status_code, r.headers["location"]) == (
+            301,
+            "/failure-modes/scope-creep/",
+        )
         r = client.get("/failure-modes/scope_creep/?ref=x")
         assert r.headers["location"] == "/failure-modes/scope-creep/?ref=x"
         # An underscore slug with no hyphenated page is a plain 404.
@@ -257,3 +262,16 @@ def test_extra_headers_rules():
     assert webapp.extra_headers("/failure-modes/scope-creep/", 200) == []
     assert webapp.extra_headers("/llms.txt", 200) == []
     assert webapp.extra_headers("/og.png", 200) == []
+
+
+def test_security_headers_on_pages_api_and_errors(monkeypatch, tmp_path):
+    with _seo_client(monkeypatch, tmp_path) as client:
+        for path in ("/", "/about/", "/api/health", "/no-such-page/"):
+            r = client.get(path)
+            assert r.headers["x-content-type-options"] == "nosniff", path
+            assert r.headers["referrer-policy"] == "strict-origin-when-cross-origin"
+            assert r.headers["x-frame-options"] == "SAMEORIGIN", path
+            # Plain-http (dev / TestClient default): no HSTS.
+            assert "strict-transport-security" not in r.headers, path
+        r = client.get("https://testserver/about/")
+        assert r.headers["strict-transport-security"] == "max-age=31536000"

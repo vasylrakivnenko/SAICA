@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import InlineCode from '../../components/InlineCode.astro';
 import { graph, failureModeLabel } from '../../lib/data.ts';
 import { breadcrumbs, clip, fmUrl } from '../../lib/seo.ts';
 
@@ -36,7 +37,7 @@ const jsonld = breadcrumbs([
             {inc.incident_date}
           </span>
         </div>
-        {inc.tagline && <p class="mt-1 text-ink-muted">{inc.tagline}</p>}
+        {inc.tagline && <p class="mt-1 text-ink-muted"><InlineCode text={inc.tagline} /></p>}
         <div class="mt-2 flex flex-wrap gap-1.5">
           <span class="chip-accent" title="Harm class">{inc.harm_class.replace(/_/g, ' ')}</span>
           <span class="chip-accent" title="Reproducibility">{inc.reproducibility}</span>

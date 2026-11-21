@@ -109,7 +109,7 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
       How well do popular open-source projects guard against the ways
       AI coding agents break things — fabricated APIs, vulnerable
       code, runaway loops, broken tests, and seven other common
-      failure modes? We audit each repo weekly and grade A–F.
+      failure modes? Each repo is audited and graded A–F (last snapshot: {generated}).
     </p>
     <p class="mx-auto mt-3 max-w-2xl text-sm text-ink-muted">
       An older, separate index. For how well supervision tools and LLMs catch coding agents' failures, see the
@@ -117,8 +117,8 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
     </p>
     <p class="mx-auto mt-3 max-w-2xl text-sm text-ink-faint">
       <strong>This page lists repos we audit.</strong> For the catalog
-      of supervision tools you can install in your own stack, see
-      <a href="/tool-coverage/" class="underline">Tool Coverage</a>.
+      of supervision tools you can install in your own stack, see the
+      <a href="/tools/" class="underline">tool catalog</a>.
     </p>
 
     <div class="mt-6 flex justify-center gap-2 text-sm">
@@ -181,8 +181,8 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
         supervision tools</em>. A repo's position reflects how well
         its own development workflow defends against AI-coding
         failure modes — not whether the repo itself supervises other
-        agents. For supervision tools, see
-        <a href="/tool-coverage/" class="underline">Tool Coverage</a>.
+        agents. For supervision tools, see the
+        <a href="/tools/" class="underline">tool catalog</a>.
       </p>
 
       <p class="text-sm text-ink-faint">
@@ -296,7 +296,7 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
       <li>
         <strong>Map detections to failure modes.</strong> Each tool in our
         knowledge graph declares which of the 11 failure modes it
-        defends against (e.g. Dependabot → <em>dependency_blindness</em>;
+        defends against (e.g. Dependabot → <em>supply_chain_attack</em>;
         Semgrep → <em>security_vulnerability</em>). We give partial
         credit for "declared coverage," more for "rationale-backed,"
         most for "citation-backed in a paper or independent eval."

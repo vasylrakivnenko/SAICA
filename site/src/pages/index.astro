@@ -50,7 +50,7 @@ const ovTypes = [...new Set(OV.rows.map((r) => r.type))];
     <h1>Leaderboard</h1>
     <p class="tagline">Can Language Models catch coding agents' failures?</p>
     <p class="byline">Vasyl Rakivnenko, Stanford University</p>
-    <p class="lead">How often each supervision tool flags a real failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).</p>
+    <p class="lead">How often each supervision tool flags a failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).</p>
 
     <div class="tabs" role="tablist" id="lb-tabs"></div>
 
@@ -103,9 +103,9 @@ const ovTypes = [...new Set(OV.rows.map((r) => r.type))];
       </table>
     </div>
     <p class="fine">
-      <b>Cost / 1k reviews</b>: what the tool costs to review 1,000 items of this mode (code changes or agent sessions), averaged
-      over our run. API models: price reported by the API (Azure: list price × tokens). Self-hosted: GPU time at $0.89/h while
-      requests ran. Free programs: $0. Hover a number for the run total and its 95% confidence interval. Stars are a popularity
+      <b>Cost / 1k reviews</b>: what the tool costs to review 1,000 items of this mode (code changes, functions or agent sessions), averaged
+      over our run. API models: price reported by the API (Azure and Fireworks: list price × tokens). Self-hosted: GPU time at $0.89/h while
+      requests ran. Free programs: $0. Hover a cost for the run total, a rate for its 95% confidence interval. Stars are a popularity
       reference only, not part of the score.
     </p>
 
@@ -145,6 +145,38 @@ const savedTypes = load('types', null); if (Array.isArray(savedTypes) && savedTy
 function rowsFor(m) { return m.rows.filter((r) => state.types.has(r.type)); }
 function pareto(rows) { return rows.filter((r) => !rows.some((o) => o !== r && o.cost <= r.cost && o.j > r.j)).sort((a, b) => a.cost - b.cost); }
 
+// Point labels: try right of the dot, above-right, below-right, then the same on the left, then a step or two further;
+// a spot is taken when it overlaps another label, another dot or the dashed frontier (which leaves every frontier point
+// horizontally to the right, so a frontier label lands above its segment instead of on it).
+function placeLabels(svg, items, segs, X0, W, H) {
+  const boxes = items.map((it, i) => ({ a: it.x - it.r - 1, b: it.x + it.r + 1, top: it.y - it.r - 1, bot: it.y + it.r + 1, own: i })).concat(segs);
+  // frontier labels first (always drawn), then the rest wherever there is still room
+  const order = items.map((it, i) => i).sort((p, q) => (items[q].must ? 1 : 0) - (items[p].must ? 1 : 0));
+  order.forEach((i) => { const it = items[i]; if (!it.text) return;
+    // a label wider than 60% of the plot is cut with an ellipsis (the dot's tooltip has the full name)
+    const maxc = Math.min(44, Math.floor((W - X0) * 0.6 / 6.3)), text = it.text.length > maxc ? it.text.slice(0, maxc - 1).trimEnd() + '…' : it.text;
+    const w = text.length * 6.3, g = it.r + 3;
+    const cands = [];
+    for (const side of [1, -1]) for (const by of [it.y + 4, it.y - it.r - 2, it.y + it.r + 12]) cands.push([side, by]);
+    for (let k = 2; k <= 3; k++) for (const side of [1, -1]) cands.push([side, it.y + 4 + 13 * k], [side, it.y + 4 - 13 * k]); // stay near the dot
+    const box = ([side, by]) => { const lx = it.x + side * g; return { lx, side, by, a: side > 0 ? lx : lx - w, b: side > 0 ? lx + w : lx, top: by - 10, bot: by + 3 }; };
+    const inside = (c) => c.a >= X0 && c.b <= W - 2 && c.top >= 0 && c.bot <= H;
+    // overlap cost: another label 4, a dot 2, a frontier segment 1 (a thin dashed line under text still reads)
+    const hits = (c) => boxes.reduce((n, p) => n + (p.own !== i && c.a < p.b && c.b > p.a && c.top < p.bot && c.bot > p.top ? (p.lx !== undefined ? 4 : p.own !== undefined ? 2 : 1) : 0), 0);
+    // first free spot; if none is free (a dense cluster, a long label crossing a frontier step), the cheapest in-bounds one
+    const fit = cands.map(box).filter(inside).map((c) => [c, hits(c)]);
+    const free = fit.find(([, h]) => h === 0);
+    if (!free && !it.must) return; // no room near the dot: leave it unlabelled (hover / focus shows the name) rather than overprint
+    const c = (free || fit.sort((x, y) => x[1] - y[1])[0] || [box(cands[0])])[0];
+    const label = svgEl('text', { class: 'lbl', x: c.lx, y: c.by, 'text-anchor': c.side > 0 ? 'start' : 'end' }); label.textContent = text; svg.append(label);
+    boxes.push(c); });
+}
+// Boxes covering the dashed frontier path (H then V between consecutive frontier points), for placeLabels.
+function frontierSegs(pts) { const s = [];
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    s.push({ a: x0, b: x1, top: y0 - 2, bot: y0 + 2 }, { a: x1 - 2, b: x1 + 2, top: Math.min(y0, y1), bot: Math.max(y0, y1) }); }
+  return s; }
+
 function renderTable(m) {
   const asc = state.key === 'fa' || state.key === 'cost';
   const rows = [...rowsFor(m)].sort((a, b) => {
@@ -159,7 +191,7 @@ function renderTable(m) {
     el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
     el('td', { class: 'num', 'data-tip': `${money(r.cost)} for all ${m.n} reviews in this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost / m.n * 1000) }),
     el('td', { class: 'num col-stars', 'data-tip': r.stars_updated_at ? `as of ${r.stars_updated_at}` : '' }, starsCell(r.stars, r.repository_url)))));
-  document.querySelectorAll('#lb-table .sort').forEach((b) => b.toggleAttribute('aria-pressed', b.dataset.k === state.key));
+  document.querySelectorAll('#lb-table .sort').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.k === state.key)));
   document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
   document.getElementById('lb-note').replaceChildren(`${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`, ...fmLink(m, ' · '));
 }
@@ -174,7 +206,8 @@ function renderChart(m) {
   const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi)));
   const x0 = M.l + freeW + 14, x1 = W - M.r, L = (v) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
   const xs = (r) => (r.cost === 0 ? M.l + freeW / 2 : x0 + L(per1k(r)) * (x1 - x0));
-  const jmin = Math.max(0, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10 - 0.05);
+  // floor at -100%, not 0: a tool scoring below chance (negative J) was drawn under the x axis, over its tick labels
+  const jmin = Math.max(-1, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10 - 0.05);
   const ys = (j) => M.t + (1 - (j - jmin) / (1 - jmin)) * (H - M.t - M.b);
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${m.name}: J versus cost per 1,000 reviews` });
   svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
@@ -188,7 +221,7 @@ function renderChart(m) {
   const xl = svgEl('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle' }); xl.textContent = 'Cost per 1,000 reviews (log scale)'; svg.append(xl);
   const front = pareto(rows);
   if (front.length > 1) { let d = ''; front.forEach((r, i) => { d += i === 0 ? `M${xs(r)},${ys(r.j)}` : `H${xs(r)}V${ys(r.j)}`; }); svg.append(svgEl('path', { class: 'front', d })); }
-  const tip = el('div', { class: 'tip', hidden: '' }); const placed = [];
+  const tip = el('div', { class: 'tip', hidden: '' }); const items = [];
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
@@ -197,15 +230,9 @@ function renderChart(m) {
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
     svg.append(c);
-    if (!narrow || onF) {
-      const short = r.tool.replace(', asked directly', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)');
-      const label = svgEl('text', { class: 'lbl' }); label.textContent = short; svg.append(label);
-      const w = short.length * 6.3; let lx = x + 9, anchor = 'start'; if (lx + w > W - 2) { lx = x - 9; anchor = 'end'; }
-      let ly = y + 4; const span = () => (anchor === 'start' ? [lx, lx + w] : [lx - w, lx]);
-      for (let k = 0; k < 8 && placed.some((p) => { const [a, b] = span(); return a < p.b && b > p.a && Math.abs(ly - p.y) < 13; }); k++) ly += 13;
-      label.setAttribute('x', lx); label.setAttribute('y', ly); label.setAttribute('text-anchor', anchor); const [a, b] = span(); placed.push({ a, b, y: ly });
-    }
+    items.push({ x, y, r: onF ? 6 : 4.5, must: onF, text: !narrow || onF ? r.tool.replace(', asked directly', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)') : '' });
   }
+  placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
   const types = [...new Set(rows.map((r) => r.type))];
   document.getElementById('lb-legend').replaceChildren(...types.map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
@@ -230,7 +257,7 @@ function renderOverview() {
       return el('td', { class: 'cell', 'data-tip': `${b.tool}: J ${pct(b.j)}` }, el('b', { text: Math.round(b.j * 100) + '%' }), el('br'), b.short || short(b.tool)); }),
     el('td', {}));
   document.getElementById('lb-ov-table').replaceChildren(head, el('tbody', {}, body, best));
-  document.querySelectorAll('#lb-ov-table .mlink').forEach((b) => b.addEventListener('click', () => go(b.dataset.id)));
+  document.querySelectorAll('#lb-ov-table .mlink').forEach((b) => b.addEventListener('click', () => { go(b.dataset.id); tabs.scrollIntoView({ block: 'start' }); }));
   document.getElementById('lb-ov-legend').replaceChildren(
     ...[...new Set(OV.rows.map((r) => r.type))].map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
     el('span', { text: 'Darker cell = higher J · “·” = not run' }));
@@ -258,13 +285,13 @@ function renderOvChart() {
     return cs.length ? { ...r, j: mean(cs.map((c) => c.j)), c: mean(cs.map((c) => c.cost1k)), n: cs.length } : null; }).filter(Boolean);
   if (!rows.length) { box.append(el('p', { class: 'fine', text: 'No reviewer in the grid ran on the checked modes.' })); return; }
   const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.48)));
-  const narrow = W < 560, M = { l: 46, r: 16, t: 12, b: 44 }, freeW = 54;
+  const narrow = W < 560, M = { l: 56, r: 16, t: 12, b: 44 }, freeW = 54; // l: room for the rotated "Average J" title left of the ticks
   const paid = rows.filter((r) => r.c > 0);
   const lo = paid.length ? Math.min(...paid.map((r) => r.c)) : 0.1, hi = paid.length ? Math.max(...paid.map((r) => r.c)) : 1;
   const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi)));
   const x0 = M.l + freeW + 14, x1 = W - M.r, L = (v) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
   const xs = (r) => (r.c === 0 ? M.l + freeW / 2 : x0 + L(r.c) * (x1 - x0));
-  const jlo = Math.max(0, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10), jhi = Math.min(1, Math.ceil(Math.max(...rows.map((r) => r.j)) * 10) / 10 + 0.05);
+  const jlo = Math.max(-1, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10), jhi = Math.min(1, Math.ceil(Math.max(...rows.map((r) => r.j)) * 10) / 10 + 0.05);
   const ys = (j) => M.t + (1 - (j - jlo) / (jhi - jlo)) * (H - M.t - M.b);
   const shade = (j) => `color-mix(in srgb, ${BLUE} ${Math.round(Math.max(0, j) * 85)}%, #fff)`;
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Average J versus average cost per 1,000 reviews for each reviewer, with the Pareto frontier' });
@@ -281,7 +308,7 @@ function renderOvChart() {
   const front = rows.filter((r) => !rows.some((o) => o !== r && o.c <= r.c && o.j > r.j)).sort((a, b) => a.c - b.c);
   if (front.length > 1) { let d = ''; front.forEach((r, i) => { d += i === 0 ? `M${xs(r)},${ys(r.j)}` : `H${xs(r)}V${ys(r.j)}`; });
     svg.append(svgEl('path', { d, fill: 'none', stroke: BLUE, 'stroke-width': 2, 'stroke-dasharray': '5 4', opacity: 0.7 })); }
-  const tip = el('div', { class: 'tip', hidden: '' }); const placed = [];
+  const tip = el('div', { class: 'tip', hidden: '' }); const items = [];
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 7 : 5.5, tabindex: 0, style: `fill:${shade(r.j)};stroke:${BLUE};stroke-width:${onF ? 2.5 : 1.25};cursor:pointer` });
@@ -291,15 +318,9 @@ function renderOvChart() {
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
     svg.append(c);
-    if (!narrow || onF) {
-      const short = r.tool + (r.n < sel.length ? ` (${r.n} of ${sel.length})` : '');
-      const label = svgEl('text', { class: 'lbl' }); label.textContent = short; svg.append(label);
-      const w = short.length * 6.3; let lx = x + 10, anchor = 'start'; if (lx + w > W - 2) { lx = x - 10; anchor = 'end'; }
-      let ly = y + 4; const span = () => (anchor === 'start' ? [lx, lx + w] : [lx - w, lx]);
-      for (let k = 0; k < 8 && placed.some((p) => { const [a, b] = span(); return a < p.b && b > p.a && Math.abs(ly - p.y) < 13; }); k++) ly += 13;
-      label.setAttribute('x', lx); label.setAttribute('y', ly); label.setAttribute('text-anchor', anchor); const [a, b] = span(); placed.push({ a, b, y: ly });
-    }
+    items.push({ x, y, r: onF ? 7 : 5.5, must: onF, text: !narrow || onF ? r.tool + (r.n < sel.length ? ` (${r.n} of ${sel.length})` : '') : '' });
   }
+  placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
 }
 
@@ -325,7 +346,8 @@ function renderStar(m) {
 
 function render() {
   const ov = state.mode === 'overview', star = STAR.find((m) => m.id === state.mode);
-  document.querySelectorAll('#lb-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.id === state.mode)));
+  document.querySelectorAll('#lb-tabs button').forEach((b) => { const on = b.dataset.id === state.mode; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+  revealTab();
   document.getElementById('lb-ov').hidden = !ov;
   document.getElementById('lb-star').hidden = !star;
   document.getElementById('lb-mode').hidden = ov || !!star;
@@ -336,6 +358,17 @@ function render() {
 }
 function go(id) { state.mode = id; history.replaceState(null, '', '#' + id); render(); }
 const tabs = document.getElementById('lb-tabs');
+// Phones: the tabs are one horizontally scrolling strip; keep the active tab visible and fade the edge while more follow.
+function tabEdge() { tabs.classList.toggle('more', tabs.scrollLeft + tabs.clientWidth < tabs.scrollWidth - 2); }
+function revealTab() { const a = tabs.querySelector('[aria-selected="true"]');
+  if (a && tabs.scrollWidth > tabs.clientWidth && (a.offsetLeft < tabs.scrollLeft || a.offsetLeft + a.offsetWidth > tabs.scrollLeft + tabs.clientWidth))
+    tabs.scrollLeft = a.offsetLeft - (tabs.clientWidth - a.offsetWidth) / 2;
+  tabEdge(); }
+tabs.addEventListener('scroll', tabEdge, { passive: true });
+// Keyboard: arrow keys / Home / End move between tabs (WAI-ARIA tabs pattern).
+tabs.addEventListener('keydown', (e) => { const bs = [...tabs.querySelectorAll('button')], i = bs.indexOf(document.activeElement); if (i < 0) return;
+  const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: bs.length - 1 }[e.key]; if (n === undefined) return;
+  e.preventDefault(); const b = bs[(n + bs.length) % bs.length]; go(b.dataset.id); b.focus(); });
 const tabDefs = (OV ? [{ id: 'overview', name: 'Overview' }] : []).concat(DATA, STAR);
 tabDefs.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => go(m.id)); tabs.append(b); });
 if (OV) { renderOverview(); renderOvModes(); }
@@ -364,12 +397,12 @@ syncTypes();
   .lb h1 { margin: 0; }
   .lb h2 { font-size: 1.15rem; margin-top: 2.2rem; }
   .lb .tagline { margin: .45rem 0 0; font: 500 18px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418; }
-  .lb .byline { margin: .2rem 0 0; font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; color: #7a8192; }
+  .lb .byline { margin: .2rem 0 0; font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; color: #6b7180; }
   .lb .lead { margin: 1rem 0 0; color: #4a5160; max-width: none; font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; text-align: left; }
   .lb .lead b { color: #111418; font-weight: 600; }
   /* sheet tabs (like a spreadsheet's): grey tabs with rounded tops on a baseline; the active tab is white, joins the
      baseline and has a blue top edge */
-  .lb .tabs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 3px; border-bottom: 1px solid rgb(17 20 24 / .15); margin: 1.4rem 0 .9rem; padding: 0 2px; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .lb .tabs { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 3px; border-bottom: 1px solid rgb(17 20 24 / .15); margin: 1.4rem 0 .9rem; padding: 0 2px; font-family: ui-sans-serif, system-ui, sans-serif; }
   .lb .tabs button { background: #f3f1ec; border: 1px solid rgb(17 20 24 / .12); border-bottom: 0; border-top: 2px solid transparent; border-radius: 7px 7px 0 0; padding: .4rem .8rem .45rem; font-size: 14px; font-weight: 500; color: #4a5160; cursor: pointer; margin-bottom: -1px; line-height: 1.3; }
   .lb .tabs button:hover { background: #fff; color: #111418; }
   .lb .tabs button[aria-selected="true"] { background: #fff; color: #1f3a93; font-weight: 600; border-top-color: #1f3a93; position: relative; padding-bottom: calc(.45rem + 1px); }
@@ -380,19 +413,19 @@ syncTypes();
   .lb .chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .lb .chip[aria-pressed="true"] { border-color: #1f3a93; background: #e4ebf7; color: #1f3a93; }
   .lb .chip:focus-visible, .lb .tabs button:focus-visible, .lb .sort:focus-visible { outline: 2px solid #1f3a93; outline-offset: 2px; }
-  .lb .mode-note { color: #7a8192; font-size: 13px; }
+  .lb .mode-note { color: #6b7180; font-size: 13px; }
   .lb .tbl-wrap { overflow-x: auto; }
   .lb table { width: 100%; border-collapse: collapse; font: 14px ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .lb th, .lb td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); white-space: nowrap; }
   .lb th { font-size: 12px; font-weight: 600; color: #4a5160; text-transform: uppercase; letter-spacing: .04em; }
   .lb .num { text-align: right; }
-  .lb td.rank { color: #7a8192; }
+  .lb td.rank { color: #6b7180; }
   .lb td.j { font-weight: 600; }
   .lb tr.baseline td:nth-child(2) { color: #4a5160; }
   .lb .bar { display: inline-block; height: 6px; border-radius: 3px; background: #1f3a93; opacity: .75; vertical-align: middle; margin-right: 8px; }
   .lb .pill { font-size: 12px; font-weight: 500; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; }
   .lb .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
-  .lb .sort[aria-pressed]::after { content: " ↓"; }
+  .lb .sort[aria-pressed="true"]::after { content: " ↓"; }
   .lb table.no-stars .col-stars { display: none; }
   .lb .sort[data-tip], .lb td[data-tip] { position: relative; }
   .lb td[data-tip]:not([data-tip=""]) { cursor: help; }
@@ -401,10 +434,10 @@ syncTypes();
     text-align: left; text-transform: none; letter-spacing: 0; font: 400 12.5px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418;
     background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 7px 9px; box-shadow: 0 6px 18px rgb(0 0 0 / .12); pointer-events: none; }
   .lb .tbl-wrap { padding-bottom: 4px; }
-  .lb .fine { font: 13px ui-sans-serif, system-ui, sans-serif; color: #7a8192; margin-top: .6rem; max-width: 80ch; }
+  .lb .fine { font: 13px ui-sans-serif, system-ui, sans-serif; color: #6b7180; margin-top: .6rem; max-width: 80ch; }
   .lb .chart { position: relative; min-height: 280px; margin-top: .5rem; }
   .lb .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .lb .chart text { font: 11.5px ui-sans-serif, system-ui, sans-serif; fill: #7a8192; }
+  .lb .chart text { font: 11.5px ui-sans-serif, system-ui, sans-serif; fill: #6b7180; }
   .lb .chart .lbl { fill: #111418; font-size: 12px; }
   .lb .chart .grid { stroke: rgb(17 20 24 / .08); }
   .lb .chart .axis { stroke: rgb(17 20 24 / .3); }
@@ -421,14 +454,14 @@ syncTypes();
   .lb #lb-star-table td.how { white-space: normal; min-width: 260px; max-width: 460px; color: #4a5160; font-size: 13px; line-height: 1.4; }
   .lb table.ov th { white-space: normal; vertical-align: bottom; text-transform: none; letter-spacing: 0; font-size: 12.5px; line-height: 1.25; min-width: 66px; }
   .lb table.ov th.mcol { text-align: center; }
-  .lb table.ov .mlink { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; border-bottom: 1px dotted #7a8192; text-align: center; }
+  .lb table.ov .mlink { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; border-bottom: 1px dotted #6b7180; text-align: center; }
   .lb table.ov .mlink:hover, .lb table.ov .mlink:focus-visible { color: #1f3a93; }
   .lb table.ov th:first-child, .lb table.ov td:first-child { position: sticky; left: 0; background: #fff; z-index: 2; min-width: 150px; }
   .lb table.ov td.cell { text-align: center; font-weight: 600; padding: .45rem .35rem; }
-  .lb table.ov td.cell.low { color: #7a8192; font-weight: 500; }
+  .lb table.ov td.cell.low { color: #6b7180; font-weight: 500; }
   .lb table.ov td.na { text-align: center; color: #9a9fab; }
   .lb table.ov td.avg { color: #4a5160; }
-  .lb table.ov .nm { color: #7a8192; font-size: 12px; }
+  .lb table.ov .nm { color: #6b7180; font-size: 12px; }
   .lb table.ov td.rname a { color: inherit; text-decoration: none; }
   .lb table.ov td.rname a:hover, .lb table.ov td.rname a:focus-visible { color: #1f3a93; text-decoration: underline; }
   .lb td a.gh { color: inherit; }
@@ -441,8 +474,20 @@ syncTypes();
   .lb .ov-caveats { font-size: 14px; color: #4a5160; }
   /* mode checkboxes: an even 3-column grid of small cards (2 on phones); only the box itself turns blue when ticked */
   .lb .ov-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem .55rem; max-width: 48rem; margin: .7rem 0 .8rem; font: 13.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
-  .lb .ov-modes label { display: flex; align-items: center; gap: .55rem; padding: .45rem .7rem; border: 1px solid rgb(17 20 24 / .12); border-radius: 8px; background: #fff; cursor: pointer; transition: background-color .15s, border-color .15s; }
+  .lb .ov-modes label { display: flex; align-items: center; gap: .55rem; margin: 0; padding: .45rem .7rem; border: 1px solid rgb(17 20 24 / .12); border-radius: 8px; background: #fff; cursor: pointer; transition: background-color .15s, border-color .15s; }
   .lb .ov-modes label:hover { border-color: rgb(31 58 147 / .55); }
   .lb .ov-modes input { accent-color: #1f3a93; width: 15px; height: 15px; margin: 0; cursor: pointer; flex: none; }
-  @media (max-width: 640px) { .lb .ov-modes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) {
+    .lb .ov-modes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* phones: the sheet tabs become one scrolling strip instead of wrapping into five or six rows. A scroller clips
+       the -1px overlap, so the baseline is drawn as a background and under each inactive tab instead. */
+    .lb .tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; border-bottom: 0; scrollbar-width: none;
+      background: linear-gradient(rgb(17 20 24 / .15), rgb(17 20 24 / .15)) left bottom / 100% 1px no-repeat; }
+    .lb .tabs::-webkit-scrollbar { display: none; }
+    .lb .tabs.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+    .lb .tabs button { flex: none; margin-bottom: 0; box-shadow: inset 0 -1px rgb(17 20 24 / .15); }
+    .lb .tabs button[aria-selected="true"] { box-shadow: none; }
+    /* long tool names wrap so the J column is not pushed off screen */
+    .lb #lb-table td:nth-child(2) { white-space: normal; min-width: 9.5rem; }
+  }
 </style>

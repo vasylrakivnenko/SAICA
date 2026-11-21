@@ -19,9 +19,16 @@ KIT = Path(__file__).resolve().parents[2] / "site" / "public" / "kit"
 
 
 def _load(name: str, filename: str):
+    # No bytecode: site/public/ is copied verbatim into site/dist/ by the
+    # Astro build, so a site/public/kit/__pycache__/ left behind by this
+    # test run would otherwise be published at https://saica.ai/kit/.
     spec = importlib.util.spec_from_file_location(name, str(KIT / filename))
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    prev, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        sys.dont_write_bytecode = prev
     return mod
 
 
@@ -100,11 +107,13 @@ def tool(command, **kw):
 def test_example_config_parses():
     cfg = sc.load_config(KIT / "checks.example.json")
     ids = [t["id"] for t in cfg["tools"]]
-    assert ids == ["semgrep", "sentrux", "pytest", "activepieces"]
-    assert cfg["kit"] == "optimal"
+    assert ids == ["semgrep", "sentrux", "pytest", "dependency-blindness-review"]
+    assert cfg["kit"] == "custom"
     assert cfg["builtin"] == {"enabled": True, "blocking": False}
-    ap = cfg["tools"][-1]
-    assert ap["runs_per_commit"] is False and ap["command"] is None
+    # The last entry is the LLM-reviewer runner (non-blocking, per commit).
+    review = cfg["tools"][-1]
+    assert review["runs_per_commit"] is True and review["blocking"] is False
+    assert review["command"].startswith("python3 .saica/saica_llm_review.py")
     assert cfg["tools"][1]["metric"]["name"] == "quality"
 
 
@@ -714,7 +723,7 @@ def test_hook_files_match_embedded_copies():
 
 def test_selftest_sandbox_end_to_end(clean_git_env):
     r = subprocess.run(
-        [sys.executable, str(KIT / "selftest.py"), "--sandbox"],
+        [sys.executable, "-B", str(KIT / "selftest.py"), "--sandbox"],
         capture_output=True,
         text=True,
         timeout=180,

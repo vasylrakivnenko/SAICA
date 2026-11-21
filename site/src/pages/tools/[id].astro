@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import InlineCode from '../../components/InlineCode.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph, facetLabel, paperLabel } from '../../lib/data.ts';
 import { abs, breadcrumbs, fmUrl, leaderboardUrl, toolUrl } from '../../lib/seo.ts';
@@ -71,6 +72,9 @@ const jsonld = [
 const starsLabel = typeof tool.stars === 'number'
   ? tool.stars.toLocaleString('en-US')
   : null;
+// URL text for the narrow sidebar card: without the scheme, with a line-break opportunity after each '/'
+// (otherwise a long repo URL either overflows the card or breaks mid-word).
+const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((seg, i) => (i ? '/' + seg : seg));
 ---
 
 <BaseLayout title={toolTitle(tool.id)} description={desc} jsonld={jsonld}>
@@ -99,7 +103,7 @@ const starsLabel = typeof tool.stars === 'number'
     <span class="chip">{facetLabel('maturity_status', tool.maturity_status)}</span>
     {maturity && (
       <span
-        class={`inline-flex items-center rounded px-2 py-0.5 text-xs font-bold ${TIER_COLORS[maturity.tier] ?? 'bg-stone-300'}`}
+        class={`inline-flex items-center rounded px-2 py-0.5 font-sans text-xs font-bold ${TIER_COLORS[maturity.tier] ?? 'bg-stone-300'}`}
         title={`Maturity tier (auto-computed score=${maturity.score})${maturity.is_override ? ' — curator override' : ''}`}
       >
         Tier {maturity.tier}
@@ -151,7 +155,7 @@ const starsLabel = typeof tool.stars === 'number'
     <section class="mt-8" aria-labelledby="measured">
       <h2 id="measured" class="!mt-0">Measured on SAICA-Bench</h2>
       <p class="max-w-3xl leading-7">
-        How well {tool.name} catches AI coding agent failures, measured on matched sets of faulty and clean
+        How well {tool.name} catches AI coding agent failures, measured on labelled sets of faulty and clean
         samples (<a href="/benchmark/">how we test</a>). J = TPR &minus; FPR: the share of faulty samples it flags
         minus the share of clean ones it wrongly flags, so 0 is no better than chance. Results as of {benchGenerated}.
       </p>
@@ -200,19 +204,19 @@ const starsLabel = typeof tool.stars === 'number'
   <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
     <div>
       <h2 class="!mt-0">Description</h2>
-      <p class="whitespace-pre-line leading-7">{tool.description}</p>
+      <p class="whitespace-pre-line leading-7"><InlineCode text={tool.description} /></p>
 
       {tool.inclusion_rationale && (
         <>
           <h2>Why it's included</h2>
-          <p class="whitespace-pre-line leading-7">{tool.inclusion_rationale}</p>
+          <p class="whitespace-pre-line leading-7"><InlineCode text={tool.inclusion_rationale} /></p>
         </>
       )}
 
       {tool.security_notes && (
         <>
           <h2>Security notes</h2>
-          <p class="whitespace-pre-line leading-7">{tool.security_notes}</p>
+          <p class="whitespace-pre-line leading-7"><InlineCode text={tool.security_notes} /></p>
         </>
       )}
 
@@ -348,13 +352,13 @@ const starsLabel = typeof tool.stars === 'number'
         {tool.repository_url && (
           <>
             <dt>Repository</dt>
-            <dd><a href={tool.repository_url} rel="noopener">{tool.repository_url.replace(/^https?:\/\//, '')}</a></dd>
+            <dd><a href={tool.repository_url} rel="noopener">{urlParts(tool.repository_url).map((seg, i) => <>{i > 0 && <wbr />}{seg}</>)}</a></dd>
           </>
         )}
         {tool.documentation_url && (
           <>
             <dt>Documentation</dt>
-            <dd><a href={tool.documentation_url} rel="noopener">{tool.documentation_url.replace(/^https?:\/\//, '')}</a></dd>
+            <dd><a href={tool.documentation_url} rel="noopener">{urlParts(tool.documentation_url).map((seg, i) => <>{i > 0 && <wbr />}{seg}</>)}</a></dd>
           </>
         )}
         {typeof tool.signed_manifest === 'boolean' && (

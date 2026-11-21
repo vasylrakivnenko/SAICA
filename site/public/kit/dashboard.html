@@ -11,7 +11,7 @@
     color-scheme: light dark;
     --ink: #111418;
     --ink-muted: #4a5160;
-    --ink-faint: #7a8192;
+    --ink-faint: #6b7180;
     --paper: #fbfaf7;
     --paper-alt: #f3f1ec;
     --card: #ffffff;
@@ -40,7 +40,7 @@
     --ag-copilot: #1baf7a;
     --ag-cursor: #e87ba4;
     --ag-other: #8a6fd1;
-    --ag-bot: #7a8192;
+    --ag-bot: #6b7180;
 
     --serif: 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, Palatino, serif;
     --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
@@ -97,7 +97,7 @@
   .faint { color: var(--ink-faint); }
   .small { font-size: 0.875rem; }
   .xs { font-size: 0.75rem; }
-  main { padding-block: 2rem 1rem; }
+  main.wrap { padding-block: 2rem 1rem; } /* main.wrap: .wrap's padding shorthand would otherwise zero this */
   section { margin-bottom: 2rem; }
 
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 1.1rem 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }

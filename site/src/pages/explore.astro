@@ -30,7 +30,7 @@ const jsonld = breadcrumbs([
     </p>
   </section>
 
-  <div class="grid grid-cols-[14rem_1fr] gap-4" id="explore-root">
+  <div class="grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)] gap-4" id="explore-root">
     <aside class="ui text-sm">
       <div class="mb-4">
         <div class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-1">Projection</div>
@@ -53,7 +53,7 @@ const jsonld = breadcrumbs([
 
       <fieldset class="mb-4">
         <legend class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-1">Tool facets</legend>
-        <label class="block text-xs text-ink-faint mt-1">control_paradigm</label>
+        <label for="ex-cp" class="block text-xs text-ink-faint mt-1">control_paradigm</label>
         <select id="ex-cp" class="w-full border border-ink/15 rounded px-2 py-1 bg-white">
           <option value="">any</option>
           <option value="prevention">prevention</option>
@@ -61,14 +61,14 @@ const jsonld = breadcrumbs([
           <option value="correction">correction</option>
           <option value="recovery">recovery</option>
         </select>
-        <label class="block text-xs text-ink-faint mt-2">temporal_phase</label>
+        <label for="ex-tp" class="block text-xs text-ink-faint mt-2">temporal_phase</label>
         <select id="ex-tp" class="w-full border border-ink/15 rounded px-2 py-1 bg-white">
           <option value="">any</option>
           <option value="pre_generation">pre_generation</option>
           <option value="in_generation">in_generation</option>
           <option value="post_generation">post_generation</option>
         </select>
-        <label class="block text-xs text-ink-faint mt-2">autonomy_level</label>
+        <label for="ex-al" class="block text-xs text-ink-faint mt-2">autonomy_level</label>
         <select id="ex-al" class="w-full border border-ink/15 rounded px-2 py-1 bg-white">
           <option value="">any</option>
           <option value="fully_autonomous">fully_autonomous</option>
@@ -80,14 +80,14 @@ const jsonld = breadcrumbs([
       <div id="ex-count" class="text-xs text-ink-faint"></div>
     </aside>
 
-    <div class="relative border border-ink/10 rounded bg-white" style="height:78vh">
+    <div class="relative border border-ink/10 rounded bg-white" style="height:78vh; min-height:360px; max-height:900px">
       <noscript>
         <div class="p-3 text-sm">
           The embedding explorer requires JavaScript. You can still read the raw
           data at <a href="/embeddings.json">/embeddings.json</a>.
         </div>
       </noscript>
-      <svg id="ex-svg" viewBox="0 0 100 100" preserveAspectRatio="none"
+      <svg id="ex-svg" role="img" aria-label="2D semantic map of catalog nodes"
            style="width:100%; height:100%; display:block"></svg>
       <div id="ex-tooltip"
            class="pointer-events-none absolute hidden bg-ink text-white text-xs rounded px-2 py-1 shadow"
@@ -167,19 +167,21 @@ const jsonld = breadcrumbs([
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     const rows = visibleRows();
     if (countEl) countEl.textContent = `${rows.length} nodes`;
-    // Padding inside the 100x100 viewBox so dots don't clip at the edge.
-    const PAD = 3;
+    // Draw in pixels (viewBox = the box's own size) so dots stay round whatever the box's aspect ratio;
+    // PAD keeps dots off the edge. render() runs again on resize.
+    const w = Math.max(1, svg.clientWidth), h = Math.max(1, svg.clientHeight), PAD = 14;
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     for (const r of rows) {
-      const cx = PAD + r.x * (100 - 2 * PAD);
-      const cy = PAD + (1 - r.y) * (100 - 2 * PAD); // flip y so "up" = larger
+      const cx = PAD + r.x * (w - 2 * PAD);
+      const cy = PAD + (1 - r.y) * (h - 2 * PAD); // flip y so "up" = larger
       const dot = document.createElementNS(svgNS, "circle");
-      dot.setAttribute("cx", cx.toFixed(3));
-      dot.setAttribute("cy", cy.toFixed(3));
-      dot.setAttribute("r", r.type === "tool" ? "0.8" : "0.7");
+      dot.setAttribute("cx", cx.toFixed(1));
+      dot.setAttribute("cy", cy.toFixed(1));
+      dot.setAttribute("r", r.type === "tool" ? "6" : "5.5");
       dot.setAttribute("fill", COLORS[r.type] ?? "#6b7280");
       dot.setAttribute("fill-opacity", "0.8");
       dot.setAttribute("stroke", "white");
-      dot.setAttribute("stroke-width", "0.15");
+      dot.setAttribute("stroke-width", "1.2");
       dot.style.cursor = "pointer";
       dot.dataset.id = r.id;
       dot.dataset.name = r.name;
@@ -234,6 +236,8 @@ const jsonld = breadcrumbs([
       el?.addEventListener("change", render)
     );
     typeBoxes.forEach((b) => b.addEventListener("change", render));
+    let rt: number | undefined;
+    window.addEventListener("resize", () => { clearTimeout(rt); rt = window.setTimeout(render, 100); });
   }
 
   init();

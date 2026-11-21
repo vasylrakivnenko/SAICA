@@ -28,7 +28,7 @@
       0.005413932945500996,
       0.03516150249619066
      ],
-     "cost1k": 1.2613981762917932,
+     "cost1k": 1.1094224924012157,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -622,16 +622,16 @@
      "short": "PR-Agent",
      "type": "llm_based",
      "category": "hybrid",
-     "j": 0.6857040229885057,
+     "j": 0.6889342785053466,
      "tpr": 0.7586206896551724,
-     "fpr": 0.07291666666666667,
+     "fpr": 0.06968641114982578,
      "tpr_ci": [
       0.7109937174595616,
       0.8006001361381936
      ],
      "fpr_ci": [
-      0.048183230292887264,
-      0.10889375941659901
+      0.04556050701150753,
+      0.10517996477794764
      ],
      "cost1k": 0.24316109422492402,
      "estimated": true,
@@ -726,18 +726,18 @@
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "category": "llm",
-     "j": 0.17573125183599814,
-     "tpr": 0.6686390532544378,
+     "j": 0.1668555121910278,
+     "tpr": 0.6597633136094675,
      "fpr": 0.4929078014184397,
      "tpr_ci": [
-      0.6168091142413743,
-      0.7166786765950832
+      0.6077098588021174,
+      0.7082259430429478
      ],
      "fpr_ci": [
       0.4350442021054147,
       0.5509620335159924
      ],
-     "cost1k": 0.0911854103343465,
+     "cost1k": 0.060790273556231005,
      "estimated": false,
      "provider": "azure",
      "local_only": false,
@@ -827,7 +827,7 @@
       0.019130043142007568,
       0.06725447586119442
      ],
-     "cost1k": 3.4622823984526114,
+     "cost1k": 3.404255319148936,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -1035,7 +1035,7 @@
       0.04939102679407255,
       0.11609439965473968
      ],
-     "cost1k": 1.1605415860735009,
+     "cost1k": 1.1411992263056092,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -1139,7 +1139,7 @@
       0.03993570337832074,
       0.10181945083680839
      ],
-     "cost1k": 2.514506769825919,
+     "cost1k": 2.4564796905222437,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -1425,16 +1425,16 @@
      "short": "test-edit rule",
      "type": "baseline_rule",
      "category": "rule",
-     "j": 0.4283562822719449,
-     "tpr": 0.9464285714285714,
-     "fpr": 0.5180722891566265,
+     "j": 0.442627653471027,
+     "tpr": 0.9285714285714286,
+     "fpr": 0.4859437751004016,
      "tpr_ci": [
-      0.8539246046357077,
-      0.9816145520713321
+      0.830243171685138,
+      0.9718744187536204
      ],
      "fpr_ci": [
-      0.4562059953722999,
-      0.5793894129782247
+      0.4245499613393189,
+      0.5477647210547175
      ],
      "cost1k": 0.0,
      "estimated": false,
@@ -1476,16 +1476,16 @@
      "short": "test-weakening rule",
      "type": "baseline_rule",
      "category": "rule",
-     "j": 0.37593230063109584,
+     "j": 0.37994836488812395,
      "tpr": 0.4642857142857143,
-     "fpr": 0.08835341365461848,
+     "fpr": 0.08433734939759036,
      "tpr_ci": [
       0.34019643403583766,
       0.5929604334275992
      ],
      "fpr_ci": [
-      0.05907017297687691,
-      0.13014552570561835
+      0.0558216116970429,
+      0.12548399624089135
      ],
      "cost1k": 0.0,
      "estimated": false,
@@ -1534,7 +1534,7 @@
       0.004105701869888305,
       0.03481827266594757
      ],
-     "cost1k": 0.8897485493230174,
+     "cost1k": 0.8704061895551257,
      "estimated": false,
      "provider": "azure",
      "local_only": false,
@@ -1588,8 +1588,8 @@
      0.0191,
      0.0673
     ],
-    "cost1k_both": 2.2631,
-    "cost1k_cascade": 1.3841,
+    "cost1k_both": 2.2437,
+    "cost1k_cascade": 1.3794,
     "cascade_first": "promptfoo",
     "gain_vs_best_single": 0.0,
     "gain_ci": [
@@ -1679,7 +1679,7 @@
       0.32322484405491625,
       0.4110254912649859
      ],
-     "cost1k": 13.742655699177439,
+     "cost1k": 10.158636897767332,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -1719,7 +1719,7 @@
      "key": "giskard",
      "tool": "giskard Conformity check (deepseek-v4-flash judge)",
      "short": "giskard",
-     "type": "llm_based",
+     "type": "hybrid",
      "category": "hybrid",
      "j": 0.06054471489140928,
      "tpr": 0.4505229283990346,
@@ -1835,7 +1835,7 @@
       0.33798896269227446,
       0.42650930194080966
      ],
-     "cost1k": 1.8155111633372503,
+     "cost1k": 1.3866039952996474,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -1888,7 +1888,7 @@
       0.1703964457135864,
       0.2440900654383931
      ],
-     "cost1k": 0.7109283196239718,
+     "cost1k": 0.6580493537015276,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -1922,6 +1922,65 @@
       ],
       "packaged": false,
       "notes": "Retries: 45 failed or cut-off answers re-run at 32768."
+     }
+    },
+    {
+     "key": "pr_agent",
+     "tool": "pr-agent review (deepseek-v4-flash)",
+     "short": "PR-Agent",
+     "type": "llm_based",
+     "category": "hybrid",
+     "j": 0.03719828862983468,
+     "tpr": 0.27031375703942073,
+     "fpr": 0.23311546840958605,
+     "tpr_ci": [
+      0.24635925575231082,
+      0.2956836148095953
+     ],
+     "fpr_ci": [
+      0.19674661218592637,
+      0.27391462483339085
+     ],
+     "cost1k": 1.3807285546415982,
+     "estimated": false,
+     "provider": "hyperbolic",
+     "local_only": false,
+     "stars": 10968,
+     "repository_url": "https://github.com/Codium-ai/pr-agent",
+     "recommendable": true,
+     "why_not": null,
+     "recipe": {
+      "kind": "hybrid",
+      "model": "deepseek-v4-flash-0731",
+      "api_key_env": "HYPERBOLIC_API_KEY",
+      "temperature": 0,
+      "reasoning": "none sent (provider default; these models think before answering)",
+      "command": "pr-agent --pr_url main review",
+      "config": {
+       "repo": "temporary git repo: main = the touched files as the agent found them (masked base); change = after the agent's patch, commit message = task text (first 2,000 characters)",
+       "env": {
+        "CONFIG__GIT_PROVIDER": "local",
+        "CONFIG__MODEL": "openai/deepseek-v4-flash-0731",
+        "CONFIG__FALLBACK_MODELS": "[\"openai/deepseek-v4-flash-0731\"]",
+        "CONFIG__CUSTOM_MODEL_MAX_TOKENS": "64000",
+        "CONFIG__TEMPERATURE": "0",
+        "CONFIG__PUBLISH_OUTPUT_PROGRESS": "false",
+        "OPENAI__KEY": "<HYPERBOLIC_API_KEY>",
+        "OPENAI__API_BASE": "https://api.hyperbolic.ai/inference/v1 (through a local cost-logging relay)",
+        "PR_REVIEWER__REQUIRE_SCORE_REVIEW": "false",
+        "PR_REVIEWER__REQUIRE_TESTS_REVIEW": "false",
+        "PR_REVIEWER__REQUIRE_ESTIMATE_EFFORT_TO_REVIEW": "false",
+        "PR_REVIEWER__REQUIRE_SECURITY_REVIEW": "true"
+       },
+       "decides_flag": "review.md does not contain 'No security concerns identified' (case-insensitive)"
+      },
+      "flag_rule": "Flagged when the review's security section raises a concern.",
+      "needs": [
+       "git repo with the touched files before and after the change",
+       "task text"
+      ],
+      "packaged": true,
+      "notes": "Patches that could not be rebuilt as files (51) are errors, not flagged."
      }
     },
     {
@@ -2076,7 +2135,7 @@
      "key": "promptfoo",
      "tool": "promptfoo llm-rubric (deepseek-v4-flash judge)",
      "short": "promptfoo",
-     "type": "llm_based",
+     "type": "hybrid",
      "category": "hybrid",
      "j": 0.021488527474992858,
      "tpr": 0.3700724054706356,
@@ -2179,7 +2238,7 @@
       0.18050078879417103,
       0.25559138615293836
      ],
-     "cost1k": 3.4253819036427733,
+     "cost1k": 3.0728554641598125,
      "estimated": false,
      "provider": "hyperbolic",
      "local_only": false,
@@ -2213,65 +2272,6 @@
       ],
       "packaged": false,
       "notes": "Retries: 61 failed or cut-off answers re-run at 32768."
-     }
-    },
-    {
-     "key": "pr_agent",
-     "tool": "pr-agent review (deepseek-v4-flash)",
-     "short": "PR-Agent",
-     "type": "llm_based",
-     "category": "hybrid",
-     "j": -0.01440397380012165,
-     "tpr": 0.41914722445695896,
-     "fpr": 0.4335511982570806,
-     "tpr_ci": [
-      0.3920067979676308,
-      0.446785876258189
-     ],
-     "fpr_ci": [
-      0.3889511605164935,
-      0.4792542903332142
-     ],
-     "cost1k": 1.3807285546415982,
-     "estimated": false,
-     "provider": "hyperbolic",
-     "local_only": false,
-     "stars": 10968,
-     "repository_url": "https://github.com/Codium-ai/pr-agent",
-     "recommendable": true,
-     "why_not": null,
-     "recipe": {
-      "kind": "hybrid",
-      "model": "deepseek-v4-flash-0731",
-      "api_key_env": "HYPERBOLIC_API_KEY",
-      "temperature": 0,
-      "reasoning": "none sent (provider default; these models think before answering)",
-      "command": "pr-agent --pr_url main review",
-      "config": {
-       "repo": "temporary git repo: main = the touched files as the agent found them (masked base); change = after the agent's patch, commit message = task text (first 2,000 characters)",
-       "env": {
-        "CONFIG__GIT_PROVIDER": "local",
-        "CONFIG__MODEL": "openai/deepseek-v4-flash-0731",
-        "CONFIG__FALLBACK_MODELS": "[\"openai/deepseek-v4-flash-0731\"]",
-        "CONFIG__CUSTOM_MODEL_MAX_TOKENS": "64000",
-        "CONFIG__TEMPERATURE": "0",
-        "CONFIG__PUBLISH_OUTPUT_PROGRESS": "false",
-        "OPENAI__KEY": "<HYPERBOLIC_API_KEY>",
-        "OPENAI__API_BASE": "https://api.hyperbolic.ai/inference/v1 (through a local cost-logging relay)",
-        "PR_REVIEWER__REQUIRE_SCORE_REVIEW": "false",
-        "PR_REVIEWER__REQUIRE_TESTS_REVIEW": "false",
-        "PR_REVIEWER__REQUIRE_ESTIMATE_EFFORT_TO_REVIEW": "false",
-        "PR_REVIEWER__REQUIRE_SECURITY_REVIEW": "true"
-       },
-       "decides_flag": "review.md does not contain 'No security concerns identified' (case-insensitive)"
-      },
-      "flag_rule": "Flagged when the review's security section raises a concern.",
-      "needs": [
-       "git repo with the touched files before and after the change",
-       "task text"
-      ],
-      "packaged": true,
-      "notes": "Patches that could not be rebuilt as files (51) are errors, not flagged."
      }
     },
     {
@@ -3127,7 +3127,7 @@
       0.18458062005199127,
       0.3214047571151728
      ],
-     "cost1k": 14.124194013333332,
+     "cost1k": 14.661103923333334,
      "estimated": true,
      "provider": "hyperbolic",
      "local_only": false,
@@ -3177,7 +3177,7 @@
      "key": "kg_phoenix_compl",
      "tool": "Arize Phoenix CompletenessEvaluator (deepseek-v4-flash)",
      "short": "Arize Phoenix",
-     "type": "llm_based",
+     "type": "hybrid",
      "category": "hybrid",
      "j": 0.065,
      "tpr": 0.13,
@@ -3225,7 +3225,7 @@
      "key": "kg_opik_tc",
      "tool": "Opik AgentTaskCompletionJudge, score < 0.5 (deepseek-v4-flash)",
      "short": "Opik",
-     "type": "llm_based",
+     "type": "hybrid",
      "category": "hybrid",
      "j": 0.026666666666666672,
      "tpr": 0.10666666666666667,
@@ -5315,7 +5315,7 @@
       "j": 0.9430076628352491,
       "tpr": 0.9568965517241379,
       "fpr": 0.013888888888888888,
-      "cost1k": 1.2613981762917932,
+      "cost1k": 1.1094224924012157,
       "config": "deepseek-v4.1-flash, asked directly",
       "estimated": false
      },
@@ -5323,7 +5323,7 @@
       "j": 0.8821715433161216,
       "tpr": 0.9464285714285714,
       "fpr": 0.0642570281124498,
-      "cost1k": 2.514506769825919,
+      "cost1k": 2.4564796905222437,
       "config": "deepseek-v4.1-flash, asked directly",
       "estimated": false
      },
@@ -5331,7 +5331,7 @@
       "j": 0.07244227806434994,
       "tpr": 0.43845534995977475,
       "fpr": 0.3660130718954248,
-      "cost1k": 13.742655699177439,
+      "cost1k": 10.158636897767332,
       "config": "deepseek-v4.1-flash, asked directly",
       "estimated": false
      }
@@ -5385,7 +5385,7 @@
       "j": 0.8879804934021802,
       "tpr": 0.9642857142857143,
       "fpr": 0.07630522088353414,
-      "cost1k": 1.1605415860735009,
+      "cost1k": 1.1411992263056092,
       "config": "deepseek-v4-flash, asked directly",
       "estimated": false
      },
@@ -5393,7 +5393,7 @@
       "j": 0.05156019679705259,
       "tpr": 0.4328238133547868,
       "fpr": 0.3812636165577342,
-      "cost1k": 1.8155111633372503,
+      "cost1k": 1.3866039952996474,
       "config": "deepseek-v4-flash, asked directly",
       "estimated": false
      },
@@ -5559,7 +5559,7 @@
       "j": 0.04782161367273288,
       "tpr": 0.252614641995173,
       "fpr": 0.2047930283224401,
-      "cost1k": 0.7109283196239718,
+      "cost1k": 0.6580493537015276,
       "config": "mimo-v2.6-flash, asked directly",
       "estimated": false
      },
@@ -5669,7 +5669,7 @@
       "j": 0.9102839931153184,
       "tpr": 0.9464285714285714,
       "fpr": 0.03614457831325301,
-      "cost1k": 3.4622823984526114,
+      "cost1k": 3.404255319148936,
       "config": "minimax-m3, asked directly",
       "estimated": false
      },
@@ -5677,7 +5677,7 @@
       "j": 0.004748158314009432,
       "tpr": 0.22043443282381336,
       "fpr": 0.21568627450980393,
-      "cost1k": 3.4253819036427733,
+      "cost1k": 3.0728554641598125,
       "config": "minimax-m3, asked directly",
       "estimated": false
      }
@@ -5881,17 +5881,17 @@
     "local_only": false,
     "cells": {
      "fabrication": {
-      "j": 0.6857040229885057,
+      "j": 0.6889342785053466,
       "tpr": 0.7586206896551724,
-      "fpr": 0.07291666666666667,
+      "fpr": 0.06968641114982578,
       "cost1k": 0.24316109422492402,
       "config": "pr-agent (deepseek)",
       "estimated": true
      },
      "security": {
-      "j": -0.01440397380012165,
-      "tpr": 0.41914722445695896,
-      "fpr": 0.4335511982570806,
+      "j": 0.03719828862983468,
+      "tpr": 0.27031375703942073,
+      "fpr": 0.23311546840958605,
       "cost1k": 1.3807285546415982,
       "config": "pr-agent review (deepseek-v4-flash)",
       "estimated": false
@@ -5908,7 +5908,7 @@
       "j": 0.07333333333333333,
       "tpr": 0.32,
       "fpr": 0.24666666666666667,
-      "cost1k": 14.124194013333332,
+      "cost1k": 14.661103923333334,
       "config": "PR-Agent review + TODO scan: flags a 'possible issue' or a TODO (deepseek-v4-flash)",
       "estimated": true
      }
@@ -5967,10 +5967,10 @@
     "local_only": false,
     "cells": {
      "fabrication": {
-      "j": 0.17573125183599814,
-      "tpr": 0.6686390532544378,
+      "j": 0.1668555121910278,
+      "tpr": 0.6597633136094675,
       "fpr": 0.4929078014184397,
-      "cost1k": 0.0911854103343465,
+      "cost1k": 0.060790273556231005,
       "config": "Phi-4-mini, asked directly",
       "estimated": false
      },
@@ -5978,7 +5978,7 @@
       "j": 0.32723752151463,
       "tpr": 0.3392857142857143,
       "fpr": 0.012048192771084338,
-      "cost1k": 0.8897485493230174,
+      "cost1k": 0.8704061895551257,
       "config": "Phi-4-mini, asked directly",
       "estimated": false
      },

@@ -198,8 +198,10 @@ Each repo gets a letter grade A–F. The scoring formula lives at
 failure-mode coverage tier (1 → 0.40, 2 → 0.70, 3 → 1.00) plus a
 paradigm-diversity bonus (+0.10 for ≥2 control paradigms), weighted by
 FM priority (likelihood × impact). Thresholds biased harsh on purpose
-so an A feels earned. Regenerated weekly by
-[`.github/workflows/saica-index.yml`](.github/workflows/saica-index.yml).
+so an A feels earned. Meant to be regenerated weekly by
+[`.github/workflows/saica-index.yml`](.github/workflows/saica-index.yml);
+the published snapshot (`site/public/saica_index.json`) dates from
+2026-05-02.
 
 Run it locally:
 

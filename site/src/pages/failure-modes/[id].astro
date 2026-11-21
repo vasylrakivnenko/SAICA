@@ -234,7 +234,7 @@ const conf = (x: string) => (x === 'exact' ? 'chip-accent' : 'chip');
           </li>
         ))}
       </ul>
-      <p class="mt-3 font-sans text-sm"><a href="/failure-modes/">All 11 AI coding agent failure modes →</a> · <a href={`/glossary/#${fmSlug(fm.id)}`}>Glossary</a></p>
+      <p class="mt-3 font-sans text-sm"><a href="/failure-modes/">All {Object.keys(graph.failureModes).length} AI coding agent failure modes →</a> · <a href={`/glossary/#${fmSlug(fm.id)}`}>Glossary</a></p>
     </section>
   )}
 

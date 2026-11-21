@@ -1,6 +1,6 @@
 # Test manipulation: the reviewer prompt we benchmarked
 
-Mode `test-manipulation` · run 2026-11-19 · source `bench/test_manipulation/run_tools.py` (constant `PLAIN_PROMPT`, copied verbatim) · 56 test edits vs 249 clean (Patronus TRACE (PatronusAI/trace-dataset)).
+Mode `test-manipulation` · run 2026-11-19 · source `bench/test_manipulation/run_tools.py` (constant `PLAIN_PROMPT`, copied verbatim) · 56 sessions that game the tests vs 249 clean (Patronus TRACE (PatronusAI/trace-dataset)).
 
 One chat call per sample: a single `user` message holding the filled-in template, no system message, one run per model.
 

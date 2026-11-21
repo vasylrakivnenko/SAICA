@@ -45,10 +45,11 @@ def _load(kind: str, filename: str) -> dict[str, Any]:
 
 
 def test_parse_sample_tool() -> None:
-    # pre-commit is prevention-paradigm and declares scope_creep coverage —
-    # same shape as the original sample (claude-code, removed in v0.3.1).
-    tool = Tool.model_validate(_load("tools", "pre-commit.yml"))
-    assert tool.id == "pre-commit"
+    # nono is prevention-paradigm and declares scope_creep coverage — same
+    # shape as the earlier samples (claude-code, removed in v0.3.1;
+    # pre-commit, removed in the 2026-11 failure-mode tag audit).
+    tool = Tool.model_validate(_load("tools", "nono.yml"))
+    assert tool.id == "nono"
     assert tool.control_paradigm.value == "prevention"
     assert "scope_creep" in [fm.value for fm in tool.addresses_failure_modes]
 

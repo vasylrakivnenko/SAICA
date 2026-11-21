@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 
 from pipeline.discovery.novelty import (
     CanonicalIds,
@@ -28,16 +27,12 @@ from pipeline.discovery.novelty import (
 
 
 def test_extract_github_from_source_url() -> None:
-    ids = extract_canonical_ids(
-        {"source_url": "https://github.com/Foo-Org/Bar-Repo"}
-    )
+    ids = extract_canonical_ids({"source_url": "https://github.com/Foo-Org/Bar-Repo"})
     assert ids.github == "foo-org/bar-repo"
 
 
 def test_extract_github_strips_dot_git() -> None:
-    ids = extract_canonical_ids(
-        {"source_url": "https://github.com/x/y.git"}
-    )
+    ids = extract_canonical_ids({"source_url": "https://github.com/x/y.git"})
     assert ids.github == "x/y"
 
 
@@ -54,9 +49,7 @@ def test_extract_arxiv_id_from_field() -> None:
 
 
 def test_extract_arxiv_id_from_summary() -> None:
-    ids = extract_canonical_ids(
-        {"summary": "See arXiv:2401.00001 for details."}
-    )
+    ids = extract_canonical_ids({"summary": "See arXiv:2401.00001 for details."})
     assert ids.arxiv == "2401.00001"
 
 
@@ -158,9 +151,9 @@ def test_drop_when_repeated_known_evidence() -> None:
     decision = classify(
         {
             "source_url": "https://github.com/foo-org/foo",
-            "paper_citations": ["paper-a"],   # already in KG
+            "paper_citations": ["paper-a"],  # already in KG
             "failure_mode_hits": ["fabrication"],  # already addresses
-            "last_updated": "2026-01-01",   # same date
+            "last_updated": "2026-01-01",  # same date
         },
         kg_index=_idx_with_one_tool(),
     )
@@ -211,7 +204,12 @@ def test_real_kg_continues_genuinely_new() -> None:
 
 def test_build_kg_index_reads_real_corpus() -> None:
     idx = build_kg_index()
-    # Sanity: index has > 50 tools and indexes by github + slug.
-    assert len(idx.tools) > 50
+    # Sanity: the index covers every tool YAML and indexes by github + slug.
+    # (Compared against the corpus, not a fixed floor: the 2026-11 tag audit
+    # cut data/tools/ from >100 to 49 and broke the old "> 50" check.)
+    tools_dir = Path(__file__).resolve().parents[3] / "data" / "tools"
+    n_yml = len(list(tools_dir.glob("*.yml")))
+    assert n_yml >= 30
+    assert len(idx.tools) == n_yml
     assert "semgrep/semgrep" in idx.by_github
     assert "semgrep" in idx.by_slug

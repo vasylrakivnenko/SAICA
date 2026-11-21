@@ -67,7 +67,7 @@ const TAKEAWAYS: [string, string][] = [
 
   <section class="mt-10">
     <h2 class="!mt-0">UMAP — categories grouped into cluster regions</h2>
-    <div class="grid grid-cols-[14rem_1fr] gap-4" id="ts-root">
+    <div class="grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)] gap-4" id="ts-root">
       <aside class="ui text-sm">
         <div class="mb-4">
           <div class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-2">Color by</div>
@@ -87,7 +87,7 @@ const TAKEAWAYS: [string, string][] = [
         <div class="text-xs text-ink-faint" id="ts-count"></div>
       </aside>
 
-      <div class="relative border border-ink/10 rounded bg-white" style="min-height: 520px; height: 72vh">
+      <div class="relative border border-ink/10 rounded bg-white overflow-x-auto" style="min-height: 520px; height: 72vh">
         <noscript>
           <div class="p-3 text-sm">
             The cluster-study explorer requires JavaScript. Raw data:

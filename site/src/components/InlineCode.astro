@@ -1,0 +1,10 @@
+---
+// Plain catalog text whose `backtick` spans render as <code> (the KG YAML uses Markdown-style inline code;
+// printed as-is the backticks showed up literally, e.g. "`rm -rf`").
+interface Props {
+  text?: string | null;
+}
+const parts = (Astro.props.text ?? '').split(/`([^`\n]+)`/);
+---
+
+{parts.map((p, i) => (i % 2 ? <code class="text-[0.9em]">{p}</code> : p))}

@@ -163,7 +163,7 @@ function formatStars(n: number | undefined): string {
             )}
             {maturityTools[t.id] && (
               <span
-                class={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold ${TIER_COLORS[maturityTools[t.id].tier] ?? 'bg-stone-300'}`}
+                class={`inline-flex items-center rounded px-1.5 py-0.5 font-sans text-[10px] font-bold ${TIER_COLORS[maturityTools[t.id].tier] ?? 'bg-stone-300'}`}
                 title={`Maturity tier${maturityTools[t.id].is_override ? ' (curator override)' : ''}`}
               >
                 {maturityTools[t.id].tier}

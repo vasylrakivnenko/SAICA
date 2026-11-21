@@ -63,9 +63,7 @@ def test_top_facets_lands_in_1A() -> None:
 def test_citation_count_caps_at_four() -> None:
     """Adding a 5th paper adds nothing — cap = 4."""
     s4 = compute_maturity(_tool(cited_in=["a", "b", "c", "d"]), today=_today())
-    s5 = compute_maturity(
-        _tool(cited_in=["a", "b", "c", "d", "e"]), today=_today()
-    )
+    s5 = compute_maturity(_tool(cited_in=["a", "b", "c", "d", "e"]), today=_today())
     assert s4.facets["paper_citations"] == s5.facets["paper_citations"]
 
 
@@ -119,7 +117,9 @@ def test_status_caps_apply(status: str) -> None:
 
 
 def test_stable_status_does_not_cap() -> None:
-    s = compute_maturity(_tool(stars=50000, cited_in=["a", "b", "c", "d"]), today=_today())
+    s = compute_maturity(
+        _tool(stars=50000, cited_in=["a", "b", "c", "d"]), today=_today()
+    )
     assert s.tier in {"1A", "1B"}
     assert s.notes == []
 
@@ -172,7 +172,9 @@ def test_real_corpus_distribution_is_not_pathological() -> None:
         counts[s.tier] += 1
 
     total = sum(counts.values())
-    assert total > 50, "expected > 50 tools in corpus"
+    # 49 tools after the 2026-11 tag audit; keep a floor so the skew check
+    # below stays statistically meaningful.
+    assert total >= 30, "expected >= 30 tools in corpus"
     # No single tier owns more than 70% of the distribution.
     assert all(
         c / total < 0.70 for c in counts.values()

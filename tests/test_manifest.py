@@ -57,9 +57,9 @@ def test_manifest_includes_canonical_urls_for_tools() -> None:
 
     # Spot-check the GitHub canonicalization path: semgrep lives on GitHub.
     assert tools["semgrep"] == "https://github.com/semgrep/semgrep"
-    # Spot-check the documentation-url fallback: braintrust is not on GitHub.
-    assert tools["braintrust"].startswith("http")
-    assert "github.com" not in tools["braintrust"]
+    # Spot-check the documentation-url fallback: modal is not on GitHub.
+    assert tools["modal"].startswith("http")
+    assert "github.com" not in tools["modal"]
 
 
 # ---------------------------------------------------------------------------

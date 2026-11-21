@@ -26,8 +26,10 @@
 - LLM: if `HYPERBOLIC_API_KEY` is set (Replit Secret), the backend uses
   Hyperbolic's OpenAI-compatible API with `ASK_MODEL` (default
   `deepseek-v4.1-flash`). Explicit `AZURE_KIMI_*` variables take precedence.
-- Retrieval uses a local sentence-transformers index in `.cache/embeddings/`,
-  built automatically on startup when missing or older than `data/`.
+- Retrieval uses a local sentence-transformers index in `.cache/embeddings/`.
+  The deployment build pre-builds it; at runtime it is (re)built lazily on the
+  first Ask request when missing or older than `data/`, never before the port
+  opens, so health checks are not blocked.
 - Python deps: `pip install torch --index-url https://download.pytorch.org/whl/cpu`
   then `pip install -r pipeline/requirements-web.txt`.
 - `SAICA_ASK_BUDGET` caps LLM calls per server process (default 50; resets on restart).

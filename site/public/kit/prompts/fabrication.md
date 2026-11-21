@@ -1,6 +1,6 @@
 # Fabrication: the reviewer prompt we benchmarked
 
-Mode `fabrication` · run 2026-11-19 · source `bench/fabrication/run_tools.py` (constant `PLAIN_PROMPT`, copied verbatim) · 348 fake code vs 288 clean (Delulu (microsoft/delulu), Python rows).
+Mode `fabrication` · run 2026-11-19 · source `bench/fabrication/run_tools.py` (constant `PLAIN_PROMPT`, copied verbatim) · 348 fabricated completions vs 288 clean (Delulu (microsoft/delulu), Python rows).
 
 One chat call per sample: a single `user` message holding the filled-in template, no system message, one run per model.
 

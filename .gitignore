@@ -41,3 +41,7 @@ research/backups/
 .idea/
 .vscode/
 *.log
+
+# Bulk README dumps written by the research/mining runs (~90 MB, regenerable).
+# Far above check-added-large-files' 2 MB limit; never commit.
+research/mining/*.jsonl

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import InlineCode from '../../components/InlineCode.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph, paperLabel } from '../../lib/data.ts';
 import { breadcrumbs, clip, fmUrl, toolUrl } from '../../lib/seo.ts';
@@ -43,7 +44,7 @@ function prettyDomain(url: string): string {
     <a href="/incidents/" class="no-underline hover:underline">Incidents</a>
   </p>
   <h1 class="mt-1">{incident.title}</h1>
-  {incident.tagline && <p class="mt-2 text-lg text-ink-muted">{incident.tagline}</p>}
+  {incident.tagline && <p class="mt-2 text-lg text-ink-muted"><InlineCode text={incident.tagline} /></p>}
 
   <div class="mt-4 flex flex-wrap gap-2">
     <span class="chip-accent" title="Incident date">{incident.incident_date}</span>
@@ -54,7 +55,7 @@ function prettyDomain(url: string): string {
   <section class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
     <div>
       <h2 class="!mt-0">Description</h2>
-      <p class="whitespace-pre-line leading-7">{incident.description}</p>
+      <p class="whitespace-pre-line leading-7"><InlineCode text={incident.description} /></p>
 
       {incident.exhibited_failure_modes.length > 0 && (
         <>
@@ -125,7 +126,7 @@ function prettyDomain(url: string): string {
       {incident.notes && (
         <>
           <h2>Notes</h2>
-          <p class="whitespace-pre-line leading-7">{incident.notes}</p>
+          <p class="whitespace-pre-line leading-7"><InlineCode text={incident.notes} /></p>
         </>
       )}
 

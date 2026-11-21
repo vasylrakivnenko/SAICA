@@ -15,11 +15,11 @@
    "n": 658,
    "n_pos": 348,
    "n_neg": 288,
-   "pos_label": "fake code",
+   "pos_label": "fabricated completions",
    "dataset": "Delulu (microsoft/delulu), Python rows",
    "summary": "Code that calls functions, methods or packages that don't exist.",
    "setup": [
-    "348 fabricated completions (fake imports, fake methods, undefined names), written by Claude Sonnet 4.5 and verified to fail; 288 clean originals of the same code.",
+    "348 fabricated completions (fake imports, fake methods, undefined names), written by Claude Sonnet 4.5 and verified to fail; 288 clean originals of the same code. Another 22 'wrong parameter' completions were reviewed too (658 reviews per tool, the basis of the cost) but are not scored.",
     "Static tools see the whole file with its 99 packages installed. AI tools see a diff with 15 lines of context.",
     "Static tools count only findings that a symbol doesn't exist. A flag on a clean original is a false positive.",
     "Temperature 0 (gpt-6-luna: its default, no temperature sent), one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
@@ -172,16 +172,16 @@
      "key": "pr_agent",
      "tool": "pr-agent (deepseek)",
      "type": "llm_based",
-     "j": 0.6857040229885057,
+     "j": 0.6889342785053466,
      "catch": 0.7586206896551724,
      "catch_ci": [
       0.7109937174595616,
       0.8006001361381936
      ],
-     "fa": 0.07291666666666667,
+     "fa": 0.06968641114982578,
      "fa_ci": [
-      0.048183230292887264,
-      0.10889375941659901
+      0.04556050701150753,
+      0.10517996477794764
      ],
      "cost": 0.16,
      "cost_note": "about $0.07 logged plus $0.09 estimated for samples run before logging",
@@ -227,7 +227,7 @@
       0.005413932945500996,
       0.03516150249619066
      ],
-     "cost": 0.83,
+     "cost": 0.73,
      "cost_note": ""
     },
     {
@@ -306,18 +306,18 @@
      "key": "plain_llm_phi",
      "tool": "Phi-4-mini, asked directly",
      "type": "baseline_model",
-     "j": 0.17573125183599814,
-     "catch": 0.6686390532544378,
+     "j": 0.1668555121910278,
+     "catch": 0.6597633136094675,
      "catch_ci": [
-      0.6168091142413743,
-      0.7166786765950832
+      0.6077098588021174,
+      0.7082259430429478
      ],
      "fa": 0.4929078014184397,
      "fa_ci": [
       0.4350442021054147,
       0.5509620335159924
      ],
-     "cost": 0.06,
+     "cost": 0.04,
      "cost_note": "Azure list price x tokens; 17 answers unreadable (Azure timeouts), left out of the rates"
     }
    ]
@@ -328,7 +328,7 @@
    "n": 517,
    "n_pos": 56,
    "n_neg": 249,
-   "pos_label": "test edits",
+   "pos_label": "sessions that game the tests",
    "dataset": "Patronus TRACE (PatronusAI/trace-dataset)",
    "summary": "The agent edits, weakens or skips tests so failures disappear instead of fixing the code.",
    "setup": [
@@ -359,7 +359,7 @@
       0.019130043142007568,
       0.06725447586119442
      ],
-     "cost": 1.79,
+     "cost": 1.76,
      "cost_note": ""
     },
     {
@@ -395,7 +395,7 @@
       0.04939102679407255,
       0.11609439965473968
      ],
-     "cost": 0.6,
+     "cost": 0.59,
      "cost_note": ""
     },
     {
@@ -460,16 +460,16 @@
      "key": "rule_test_edit",
      "tool": "Rule: agent wrote to a test file",
      "type": "baseline_rule",
-     "j": 0.4283562822719449,
-     "catch": 0.9464285714285714,
+     "j": 0.442627653471027,
+     "catch": 0.9285714285714286,
      "catch_ci": [
-      0.8539246046357077,
-      0.9816145520713321
+      0.830243171685138,
+      0.9718744187536204
      ],
-     "fa": 0.5180722891566265,
+     "fa": 0.4859437751004016,
      "fa_ci": [
-      0.4562059953722999,
-      0.5793894129782247
+      0.4245499613393189,
+      0.5477647210547175
      ],
      "cost": 0.0,
      "cost_note": ""
@@ -478,16 +478,16 @@
      "key": "rule_test_weaken",
      "tool": "Rule: test edit drops asserts or adds skip",
      "type": "baseline_rule",
-     "j": 0.37593230063109584,
+     "j": 0.37994836488812395,
      "catch": 0.4642857142857143,
      "catch_ci": [
       0.34019643403583766,
       0.5929604334275992
      ],
-     "fa": 0.08835341365461848,
+     "fa": 0.08433734939759036,
      "fa_ci": [
-      0.05907017297687691,
-      0.13014552570561835
+      0.0558216116970429,
+      0.12548399624089135
      ],
      "cost": 0.0,
      "cost_note": ""
@@ -507,7 +507,7 @@
       0.03993570337832074,
       0.10181945083680839
      ],
-     "cost": 1.3,
+     "cost": 1.27,
      "cost_note": ""
     },
     {
@@ -597,7 +597,7 @@
       0.004105701869888305,
       0.03481827266594757
      ],
-     "cost": 0.46,
+     "cost": 0.45,
      "cost_note": "Azure list price x tokens; 14 answers unreadable (Azure timeouts), counted as not flagged"
     }
    ]
@@ -623,7 +623,7 @@
     "Label check: Opus (medium effort), shown the CWE, the real CVE fix and the security test, agreed with 78% of a sample of 'vulnerable' labels and 80% of 'secure' ones. About 20% label noise each way shrinks every J by about 40%.",
     "Without such hints even Opus at medium effort tells apart only 6 of 50 vulnerable/fixed versions of the same code (J +10%): these flaws are mostly missing checks that don't show in a diff.",
     "Dropping tasks with over-strict security tests (exact error-message checks, or no agent ever passing) raises J by only 1\u20135 points.",
-    "Unreadable answers (no verdict) count as not flagged: ultramarine 383, promptfoo 322, deepseek-v4.1 169 of 1,702.",
+    "Unreadable answers (no verdict) count as not flagged: ultramarine 383, pr-agent 328 (reviews that failed to run), promptfoo 322, deepseek-v4.1 169 of 1,702.",
     "51 patches could not be rebuilt as files (binary or missing vendored files); the static tools count them as not flagged."
    ],
    "rows": [
@@ -642,7 +642,7 @@
       0.32322484405491625,
       0.4110254912649859
      ],
-     "cost": 23.39,
+     "cost": 17.29,
      "cost_note": "API-reported, including re-runs of cut-off answers"
     },
     {
@@ -660,7 +660,7 @@
       0.33798896269227446,
       0.42650930194080966
      ],
-     "cost": 3.09,
+     "cost": 2.36,
      "cost_note": "API-reported, including re-runs of cut-off answers"
     },
     {
@@ -678,7 +678,7 @@
       0.1703964457135864,
       0.2440900654383931
      ],
-     "cost": 1.21,
+     "cost": 1.12,
      "cost_note": "API-reported, including re-runs"
     },
     {
@@ -696,7 +696,7 @@
       0.18050078879417103,
       0.25559138615293836
      ],
-     "cost": 5.83,
+     "cost": 5.23,
      "cost_note": "API-reported, including re-runs"
     },
     {
@@ -810,7 +810,7 @@
     {
      "key": "giskard",
      "tool": "giskard Conformity check (deepseek-v4-flash judge)",
-     "type": "llm_based",
+     "type": "hybrid",
      "j": 0.06054471489140928,
      "catch": 0.4505229283990346,
      "catch_ci": [
@@ -828,7 +828,7 @@
     {
      "key": "promptfoo",
      "tool": "promptfoo llm-rubric (deepseek-v4-flash judge)",
-     "type": "llm_based",
+     "type": "hybrid",
      "j": 0.021488527474992858,
      "catch": 0.3700724054706356,
      "catch_ci": [
@@ -851,16 +851,16 @@
      "key": "pr_agent",
      "tool": "pr-agent review (deepseek-v4-flash)",
      "type": "llm_based",
-     "j": -0.01440397380012165,
-     "catch": 0.41914722445695896,
+     "j": 0.03719828862983468,
+     "catch": 0.27031375703942073,
      "catch_ci": [
-      0.3920067979676308,
-      0.446785876258189
+      0.24635925575231082,
+      0.2956836148095953
      ],
-     "fa": 0.4335511982570806,
+     "fa": 0.23311546840958605,
      "fa_ci": [
-      0.3889511605164935,
-      0.4792542903332142
+      0.19674661218592637,
+      0.27391462483339085
      ],
      "cost": 2.35,
      "cost_note": "API-reported deepseek cost",
@@ -933,7 +933,8 @@
     "Short, self-contained functions from two famous public problem sets: models may know the right answers, so these scores are an upper bound for real agent code.",
     "The correct functions are reference solutions, the wrong ones model-written: style differs between the two classes.",
     "Type checkers and linters look for a different kind of bug; they are here as a floor, not as fair competitors.",
-    "KG tools run through their own built-in check, with deepseek-v4-flash as their model: uqlm re-solves the task 5 times and flags code that disagrees with most re-solves; it was run on the first 300 + 300 functions only (it makes 10 model calls per review), and 62 of its answers were unreadable (counted as not flagged)."
+    "KG tools run through their own built-in check, with deepseek-v4-flash as their model: uqlm re-solves the task 5 times and flags code that disagrees with most re-solves; it was run on the first 300 + 300 functions only (it makes 10 model calls per review), and 62 of its answers were unreadable (counted as not flagged).",
+    "Unreadable answers count as not flagged: Phi-4-mini 314, deepseek-v4-flash 26, mimo 14 of 2,440."
    ],
    "rows": [
     {
@@ -1270,7 +1271,7 @@
     {
      "key": "kg_phoenix_compl",
      "tool": "Arize Phoenix CompletenessEvaluator (deepseek-v4-flash)",
-     "type": "llm_based",
+     "type": "hybrid",
      "j": 0.065,
      "catch": 0.13,
      "catch_ci": [
@@ -1292,7 +1293,7 @@
     {
      "key": "kg_opik_tc",
      "tool": "Opik AgentTaskCompletionJudge, score < 0.5 (deepseek-v4-flash)",
-     "type": "llm_based",
+     "type": "hybrid",
      "j": 0.026666666666666672,
      "catch": 0.10666666666666667,
      "catch_ci": [
@@ -1348,8 +1349,8 @@
       0.18458062005199127,
       0.3214047571151728
      ],
-     "cost": 16.949032816,
-     "cost_note": "estimated: run on the first 150 + 150 samples only (our cost $4.24), scaled to all 1200; rates are on those 300. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
+     "cost": 17.593324708,
+     "cost_note": "estimated: run on the first 150 + 150 samples only (our cost $4.40), scaled to all 1200; rates are on those 300. API-reported (Hyperbolic) for the tool's deepseek-v4-flash calls, logged per tool by kgtools/relay.py",
      "repository_url": "https://github.com/Codium-ai/pr-agent",
      "stars": 10968,
      "stars_updated_at": "2026-04-23",
@@ -1398,7 +1399,8 @@
     "Synthetic: the unrequested changes were written by a model on purpose. Natural scope creep may be subtler or messier.",
     "The 'clean' side was filtered to near-minimal patches, but some may still hold small unrequested edits; that would inflate FPR.",
     "All patches come from one agent (Qwen3-Coder-480B with OpenHands).",
-    "None of the KG's scope-creep tools can be run on a finished patch: 20 of 22 prevent it during the run (approval gates, allow-lists, sandboxes); the other 2 are configurable LLM judges."
+    "None of the KG's scope-creep tools has a built-in check for a finished patch: 20 of 22 prevent it during the run (approval gates, allow-lists, sandboxes); the other 2 (promptfoo, DeepEval) are general LLM judges that would only run a rubric we wrote, which the models asked directly already measure.",
+    "Unreadable answers count as not flagged: Phi-4-mini 34, deepseek-v4-flash 6, mimo 3 of 350."
    ],
    "rows": [
     {
@@ -1521,16 +1523,17 @@
    "dataset": "Wang et al. (ICSE'25) deprecated-API map (65 pairs, 8 libraries) + solutions written by 5 models, deprecated call swapped in",
    "summary": "The code uses a deprecated or removed library API.",
    "setup": [
-    "155 solutions with the modern API swapped back to its deprecated twin vs 155 untouched solutions, all written by the same 5 models (gpt-6-luna, grok-4.1-fast, Phi-4-mini, deepseek-v4-flash, mimo) for the same tasks, across numpy, pandas, scipy, scikit-learn, seaborn, PyTorch, TensorFlow and transformers.",
+    "151 solutions with the modern API swapped back to its deprecated twin vs 151 untouched solutions, all written by the same 5 models (gpt-6-luna, grok-4.1-fast, Phi-4-mini, deepseek-v4-flash, mimo) for the same tasks, across numpy, pandas, scipy, scikit-learn, seaborn, PyTorch, TensorFlow and transformers.",
     "The swap is an automatic code edit (imports, aliases, dotted paths, method and class names), kept only if the result uses the deprecated API and nothing else from the map. Run with the latest libraries, 77 swapped solutions fail on load (ImportError, DeprecationWarning, ...) and 129 of 131 untouched ones run clean (TensorFlow not checked).",
-    "Plus 4 hand-written pairs for LLM SDKs. Anthropic: a call that names Claude 3.5 Sonnet (retired Oct 28, 2025) and passes temperature (removed from messages.create in SDK 1.x) through a settings object, and a modern streaming call that still names the retired model. Google: a streaming tutor chatbot on the legacy google-generativeai SDK (support ended Nov 30, 2025; imported as `from google import generativeai as genai`) with gemini-pro, and the same chatbot on the current google-genai SDK but still naming gemini-pro. Clean twins use claude-sonnet-5-5 / gemini-3.8-flash on the current SDKs.",
+    "Plus 4 hand-written pairs for LLM SDKs (155 + 155 samples in all). Anthropic: a call that names Claude 3.5 Sonnet (retired Oct 28, 2025) and passes temperature (removed from messages.create in SDK 1.x) through a settings object, and a modern streaming call that still names the retired model. Google: a streaming tutor chatbot on the legacy google-generativeai SDK (support ended Nov 30, 2025; imported as `from google import generativeai as genai`) with gemini-pro, and the same chatbot on the current google-genai SDK but still naming gemini-pro. Clean twins use claude-sonnet-5-5 / gemini-3.8-flash on the current SDKs.",
     "Reviewers see the task and the code and are told to assume the latest library versions. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20."
    ],
    "caveats": [
     "The LLM-SDK pairs are the hard ones: only the legacy Google SDK was caught (gpt-6-luna and mimo, and pyright with the current google-genai installed). Nobody caught a retired model ID inside otherwise current code (Claude 3.5 Sonnet, gemini-pro), nor temperature hidden in a settings object; grok flagged all eight samples, clean twins included. Retirements newer than a model's training need current documentation.",
     "Synthetic: the deprecated calls were swapped in; models writing freely today rarely use these APIs (49 of 956 solutions).",
     "53 positives use APIs that are deprecated but still present (mostly PyTorch); on removed APIs only, J is about the same for the top three.",
-    "The KG's type checkers were run with the latest version of every library installed (numpy 2.5, pandas 3.1, scipy 1.18, scikit-learn 1.9, PyTorch 2.15, transformers 5.23, current Anthropic and Google SDKs): they catch removed APIs (missing attribute or import) and APIs marked @deprecated, so pyright beats most models for free; mypy finds far fewer because many libraries ship no type information for it. They cannot see a retired model name. The other KG tools tagged obsolescence work before code is written or bump dependency versions. The two ruff rule sets are outside baselines and cover only NumPy 2 and Python-syntax upgrades."
+    "The KG's type checkers were run with the latest version of every library installed (numpy 2.5, pandas 3.1, scipy 1.18, scikit-learn 1.9, PyTorch 2.15, transformers 5.23, current Anthropic and Google SDKs): they catch removed APIs (missing attribute or import) and APIs marked @deprecated, so pyright, for free, beats the weaker models (grok, Phi-4-mini) but not the three strongest; mypy finds far fewer because many libraries ship no type information for it. They cannot see a retired model name. The other KG tools tagged obsolescence work before code is written or bump dependency versions. ruff's two rule sets for old APIs cover only NumPy 2 (NPY) and Python-syntax upgrades (UP).",
+    "Unreadable answers count as not flagged: Phi-4-mini 16, deepseek-v4-flash 8, mimo 1 of 310."
    ],
    "rows": [
     {
@@ -1726,7 +1729,8 @@
     "Synthetic: real agents add a malicious dependency rarely; this tests whether a reviewer notices one, not how often agents do it.",
     "Only known-malicious names: a lookup in OSV/OpenSSF would catch every one of them, and none of them can be installed from PyPI today (all removed). The test is what a reviewer reading the diff can tell.",
     "Most KG supply-chain tools (Socket, Snyk, Dependabot, Renovate) need accounts or GitHub and were not run; the two rules are simple stand-ins for name-reputation checks.",
-    "2 pairs (4 patches) were blocked by Hyperbolic's firewall for deepseek and mimo on every try; like other unreadable answers they count as not flagged."
+    "2 pairs (4 patches) were blocked by Hyperbolic's firewall for deepseek and mimo on every try; like other unreadable answers they count as not flagged.",
+    "Unreadable answers count as not flagged: Phi-4-mini 15, deepseek-v4-flash 12, mimo 5 of 296."
    ],
    "rows": [
     {
@@ -2120,14 +2124,14 @@
       "tool": "deepseek-v4-flash, asked directly",
       "short": "deepseek-v4-flash",
       "fa": 0.07630522088353414,
-      "cost1k": 1.1605415860735009
+      "cost1k": 1.1411992263056092
      },
      "security": {
       "j": 0.05156019679705259,
       "tool": "deepseek-v4-flash, asked directly",
       "short": "deepseek-v4-flash",
       "fa": 0.3812636165577342,
-      "cost1k": 1.8155111633372503
+      "cost1k": 1.3866039952996474
      },
      "logic_error": {
       "j": 0.6919074944690266,
@@ -2173,7 +2177,7 @@
      }
     },
     "avg": 0.6725768860866311,
-    "avg_cost1k": 1.0450302332648531,
+    "avg_cost1k": 0.9952247301753538,
     "n_modes": 9
    },
    {
@@ -2199,7 +2203,7 @@
       "tool": "mimo-v2.6-flash, asked directly",
       "short": "mimo-v2.6-flash",
       "fa": 0.2047930283224401,
-      "cost1k": 0.7109283196239718
+      "cost1k": 0.6580493537015276
      },
      "logic_error": {
       "j": 0.7429134402654867,
@@ -2245,7 +2249,7 @@
      }
     },
     "avg": 0.6766669122857643,
-    "avg_cost1k": 0.8596852021218386,
+    "avg_cost1k": 0.8538097614637893,
     "n_modes": 9
    },
    {
@@ -2325,18 +2329,18 @@
     "type": "baseline_model",
     "cells": {
      "fabrication": {
-      "j": 0.17573125183599814,
+      "j": 0.1668555121910278,
       "tool": "Phi-4-mini, asked directly",
       "short": "Phi-4-mini",
       "fa": 0.4929078014184397,
-      "cost1k": 0.0911854103343465
+      "cost1k": 0.060790273556231005
      },
      "test-manipulation": {
       "j": 0.32723752151463,
       "tool": "Phi-4-mini, asked directly",
       "short": "Phi-4-mini",
       "fa": 0.012048192771084338,
-      "cost1k": 0.8897485493230174
+      "cost1k": 0.8704061895551257
      },
      "logic_error": {
       "j": 0.19894220132743362,
@@ -2381,8 +2385,8 @@
       "cost1k": 0.166914
      }
     },
-    "avg": 0.09351076123567938,
-    "avg_cost1k": 0.23415416688851082,
+    "avg": 0.09240129378005808,
+    "avg_cost1k": 0.22793697982025993,
     "n_modes": 8
    },
    {
@@ -2487,17 +2491,17 @@
     "type": "llm_based",
     "cells": {
      "fabrication": {
-      "j": 0.6857040229885057,
+      "j": 0.6889342785053466,
       "tool": "pr-agent (deepseek)",
       "short": "pr-agent",
-      "fa": 0.07291666666666667,
+      "fa": 0.06968641114982578,
       "cost1k": 0.24316109422492402
      },
      "security": {
-      "j": -0.01440397380012165,
+      "j": 0.03719828862983468,
       "tool": "pr-agent review (deepseek-v4-flash)",
       "short": "pr-agent review",
-      "fa": 0.4335511982570806,
+      "fa": 0.23311546840958605,
       "cost1k": 1.3807285546415982
      },
      "logic_error": {
@@ -2512,16 +2516,16 @@
       "tool": "PR-Agent review + TODO scan: flags a 'possible issue' or a TODO (deepseek-v4-flash)",
       "short": "PR-Agent review + TODO scan",
       "fa": 0.24666666666666667,
-      "cost1k": 14.124194013333332
+      "cost1k": 14.661103923333334
      }
     },
-    "avg": 0.25716941910019336,
-    "avg_cost1k": 4.257977263357341,
+    "avg": 0.27087754858689267,
+    "avg_cost1k": 4.392204740857341,
     "n_modes": 4
    },
    {
     "tool": "promptfoo",
-    "type": "llm_based",
+    "type": "hybrid",
     "cells": {
      "test-manipulation": {
       "j": 0.8620912220309811,
@@ -2544,7 +2548,7 @@
    },
    {
     "tool": "giskard",
-    "type": "llm_based",
+    "type": "hybrid",
     "cells": {
      "test-manipulation": {
       "j": 0.8919965576592083,
@@ -2570,10 +2574,10 @@
     "type": "baseline_rule",
     "cells": {
      "test-manipulation": {
-      "j": 0.4283562822719449,
+      "j": 0.442627653471027,
       "tool": "Rule: agent wrote to a test file",
       "short": "a test-edit rule",
-      "fa": 0.5180722891566265,
+      "fa": 0.4859437751004016,
       "cost1k": 0.0
      },
      "incomplete_execution": {
@@ -2605,7 +2609,7 @@
       "cost1k": 0.0
      }
     },
-    "avg": 0.28223882402195655,
+    "avg": 0.285093098261773,
     "avg_cost1k": 0.0,
     "n_modes": 5
    }
@@ -2680,12 +2684,12 @@
     " No model, program or judge we ran reaches J 25% there."
    ],
    [
-    "Free programs pay off where the failure is a checkable fact: pyright on Fabrication (+85%); pyright (latest libraries) on Obsolescence (+57%); a typosquat rule on Supply chain (+84%).",
+    "Free programs and simple rules pay off where the failure is a checkable fact: pyright on Fabrication (+85%); pyright (latest libraries) on Obsolescence (+57%); a typosquat rule on Supply chain (+84%).",
     " The best free option scores J under 15% on Security vulnerability, Logic error, Incomplete execution, Scope creep, Dependency blindness."
    ],
    [
     "Wrapping the model in a review tool did not help: PR-Agent runs on deepseek-v4-flash, yet scores below deepseek-v4-flash asked directly in 4 of 4 modes.",
-    " Fabrication +69% vs +92%; Security vulnerability -1% vs +5%; Logic error +28% vs +69%; Incomplete execution +7% vs +17%."
+    " Fabrication +69% vs +92%; Security vulnerability +4% vs +5%; Logic error +28% vs +69%; Incomplete execution +7% vs +17%."
    ],
    [
     "Small and non-reasoning models fall short: Phi-4-mini scores J under 20% in 7 of 8 modes,",

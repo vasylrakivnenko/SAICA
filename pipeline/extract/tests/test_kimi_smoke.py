@@ -1,10 +1,15 @@
 """Smoke test: verify Azure Kimi auth + endpoint work.
 
-This test is deliberately minimal. It only runs if ``AZURE_KIMI_API_KEY``
-is set; otherwise it's skipped. It sends a 2-word probe ("say hi in 2
-words") through the chat completion endpoint and asserts that we got
-*some* content back. It does NOT exercise the function-calling structured-
-output path — that's covered by the CLI roundtrip tests.
+This test is deliberately minimal. It makes a real (billed) network call,
+so it only runs when explicitly opted into with ``SAICA_LIVE_TESTS=1`` and
+``AZURE_KIMI_API_KEY`` / ``AZURE_KIMI_ENDPOINT`` are set; otherwise it's
+skipped. (Keys alone are not enough: ``pipeline.ask.server`` loads
+``.env.local`` at import time, so collecting ``tests/test_ask_server.py``
+first used to silently turn this into a live call in every local run.)
+It sends a 2-word probe ("say hi in 2 words") through the chat completion
+endpoint and asserts that we got *some* content back. It does NOT exercise
+the function-calling structured-output path — that's covered by the CLI
+roundtrip tests.
 """
 
 from __future__ import annotations
@@ -15,9 +20,11 @@ import pytest
 
 
 pytestmark = pytest.mark.skipif(
-    not os.environ.get("AZURE_KIMI_API_KEY")
+    os.environ.get("SAICA_LIVE_TESTS") != "1"
+    or not os.environ.get("AZURE_KIMI_API_KEY")
     or not os.environ.get("AZURE_KIMI_ENDPOINT"),
-    reason="AZURE_KIMI_API_KEY / AZURE_KIMI_ENDPOINT not set",
+    reason="live test: set SAICA_LIVE_TESTS=1 plus AZURE_KIMI_API_KEY / "
+    "AZURE_KIMI_ENDPOINT to run",
 )
 
 
