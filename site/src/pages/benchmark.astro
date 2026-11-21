@@ -10,14 +10,14 @@ const modes = results.modes;
   <h1>SAICA-Bench</h1>
 
   <h2 class="mt-6">Overview</h2>
-  <p class="mt-2 max-w-3xl">
+  <p class="mt-2 max-w-4xl">
     SAICA-Bench measures how well supervision tools and LLMs catch the typical failures of AI coding agents. Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or expert review, or from matched pairs we build in which the two versions differ only in the failure. Every tool reviews the same samples without seeing the labels: free programs such as type checkers and linters, hybrid tools that wrap a model (PR-Agent, promptfoo, DeepEval), and plain language models asked directly with one fixed prompt. Each verdict is compared with the label: the true positive rate (TPR) is the share of bad samples a tool flags, the false positive rate (FPR) the share of clean samples it flags, and the headline score is <strong>J = TPR − FPR</strong>, reported with the cost per 1,000 reviews.
   </p>
   <BenchSchema />
 
   <h2 class="mt-10">Failure modes</h2>
 
-  <div class="mt-4 grid gap-5">
+  <div class="mt-4 grid gap-5 max-w-4xl">
     {modes.map((m) => (
       <section class="card p-5 border border-ink/10 rounded-lg bg-white" id={m.id}>
         <div class="font-sans text-xs uppercase tracking-wide text-ink-faint">{m.n_pos} {m.pos_label} · {m.n_neg} clean · {m.rows.length} tools</div>
@@ -36,7 +36,7 @@ const modes = results.modes;
     ))}
   </div>
 
-  <p class="mt-8 text-sm text-ink-muted max-w-3xl">
+  <p class="mt-8 text-sm text-ink-muted max-w-4xl">
     Not benchmarked yet: Cascading failure and Context pollution, for which no dataset with confirmed labels exists; the leaderboard lists their catalog tools by GitHub stars instead. Several sets are synthetic or hand-built pairs; each mode's setup and caveats say how its samples were made.
   </p>
 </BaseLayout>
