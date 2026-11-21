@@ -30,14 +30,14 @@ import kit from '../../public/bench/kit.json';
           <option value="1">$1</option><option value="5">$5</option>
         </select>
       </label>
-      <div class="kb-row kb-provs"><span>Providers I can use:</span><span id="kb-provs" class="kb-checks kb-inline"></span></div>
       <label class="kb-row"><input type="checkbox" id="kb-pairs" checked /><span>Use a measured pair when it is better, or as good for less</span></label>
       <label class="kb-row"><input type="checkbox" id="kb-combined" /><span>One LLM call for all modes <span class="kb-warn">(cheaper, but untested: scores were measured one prompt per call)</span></span></label>
     </fieldset>
   </div>
 
-  <div class="kb-tbl"><table id="kb-table"></table></div>
+  <div class="kb-tbl" id="kb-tbl"><table id="kb-table"></table></div>
   <p class="kb-fine" id="kb-summary"></p>
+  <div class="kb-gaps" id="kb-gaps" hidden></div>
 
   <div class="kb-actions">
     <button type="button" id="kb-copy">Copy setup prompt</button>
@@ -83,17 +83,16 @@ const savedModes = load('modes', null);
 const state = {
   modes: new Set(Array.isArray(savedModes) ? savedModes.filter((id) => MODES.some((m) => m.id === id)) : defaultModes),
   type: load('type', 'any'), local: load('local', false), maxCost: load('maxCost', 'inf'),
-  provs: new Set(load('provs', Object.keys(kit.providers))), pairs: load('pairs', true), combined: load('combined', false),
+  pairs: load('pairs', true), combined: load('combined', false),
 };
 const save = () => { store('modes', [...state.modes]); store('type', state.type); store('local', state.local); store('maxCost', state.maxCost);
-  store('provs', [...state.provs]); store('pairs', state.pairs); store('combined', state.combined); };
+  store('pairs', state.pairs); store('combined', state.combined); };
 
 function fits(r) {
   if (!r.recommendable) return false;
   if (state.type === 'program' && !(r.category === 'program' || r.category === 'rule')) return false;
   if ((state.type === 'hybrid' || state.type === 'llm') && r.category !== state.type) return false;
   if (state.local && !r.local_only) return false;
-  if (r.provider && !state.provs.has(r.provider)) return false;
   const max = state.maxCost === 'inf' ? Infinity : Number(state.maxCost);
   return r.cost1k <= max + 1e-9;
 }
@@ -134,30 +133,25 @@ TYPES.forEach(([v, label]) => {
   rb.addEventListener('change', () => { state.type = v; save(); render(); });
   typesBox.append(el('label', { class: 'kb-row' }, rb, label));
 });
-const provBox = document.getElementById('kb-provs');
-Object.entries(kit.providers).forEach(([k, label]) => {
-  const cb = el('input', { type: 'checkbox', value: k }); cb.checked = state.provs.has(k);
-  cb.addEventListener('change', () => { cb.checked ? state.provs.add(k) : state.provs.delete(k); save(); render(); });
-  provBox.append(el('label', {}, cb, label));
-});
 const bind = (id, key, prop = 'checked') => { const e = document.getElementById(id); e[prop] = state[key];
   e.addEventListener('change', () => { state[key] = e[prop]; save(); render(); }); };
 bind('kb-local', 'local'); bind('kb-pairs', 'pairs'); bind('kb-combined', 'combined'); bind('kb-cost', 'maxCost', 'value');
 
 // ---------- table ----------
 const short = (t) => t.replace(', asked directly', '').replace(/ \((deepseek|deepseek-v4-flash)\)$/, '');
+const nm = (r) => r.short || short(r.tool);
 const PILL = { program: ['free', 'kb-pill-free'], rule: ['built-in', 'kb-pill-free'], hybrid: ['hybrid', 'kb-pill-hybrid'], llm: ['LLM', 'kb-pill-llm'] };
 const kstars = (n) => (n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n || 0));
 function toolCell(r) {
-  const name = r.repository_url ? el('a', { href: r.repository_url, rel: 'noopener', text: short(r.tool) }) : short(r.tool);
+  const name = r.repository_url ? el('a', { href: r.repository_url, rel: 'noopener', text: nm(r), title: r.tool }) : el('span', { title: r.tool, text: nm(r) });
   const [label, cls] = PILL[r.category] || [r.category, 'kb-pill-hybrid'];
   return el('span', { class: 'kb-tool' }, name, el('span', { class: 'kb-pill ' + cls, text: label, title: CAT[r.category] || r.category }));
 }
 function pairNote(c) {
   const p = c.pair;
   return p.why === 'better'
-    ? `${Math.round((p.j - c.tool.j) * 100)} points over ${short(c.tool.tool)} alone; held up on held-out samples.`
-    : `Same J as ${short(c.tool.tool)}, for ${money(p.cost1k_cascade)} instead of ${money(c.tool.cost1k)} per 1k.`;
+    ? `${Math.round((p.j - c.tool.j) * 100)} points over ${nm(c.tool)} alone; held up on held-out samples.`
+    : `Same J as ${nm(c.tool)}, for ${money(p.cost1k_cascade)} instead of ${money(c.tool.cost1k)} per 1k.`;
 }
 function pairText(c) {
   const p = c.pair, [a, b] = p.tools;
@@ -170,12 +164,12 @@ function pairText(c) {
 function render() {
   const sel = MODES.filter((m) => state.modes.has(m.id));
   const head = el('thead', {}, el('tr', {}, ['Failure mode', 'Pick', 'J', 'TPR', 'FPR', 'Cost / 1k'].map((h, i) => el('th', { class: i > 1 ? 'num' : '', text: h }))));
-  const body = el('tbody');
+  const body = el('tbody'), gaps = [];
   let n = 0, cost = 0;
+  const best = (r) => `${nm(r)} · J ${pct(r.j)}`;
   for (const m of sel) {
     const c = choose(m);
-    const mode = el('td', { class: 'kb-mode' }, m.benchmarked ? el('a', { href: '/#' + m.id, text: m.name }) : m.name);
-    const note = (kids) => el('td', { colspan: '5', class: 'kb-note' }, kids);
+    const link = m.benchmarked ? el('a', { href: '/#' + m.id, text: m.name }) : el('a', { href: '/#' + m.id, text: m.name });
     if (c.kind === 'pick') {
       n++;
       const parts = c.pair ? c.pair.tools : [c.tool];
@@ -184,23 +178,30 @@ function render() {
       const pick = el('td', { class: 'kb-pickcell' },
         el('div', { class: 'kb-pick' }, parts.map((r, i) => [i ? el('span', { class: 'kb-then', text: c.pair.rule === 'and' ? 'and' : 'then' }) : null, toolCell(r)])),
         c.pair ? el('div', { class: 'kb-sub', title: pairText(c), text: pairNote(c) }) : null);
-      body.append(el('tr', {}, mode, pick, el('td', { class: 'num j', text: pct(j) }), el('td', { class: 'num', text: pct(tpr) }),
+      body.append(el('tr', {}, el('td', { class: 'kb-mode' }, link), pick, el('td', { class: 'num j', text: pct(j) }), el('td', { class: 'num', text: pct(tpr) }),
         el('td', { class: 'num', text: pct(fpr) }), el('td', { class: 'num', text: (c.tool.estimated && !c.pair ? '~' : '') + money(k) })));
     } else if (c.kind === 'stars') {
-      const link = (t, i) => [i ? ', ' : '', t.repository_url ? el('a', { href: t.repository_url, rel: 'noopener', text: t.name }) : t.name, el('span', { class: 'kb-star', text: ` ★${kstars(t.stars)}` })];
-      body.append(el('tr', { class: 'kb-muted' }, mode, note([el('span', { class: 'kb-tag', text: 'not benchmarked' }), ' ',
-        c.tools.length ? ['Detect or prevent: ', c.tools.map(link)] : '', c.records.length ? [el('span', { class: 'kb-dot', text: ' · ' }), 'Record only: ', c.records.map(link)] : '',
-        c.note ? el('div', { class: 'kb-sub', text: c.note }) : null])));
+      const top = (c.tools.length ? c.tools : c.records).slice(0, 2).map((t) => `${t.name} ★${kstars(t.stars)}`).join(', ');
+      gaps.push([link, 'not benchmarked', top ? `most-starred: ${top}` : '']);
     } else if (c.kind === 'unreliable') {
-      body.append(el('tr', { class: 'kb-muted' }, mode, note([el('span', { class: 'kb-tag', text: 'no reliable tool yet' }), ` Best measured: ${short(c.top.tool)}, J ${pct(c.top.j)}. Left out of the prompt.`])));
+      gaps.push([link, 'no reliable tool yet', `best measured: ${best(c.top)}`]);
     } else if (c.kind === 'weak') {
-      body.append(el('tr', { class: 'kb-muted' }, mode, note([el('span', { class: 'kb-tag', text: 'nothing reliable fits' }), ` Best that fits: ${short(c.best.tool)}, J ${pct(c.best.j)}. Best overall: ${short(c.top.tool)}, J ${pct(c.top.j)}, ${money(c.top.cost1k)} per 1k.`])));
+      gaps.push([link, `best fit too weak (${best(c.best)})`, `best overall: ${best(c.top)}`]);
     } else {
-      body.append(el('tr', { class: 'kb-muted' }, mode, note([el('span', { class: 'kb-tag', text: 'nothing fits' }), ` Best overall: ${short(c.top.tool)}, J ${pct(c.top.j)}, ${money(c.top.cost1k)} per 1k${c.top.why_not ? ` (not offered: ${c.top.why_not})` : ''}.`])));
+      const KIND = { program: 'free program', hybrid: 'hybrid tool', llm: 'LLM reviewer' };
+      const anyOfKind = state.type !== 'any' && m.rows.some((r) => r.recommendable && (state.type === 'program' ? ['program', 'rule'].includes(r.category) : r.category === state.type));
+      const why = state.type !== 'any' && !anyOfKind ? `no ${KIND[state.type]} measured` : 'nothing measured fits these limits';
+      gaps.push([link, why, `best overall: ${best(c.top)}${c.top.why_not ? ` (${c.top.why_not})` : ''}`]);
     }
   }
-  if (!sel.length) body.append(el('tr', { class: 'kb-muted' }, el('td', { colspan: '6', text: 'Tick at least one failure mode.' })));
-  document.getElementById('kb-table').replaceChildren(head, body);
+  const table = document.getElementById('kb-table');
+  if (n) table.replaceChildren(head, body);
+  else table.replaceChildren(el('tbody', {}, el('tr', { class: 'kb-muted' }, el('td', { text: sel.length ? 'None of the ticked failure modes is covered with these settings.' : 'Tick at least one failure mode.' }))));
+  const g = document.getElementById('kb-gaps');
+  g.hidden = !gaps.length;
+  g.replaceChildren(el('div', { class: 'kb-gaps-h', text: n ? 'Not covered with these settings' : 'Why not' }),
+    el('ul', {}, gaps.map(([mode, why, hint]) => el('li', {}, el('span', { class: 'kb-gap-mode' }, mode), el('span', { class: 'kb-gap-why', text: why }),
+      hint ? el('span', { class: 'kb-gap-hint', text: hint }) : null))));
   document.getElementById('kb-summary').textContent = n
     ? `${n} failure mode${n === 1 ? '' : 's'} covered by measured picks; ${cost === 0 ? 'all of them free' : `about ${money(cost)} per 1,000 reviews in total if every check runs on every change`}.`
     : '';
@@ -336,8 +337,6 @@ render();
   .kb-row { display: flex; align-items: center; gap: .45rem; font-size: 14px; color: #111418; cursor: pointer; margin: .12rem 0; line-height: 1.4; }
   .kb-row > span { min-width: 0; }
   .kb-row input { flex: none; align-self: flex-start; margin-top: 2px !important; }
-  .kb-provs { flex-wrap: wrap; }
-  .kb-provs { cursor: default; }
   .kb-inline label { display: inline-flex; align-items: center; gap: .35rem; font-size: 14px; cursor: pointer; }
   .kb input[type="checkbox"], .kb input[type="radio"] { accent-color: #1f3a93; width: 15px; height: 15px; margin: 0; cursor: pointer; }
   .kb select { border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 2px 6px; background: #fff; font: inherit; }
@@ -371,6 +370,15 @@ render();
   .kb-dot { color: #c3c7cf; }
   .kb-muted td.kb-mode, .kb-muted td.kb-mode a { color: #7a8192; }
   .kb-fine { font-size: 12.5px; color: #7a8192; margin-top: .5rem; }
+  .kb-gaps { margin-top: 1rem; border: 1px solid rgb(17 20 24 / .1); border-radius: 10px; background: #fbfaf7; padding: .75rem 1rem .85rem; }
+  .kb-gaps-h { font-size: 11.5px; font-weight: 600; color: #7a8192; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .35rem; }
+  .kb-gaps ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: max-content max-content minmax(0, 1fr); gap: .35rem 1.4rem; align-items: baseline; font-size: 13.5px; }
+  .kb-gaps li { display: contents; }
+  .kb-gap-mode a { color: #4a5160; text-decoration: none; border-bottom: 1px dotted #9a9fab; font-weight: 500; }
+  .kb-gap-mode a:hover { color: #1f3a93; }
+  .kb-gap-why { color: #4a5160; white-space: nowrap; }
+  .kb-gap-hint { color: #9a9fab; font-size: 12.5px; }
+  @media (max-width: 640px) { .kb-gaps ul { grid-template-columns: 1fr; gap: 0; } .kb-gap-hint { margin-bottom: .45rem; } .kb-gap-why { white-space: normal; } }
   .kb-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: 1rem; }
   .kb-actions button { font: 500 14px ui-sans-serif, system-ui, sans-serif; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: .4rem .85rem; background: #fff; cursor: pointer; color: #111418; }
   .kb-actions button:hover { border-color: #1f3a93; color: #1f3a93; }
