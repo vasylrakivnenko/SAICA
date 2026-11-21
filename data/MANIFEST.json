@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-20T21:28:04Z",
+  "generated_at": "2026-11-21T19:39:14Z",
   "kg_version": "2026.11",
   "counts": {
     "tools": 49,
@@ -100,7 +100,6 @@
       "li-2026-security-considerations-artificial-intelligence",
       "lindner-2025-monitoring",
       "liu-2024-beyond-functional-correctness",
-      "liu-2025-code-copycat",
       "liu-2025-code-copycat-conundrum-demystifying",
       "liu-2025-empirical-study-failures-automated",
       "liu-2026-packmonitor-enabling-zero-package",
@@ -114,6 +113,7 @@
       "qiu-2026-prbench-end-end-paper",
       "santos-2025-decoding-configuration-ai-coding",
       "shah-2026-characterizing-faults",
+      "shamsujjoha-2024-swiss-cheese-model",
       "song-2025-help-hurdle-rethinking-model",
       "spracklen-2024-we-have-a-package",
       "tian-2024-codehalu",

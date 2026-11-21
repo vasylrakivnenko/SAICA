@@ -215,9 +215,8 @@ const SYN_FILE = path.join(import.meta.env.KG_DATA_DIR as string, 'failure_mode_
 const SYNONYMS: Record<string, any> = fs.existsSync(SYN_FILE)
   ? ((yaml.load(fs.readFileSync(SYN_FILE, 'utf8')) as Record<string, any>) ?? {})
   : {};
-// dependency_blindness's discovery synonyms ("lockfile ignored", "undeclared dependency", ...) describe a different
-// concept from its definition (re-implementing what exists), so they are not shown as other names for it.
-const SKIP_SYNONYMS = new Set(['dependency_blindness']);
+// (dependency_blindness's synonyms were rewritten on 2026-11-21 to match its definition, so no mode is skipped now.)
+const SKIP_SYNONYMS = new Set<string>();
 
 const pretty = (s: string) => s.replace(/-/g, ' ');
 

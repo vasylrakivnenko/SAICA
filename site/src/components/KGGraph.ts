@@ -57,6 +57,14 @@ export async function mountKGGraph(opts: {
   container: HTMLElement; sidebar: HTMLElement; filters: HTMLElement;
   layoutSelect: HTMLSelectElement; resetBtn: HTMLButtonElement;
   search: HTMLInputElement; focusNodeId?: string | null;
+  // Keyboard access (all optional so the mouse-only path keeps working).
+  // nodeList: element that receives a plain HTML list of the nodes (screen-reader / keyboard alternative).
+  // onActivate: called after a node's details were rendered by keyboard (graph, search Enter, list button);
+  //   `returnTo` is where focus should go back to when the details close.
+  // isDetailsOpen: lets Escape on the graph close the details card first and clear the selection only after.
+  nodeList?: HTMLElement | null;
+  onActivate?: (returnTo: HTMLElement) => void;
+  isDetailsOpen?: () => boolean;
 }): Promise<void> {
   const { container, sidebar, filters, layoutSelect, resetBtn, search, focusNodeId } = opts;
 
@@ -155,6 +163,17 @@ export async function mountKGGraph(opts: {
       { selector: "node.kg-neighbor", style: { "border-width": 2, "border-color": "#f59e0b", "border-opacity": 0.7 } },
       { selector: "edge.kg-neighbor", style: { width: 1.6, opacity: 1 } },
       ...edgeStyleBlocks,
+      // Keyboard focus ring (navy, same colour as the site's :focus-visible outline). Last so it wins over
+      // kg-dim; its width is re-applied per zoom level in paintRing() so it stays ~3 px on screen.
+      {
+        selector: "node.kg-kbfocus",
+        style: {
+          "outline-color": "#1f3a93", "outline-opacity": 1, "outline-style": "solid",
+          "outline-width": 3, "outline-offset": 3,
+          opacity: 1, "text-opacity": 1, "z-index": 999,
+          color: "#1f3a93", "font-weight": 700,
+        },
+      },
     ] as unknown as Stylesheet[],
     layout: layoutFor("cose"),
   });
@@ -201,20 +220,33 @@ export async function mountKGGraph(opts: {
     neighborOnly.addClass("kg-neighbor");
   };
 
-  cy.on("tap", "node", (evt: EventObjectNode) => {
+  const selectNode = (n: NodeSingular) => {
     cy!.nodes().unselect();
-    evt.target.select();
-    clickFocusId = evt.target.id();
+    n.select();
+    clickFocusId = n.id();
     applyFocus();
-    renderSidebar(sidebar, evt.target);
+    renderSidebar(sidebar, n);
+  };
+  const clearSelection = () => {
+    cy!.nodes().unselect();
+    clickFocusId = null;
+    applyFocus();
+    renderSidebarEmpty(sidebar);
+  };
+
+  const kb = setupKeyboard({
+    cy, container, search, nodeList: opts.nodeList ?? null,
+    selectNode, clearSelection,
+    hasSelection: () => clickFocusId !== null,
+    onActivate: opts.onActivate, isDetailsOpen: opts.isDetailsOpen,
+  });
+
+  cy.on("tap", "node", (evt: EventObjectNode) => {
+    selectNode(evt.target);
+    kb.syncFromPointer(evt.target);
   });
   cy.on("tap", (evt) => {
-    if (evt.target === cy) {
-      cy!.nodes().unselect();
-      clickFocusId = null;
-      applyFocus();
-      renderSidebarEmpty(sidebar);
-    }
+    if (evt.target === cy) clearSelection();
   });
 
   layoutSelect.addEventListener("change", () => cy!.layout(layoutFor(layoutSelect.value)).run());
@@ -227,8 +259,9 @@ export async function mountKGGraph(opts: {
     cy!.fit(undefined, 30);
     cy!.nodes().unselect();
     renderSidebarEmpty(sidebar);
+    kb.filtersChanged();
   });
-  filters.addEventListener("change", () => { applyFilters(filters, search.value); applyFocus(); });
+  filters.addEventListener("change", () => { applyFilters(filters, search.value); applyFocus(); kb.filtersChanged(); });
   search.addEventListener("input", () => { applyFilters(filters, search.value); applyFocus(); });
 
   if (focusNodeId) {
@@ -240,11 +273,358 @@ export async function mountKGGraph(opts: {
         clickFocusId = n.id();
         applyFocus();
         renderSidebar(sidebar, n as NodeSingular);
+        kb.syncFromPointer(n as NodeSingular);
       });
     }
   }
 
   renderSidebarEmpty(sidebar);
+}
+
+// ---------- Keyboard + screen-reader access ----------
+// Cytoscape draws on a <canvas>, so nodes are not DOM elements. The container becomes one Tab stop
+// (role=application); a "current" node is tracked here and drawn with a navy outline ring. Arrow keys move
+// to the nearest visible node in that direction, Enter/Space opens the same details card a click opens,
+// Escape closes it (graph.astro) or clears the selection. Changes are announced in a polite live region.
+// A plain list of links (opts.nodeList) and Enter-in-search give non-spatial routes to every node.
+const TYPE_LABEL: Record<NodeType, string> = {
+  tool: "tool", failure_mode: "failure mode", taxonomy: "taxonomy", paper: "paper",
+};
+const TYPE_PLURAL: Record<NodeType, string> = {
+  failure_mode: "Failure modes", tool: "Tools", taxonomy: "Taxonomies", paper: "Papers",
+};
+const SR_ONLY = "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;"
+  + "clip:rect(0,0,0,0);white-space:nowrap;border:0";
+
+function pageUrlFor(type: NodeType, id: string): string {
+  // Canonical page URLs (hyphenated failure-mode slugs, trailing slash); see lib/seo.ts.
+  return type === "tool" ? toolUrl(encodeURIComponent(id))
+    : type === "failure_mode" ? fmUrl(encodeURIComponent(id))
+    : type === "taxonomy" ? `/taxonomies/${encodeURIComponent(id)}/`
+    : `/papers/${encodeURIComponent(id)}/`;
+}
+
+function setupKeyboard(o: {
+  cy: Core; container: HTMLElement; search: HTMLInputElement; nodeList: HTMLElement | null;
+  selectNode: (n: NodeSingular) => void; clearSelection: () => void; hasSelection: () => boolean;
+  onActivate?: (returnTo: HTMLElement) => void; isDetailsOpen?: () => boolean;
+}): { syncFromPointer: (n: NodeSingular) => void; filtersChanged: () => void } {
+  const { cy, container, search, nodeList } = o;
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+
+  // --- ARIA scaffolding (created here so both page shells in graph.astro get it) ---
+  const help = document.createElement("p");
+  help.id = "kg-kbd-help";
+  help.style.cssText = SR_ONLY;
+  help.textContent = "Interactive graph. Use the arrow keys to move between nodes; Home and End jump to the "
+    + "first and last node. Press Enter or Space to open the focused node's details, and Escape to close them. "
+    + "Plus and minus zoom, 0 fits the whole graph. The search box above jumps to a node by name, and a plain "
+    + "list of all nodes follows the graph.";
+  const live = document.createElement("div");
+  live.id = "kg-kbd-live";
+  live.setAttribute("role", "status");
+  live.setAttribute("aria-live", "polite");
+  live.setAttribute("aria-atomic", "true");
+  live.style.cssText = SR_ONLY;
+  container.after(help, live);
+
+  container.tabIndex = 0;
+  container.setAttribute("role", "application");
+  container.setAttribute("aria-label", "Knowledge graph");
+  container.setAttribute("aria-describedby", help.id);
+
+  // Search: datalist suggestions + a hint; Enter jumps to the best match.
+  const datalist = document.createElement("datalist");
+  datalist.id = "kg-search-options";
+  search.after(datalist);
+  search.setAttribute("list", datalist.id);
+  const searchHint = document.createElement("span");
+  searchHint.id = "kg-search-hint";
+  searchHint.style.cssText = SR_ONLY;
+  searchHint.textContent = "Matching nodes are highlighted as you type. Press Enter to open the best match.";
+  search.after(searchHint);
+  search.setAttribute("aria-describedby", searchHint.id);
+
+  let announceTimer: number | undefined;
+  const announce = (msg: string) => {
+    // Clear then set, so repeating the same text is still announced.
+    live.textContent = "";
+    clearTimeout(announceTimer);
+    announceTimer = window.setTimeout(() => { live.textContent = msg; }, 40);
+  };
+
+  // --- Input modality: show the ring only for keyboard users ---
+  let keyboardMode = false;
+  document.addEventListener("keydown", () => { keyboardMode = true; }, true);
+  document.addEventListener("pointerdown", () => { keyboardMode = false; }, true);
+
+  let currentId: string | null = null;
+  let ringed: NodeSingular | null = null;
+
+  const visibleNodes = () => cy.nodes(":visible");
+  const current = (): NodeSingular | null => {
+    if (!currentId) return null;
+    const n = cy.getElementById(currentId);
+    return n.nonempty() && n.visible() ? (n as NodeSingular) : null;
+  };
+  const readingOrder = () => visibleNodes().toArray()
+    .map((n) => n as NodeSingular)
+    .sort((a, b) => (a.position("y") - b.position("y")) || (a.position("x") - b.position("x")));
+
+  const paintRing = () => {
+    if (!ringed) return;
+    // Model units scale with zoom; divide so the ring stays about 3 px on screen.
+    const z = cy.zoom() || 1;
+    ringed.style({ "outline-width": 3 / z, "outline-offset": 3 / z });
+  };
+  const unring = () => {
+    if (!ringed) return;
+    ringed.removeClass("kg-kbfocus");
+    ringed.removeStyle("outline-width outline-offset");
+    ringed = null;
+  };
+  const ring = (n: NodeSingular | null) => {
+    if (ringed && n && ringed.same(n)) { paintRing(); return; }
+    unring();
+    if (!n) return;
+    ringed = n;
+    n.addClass("kg-kbfocus");
+    paintRing();
+  };
+  cy.on("zoom", paintRing);
+
+  const describe = (n: NodeSingular): string => {
+    const type = n.data("type") as NodeType;
+    const deg = n.connectedEdges(":visible").length;
+    return `${n.data("label") || n.id()}, ${TYPE_LABEL[type] ?? type}. `
+      + `${deg} connection${deg === 1 ? "" : "s"}.${n.selected() ? " Selected." : ""}`;
+  };
+
+  const ensureInView = (n: NodeSingular, forceCenter = false) => {
+    const bb = n.renderedBoundingBox({ includeLabels: true });
+    const w = cy.width(), h = cy.height(), m = 24;
+    const outside = bb.x1 < m || bb.y1 < m || bb.x2 > w - m || bb.y2 > h - m;
+    if (!outside && !forceCenter) return;
+    if (reduceMotion) cy.center(n);
+    else cy.animate({ center: { eles: n } }, { duration: 200 });
+  };
+
+  const moveTo = (n: NodeSingular | null, opts: { announce?: boolean; center?: boolean } = {}) => {
+    if (!n) return;
+    currentId = n.id();
+    ring(document.activeElement === container ? n : null);
+    ensureInView(n, !!opts.center);
+    if (opts.announce !== false) announce(describe(n));
+  };
+
+  const nearestToViewportCenter = (): NodeSingular | null => {
+    const e = cy.extent();
+    const cx = (e.x1 + e.x2) / 2, cyy = (e.y1 + e.y2) / 2;
+    let best: NodeSingular | null = null, bestD = Infinity;
+    visibleNodes().forEach((n) => {
+      const p = n.position();
+      const d = (p.x - cx) ** 2 + (p.y - cyy) ** 2;
+      if (d < bestD) { bestD = d; best = n as NodeSingular; }
+    });
+    return best;
+  };
+
+  const startNode = (): NodeSingular | null => {
+    const c = current();
+    if (c) return c;
+    const sel = cy.nodes(":selected:visible");
+    if (sel.nonempty()) return sel[0] as NodeSingular;
+    return nearestToViewportCenter();
+  };
+
+  // Nearest visible node in a direction: candidates inside a ~70 degree cone score by distance along the axis
+  // plus twice the sideways offset; if the cone is empty, anything in that half-plane qualifies.
+  const nearestInDirection = (from: NodeSingular, dx: number, dy: number): NodeSingular | null => {
+    const p0 = from.position();
+    let best: NodeSingular | null = null, bestScore = Infinity;
+    visibleNodes().forEach((n) => {
+      if (n.same(from)) return;
+      const p = n.position();
+      const vx = p.x - p0.x, vy = p.y - p0.y;
+      const along = vx * dx + vy * dy;
+      if (along <= 0.5) return;
+      const perp = Math.abs(vx * dy - vy * dx);
+      const score = along + 2 * perp + (perp > along * 1.4 ? 1e7 : 0);
+      if (score < bestScore) { bestScore = score; best = n as NodeSingular; }
+    });
+    return best;
+  };
+
+  const activate = (n: NodeSingular, returnTo: HTMLElement) => {
+    o.selectNode(n);
+    currentId = n.id();
+    announce(`${describe(n)} Details open.`);
+    o.onActivate?.(returnTo);
+  };
+
+  container.addEventListener("focus", () => {
+    if (!keyboardMode) return;
+    const n = startNode();
+    if (!n) { announce("No nodes are shown. Change the filters to show some."); return; }
+    moveTo(n);
+  });
+  container.addEventListener("blur", () => ring(null));
+
+  container.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    keyboardMode = true;
+    const dirs: Record<string, [number, number]> = {
+      ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1],
+    };
+    const cur = startNode();
+    if (e.key in dirs) {
+      e.preventDefault();
+      if (!cur) return;
+      if (!current()) { moveTo(cur); return; }
+      const [dx, dy] = dirs[e.key];
+      const next = nearestInDirection(cur, dx, dy);
+      if (next) moveTo(next);
+      else announce(`No node further ${e.key.replace("Arrow", "").toLowerCase()}. ${describe(cur)}`);
+      return;
+    }
+    switch (e.key) {
+      case "Home":
+      case "End": {
+        e.preventDefault();
+        const order = readingOrder();
+        moveTo(e.key === "Home" ? order[0] ?? null : order[order.length - 1] ?? null);
+        return;
+      }
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        if (cur) { moveTo(cur, { announce: false }); activate(cur, container); }
+        return;
+      case "Escape":
+        // An open details card is closed by graph.astro's document-level handler first.
+        if (o.isDetailsOpen?.()) return;
+        if (o.hasSelection()) {
+          o.clearSelection();
+          announce("Selection cleared.");
+        }
+        return;
+      case "+":
+      case "=":
+      case "-":
+      case "_": {
+        e.preventDefault();
+        const factor = e.key === "+" || e.key === "=" ? 1.25 : 0.8;
+        const c = current();
+        const pos = c ? c.renderedPosition() : { x: cy.width() / 2, y: cy.height() / 2 };
+        cy.zoom({ level: cy.zoom() * factor, renderedPosition: pos });
+        announce(`Zoom ${Math.round(cy.zoom() * 100)} percent.`);
+        return;
+      }
+      case "0":
+        e.preventDefault();
+        cy.fit(undefined, 30);
+        announce("Whole graph in view.");
+        return;
+    }
+  });
+
+  // Search: Enter jumps to the best visible match (exact > prefix > word prefix > substring; shorter first).
+  const bestMatch = (raw: string): NodeSingular | null => {
+    const q = raw.trim().toLowerCase();
+    if (!q) return null;
+    let best: NodeSingular | null = null, bestRank = Infinity, bestLen = Infinity;
+    visibleNodes().forEach((n) => {
+      const label = String(n.data("label") || "").toLowerCase();
+      const id = n.id().toLowerCase();
+      const aliases = ((n.data("aliases") as string[] | undefined) ?? []).map((a) => a.toLowerCase());
+      let rank = Infinity;
+      if (label === q || id === q || aliases.includes(q)) rank = 0;
+      else if (label.startsWith(q) || id.startsWith(q)) rank = 1;
+      else if (label.split(/[\s\-_/(]+/).some((w) => w.startsWith(q))) rank = 2;
+      else if ([label, id, ...aliases].some((s) => s.includes(q))) rank = 3;
+      if (rank < bestRank || (rank === bestRank && rank < Infinity && label.length < bestLen)) {
+        best = n as NodeSingular; bestRank = rank; bestLen = label.length;
+      }
+    });
+    return best;
+  };
+  search.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const n = bestMatch(search.value);
+    if (!n) { announce(search.value.trim() ? `No shown node matches "${search.value.trim()}".` : "Type a node name first."); return; }
+    moveTo(n, { announce: false, center: true });
+    activate(n, container);
+  });
+
+  // --- Plain list alternative ---
+  const listItems = new Map<string, HTMLLIElement>();
+  const groups: { type: NodeType; section: HTMLElement }[] = [];
+  let listCount: HTMLElement | null = null;
+  if (nodeList) {
+    nodeList.innerHTML = "";
+    listCount = document.createElement("p");
+    listCount.className = "kg-list-count";
+    nodeList.appendChild(listCount);
+    for (const type of ["failure_mode", "tool", "taxonomy", "paper"] as NodeType[]) {
+      const nodes = cy.nodes(`[type = "${type}"]`).toArray().map((n) => n as NodeSingular)
+        .sort((a, b) => String(a.data("label")).localeCompare(String(b.data("label"))));
+      if (nodes.length === 0) continue;
+      const section = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = TYPE_PLURAL[type];
+      const ul = document.createElement("ul");
+      for (const n of nodes) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = pageUrlFor(type, n.id());
+        a.textContent = String(n.data("label") || n.id());
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Show in graph";
+        btn.setAttribute("aria-label", `Show ${a.textContent} in the graph`);
+        btn.addEventListener("click", () => {
+          const node = cy.getElementById(n.id());
+          if (node.empty() || !node.visible()) return;
+          moveTo(node as NodeSingular, { announce: false, center: true });
+          activate(node as NodeSingular, btn);
+        });
+        li.append(a, " ", btn);
+        ul.appendChild(li);
+        listItems.set(n.id(), li);
+      }
+      section.append(h, ul);
+      nodeList.appendChild(section);
+      groups.push({ type, section });
+    }
+  }
+
+  const refreshDerived = () => {
+    const vis = new Set(visibleNodes().map((n) => n.id()));
+    for (const [id, li] of listItems) li.hidden = !vis.has(id);
+    for (const g of groups) g.section.hidden = !Array.from(g.section.querySelectorAll("li")).some((li) => !li.hidden);
+    if (listCount) listCount.textContent = `${vis.size} node${vis.size === 1 ? "" : "s"} shown with the current filters.`;
+    // Datalist: one option per distinct visible label.
+    const labels = new Set<string>();
+    visibleNodes().forEach((n) => { labels.add(String(n.data("label") || n.id())); });
+    datalist.replaceChildren(...Array.from(labels).sort().map((l) => {
+      const opt = document.createElement("option");
+      opt.value = l;
+      return opt;
+    }));
+  };
+  refreshDerived();
+
+  return {
+    syncFromPointer: (n) => { currentId = n.id(); ring(null); },
+    filtersChanged: () => {
+      if (currentId && !current()) {
+        currentId = null;
+        ring(null);
+      }
+      refreshDerived();
+    },
+  };
 }
 
 // ---------- Element construction ----------
@@ -408,15 +788,12 @@ function renderSidebar(sidebar: HTMLElement, n: NodeSingular): void {
     if (p) body = `<p>${escapeHtml(p.title ?? "")}</p>
       <p style="color:#6b7280;font-size:12px">${escapeHtml(formatAuthors(p.authors))}${p.year ? ` (${escapeHtml(String(p.year))})` : ""}</p>`;
   }
-  // Canonical page URLs (hyphenated failure-mode slugs, trailing slash); see lib/seo.ts.
-  const pageUrl = type === "tool" ? toolUrl(encodeURIComponent(id))
-    : type === "failure_mode" ? fmUrl(encodeURIComponent(id))
-    : type === "taxonomy" ? `/taxonomies/${encodeURIComponent(id)}/`
-    : `/papers/${encodeURIComponent(id)}/`;
+  const pageUrl = pageUrlFor(type, id);
+  // The title is a focus target (tabindex=-1) for keyboard activation; see onActivate in graph.astro.
   sidebar.innerHTML = `
     <div style="padding:16px;font-size:13px;line-height:1.5">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6b7280">${escapeHtml(type.replace("_", " "))}</div>
-      <div style="font-size:18px;font-weight:600;margin:2px 0">${escapeHtml(label)}</div>
+      <div id="kg-detail-title" role="heading" aria-level="2" tabindex="-1" style="font-size:18px;font-weight:600;margin:2px 0">${escapeHtml(label)}</div>
       <div style="font-size:11px;color:#9ca3af;font-family:ui-monospace,monospace;margin-bottom:10px">${escapeHtml(id)}</div>
       ${body}
       <a style="display:inline-block;margin-top:12px;color:#2563eb" href="${pageUrl}">View full page →</a>

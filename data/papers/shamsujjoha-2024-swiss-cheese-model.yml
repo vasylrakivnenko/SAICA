@@ -1,0 +1,50 @@
+id: shamsujjoha-2024-swiss-cheese-model
+authors:
+  - Md Shamsujjoha
+  - Qinghua Lu
+  - Dehai Zhao
+  - Liming Zhu
+year: 2024
+title: "Swiss Cheese Model for AI Safety: A Taxonomy and Reference Architecture for Multi-Layered Guardrails of Foundation Model Based Agents"
+venue: International Conference on Software Architecture
+url: https://arxiv.org/abs/2408.02205
+doi: "10.1109/ICSA65012.2025.00014"
+arxiv_id: "2408.02205"
+semantic_scholar_id: "88794317f405c098ab08bbdf43d99024aec1ddfe"
+citation_count: 33
+abstract: >
+  Foundation Model (FM)-based agents are revolutionizing application
+  development across various domains. However, their rapidly growing
+  capabilities and autonomy have raised significant concerns about AI
+  safety. Researchers are exploring better ways to design guardrails to
+  ensure that the runtime behavior of FM-based agents remains within
+  specific boundaries. Nevertheless, designing effective runtime guardrails
+  is challenging due to the agents' autonomous and non-deterministic
+  behavior. The involvement of multiple pipeline stages and agent artifacts,
+  such as goals, plans, tools, at runtime further complicates these issues.
+  Addressing these challenges at runtime requires multi-layered guardrails
+  that operate effectively at various levels of the agent architecture.
+  Therefore, in this paper, based on the results of a systematic literature
+  review, we present a comprehensive taxonomy of runtime guardrails for
+  FM-based agents to identify the key quality attributes for guardrails and
+  design dimensions. Inspired by the Swiss Cheese Model, we also propose a
+  reference architecture for designing multi-layered runtime guardrails for
+  FM-based agents, which includes three dimensions: quality attributes,
+  pipelines, and artifacts. The proposed taxonomy and reference architecture
+  provide concrete and robust guidance for researchers and practitioners to
+  build AI-safety-by-design from a software architecture perspective.
+tldr: >
+  SLR-derived taxonomy of runtime guardrails for FM-based agents plus a
+  Swiss-Cheese-inspired reference architecture for multi-layered guardrails
+  along three dimensions: quality attributes, pipelines, and artifacts.
+relevance_tags:
+  - guardrails
+  - external-taxonomy-seed
+  - reference-architecture
+  - systematic-literature-review
+notes: >
+  Primary source for the swiss-cheese-model Taxonomy node in SAICA-KG.
+  arXiv v1 2024-08-05, v4 2025-01-27; published at IEEE ICSA 2025 (DOI
+  above; the arXiv DOI is 10.48550/arXiv.2408.02205). Metadata checked
+  against the arXiv API and Semantic Scholar on 2026-11-21. arXiv license
+  is CC BY-NC-SA 4.0.

@@ -36,7 +36,8 @@ const jsonld = breadcrumbs([
         <a href="/taxonomies/">failure taxonomies</a> that map onto them (purple) and, when switched on in Filters,
         the <a href="/papers/">research papers</a> behind them. Edges show which tool addresses which failure, how tools
         compose or feed into each other, and how other taxonomies crosswalk to ours. Click a node for details and a link
-        to its page.
+        to its page. With a keyboard, Tab into the graph, move between nodes with the arrow keys and press Enter for
+        details; a <a href="#kg-node-list-wrap">plain list of all nodes</a> is below the graph.
       </p>
       <noscript>
         <div class="p-3 bg-yellow-50 border border-yellow-200 rounded mb-2 text-sm">
@@ -188,6 +189,12 @@ const jsonld = breadcrumbs([
           <div id="kg-sidebar"></div>
         </aside>
       </div>
+
+      {/* Keyboard / screen-reader alternative: every node as a link, filled and filtered by KGGraph.ts */}
+      <details id="kg-node-list-wrap" class="ui mt-3 text-sm">
+        <summary class="cursor-pointer text-ink-muted">List of all nodes in the graph</summary>
+        <div id="kg-node-list" class="mt-2"></div>
+      </details>
     </section>
   </Layout>
 ) : (
@@ -369,6 +376,11 @@ const jsonld = breadcrumbs([
             <div id="kg-sidebar"></div>
           </aside>
         </div>
+
+        <details id="kg-node-list-wrap" style="margin-top:12px;font-size:14px">
+          <summary style="cursor:pointer">List of all nodes in the graph</summary>
+          <div id="kg-node-list" style="margin-top:8px"></div>
+        </details>
       </section>
     </body>
   </html>
@@ -448,11 +460,21 @@ const jsonld = breadcrumbs([
     }
   }
 
+  // Where focus goes back to when the details card closes after a keyboard activation (the graph, or the
+  // "Show in graph" button in the node list). Also used when the card is closed with focus inside it.
+  let detailsReturnTo: HTMLElement | null = null;
+
   function setSidebarOpen(open: boolean): void {
     if (!sidebarCard) return;
+    const hadFocus = sidebarCard.contains(document.activeElement);
     sidebarCard.classList.toggle("hidden", !open);
     sidebarCard.setAttribute("aria-hidden", open ? "false" : "true");
+    if (!open && hadFocus) {
+      (detailsReturnTo && detailsReturnTo.isConnected ? detailsReturnTo : container)?.focus();
+    }
+    if (!open) detailsReturnTo = null;
   }
+  const isDetailsOpen = (): boolean => !!sidebarCard && !sidebarCard.classList.contains("hidden");
 
   filtersToggle?.addEventListener("click", () => {
     const open = filtersDrawer?.classList.contains("hidden");
@@ -502,6 +524,13 @@ const jsonld = breadcrumbs([
       resetBtn,
       search,
       focusNodeId,
+      nodeList: document.getElementById("kg-node-list"),
+      isDetailsOpen,
+      onActivate: (returnTo: HTMLElement) => {
+        setSidebarOpen(true);
+        detailsReturnTo = returnTo;
+        document.getElementById("kg-detail-title")?.focus();
+      },
     }).catch((err) => {
       const fb = document.getElementById("kg-fallback");
       if (fb) {
@@ -514,3 +543,20 @@ const jsonld = breadcrumbs([
     });
   }
 </script>
+
+<style is:global>
+  /* Keyboard access (see setupKeyboard in KGGraph.ts). The canvas wrapper clips overflow, so draw the
+     container's focus outline inside its edge. The focused node itself gets a navy ring on the canvas. */
+  #cy:focus-visible { outline: 2px solid #1f3a93; outline-offset: -3px; }
+  #kg-detail-title:focus { outline: none; }
+  #kg-search::-webkit-calendar-picker-indicator { display: none !important; }
+  #kg-node-list h2 { font-size: 0.8125rem; font-weight: 600; margin: 0.75rem 0 0.25rem; }
+  #kg-node-list ul { list-style: none; margin: 0; padding: 0; columns: 18rem; column-gap: 1.5rem; }
+  #kg-node-list li { margin: 0.125rem 0; break-inside: avoid; }
+  #kg-node-list button {
+    font-size: 0.75rem; line-height: 1.25; padding: 0 0.375rem; margin-left: 0.25rem;
+    border: 1px solid #d1d5db; border-radius: 4px; background: #fff; color: #4b5563; cursor: pointer;
+  }
+  #kg-node-list button:hover { background: #f3f4f6; }
+  #kg-node-list .kg-list-count { color: #6b7280; font-size: 0.75rem; margin: 0; }
+</style>

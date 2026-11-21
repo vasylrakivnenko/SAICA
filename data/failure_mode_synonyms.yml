@@ -39,8 +39,8 @@
 # Versioning: bump `version` on any non-trivial change. Discovery runs
 # log the version they consumed for reproducibility.
 
-version: 1
-last_updated: 2026-05-01
+version: 2
+last_updated: 2026-11-21
 
 
 scope_creep:
@@ -109,21 +109,28 @@ obsolescence:
 
 dependency_blindness:
   canonical: Dependency blindness
+  # Definition: re-implementing functionality that already exists in the
+  # stdlib, a declared dependency, or the repo's own helpers. (Before v2 this
+  # block listed version/lockfile terms, which belong to obsolescence and
+  # dependency management, not to this mode.)
   synonyms:
-    - import blindness
-    - library mismatch
-    - version blindness
-    - lockfile ignored
-    - undeclared dependency
-    - implicit dependency
-    - dependency drift
+    - reinventing the wheel
+    - reimplementation
+    - not invented here
+    - missed code reuse
+    - duplicate utility
+    - redundant implementation
+    - ecosystem duplication
+    - library underuse
   anchor_papers:
-    - cemri-2025-mast
+    - liu-2025-code-copycat-conundrum-demystifying   # closest neighbour (intra-generation repetition); contrast paper
   negative_keywords:
     - dependency injection   # DI pattern, unrelated
     - dependency graph
     - circular dependency
     - dependency parsing
+    - version conflict       # dependency management, not reinvention
+    - lockfile
 
 
 logic_error:

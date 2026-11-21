@@ -35,6 +35,6 @@ crosswalks:
     confidence: exact
     note: DAPLab "Cascading Error Recovery" is the direct counterpart.
   - taxonomy: mast
-    external_id: MAST-FM-14
-    confidence: partial
-    note: MAST "Infinite Loop" is one manifestation of a recovery-spiral pattern.
+    external_id: FM-1.3
+    confidence: related
+    note: MAST "Step repetition" shows up in recovery spirals, but it is redoing completed work, not fixes that add new errors.

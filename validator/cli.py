@@ -227,6 +227,24 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
                     f"external={ext} not a category of taxonomy '{tax_id}'"
                 )
 
+    # Taxonomy nodes: paper_id must be a known paper, and every category's
+    # parent_id must be an external_id defined in the same taxonomy.
+    for tax_id, tax in taxonomies.items():
+        pid = tax.get("paper_id")
+        if pid is not None and pid not in papers:
+            err.append(
+                f"[taxonomies] {tax_id} paper_id references missing paper '{pid}'"
+            )
+        cats = [c for c in tax.get("categories", []) or [] if isinstance(c, dict)]
+        cat_ids = {c.get("external_id") for c in cats}
+        for c in cats:
+            parent = c.get("parent_id")
+            if parent is not None and parent not in cat_ids:
+                err.append(
+                    f"[taxonomies] {tax_id} category {c.get('external_id')} has "
+                    f"parent_id '{parent}' that is not a category of this taxonomy"
+                )
+
     known_modes = set(modes) | KNOWN_FAILURE_MODE_IDS
 
     composes: dict[str, set[str]] = defaultdict(set)
@@ -243,7 +261,9 @@ def cross_invariants(warn: list[str], err: list[str]) -> None:
             if fm not in known_modes:
                 err.append(f"[tools] {tid} records unknown FailureMode '{fm}'")
             if fm in tool.get("addresses_failure_modes", []):
-                err.append(f"[tools] {tid} lists '{fm}' in both addresses_ and records_failure_modes")
+                err.append(
+                    f"[tools] {tid} lists '{fm}' in both addresses_ and records_failure_modes"
+                )
         for other in tool.get("composes_with", []) or []:
             composes[tid].add(other)
             if other not in tools:

@@ -19,6 +19,6 @@ detection_signals:
 
 crosswalks:
   - taxonomy: mast
-    external_id: MAST-FM-11
+    external_id: FM-1.1
     confidence: partial
-    note: MAST Verification Failure covers acceptance of incorrect output; logic_error is a cause upstream.
+    note: MAST "Disobey task specification" includes code that runs but misses a stated requirement (the paper's ChatDev Wordle example); FM-1.1 also covers non-code violations.

@@ -3,136 +3,131 @@ saica_axis: failure_mode
 taxonomy: mast
 authored_by:
   - claude-opus-4-7
-last_reviewed: 2026-04-22
+last_reviewed: 2026-11-21
+
+# Re-judged 2026-11-21 against the published MAST (arXiv 2503.13657v3,
+# Appendix A definitions). MAST describes the behaviour of agents in a
+# multi-agent run; SAICA modes describe what a coding agent does to a
+# codebase. So "exact" is used only where a MAST annotator and a SAICA
+# labeller would tag the same incident. See
+# research/review_20261121/mast_fix.md for the old -> new history.
+#
+# Unmapped on purpose (no SAICA counterpart):
+#   FM-2.2 Fail to ask for clarification (SAICA has no clarification /
+#          escalation mode)
+#   FM-2.4 Information withholding, FM-2.5 Ignored other agent's input
+#          (inter-agent only)
+#   FM-2.6 Reasoning-action mismatch (agent-behaviour mode; no SAICA mode
+#          is defined by plan-vs-action divergence)
 
 mappings:
-  # MAST-FM-01 — Role Violation
+  # FM-1.1 Disobey task specification
   - saica_value: scope_creep
-    external_id: MAST-FM-01
-    confidence: exact
-    note: >
-      Role violation in MAS is the direct multi-agent expression of
-      scope_creep (acting outside declared task/role boundary).
-
-  # MAST-FM-02 — Task Decomposition Failure
-  - saica_value: logic_error
-    external_id: MAST-FM-02
+    external_id: FM-1.1
     confidence: partial
     note: >
-      Decomposition failures are reasoning errors; logic_error covers the
-      single-agent analog.
-
-  # MAST-FM-03 — Coordination Failure
-  # Primarily multi-agent; no strong single-agent counterpart. Omitted.
-
-  # MAST-FM-04 — Redundant Work
-  - saica_value: dependency_blindness
-    external_id: MAST-FM-04
-    confidence: related
-    note: >
-      dependency_blindness is cross-codebase reinvention; MAST-FM-04 is
-      cross-agent duplication. Spiritual analog, not a strict mapping.
-
-  # MAST-FM-05 — Communication Breakdown
-  # Multi-agent specific; omitted.
-
-  # MAST-FM-06 — Stalling / Deadlock
-  # Multi-agent specific; omitted (no single-agent counterpart in SAICA enum).
-
-  # MAST-FM-07 — Premature Termination
-  - saica_value: incomplete_execution
-    external_id: MAST-FM-07
-    confidence: exact
-    note: >
-      Direct counterpart — ending a task before completion criteria are met
-      is exactly incomplete_execution (claimed-done / premature-completion).
+      Acting beyond the stated task violates the task's constraints, which
+      FM-1.1 covers; FM-1.1 is wider (any unmet requirement or constraint).
   - saica_value: logic_error
-    external_id: MAST-FM-07
-    confidence: related
-    note: >
-      Premature termination is also a control-flow / reasoning defect;
-      logic_error remains a related causal mode.
-
-  # MAST-FM-08 — Goal Drift
-  - saica_value: context_pollution
-    external_id: MAST-FM-08
+    external_id: FM-1.1
     confidence: partial
     note: >
-      context_pollution captures within-session drift; MAST goal drift is
-      broader (may be adversarially induced) but overlaps substantially.
+      FM-1.1 includes code that runs but misses a stated requirement (the
+      paper's ChatDev Wordle example ships a fixed word list against the
+      spec), which is logic_error. FM-1.1 also covers non-code violations.
+
+  # FM-1.2 Disobey role specification
   - saica_value: scope_creep
-    external_id: MAST-FM-08
-    confidence: related
-    note: >
-      Drift may manifest as unrequested actions, overlapping with
-      scope_creep.
-
-  # MAST-FM-09 — Tool Misuse
-  - saica_value: logic_error
-    external_id: MAST-FM-09
+    external_id: FM-1.2
     confidence: partial
     note: >
-      Incorrect tool invocation with real APIs is a logic_error; MAST-FM-09
-      also includes unnecessary invocations (scope_creep-adjacent).
-  - saica_value: fabrication
-    external_id: MAST-FM-09
-    confidence: related
-    note: Invoking a non-existent tool overlaps with fabrication.
-  - saica_value: scope_creep
-    external_id: MAST-FM-09
-    confidence: related
-    note: Unnecessary tool calls beyond task scope overlap with scope_creep.
+      Overstepping an assigned role ("an agent behaving like another") is
+      the multi-agent form of acting outside the declared boundary. Not
+      exact: SAICA scope is set by the user's request, not by a role.
 
-  # MAST-FM-10 — Fabrication in Inter-Agent Messages
-  - saica_value: fabrication
-    external_id: MAST-FM-10
-    confidence: partial
-    note: >
-      SAICA fabrication is about non-existent code references; MAST-FM-10 is
-      about factually incorrect assertions between agents. Same family,
-      different medium.
-
-  # MAST-FM-11 — Verification Failure
-  - saica_value: logic_error
-    external_id: MAST-FM-11
-    confidence: partial
-    note: >
-      Accepting incorrect output without checking is downstream of a
-      logic_error; overlap is on cause, not on symptom.
-  - saica_value: test_manipulation
-    external_id: MAST-FM-11
-    confidence: partial
-    note: >
-      Verification-failure is adjacent to test_manipulation — both involve
-      the agent not honestly evaluating its own output. MAST-FM-11 covers
-      passive non-checking; test_manipulation covers active gaming.
-
-  # MAST-FM-12 — Escalation Failure
-  # SAICA enum has no human-escalation failure mode; omitted.
-
-  # MAST-FM-13 — Context Loss
-  - saica_value: context_pollution
-    external_id: MAST-FM-13
-    confidence: exact
-    note: >
-      Context loss (dropping still-relevant prior context) is the direct
-      counterpart of context_pollution (session-state hygiene failure).
-
-  # MAST-FM-14 — Infinite Loop
+  # FM-1.3 Step repetition
   - saica_value: cascading_failure
-    external_id: MAST-FM-14
+    external_id: FM-1.3
+    confidence: related
+    note: >
+      Repeated steps show up in recovery spirals, but FM-1.3 is redoing
+      completed work, while cascading_failure is fixes that add new errors.
+  - saica_value: context_pollution
+    external_id: FM-1.3
+    confidence: related
+    note: >
+      Repeating already-completed steps is a detection signal that the agent
+      has lost track of session state.
+
+  # FM-1.4 Loss of conversation history
+  - saica_value: context_pollution
+    external_id: FM-1.4
     confidence: partial
     note: >
-      Infinite loops are one manifestation of a recovery-spiral: repeated
-      fix attempts that compound rather than converge. cascading_failure
-      captures the compounding pattern; MAST-FM-14 is the MAS-level symptom.
-  - saica_value: context_pollution
-    external_id: MAST-FM-14
+      Context truncation that drops recent history is the "relevant prior
+      information is dropped" part of context_pollution. context_pollution
+      is wider (also accumulation of irrelevant material and earlier
+      hallucinations treated as ground truth).
+
+  # FM-1.5 Unaware of termination conditions
+  - saica_value: scope_creep
+    external_id: FM-1.5
     confidence: related
     note: >
-      Repeated identical tool calls are a context_pollution detection
-      signal; infinite loop is the MAS-level pattern.
-  - saica_value: logic_error
-    external_id: MAST-FM-14
+      Not recognising that the task is done leads to unnecessary
+      continuation, one route to unrequested follow-on work.
+
+  # FM-2.1 Conversation reset
+  - saica_value: context_pollution
+    external_id: FM-2.1
     confidence: related
-    note: Infinite loops often originate in a control-flow logic_error.
+    note: >
+      An unwarranted restart loses context and progress, an abrupt form of
+      in-session state loss.
+
+  # FM-2.3 Task derailment
+  - saica_value: scope_creep
+    external_id: FM-2.3
+    confidence: related
+    note: >
+      Deviation from the objective "resulting in irrelevant or unproductive
+      actions" overlaps with unrequested actions.
+  - saica_value: context_pollution
+    external_id: FM-2.3
+    confidence: related
+    note: >
+      Gradual derailment often follows context degradation, but FM-2.3 is
+      about the objective, context_pollution about session state.
+
+  # FM-3.1 Premature termination
+  - saica_value: incomplete_execution
+    external_id: FM-3.1
+    confidence: exact
+    note: >
+      Ending a task before its objectives are met is the core of
+      incomplete_execution (terminating before all user-specified items are
+      addressed). SAICA also stresses the false "done" claim, which MAST
+      does not require.
+
+  # FM-3.2 No or incomplete verification
+  - saica_value: incomplete_execution
+    external_id: FM-3.2
+    confidence: related
+    note: >
+      Claiming success without checking outcomes is how incomplete work
+      ships as "done"; FM-3.2 is the missing check, not the missing work.
+  - saica_value: logic_error
+    external_id: FM-3.2
+    confidence: related
+    note: >
+      Omitted verification is what lets a logic_error propagate undetected;
+      the overlap is cause and effect, not the same failure.
+
+  # FM-3.3 Incorrect verification
+  - saica_value: test_manipulation
+    external_id: FM-3.3
+    confidence: partial
+    note: >
+      Weakening or rewriting tests yields a verification step that does not
+      validate anything. FM-3.3 covers honest but inadequate checking too;
+      test_manipulation is the deliberate gaming case.

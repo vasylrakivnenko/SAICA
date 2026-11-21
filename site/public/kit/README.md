@@ -58,7 +58,7 @@ CI, the self-test and the dashboard.
     },
     {
       "id": "sentrux",
-      "failure_modes": ["cascading_failure", "dependency_blindness"],
+      "failure_modes": ["dependency_blindness"],
       "runs_per_commit": true,
       "command": "sentrux gate",
       "blocking": false,

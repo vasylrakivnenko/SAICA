@@ -1,14 +1,13 @@
 ---
 // SAICA-Bench home: the leaderboard. Data: /bench/results.json, written by
 // bench/build_report.py from each failure mode's results. An Overview tab (results.overview: reviewer x mode
-// grid, best tool per mode, findings) and one tab per mode.
+// grid, quality-vs-cost chart, findings) and one tab per mode. The best-tool-per-mode table lives on /tools/.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import BestPerMode from '../components/home/BestPerMode.astro';
 import results from '../../public/bench/results.json';
-import { OVERVIEW as OV, MODES, SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, GENERATED_LONG, AUTHOR, pct, money, toolPage } from '../components/home/bench';
+import { OVERVIEW as OV, MODES, SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, AUTHOR, pct, money, toolPage } from '../components/home/bench';
 import { SITE_NAME, abs, fmUrl } from '../lib/seo';
 
-// SEO: the Overview tab (grid, legend, findings, caveats) and the best-per-mode table are rendered here at build time,
+// SEO: the Overview tab (grid, legend, findings, caveats) is rendered here at build time,
 // so the page has its results in static HTML; the inline script below re-renders them identically and adds the rest.
 const hi = [...SUMMARIES].sort((a, b) => b.best.j - a.best.j);
 const title = 'SAICA-Bench: AI Code Review Benchmark for Coding Agent Failures';
@@ -64,10 +63,6 @@ const ovTypes = [...new Set(OV.rows.map((r) => r.type))];
       <div class="chart" id="lb-ov-chart"></div>
       <h2>What the grid says</h2>
       <ul class="findings" id="lb-ov-findings">{OV.findings.map(([lead, rest]) => <li><b>{lead}</b>{rest}</li>)}</ul>
-      <h2>Best tool per failure mode</h2>
-      <p class="fine ov-intro">The top entry in each mode with its true and false positive rates and its cost per 1,000 reviews, next to the best free option (a free program or a simple rule). A mode's name opens what it is and how to catch it; “All →” opens its tab.</p>
-      <BestPerMode />
-      <p class="fine">Results as of {GENERATED_LONG} · <a href="/findings/">All findings in one page →</a></p>
       <h2>Read before citing</h2>
       <ul class="ov-caveats" id="lb-ov-caveats">{OV.caveats.map((c) => <li>{c}</li>)}</ul>
     </section>

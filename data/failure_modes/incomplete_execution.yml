@@ -37,6 +37,6 @@ crosswalks:
     confidence: exact
     note: DAPLab "Incomplete Task Execution" is the direct counterpart.
   - taxonomy: mast
-    external_id: MAST-FM-07
+    external_id: FM-3.1
     confidence: exact
-    note: MAST "Premature Termination" is the direct counterpart at the multi-agent level.
+    note: MAST "Premature termination" (ending a task before its objectives are met) is the direct counterpart at the multi-agent level.

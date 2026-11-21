@@ -23,9 +23,9 @@ crosswalks:
     confidence: partial
     note: OWASP "Memory & Context Poisoning" covers adversarial manipulation; context_pollution covers accidental drift as well.
   - taxonomy: mast
-    external_id: MAST-FM-13
-    confidence: exact
-    note: MAST Context Loss is the direct counterpart.
+    external_id: FM-1.4
+    confidence: partial
+    note: MAST "Loss of conversation history" (context truncation) is the dropped-information part of context_pollution, which also covers accumulated noise and earlier hallucinations.
   - taxonomy: daplab-9-patterns
     external_id: DAP-05
     confidence: exact

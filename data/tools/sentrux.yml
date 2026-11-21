@@ -63,10 +63,14 @@ documented_in: []
 
 inclusion_rationale: >
   Occupies detection × post_generation × fully_autonomous for
-  cascading_failure (continuous architectural metrics let an agent
-  detect that its own session regressed quality before the next
-  edit) and dependency_blindness (the redundancy metric flags
-  scattered re-implementations of the same concept across files).
+  dependency_blindness: the redundancy metric flags duplicate
+  function bodies (identical body hashes) inside the repo. Narrow
+  coverage: it catches exact in-repo duplicates, not re-implementation
+  of stdlib or library functionality. The session gate (`sentrux
+  gate`) measures structural-quality regression between agent runs;
+  the 2026-11-20 tag audit judged that this is not detection of
+  cascading_failure (error recovery compounding errors), so that
+  tag was removed (research/fm_tag_audit/final_table.csv).
   Distinct from langfuse / helicone (LLM-call observability) by
   observing the *codebase structure* rather than the model trace,
   and from semgrep / tree-sitter (rule-or-pattern static analysis)
@@ -87,5 +91,4 @@ provenance:
   discovery_sources:
     - manual
   failure_mode_hits:
-    - cascading_failure
     - dependency_blindness

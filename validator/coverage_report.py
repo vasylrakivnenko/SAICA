@@ -68,7 +68,10 @@ PAPER_KEYWORDS: list[tuple[str, list[str]]] = [
         "wang-2024-llms-meet-library-evolution",
         ["deprecat", "library evolution", "obsolescen", "version"],
     ),
-    ("liu-2025-code-copycat", ["repetition", "copycat", "duplicat"]),
+    (
+        "liu-2025-code-copycat-conundrum-demystifying",
+        ["repetition", "copycat", "duplicat"],
+    ),
     ("cemri-2025-mast", ["multi-agent", "multi agent", "mas"]),
     ("williams-2025-sscs", ["supply chain", "supply-chain", "sscs"]),
     ("lindner-2025-monitoring", ["monitor", "observability", "trace"]),

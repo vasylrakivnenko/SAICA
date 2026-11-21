@@ -18,9 +18,9 @@ detection_signals:
 
 crosswalks:
   - taxonomy: mast
-    external_id: MAST-FM-01
-    confidence: exact
-    note: MAST Role Violation is the direct counterpart at the multi-agent level.
+    external_id: FM-1.2
+    confidence: partial
+    note: MAST "Disobey role specification" (an agent overstepping its assigned role) is the multi-agent form of acting outside the declared boundary; see also FM-1.1 in the mast-to-saica crosswalk.
   - taxonomy: owasp-agentic-top-10-2026
     external_id: ASI02
     confidence: partial

@@ -62,3 +62,8 @@ notes: >
   Relates to SAICA-KG failure modes: context_pollution, logic_error. Cite when
   arguing that syntactic-quality detectors complement semantic ones in the
   supervision stack.
+  Also the contrast paper for dependency_blindness: Liu 2025 measures
+  repetition *within* a single generation, whereas dependency_blindness is
+  the agent re-implementing code that already exists elsewhere (declared
+  dependencies, stdlib, internal modules). Merged from the duplicate record
+  liu-2025-code-copycat (same Semantic Scholar id), deleted 2026-11-21.

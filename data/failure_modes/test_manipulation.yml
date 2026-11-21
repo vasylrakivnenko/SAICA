@@ -39,6 +39,6 @@ crosswalks:
     confidence: exact
     note: DAPLab "Silent Test-Passing Workaround" is the direct counterpart.
   - taxonomy: mast
-    external_id: MAST-FM-11
+    external_id: FM-3.3
     confidence: partial
-    note: MAST "Verification Failure" is adjacent — accepting incorrect output without checking.
+    note: MAST "Incorrect verification" covers checks that fail to validate; test_manipulation is the deliberate case where the agent weakens the tests.

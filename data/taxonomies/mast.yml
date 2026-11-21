@@ -1,63 +1,144 @@
 id: mast
 name: "MAST: Multi-Agent System Failure Taxonomy"
 owner: Cemri et al. (UC Berkeley + collaborators)
-version: "2025"
+version: "arXiv 2503.13657v3 (2025-10-26)"
 first_published: 2025-03-17
+last_updated: 2025-10-26
 url: https://arxiv.org/abs/2503.13657
-license: "arXiv preprint; taxonomy content CC-BY"
+license: "arXiv preprint, CC BY-NC-ND 4.0 (per the arXiv abstract page). Labels and definitions below are quoted verbatim with attribution."
 paper_id: cemri-2025-mast
 scope: >
-  Failure modes of multi-agent LLM systems, grounded-theory derived from
-  1,600 annotated traces across 7 multi-agent frameworks.
+  Failure modes of multi-agent LLM systems: 14 failure modes in 3 categories,
+  derived from expert annotation of 150 traces (kappa = 0.88) and applied to
+  MAST-Data (1,600+ annotated traces across 7 multi-agent frameworks).
 
+# Ids are the paper's own: FC1-FC3 for the categories, FM-x.y for the
+# failure modes. Labels and descriptions are quoted from Appendix A of v3.
 categories:
-  - external_id: MAST-FM-01
-    label: Role Violation
-    description: Agent acts outside its declared role or scope.
-  - external_id: MAST-FM-02
-    label: Task Decomposition Failure
-    description: Agent fails to break a task into solvable subtasks.
-  - external_id: MAST-FM-03
-    label: Coordination Failure
-    description: Agents fail to coordinate on shared state or handoff.
-  - external_id: MAST-FM-04
-    label: Redundant Work
-    description: Multiple agents duplicate effort without coordination.
-  - external_id: MAST-FM-05
-    label: Communication Breakdown
-    description: Messages between agents are lost, misinterpreted, or ignored.
-  - external_id: MAST-FM-06
-    label: Stalling / Deadlock
-    description: Agents block waiting on each other with no progress.
-  - external_id: MAST-FM-07
-    label: Premature Termination
-    description: Agent ends a task before completion criteria are met.
-  - external_id: MAST-FM-08
-    label: Goal Drift
-    description: Agent's working goal diverges from the user's stated goal.
-  - external_id: MAST-FM-09
-    label: Tool Misuse
-    description: Agent invokes an available tool incorrectly or unnecessarily.
-  - external_id: MAST-FM-10
-    label: Fabrication in Inter-Agent Messages
-    description: Agent sends factually incorrect information to another agent.
-  - external_id: MAST-FM-11
-    label: Verification Failure
-    description: Agent accepts incorrect output without checking.
-  - external_id: MAST-FM-12
-    label: Escalation Failure
-    description: Agent does not escalate to a human when appropriate.
-  - external_id: MAST-FM-13
-    label: Context Loss
-    description: Relevant prior context is dropped or truncated.
-  - external_id: MAST-FM-14
-    label: Infinite Loop
-    description: Agent cycles over the same state or tool call indefinitely.
+  # --- 3 failure categories ---
+  - external_id: FC1
+    label: System Design Issues
+    description: >
+      Failures originate from system design decisions, and poor or ambiguous
+      prompt specifications.
+  - external_id: FC2
+    label: Inter-Agent Misalignment
+    description: >
+      Failures arise from a breakdown in critical information flow from
+      inter-agent interaction and coordination during execution.
+  - external_id: FC3
+    label: Task Verification
+    description: >
+      Failures involve inadequate verification processes that fail to detect
+      or correct errors, or premature termination of tasks.
+
+  # --- FC1. System Design Issues ---
+  - external_id: FM-1.1
+    label: Disobey task specification
+    description: >
+      Failure to adhere to the specified constraints or requirements of a
+      given task, leading to suboptimal or incorrect outcomes.
+    parent_id: FC1
+  - external_id: FM-1.2
+    label: Disobey role specification
+    description: >
+      Failure to adhere to the defined responsibilities and constraints of an
+      assigned role, potentially leading to an agent behaving like another.
+    parent_id: FC1
+  - external_id: FM-1.3
+    label: Step repetition
+    description: >
+      Unnecessary reiteration of previously completed steps in a process,
+      potentially causing delays or errors in task completion.
+    parent_id: FC1
+  - external_id: FM-1.4
+    label: Loss of conversation history
+    description: >
+      Unexpected context truncation, disregarding recent interaction history
+      and reverting to an antecedent conversational state.
+    parent_id: FC1
+  - external_id: FM-1.5
+    label: Unaware of termination conditions
+    description: >
+      Lack of recognition or understanding of the criteria that should
+      trigger the termination of the agents' interaction, potentially leading
+      to unnecessary continuation.
+    parent_id: FC1
+
+  # --- FC2. Inter-Agent Misalignment ---
+  - external_id: FM-2.1
+    label: Conversation reset
+    description: >
+      Unexpected or unwarranted restarting of a dialogue, potentially losing
+      context and progress made in the interaction.
+    parent_id: FC2
+  - external_id: FM-2.2
+    label: Fail to ask for clarification
+    description: >
+      Inability to request additional information when faced with unclear or
+      incomplete data, potentially resulting in incorrect actions.
+    parent_id: FC2
+  - external_id: FM-2.3
+    label: Task derailment
+    description: >
+      Deviation from the intended objective or focus of a given task,
+      potentially resulting in irrelevant or unproductive actions.
+    parent_id: FC2
+  - external_id: FM-2.4
+    label: Information withholding
+    description: >
+      Failure to share or communicate important data or insights that an
+      agent possess and could impact decision-making of other agents if
+      shared.
+    parent_id: FC2
+  - external_id: FM-2.5
+    label: Ignored other agent's input
+    description: >
+      Disregarding or failing to adequately consider input or recommendations
+      provided by other agents in the system, potentially leading to
+      suboptimal decisions or missed opportunities for collaboration.
+    parent_id: FC2
+  - external_id: FM-2.6
+    label: Reasoning-action mismatch
+    description: >
+      Discrepancy between the logical reasoning process and the actual
+      actions taken by the agent, potentially resulting in unexpected or
+      undesired behaviors.
+    parent_id: FC2
+
+  # --- FC3. Task Verification ---
+  - external_id: FM-3.1
+    label: Premature termination
+    description: >
+      Ending a dialogue, interaction or task before all necessary information
+      has been exchanged or objectives have been met, potentially resulting
+      in incomplete or incorrect outcomes.
+    parent_id: FC3
+  - external_id: FM-3.2
+    label: No or incomplete verification
+    description: >
+      (partial) omission of proper checking or confirmation of task outcomes
+      or system outputs, potentially allowing errors or inconsistencies to
+      propagate undetected.
+    parent_id: FC3
+  - external_id: FM-3.3
+    label: Incorrect verification
+    description: >
+      Failure to adequately validate or cross-check crucial information or
+      decisions during the iterations, potentially leading to errors or
+      vulnerabilities in the system.
+    parent_id: FC3
 
 notes: >
-  Category labels here are paraphrased for seed purposes and MUST be verified
-  against the MAST paper's Table 1 before v0.1 release. Full-text review is
-  a Week-1 task.
+  Checked 2026-11-21 against arXiv 2503.13657v3 (2025-10-26, title "Why Do
+  Multi-Agent LLM Systems Fail?"): category names and definitions from
+  Section 4, failure-mode names and definitions from Appendix A. Earlier
+  versions use the same FM-1.1 to FM-3.3 ids and mode names, but v1 names
+  the categories "Specification and System Design Failures" (FC1) and "Task
+  Verification and Termination" (FC3). Earlier SAICA-KG releases carried
+  paraphrased seed labels (MAST-FM-01 to MAST-FM-14) that did not match the
+  paper; they were replaced by the paper's ids on 2026-11-21 and all
+  crosswalks were re-judged against these definitions.
 
 inclusion_rationale: >
   MAST is the most-cited 2025 multi-agent failure taxonomy and is a primary

@@ -19,7 +19,7 @@ related_modes:
   - logic_error
 
 prior_work:
-  - liu-2025-code-copycat
+  - liu-2025-code-copycat-conundrum-demystifying
   - usman-2017-taxonomy-construction
 
 detection_signals:

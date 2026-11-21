@@ -1,11 +1,11 @@
 id: swiss-cheese-model
 name: "Swiss Cheese Model for AI Safety: Multi-Layered Runtime Guardrail Taxonomy"
 owner: Shamsujjoha, Lu, Zhao, Zhu (CSIRO Data61)
-version: "2025-01 (v3)"
+version: "2025-01 (arXiv v4; IEEE ICSA 2025)"
 first_published: 2024-08-05
 last_updated: 2025-01-27
 url: https://arxiv.org/abs/2408.02205
-license: "arXiv preprint; CC-BY"
+license: "arXiv preprint; CC BY-NC-SA 4.0"
 paper_id: shamsujjoha-2024-swiss-cheese-model
 scope: >
   A SLR-derived taxonomy of multi-layered runtime guardrails for
@@ -15,6 +15,28 @@ scope: >
   reference architecture for AI safety by design.
 
 categories:
+  # --- Top-level dimensions (parents of the categories below) ---
+  - external_id: SC-QA
+    label: Quality Attributes
+    description: >
+      Properties a runtime guardrail should possess (accuracy, privacy,
+      security, safety, fairness, and so on). Parent of SC-QA-01..14.
+  - external_id: SC-PIPE
+    label: Pipelines
+    description: >
+      Where in the agent's request/response flow the guardrail acts (prompt,
+      intermediate-results, and final-results stages). Parent of SC-PIPE-01..03.
+  - external_id: SC-ART
+    label: Artifacts
+    description: >
+      Agent artifacts the guardrail protects (goals, context, memory, plans,
+      tools, and so on). Parent of SC-ART-01..10.
+  - external_id: SC-ACT
+    label: Actions
+    description: >
+      What a guardrail can do when triggered (block, flag, modify, retry,
+      fall back, isolate, and so on). Parent of SC-ACT-01..13.
+
   # --- Quality Attributes (what a guardrail should possess) ---
   - external_id: SC-QA-01
     label: Accuracy
@@ -185,9 +207,10 @@ categories:
 
 notes: >
   Category labels derived from the arXiv v3 HTML; quality-attribute and
-  action lists are canonical. Parent_id groupings (SC-QA, SC-PIPE, SC-ART,
-  SC-ACT) are synthetic grouping anchors used for hierarchy — the underlying
-  paper treats them as dimensions rather than named parents. Pending
+  action lists are canonical. The parent categories SC-QA, SC-PIPE, SC-ART
+  and SC-ACT are SAICA-KG ids for the paper's dimensions (the paper names
+  the dimensions but gives them no ids); they are defined at the top of
+  `categories:` so every parent_id resolves. Pending
   full-text verification against the final ICSA 2025 version, including the
   Rules, Sources, Modality, and Underlying-Models dimensions which are
   deferred to v0.2 expansion.

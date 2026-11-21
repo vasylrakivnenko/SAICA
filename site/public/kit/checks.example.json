@@ -19,7 +19,6 @@
     {
       "id": "sentrux",
       "failure_modes": [
-        "cascading_failure",
         "dependency_blindness"
       ],
       "runs_per_commit": true,
