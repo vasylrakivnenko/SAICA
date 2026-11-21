@@ -30,6 +30,12 @@ import results from '../../public/bench/results.json';
       <ul class="ov-caveats" id="lb-ov-caveats"></ul>
     </section>
 
+    <section id="lb-star" hidden>
+      <p class="fine ov-intro" id="lb-star-intro"></p>
+      <div class="tbl-wrap"><table id="lb-star-table"></table></div>
+      <p class="fine" id="lb-star-note"></p>
+    </section>
+
     <div id="lb-mode">
     <div class="controls">
       <div class="types" id="lb-types" role="group" aria-label="Filter by type"></div>
@@ -72,7 +78,7 @@ import results from '../../public/bench/results.json';
 </BaseLayout>
 
 <script is:inline define:vars={{ results }}>
-const DATA = results.modes, TYPE_LABEL = results.type_label, OV = results.overview;
+const DATA = results.modes, TYPE_LABEL = results.type_label, OV = results.overview, STAR = results.star_modes || [];
 const TYPE_VAR = {deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule'};
 const isBaseline = (r) => r.type === 'baseline_model' || r.type === 'baseline_rule';
 const pct = (x) => (x * 100).toFixed(1) + '%';
@@ -251,18 +257,40 @@ function renderOvChart() {
   box.append(svg, tip);
 }
 
+function renderStar(m) {
+  const MECH = { detects: 'Detects', prevents: 'Prevents', records: 'Records only' };
+  const fin = (v) => (v === true ? 'yes' : v === false ? 'no' : 'unclear');
+  document.getElementById('lb-star-intro').textContent = `Not benchmarked yet: no public dataset with confirmed labels exists for ${m.name.toLowerCase()}, so these are the SAICA catalog's tools tagged for it, ranked by GitHub stars. Stars measure popularity, not how well a tool catches the failure. ${m.description || ''}`;
+  const head = el('thead', {}, el('tr', {}, el('th', { class: 'num', text: '#' }), el('th', { text: 'Tool' }), el('th', { text: 'How it addresses this' }),
+    el('th', { 'data-tip': 'Detects = flags it after the fact; Prevents = stops it during a run; Records only = keeps traces you could inspect', text: 'Mechanism' }),
+    el('th', { 'data-tip': 'Can it check a finished change or saved session, rather than only working inside a run or an agent built with it?', text: 'On a finished change' }),
+    el('th', { class: 'num', text: '★ Stars' })));
+  const tools = [...m.tools].sort((a, b) => (b.stars || 0) - (a.stars || 0));
+  const body = el('tbody', {}, tools.map((t, i) => el('tr', { class: t.mechanism === 'records' ? 'baseline' : '' },
+    el('td', { class: 'num rank', text: String(i + 1) }),
+    el('td', {}, t.repository_url ? el('a', { href: t.repository_url, rel: 'noopener', text: t.name }) : t.name),
+    el('td', { class: 'how', text: t.how || '' }),
+    el('td', {}, el('span', { class: 'pill', style: 'color:#1f3a93', text: MECH[t.mechanism] || t.mechanism })),
+    el('td', { text: fin(t.runs_on_finished_change) }),
+    el('td', { class: 'num', 'data-tip': t.stars_updated_at ? `as of ${t.stars_updated_at}` : '', text: t.stars ? t.stars.toLocaleString('en-US') : '—' }))));
+  document.getElementById('lb-star-table').replaceChildren(head, body);
+  document.getElementById('lb-star-note').textContent = m.note || '';
+}
+
 function render() {
-  const ov = state.mode === 'overview';
+  const ov = state.mode === 'overview', star = STAR.find((m) => m.id === state.mode);
   document.querySelectorAll('#lb-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.id === state.mode)));
   document.getElementById('lb-ov').hidden = !ov;
-  document.getElementById('lb-mode').hidden = ov;
+  document.getElementById('lb-star').hidden = !star;
+  document.getElementById('lb-mode').hidden = ov || !!star;
   if (ov) { renderOvChart(); return; }
+  if (star) { renderStar(star); return; }
   const m = DATA.find((d) => d.id === state.mode);
   renderTable(m); renderChart(m);
 }
 function go(id) { state.mode = id; history.replaceState(null, '', '#' + id); render(); }
 const tabs = document.getElementById('lb-tabs');
-const tabDefs = (OV ? [{ id: 'overview', name: 'Overview' }] : []).concat(DATA);
+const tabDefs = (OV ? [{ id: 'overview', name: 'Overview' }] : []).concat(DATA, STAR);
 tabDefs.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => go(m.id)); tabs.append(b); });
 if (OV) { renderOverview(); renderOvModes(); }
 document.querySelectorAll('#lb-table .sort').forEach((b) => b.addEventListener('click', () => { state.key = b.dataset.k; render(); }));
@@ -277,7 +305,7 @@ ALL_TYPES.forEach((t) => { const b = el('button', { type: 'button', class: 'chip
 function syncTypes() { typesBox.querySelectorAll('.chip[data-t]').forEach((b) => b.setAttribute('aria-pressed', String(state.types.has(b.dataset.t) && state.types.size < ALL_TYPES.length)));
   allBtn.setAttribute('aria-pressed', String(state.types.size === ALL_TYPES.length)); store('types', [...state.types]); render(); }
 cs.addEventListener('change', () => { state.stars = cs.checked; store('stars', cs.checked); render(); });
-const h = location.hash.slice(1); if (DATA.some((d) => d.id === h) || (OV && h === 'overview')) state.mode = h;
+const h = location.hash.slice(1); if (DATA.some((d) => d.id === h) || STAR.some((d) => d.id === h) || (OV && h === 'overview')) state.mode = h;
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 100); });
 syncTypes();
 </script>
@@ -335,6 +363,7 @@ syncTypes();
   .lb .legend i.fl { width: 18px; height: 0; border-top: 2px dashed var(--frontier); border-radius: 0; }
   .lb .more { margin-top: 2rem; font: 14px ui-sans-serif, system-ui, sans-serif; }
   .lb .ov-intro { margin: 0 0 .8rem; }
+  .lb #lb-star-table td.how { white-space: normal; min-width: 260px; max-width: 460px; color: #4a5160; font-size: 13px; line-height: 1.4; }
   .lb table.ov th { white-space: normal; vertical-align: bottom; text-transform: none; letter-spacing: 0; font-size: 12.5px; line-height: 1.25; min-width: 66px; }
   .lb table.ov th.mcol { text-align: center; }
   .lb table.ov .mlink { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; border-bottom: 1px dotted #7a8192; text-align: center; }

@@ -22,7 +22,7 @@
     "348 fabricated completions (fake imports, fake methods, undefined names), written by Claude Sonnet 4.5 and verified to fail; 288 clean originals of the same code.",
     "Static tools see the whole file with its 99 packages installed. AI tools see a diff with 15 lines of context.",
     "Static tools count only findings that a symbol doesn't exist. A flag on a clean original is a false positive.",
-    "Temperature 0, one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
+    "Temperature 0 (gpt-6-luna: its default, no temperature sent), one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19."
    ],
    "caveats": [
     "The fakes were made on purpose and the dataset picked hard cases; real agent mistakes may be easier or harder.",
@@ -1039,7 +1039,7 @@
     },
     {
      "key": "mypy",
-     "tool": "mypy (--check-untyped-defs)",
+     "tool": "mypy (--check-untyped-defs --ignore-missing-imports)",
      "type": "deterministic",
      "j": -0.007144174041297937,
      "catch": 0.026041666666666668,
@@ -1605,7 +1605,7 @@
     },
     {
      "key": "ruff_npy",
-     "tool": "ruff NumPy 2 rules (NPY201)",
+     "tool": "ruff NumPy rules (NPY)",
      "type": "deterministic",
      "j": 0.07741935483870968,
      "catch": 0.07741935483870968,
@@ -2406,7 +2406,7 @@
      },
      "logic_error": {
       "j": -0.007144174041297937,
-      "tool": "mypy (--check-untyped-defs)",
+      "tool": "mypy (--check-untyped-defs --ignore-missing-imports)",
       "short": "mypy",
       "fa": 0.033185840707964605,
       "cost1k": 0.0
@@ -2450,8 +2450,8 @@
      },
      "obsolescence": {
       "j": 0.07741935483870968,
-      "tool": "ruff NumPy 2 rules (NPY201)",
-      "short": "ruff NumPy 2 rules",
+      "tool": "ruff NumPy rules (NPY)",
+      "short": "ruff NumPy rules",
       "fa": 0.0,
       "cost1k": 0.0
      }
@@ -2674,7 +2674,195 @@
    "J compares tools within a mode. Across modes it only roughly reflects difficulty: each dataset was built differently (real agent runs, execution-checked model code, synthetic injections, hand-built pairs), so a high J on a hand-built synthetic mode is not as hard-won as a low one on real agent runs.",
    "Averages weight every mode equally and cover only the modes a tool ran (the number is in brackets).",
    "mypy, ruff and the simple rules show the best configuration we ran in each mode; hover a cell to see which. pyright and mypy on Obsolescence ran with the latest libraries installed.",
-   "Same prompt style for every model, temperature 0, one run each; no tool was tuned per mode. Findings above are computed from the table, so they update with it."
+   "Same prompt style for every model, temperature 0 (gpt-6-luna: its default), one run each; no tool was tuned per mode. Findings above are computed from the table, so they update with it."
   ]
- }
+ },
+ "star_modes": [
+  {
+   "id": "cascading_failure",
+   "fm": "cascading_failure",
+   "name": "Cascading failure",
+   "benchmarked": false,
+   "description": "The agent detects an error and attempts a fix that introduces NEW errors; repeated iterations spiral further from the working state.",
+   "note": "No dedicated tool yet. The KG's only tag is borderline: agent-governance-toolkit's circuit breakers stop error-rate runaways, not fix-spirals, and it is an experimental template.",
+   "tools": [
+    {
+     "id": "agent-governance-toolkit",
+     "name": "agent-governance-toolkit",
+     "stars": 1177,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/microsoft/agent-governance-toolkit",
+     "documentation_url": null,
+     "implementation": "deterministic",
+     "mechanism": "prevents",
+     "how": "Its Agent SRE layer ships a kill switch, SLO/error-budget monitoring and circuit breakers that halt a runaway failing agent loop; aimed at generic error-rate runaways, not fix-spirals specifically.",
+     "evidence_url": "https://github.com/microsoft/agent-governance-toolkit",
+     "runs_on_finished_change": false,
+     "integration_surfaces": [
+      "library",
+      "cli"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "context_pollution",
+   "fm": "context_pollution",
+   "name": "Context pollution",
+   "benchmarked": false,
+   "description": "The agent's working context degrades over a session \u2014 relevant prior information is dropped, irrelevant material accumulates, or hallucinations from earlier turns are treated as ground truth in later turns.",
+   "note": "No dedicated detector for coding agents yet. The three that detect it are LLM-judge knowledge-retention scores built for chat assistants; several others only work on agents built with them.",
+   "tools": [
+    {
+     "id": "autogen",
+     "name": "AutoGen",
+     "stars": 57354,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/microsoft/autogen",
+     "documentation_url": "https://microsoft.github.io/autogen/",
+     "implementation": "hybrid",
+     "mechanism": "records",
+     "how": "Built-in OpenTelemetry tracing lets a human inspect drift; its buffered/head-tail contexts are token budgeting, not an anti-degradation mechanism.",
+     "evidence_url": "https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/tracing.html",
+     "runs_on_finished_change": false,
+     "integration_surfaces": [
+      "library"
+     ]
+    },
+    {
+     "id": "agno",
+     "name": "agno",
+     "stars": 39620,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/agno-agi/agno",
+     "documentation_url": null,
+     "implementation": "hybrid",
+     "mechanism": "records",
+     "how": "Traces runs and tool calls so a human can diagnose drift; no built-in context-pollution check.",
+     "evidence_url": "https://github.com/agno-agi/agno",
+     "runs_on_finished_change": false,
+     "integration_surfaces": [
+      "library"
+     ]
+    },
+    {
+     "id": "langgraph",
+     "name": "LangGraph",
+     "stars": 30108,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/langchain-ai/langgraph",
+     "documentation_url": "https://langchain-ai.github.io/langgraph/",
+     "implementation": "deterministic",
+     "mechanism": "prevents",
+     "how": "Memory docs name stale or off-topic context as a failure and ship trim/remove/summarize message utilities that the developer must apply; no detection.",
+     "evidence_url": "https://docs.langchain.com/oss/python/langgraph/memory",
+     "runs_on_finished_change": false,
+     "integration_surfaces": [
+      "library"
+     ]
+    },
+    {
+     "id": "mlflow",
+     "name": "mlflow",
+     "stars": 25505,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/mlflow/mlflow",
+     "documentation_url": null,
+     "implementation": "hybrid",
+     "mechanism": "detects",
+     "how": "Built-in multi-turn KnowledgeRetention LLM judge (experimental) checks whether the assistant retains information from earlier user inputs.",
+     "evidence_url": "https://mlflow.org/docs/latest/genai/eval-monitor/scorers/llm-judge/predefined/",
+     "runs_on_finished_change": true,
+     "integration_surfaces": [
+      "http_service",
+      "library",
+      "cli"
+     ]
+    },
+    {
+     "id": "mastra",
+     "name": "mastra",
+     "stars": 23247,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/mastra-ai/mastra",
+     "documentation_url": null,
+     "implementation": "hybrid",
+     "mechanism": "prevents",
+     "how": "Observational Memory compresses old messages into observations so the agent reads what matters instead of stale tool output over long sessions.",
+     "evidence_url": "https://mastra.ai/docs/memory/observational-memory",
+     "runs_on_finished_change": false,
+     "integration_surfaces": [
+      "library"
+     ]
+    },
+    {
+     "id": "opik",
+     "name": "opik",
+     "stars": 18988,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/comet-ml/opik",
+     "documentation_url": null,
+     "implementation": "hybrid",
+     "mechanism": "detects",
+     "how": "Conversation-thread metrics (Knowledge Retention, Degeneration) check that later replies keep earlier user facts and flag repetition/degeneration.",
+     "evidence_url": "https://www.comet.com/docs/opik/evaluation/metrics/conversation_threads_metrics",
+     "runs_on_finished_change": true,
+     "integration_surfaces": [
+      "http_service",
+      "library"
+     ]
+    },
+    {
+     "id": "deepeval",
+     "name": "DeepEval",
+     "stars": 14938,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/confident-ai/deepeval",
+     "documentation_url": null,
+     "implementation": "llm_based",
+     "mechanism": "detects",
+     "how": "Multi-turn LLM-judge metrics (Knowledge Retention, Turn Relevancy) score whether a conversation keeps earlier facts and stays on task.",
+     "evidence_url": "https://deepeval.com/docs/metrics-knowledge-retention",
+     "runs_on_finished_change": true,
+     "integration_surfaces": [
+      "library",
+      "cli"
+     ]
+    },
+    {
+     "id": "arize-phoenix",
+     "name": "Arize Phoenix",
+     "stars": 9394,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/Arize-ai/phoenix",
+     "documentation_url": "https://arize.com/docs/phoenix",
+     "implementation": "hybrid",
+     "mechanism": "records",
+     "how": "OpenTelemetry tracing records the session for human review; no built-in context-degradation metric.",
+     "evidence_url": "https://github.com/Arize-ai/phoenix",
+     "runs_on_finished_change": null,
+     "integration_surfaces": [
+      "http_service",
+      "library"
+     ]
+    },
+    {
+     "id": "trulens",
+     "name": "TruLens",
+     "stars": 3266,
+     "stars_updated_at": "2026-04-23",
+     "repository_url": "https://github.com/truera/trulens",
+     "documentation_url": null,
+     "implementation": "llm_based",
+     "mechanism": "records",
+     "how": "Trace-level Logical Consistency judge flags hallucinations and unsupported assertions, not stale or irrelevant context, so the audit keeps it as records only.",
+     "evidence_url": "https://github.com/truera/trulens/blob/main/docs/component_guides/evaluation/agentic_evaluations.md",
+     "runs_on_finished_change": null,
+     "integration_surfaces": [
+      "library"
+     ]
+    }
+   ]
+  }
+ ]
 }

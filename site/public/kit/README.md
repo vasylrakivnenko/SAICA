@@ -17,10 +17,13 @@ the copied setup prompt on `/tool-coverage` walks it through the steps.
 | `saica-ci.yml` | `.github/workflows/saica-ci.yml` | Same checks on every push (backstop for `--no-verify`). |
 | `dashboard.html` | `.saica/dashboard.template.html` | Offline dashboard: commits × failure modes. |
 | `selftest.py` | `.saica/selftest.py` | End-to-end proof that the wiring works. |
+| `saica_llm_review.py` | `.saica/saica_llm_review.py` | Optional: runs a benchmarked LLM reviewer as a check (see [LLM reviewer checks](#llm-reviewer-checks)). |
+| `prompts/<mode>.md` | `.saica/prompts/<mode>.md` | Optional: the SAICA-Bench reviewer prompts. |
 
 Commit `.saica/saica_check.py`, `.saica/checks.json`, `.saica/selftest.py`,
-`.saica/dashboard.template.html`. Gitignore `.saica/events.jsonl`,
-`.saica/pending.jsonl`, `.saica/dashboard.html`.
+`.saica/dashboard.template.html` (plus `.saica/saica_llm_review.py` and
+`.saica/prompts/` if you use LLM reviewers). Gitignore `.saica/events.jsonl`,
+`.saica/pending.jsonl`, `.saica/dashboard.html`, `.saica/task.md`.
 
 ---
 
@@ -61,10 +64,12 @@ CI, the self-test and the dashboard.
       "metric": { "name": "quality", "regex": "quality[^0-9]*([0-9]+(?:\\.[0-9]+)?)" }
     },
     {
-      "id": "activepieces",
-      "failure_modes": ["context_pollution", "scope_creep", "supply_chain_attack"],
-      "runs_per_commit": false,
-      "note": "Workflow platform; not a per-commit check."
+      "id": "dependency-blindness-review",
+      "failure_modes": ["dependency_blindness"],
+      "runs_per_commit": true,
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.md --model gpt-6-luna --api-style azure --api-base-env SAICA_LLM_API_BASE --api-key-env SAICA_LLM_API_KEY",
+      "blocking": false,
+      "timeout_s": 300
     }
   ]
 }
@@ -167,3 +172,81 @@ framework configuration; the runner and direct Git hooks do not require it.
 events (with `</` escaped) and writes `.saica/dashboard.html`. When the
 embedded array is empty the page tries `fetch("events.jsonl")` and
 offers a file picker / drag-and-drop for a `.jsonl` file.
+
+---
+
+## LLM reviewer checks
+
+`saica_llm_review.py` (Python 3.9+, stdlib only) runs one SAICA-Bench
+reviewer prompt as an ordinary `command`, so its results flow through the
+same events, blocking rules and dashboard as any other tool. Commit it and
+the prompts: pre-commit runs commands in a temporary checkout of the staged
+tree, and untracked files are not in that checkout.
+
+```bash
+python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.md \
+    --model gpt-6-luna --api-style azure --dry-run   # print the filled prompt; no call
+```
+
+- **Which change.** In pre-commit (`SAICA_REPO_ROOT` is set) the reviewer
+  reads the staged diff with `git diff --cached`, which inside the temporary
+  checkout reads the snapshot's index. Everywhere else (CI, `run --commit`,
+  manual runs) it reviews `HEAD` against its first parent; `saica-ci.yml`
+  checks each commit out first. Override with `--staged`, `--commit REV` or
+  `--diff-file PATH` (`-` = stdin). Do not use `replay --with-tools` with LLM
+  reviewers: replay does not check out old commits, so the reviewer would
+  re-review the current `HEAD` once per replayed commit and pay for every call.
+- **Environment.** The endpoint and key are read from the variables named by
+  `--api-base-env` / `--api-key-env` (defaults `SAICA_LLM_API_BASE` /
+  `SAICA_LLM_API_KEY`). Never put a key in `checks.json`. The base is the URL
+  in front of `/chat/completions`, e.g.
+  `https://<resource>.services.ai.azure.com/openai/v1`. `--api-style openai`
+  sends `Authorization: Bearer` and `max_tokens`. `--api-style azure` sends
+  `api-key` and `max_completion_tokens`, plus `?api-version=` when
+  `--api-version` is given. In CI, set both variables from repository secrets
+  in the `env` of the "Run SAICA checks for each commit" step. The key is
+  redacted from all output. The diff and task text are sent to the provider.
+- **Task file.** The benchmark gave each reviewer the issue text; at commit
+  time the task file plays that role. `{issue}` (also `{task}`, `{spec}`) is
+  filled from `--task-file`, else `$SAICA_TASK_FILE`, else `.saica/task.md`,
+  else `(no task description provided)`. Relative task paths are looked up in
+  the real checkout first, so the file can stay untracked: have the agent, or
+  you, write the task there when the work starts. In CI it is absent unless a
+  step writes one (e.g. the PR description) and sets `SAICA_TASK_FILE`.
+- **Template.** For a `.md` prompt the template is the first fenced code
+  block. Placeholders are `{issue}`, `{patch}` (also `{diff}`, `{code}`),
+  `{context}` (from `--context-file`, repeatable, shown as in the benchmark),
+  and `--fill NAME=FILE` for any other name. Unknown placeholders are emptied
+  with a warning. Literal braces are written `{{` `}}`, as in the benchmark
+  source.
+- **Output and exit codes.** The reviewer prints one line:
+  `flagged: <evidence>` (exit 1, recorded as `caught`), `ok: <reason>`
+  (exit 0, `pass`) or `error: <reason>` (exit 127, `error`). Errors are a
+  missing variable, an HTTP failure after retries, `--timeout` reached, an
+  unreadable answer or bad arguments. Contract v1 maps only exit 127 and
+  timeouts to `error`, so these events' detail starts with the runner's
+  generic `command not found (exit 127):` before the reviewer's `error:`
+  line. An `error` never blocks. Any other non-zero exit would be recorded
+  as `caught`; `--error-exit N` sets a different code for other runners.
+  Answers are parsed as in SAICA-Bench: the text after `</think>`, then the
+  last JSON object holding the flag field (by default the field the template
+  asks to be `true or false`; `--flag-field` overrides it). Keep `timeout_s`
+  above `--timeout` (default 240 s, retries included).
+- **Comparable results.** A result is comparable to the SAICA-Bench score
+  only when the prompt is unchanged and the model, provider and settings
+  match the recipe published with that prompt: `--temperature` (not sent by
+  default; the benchmark used 0, except for gpt-6-luna, which accepts only
+  its default), `--max-tokens` (default 16384, as in the benchmark),
+  `--stream` (used for Hyperbolic), `--extra-body` (e.g.
+  `'{"reasoning_effort": "low"}'`), and a real task description. Cutting the
+  diff (`--max-diff-chars`, default 100000) also breaks comparability.
+- **Combined mode (untested).** With several `--prompt` files, the reviewer
+  sends ONE request that holds every template. It prints one line per failure
+  mode, named after each file (`dependency_blindness.md` →
+  `dependency_blindness`). It exits 1 if any mode is flagged, 127 if any answer
+  is unreadable and none is flagged, else 0. It warns that combined review is
+  not benchmarked: SAICA-Bench measured one prompt per call. The runner still
+  records one outcome per tool, so every failure mode of a combined entry gets
+  the same outcome. Use one entry per mode to keep them apart.
+- **Cost.** Each LLM entry makes one paid call per commit, plus one per
+  commit that CI checks. Start with `blocking: false`.

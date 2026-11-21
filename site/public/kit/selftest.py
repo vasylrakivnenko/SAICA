@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """SAICA supervision kit: end-to-end self-test (stdlib only).
 
-Two parts:
+Three parts:
 
 * sandbox: builds a throwaway git repo in a temp dir, copies the runner and
   hooks into it with a test checks.json (built-ins plus fake ``sh`` tools, no
@@ -9,6 +9,12 @@ Two parts:
   (a) a planted stub is ``caught`` after stamp, (b) a failing blocking tool
   blocks the commit, (c) events.jsonl matches the contract, (d) uncovered
   failure modes get ``not_covered`` events, (e) ``dashboard`` embeds events.
+* llm (runs with sandbox; skipped if saica_llm_review.py is not next to this
+  file): a local fake OpenAI-compatible server proves saica_llm_review.py maps
+  flagged / ok / malformed / streamed / combined answers to exit 1 / 0 / 127 /
+  1 / 1, redacts the key, and that saica_check.py records caught / error for
+  it in both the pre-commit temp checkout and a CI-style ``run --commit``.
+  No network access beyond 127.0.0.1 and no paid API calls.
 * repo: checks a real install (default: the current repo): .saica/checks.json
   is valid, hooks are installed and call the runner, runnable tools' binaries
   are on PATH (warning only), and the dashboard template is present.
@@ -496,6 +502,428 @@ def _sandbox_steps(report: Report, runner: Path, tmp: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# LLM reviewer (offline: a local fake OpenAI-compatible server, no paid calls)
+# ---------------------------------------------------------------------------
+
+LLM_FAKE_KEY = "sk-selftest-0123456789abcdef"
+LLM_ERROR_EXIT = 127  # saica_llm_review.py default; contract v1 records 127 as 'error'
+LLM_COMBINED_WARNING = "combined review is not benchmarked"
+LLM_PROMPT_DB = """# Dependency blindness reviewer (selftest copy)
+
+```text
+Is this dependency blindness?
+
+Issue:
+<issue>
+{issue}
+</issue>
+{context}
+The agent's patch (unified diff):
+<patch>
+{patch}
+</patch>
+
+Answer with one JSON object only:
+{{"dependency_blindness": true or false, "evidence": "<what, or empty>"}}
+```
+"""
+LLM_PROMPT_SC = """# Scope creep reviewer (selftest copy)
+
+```text
+Is this scope creep?
+<issue>
+{issue}
+</issue>
+<patch>
+{patch}
+</patch>
+Answer with one JSON object only:
+{{"scope_creep": true or false, "evidence": "<file, or empty>"}}
+```
+"""
+
+
+def _fake_llm_reply(rec: dict) -> Tuple[int, str, List[bytes]]:
+    body, hdr = rec["body"], rec["headers"]
+    model = body.get("model")
+
+    def chat(content: str) -> Tuple[int, str, List[bytes]]:
+        payload = {
+            "choices": [
+                {
+                    "message": {"role": "assistant", "content": content},
+                    "finish_reason": "stop",
+                }
+            ],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+        }
+        return 200, "application/json", [json.dumps(payload).encode("utf-8")]
+
+    def fail(status: int, message: str) -> Tuple[int, str, List[bytes]]:
+        return (
+            status,
+            "application/json",
+            [json.dumps({"error": {"message": message}}).encode("utf-8")],
+        )
+
+    if model == "fake-azure":
+        if (
+            hdr.get("api-key") == LLM_FAKE_KEY
+            and "authorization" not in hdr
+            and "api-version=2024-10-21" in rec["path"]
+            and "max_completion_tokens" in body
+        ):
+            return chat('{"dependency_blindness": false, "evidence": ""}')
+        return fail(400, "azure request shape wrong")
+    if model == "fake-401" or hdr.get("authorization") != "Bearer " + LLM_FAKE_KEY:
+        # Echo the credential back, as some gateways do: the reviewer must redact it.
+        return fail(401, "invalid api key: %s" % hdr.get("authorization", ""))
+    if model == "fake-flag":
+        return chat(
+            "Let me look at {this} first.\n```json\n"
+            '{"dependency_blindness": true, "evidence": "app.py re-implements json.dumps"}\n```'
+        )
+    if model == "fake-ok":
+        return chat(
+            '<think>{"dependency_blindness": true}</think>\n'
+            '{"dependency_blindness": false, "evidence": ""}'
+        )
+    if model == "fake-malformed":
+        return chat("I am not sure; it depends.")
+    if model == "fake-stream":
+        if body.get("stream") is not True:
+            return fail(400, "expected stream: true")
+        pieces = ['{"dependency_', 'blindness": tr', 'ue, "evidence": "stream', 'ed"}']
+        chunks = [
+            (
+                "data: %s\n\n"
+                % json.dumps(
+                    {"choices": [{"delta": {"content": p}, "finish_reason": None}]}
+                )
+            ).encode("utf-8")
+            for p in pieces
+        ]
+        chunks.append(
+            (
+                "data: %s\n\n"
+                % json.dumps(
+                    {
+                        "choices": [{"delta": {}, "finish_reason": "stop"}],
+                        "usage": {"total_tokens": 9},
+                    }
+                )
+            ).encode("utf-8")
+        )
+        chunks.append(b"data: [DONE]\n\n")
+        return 200, "text/event-stream", chunks
+    if model == "fake-combined":
+        return chat(
+            json.dumps(
+                {
+                    "dependency_blindness": {
+                        "dependency_blindness": False,
+                        "evidence": "",
+                    },
+                    "scope_creep": {
+                        "scope_creep": True,
+                        "evidence": "README.md rewritten",
+                    },
+                }
+            )
+        )
+    return fail(404, "unknown model %r" % model)
+
+
+def _start_fake_llm() -> Tuple[Any, List[dict]]:
+    """Serve POST */chat/completions on 127.0.0.1 in a daemon thread."""
+    import http.server
+    import threading
+
+    seen: List[dict] = []
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *args: Any) -> None:  # keep the selftest output clean
+            pass
+
+        def do_POST(self) -> None:
+            raw = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            try:
+                body = json.loads(raw.decode("utf-8"))
+            except ValueError:
+                body = {}
+            rec = {
+                "path": self.path,
+                "headers": {k.lower(): v for k, v in self.headers.items()},
+                "body": body if isinstance(body, dict) else {},
+            }
+            seen.append(rec)
+            status, ctype, chunks = _fake_llm_reply(rec)
+            self.send_response(status)
+            self.send_header("Content-Type", ctype)
+            if len(chunks) == 1:
+                self.send_header("Content-Length", str(len(chunks[0])))
+            self.end_headers()
+            for chunk in chunks:  # HTTP/1.0: the stream ends when the socket closes
+                self.wfile.write(chunk)
+                self.wfile.flush()
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, seen
+
+
+def _prompt_of(rec: Optional[dict]) -> str:
+    try:
+        return rec["body"]["messages"][0]["content"]  # type: ignore[index]
+    except (TypeError, KeyError, IndexError):
+        return ""
+
+
+def run_llm_review(
+    report: Report, reviewer: Optional[Path] = None, keep: bool = False
+) -> None:
+    print("LLM reviewer test (offline: local fake API, no paid calls)")
+    reviewer = reviewer or HERE / "saica_llm_review.py"
+    if not reviewer.is_file():
+        report.skip("saica_llm_review.py not found next to selftest.py")
+        return
+    if shutil.which("git") is None:
+        report.check(False, "git on PATH")
+        return
+    tmp = Path(tempfile.mkdtemp(prefix="saica-llm-selftest-"))
+    server, seen = _start_fake_llm()
+    try:
+        _llm_steps(report, reviewer, tmp, server, seen)
+    finally:
+        server.shutdown()
+        server.server_close()
+        if keep:
+            print("  (sandbox kept at %s)" % tmp)
+        else:
+            shutil.rmtree(str(tmp), ignore_errors=True)
+
+
+def _llm_steps(
+    report: Report, reviewer: Path, tmp: Path, server: Any, seen: List[dict]
+) -> None:
+    home = tmp / "home"
+    home.mkdir()
+    (home / ".gitconfig").write_text("", encoding="utf-8")
+    repo = tmp / "repo"
+    repo.mkdir()
+    env = _clean_env(home)
+    for k in ("SAICA_REPO_ROOT", "SAICA_TASK_FILE"):
+        env.pop(k, None)
+    env["SAICA_LLM_API_BASE"] = "http://127.0.0.1:%d/v1" % server.server_address[1]
+    env["SAICA_LLM_API_KEY"] = LLM_FAKE_KEY
+    env["NO_PROXY"] = env["no_proxy"] = "127.0.0.1,localhost"
+    py = sys.executable
+
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return _run(["git"] + list(args), repo, env)
+
+    git("init", "-q")
+    git("config", "user.name", "SAICA Selftest")
+    git("config", "user.email", "selftest@example.invalid")
+    git("config", "commit.gpgsign", "false")
+    (repo / "app.py").write_text(
+        "def to_json(d):\n    return str(d)  # COMMITTED_MARKER\n", encoding="utf-8"
+    )
+    git("add", "app.py")
+    git("commit", "-q", "-m", "Initial")
+    with (repo / "app.py").open("a", encoding="utf-8") as fh:
+        fh.write("\n\ndef dump(x):\n    return repr(x)  # STAGED_MARKER\n")
+    git("add", "app.py")
+
+    saica = repo / ".saica"
+    prompts = saica / "prompts"
+    prompts.mkdir(parents=True)
+    shutil.copy2(str(reviewer), str(saica / "saica_llm_review.py"))
+    (prompts / "dependency_blindness.md").write_text(LLM_PROMPT_DB, encoding="utf-8")
+    (prompts / "scope_creep.md").write_text(LLM_PROMPT_SC, encoding="utf-8")
+    (prompts / "unknown.txt").write_text(
+        "Task: {issue}\nPatch: {patch}\nExtra: {nope}\n", encoding="utf-8"
+    )
+    (saica / "task.md").write_text(
+        "Add a dump() helper. TASK_MARKER\n", encoding="utf-8"
+    )
+
+    def review(
+        *extra: str, model: str, prompt: str = ".saica/prompts/dependency_blindness.md"
+    ) -> Tuple[subprocess.CompletedProcess, Optional[dict]]:
+        before = len(seen)
+        cmd = [py, ".saica/saica_llm_review.py", "--prompt", prompt, "--model", model]
+        r = _run(cmd + list(extra), repo, env)
+        return r, (seen[-1] if len(seen) > before else None)
+
+    r, req = review("--staged", model="fake-flag")
+    sent = _prompt_of(req)
+    report.check(
+        r.returncode == 1 and "flagged: app.py re-implements json.dumps" in r.stdout,
+        "llm: flagged answer (fenced JSON after reasoning text) -> exit 1",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    report.check(
+        "STAGED_MARKER" in sent
+        and "TASK_MARKER" in sent
+        and '{"dependency_blindness": true or false' in sent
+        and "{issue}" not in sent,
+        "llm: --staged prompt has the staged diff, task file and unescaped braces",
+    )
+    r, req = review(model="fake-ok")
+    sent = _prompt_of(req)
+    report.check(
+        r.returncode == 0 and r.stdout.strip().startswith("ok:"),
+        "llm: ok answer (after </think>) -> exit 0",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    report.check(
+        "COMMITTED_MARKER" in sent and "STAGED_MARKER" not in sent,
+        "llm: default outside pre-commit reviews HEAD against its parent",
+    )
+    r, _req = review(model="fake-malformed")
+    report.check(
+        r.returncode == LLM_ERROR_EXIT and "error: unreadable answer" in r.stdout,
+        "llm: malformed answer -> exit %d (error)" % LLM_ERROR_EXIT,
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    r, _req = review("--error-exit", "2", model="fake-malformed")
+    report.check(
+        r.returncode == 2, "llm: --error-exit 2 -> exit 2", "exit %d" % r.returncode
+    )
+    r, req = review("--stream", model="fake-stream")
+    report.check(
+        r.returncode == 1
+        and "flagged: streamed" in r.stdout
+        and bool(req)
+        and req["body"].get("stream") is True,  # type: ignore[index]
+        "llm: streamed (SSE) flagged answer -> exit 1",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    r, _req = review(model="fake-401")
+    report.check(
+        r.returncode == LLM_ERROR_EXIT
+        and "HTTP 401" in r.stdout
+        and LLM_FAKE_KEY not in r.stdout,
+        "llm: HTTP 401 -> error, and the echoed API key is redacted",
+        r.stdout.strip(),
+    )
+    r, _req = review(
+        "--api-style", "azure", "--api-version", "2024-10-21", model="fake-azure"
+    )
+    report.check(
+        r.returncode == 0,
+        "llm: --api-style azure sends api-key header, api-version, max_completion_tokens",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    n = len(seen)
+    r, _req = review("--prompt", ".saica/prompts/scope_creep.md", model="fake-combined")
+    report.check(
+        r.returncode == 1
+        and len(seen) == n + 1
+        and LLM_COMBINED_WARNING in r.stdout
+        and "scope_creep flagged: README.md rewritten" in r.stdout
+        and "dependency_blindness ok:" in r.stdout,
+        "llm: combined mode (2 prompts, 1 request, 1 mode flagged) -> exit 1",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    n = len(seen)
+    r, _req = review("--dry-run", model="fake-ok", prompt=".saica/prompts/unknown.txt")
+    report.check(
+        r.returncode == 0
+        and len(seen) == n
+        and "COMMITTED_MARKER" in r.stdout
+        and "{nope}" in r.stdout
+        and "Extra: \n" in r.stdout,
+        "llm: --dry-run prints the prompt without a call; unknown placeholder warned + emptied",
+        r.stdout.strip()[:300],
+    )
+
+    # Through the real runner: pre-commit temp checkout, then CI-style --commit.
+    shutil.copy2(str(reviewer.parent / "saica_check.py"), str(saica / "saica_check.py"))
+    base_cmd = "%s .saica/saica_llm_review.py --prompt .saica/prompts/%s --model %s"
+    config = {
+        "version": 1,
+        "kit": "selftest",
+        "builtin": {"enabled": False},
+        "tools": [
+            {
+                "id": "llm-flag",
+                "failure_modes": ["dependency_blindness"],
+                "command": base_cmd
+                % (shlex.quote(py), "dependency_blindness.md", "fake-flag"),
+                "blocking": False,
+                "timeout_s": 60,
+            },
+            {
+                "id": "llm-broken",
+                "failure_modes": ["scope_creep"],
+                "command": base_cmd
+                % (shlex.quote(py), "scope_creep.md", "fake-malformed"),
+                "blocking": True,
+                "timeout_s": 60,
+            },
+        ],
+    }
+    (saica / "checks.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+    # The reviewer and prompts are committed (they must be in the checked tree);
+    # app.py stays staged; task.md stays untracked and is found through
+    # SAICA_REPO_ROOT.
+    kit_files = [
+        ".saica/saica_llm_review.py",
+        ".saica/prompts",
+        ".saica/checks.json",
+        ".saica/saica_check.py",
+    ]
+    git("add", *kit_files)
+    git("commit", "-q", "-m", "Install kit", "--", *kit_files)
+    n = len(seen)
+    r = _run([py, ".saica/saica_check.py", "run", "--staged"], repo, env)
+    pending = {e["tool_id"]: e for e in _read_events(saica / "pending.jsonl")}
+    flag_reqs = [s for s in seen[n:] if s["body"].get("model") == "fake-flag"]
+    report.check(
+        r.returncode == 0
+        and pending.get("llm-flag", {}).get("outcome") == "caught"
+        and pending.get("llm-broken", {}).get("outcome") == "error",
+        "llm via saica_check run --staged: flagged -> caught, unreadable -> error "
+        "(not blocking)",
+        "exit %d; %s"
+        % (r.returncode, {k: v.get("outcome") for k, v in pending.items()}),
+    )
+    report.check(
+        bool(flag_reqs)
+        and "STAGED_MARKER" in _prompt_of(flag_reqs[-1])
+        and "TASK_MARKER" in _prompt_of(flag_reqs[-1]),
+        "llm via saica_check: temp checkout reviewed the staged diff with the untracked task file",
+        (
+            _prompt_of(flag_reqs[-1])[:400]
+            if flag_reqs
+            else "no request reached the fake API"
+        ),
+    )
+    git("commit", "-q", "-m", "Add dump helper")
+    r = _run(
+        [py, ".saica/saica_check.py", "run", "--commit", "HEAD", "--source", "ci"],
+        repo,
+        env,
+    )
+    events = [e for e in _read_events(saica / "events.jsonl") if e["source"] == "ci"]
+    by_tool = {e["tool_id"]: e for e in events}
+    report.check(
+        r.returncode == 0
+        and by_tool.get("llm-flag", {}).get("outcome") == "caught"
+        and by_tool.get("llm-broken", {}).get("outcome") == "error"
+        and not [err for e in events for err in validate_event(e)],
+        "llm via saica_check run --commit HEAD --source ci: same outcomes, valid events",
+        "exit %d; %s"
+        % (r.returncode, {k: v.get("outcome") for k, v in by_tool.items()}),
+    )
+    raw = (saica / "events.jsonl").read_text(encoding="utf-8")
+    raw += (saica / "pending.jsonl").read_text(encoding="utf-8")
+    report.check(LLM_FAKE_KEY not in raw, "llm: API key never reaches the event log")
+
+
+# ---------------------------------------------------------------------------
 # Repo check
 # ---------------------------------------------------------------------------
 
@@ -779,6 +1207,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if do_sandbox:
         run_sandbox(report, keep=args.keep)
+        run_llm_review(report, keep=args.keep)
     if do_repo:
         explicit = args.repo is not None
         root = _git_root(Path(args.repo or "."))

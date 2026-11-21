@@ -4,8 +4,9 @@
 // Cells are tiered 0..3; color encodes *per-mapping* evidence, never popularity.
 // Rendered as an HTML table (accessible, SEO-visible, no chart library).
 import BaseLayout from "../layouts/BaseLayout.astro";
+import KitBuilder from "../components/KitBuilder.astro";
 import { graph } from "../lib/data.ts";
-const title = "Tool × Failure-Mode Coverage";
+const title = "Coverage: build your supervision kit";
 
 // Per-tool metadata for the "setup prompt" generator. Read from the KG at
 // build time so the prompt cites each tool's own repository / docs links
@@ -27,11 +28,13 @@ const toolMetaJson = JSON.stringify(toolMeta).replace(/</g, "\\u003c");
 ---
 
 <BaseLayout title={title}>
+  <KitBuilder />
+
   <section class="mb-6 max-w-3xl">
     <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
       Coverage Matrix
     </p>
-    <h1 class="mt-2">Tool × Failure-Mode evidence</h1>
+    <h2 class="mt-2">Catalog coverage map: tool × failure-mode evidence</h2>
     <p class="mt-4 leading-7">
       Which of the supervision tools in the KG address which failure modes,
       and how strong is the evidence for each mapping? Cell color encodes an
@@ -77,24 +80,6 @@ const toolMetaJson = JSON.stringify(toolMeta).replace(/</g, "\\u003c");
     <div class="text-xs text-ink-faint" id="tc-count"></div>
   </section>
 
-  <section class="mb-4 text-sm font-sans" id="tc-setup">
-    <div class="flex flex-wrap items-center gap-2">
-      <button type="button" id="tc-preview-btn" disabled class="border border-ink/15 rounded px-3 py-1 bg-white hover:bg-paper-alt disabled:opacity-50 disabled:cursor-not-allowed" aria-expanded="false" aria-controls="tc-prompt-panel">Preview setup prompt</button>
-      <button type="button" id="tc-copy-btn" disabled class="border border-ink/15 rounded px-3 py-1 bg-white hover:bg-paper-alt disabled:opacity-50 disabled:cursor-not-allowed">Copy setup prompt</button>
-      <button type="button" id="tc-download-btn" disabled class="border border-ink/15 rounded px-3 py-1 bg-white hover:bg-paper-alt disabled:opacity-50 disabled:cursor-not-allowed">Download .md</button>
-      <span id="tc-setup-status" class="text-xs text-ink-faint" role="status" aria-live="polite"></span>
-    </div>
-    <p class="mt-2 text-xs text-ink-faint max-w-3xl">
-      Generates instructions for your coding agent (Claude Code, Cursor, Replit Agent, …) to integrate
-      exactly the tools in the selected view, then wire them into <a href="/kit/README.md">SAICA's commit checks</a>:
-      a git hook and a CI job run them on every commit, and a local dashboard shows what they catch over time.
-      The agent inspects your repo and proposes a plan before changing anything. Coverage shown here is
-      <em>declared</em>, not verified protection.
-    </p>
-    <div id="tc-prompt-panel" class="mt-3" hidden>
-      <pre id="tc-prompt" class="whitespace-pre-wrap text-xs font-mono bg-white border border-ink/10 rounded p-3 max-h-96 overflow-auto"></pre>
-    </div>
-  </section>
   <script type="application/json" id="tc-tool-meta" set:html={toolMetaJson}></script>
 
   <section class="mb-8">

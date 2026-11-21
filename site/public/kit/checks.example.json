@@ -39,6 +39,16 @@
       "command": "python3 -m pytest -q -x",
       "blocking": true,
       "timeout_s": 600
+    },
+    {
+      "id": "dependency-blindness-review",
+      "failure_modes": [
+        "dependency_blindness"
+      ],
+      "runs_per_commit": true,
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.md --model gpt-6-luna --api-style azure --api-base-env SAICA_LLM_API_BASE --api-key-env SAICA_LLM_API_KEY",
+      "blocking": false,
+      "timeout_s": 300
     }
   ]
 }
