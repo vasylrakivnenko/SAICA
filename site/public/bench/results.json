@@ -1341,6 +1341,154 @@
      "cost_note": ""
     }
    ]
+  },
+  {
+   "id": "obsolescence",
+   "name": "Obsolescence",
+   "n": 302,
+   "n_pos": 151,
+   "n_neg": 151,
+   "pos_label": "solutions calling a deprecated API",
+   "dataset": "Wang et al. (ICSE'25) deprecated-API map (65 pairs, 8 libraries) + solutions written by 5 models, deprecated call swapped in",
+   "summary": "The code uses a deprecated or removed library API.",
+   "setup": [
+    "151 solutions with the modern API swapped back to its deprecated twin vs 151 untouched solutions, all written by the same 5 models (gpt-6-luna, grok-4.1-fast, Phi-4-mini, deepseek-v4-flash, mimo) for the same tasks, across numpy, pandas, scipy, scikit-learn, seaborn, PyTorch, TensorFlow and transformers.",
+    "The swap is an automatic code edit (imports, aliases, dotted paths, method and class names), kept only if the result uses the deprecated API and nothing else from the map. Run with the latest libraries, 77 swapped solutions fail on load (ImportError, DeprecationWarning, ...) and 129 of 131 untouched ones run clean (TensorFlow not checked).",
+    "Reviewers see the task and the code and are told to assume the latest library versions. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20."
+   ],
+   "caveats": [
+    "Synthetic: the deprecated calls were swapped in; models writing freely today rarely use these APIs (49 of 956 solutions).",
+    "53 positives use APIs that are deprecated but still present (mostly PyTorch); on removed APIs only, J is about the same for the top three.",
+    "No KG tool can review code for this mode (the ones tagged obsolescence work before generation or bump dependencies); the two ruff rule sets are outside baselines and cover only NumPy 2 and Python-syntax upgrades."
+   ],
+   "rows": [
+    {
+     "key": "plain_llm_luna",
+     "tool": "gpt-6-luna, asked directly",
+     "type": "baseline_model",
+     "j": 0.9139072847682119,
+     "catch": 0.9933774834437086,
+     "catch_ci": [
+      0.9634436690411698,
+      0.9988300351830177
+     ],
+     "fa": 0.07947019867549669,
+     "fa_ci": [
+      0.04604220934704814,
+      0.13376476758938236
+     ],
+     "cost": 0.049866,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_mimo",
+     "tool": "mimo-v2.6-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.9006622516556291,
+     "catch": 0.9337748344370861,
+     "catch_ci": [
+      0.882392181938275,
+      0.963633692245407
+     ],
+     "fa": 0.033112582781456956,
+     "fa_ci": [
+      0.014224835577160273,
+      0.07516716243887676
+     ],
+     "cost": 0.0759756742,
+     "cost_note": "API-reported (Hyperbolic)"
+    },
+    {
+     "key": "plain_llm_deepseek",
+     "tool": "deepseek-v4-flash, asked directly",
+     "type": "baseline_model",
+     "j": 0.9006622516556292,
+     "catch": 0.9867549668874173,
+     "catch_ci": [
+      0.952997015273051,
+      0.9963602633910805
+     ],
+     "fa": 0.08609271523178808,
+     "fa_ci": [
+      0.051001900671616,
+      0.1417215018248707
+     ],
+     "cost": 0.0942286728,
+     "cost_note": "API-reported (Hyperbolic)"
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "j": 0.5430463576158941,
+     "catch": 0.9006622516556292,
+     "catch_ci": [
+      0.8425706088232716,
+      0.9388731375601294
+     ],
+     "fa": 0.3576158940397351,
+     "fa_ci": [
+      0.28557084895621565,
+      0.4367260015025757
+     ],
+     "cost": 0.0372923,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "plain_llm_phi",
+     "tool": "Phi-4-mini, asked directly",
+     "type": "baseline_model",
+     "j": 0.1324503311258278,
+     "catch": 0.1390728476821192,
+     "catch_ci": [
+      0.09279417711003801,
+      0.2032606298668984
+     ],
+     "fa": 0.006622516556291391,
+     "fa_ci": [
+      0.0011699648169822205,
+      0.036556330958829965
+     ],
+     "cost": 0.009504,
+     "cost_note": "Azure list price x tokens (Azure reports no cost)"
+    },
+    {
+     "key": "ruff_npy",
+     "tool": "ruff NumPy 2 rules (NPY201)",
+     "type": "deterministic",
+     "j": 0.07947019867549669,
+     "catch": 0.07947019867549669,
+     "catch_ci": [
+      0.04604220934704814,
+      0.13376476758938236
+     ],
+     "fa": 0.0,
+     "fa_ci": [
+      0.0,
+      0.02480987021575597
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    },
+    {
+     "key": "ruff_up",
+     "tool": "ruff pyupgrade rules (UP)",
+     "type": "deterministic",
+     "j": 0.01324503311258278,
+     "catch": 0.0728476821192053,
+     "catch_ci": [
+      0.04116064625333085,
+      0.12572990512304344
+     ],
+     "fa": 0.059602649006622516,
+     "fa_ci": [
+      0.031670396806447315,
+      0.10938730344981454
+     ],
+     "cost": 0.0,
+     "cost_note": ""
+    }
+   ]
   }
  ]
 }
