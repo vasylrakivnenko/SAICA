@@ -1,22 +1,23 @@
 ---
 // SAICA-Bench overview: one block per failure mode (what it tests, data, counts, caveats).
 import BaseLayout from '../layouts/BaseLayout.astro';
+import BenchSchema from '../components/BenchSchema.astro';
 import results from '../../public/bench/results.json';
 const modes = results.modes;
-const planned = ['Obsolescence', 'Dependency blindness', 'Incomplete execution', 'Scope creep', 'Logic error', 'Supply-chain attack', 'Cascading failure', 'Context pollution'];
 ---
 
 <BaseLayout title="Benchmark" description="What SAICA-Bench tests, on which data, and how it is scored.">
   <h1>SAICA-Bench</h1>
-  <p class="mt-3 max-w-3xl">
-    Each failure mode is tested on a public dataset whose labels were confirmed by execution, construction or expert
-    review. A tool sees the agent's change (or full session), and we record whether it flags it. Bad and clean samples are
-    mixed, so every tool gets a true positive rate (TPR: share of bad samples it flags) and a false positive rate (FPR: share
-    of clean samples it flags). The headline score is <strong>J = TPR − FPR</strong>, which does not depend on the mix and
-    compares across modes.
-  </p>
 
-  <div class="mt-8 grid gap-5">
+  <h2 class="mt-6">Overview</h2>
+  <p class="mt-2 max-w-3xl">
+    SAICA-Bench measures how well supervision tools catch the typical failures of AI coding agents. Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or expert review, or from matched pairs we build in which the two versions differ only in the failure. Every tool reviews the same samples without seeing the labels: free programs such as type checkers and linters, hybrid tools that wrap a model (PR-Agent, promptfoo, DeepEval), and plain language models asked directly with one fixed prompt. Each verdict is compared with the label: the true positive rate (TPR) is the share of bad samples a tool flags, the false positive rate (FPR) the share of clean samples it flags, and the headline score is <strong>J = TPR − FPR</strong>, reported with the cost per 1,000 reviews.
+  </p>
+  <BenchSchema />
+
+  <h2 class="mt-10">Failure modes</h2>
+
+  <div class="mt-4 grid gap-5">
     {modes.map((m) => (
       <section class="card p-5 border border-ink/10 rounded-lg bg-white" id={m.id}>
         <div class="font-sans text-xs uppercase tracking-wide text-ink-faint">{m.n_pos} {m.pos_label} · {m.n_neg} clean · {m.rows.length} tools</div>
@@ -36,7 +37,6 @@ const planned = ['Obsolescence', 'Dependency blindness', 'Incomplete execution',
   </div>
 
   <p class="mt-8 text-sm text-ink-muted max-w-3xl">
-    Coming next: {planned.join(', ')}. Modes without a public dataset with confirmed labels are left out rather than
-    filled with synthetic data.
+    Not benchmarked yet: Cascading failure and Context pollution, for which no dataset with confirmed labels exists; the leaderboard lists their catalog tools by GitHub stars instead. Several sets are synthetic or hand-built pairs; each mode's setup and caveats say how its samples were made.
   </p>
 </BaseLayout>
