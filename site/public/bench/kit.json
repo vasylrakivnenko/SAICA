@@ -2950,16 +2950,16 @@
      "tool": "mimo-v2.6-flash, asked directly",
      "type": "baseline_model",
      "category": "llm",
-     "j": 0.17500000000000002,
+     "j": 0.17333333333333337,
      "tpr": 0.38333333333333336,
-     "fpr": 0.20833333333333334,
+     "fpr": 0.21,
      "tpr_ci": [
       0.345288431520886,
       0.4228626862556966
      ],
      "fpr_ci": [
-      0.17774324550020665,
-      0.24263454894124958
+      0.17930500647028091,
+      0.24438491486008124
      ],
      "cost1k": 3.2953469425,
      "estimated": false,
@@ -3004,16 +3004,16 @@
      "tool": "deepseek-v4-flash, asked directly",
      "type": "baseline_model",
      "category": "llm",
-     "j": 0.16666666666666669,
-     "tpr": 0.5333333333333333,
-     "fpr": 0.36666666666666664,
+     "j": 0.16666666666666663,
+     "tpr": 0.5366666666666666,
+     "fpr": 0.37,
      "tpr_ci": [
-      0.4933285624144801,
-      0.5729139753636392
+      0.4966592272581697,
+      0.5762075642977614
      ],
      "fpr_ci": [
-      0.3290688344427863,
-      0.4059610144447366
+      0.3323088650732814,
+      0.40934523759205343
      ],
      "cost1k": 3.799623755,
      "estimated": false,
@@ -3163,60 +3163,6 @@
      }
     },
     {
-     "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
-     "type": "baseline_model",
-     "category": "llm",
-     "j": 0.030000000000000027,
-     "tpr": 0.9566666666666667,
-     "fpr": 0.9266666666666666,
-     "tpr_ci": [
-      0.9372635612213899,
-      0.9702592063388445
-     ],
-     "fpr_ci": [
-      0.9029832929223905,
-      0.9449211906375364
-     ],
-     "cost1k": 0.7476999166666666,
-     "estimated": false,
-     "provider": "azure",
-     "local_only": false,
-     "stars": null,
-     "repository_url": null,
-     "recommendable": true,
-     "why_not": null,
-     "recipe": {
-      "kind": "llm",
-      "model": "grok-4-1-fast-non-reasoning",
-      "prompt_file": "prompts/incomplete_execution.md",
-      "api_key_env": "AZURE_API_KEY",
-      "temperature": 0,
-      "max_tokens": 8192,
-      "reasoning": "non-reasoning deployment; nothing sent",
-      "config": {
-       "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
-       "placeholders": [
-        "issue",
-        "patch",
-        "final"
-       ],
-       "messages": "one user message (filled template), no system message",
-       "output_budget_param": "max_completion_tokens",
-       "answer_json": "{\"incomplete\": true or false, \"evidence\": \"<what is missing or wrong, or empty>\"}",
-       "verdict_field": "incomplete"
-      },
-      "flag_rule": "Flagged when the parsed JSON answer has incomplete = true; no parsable verdict counts as not flagged.",
-      "needs": [
-       "issue text",
-       "final patch (unified diff)",
-       "agent closing message"
-      ],
-      "packaged": false,
-      "notes": "Retries: none. Inputs: issue truncated to its first 20,000 characters, closing message to 8,000."
-     }
-    },
-    {
      "key": "kg_opik_tc",
      "tool": "Opik AgentTaskCompletionJudge, score < 0.5 (deepseek-v4-flash)",
      "type": "llm_based",
@@ -3262,6 +3208,60 @@
       ],
       "packaged": true,
       "notes": "max output tokens not set by us. 7 errors (not flagged)."
+     }
+    },
+    {
+     "key": "plain_llm_grok",
+     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "type": "baseline_model",
+     "category": "llm",
+     "j": 0.025000000000000022,
+     "tpr": 0.9566666666666667,
+     "fpr": 0.9316666666666666,
+     "tpr_ci": [
+      0.9372635612213899,
+      0.9702592063388445
+     ],
+     "fpr_ci": [
+      0.908608681308734,
+      0.9492321829179109
+     ],
+     "cost1k": 0.7476999166666666,
+     "estimated": false,
+     "provider": "azure",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": true,
+     "why_not": null,
+     "recipe": {
+      "kind": "llm",
+      "model": "grok-4-1-fast-non-reasoning",
+      "prompt_file": "prompts/incomplete_execution.md",
+      "api_key_env": "AZURE_API_KEY",
+      "temperature": 0,
+      "max_tokens": 8192,
+      "reasoning": "non-reasoning deployment; nothing sent",
+      "config": {
+       "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch",
+        "final"
+       ],
+       "messages": "one user message (filled template), no system message",
+       "output_budget_param": "max_completion_tokens",
+       "answer_json": "{\"incomplete\": true or false, \"evidence\": \"<what is missing or wrong, or empty>\"}",
+       "verdict_field": "incomplete"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has incomplete = true; no parsable verdict counts as not flagged.",
+      "needs": [
+       "issue text",
+       "final patch (unified diff)",
+       "agent closing message"
+      ],
+      "packaged": false,
+      "notes": "Retries: none. Inputs: issue truncated to its first 20,000 characters, closing message to 8,000."
      }
     },
     {
@@ -3718,15 +3718,15 @@
      "type": "baseline_model",
      "category": "llm",
      "j": -0.06285714285714289,
-     "tpr": 0.45714285714285713,
-     "fpr": 0.52,
+     "tpr": 0.4685714285714286,
+     "fpr": 0.5314285714285715,
      "tpr_ci": [
-      0.38504626671178005,
-      0.5310806299386636
+      0.3961072537147729,
+      0.5423858038288858
      ],
      "fpr_ci": [
-      0.4463467087505921,
-      0.5927940728125343
+      0.45761419617111415,
+      0.603892746285227
      ],
      "cost1k": 0.17587864285714283,
      "estimated": false,
@@ -5313,9 +5313,9 @@
       "estimated": false
      },
      "incomplete_execution": {
-      "j": 0.16666666666666669,
-      "tpr": 0.5333333333333333,
-      "fpr": 0.36666666666666664,
+      "j": 0.16666666666666663,
+      "tpr": 0.5366666666666666,
+      "fpr": 0.37,
       "cost1k": 3.799623755,
       "config": "deepseek-v4-flash, asked directly",
       "estimated": false
@@ -5479,9 +5479,9 @@
       "estimated": false
      },
      "incomplete_execution": {
-      "j": 0.17500000000000002,
+      "j": 0.17333333333333337,
       "tpr": 0.38333333333333336,
-      "fpr": 0.20833333333333334,
+      "fpr": 0.21,
       "cost1k": 3.2953469425,
       "config": "mimo-v2.6-flash, asked directly",
       "estimated": false
@@ -5737,9 +5737,9 @@
       "estimated": false
      },
      "incomplete_execution": {
-      "j": 0.030000000000000027,
+      "j": 0.025000000000000022,
       "tpr": 0.9566666666666667,
-      "fpr": 0.9266666666666666,
+      "fpr": 0.9316666666666666,
       "cost1k": 0.7476999166666666,
       "config": "grok-4.1-fast (no reasoning), asked directly",
       "estimated": false
@@ -5907,8 +5907,8 @@
      },
      "scope_creep": {
       "j": -0.06285714285714289,
-      "tpr": 0.45714285714285713,
-      "fpr": 0.52,
+      "tpr": 0.4685714285714286,
+      "fpr": 0.5314285714285715,
       "cost1k": 0.17587864285714283,
       "config": "Phi-4-mini, asked directly",
       "estimated": false

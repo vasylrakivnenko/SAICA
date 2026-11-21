@@ -39,7 +39,7 @@ Answer with one JSON object only:
 ## Expected answer and flag rule
 
 - Expected answer: one JSON object, `{"supply_chain_risk": true or false, "evidence": "<package or line and why, or empty>"}`.
-- Parser: The answer text after the last `</think>` is scanned from the LAST `{` backwards; the first position where `json.JSONDecoder().raw_decode` yields a dict containing the key `supply_chain_risk` is the verdict. The script's fallback regex looks for `"logic_error"` instead of `"supply_chain_risk"` (copied from the logic-error script), so in practice there is no partial parse: only a complete JSON object counts.
+- Parser: The answer text after the last `</think>` is scanned from the LAST `{` backwards; the first position where `json.JSONDecoder().raw_decode` yields a dict containing the key `supply_chain_risk` is the verdict. If no complete object is found, a fallback regex reads `"supply_chain_risk": true|false` from the text (a partial parse). Until 2026-11-20 this regex looked for `"logic_error"` by mistake; the published scores were re-computed with the fix from the cached answers.
 - Flagged when `verdict["supply_chain_risk"] is True`.
 - No verdict, or a failed call -> not flagged (2 pairs were blocked by Hyperbolic's firewall for deepseek and mimo).
 

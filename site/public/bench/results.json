@@ -1140,7 +1140,7 @@
     "'Not done' here means the hidden tests fail: that includes wrong fixes as well as unfinished ones, so this mode overlaps with logic error.",
     "The KG's stub signal (TODO, pass, NotImplementedError in the diff) does not define the label: across 60,739 finished runs, stub markers appear about as often in passing runs (2,092) as in failing ones (2,208).",
     "All runs come from one agent (Qwen3-Coder-480B with OpenHands).",
-    "Unreadable answers count as not flagged: deepseek-v4-flash 373 of 1,200 (mostly thinking past 32k tokens without answering), mimo 121, Phi 25. Phi almost never calls a run incomplete.",
+    "Unreadable answers count as not flagged: deepseek-v4-flash 369 of 1,200 (mostly thinking past 32k tokens without answering), mimo 120, Phi 23. (Re-scored 2026-11-20 after a parser fix recovered 10 answers whose JSON was incomplete.) Phi almost never calls a run incomplete.",
     "The KG's task-completion judges (Phoenix, Opik, DeepEval; each through its own built-in check, with deepseek-v4-flash as its model) almost never call a finished run incomplete (they flag 2-13% of failing runs): given the agent's own 'done' message, they believe it. PR-Agent's review flags about a third of failing runs but a quarter of passing ones too. Opik and PR-Agent were run on the first 150 + 150 runs only (PR-Agent takes about 4 minutes per review). Not runnable on a finished patch: PR-Agent ticket compliance (needs a linked GitHub or Jira ticket), TruLens Plan Adherence and DeepEval Step Efficiency (need the agent's step traces)."
    ],
    "rows": [
@@ -1166,16 +1166,16 @@
      "key": "plain_llm_mimo",
      "tool": "mimo-v2.6-flash, asked directly",
      "type": "baseline_model",
-     "j": 0.17500000000000002,
+     "j": 0.17333333333333337,
      "catch": 0.38333333333333336,
      "catch_ci": [
       0.345288431520886,
       0.4228626862556966
      ],
-     "fa": 0.20833333333333334,
+     "fa": 0.21,
      "fa_ci": [
-      0.17774324550020665,
-      0.24263454894124958
+      0.17930500647028091,
+      0.24438491486008124
      ],
      "cost": 3.954416331,
      "cost_note": "API-reported (Hyperbolic)"
@@ -1184,16 +1184,16 @@
      "key": "plain_llm_deepseek",
      "tool": "deepseek-v4-flash, asked directly",
      "type": "baseline_model",
-     "j": 0.16666666666666669,
-     "catch": 0.5333333333333333,
+     "j": 0.16666666666666663,
+     "catch": 0.5366666666666666,
      "catch_ci": [
-      0.4933285624144801,
-      0.5729139753636392
+      0.4966592272581697,
+      0.5762075642977614
      ],
-     "fa": 0.36666666666666664,
+     "fa": 0.37,
      "fa_ci": [
-      0.3290688344427863,
-      0.4059610144447366
+      0.3323088650732814,
+      0.40934523759205343
      ],
      "cost": 4.559548506,
      "cost_note": "API-reported (Hyperbolic)"
@@ -1202,16 +1202,16 @@
      "key": "plain_llm_grok",
      "tool": "grok-4.1-fast (no reasoning), asked directly",
      "type": "baseline_model",
-     "j": 0.030000000000000027,
+     "j": 0.025000000000000022,
      "catch": 0.9566666666666667,
      "catch_ci": [
       0.9372635612213899,
       0.9702592063388445
      ],
-     "fa": 0.9266666666666666,
+     "fa": 0.9316666666666666,
      "fa_ci": [
-      0.9029832929223905,
-      0.9449211906375364
+      0.908608681308734,
+      0.9492321829179109
      ],
      "cost": 0.8972399,
      "cost_note": "Azure list price x tokens (Azure reports no cost)"
@@ -1458,15 +1458,15 @@
      "tool": "Phi-4-mini, asked directly",
      "type": "baseline_model",
      "j": -0.06285714285714289,
-     "catch": 0.45714285714285713,
+     "catch": 0.4685714285714286,
      "catch_ci": [
-      0.38504626671178005,
-      0.5310806299386636
+      0.3961072537147729,
+      0.5423858038288858
      ],
-     "fa": 0.52,
+     "fa": 0.5314285714285715,
      "fa_ci": [
-      0.4463467087505921,
-      0.5927940728125343
+      0.45761419617111415,
+      0.603892746285227
      ],
      "cost": 0.061557524999999995,
      "cost_note": "Azure list price x tokens (Azure reports no cost)"
@@ -2115,10 +2115,10 @@
       "cost1k": 0.25586673786885245
      },
      "incomplete_execution": {
-      "j": 0.16666666666666669,
+      "j": 0.16666666666666663,
       "tool": "deepseek-v4-flash, asked directly",
       "short": "deepseek-v4-flash",
-      "fa": 0.36666666666666664,
+      "fa": 0.37,
       "cost1k": 3.799623755
      },
      "scope_creep": {
@@ -2187,10 +2187,10 @@
       "cost1k": 0.20017094549180328
      },
      "incomplete_execution": {
-      "j": 0.17500000000000002,
+      "j": 0.17333333333333337,
       "tool": "mimo-v2.6-flash, asked directly",
       "short": "mimo-v2.6-flash",
-      "fa": 0.20833333333333334,
+      "fa": 0.21,
       "cost1k": 3.2953469425
      },
      "scope_creep": {
@@ -2222,7 +2222,7 @@
       "cost1k": 0.3164622
      }
     },
-    "avg": 0.6768520974709493,
+    "avg": 0.6766669122857643,
     "avg_cost1k": 0.8596852021218386,
     "n_modes": 9
    },
@@ -2259,10 +2259,10 @@
       "cost1k": 0.14042315573770492
      },
      "incomplete_execution": {
-      "j": 0.030000000000000027,
+      "j": 0.025000000000000022,
       "tool": "grok-4.1-fast (no reasoning), asked directly",
       "short": "grok-4.1-fast",
-      "fa": 0.9266666666666666,
+      "fa": 0.9316666666666666,
       "cost1k": 0.7476999166666666
      },
      "scope_creep": {
@@ -2294,7 +2294,7 @@
       "cost1k": 0.52575
      }
     },
-    "avg": 0.395682398619952,
+    "avg": 0.3951268430643965,
     "avg_cost1k": 0.6126006165595722,
     "n_modes": 9
    },
@@ -2334,7 +2334,7 @@
       "j": -0.06285714285714289,
       "tool": "Phi-4-mini, asked directly",
       "short": "Phi-4-mini",
-      "fa": 0.52,
+      "fa": 0.5314285714285715,
       "cost1k": 0.17587864285714283
      },
      "obsolescence": {
