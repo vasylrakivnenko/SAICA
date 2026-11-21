@@ -48,9 +48,6 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
         <a href="/" class="no-underline text-ink hover:text-accent font-semibold tracking-tight text-lg">SAICA-Bench</a>
         <p class="mt-1 text-sm leading-snug text-ink">Can Language Models catch coding agents' failures?</p>
         <p class="mt-1.5 text-xs text-ink-muted">Vasyl Rakivnenko, Stanford University</p>
-        <p class="mt-4 text-xs leading-relaxed text-ink-muted text-left">
-          How often each supervision tool flags a real failure of an AI coding agent (<b class="font-semibold text-ink">true positive rate</b>, TPR) and how often it flags clean work (<b class="font-semibold text-ink">false positive rate</b>, FPR). Each entry reports <b class="font-semibold text-ink">J = TPR − FPR</b> (0% = chance, 100% = perfect).
-        </p>
         <nav aria-label="Primary" class="mt-5 md:mt-6 text-sm">
           <ul class="flex flex-wrap md:flex-col gap-x-5 gap-y-1 md:gap-y-2">
             {nav.map((n) => (

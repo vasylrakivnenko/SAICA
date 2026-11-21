@@ -9,6 +9,7 @@ import results from '../../public/bench/results.json';
 <BaseLayout title="SAICA-Bench">
   <div class="lb">
     <h1>Leaderboard</h1>
+    <p class="lead">How often each supervision tool flags a real failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).</p>
 
     <div class="tabs" role="tablist" id="lb-tabs"></div>
 
@@ -310,7 +311,8 @@ syncTypes();
   .lb { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; --frontier: #b5532a; }
   .lb h1 { margin: 0; }
   .lb h2 { font-size: 1.15rem; margin-top: 2.2rem; }
-  .lb .lead { margin-top: .5rem; color: #4a5160; max-width: 70ch; }
+  .lb .lead { margin: .6rem 0 0; color: #4a5160; max-width: none; font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; text-align: left; }
+  .lb .lead b { color: #111418; font-weight: 600; }
   .lb .tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid rgb(17 20 24 / .12); margin: 1.4rem 0 .9rem; font-family: ui-sans-serif, system-ui, sans-serif; }
   .lb .tabs button { background: none; border: 0; padding: .55rem .9rem; font-weight: 500; color: #4a5160; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .lb .tabs button[aria-selected="true"] { color: #1f3a93; border-bottom-color: #1f3a93; }
