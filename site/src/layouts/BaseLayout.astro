@@ -44,10 +44,8 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path === href)
       >Skip to main content</a
     >
     <div class="mx-auto max-w-prose-wide px-5 md:flex md:gap-10">
-      <aside class="md:w-56 md:shrink-0 md:sticky md:top-0 md:self-start md:max-h-screen md:overflow-y-auto border-b md:border-b-0 border-ink/10 py-4 md:py-10 font-sans">
+      <aside class="md:w-44 md:shrink-0 md:sticky md:top-0 md:self-start md:max-h-screen md:overflow-y-auto border-b md:border-b-0 border-ink/10 py-4 md:py-10 font-sans">
         <a href="/" class="no-underline text-ink hover:text-accent font-semibold tracking-tight text-lg">SAICA-Bench</a>
-        <p class="mt-1 text-sm leading-snug text-ink">Can Language Models catch coding agents' failures?</p>
-        <p class="mt-1.5 text-xs text-ink-muted">Vasyl Rakivnenko, Stanford University</p>
         <nav aria-label="Primary" class="mt-5 md:mt-6 text-sm">
           <ul class="flex flex-wrap md:flex-col gap-x-5 gap-y-1 md:gap-y-2">
             {nav.map((n) => (
