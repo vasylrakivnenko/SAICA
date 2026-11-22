@@ -3,7 +3,9 @@ name: Superagent
 tagline: Security layer protecting AI apps from prompt injection, data leaks, and harmful outputs.
 description: A security wrapper that protects AI applications against prompt injections, data leaks, and harmful outputs. Developers embed this safety layer directly into their applications to enforce runtime security policies and demonstrate compliance.
 first_released: '2023-05-10'
-last_updated: '2026-04-11'
+last_updated: 2026-08-25
+upstream_pushed_at: 2026-08-25
+last_reviewed: 2026-11-21
 maturity_status: experimental
 repository_url: https://github.com/superagent-ai/superagent
 license: MIT
@@ -19,16 +21,15 @@ locus_of_control:
 integration_surfaces:
   - library
   - http_service
-stars: 6553
-stars_updated_at: '2026-04-23'
+stars: 6884
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Occupies prevention × in_generation × fully_autonomous as an embedded
-  security wrapper: developers link the library directly into the application
-  so policy enforcement runs inline with the LLM call rather than behind a
-  network proxy (contrast pipelock) or as a post-hoc validator (contrast
-  guardrails-ai). Emphasizes compliance-ready runtime enforcement,
-  distinguishing it from the detector-only posture of rebuff and last-layer,
-  and making it a useful exemplar of in-process guardrail deployment.
+  security wrapper: developers link the library directly into the
+  application so policy enforcement runs inline with the LLM call rather
+  than behind a network proxy or as a post-hoc validator (contrast
+  guardrails-ai). Emphasizes compliance-ready runtime enforcement, making it
+  a useful exemplar of in-process guardrail deployment.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

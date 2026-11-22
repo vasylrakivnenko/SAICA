@@ -4,11 +4,12 @@ authors:
   - Yuetong Liu
   - Yitong Zhang
   - Jia Li
-  - Shiyuan Hu
+  - Shi-Min Hu
 year: 2026
 title: "PackMonitor: Enabling Zero Package Hallucinations Through Decoding-Time Monitoring"
 venue: arXiv
 arxiv_id: "2602.20717"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2602.20717"
 url: https://www.semanticscholar.org/paper/31191f5478cac72e8dc816fbc5c46ce00f98ddf4
 semantic_scholar_id: "31191f5478cac72e8dc816fbc5c46ce00f98ddf4"
@@ -47,6 +48,7 @@ tldr: >
 relevance_tags:
   - supervision
   - supply-chain
+provenance: s2-derived
 notes: >
   Introduces PackMonitor, a decoding-time monitor that eliminates (not just
   mitigates) package hallucinations by constraining the decoding space to an

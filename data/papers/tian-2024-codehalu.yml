@@ -8,12 +8,14 @@ authors:
   - Wen Wang
   - Ziyang Luo
   - Lei Ma
+  - Dawn Song
 year: 2024
 title: "CodeHalu: Investigating Code Hallucinations in LLMs via Execution-based Verification"
-venue: "AAAI Conference on Artificial Intelligence"
+venue: "AAAI Conference on Artificial Intelligence (AAAI 2025)"
 url: https://arxiv.org/abs/2405.00253
 doi: "10.1609/aaai.v39i24.34717"
 arxiv_id: "2405.00253"
+arxiv_version: "v4"
 semantic_scholar_id: "643e596ba6c95e9dfc3bc952f4dc874fc0e9e9fb"
 citation_count: 38
 tldr: >
@@ -28,6 +30,7 @@ relevance_tags:
   - code-generation
   - benchmark
   - execution-based-verification
+provenance: hand-curated
 notes: >
   Must-cite. The "mapping / naming / resource / logic" axis is a direct
   predecessor to SAICA-KG's FailureMode partition (fabrication / logic_error

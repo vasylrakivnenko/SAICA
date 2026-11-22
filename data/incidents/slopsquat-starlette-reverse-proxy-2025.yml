@@ -1,21 +1,22 @@
 id: slopsquat-starlette-reverse-proxy-2025
-title: Autonomous coding agent imports hallucinated "starlette-reverse-proxy" during build
+title: 'Trend Micro research: coding agents invent package names such as "starlette-reverse-proxy"'
 tagline: >-
-  An autonomous coding agent emitted `import starlette_reverse_proxy` during build — a package that didn't exist. Crash was benign; surfaces the pre-registration slopsquat attack surface.
+  Trend Micro reports seeing an agent generate a plausible package name that did not exist; the build failed with "module not found". It gives `starlette-reverse-proxy` as an example of such a name.
 description: >
-  Trend Micro's slopsquatting write-up documents a 2025 observation in which
-  an advanced autonomous coding agent emitted code depending on a
-  nonexistent Python package `starlette-reverse-proxy`. The build failed
-  with `ModuleNotFoundError`, so the specific session was harmless. The
-  significance is the mechanism: the agent produced plausible-sounding
-  package names without a pre-generation existence check. If an attacker
-  had pre-registered the name on PyPI (a low-effort operation), the next
-  agent run with a similar prompt could have imported attacker-controlled
-  code. The observation is one of several 2025 sightings that moved
-  slopsquatting from theoretical to operational.
+  Trend Micro's write-up on slopsquatting says: "During our research, we
+  observed an advanced agent confidently generating a perfectly plausible
+  package name out of thin air, only to have the build crash with a
+  'module not found' error moments later." It names
+  `starlette-reverse-proxy` as an example of a dependency a coding agent
+  can hallucinate, and points out that an attacker could register such a
+  name on PyPI so that a later run installs the attacker's code. The
+  article also compares how many made-up package names several agents and
+  models propose per task. Nothing harmful happened in the observed
+  session.
 
+kind: study
 incident_date: 2025-05-01
-harm_class: security_breach
+harm_class: user_reported
 reproducibility: plausible
 
 exhibited_failure_modes:
@@ -23,7 +24,7 @@ exhibited_failure_modes:
 - supply_chain_attack
 
 affected_systems:
-- unnamed autonomous coding agent
+- unnamed coding agent
 
 source_urls:
 - https://www.trendmicro.com/vinfo/us/security/news/cybercrime-and-digital-threats/slopsquatting-when-ai-agents-hallucinate-malicious-packages
@@ -35,6 +36,11 @@ mitigated_by:
 - socket
 
 notes: >
-  Date is approximate (publication month); Trend Micro did not provide a
-  precise event date. `reproducibility: plausible` (single-source) because
-  the specific agent was not named.
+  A vendor's research write-up, not an incident. Corrected on 2026-11-21
+  from the article: the text does not say that the session it observed
+  involved `starlette-reverse-proxy`; that name is given as an example, so
+  the title and text no longer claim it. `harm_class` was
+  "security_breach" although the record itself called the session
+  harmless. The article shows no publication date on the page; 2025-05-01
+  is the approximate date this record already carried and was not
+  verified.

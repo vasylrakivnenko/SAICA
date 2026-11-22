@@ -3,11 +3,17 @@ authors:
   - Fang Liu
   - Yang Liu
   - Lin Shi
-  - Houkun Yang
-  - Zhen Zhang
+  - Zhen Yang
+  - Li Zhang
+  - Xiaoli Lian
+  - Zhongqi Li
+  - Yuchi Ma
 year: 2024
 title: "Beyond Functional Correctness: Exploring Hallucinations in LLM-Generated Code"
-venue: IEEE Transactions on Software Engineering
+venue: "IEEE Transactions on Software Engineering, vol. 52 (2026)"
+arxiv_id: "2404.00971"
+arxiv_version: "v3"
+doi: "10.1109/TSE.2026.3657432"
 url: https://www.semanticscholar.org/paper/31a23ae2821910f6b26d8991e953d20ae6d2297f
 citation_count: 216
 relevance_tags:
@@ -20,6 +26,7 @@ tldr: >
   FailureMode axis. Conflates axes (cause, symptom, type) rather than
   partitioning them orthogonally.
 abstract: The rise of Large Language Models (LLMs) has significantly advanced various applications on software engineering tasks, particularly in code generation. Despite the promising performance, LLMs are prone to generate hallucinations, which means LLMs might produce outputs that deviate from users’ intent, exhibit internal inconsistencies, or misaligned with the real-world knowledge, making the deployment of LLMs potentially risky in a wide range of applications. Existing work mainly focuses on investigating the hallucination in the domain of Natural Language Generation (NLG), leaving a gap in comprehensively understanding the types, causes, and impacts of hallucinations in the context of code generation. To bridge the gap, we conducted a thematic analysis of the LLM-generated code to summarize and categorize the hallucinations, as well as their causes and impacts. Our study established a comprehensive taxonomy of code hallucinations, encompassing 3 primary categories and 12 specific categories. Furthermore, we systematically analyzed the distribution of hallucinations, exploring variations among different LLMs and benchmarks. Moreover, we perform an in-depth analysis on the causes and impacts of various hallucinations, aiming to provide valuable insights into hallucination mitigation. Finally, to enhance the correctness and reliability of LLM-generated code in a lightweight manner, we explore training-free hallucination mitigation approaches by prompt enhancing techniques. We believe our findings will shed light on future research about code hallucination evaluation and mitigation, ultimately paving the way for building more effective and reliable code LLMs in the future. The replication package is available at https://github.com/Lorien1128/code_hallucination.
+provenance: hand-curated
 notes: >
   Must-cite. Anchor paper for FailureMode taxonomy discussion and for the
   "prior taxonomies are not MECE" argument in the SAICA-KG paper.

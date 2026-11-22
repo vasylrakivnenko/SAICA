@@ -7,7 +7,9 @@ description: >
   uncertainty estimators so downstream code can abstain, escalate to human
   review, or request clarification when confidence is low.
 first_released: '2025-04-17'
-last_updated: '2026-04-16'
+last_updated: 2026-11-08
+upstream_pushed_at: 2026-11-08
+last_reviewed: 2026-11-21
 maturity_status: experimental
 published_by: cvs-health
 repository_url: https://github.com/cvs-health/uqlm
@@ -31,8 +33,10 @@ implements_techniques:
   - white-box-uq
   - semantic-uq
   - abstain-routing
-stars: 1146
-stars_updated_at: '2026-04-23'
+stars: 1215
+stars_updated_at: '2026-11-21'
+evaluated_on:
+  - saica-bench-2026-11
 inclusion_rationale: >
   Uncertainty-first branch of detection — enables explicit abstain/escalate
   routing, valuable for high-stakes medical/finance LLM deployments.

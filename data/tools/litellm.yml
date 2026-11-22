@@ -7,7 +7,9 @@ description: >
   spend tracking, failover, and rate limits. De-facto standard for
   provider-agnostic LLM access.
 first_released: '2023-07-27'
-last_updated: '2026-04-23'
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: berri-ai
 repository_url: https://github.com/BerriAI/litellm
@@ -29,11 +31,10 @@ implements_techniques:
   - virtual-keys
   - spend-tracking
   - failover
-stars: 44383
-stars_updated_at: '2026-04-23'
+stars: 63671
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
-  Multi-provider gateway cell — canonical point of comparison for bifrost and
-  manifest.
+  Multi-provider gateway cell — canonical point of comparison for bifrost.
 provenance:
   source: bulk-curation-20260423
   ingested_at: '2026-04-23'

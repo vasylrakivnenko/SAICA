@@ -3,11 +3,13 @@ authors:
   - Huanting Wang
   - Jingzhi Gong
   - Huawei Zhang
+  - Jie Xu
   - Zheng Wang
 year: 2025
 title: "AI Agentic Programming: A Survey of Techniques, Challenges, and Opportunities"
 venue: arXiv
 arxiv_id: "2508.11126"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2508.11126"
 url: https://arxiv.org/abs/2508.11126
 semantic_scholar_id: "280671610"
@@ -38,6 +40,7 @@ relevance_tags:
   - supervision
   - benchmark
   - survey
+provenance: elicit-derived
 notes: >
   Survey of AI agentic programming: introduces a taxonomy of agent behaviors
   and system architectures and reviews techniques for planning, context

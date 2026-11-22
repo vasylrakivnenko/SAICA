@@ -1,14 +1,15 @@
 id: bulut-2026-avda-autonomous-vibe-detection
 authors:
   - Fatih Bulut
-  - C. Depaolis
+  - Carlo DePaolis
   - Raghav Batta
   - Anjali Mangal
 year: 2026
 title: "AVDA: Autonomous Vibe Detection Authoring for Cybersecurity"
-venue: arXiv
+venue: "ACM International Conference on the Foundations of Software Engineering (FSE 2026)"
 arxiv_id: "2603.25930"
-doi: "10.1145/3803437.3805261 10.1145/3803437.3805261 10.1145/3803437.3805261"
+arxiv_version: "v2"
+doi: "10.1145/3803437.3805261"
 url: https://www.semanticscholar.org/paper/a4343100a053fd94c99800cd388de3f5d17fd612
 semantic_scholar_id: "a4343100a053fd94c99800cd388de3f5d17fd612"
 abstract: >
@@ -44,6 +45,7 @@ tldr: >
 relevance_tags:
   - agentic-ai
   - MCP
+provenance: s2-derived
 notes: >
   Introduces AVDA, an MCP-based framework for automating cybersecurity
   detection authoring by feeding organizational context (existing detections,

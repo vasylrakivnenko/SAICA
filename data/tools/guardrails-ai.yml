@@ -9,12 +9,14 @@ description: >
   post-generation detect-and-retry layer, not a decoding-time constraint.
 
 first_released: 2023-02-01
-last_updated: 2026-03-20
+last_updated: 2026-11-18
+upstream_pushed_at: 2026-11-18
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: guardrails-ai
 repository_url: https://github.com/guardrails-ai/guardrails
-documentation_url: https://www.guardrailsai.com/docs
+documentation_url: https://github.com/guardrails-ai/guardrails#readme
 license: Apache-2.0
 
 control_paradigm: detection
@@ -53,6 +55,6 @@ inclusion_rationale: >
   Canonical detection × post_generation × fully_autonomous exemplar for
   validator-retry on LLM output. Widely cited reference implementation of
   the "validate-then-reask" pattern, distinct from in-generation constrained
-  decoding (Outlines/Guidance).
-stars: 6718
-stars_updated_at: '2026-04-23'
+  decoding.
+stars: 7635
+stars_updated_at: '2026-11-21'

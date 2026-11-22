@@ -9,6 +9,7 @@ year: 2025
 title: "Help or Hurdle? Rethinking Model Context Protocol-Augmented Large Language Models"
 venue: arXiv
 arxiv_id: "2508.12566"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2508.12566"
 url: https://www.semanticscholar.org/paper/a35799715bfe73519d5be6bfdfaa07014a1f4086
 semantic_scholar_id: "a35799715bfe73519d5be6bfdfaa07014a1f4086"
@@ -39,6 +40,7 @@ tldr: >
 relevance_tags:
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Introduces MCPGAUGE, the first comprehensive evaluation framework for
   LLM-MCP interactions along four dimensions: proactivity (self-initiated tool

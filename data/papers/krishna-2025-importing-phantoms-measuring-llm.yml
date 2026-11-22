@@ -8,6 +8,7 @@ year: 2025
 title: "Importing Phantoms: Measuring LLM Package Hallucination Vulnerabilities"
 venue: arXiv
 arxiv_id: "2501.19012"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2501.19012"
 url: https://www.semanticscholar.org/paper/473e0cc43e9c95be45e0d8a23fbe6d51cdfce485
 semantic_scholar_id: "473e0cc43e9c95be45e0d8a23fbe6d51cdfce485"
@@ -41,6 +42,7 @@ tldr: >
 relevance_tags:
   - benchmark
   - supply-chain
+provenance: s2-derived
 notes: >
   Measures package-hallucination behavior across multiple LLMs and programming
   languages. Two key empirical claims for SAICA-KG: (a) the Pareto frontier

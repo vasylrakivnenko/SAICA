@@ -1,7 +1,7 @@
 id: fabrication-resistant-python-agent
 name: Fabrication-resistant Python agent
 tagline: >
-  context-hub (RAG grounding) → pydantic-ai (schema-validated outputs) →
+  context-hub (current API docs) → pydantic-ai (schema-validated outputs) →
   e2b (sandboxed execution) → pytest post-check. Fails fast on
   hallucinated symbols before any change leaves the sandbox.
 description: >
@@ -23,9 +23,6 @@ description: >
   test suite is the final correctness gate and also catches logic errors
   that parsed and imported successfully.
 
-  This is the canonical v0.1 reference composition for
-  `python` + `graduated_hitl` workflows.
-
 targets_failure_modes:
   - fabrication
   - logic_error
@@ -34,12 +31,20 @@ stack:
   - context-hub
   - pydantic-ai
   - e2b
+  - pytest
 
 evidence_tier: case_studied
 language: python
 
 notes: >
-  Pytest is the post-check but not a separate node in the KG. Evidence tier
-  `case_studied` reflects that the composition appears in Andrew Ng's
-  context-hub reference materials and PydanticAI docs but has not been
-  formally benchmarked.
+  Changed on 2026-11-21: pytest, which the text has always named as stage
+  4, was added to `stack` (it has been a KG node since 2026-05-01, and it
+  is the stack tool the KG tags for `logic_error`). A sentence that called
+  this the reference composition for `graduated_hitl` workflows was
+  removed; the KG labels these tools `fully_autonomous`. Of the stack
+  tools the KG tags context-hub for fabrication and pytest for
+  logic_error; pydantic-ai and e2b are tagged for other modes and are here
+  for the mechanism the text describes. The basis given for
+  `case_studied` (the composition is said to appear in context-hub and
+  PydanticAI material) was not re-checked and no write-up is cited. The
+  composition has not been benchmarked.

@@ -7,6 +7,7 @@ year: 2025
 title: "PAGENT: Learning to Patch Software Engineering Agents"
 venue: arXiv
 arxiv_id: "2506.17772"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2506.17772"
 url: https://arxiv.org/abs/2506.17772
 semantic_scholar_id: "4fee1a85d1cb222f3fed5dc1421c8b17f0ae27d2"
@@ -37,6 +38,7 @@ relevance_tags:
   - swe-bench
   - empirical
   - patch-repair
+provenance: hand-curated
 notes: >
   High-signal SWE-bench failure taxonomy; the 6 categories align
   closely with SAICA-KG's logic_error, fabrication, and dependency_blindness

@@ -6,6 +6,8 @@ description: >
   name, or by a compromised upstream — to install or invoke malicious code.
   Covers slopsquatting (hallucinated package names registered by an attacker),
   typosquatting (near-miss names), and compromised MCP servers or tools.
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - slopsquatting
@@ -23,9 +25,3 @@ detection_signals:
   - Package name is a near-miss (Levenshtein ≤ 2) of a well-known dependency.
   - MCP server manifest is unsigned or from an unknown publisher.
   - Post-install, the environment shows outbound connections to unexpected hosts.
-
-crosswalks:
-  - taxonomy: owasp-agentic-top-10-2026
-    external_id: ASI04
-    confidence: exact
-    note: OWASP ASI04 "Agentic Supply Chain Vulnerabilities" is the direct counterpart, including slopsquatting.

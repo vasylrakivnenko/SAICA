@@ -2,12 +2,15 @@ id: bhattarai-2025-arcs-agentic-retrieval-augmented
 authors:
   - Manish Bhattarai
   - Miguel Cordova
-  - Javier E. Santos
+  - Minh Vu
+  - Javier Santos
+  - Ismael Boureima
   - Dan O'Malley
 year: 2025
 title: "ARCS: Agentic Retrieval-Augmented Code Synthesis with Iterative Refinement"
 venue: arXiv
 arxiv_id: "2504.20434"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2504.20434"
 url: https://www.semanticscholar.org/paper/172e194d8b190377e12ffad78d025ca32459cb79
 semantic_scholar_id: "172e194d8b190377e12ffad78d025ca32459cb79"
@@ -35,6 +38,7 @@ tldr: >
   improvement, and bounded cost.
 relevance_tags:
   - agentic-ai
+provenance: s2-derived
 notes: >
   Introduces ARCS (Agentic Retrieval-Augmented Code Synthesis), a budgeted
   synthesize-execute-repair loop over a frozen LLM with formal guarantees on

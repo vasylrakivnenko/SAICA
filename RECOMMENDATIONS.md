@@ -1,615 +1,189 @@
-# SAICA-KG — Supervision recommendations
+# SAICA-KG — Tool suggestions from the catalogue
 
-> Read once at project setup. Don't poll this file per-task.
-> For per-action agent guidance, see `SKILLS.md` (drop into your
-> `.claude/skills/`, `.cursor/rules/`, or equivalent skills directory).
+> These lists come from the catalogue's **tags**: what each tool's own
+> documentation says it addresses. A tag is a claim, not a measurement.
+> Where SAICA-Bench measured a tool on a failure mode, the J is shown,
+> and a tool is never listed for a mode where it measured below J 25%.
+> For picks built from measured results only, use https://saica.ai/tool-coverage/.
 
-Pre-computed from the KG. Regenerate with `python -m validator.generate_recommendations`.
-Last regenerated: 2026-11-20 from KG version 2026.11.
-
-> 🔥 marks repos currently on github.com/trending. Trending tools win ties
-> against non-trending peers with up to ~+30% more raw stars (boost = 1.43×; see
-> `pipeline/shared/trending.py`).
-
-This regeneration saw **39** trending repositories in `data/trending.json`.
+Pre-computed. Regenerate with `python -m validator.generate_recommendations`.
+Generated from KG version 2026.11 (manifest of 2026-11-22); benchmark results of 2026-11-22.
 
 ---
 
-## Quickstart — pick by which agent you use
+## Three stacks by tag coverage
 
-If you already use one of these coding agents, install the supervisors below for full 11-failure-mode coverage. None of these are competing coding agents — they all *compose with* the agent you have.
+Tools are picked for how many weighted failure modes their tags name, times their popularity. See Method at the end.
 
-### If you use **Aider**
+**One tool (`minimum`)** — 1 tool. Its tags name 4 of 11 failure modes; none of these tool-mode pairs was measured by SAICA-Bench. A tag is the tool's own claim.
 
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
+| Tool | Paradigm | Phase | Surfaces | Stars | Tagged for | Measured |
+| --- | --- | --- | --- | ---: | --- | --- |
+| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 6,590 | `security_vulnerability`, `scope_creep`, `supply_chain_attack`, `cascading_failure` | — |
 
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
+**Three tools (`optimal`)** — 3 tools. Their tags name 8 of 11 failure modes; none of these tool-mode pairs was measured by SAICA-Bench. A tag is the tool's own claim.
 
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
+| Tool | Paradigm | Phase | Surfaces | Stars | Tagged for | Measured |
+| --- | --- | --- | --- | ---: | --- | --- |
+| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 6,590 | `security_vulnerability`, `scope_creep`, `supply_chain_attack`, `cascading_failure` | — |
+| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 27,642 | `logic_error`, `security_vulnerability`, `fabrication`, `incomplete_execution` | — |
+| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 45,236 | `scope_creep`, `context_pollution` | — |
 
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
+**Widest reach of tags with the fewest tools (`full`)** — 6 tools. Their tags name 11 of 11 failure modes; 1 of the 16 tool-mode pairs was measured by SAICA-Bench (J at or above 25%). A tag is the tool's own claim.
 
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
+| Tool | Paradigm | Phase | Surfaces | Stars | Tagged for | Measured |
+| --- | --- | --- | --- | ---: | --- | --- |
+| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 6,590 | `security_vulnerability`, `scope_creep`, `supply_chain_attack`, `cascading_failure` | — |
+| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 27,642 | `logic_error`, `security_vulnerability`, `fabrication`, `incomplete_execution` | — |
+| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 45,236 | `scope_creep`, `context_pollution` | — |
+| [Context7](data/tools/context7.yml) | prevention | pre_generation | mcp_server, cli | 65,244 | `fabrication`, `obsolescence` | — |
+| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 27,525 | `scope_creep`, `test_manipulation`, `supply_chain_attack` | test_manipulation J +86% |
+| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 3,344 | `dependency_blindness` | — |
 
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
+## By coding agent
 
-### If you use **Claude Code**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Cline**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Codex CLI**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Continue.dev**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Cursor**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Devin**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Gemini CLI**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **GitHub Copilot**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **OpenHands**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Replit Agent**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Sourcegraph Cody**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **SWE-agent**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **v0**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Windsurf**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
-### If you use **Zed Agent**
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
+The picks are the same for all 16 coding agents the recommender knows by name (Cursor, Claude Code, Codex CLI and others): no coding agent is in the catalogue, so there is nothing to filter out for any of them.
 
 ---
 
-## Agnostic baseline (no specific coding agent)
+## By failure mode
 
-If you don't use one of the listed coding agents — or you're evaluating supervisors without a fixed asker — these are the three tiers without a peer-coding-agent filter. The blocklist still applies.
-
-**Minimum (1 tool — best starter)** — 1 tool covers 3 of 11 failure modes (highest-priority single pick).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-
-**Optimal (3 tools — best responsible kit)** — 3 tools cover 8 of 11 failure modes (weighted set cover, capped at 3).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-
-**Full / MECE (minimum tools to cover all 11 failure modes)** — 6 tools cover 11 of 11 failure modes (minimum weighted set cover).
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending |
-| --- | --- | --- | --- | ---: | :---: |
-| [Daytona](data/tools/daytona.yml) | recovery | post_generation | cli, http_service | 72,378 |  |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  |
-
----
-
-## Quickstart — pick by failure mode
-
-Top 3 supervisors per failure mode (agnostic; pick the row whose paradigm and surfaces fit your workflow).
+Up to 3 tools per failure mode. Measured tools first; a row that says "tag only" has not been tested on this mode.
 
 ### Fabrication
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [mypy](data/tools/mypy.yml) | detection | post_generation | cli, ci_app, ide_plugin | 18,000 |  | Static type checker for Python. Catches mismatched types before runti… |
-| [Pyright](data/tools/pyright.yml) | detection | post_generation | cli, ci_app, ide_plugin | 14,000 |  | Microsoft's fast static type checker for Python. |
-| [Context7](data/tools/context7.yml) | prevention | pre_generation | mcp_server, cli | 54,254 |  | Up-to-date, version-pinned library documentation for coding agents —… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [Pyright](data/tools/pyright.yml) | measured J +85% | detection | post_generation | cli, ci_app, ide_plugin | 15,755 | Microsoft's fast static type checker for Python. |
+| [mypy](data/tools/mypy.yml) | measured J +77% | detection | post_generation | cli, ci_app, ide_plugin | 20,734 | Static type checker for Python. Catches mismatched types before runti… |
+| [Ruff](data/tools/ruff.yml) | measured J +54% | detection | post_generation | cli, ci_app, ide_plugin | 51,351 | Extremely fast Python linter and formatter, written in Rust. |
 
 ### Obsolescence
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  | Highly configurable multi-platform dependency update bot. |
-| [Context Hub](data/tools/context-hub.yml) | prevention | pre_generation | mcp_server, cli | 13,025 |  | Up-to-date, curated API docs for coding agents. |
-| [Dependabot](data/tools/dependabot.yml) | detection | post_generation | ci_app | 5,546 |  | Automated dependency-update PRs that flag outdated and vulnerable pac… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [Pyright](data/tools/pyright.yml) | measured J +57% | detection | post_generation | cli, ci_app, ide_plugin | 15,755 | Microsoft's fast static type checker for Python. |
+| [Renovate](data/tools/renovate.yml) | tag only, not measured | detection | post_generation | ci_app, cli | 23,220 | Highly configurable multi-platform dependency update bot. |
+| [Context Hub](data/tools/context-hub.yml) | tag only, not measured | prevention | pre_generation | mcp_server, cli | 13,993 | Up-to-date, curated API docs for coding agents. |
 
 ### Dependency blindness
 
-Top 1 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [sentrux](data/tools/sentrux.yml) | detection | post_generation | cli, mcp_server, library | 1,975 |  | Real-time architectural sensor that scores codebase modularity, acycl… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [sentrux](data/tools/sentrux.yml) | tag only, not measured | detection | post_generation | cli, mcp_server, library | 3,344 | Real-time architectural sensor that scores codebase modularity, acycl… |
 
 ### Logic error
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  | Extremely fast Python linter and formatter, written in Rust. |
-| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 25,000 |  | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
-| [Pyright](data/tools/pyright.yml) | detection | post_generation | cli, ci_app, ide_plugin | 14,000 |  | Microsoft's fast static type checker for Python. |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [pr-agent](data/tools/pr-agent.yml) | measured J +53% | detection | post_generation | ci_app, cli | 16,537 | AI-powered tool for automated pull-request analysis, feedback, and su… |
+| [uqlm](data/tools/uqlm.yml) | measured J +52% | detection | post_generation | library | 1,215 | Uncertainty Quantification for Language Models. |
+| [ESLint](data/tools/eslint.yml) | tag only, not measured | detection | post_generation | cli, ci_app, ide_plugin | 27,642 | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
 
 ### Security vulnerability
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 25,000 |  | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
-| [Bandit](data/tools/bandit.yml) | detection | post_generation | cli, ci_app | 6,000 |  | Security linter for Python. Catches common code-level vulnerabilities. |
-| [Snyk](data/tools/snyk.yml) | detection | post_generation | cli, ci_app | 5,506 |  | Vulnerability scanning for code, dependencies, containers, and IaC. |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [Ruff](data/tools/ruff.yml) | tag only, not measured | detection | post_generation | cli, ci_app, ide_plugin | 51,351 | Extremely fast Python linter and formatter, written in Rust. |
+| [ESLint](data/tools/eslint.yml) | tag only, not measured | detection | post_generation | cli, ci_app, ide_plugin | 27,642 | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
+| [Snyk](data/tools/snyk.yml) | tag only, not measured | detection | post_generation | cli, ci_app | 5,716 | Vulnerability scanning for code, dependencies, containers, and IaC. |
 
 ### Scope creep
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  | Graph-structured state machines for stateful multi-agent orchestratio… |
-| [browser-use](data/tools/browser-use.yml) | prevention | post_generation | library, web_app | 89,651 |  | Make websites accessible for AI agents. |
-| [AutoGen](data/tools/autogen.yml) | prevention | pre_generation | library | 57,354 |  | Multi-agent conversation framework with programmable group chats. |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [LangGraph](data/tools/langgraph.yml) | tag only, not measured | prevention | pre_generation | library | 45,236 | Graph-structured state machines for stateful multi-agent orchestratio… |
+| [letta](data/tools/letta.yml) | tag only, not measured | prevention | pre_generation | library, http_service | 25,510 | Stateful agents framework with memory, reasoning, and context managem… |
+| [browser-use](data/tools/browser-use.yml) | tag only, not measured | prevention | post_generation | library, web_app | 121,683 | Make websites accessible for AI agents. |
 
 ### Context pollution
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [LangGraph](data/tools/langgraph.yml) | prevention | pre_generation | library | 30,108 |  | Graph-structured state machines for stateful multi-agent orchestratio… |
-| [mlflow](data/tools/mlflow.yml) | detection | post_generation | http_service, library, cli | 25,505 |  | Open-source platform for the machine learning lifecycle — experiments… |
-| [mastra](data/tools/mastra.yml) | prevention | pre_generation | library | 23,247 |  | The TypeScript AI agent framework — assistants, RAG, observability; s… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [LangGraph](data/tools/langgraph.yml) | tag only, not measured | prevention | pre_generation | library | 45,236 | Graph-structured state machines for stateful multi-agent orchestratio… |
+| [mastra](data/tools/mastra.yml) | tag only, not measured | prevention | pre_generation | library | 29,724 | The TypeScript AI agent framework — assistants, RAG, observability; s… |
+| [mlflow](data/tools/mlflow.yml) | tag only, not measured | detection | post_generation | http_service, library, cli | 28,924 | Open-source platform for the machine learning lifecycle — experiments… |
 
 ### Supply chain attack
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [Socket](data/tools/socket.yml) | detection | pre_generation | ci_app, cli, library | — |  | Dependency supply-chain scanner that inspects packages before install. |
-| [Renovate](data/tools/renovate.yml) | detection | post_generation | ci_app, cli | 21,353 |  | Highly configurable multi-platform dependency update bot. |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  | Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnera… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [Semgrep](data/tools/semgrep.yml) | tag only, not measured | detection | post_generation | cli, ci_app, library | 17,880 | Fast, rule-based static analysis with a pattern syntax that mirrors s… |
+| [Socket](data/tools/socket.yml) | tag only, not measured | detection | pre_generation | ci_app, cli, library | — | Dependency supply-chain scanner that inspects packages before install. |
+| [promptfoo](data/tools/promptfoo.yml) | tag only, not measured | detection | post_generation | cli, library, ci_app | 27,525 | Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnera… |
 
 ### Cascading failure
 
-Top 1 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | prevention | in_generation | library, cli | 1,177 |  | AI Agent Governance Toolkit — policy enforcement, zero-trust identity… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [agent-governance-toolkit](data/tools/agent-governance-toolkit.yml) | tag only, not measured | prevention | in_generation | library, cli | 6,590 | AI Agent Governance Toolkit — policy enforcement, zero-trust identity… |
 
 ### Incomplete execution
 
-Top 3 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [Ruff](data/tools/ruff.yml) | detection | post_generation | cli, ci_app, ide_plugin | 30,000 |  | Extremely fast Python linter and formatter, written in Rust. |
-| [ESLint](data/tools/eslint.yml) | detection | post_generation | cli, ci_app, ide_plugin | 25,000 |  | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
-| [opik](data/tools/opik.yml) | detection | post_generation | http_service, library | 18,988 |  | Debug, evaluate, and monitor LLM applications, RAG systems, and agent… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [ESLint](data/tools/eslint.yml) | tag only, not measured | detection | post_generation | cli, ci_app, ide_plugin | 27,642 | Pluggable JavaScript/TypeScript linter and code-quality enforcer. |
+| [TruLens](data/tools/trulens.yml) | tag only, not measured | detection | post_generation | library | 3,665 | Evaluation and Tracking for LLM Experiments and AI Agents |
 
 ### Test manipulation
 
-Top 1 supervisors:
-
-| Tool | Paradigm | Phase | Surfaces | Stars | Trending | Why |
-| --- | --- | --- | --- | ---: | :---: | --- |
-| [promptfoo](data/tools/promptfoo.yml) | detection | post_generation | cli, library, ci_app | 20,465 |  | Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnera… |
+| Tool | Evidence for this mode | Paradigm | Phase | Surfaces | Stars | What it is |
+| --- | --- | --- | --- | --- | ---: | --- |
+| [promptfoo](data/tools/promptfoo.yml) | measured J +86% | detection | post_generation | cli, library, ci_app | 27,525 | Test prompts, agents, and RAGs — red-teaming, pentesting, and vulnera… |
 
 ---
 
-## Methodology
+## Tagged, measured, not listed
 
-Selection is by **likelihood × impact × reliability**. Per-FM likelihood and impact live in `data/failure_mode_priorities.yml` (hybrid: KG tool-coverage prior + editorial calibration against Shah 2026 / DAPLab evidence). Reliability is a bounded combiner of log-stars, github-trending bump, citation count, and maturity.
+These tools are tagged for the mode in the catalogue, but SAICA-Bench measured them below J 25% on it (or their repository is archived), so no list in this file names them for that mode.
 
-Three tiers per asker:
+| Tool | Failure mode | Why not listed |
+| --- | --- | --- |
+| [arize-phoenix](data/tools/arize-phoenix.yml) | `incomplete_execution` | measured J +6.6% |
+| [autogen](data/tools/autogen.yml) | `scope_creep` | upstream repository is archived |
+| [bandit](data/tools/bandit.yml) | `security_vulnerability` | measured J +1.3% |
+| [daytona](data/tools/daytona.yml) | `supply_chain_attack` | upstream repository is archived |
+| [daytona](data/tools/daytona.yml) | `security_vulnerability` | upstream repository is archived |
+| [daytona](data/tools/daytona.yml) | `scope_creep` | upstream repository is archived |
+| [deepeval](data/tools/deepeval.yml) | `incomplete_execution` | measured J +0.9% |
+| [flowise](data/tools/flowise.yml) | `scope_creep` | upstream repository is archived |
+| [llm-guard](data/tools/llm-guard.yml) | `security_vulnerability` | upstream repository is archived |
+| [llm-guard](data/tools/llm-guard.yml) | `fabrication` | upstream repository is archived |
+| [mypy](data/tools/mypy.yml) | `obsolescence` | measured J +14% |
+| [opik](data/tools/opik.yml) | `incomplete_execution` | measured J +3.6% |
+| [pr-agent](data/tools/pr-agent.yml) | `incomplete_execution` | measured J +15% |
+| [pr-agent](data/tools/pr-agent.yml) | `security_vulnerability` | measured J +0.1% |
+| [promptfoo](data/tools/promptfoo.yml) | `security_vulnerability` | measured J +1.8% |
+| [pyright](data/tools/pyright.yml) | `logic_error` | measured J +0.3% |
+| [ruff](data/tools/ruff.yml) | `incomplete_execution` | measured J +0.5% |
+| [ruff](data/tools/ruff.yml) | `logic_error` | measured J -3.1% |
+| [ruff](data/tools/ruff.yml) | `obsolescence` | measured J +7.7% |
+| [semgrep](data/tools/semgrep.yml) | `security_vulnerability` | measured J +2.5% |
 
-- **Minimum (1 tool)** — single tool maximising Σ priority(fm) over its addressed FMs × its reliability.
-- **Optimal (3 tools)** — greedy weighted set cover capped at 3.
-- **Full / MECE** — greedy weighted set cover until every FM is covered (no pad). Typically 4-5 tools.
+---
 
-Coding-agent peers are filtered out per asker (the user has a coding agent already; we recommend supervisors, not peers).
-The blocklist (currently: `comfyui`) excludes tools whose role is too ambiguous.
+## Method
 
-Priority order (likelihood × impact, descending):
+Each failure mode has a weight (likelihood × impact) in `data/failure_mode_priorities.yml`, which describes its own numbers as: "editorial weights, no empirical calibration". They were set by hand; no likelihood comes from a count of real failures.
 
-| Failure mode | priority |
+Each tool has a **popularity** score: log10(GitHub stars + 1) plus an adjustment for the curated `maturity_status` (stable +0.5, experimental +0.2, at_risk -0.3, deprecated -1.0, abandoned -2.0). It says how widely a tool is used, not how well it works.
+Star counts in the tool files date from 2026-11-21 to 2026-11-21.
+
+The three stacks:
+
+- **`minimum`** — the one tool with the largest sum of weights over its tagged modes × (1 + popularity).
+- **`optimal`** — three tools picked one after another by the same score, each time counting only modes not yet reached.
+- **`full`** — the same greedy pick, continued until no eligible tool adds a mode.
+
+Per failure mode: tools with a measured J at or above the floor come first, highest J first. Then tools with a tag only, in the recommender's order: prevention and detection before correction and recovery, then tools whose rationale text names the mode, then stars.
+
+Measured results: `site/public/bench/results.json`, generated 2026-11-22; 11 catalogue tools have at least one measured row; floor J 25%.
+
+Never listed, whatever their tags: `comfyui` (role too unclear to suggest).
+
+Weight per failure mode (likelihood × impact, descending):
+
+| Failure mode | weight |
 | --- | ---: |
 | `scope_creep` | 1.70 |
 | `fabrication` | 1.40 |
@@ -623,4 +197,4 @@ Priority order (likelihood × impact, descending):
 | `dependency_blindness` | 0.20 |
 | `incomplete_execution` | 0.15 |
 
-This file is regenerated from `data/tools/*.yml` and `data/failure_mode_priorities.yml` by `validator/generate_recommendations.py`.
+This file is regenerated from `data/tools/*.yml`, `data/failure_mode_priorities.yml` and the benchmark results by `validator/generate_recommendations.py`.

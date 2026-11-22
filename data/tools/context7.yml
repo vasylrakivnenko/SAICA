@@ -12,7 +12,9 @@ description: >
   against fabricated APIs and obsolete-syntax suggestions.
 
 first_released: 2025-04-01
-last_updated: 2026-05-01
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: upstash
@@ -73,5 +75,5 @@ editorial_notes: >
   Added 2026-05-01 (v0.5.1) following the Stage 4 quality-gate
   enrichment pass that surfaced it from the long tail. Motivating
   example for that workstream.
-stars: 54254
-stars_updated_at: '2026-05-01'
+stars: 65244
+stars_updated_at: '2026-11-21'

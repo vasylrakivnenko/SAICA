@@ -9,6 +9,8 @@ description: >
   addressed. Overconfidence paired with under-delivery. Distinct from
   scope_creep (which over-reaches beyond the request) — this is the opposite
   failure of under-delivering inside the requested surface.
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - premature-completion
@@ -30,13 +32,3 @@ detection_signals:
   - Tests for features the user explicitly named don't exist.
   - Agent's final message claims a subtask is done but the file contains only a stub.
   - Function docstrings describe a behavior not implemented by the body.
-
-crosswalks:
-  - taxonomy: daplab-9-patterns
-    external_id: DAP-01
-    confidence: exact
-    note: DAPLab "Incomplete Task Execution" is the direct counterpart.
-  - taxonomy: mast
-    external_id: FM-3.1
-    confidence: exact
-    note: MAST "Premature termination" (ending a task before its objectives are met) is the direct counterpart at the multi-agent level.

@@ -1,10 +1,3 @@
-id: mast-to-saica
-saica_axis: failure_mode
-taxonomy: mast
-authored_by:
-  - claude-opus-4-7
-last_reviewed: 2026-11-21
-
 # Re-judged 2026-11-21 against the published MAST (arXiv 2503.13657v3,
 # Appendix A definitions). MAST describes the behaviour of agents in a
 # multi-agent run; SAICA modes describe what a coding agent does to a
@@ -12,13 +5,25 @@ last_reviewed: 2026-11-21
 # labeller would tag the same incident. See
 # research/review_20261121/mast_fix.md for the old -> new history.
 #
-# Unmapped on purpose (no SAICA counterpart):
-#   FM-2.2 Fail to ask for clarification (SAICA has no clarification /
-#          escalation mode)
-#   FM-2.4 Information withholding, FM-2.5 Ignored other agent's input
-#          (inter-agent only)
-#   FM-2.6 Reasoning-action mismatch (agent-behaviour mode; no SAICA mode
-#          is defined by plan-vs-action divergence)
+# Changed later the same day (fix round, E4):
+#   FM-3.1 <-> incomplete_execution lowered from exact to partial: MAST
+#     does not require the false "done" claim that defines the SAICA mode,
+#     and it covers early stops that SAICA would not label.
+#   FM-1.2 <-> scope_creep lowered from partial to related: a role is not
+#     the user's task boundary; FM-1.1 is the closer entry.
+#   The list of categories left out moved from this comment to `unmapped`.
+# No row is "exact" now. Labels and definitions in the taxonomy file were
+# compared with the v3 PDF again by script (17 of 17 match).
+# Drafted by an LLM. No person has reviewed these rows yet.
+
+id: mast-to-saica
+saica_axis: failure_mode
+taxonomy: mast
+authored_by:
+  - claude-opus-4-7
+  - claude-fable-5-2
+review_state: llm_drafted_unreviewed
+source_checked_on: 2026-11-21
 
 mappings:
   # FM-1.1 Disobey task specification
@@ -39,11 +44,12 @@ mappings:
   # FM-1.2 Disobey role specification
   - saica_value: scope_creep
     external_id: FM-1.2
-    confidence: partial
+    confidence: related
     note: >
       Overstepping an assigned role ("an agent behaving like another") is
-      the multi-agent form of acting outside the declared boundary. Not
-      exact: SAICA scope is set by the user's request, not by a role.
+      the multi-agent analogue of acting outside a declared boundary. In
+      SAICA the boundary is the user's request, not a role, so FM-1.1 is
+      the closer entry. Was "partial" before the fix round of 2026-11-21.
 
   # FM-1.3 Step repetition
   - saica_value: cascading_failure
@@ -102,12 +108,14 @@ mappings:
   # FM-3.1 Premature termination
   - saica_value: incomplete_execution
     external_id: FM-3.1
-    confidence: exact
+    confidence: partial
     note: >
-      Ending a task before its objectives are met is the core of
-      incomplete_execution (terminating before all user-specified items are
-      addressed). SAICA also stresses the false "done" claim, which MAST
-      does not require.
+      Ending a task before its objectives are met overlaps with
+      incomplete_execution (stopping before all user-specified items are
+      addressed). Not exact: the SAICA mode is defined by a false "done"
+      claim, which MAST does not require, and FM-3.1 also covers early
+      stops with no such claim. Was "exact" before the fix round of
+      2026-11-21.
 
   # FM-3.2 No or incomplete verification
   - saica_value: incomplete_execution
@@ -131,3 +139,17 @@ mappings:
       Weakening or rewriting tests yields a verification step that does not
       validate anything. FM-3.3 covers honest but inadequate checking too;
       test_manipulation is the deliberate gaming case.
+
+unmapped:
+  - category: FM-2.2
+    reason: >
+      Fail to ask for clarification: SAICA has no mode for not asking or
+      not escalating.
+  - category: FM-2.4
+    reason: "Information withholding: between agents only."
+  - category: FM-2.5
+    reason: "Ignored other agent's input: between agents only."
+  - category: FM-2.6
+    reason: >
+      Reasoning-action mismatch: no SAICA mode is defined by a gap between
+      what the agent reasons and what it does.

@@ -4,7 +4,7 @@ authors:
   - Juntao Chen
   - Yanlin Wang
   - Tianyue Jiang
-  - Xing Li
+  - Xingzhe Li
   - Mingwei Liu
   - Xilin Liu
   - Yuchi Ma
@@ -13,6 +13,7 @@ year: 2025
 title: "What to Retrieve for Effective Retrieval-Augmented Code Generation? An Empirical Study and Beyond"
 venue: arXiv
 arxiv_id: "2503.20589"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2503.20589"
 url: https://www.semanticscholar.org/paper/695f334494f305d2ff57f2d584c27cdcaa4012ff
 semantic_scholar_id: "695f334494f305d2ff57f2d584c27cdcaa4012ff"
@@ -41,6 +42,7 @@ tldr: >
 relevance_tags:
   - benchmark
   - empirical
+provenance: s2-derived
 notes: >
   Empirical study of which retrieved-information sources actually help
   repository-level code generation. Key finding: in-context code and potential

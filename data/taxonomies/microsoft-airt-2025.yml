@@ -1,112 +1,245 @@
 id: microsoft-airt-2025
-name: "Microsoft AI Red Team: Taxonomy of Failure Modes in Agentic AI Systems"
+name: "Taxonomy of Failure Mode in Agentic AI Systems (Microsoft AI Red Team, version 1.0)"
 owner: Microsoft AI Red Team (AIRT)
-version: "2025-04"
+version: "1.0 (2025-04)"
 first_published: 2025-04-24
 url: https://www.microsoft.com/en-us/security/blog/2025/04/24/new-whitepaper-outlines-the-taxonomy-of-failure-modes-in-ai-agents/
-license: "Microsoft whitepaper; attribution required"
+license: "Microsoft whitepaper; no open licence stated"
+verified_against_source: 2026-11-21
 scope: >
-  Failure modes of agentic AI systems, split along two axes: safety vs.
-  security (impact) and novel vs. existing (whether the mode is unique to
-  agentic AI or inherited from prior generative AI). Single- vs. multi-agent
-  distinctions are surfaced in descriptions. Derived from Microsoft AI Red
-  Team's operational experience and a 30-page April 2025 whitepaper.
+  Version 1.0 of the Microsoft AI Red Team's list of failure modes of
+  agentic AI systems: 27 modes on two axes, safety or security and novel
+  (only in agentic systems) or existing (known from other AI systems, with
+  higher risk in agents). 4 novel safety, 6 novel security, 7 existing
+  safety and 10 existing security modes. The paper calls its method a
+  failure mode and effects analysis of current and envisaged systems. It
+  is about agentic systems in general, with many multi-agent cases, not
+  about coding agents.
 
 categories:
-  # --- Novel Security (unique to agentic AI, security impact) ---
-  - external_id: MS-NS-01
-    label: Agent Compromise
-    description: >
-      Unauthorized control or manipulation of an agent; one corrupted node
-      can subvert entire multi-agent workflows.
-  - external_id: MS-NS-02
-    label: Agent Injection
-    description: Insertion of malicious instructions into agent prompts, plans, or tool-call arguments.
-  - external_id: MS-NS-03
-    label: Agent Impersonation
-    description: >
-      Threat actors register counterfeit agents that appear legitimate,
-      tricking other modules into leaking data or executing actions.
-  - external_id: MS-NS-04
-    label: Agent Flow Manipulation
-    description: >
-      Unauthorized alteration of agent workflow execution paths, e.g.,
-      injecting tokens like STOP to reroute workflows or bypass safety logic.
-  - external_id: MS-NS-05
-    label: Multi-Agent Jailbreaks
-    description: >
-      Jailbreak payload split across agent messages; recombination bypasses
-      single-prompt detectors. Specific to multi-agent topologies.
-
-  # --- Novel Safety (unique to agentic AI, RAI/harm impact) ---
+  # --- Novel safety failure modes (4) ---
   - external_id: MS-NF-01
-    label: Intra-Agent Responsible AI Concerns
+    label: "Intra-agent Responsible AI (RAI) issues"
     description: >
-      Toxic or RAI-violating content propagates through internal inter-agent
-      messages and reaches users or logs without filtering.
+      "Communications between agents in a multi-agent system could include RAI
+      harms that are either exposed to the user during output or are included
+      in transparency logging."
   - external_id: MS-NF-02
-    label: Bias in Resource Allocation
-    description: Discriminatory distribution of resources across users when agents act as allocators.
+    label: "Harms of allocation in multi-user scenarios"
+    description: >
+      Agents with autonomy have to balance priorities, for example when
+      scheduling meetings. "If not addressed in system design, biases in the
+      LLMs used by agents could lead to different users or groups being
+      prioritized differently, leading to differing quality of service."
   - external_id: MS-NF-03
-    label: Organizational Knowledge Degradation
+    label: "Organizational knowledge loss"
     description: >
-      Heavy automation erodes human understanding of the underlying system;
-      recovery is difficult when agents fail.
+      "A subset of overreliance." An organization that delegates significant
+      powers to agents "could see a breakdown in knowledge or relationships as
+      interactions are handled agent-agent".
   - external_id: MS-NF-04
-    label: Prioritization Risks (Performance Over Safety)
+    label: "Prioritization leading to user safety issues"
     description: >
-      Goal-driven agents skip safety checks to optimize KPIs, prioritizing
-      performance metrics over user safety.
+      "The autonomy granted to agentic AI systems may lead to the system
+      prioritizing its given objective ahead of the safety of users or other
+      systems unless systems are given robust safety guardrails." Sample
+      scenario: an agent that must add database entries deletes all existing
+      entries to make room.
 
-  # --- Existing Security (inherited from GenAI, re-scored for agentic) ---
-  - external_id: MS-ES-01
-    label: Memory Poisoning
+  # --- Novel security failure modes (6) ---
+  - external_id: MS-NS-01
+    label: "Agent compromise"
     description: >
-      Attackers embed malicious instructions into long-term memory; every
-      future recall re-executes the attack. Flagship case study in the paper.
-  - external_id: MS-ES-02
-    label: Cross-Domain Prompt Injection (XPIA)
+      "The compromise of an existing agent with new threat actor–controlled
+      instructions, or a threat actor–controlled model that breaks existing
+      guardrails and introduces a malicious element to an agent or the
+      system."
+  - external_id: MS-NS-02
+    label: "Agent injection"
     description: >
-      External content (PDFs, calendar invites, web pages) contains hidden
-      commands that hijack agent decision logic.
-  - external_id: MS-ES-03
-    label: Human-in-the-Loop Bypass
-    description: Circumvention of human oversight and approval gates.
-  - external_id: MS-ES-04
-    label: Incorrect Permissions Management
+      "The introduction of new malicious agents into an existing multi-agent
+      system with the intent of performing a malicious action or having a
+      detrimental impact on the system." This is the injection of agents, not
+      prompt injection (see MS-ES-03).
+  - external_id: MS-NS-03
+    label: "Agent impersonation"
     description: >
-      Over-scoped agent permissions let agents access files or perform actions
-      beyond the user's intent.
-  - external_id: MS-ES-05
-    label: Insufficient Isolation
-    description: Inadequate separation between agent operational boundaries, enabling lateral compromise.
+      "The introduction of a new malicious agent into a system that
+      impersonates an existing agent in a way that is accepted by other agents
+      in the system."
+  - external_id: MS-NS-04
+    label: "Agent flow manipulation"
+    description: >
+      "A threat actor compromises some part of the agentic AI system to
+      subvert the flow of the agent system." The flow can be ended, redirected
+      or altered, through crafted prompts, a compromised framework or the
+      network.
+  - external_id: MS-NS-05
+    label: "Agent provisioning poisoning"
+    description: >
+      "The manipulation of the method by which new agents are deployed to
+      introduce a malicious element to new agents deployed to the system, or
+      to deploy a specifically malicious agent."
+  - external_id: MS-NS-06
+    label: "Multi-agent jailbreaks"
+    description: >
+      In a multi-agent system "a jailbreak could be generated as part of
+      multiple agent interactions, resulting in Agent Compromise while
+      avoiding jailbreak detections".
 
-  # --- Existing Safety (inherited from GenAI, RAI/harm impact) ---
+  # --- Existing safety failure modes (7) ---
   - external_id: MS-EF-01
-    label: Bias Amplification
-    description: Magnification of existing prejudices in agent outputs across iterative loops.
+    label: "Insufficient transparency and accountability"
+    description: >
+      "An agent performs an action or takes a decision for which there should
+      be clear accountability tracing." If too little of the agent process is
+      logged, that accountability is not available.
   - external_id: MS-EF-02
-    label: Hallucinations
-    description: Generation of false or fabricated information, including fabricated tool calls and references.
+    label: "Parasocial relationships"
+    description: >
+      "A user of an agent develops an inappropriate relationship with the
+      agent through repeated interaction with it, resulting in a negative
+      impact to the user."
   - external_id: MS-EF-03
-    label: Misinterpretation of Instructions
-    description: Incorrect understanding of user directives leading to unintended actions.
+    label: "Bias amplification"
+    description: >
+      "A user who holds biased views passes those biases on to the agent,
+      which are subsequently embedded due to the memory and personalization
+      features of the system." A biased agent may also pass the bias to other
+      agents.
   - external_id: MS-EF-04
-    label: Lack of Transparency
-    description: Insufficient clarity over agent behavior, preventing informed user consent and oversight.
+    label: "User impersonation"
+    description: >
+      "An agent intentionally or deliberately impersonates a human user,
+      without disclosing its nature as an AI agent."
+  - external_id: MS-EF-05
+    label: "Insufficient intelligibility for meaningful consent"
+    description: >
+      An agent asks a user for consent through a human-in-the-loop control but
+      "does not provide sufficient information to the user", so "they cannot
+      meaningfully consent to the action".
+  - external_id: MS-EF-06
+    label: "Hallucinations"
+    description: >
+      "The agent produces responses that include incorrect information
+      presented factually by the agent."
+  - external_id: MS-EF-07
+    label: "Misinterpretation of instructions"
+    description: >
+      "The agent-wide latitude of actions and roles leads it to misinterpret
+      the user’s intent and perform incorrect actions." Sample scenario: asked
+      to "get rid of it" about one record, the agent deletes the whole table.
+
+  # --- Existing security failure modes (10) ---
+  - external_id: MS-ES-01
+    label: "Memory poisoning and theft"
+    description: >
+      "A threat actor can manipulate future actions of an agent by adding
+      content, most notably malicious instructions, to the system’s memory,
+      which the agent will process each time it is recalled." The details
+      section is headed "Memory poisoning" and does not describe theft.
+  - external_id: MS-ES-02
+    label: "Targeted knowledge base poisoning"
+    description: >
+      When agents have access to knowledge sources specific to their role,
+      often through RAG, "there is an opportunity for a threat actor to poison
+      these knowledge bases with malicious data".
+  - external_id: MS-ES-03
+    label: "Cross domain prompt injection (XPIA)"
+    description: >
+      "Due to an agent’s inability to distinguish between instructions and
+      data, any data source that the agent ingests that includes instructions
+      poses a risk of that instruction being actioned by the agent, regardless
+      of its provenance." The overview table lists this mode as "XPIA"; the
+      paper notes that others call it indirect prompt injection.
+  - external_id: MS-ES-04
+    label: "Human-in-the-loop bypass"
+    description: >
+      "The threat actor exploits a logic flaw or human flaw in the
+      human-in-the-loop (HitL) process to either bypass the HitL control or
+      convince the user to approve the control for a malicious action."
+  - external_id: MS-ES-05
+    label: "Function compromise and malicious functions"
+    description: >
+      "A threat actor compromises a tool or function available to an agent to
+      use the invocation of that plugin or response from it to manipulate the
+      agent or perform a malicious action." The details section is headed
+      "Tool compromise".
+  - external_id: MS-ES-06
+    label: "Incorrect permissions"
+    description: >
+      "The agent is provided with permission to access data or perform actions
+      that are above and beyond those provided to an end user." Workflow logic
+      issues let a threat actor use this to reach data or actions they should
+      not have.
+  - external_id: MS-ES-07
+    label: "Resource exhaustion"
+    description: >
+      A threat actor manipulates the agent or its inputs "to perform actions
+      that use a lot of resources", so that they are exhausted and service
+      quality or availability suffers for others.
+  - external_id: MS-ES-08
+    label: "Insufficient isolation"
+    description: >
+      "An agent that can perform an unstructured action does so in a way that
+      allows it to interact with systems, users, or components outside of the
+      intended scope of the agent."
+  - external_id: MS-ES-09
+    label: "Excessive agency"
+    description: >
+      "An agent is provided with insufficient scoping and direction in its
+      actions, resulting in it making decisions and taking actions beyond what
+      is expected of the agent." Sample scenario: asked for advice on an
+      underperforming employee, an agent with full access to the HR system
+      terminates the employee.
+  - external_id: MS-ES-10
+    label: "Loss of data provenance"
+    description: >
+      Data that grounds the agent's actions "is passed between multiple agents
+      or components before being output, potentially leading to the loss of
+      provenance for that data", with integrity or confidentiality issues as a
+      result.
 
 notes: >
-  Category labels paraphrased from the Microsoft Security Blog summary and
-  Adversa/MarkTechPost coverage; pending full-text verification against the
-  30-page whitepaper PDF. Full expansion (e.g., sub-modes under Memory
-  Poisoning) and any additional categories is a v0.2 task.
+  Rebuilt on 2026-11-21 from the whitepaper PDF (28 pages, created
+  2025-04-16), linked from the blog post in `url`:
+  https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/Taxonomy-of-Failure-Mode-in-Agentic-AI-Systems-Whitepaper.pdf
+  Labels are those of the table "Overview of failure modes"; for MS-ES-03
+  the table gives only the acronym XPIA, so the heading of the details
+  section is used. Quoted text is the "Description" line of each mode. The
+  ids are SAICA-KG's, in the order of the table; the whitepaper publishes
+  none.
+
+  What changed. Until 2026-11-21 this file held 18 of the 27 modes, taken
+  from summaries of the whitepaper, with several labels reworded and one
+  description wrong (Agent injection was described as injected
+  instructions; the paper means injected agents). Nine modes were missing:
+  Agent provisioning poisoning, Targeted knowledge base poisoning, Function
+  compromise and malicious functions, Resource exhaustion, Excessive
+  agency, Loss of data provenance, Parasocial relationships, User
+  impersonation and Insufficient intelligibility for meaningful consent.
+  Ids that moved (old id -> new id): MS-NS-05 Multi-agent jailbreaks ->
+  MS-NS-06; MS-ES-02 XPIA -> MS-ES-03; MS-ES-03 Human-in-the-loop bypass ->
+  MS-ES-04; MS-ES-04 Incorrect permissions -> MS-ES-06; MS-ES-05
+  Insufficient isolation -> MS-ES-08; MS-EF-01 Bias amplification ->
+  MS-EF-03; MS-EF-02 Hallucinations -> MS-EF-06; MS-EF-03
+  Misinterpretation of instructions -> MS-EF-07; MS-EF-04 (was "Lack of
+  Transparency") -> MS-EF-01. An old reference by id must be re-read. The
+  same completion was first made on 2026-08-17 (commit 07cbe15) and was
+  lost in the reset of 2026-11-19.
+
+  Version 2.0 exists (PDF "Taxonomy of Failure Modes in Agentic AI Systems,
+  v2.0", dated April 2026, read on 2026-11-21). It keeps these 27 modes and
+  adds seven novel security modes: Agentic supply chain compromise, Goal
+  hijacking, Inter-agent trust escalation, Computer Use Agent (CUA) visual
+  attack, Session context contamination, MCP/plugin abuse and
+  Capability/architecture disclosure. They are not in this file; adding
+  version 2.0 as its own taxonomy node is an open decision.
 
 inclusion_rationale: >
-  The Microsoft AIRT taxonomy is the most operationally-grounded agentic AI
-  failure taxonomy from a frontier vendor and is widely cited in industry
-  agentic-security discussions. Ingesting it as a first-class Taxonomy node
-  gives SAICA-KG crosswalks into: supply_chain_attack (MS-NS-02, MS-ES-02),
-  context_pollution (MS-ES-01 memory poisoning), scope_creep (MS-ES-04,
-  MS-NS-04), fabrication (MS-EF-02), and security_vulnerability (most of the
-  NS/ES axis). The novel-vs-existing axis also informs the
-  single-agent-vs-multi-agent framing in SAICA-KG's Tool nodes.
+  A vendor red team's list of how agentic systems fail, widely cited in
+  security discussions of agents. Several of its modes are close to SAICA
+  failure modes (Excessive agency, Hallucinations, Function compromise and
+  malicious functions, Memory poisoning); most of the rest concern
+  multi-agent attacks and responsible-AI harms that SAICA does not cover.
+  See data/crosswalks/msft-airt-to-saica.yml.

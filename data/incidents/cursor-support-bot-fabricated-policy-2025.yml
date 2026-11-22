@@ -13,6 +13,7 @@ description: >
   has no single-device policy, refunded the affected user, and committed to
   labelling AI-assisted email replies as AI in future.
 
+kind: event
 incident_date: 2025-04-18
 harm_class: reputational
 reproducibility: confirmed

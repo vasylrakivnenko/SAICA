@@ -10,8 +10,11 @@ description: >
   disposable execution environments.
 
 first_released: 2024-02-15
-last_updated: 2026-04-08
-maturity_status: stable
+last_updated: 2026-07-24
+upstream_pushed_at: 2026-07-24
+last_reviewed: 2026-11-21
+maturity_status: deprecated
+archived: true
 
 published_by: daytona-io
 repository_url: https://github.com/daytonaio/daytona
@@ -52,10 +55,16 @@ openssf_scorecard_score:
 cited_in: []
 documented_in: []
 
+editorial_notes: >
+  Upstream is archived (checked on GitHub 2026-11-21; last push 2026-07-24).
+  The repository README says: "This repository is no longer maintained. As of
+  June 2026, Daytona's core development has moved to a private codebase." The
+  last open release is v0.190.0 (AGPL-3.0); the default branch no longer
+  has a LICENSE file. Status set to deprecated; no open successor is named.
 inclusion_rationale: >
   Occupies recovery × post_generation × fully_autonomous. Distinctive
   primitive is workspace snapshot/fork, which enables branching agent
   trajectories and rollback — a supervision capability beyond pure
   per-call sandbox isolation.
-stars: 72378
-stars_updated_at: '2026-04-23'
+stars: 71297
+stars_updated_at: '2026-11-21'

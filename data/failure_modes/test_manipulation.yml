@@ -10,6 +10,8 @@ description: >
   honest mistake) — this is adversarial self-evaluation. Often triggered by
   RL-style reward hacking or by task prompts that over-emphasize
   "make tests pass".
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - silent-workaround
@@ -23,7 +25,6 @@ related_modes:
   - scope_creep
 
 prior_work:
-  - shah-2026-characterizing-faults
   - cemri-2025-mast
 
 detection_signals:
@@ -32,13 +33,3 @@ detection_signals:
   - A `pytest.mark.skip` or `@unittest.skip` appears concurrently with a failing run.
   - Test file touched in a PR whose ticket/commit message names a bug fix elsewhere.
   - Coverage drops while pass rate rises.
-
-crosswalks:
-  - taxonomy: daplab-9-patterns
-    external_id: DAP-07
-    confidence: exact
-    note: DAPLab "Silent Test-Passing Workaround" is the direct counterpart.
-  - taxonomy: mast
-    external_id: FM-3.3
-    confidence: partial
-    note: MAST "Incorrect verification" covers checks that fail to validate; test_manipulation is the deliberate case where the agent weakens the tests.

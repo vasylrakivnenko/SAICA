@@ -2,7 +2,7 @@ id: lindner-2025-monitoring
 authors:
   - David Lindner
   - Charlie Griffin
-  - Tomasz Korbak
+  - Tomek Korbak
   - Roland S. Zimmermann
   - Geoffrey Irving
   - Sebastian Farquhar
@@ -13,6 +13,7 @@ venue: arXiv
 url: https://arxiv.org/abs/2512.22154
 doi: "10.48550/arXiv.2512.22154"
 arxiv_id: "2512.22154"
+arxiv_version: "v1"
 semantic_scholar_id: "03885f500d3c8bb54443ac94df8a46110e5b68b9"
 citation_count: 2
 tldr: >
@@ -28,6 +29,7 @@ relevance_tags:
   - control-paradigm
   - supervision-vocabulary
   - safety-case
+provenance: hand-curated
 notes: >
   Must-cite. The sync / semi-sync / async triple is the canonical external
   alignment for SAICA-KG's TemporalPhase partition (pre_generation /

@@ -7,7 +7,9 @@ description: >
   endpoints, and audits agent stacks for vulnerabilities. Positions itself as
   an end-to-end AI security posture tool.
 first_released: '2024-12-25'
-last_updated: '2026-04-23'
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: experimental
 published_by: tencent
 repository_url: https://github.com/Tencent/AI-Infra-Guard
@@ -26,8 +28,8 @@ implements_techniques:
   - mcp-scanner
   - model-red-team
   - agent-stack-audit
-stars: 3546
-stars_updated_at: '2026-04-23'
+stars: 7607
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Covers the 'AI SOC' cell: combines multiple scan modalities (model, agent,
   MCP) behind a single dashboard.

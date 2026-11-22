@@ -6,11 +6,13 @@ description: >
   workflows, RAG, evals, and observability. Positions itself as a lightweight
   alternative to LangChain-js for TS/Node ecosystems.
 first_released: '2024-08-06'
-last_updated: '2026-04-23'
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: mastra-ai
 repository_url: https://github.com/mastra-ai/mastra
-license: Elastic-2.0
+license: Apache-2.0
 control_paradigm: prevention
 temporal_phase: pre_generation
 autonomy_level: graduated_hitl
@@ -27,11 +29,14 @@ implements_techniques:
   - workflow-authoring
   - rag-integration
   - builtin-evals
-stars: 23247
-stars_updated_at: '2026-04-23'
+stars: 29724
+stars_updated_at: '2026-11-21'
+editorial_notes: >
+  Licence checked in the repository's LICENSE.md on 2026-11-21: content
+  outside the `ee/` directories is under the Apache License 2.0; the `ee/`
+  directories have their own licence. This record said Elastic-2.0.
 inclusion_rationale: >
-  TypeScript-agent-framework cell. Complements voltagent
-  (runtime-observability focus) by centring workflow authoring + RAG
+  TypeScript-agent-framework cell, centred on workflow authoring + RAG
   integration.
 provenance:
   source: bulk-curation-20260423

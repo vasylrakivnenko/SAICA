@@ -3,7 +3,9 @@ name: TruLens
 tagline: Evaluation and Tracking for LLM Experiments and AI Agents
 description: TruLens provides open-source tools for evaluating and tracking LLM experiments with programmable feedback functions. It enables developers to instrument, evaluate, and iterate on LLM applications using feedback functions for quality assessment, including coverage of context relevance, groundedness, and answer relevance.
 first_released: '2020-11-02'
-last_updated: '2026-04-22'
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: experimental
 repository_url: https://github.com/truera/trulens
 license: MIT
@@ -21,17 +23,16 @@ locus_of_control:
   - environment
 integration_surfaces:
   - library
-stars: 3266
-stars_updated_at: '2026-04-23'
+stars: 3665
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Occupies detection × post_generation × graduated_hitl with the RAG Triad —
   context relevance, groundedness, and answer relevance — as programmable
   feedback functions over instrumented traces. Distinguished from general
-  LLM-observability platforms (langfuse, langsmith, arize-phoenix) by
-  centering RAG-specific groundedness metrics and from deepeval by exposing
-  those metrics as live feedback functions rather than Pytest assertions.
-  Useful as the canonical RAG-evaluation exemplar in the post-generation
-  detection cell.
+  LLM-observability platforms (arize-phoenix) by centering RAG-specific
+  groundedness metrics and from deepeval by exposing those metrics as live
+  feedback functions rather than Pytest assertions. Useful as the canonical
+  RAG-evaluation exemplar in the post-generation detection cell.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

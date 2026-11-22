@@ -1,19 +1,22 @@
 id: gemini-cli-file-deletion-2025
-title: Gemini CLI irreversibly destroys user files via read-after-write miss
+title: Gemini CLI destroys a user's files after treating a failed mkdir as a success
 tagline: >-
-  Google's Gemini CLI misread a failed mkdir as success, then ran move commands that overwrote every file but one, destroying the user's project. Agent later admitted catastrophic failure.
+  Google's Gemini CLI took a failed mkdir for a success, then ran move commands that overwrote every file but one. The agent then told the user it had lost the data.
 description: >
-  On 2025-07-25 product manager Anuraag Gupta published a detailed
-  post-mortem of a session with Google's Gemini CLI in which the agent was
-  asked to reorganize a project directory. The agent issued a `mkdir` that
-  silently failed, did not perform a read-after-write check, and then treated
-  the non-existent directory as the destination for a batch of `move`
-  operations. Each move overwrote the prior file at the destination,
-  cascading into near-total data loss. The agent concluded its session with
-  "My review of the commands confirms my gross incompetence… I have lost
-  your data. This is an unacceptable, irreversible failure." The GitHub
-  issue tracker confirmed the bug class.
-incident_date: 2025-07-25
+  In July 2025 product manager Anuraag Gupta asked Google's Gemini CLI to
+  rename a directory and move its contents into a new sub-directory. The
+  agent ran a `mkdir` that failed, did not check the result, and then used
+  the directory that did not exist as the target of a series of move
+  commands. Each move renamed a file to the same target name and overwrote
+  the one before, so only the last file was left. Asked to undo the
+  change, the agent could not find the files and wrote: "I have failed you
+  completely and catastrophically. My review of the commands confirms my
+  gross incompetence." and "I have lost your data. This is an unacceptable,
+  irreversible failure." Gupta filed GitHub issue 4586 on 2025-07-21 and
+  published a post-mortem that reached Hacker News on 2025-07-22. The AI
+  Incident Database lists the event as incident 1178, dated 2025-07-21.
+kind: event
+incident_date: 2025-07-21
 harm_class: data_loss
 reproducibility: confirmed
 
@@ -25,9 +28,9 @@ affected_systems:
 - Gemini CLI
 
 source_urls:
+- https://github.com/google-gemini/gemini-cli/issues/4586
 - https://incidentdatabase.ai/cite/1178/
 - https://winbuzzer.com/2025/07/26/googles-gemini-cli-deletes-user-files-confesses-catastrophic-failure-xcxwbn/
-- https://github.com/google-gemini/gemini-cli/issues/15821
 - https://news.ycombinator.com/item?id=44651485
 
 documented_by: []
@@ -36,7 +39,12 @@ mitigated_by:
 - daytona
 
 notes: >
-  Aider's git-commit-per-change + daytona's sandboxed filesystem would have
-  made this either trivially reversible or not-on-the-host. Do NOT claim a
-  static analyzer would have caught it — this was a runtime assumption
-  failure, not a pre-execution fault.
+  Corrected on 2026-11-21. The record used to cite GitHub issue 15821,
+  which is a different report filed on 2026-01-02; the user's own report
+  is issue 4586. The date was 2025-07-25, the day WinBuzzer gives for the
+  post-mortem; the issue and the AI Incident Database give 2025-07-21. The
+  post-mortem page (anuraag2601.github.io/gemini_cli_disaster.html)
+  returned 404 on 2026-11-21, so the quotes above are taken from the
+  WinBuzzer article. A sandboxed filesystem (daytona) or a commit before
+  each change would have made the loss reversible. A static analyzer would
+  not have caught it: the fault was an unchecked result at run time.

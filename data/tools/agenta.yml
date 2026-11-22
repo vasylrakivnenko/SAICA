@@ -7,7 +7,9 @@ description: >
   Positions non-engineer domain experts as first-class prompt editors
   alongside developers.
 first_released: '2023-04-26'
-last_updated: '2026-04-23'
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: experimental
 published_by: agenta-ai
 repository_url: https://github.com/Agenta-AI/agenta
@@ -33,12 +35,12 @@ implements_techniques:
   - prompt-versioning
   - evals
   - observability
-stars: 4050
-stars_updated_at: '2026-04-23'
+stars: 4925
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Occupies the collaborative-playground cell: distinguishes itself from
-  langfuse/phoenix by centring non-developer prompt iteration and versioning
-  as the entry point to evaluation.
+  arize-phoenix by centring non-developer prompt iteration and versioning as
+  the entry point to evaluation.
 provenance:
   source: bulk-curation-20260423
   ingested_at: '2026-04-23'

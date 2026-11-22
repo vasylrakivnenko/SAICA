@@ -6,11 +6,12 @@ authors:
   - Sam Manning
   - Kevin Xu
 year: 2025
-title: "Measuring AI Agent Autonomy: Towards a Scalable Approach with Code Inspection"
+title: "Measuring AI agent autonomy: Towards a scalable approach with code inspection"
 venue: arXiv
 url: https://arxiv.org/abs/2502.15212
 doi: "10.48550/arXiv.2502.15212"
 arxiv_id: "2502.15212"
+arxiv_version: "v1"
 semantic_scholar_id: "783c566fc06acd6b10a6679c2363d5d0cc26f0c2"
 citation_count: 11
 tldr: >
@@ -24,6 +25,7 @@ relevance_tags:
   - supervision-vocabulary
   - oversight
   - impact
+provenance: hand-curated
 notes: >
   Must-cite. Direct external anchor for SAICA-KG's AutonomyLevel partition
   — see enums.yml where AutonomyLevel values are explicitly aligned to

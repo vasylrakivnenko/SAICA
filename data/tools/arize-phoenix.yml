@@ -12,7 +12,9 @@ description: >
   sharing the same data model.
 
 first_released: 2023-04-17
-last_updated: 2026-04-05
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: arize-ai
@@ -58,13 +60,14 @@ openssf_scorecard_score:
 
 cited_in: []
 documented_in: []
+evaluated_on:
+  - saica-bench-2026-11
 
 inclusion_rationale: >
-  Occupies detection × post_generation × fully_autonomous alongside
-  Langfuse and LangSmith but with a tighter OpenTelemetry/
-  OpenInference standardization posture and a notebook-friendly local
-  mode. Worth modeling as a distinct node because it is the de-facto
-  reference implementation of OpenInference semantic conventions for
-  LLM traces.
-stars: 9394
-stars_updated_at: '2026-04-23'
+  Occupies detection × post_generation × fully_autonomous with a tight
+  OpenTelemetry / OpenInference standardization posture and a
+  notebook-friendly local mode. Worth modeling as a distinct node because it
+  is the de-facto reference implementation of OpenInference semantic
+  conventions for LLM traces.
+stars: 12368
+stars_updated_at: '2026-11-21'

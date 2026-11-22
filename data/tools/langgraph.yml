@@ -12,7 +12,9 @@ description: >
   agent loops.
 
 first_released: 2024-01-08
-last_updated: 2026-04-10
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: langchain-ai
@@ -60,5 +62,5 @@ inclusion_rationale: >
   pre-generation contract: each node sees only declared state slices,
   which bounds context pollution and scope creep before generation
   rather than filtering outputs after.
-stars: 30108
-stars_updated_at: '2026-04-23'
+stars: 45236
+stars_updated_at: '2026-11-21'

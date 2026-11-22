@@ -3,15 +3,16 @@ authors:
   - Zhengyang Qi
   - Charles Dickens
   - Derek Pham
-  - A. Dsouza
+  - Amanda Dsouza
   - Armin Parchami
   - Frederic Sala
-  - P. Varma
+  - Paroma Varma
 year: 2026
 title: "RIFT: A RubrIc Failure Mode Taxonomy and Automated Diagnostics"
 venue: arXiv
 arxiv_id: "2604.01375"
-url: https://arxiv.org/abs/2604.01375
+arxiv_version: "v2"
+url: https://arxiv.org/abs/2604.01375v2
 semantic_scholar_id: "5e99dc492a86cc1df499e9b8ca62cc9e3af16c1e"
 citation_count: 0
 abstract: >
@@ -40,7 +41,14 @@ relevance_tags:
   - rubric
   - grounded-theory
   - multi-domain
+provenance: hand-curated
 notes: >
   Complements SAICA-KG's FailureMode axis from the evaluation/rubric angle
   rather than the agent-trace angle. Informs how FailureMode tags interact
   with evaluator quality (meta-evaluation).
+  This record describes arXiv v2 (2026-04-20): eight failure modes in three
+  categories, first author Zhengyang Qi. From v3 (2026-10-01) the same
+  arXiv id carries a rewritten paper, "The Hitchhikers Guide to Rubric
+  Quality Understanding and Enrichment", first author Ankit Aich, ten
+  authors; its abstract describes RIFT with nine failure modes under
+  reliability and content validity.

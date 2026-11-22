@@ -3,7 +3,9 @@ name: DeepEval
 tagline: The open-source LLM evaluation framework for testing and evaluating LLM applications across 20+ custom and researched metrics.
 description: DeepEval is an open-source framework for unit testing and evaluating LLM applications. It provides 20+ research-backed evaluation metrics including hallucination detection, correctness, answer relevancy, faithfulness, contextual recall/precision, and prompt injection detection. Developers can integrate it into CI/CD pipelines for continuous evaluation of LLM outputs. Supports custom metrics, chain-of-thought evaluation, and synthetic data generation for test cases.
 first_released: '2023-08-10'
-last_updated: '2026-04-22'
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: experimental
 repository_url: https://github.com/confident-ai/deepeval
 license: Apache-2.0
@@ -24,17 +26,18 @@ locus_of_control:
 integration_surfaces:
   - library
   - cli
-stars: 14938
-stars_updated_at: '2026-04-23'
+stars: 19587
+stars_updated_at: '2026-11-21'
+evaluated_on:
+  - saica-bench-2026-11
 inclusion_rationale: >
   Occupies detection × post_generation × full_hitl as a unit-testing harness
   for LLM applications: developers write pytest-style assertions over 20+
   research-backed metrics (faithfulness, contextual recall/precision,
   hallucination, G-Eval chain-of-thought) and gate CI on them. Distinguished
-  from observability-first peers (langfuse, langsmith) by centering test-case
-  authoring rather than trace capture, and from braintrust by being
-  open-source and Pytest-native. Useful as the canonical CI-gate exemplar for
-  the post-generation evaluation cell.
+  from observability-first tools by centering test-case authoring rather
+  than trace capture; it is open-source and Pytest-native. Useful as the
+  canonical CI-gate exemplar for the post-generation evaluation cell.
 provenance:
   source: pipeline-v0.1
   ingested_at: '2026-04-23'

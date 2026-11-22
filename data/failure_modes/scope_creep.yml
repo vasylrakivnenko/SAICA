@@ -5,6 +5,12 @@ description: >
   The agent performs actions beyond the user-stated task scope — edits files
   not in the request, installs packages not asked for, modifies configs
   outside the declared surface, or chains follow-on work unprompted.
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
+
+related_modes:
+  - test_manipulation
+  - incomplete_execution
 
 prior_work:
   - cemri-2025-mast
@@ -15,13 +21,3 @@ detection_signals:
   - Agent installs dependencies not named in the prompt.
   - Agent commits additional unrelated changes alongside the requested edit.
   - Agent performs cleanup, refactoring, or "improvement" not explicitly requested.
-
-crosswalks:
-  - taxonomy: mast
-    external_id: FM-1.2
-    confidence: partial
-    note: MAST "Disobey role specification" (an agent overstepping its assigned role) is the multi-agent form of acting outside the declared boundary; see also FM-1.1 in the mast-to-saica crosswalk.
-  - taxonomy: owasp-agentic-top-10-2026
-    external_id: ASI02
-    confidence: partial
-    note: OWASP "Tool Misuse" partially overlaps; scope_creep is narrower (task-boundary violation).

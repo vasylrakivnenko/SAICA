@@ -7,7 +7,9 @@ description: >
   Provides trace capture, LLM-as-judge graders, test dataset management, and
   production monitoring dashboards. Self-hostable alongside a SaaS offering.
 first_released: '2023-05-10'
-last_updated: '2026-04-23'
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: comet-ml
 repository_url: https://github.com/comet-ml/opik
@@ -34,12 +36,14 @@ implements_techniques:
   - llm-as-judge
   - test-datasets
   - production-monitoring
-stars: 18988
-stars_updated_at: '2026-04-23'
+stars: 23482
+stars_updated_at: '2026-11-21'
+evaluated_on:
+  - saica-bench-2026-11
 inclusion_rationale: >
-  Occupies detection × post_generation × full_hitl. Differentiated from
-  langfuse by being Comet-ecosystem-integrated (shared ML experiment-tracking
-  backbone) and from phoenix by its agent-focused trace model.
+  Occupies detection × post_generation × full_hitl.
+  Comet-ecosystem-integrated (shared ML experiment-tracking backbone);
+  differentiated from arize-phoenix by its agent-focused trace model.
 provenance:
   source: bulk-curation-20260423
   ingested_at: '2026-04-23'

@@ -7,6 +7,7 @@ year: 2025
 title: "Enhancing LLM Code Generation: A Systematic Evaluation of Multi-Agent Collaboration and Runtime Debugging for Improved Accuracy, Reliability, and Latency"
 venue: arXiv
 arxiv_id: "2505.02133"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2505.02133"
 url: https://www.semanticscholar.org/paper/92b2ea3c244855235d10ca270dea7348fae07a25
 semantic_scholar_id: "92b2ea3c244855235d10ca270dea7348fae07a25"
@@ -48,6 +49,7 @@ relevance_tags:
   - supervision
   - benchmark
   - empirical
+provenance: s2-derived
 notes: >
   Empirical study chaining multi-agent collaboration with
   runtime-execution-information-based debugging across 19 LLMs on HumanEval

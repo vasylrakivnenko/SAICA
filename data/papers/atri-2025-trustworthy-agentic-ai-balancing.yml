@@ -1,6 +1,6 @@
 id: atri-2025-trustworthy-agentic-ai-balancing
 authors:
-  - S. Atri
+  - Saurabh Atri
 year: 2025
 title: "Trustworthy Agentic AI: Balancing Autonomy with Human Oversight"
 venue: International journal of computer science and mobile computing
@@ -29,6 +29,7 @@ relevance_tags:
   - agentic-ai
   - supervision
   - autonomy
+provenance: elicit-derived
 notes: >
   Pattern paper proposing a trustworthy-agentic-AI architecture built from a
   policy gate, typed tools and effects, human-in-the-loop (HITL) controls,

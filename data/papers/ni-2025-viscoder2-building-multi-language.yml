@@ -2,9 +2,9 @@ id: ni-2025-viscoder2-building-multi-language
 authors:
   - Yuansheng Ni
   - Songcheng Cai
-  - Xiang Chen
+  - Xiangchao Chen
   - Jiarong Liang
-  - Z. Lyu
+  - Zhiheng Lyu
   - Jiaqi Deng
   - Kai Zou
   - Ping Nie
@@ -15,6 +15,7 @@ year: 2025
 title: "VisCoder2: Building Multi-Language Visualization Coding Agents"
 venue: arXiv
 arxiv_id: "2510.23642"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2510.23642"
 url: https://www.semanticscholar.org/paper/86366ae838f8b9e3e4f7dfa0ebb218f17b305142
 semantic_scholar_id: "86366ae838f8b9e3e4f7dfa0ebb218f17b305142"
@@ -49,6 +50,7 @@ relevance_tags:
   - coding-agent
   - supervision
   - benchmark
+provenance: s2-derived
 notes: >
   Releases three resources for visualization-coding agents: VisCode-Multi-679K
   (679K validated executable visualization samples with multi-turn correction

@@ -8,6 +8,8 @@ description: >
   library version that has since been superseded, and it confidently emits
   the older form. Distinct from fabrication (non-existent) and from
   dependency_blindness (real-and-current-but-ignored).
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - stale-training-knowledge
@@ -29,9 +31,3 @@ detection_signals:
   - Package pinning is older than the latest minor release by N versions (threshold configurable).
   - Language-server or linter emits a deprecation warning.
   - Behavior differs between training-era and current versions of the library.
-
-crosswalks:
-  - taxonomy: daplab-9-patterns
-    external_id: DAP-03
-    confidence: exact
-    note: DAPLab "Stale API Usage" is the direct counterpart.

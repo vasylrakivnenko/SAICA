@@ -3,17 +3,15 @@ name: Semgrep
 tagline: Fast, rule-based static analysis with a pattern syntax that mirrors source code.
 description: >
   Open-source static-analysis engine that matches syntactic and
-  lightweight-dataflow patterns written in a source-code-like DSL,
-  spanning 30+ languages. Ships a large community rule registry
-  (OWASP Top 10, secrets, framework anti-patterns) and supports
-  custom rules that can flag reinvented-wheel patterns - e.g.,
-  hand-rolled retry loops, ad-hoc string-escaping, or reimplemented
-  stdlib utilities - surfacing places where an agent wrote code that
-  an existing library call would have covered. Runs in CLI, pre-commit,
-  and CI; Semgrep AppSec Platform adds hosted findings triage.
+  lightweight-dataflow patterns written in a source-code-like DSL, spanning
+  30+ languages. Ships a large community rule registry (OWASP Top 10,
+  secrets, framework anti-patterns) and supports custom rules. Runs in CLI,
+  pre-commit, and CI; Semgrep AppSec Platform adds hosted findings triage.
 
 first_released: 2020-03-17
-last_updated: 2026-04-17
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: semgrep
@@ -57,6 +55,8 @@ openssf_scorecard_score:
 
 cited_in: []
 documented_in: []
+evaluated_on:
+  - saica-bench-2026-11
 
 supervises_targets:
   - python
@@ -71,12 +71,13 @@ supervises_targets:
 
 inclusion_rationale: >
   Occupies detection x post_generation x fully_autonomous for
-  dependency_blindness: custom rules catch patterns such as "string built
-  with manual concatenation where shlex.quote exists" or "home-rolled
-  HTTP retry where tenacity is on the requirements", pointing reviewers
-  at library-duplicating code after the fact. Distinct from tree-sitter
-  (structural substrate, prevention) and sourcegraph-cody (retrieval
-  grounding) because Semgrep is rule-based diagnosis on the finished
-  diff, making it the classic CI-gate node in the MECE grid.
-stars: 14901
-stars_updated_at: '2026-04-23'
+  security_vulnerability: the rule registry flags injection, weak crypto and
+  secrets on the finished diff (the Community Edition analyses one file at a
+  time; cross-file dataflow is in the paid engine). The supply_chain_attack
+  tag rests on Semgrep Supply Chain, a commercial part of the AppSec
+  Platform, not on the open-source engine this record describes. The
+  2026-11-20 tag audit removed dependency_blindness: no shipped rule flags
+  re-implemented library functionality; that would need custom rules per
+  codebase (research/fm_tag_audit/final_table.csv).
+stars: 17880
+stars_updated_at: '2026-11-21'

@@ -7,6 +7,7 @@ year: 2025
 title: "NetMCP: Network-Aware Model Context Protocol Platform for LLM Capability Extension"
 venue: arXiv
 arxiv_id: "2510.13467"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2510.13467"
 url: https://www.semanticscholar.org/paper/5797ce51c448e9bc05869f1be77ce92b85e35761
 semantic_scholar_id: "5797ce51c448e9bc05869f1be77ce92b85e35761"
@@ -41,6 +42,7 @@ tldr: >
 relevance_tags:
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Builds NetMCP, an experimental MCP testbed over five representative network
   states, and proposes SONAR (Semantic Oriented and Network Aware Routing), an

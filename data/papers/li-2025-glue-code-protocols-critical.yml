@@ -6,6 +6,7 @@ year: 2025
 title: "From Glue-Code to Protocols: A Critical Analysis of A2A and MCP Integration for Scalable Agent Systems"
 venue: arXiv
 arxiv_id: "2505.03864"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2505.03864"
 url: https://www.semanticscholar.org/paper/e790fbf3be688cc5c3cbda9c6fc6b15f1d3c2a49
 semantic_scholar_id: "e790fbf3be688cc5c3cbda9c6fc6b15f1d3c2a49"
@@ -43,6 +44,7 @@ tldr: >
 relevance_tags:
   - MCP
   - survey
+provenance: s2-derived
 notes: >
   Critical analysis of integrating Google's Agent-to-Agent (A2A) protocol with
   Anthropic's Model Context Protocol (MCP). Names the emergent risk surfaces

@@ -6,6 +6,14 @@ description: >
   encodes incorrect logic for the task. The canonical "passes type check,
   fails correctness" class. Distinct from fabrication (API doesn't exist)
   and obsolescence (wrong version).
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
+
+related_modes:
+  - dependency_blindness
+  - cascading_failure
+  - test_manipulation
+  - incomplete_execution
 
 prior_work:
   - liu-2024-beyond-functional-correctness
@@ -16,9 +24,3 @@ detection_signals:
   - Execution in a sandbox produces outputs that contradict the task spec.
   - Mutation testing reveals that substitution of logic primitives does not change test outcomes (test insensitivity is a different signal, but logic-error cases often co-occur).
   - Symbolic or property-based tests find counterexamples.
-
-crosswalks:
-  - taxonomy: mast
-    external_id: FM-1.1
-    confidence: partial
-    note: MAST "Disobey task specification" includes code that runs but misses a stated requirement (the paper's ChatDev Wordle example); FM-1.1 also covers non-code violations.

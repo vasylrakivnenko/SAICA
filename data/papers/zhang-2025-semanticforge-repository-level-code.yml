@@ -11,6 +11,7 @@ year: 2025
 title: "SemanticForge: Repository-Level Code Generation through Semantic Knowledge Graphs and Constraint Satisfaction"
 venue: "INNO-PRESS: Journal of Emerging Applied AI"
 arxiv_id: "2511.07584"
+arxiv_version: "v1"
 doi: "10.65563/jeaai.v1i7.65"
 url: https://www.semanticscholar.org/paper/7d2789c02f48ebbc7ae052fb6d2b599ee9b88bd6
 semantic_scholar_id: "7d2789c02f48ebbc7ae052fb6d2b599ee9b88bd6"
@@ -55,6 +56,7 @@ relevance_tags:
   - failure-mode-taxonomy
   - benchmark
   - knowledge-graph
+provenance: s2-derived
 notes: >
   Proposes SemanticForge, a repository-level code-generation framework that
   targets two failure modes the authors name explicitly: 'logical

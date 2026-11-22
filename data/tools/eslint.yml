@@ -2,17 +2,18 @@ id: eslint
 name: ESLint
 tagline: Pluggable JavaScript/TypeScript linter and code-quality enforcer.
 description: >
-  ESLint is the canonical JavaScript and TypeScript linter: it parses
-  source to an AST and runs configurable rule plugins covering logic
-  bugs (unused vars, unreachable code, mistaken equality), style
-  consistency (scope_creep on review), and a growing set of security
-  rules (eslint-plugin-security, no-eval). It runs from the CLI, in
-  pre-commit, in CI, and as a language-server in editors. Configuration
-  lives in `eslint.config.js` or `package.json` `eslintConfig`, which
-  the audit detector now recognises.
+  ESLint is the canonical JavaScript and TypeScript linter: it parses source
+  to an AST and runs configurable rule plugins covering logic bugs (unused
+  vars, unreachable code, mistaken equality), style consistency, and a
+  growing set of security rules (eslint-plugin-security, no-eval). It runs
+  from the CLI, in pre-commit, in CI, and as a language-server in editors.
+  Configuration lives in `eslint.config.js` or `package.json`
+  `eslintConfig`, which the audit detector now recognises.
 
 first_released: 2013-06-21
-last_updated: 2026-04-15
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: eslint
@@ -61,13 +62,19 @@ supervises_targets:
   - typescript
 
 inclusion_rationale: >
-  Occupies detection × post_generation × fully_autonomous for
-  logic_error, scope_creep, and security_vulnerability in the JS/TS
-  lane. Mature workhorse; missing it leaves the audit detector unable
-  to recognise the single most common JavaScript linting gate present
-  in nearly every modern Node project.
+  Occupies detection × post_generation × fully_autonomous in the JS/TS lane.
+  Tag basis (2026-11-20 tag audit, research/fm_tag_audit/final_table.csv):
+  logic_error from the core 'possible problems' rules such as
+  no-unreachable; security_vulnerability from no-eval and related rules
+  (wider coverage needs third-party plugins); fabrication from no-undef,
+  which flags names that do not exist; incomplete_execution from
+  no-warning-comments, which flags TODO / FIXME and is off by default. The
+  audit removed scope_creep: a linter has no notion of a task boundary.
+  Mature workhorse; missing it leaves the audit detector unable to recognise
+  the single most common JavaScript linting gate present in nearly every
+  modern Node project.
 editorial_notes: >
   Added 2026-05-01 to fill the package.json detection path so the
   audit no longer reports eslint as an unknown tool.
-stars: 25000
-stars_updated_at: '2026-04-23'
+stars: 27642
+stars_updated_at: '2026-11-21'

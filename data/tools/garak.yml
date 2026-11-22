@@ -7,7 +7,9 @@ description: >
   misinformation) against any LLM endpoint and reports per-probe attack
   success rates. Models the NVIDIA NeMo Guardrails adversarial test plane.
 first_released: '2023-05-10'
-last_updated: '2026-04-21'
+last_updated: 2026-11-18
+upstream_pushed_at: 2026-11-18
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: nvidia
 repository_url: https://github.com/NVIDIA/garak
@@ -28,11 +30,11 @@ implements_techniques:
   - llm-probes
   - attack-success-rate-metrics
   - detect-generators
-stars: 7614
-stars_updated_at: '2026-04-23'
+stars: 10125
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
-  Canonical LLM-vuln-scanner: complements llm-guard/rebuff by running at
-  assessment time rather than at request time.
+  Canonical LLM-vuln-scanner: complements llm-guard by running at assessment
+  time rather than at request time.
 provenance:
   source: bulk-curation-20260423
   ingested_at: '2026-04-23'

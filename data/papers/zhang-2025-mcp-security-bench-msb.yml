@@ -10,6 +10,7 @@ year: 2025
 title: "MCP Security Bench (MSB): Benchmarking Attacks Against Model Context Protocol in LLM Agents"
 venue: arXiv
 arxiv_id: "2510.15994"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2510.15994"
 url: https://www.semanticscholar.org/paper/bb33f9e07e661b52a6fade948f71d5a0e0bbc773
 semantic_scholar_id: "bb33f9e07e661b52a6fade948f71d5a0e0bbc773"
@@ -47,6 +48,7 @@ relevance_tags:
   - agentic-ai
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Introduces MSB (MCP Security Benchmark), the first end-to-end evaluation
   suite that measures LLM-agent resistance to MCP-specific attacks across the

@@ -11,6 +11,7 @@ year: 2025
 title: "An Empirical Study on Failures in Automated Issue Solving"
 venue: arXiv
 arxiv_id: "2509.13941"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2509.13941"
 url: https://arxiv.org/pdf/2509.13941
 semantic_scholar_id: "281333210"
@@ -54,6 +55,7 @@ relevance_tags:
   - supervision
   - benchmark
   - empirical
+provenance: elicit-derived
 notes: >
   Manual analysis of 150 failed SWE-Bench-Verified instances across three SOTA
   tools (pipeline-based and agentic) produces a taxonomy of 3 phases, 9 main

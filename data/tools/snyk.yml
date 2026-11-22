@@ -12,11 +12,13 @@ description: >
   advisory feeds.
 
 first_released: 2015-04-01
-last_updated: 2026-04-12
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: snyk
-repository_url: https://github.com/snyk/snyk
+repository_url: https://github.com/snyk/cli
 documentation_url: https://docs.snyk.io
 license: proprietary
 
@@ -62,11 +64,16 @@ supervises_targets:
   - go-modules
   - container-images
 
+editorial_notes: >
+  The repository named here is the Snyk CLI. It was renamed from snyk/snyk to
+  snyk/cli (GitHub redirects the old address; checked 2026-11-21) and its
+  licence file is Apache-2.0. `license: proprietary` describes the hosted
+  Snyk platform that the CLI talks to.
 inclusion_rationale: >
   Occupies detection × post_generation × fully_autonomous for the
   security-vulnerability failure mode. Pairs naturally with Socket in
   the taxonomy: Socket screens adoption (pre_generation manifest
   gating), Snyk scans what already landed (post_generation artifact
   analysis). Both are supply-chain-relevant but at different moments.
-stars: 5506
-stars_updated_at: '2026-04-23'
+stars: 5716
+stars_updated_at: '2026-11-21'

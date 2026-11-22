@@ -15,6 +15,7 @@ description: >
   but used default rather than requested colors. The review is the most
   cited cautionary public study of autonomous coding-agent incompleteness.
 
+kind: study
 incident_date: 2025-01-08
 harm_class: user_reported
 reproducibility: confirmed
@@ -37,7 +38,9 @@ documented_by: []
 mitigated_by: []
 
 notes: >
-  `mitigated_by` cites tools whose plan-mode / per-step review pattern
-  would have surfaced the Railway limitation before a day of wasted
-  autonomous iteration. Do not imply they would "fix" autonomy mismatch
-  — they would degrade the task to graduated-HITL, not solve it.
+  An evaluation of 20 tasks by one team, so `kind` is "study"; the Railway
+  episode is one task inside it. incident_date is the date of Answer.AI's
+  post (the id says 2024 because ids are not changed once published).
+  `mitigated_by` is empty: no KG tool is linked. A step-by-step review of
+  the plan would have shown the Railway limit earlier, but that is a way
+  of working, not a tool in the KG.

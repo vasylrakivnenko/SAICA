@@ -1,60 +1,61 @@
 id: qiu-2026-prbench-end-end-paper
 authors:
   - Shi Qiu
-  - Jun Deng
+  - Junyi Deng
   - Yiwei Deng
   - Haoran Dong
-  - Jie Fu
+  - Jieyu Fu
   - Mao Li
   - Zeyu Li
-  - Zhao Zhang
+  - Zhaolong Zhang
   - Huiwen Zheng
-  - Lei Bao
-  - Anqiang Lv
+  - Leidong Bao
+  - Anqi Lv
   - Zihan Mo
   - Yadi Niu
   - Yiyang Peng
   - Yu Tian
-  - Yilin Wang
+  - Yili Wang
   - Ziyu Wang
-  - Ziyu Wang
+  - Zi-Yu Wang
   - Jiashen Wei
-  - Liu Wu
-  - Ao Xue
+  - Liuheng Wu
+  - Aoran Xue
   - Leyi Yang
   - Guanglu Yuan
-  - Xia Zhan
+  - Xiarui Zhan
   - Jingjun Zhang
   - Zifan Zheng
   - Pengfei Liu
-  - Li Zhen
+  - Linrui Zhen
   - Kaiyang Li
   - Qichang Li
   - Ziheng Zhou
-  - Guokui Nian
-  - Yu-Xiao Xiao
+  - Guo-En Nian
+  - Yunwei Xiao
   - Qing-Hong Cao
-  - L. Dai
+  - Linjie Dai
   - Xu Feng
-  - Pengyu Gao
+  - Peng Gao
   - Ying Gu
   - Chang Liu
   - Jia Liu
-  - M. Luo
+  - Ming-xing Luo
   - Yan-Qing Ma
-  - Liangchen Peng
+  - Liang-You Peng
   - Huichao Song
   - Shufeng Wang
   - Chenxu Wang
   - Tao Wang
   - Yi-Nan Wang
-  - C. Wu
-  - Peng Zhao
-  - H. Zhu
+  - Chengyin Wu
+  - Pengwei Zhao
+  - Hua Xing Zhu
 year: 2026
 title: "PRBench: End-to-end Paper Reproduction in Physics Research"
 venue: arXiv
 arxiv_id: "2603.27646"
+arxiv_version: "v1"
 url: https://www.semanticscholar.org/paper/47471be1d0a60ed97370384746c6bc0accee2473
 semantic_scholar_id: "47471be1d0a60ed97370384746c6bc0accee2473"
 abstract: >
@@ -93,6 +94,7 @@ relevance_tags:
   - coding-agent
   - benchmark
   - guardrails
+provenance: s2-derived
 notes: >
   Introduces PRBench, a benchmark of 30 expert-curated end-to-end physics
   paper-reproduction tasks across 11 subfields, where the agent must

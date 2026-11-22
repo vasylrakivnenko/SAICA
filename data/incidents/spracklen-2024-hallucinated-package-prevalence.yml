@@ -1,21 +1,27 @@
 id: spracklen-2024-hallucinated-package-prevalence
-title: Spracklen et al. find ~20% of AI-generated code samples import nonexistent packages
+title: "Study: 19.7% of the package names recommended by 16 code LLMs do not exist (Spracklen et al., USENIX Security 2025)"
 tagline: >-
-  USENIX Security 2024 study of 16 LLMs across 576K prompts: 19.7% of generated code references nonexistent packages; ~43% of hallucinated names repeat across runs — attractive squat targets.
+  16 LLMs, 576,000 code samples: 440,445 of 2.23 million recommended packages (19.7%) do not exist. Re-running a prompt ten times, 43% of hallucinated names came back every time.
 description: >
-  The Spracklen et al. paper "We Have a Package for You!" (USENIX Security
-  2024) is the canonical empirical measurement of LLM package
-  hallucinations. Across 16 LLMs and 576,000 code samples, 19.7% of
-  samples reference at least one nonexistent package. 43% of the
-  hallucinated package names re-appear across multiple runs with similar
-  prompts, making them predictable to adversaries. The paper formalizes
-  "package hallucination" as the failure class underlying slopsquatting. It
-  is the academic ground-truth for the `fabrication` × `supply_chain_attack`
-  intersection that SAICA-KG models.
-
-incident_date: 2024-08-14
-harm_class: security_breach
-reproducibility: confirmed
+  "We Have a Package for You! A Comprehensive Analysis of Package
+  Hallucinations by Code Generating LLMs" (Spracklen, Wijewickrama, Sakib,
+  Maiti, Viswanath and Jadliwala; arXiv 2406.10279, USENIX Security 2025)
+  measures how often code LLMs recommend packages that do not exist. With
+  16 models and two prompt datasets the authors generated 576,000 code
+  samples in Python and JavaScript. The samples named 2.23 million
+  packages, of which 440,445 (19.7%) were not in PyPI or npm; 205,474 of
+  those names were unique. The rate is a share of recommended package
+  names, not of code samples. It was 5.2% on average for the commercial
+  models and 21.7% for the open-source models. To test persistence, 500
+  prompts that had produced a hallucination were each run ten more times:
+  43% of the hallucinated packages came back in all ten runs and 39% in
+  none. The paper calls the failure "package hallucination" and the attack
+  it enables a package confusion attack; it does not use the later term
+  slopsquatting.
+kind: study
+incident_date: 2024-06-12
+harm_class: user_reported
+reproducibility: plausible
 
 exhibited_failure_modes:
 - fabrication
@@ -30,7 +36,8 @@ affected_systems:
 - 11 others evaluated in the paper
 
 source_urls:
-- https://www.usenix.org/conference/usenixsecurity24/presentation/spracklen
+- https://arxiv.org/abs/2406.10279
+- https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen
 - https://www.semanticscholar.org/paper/b76124ef53341af42d6d582ffe340cd0ddb49fc8
 
 documented_by:
@@ -41,6 +48,13 @@ mitigated_by:
 - snyk
 
 notes: >
-  This entry models "measurement as incident" — a dataset-scale finding
-  rather than a single event. `reproducibility: confirmed` because the
-  methodology was peer-reviewed at USENIX Security.
+  A study, not an incident; incident_date is the date of the first arXiv
+  version. Corrected on 2026-11-21 from the paper (v3). Until then the
+  record said that 19.7% of code samples reference a package that does not
+  exist; the paper's 19.7% is the share of recommended package names. It
+  named the venue as USENIX Security 2024 with the date 2024-08-14 and
+  linked to a usenix.org page that returns 404; the paper is in USENIX
+  Security 2025. `harm_class` was "security_breach", which the schema
+  defines as a confirmed incident with compromise; a measurement is not
+  one. `reproducibility` is "plausible" because no independent replication
+  is recorded here.

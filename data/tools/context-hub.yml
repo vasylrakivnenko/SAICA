@@ -8,13 +8,15 @@ description: >
   fabrication and obsolescence at the pre-generation phase.
 
 first_released: 2026-03-09
-last_updated: 2026-04-15
+last_updated: 2026-05-31
+upstream_pushed_at: 2026-05-31
+last_reviewed: 2026-11-21
 maturity_status: experimental
 
 published_by: deeplearning-ai
 repository_url: https://github.com/andrewyng/context-hub
-documentation_url: https://deeplearning.ai/context-hub
-license: Apache-2.0
+documentation_url: https://github.com/andrewyng/context-hub#readme
+license: MIT
 
 control_paradigm: prevention
 temporal_phase: pre_generation
@@ -53,5 +55,5 @@ inclusion_rationale: >
 editorial_notes: >
   Added 2026-03-10 (from user's v0.1 spec). Fast-moving; revisit
   maturity_status at 90-day checkpoint.
-stars: 13025
-stars_updated_at: '2026-04-23'
+stars: 13993
+stars_updated_at: '2026-11-21'

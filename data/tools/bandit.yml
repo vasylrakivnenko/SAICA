@@ -11,7 +11,9 @@ description: >
   audit detector now recognises.
 
 first_released: 2014-09-15
-last_updated: 2026-04-15
+last_updated: 2026-11-09
+upstream_pushed_at: 2026-11-09
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: pycqa
@@ -49,6 +51,8 @@ openssf_scorecard_score:
 
 cited_in: []
 documented_in: []
+evaluated_on:
+  - saica-bench-2026-11
 
 supervises_targets:
   - python
@@ -62,5 +66,5 @@ inclusion_rationale: >
 editorial_notes: >
   Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
   the audit no longer reports bandit as an unknown tool.
-stars: 6000
-stars_updated_at: '2026-04-23'
+stars: 8399
+stars_updated_at: '2026-11-21'

@@ -11,7 +11,7 @@ authors:
   - Patrick Morrison
   - Yasemin Acar
   - Michel Cukier
-  - Christian Kastner
+  - Christian Kästner
   - Alexandros Kapravelos
   - Dominik Wermke
   - William Enck
@@ -46,6 +46,7 @@ relevance_tags:
   - software-engineering
   - roadmap
   - failure-mode-seed
+provenance: hand-curated
 notes: >
   Anchors SAICA-KG's supply_chain_attack FailureMode in the SE-research
   mainstream. Useful citation backbone for slopsquatting/typosquatting claims

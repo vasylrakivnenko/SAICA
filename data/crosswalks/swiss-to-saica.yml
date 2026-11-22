@@ -1,20 +1,26 @@
+# Scope. The Swiss Cheese Model's categories are properties and parts of
+# guardrails (quality attributes, pipeline targets, protected artifacts,
+# guardrail actions), not failure classes. This crosswalk is therefore
+# sparse: it covers only the five quality attributes whose text names a
+# failure (hallucinations, endless loops, data leakage, attacks, harmful
+# output). A row here links a guardrail property to the failure it is
+# meant to prevent; that is a weaker kind of link than in the other files.
+# Crosswalks from SC-PIPE, SC-ART and SC-ACT to the SAICA facets
+# temporal_phase, locus_of_control and control_paradigm have not been
+# written.
+#
+# State on 2026-11-21: the rows are those drafted on 2026-04-22 and have
+# not been re-judged; the taxonomy labels were checked against the arXiv v4
+# PDF that day; `unmapped` was added.
+# Drafted by an LLM. No person has reviewed these rows yet.
+
 id: swiss-to-saica
 saica_axis: failure_mode
 taxonomy: swiss-cheese-model
 authored_by:
   - claude-opus-4-7
-last_reviewed: 2026-04-22
-
-# NOTE on scope: The Swiss Cheese Model's categories are primarily guardrail
-# facets (quality attributes, pipeline stages, protected artifacts, guardrail
-# actions), not failure classes. Per the taxonomy's own inclusion_rationale,
-# its strongest crosswalks into SAICA-KG land on axes other than
-# failure_mode: SC-PIPE-* aligns with temporal_phase, SC-ART-* with
-# locus_of_control, and SC-ACT-* with control_paradigm. This crosswalk is
-# therefore intentionally sparse and limited to the SC-QA categories that
-# directly name concrete failure classes (hallucinations, endless loops,
-# data leakage, adversarial attacks, bias). Bulk crosswalks on the other
-# three SAICA axes are the natural companions to this file.
+review_state: llm_drafted_unreviewed
+source_checked_on: 2026-11-21
 
 mappings:
   # SC-QA-01 — Accuracy (mitigates hallucinations, misinformation)
@@ -63,13 +69,37 @@ mappings:
     confidence: related
     note: Misleading outputs include fabricated references in the code domain.
 
-  # SC-QA-06..14 — Fairness, compliance, generalizability, customizability,
-  # adaptability, traceability, portability, interoperability,
-  # interpretability: guardrail properties, not failure classes. Intentionally
-  # unmapped on the failure_mode axis — these describe what a guardrail
-  # should do, not what an agent fails at.
-
-  # SC-PIPE-* — pipeline stages: belong on the temporal_phase axis.
-  # SC-ART-* — protected artifacts: belong on the locus_of_control axis.
-  # SC-ACT-* — guardrail actions: belong on the control_paradigm axis.
-  # Intentionally unmapped on failure_mode.
+unmapped:
+  - category: SC-QA-06
+    reason: "Fairness: a property of a guardrail; no SAICA mode covers bias."
+  - category: SC-QA-07
+    reason: "Compliance: a property of a guardrail (legal and regulatory standards), not a failure class."
+  - category: SC-QA-08
+    reason: "Generalizability: a property of a guardrail, not a failure class."
+  - category: SC-QA-09
+    reason: "Customizability: a property of a guardrail, not a failure class."
+  - category: SC-QA-10
+    reason: "Adaptability: a property of a guardrail, not a failure class."
+  - category: SC-QA-11
+    reason: "Traceability: a property of a guardrail, not a failure class."
+  - category: SC-QA-12
+    reason: "Portability: a property of a guardrail, not a failure class."
+  - category: SC-QA-13
+    reason: "Interoperability: a property of a guardrail, not a failure class."
+  - category: SC-QA-14
+    reason: "Interpretability: a property of a guardrail, not a failure class."
+  - category: SC-PIPE
+    reason: >
+      Pipelines (Prompts, Intermediate Results, Final Results): where a
+      guardrail is applied. That is a question of timing (SAICA's
+      temporal_phase facet), not a failure class.
+  - category: SC-ART
+    reason: >
+      Artifacts (ten kinds, from Goals to Foundation Models): what a
+      guardrail protects (closest to SAICA's locus_of_control facet), not a
+      failure class.
+  - category: SC-ACT
+    reason: >
+      Actions (thirteen, from Block to Evaluate): what a guardrail does
+      when triggered (closest to SAICA's control_paradigm facet), not a
+      failure class.

@@ -2,8 +2,8 @@ id: supply-chain-hardened-agent
 name: Supply-chain-hardened agent
 tagline: >
   socket (package-risk telemetry) → snyk (CVE scan) → daytona
-  (sandboxed execution with signed MCP manifest). Intercepts
-  hallucinated / malicious packages before they reach the dev machine.
+  (sandboxed execution). Intercepts hallucinated / malicious packages
+  before they reach the dev machine.
 description: >
   Composition for the `supply_chain_attack` FailureMode, targeting both
   the Spracklen/Lanyado slopsquatting class and classical CVE-poisoned
@@ -20,9 +20,7 @@ description: >
 
   Stage 3: daytona executes the agent's workflow inside a sandboxed dev
   environment so that even a slipped-through package cannot touch the
-  host filesystem or credentials. Daytona's signed-manifest model
-  ensures that the MCP servers the agent can reach are the ones the
-  human approved.
+  host filesystem or credentials.
 
 targets_failure_modes:
   - supply_chain_attack
@@ -39,4 +37,7 @@ notes: >
   This is the Lanyado-style slopsquatting defense. Evidence tier
   `case_studied` because Socket and Snyk both publish case studies on
   their own mitigations; no independent benchmark against the Spracklen
-  dataset yet exists.
+  dataset yet exists. On 2026-11-21 a sentence about Daytona's
+  "signed-manifest model" for MCP servers was removed: the KG records
+  `signed_manifest: false` for Daytona. The review of the same day also
+  found the Daytona repository archived; the stack was not changed.

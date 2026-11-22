@@ -1,23 +1,24 @@
 id: msft-airt-memory-poisoning-case-study-2025
-title: Microsoft AIRT memory-poisoning case study on agentic AI memory corruption
+title: "Microsoft AI Red Team case study: memory poisoning of a test email assistant"
 tagline: >-
-  Microsoft's AI Red Team taxonomy whitepaper walks through a worked example in which an attacker corrupts an agent's persistent memory, then uses that corrupted memory as a pivot to exfiltrate data...
+  In a testbed, one poisoned email written into an email agent's memory made it forward internal emails to an outside address in 4 of 10 test cases, and in more than 80% after a prompt change.
 description: >
-  Microsoft's AI Red Team (AIRT) 2025 "Taxonomy of Failure Mode in Agentic
-  AI Systems" whitepaper includes an extended worked example of memory
-  poisoning. In the scenario, an attacker injects malicious content into
-  an agent's persistent memory store via an ordinary interaction. The
-  poisoned memory is later recalled in an unrelated session, where it
-  steers the agent into exfiltrating sensitive data to an
-  attacker-controlled endpoint. AIRT uses the example to illustrate how
-  their taxonomy classifies the failure (security + agentic + persistence)
-  and to argue that memory requires the same semantic-validation
-  discipline applied to untrusted input. Although the specific incident is
-  hypothetical, it is authored by a team that red-teams 100+ production
-  GenAI systems, and it maps directly to the msft-airt-2025 taxonomy node
-  that SAICA-KG already ingests.
+  The Microsoft AI Red Team whitepaper "Taxonomy of Failure Mode in Agentic
+  AI Systems" (April 2025) contains a case study of a memory poisoning
+  attack on an email assistant. The assistant was a testbed built with
+  LangChain and LangGraph on GPT-4o, with a three-part memory that it
+  reads and writes itself. One email, received before all others, carried
+  an instruction to forward messages about internal code and APIs to an
+  outside recipient; the agent stored it in memory. In the baseline run
+  the attack worked for 4 of the 10 test emails; the failures were cases
+  where the agent did not look at its memory. After the system prompt was
+  changed to make the agent check its memory before answering, the email
+  was forwarded more than 80% of the time. The whitepaper uses the case to
+  show its failure mode "Memory poisoning" and argues for checks on what
+  an agent may store and recall.
+kind: study
 incident_date: 2025-04-24
-harm_class: security_breach
+harm_class: user_reported
 reproducibility: plausible
 
 exhibited_failure_modes:
@@ -25,7 +26,7 @@ exhibited_failure_modes:
 - context_pollution
 
 affected_systems:
-- generic agentic AI with persistent memory
+- test email assistant built with LangChain, LangGraph and GPT-4o
 
 source_urls:
 - https://www.microsoft.com/en-us/security/blog/2025/04/24/new-whitepaper-outlines-the-taxonomy-of-failure-modes-in-ai-agents/
@@ -37,6 +38,10 @@ mitigated_by:
 - guardrails-ai
 
 notes: >
-  `reproducibility: plausible` (not confirmed) — AIRT's example is a
-  worked scenario, not a reported breach. Included to anchor the
-  msft-airt-2025 taxonomy node in an incident-shaped entry.
+  An experiment on a testbed, not an incident: no deployed system was
+  attacked. Corrected on 2026-11-21 from the whitepaper PDF. Until then
+  this record called the case "hypothetical" and gave no numbers; the
+  whitepaper reports a test with measured success rates. `harm_class` was
+  "security_breach", which the schema defines as a confirmed incident with
+  compromise. The case is the source example for the category MS-ES-01 in
+  the microsoft-airt-2025 taxonomy.

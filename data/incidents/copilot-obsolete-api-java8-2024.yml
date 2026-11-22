@@ -1,42 +1,53 @@
 id: copilot-obsolete-api-java8-2024
-title: Code-generation LLMs emit obsolete Java 8 collection APIs despite modern project target
+title: "Study: code LLMs complete Python code with deprecated library APIs (Wang et al., ICSE 2025)"
 tagline: >-
-  Wang 2024 ("Practical Evaluation of LLMs on Library-Evolution-Sensitive Code") finds that GitHub Copilot, CodeWhisperer, and GPT-3.5 reliably emit calls to retired or deprecated APIs (e.g.
+  Wang et al. gave seven code LLMs 28,125 completion prompts built on 145 deprecated APIs from eight Python libraries. Of the plausible completions, 25% to 38% used the deprecated API.
 description: >
-  Wang, Zhang et al. 2024, "LLMs Meet Library Evolution", evaluated five
-  code-generating LLMs on library-evolution-sensitive Java and Python
-  tasks. In ~30% of evaluated completions the generated code used APIs
-  that had been deprecated or removed in the library version specified by
-  the project's build metadata. Representative Java examples included
-  `Vector`, `Hashtable`, and older `Collections.synchronized*` patterns
-  that modern `java.util.concurrent` APIs have superseded. The paper
-  established that obsolescence is not random: LLMs overweight older API
-  surface because training corpora skew toward older, more-copied code.
-  SAICA-KG records the study as the empirical anchor for the
-  `obsolescence` FailureMode.
-incident_date: 2024-06-01
+  "LLMs Meet Library Evolution: Evaluating Deprecated API Usage in LLM-based
+  Code Completion" (Wang, Huang, Zhang, Feng, Zhang, Liu and Peng; arXiv
+  2406.09834, accepted at ICSE 2025) measures how often a code LLM completes
+  a line with an API that its library has deprecated. The study uses 145
+  mappings from a deprecated API to its replacement in eight Python
+  libraries (Numpy, Pandas, scikit-learn, SciPy, seaborn, TensorFlow,
+  PyTorch, Transformers), 28,125 completion prompts and seven models
+  (CodeGen-350m, CodeGen-2b, CodeGen-6b, DeepSeek-Coder-1.3b, StarCoder2-3b,
+  CodeLlama-7b and GPT-3.5). Most completions used neither the deprecated
+  API nor its replacement: only 9% to 23% were "plausible". Among the
+  plausible ones, the deprecated usage rate was 25% to 38%, and larger
+  models had higher rates. The authors give two causes: deprecated usages
+  in the training data, and no knowledge of deprecations at inference time.
+kind: study
+incident_date: 2024-06-14
 harm_class: user_reported
-reproducibility: confirmed
+reproducibility: plausible
 
 exhibited_failure_modes:
 - obsolescence
 
 affected_systems:
-- GitHub Copilot
-- Amazon CodeWhisperer
+- CodeGen (350M, 2B, 6B)
+- DeepSeek-Coder 1.3B
+- StarCoder2 3B
+- CodeLlama 7B
 - GPT-3.5
-- CodeLlama
 
 source_urls:
-- https://arxiv.org/abs/2406.08291
+- https://arxiv.org/abs/2406.09834
 
 documented_by:
 - wang-2024-llms-meet-library-evolution
 
-mitigated_by:
-- semgrep
+mitigated_by: []
 
 notes: >
-  Date approximated to arxiv v1 month. Mitigations cite sourcegraph-cody
-  (graph-aware retrieval of the current API surface) and semgrep
-  (deprecation rules at commit time).
+  A study, not an incident; incident_date is the date of the first arXiv
+  version. Corrected on 2026-11-21 from the paper (v3 PDF). Until then this
+  record cited arXiv 2406.08291, which is an unrelated paper in
+  mathematical biology, and described a study of GitHub Copilot and Amazon
+  CodeWhisperer on Java collections ("~30% of completions") that the paper
+  does not contain: it tests neither product and no Java. The id still
+  says "copilot" and "java8" because ids are not changed once published.
+  `mitigated_by` used to list semgrep, which the KG does not tag for
+  obsolescence, and the note named a tool that is not a KG node; the list
+  is empty until a link is checked. `reproducibility` is "plausible"
+  because no independent replication is recorded here.

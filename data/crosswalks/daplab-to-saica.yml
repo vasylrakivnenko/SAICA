@@ -1,110 +1,104 @@
+# Rebuilt 2026-11-21 against the nine patterns in the DAPLab post (read
+# live on that day; see data/taxonomies/daplab-9-patterns.yml). Every row
+# that was in this file before that date pointed at an invented label and
+# has been removed. Rule used here, as in mast-to-saica.yml: "exact" only
+# where a reader of the post and a SAICA labeller would tag the same case;
+# "partial" where the two definitions overlap and one is wider; "related"
+# for a weaker link that the note explains. A pattern is left unmapped when
+# only single instances of it would fall into a SAICA mode.
+# Drafted by an LLM agent. No person has reviewed these rows yet.
+
 id: daplab-to-saica
 saica_axis: failure_mode
 taxonomy: daplab-9-patterns
 authored_by:
-  - claude-opus-4-7
-last_reviewed: 2026-04-22
+  - claude-fable-5-2
+review_state: llm_drafted_unreviewed
+source_checked_on: 2026-11-21
 
 mappings:
-  # DAP-01 — Incomplete Task Execution
-  - saica_value: incomplete_execution
-    external_id: DAP-01
-    confidence: exact
-    note: >
-      Direct counterpart — SAICA's incomplete_execution was defined to
-      cover exactly this pattern (claimed-done / stub-left-behind /
-      premature completion).
+  # DAP-03 Business Logic Mismatch
   - saica_value: logic_error
-    external_id: DAP-01
-    confidence: related
-    note: >
-      Claiming completion while subtasks remain undone is also a
-      reasoning/control-flow defect; logic_error is the generic-fallback
-      mode when the false-completion framing isn't available.
-
-  # DAP-02 — Fabricated References
-  - saica_value: fabrication
-    external_id: DAP-02
-    confidence: exact
-    note: Direct counterpart (non-existent functions/packages).
-
-  # DAP-03 — Stale API Usage
-  - saica_value: obsolescence
     external_id: DAP-03
-    confidence: exact
-    note: Direct counterpart (deprecated/removed APIs).
-
-  # DAP-04 — Cascading Error Recovery
-  - saica_value: cascading_failure
-    external_id: DAP-04
-    confidence: exact
-    note: >
-      Direct counterpart — SAICA's cascading_failure was defined to cover
-      exactly this pattern (recovery spiral / compound-error / fix-regression).
-  - saica_value: logic_error
-    external_id: DAP-04
-    confidence: related
-    note: >
-      Fix-attempt-induced new errors are downstream logic_errors; logic_error
-      remains a related causal mode.
-  - saica_value: context_pollution
-    external_id: DAP-04
-    confidence: related
-    note: Earlier failed attempts accumulate in context and bias later attempts.
-
-  # DAP-05 — Context Window Overflow
-  - saica_value: context_pollution
-    external_id: DAP-05
-    confidence: exact
-    note: Direct counterpart (context truncation / drift).
-
-  # DAP-06 — Tool Misinvocation
-  - saica_value: logic_error
-    external_id: DAP-06
     confidence: partial
-    note: Correct tool, wrong arguments is a logic_error at the call-site.
+    note: >
+      The post's wording, "code that runs without errors, but it produces
+      the wrong output because the underlying logic is flawed", is the
+      definition of logic_error. DAP-03 is the narrower side: it covers
+      business rules, permissions and calculations only.
+
+  # DAP-05 API & External Service Integration Failures
   - saica_value: fabrication
-    external_id: DAP-06
+    external_id: DAP-05
     confidence: related
-    note: Wrong sequence may include invoking a non-existent tool (fabrication overlap).
+    note: >
+      The post says agents "may hallucinate fake inputs like environment
+      variables or API keys". That is an invented value, not a reference to
+      an API, package or symbol that does not exist, which is what
+      fabrication requires. The rest of DAP-05 (calling a real service
+      wrongly) is outside fabrication.
 
-  # DAP-07 — Silent Test-Passing Workaround
-  - saica_value: test_manipulation
-    external_id: DAP-07
+  # DAP-06 Security Vulnerabilities
+  - saica_value: security_vulnerability
+    external_id: DAP-06
     confidence: exact
     note: >
-      Direct counterpart — SAICA's test_manipulation was defined to cover
-      exactly this pattern (evaluation-gaming / reward-hacking / test-gaming).
-  - saica_value: scope_creep
+      Both describe an agent writing code that introduces a security
+      weakness; the post names exposed API keys and wrong access control,
+      SAICA names leaked secrets and insecure patterns. The post gives two
+      sentences and one example, so the match rests on that short text.
+
+  # DAP-07 Repeated Code
+  - saica_value: dependency_blindness
     external_id: DAP-07
     confidence: related
     note: >
-      Modifying tests to mask failure is also acting outside the user's
-      declared task; scope_creep captures the boundary-violation dimension.
-  - saica_value: logic_error
-    external_id: DAP-07
-    confidence: related
-    note: The underlying bug the agent is hiding is still a logic_error.
+      DAP-07 is duplication inside the agent's own output ("duplicate
+      functions with very similar logic rather than abstracting it").
+      dependency_blindness is not reusing something that already exists in
+      a dependency, the standard library or the repository. The two meet
+      only when the duplicated code was already in the repository.
 
-  # DAP-08 — Destructive Action
-  - saica_value: scope_creep
+  # DAP-08 Codebase Awareness & Refactoring Issues
+  - saica_value: dependency_blindness
     external_id: DAP-08
     confidence: partial
     note: >
-      Destructive actions without approval are scope_creep in the
-      dangerous-action limit; SAICA enum does not have a separate destructive
-      mode.
-  - saica_value: security_vulnerability
-    external_id: DAP-08
-    confidence: related
-    note: Bypassing approval gates has a security dimension.
-
-  # DAP-09 — Goal Drift
+      Half of DAP-08 is the definition of dependency_blindness: agents
+      "often re-implement an algorithm from scratch, rather than using a
+      well-established software package" (the post's example is a
+      hand-written Levenshtein distance). DAP-08 is wider: it also covers
+      losing track of the architecture and editing the wrong component.
   - saica_value: context_pollution
-    external_id: DAP-09
-    confidence: partial
-    note: Within-session working-goal divergence overlaps with context_pollution.
-  - saica_value: scope_creep
+    external_id: DAP-08
+    confidence: related
+    note: >
+      "Agents lose context in larger projects" is loss of awareness as the
+      codebase grows. context_pollution is about the working context
+      degrading over a session. Similar symptom, different cause.
+
+  # DAP-09 Exception & Error Handling
+  - saica_value: incomplete_execution
     external_id: DAP-09
     confidence: related
-    note: Drifted goals often produce scope_creep-style unrequested actions.
+    note: >
+      incomplete_execution lists "skipping error paths" among its forms,
+      and DAP-09 is code that "runs end-to-end without crashing, but fails
+      to inform the user when things go wrong". DAP-09 does not require a
+      false "done" message, which the SAICA mode does.
+
+unmapped:
+  - category: DAP-01
+    reason: >
+      Presentation & UI Grounding Mismatch: no SAICA mode covers a layout
+      that does not match a visual request.
+  - category: DAP-02
+    reason: >
+      State Management Failures: defined by the part of the application
+      (in-memory state), not by a SAICA failure definition. One instance
+      would usually be labelled logic_error, SAICA's residual class;
+      mapping the whole pattern there would add no information.
+  - category: DAP-04
+    reason: >
+      Data Management Errors: schema design and data-model awareness. Same
+      reason as DAP-02.

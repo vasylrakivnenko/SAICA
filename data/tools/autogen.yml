@@ -12,8 +12,11 @@ description: >
   autogen-core).
 
 first_released: 2023-09-25
-last_updated: 2026-03-30
-maturity_status: stable
+last_updated: 2026-11-12
+upstream_pushed_at: 2026-11-12
+last_reviewed: 2026-11-21
+maturity_status: deprecated
+archived: true
 
 published_by: microsoft
 repository_url: https://github.com/microsoft/autogen
@@ -57,11 +60,17 @@ cited_in:
   - cihon-stein-2025-autonomy-scoring
 documented_in: []
 
+editorial_notes: >
+  Upstream is archived (checked on GitHub 2026-11-21; last push 2026-11-12).
+  The repository README says the project "has been archived and is no longer
+  actively maintained by Microsoft" and names Microsoft Agent Framework
+  (github.com/microsoft/agent-framework) as the successor; that project is
+  not a node here. Licence: code MIT (LICENSE-CODE), documentation CC-BY-4.0
+  (LICENSE). Status set to deprecated.
 inclusion_rationale: >
   Occupies prevention × pre_generation × fully_autonomous for the
-  conversation-centric multi-agent archetype. Distinct locus from
-  CrewAI: AutoGen scopes behavior via per-agent system messages and
-  turn protocols rather than explicit role/task contracts, which is
-  worth separating in the taxonomy.
-stars: 57354
-stars_updated_at: '2026-04-23'
+  conversation-centric multi-agent archetype. AutoGen scopes behavior via
+  per-agent system messages and turn protocols rather than explicit
+  role/task contracts, which is worth separating in the taxonomy.
+stars: 61956
+stars_updated_at: '2026-11-21'

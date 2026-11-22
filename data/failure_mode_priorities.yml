@@ -1,133 +1,162 @@
-# Per-failure-mode priority weighting used by pipeline.mcp.recommender.
+# EDITORIAL WEIGHTS, NO EMPIRICAL CALIBRATION.
 #
-# priority = likelihood × impact
+# Per-failure-mode weights used to order SKILLS.md, to pick the tiers in
+# RECOMMENDATIONS.md and to weight the SAICA Index grades
+# (pipeline.shared.priorities, pipeline.mcp.recommender,
+# pipeline.saica_index).
 #
-# likelihood (0..1): HYBRID source.
-#   1. Start from KG tool-coverage counts as a community-attention prior
-#      (more tools targeting an FM ⇒ more practitioner reports of it).
-#   2. Calibrate with editorial knowledge of Shah 2026's 385-fault corpus
-#      and our crosswalks (data/crosswalks/shah-to-saica.yml,
-#      data/crosswalks/daplab-to-saica.yml) where the prior under-
-#      represents the empirical frequency. Specifically calibrated up:
-#      obsolescence (training-data staleness is real-and-frequent but
-#      under-tooled), cascading_failure (common in retry loops),
-#      dependency_blindness (common; under-tooled ⇒ under-measured).
-#   Source attribution per row in the `source` field; a `justification`
-#   line explains every editorial deviation from the raw prior.
+#   priority = likelihood x impact
 #
-# impact (1..3): EDITORIAL. Locked 2026-04-30 with explicit rationale.
-#   3 = critical: direct production damage or hidden-bug masking
-#   2 = high:     frequent rework / time loss
-#   1 = medium:   quality drag, recoverable
+# What the numbers are. Both were set by hand on 2026-04-30 and have not
+# been changed since.
+#   likelihood (0..1): started from the number of KG tools that were tagged
+#     for each mode in April 2026 ("many tools, so probably common") and was
+#     then raised by hand for four modes. The number of tools on offer is
+#     not a measure of how often a failure happens, and the tool counts
+#     used then no longer hold: the tag audit of 2026-11-20 cut the tags
+#     from 253 to 93. No likelihood here comes from a count of real
+#     failures.
+#   impact (1..3): an editorial judgement.
+#     3 = critical: direct production damage or hidden-bug masking
+#     2 = high:     frequent rework / time loss
+#     1 = medium:   quality drag, recoverable
 #
-# Revisions: bump version + changelog at the bottom; reviewers should
-# ask "what new evidence prompted this?" rather than "does this feel
-# right?".
+# What was removed on 2026-11-21 (review issue E7). Earlier text said the
+# weights were calibrated against "Shah 2026's 385-fault corpus" and the
+# Shah and DAPLab crosswalks, and several justifications cited sources that
+# do not say what was claimed: Shah et al. study defects in agent software
+# and have no scope-creep or test-manipulation category; the DAPLab post
+# has no stale-API pattern; MAST has no recovery-spiral mode; the paper
+# cited for dependency blindness is the KG's contrast case; the 19.7% in
+# Spracklen et al. is a share of recommended package names, not of install
+# attempts. Those attributions are gone. The weights themselves were left
+# as they were, so that nothing downstream changes silently; replacing
+# likelihood with something measured is an open decision (E7 step 2).
+#
+# Known tension with the project's own benchmark (same review): the notes
+# for logic_error ("tests and type checks catch the worst cases") and
+# incomplete_execution ("easily retried") are assumptions that the
+# benchmark results do not support. They are marked below and kept until
+# the weights are revised.
+#
+# Revisions: bump `version` when a weight changes and add a changelog entry.
 
+label: "editorial weights, no empirical calibration"
 version: 1
-last_updated: 2026-04-30
+last_updated: 2026-11-21
 
 priorities:
 
   scope_creep:
     likelihood: 0.85
     impact: 2
-    source: kg-coverage-prior + editorial
+    source: editorial
     justification: >
-      Most-cited FM in Shah's coding-agent traces; ranks #1 by KG tool
-      coverage (67 tools target it). Impact = 2 because typically caught
-      in PR review; not 3 because rarely damages production directly.
+      Editorial. Likelihood follows the April 2026 tool count (67 tools
+      were tagged for this mode then, 22 after the audit of 2026-11-20); no
+      incidence data. Impact 2: usually caught in review, rarely damages
+      production directly.
 
   fabrication:
     likelihood: 0.70
     impact: 2
-    source: kg-coverage-prior + editorial
+    source: editorial
     justification: >
-      Second-most-cited (54 KG tools). Spracklen 2024 measured 19.7%
-      hallucinated package install attempts — empirically common.
-      Impact = 2 (caught by tests / language server in most cases).
+      Editorial. Likelihood follows the April 2026 tool count (54 tools
+      then, 9 after the audit). One measured data point exists for a
+      related quantity: Spracklen et al. found that 19.7% of the package
+      names recommended by 16 code LLMs did not exist; that is not a
+      likelihood of this mode. Impact 2: often caught by tests or a
+      language server.
 
   security_vulnerability:
     likelihood: 0.45
     impact: 3
-    source: kg-coverage-prior + editorial
+    source: editorial
     justification: >
-      39 KG tools target it; OWASP LLM Top-10 2025 lists multiple. Impact
-      = 3 because direct production damage path (data leakage, RCE,
-      auth bypass).
+      Editorial. Likelihood follows the April 2026 tool count (39 tools
+      then, 19 after the audit). Impact 3: a direct path to production
+      damage (data leakage, remote code execution, authentication bypass).
 
   supply_chain_attack:
     likelihood: 0.20
     impact: 3
-    source: kg-coverage-prior + editorial
+    source: editorial
     justification: >
-      Low base rate (16 KG tools, mostly specialised) but high impact
-      per Spracklen 2024 + slopsquatting incidents. Impact = 3 because
-      compromise propagates into all dependents.
+      Editorial. Likelihood follows the April 2026 tool count (16 tools
+      then, 14 after the audit); no incidence data. Impact 3: a compromised
+      dependency reaches everything that depends on it.
 
   test_manipulation:
     likelihood: 0.10
     impact: 3
-    source: editorial-calibrated-up
+    source: editorial (set by hand)
     justification: >
-      Rare in Shah's corpus (3 KG tools target it) but high impact —
-      hides true bug rate, undermines all other supervision. Impact = 3
-      because failure of detection itself (specification gaming).
+      Editorial; no incidence data and no source for the likelihood (3
+      tools were tagged in April, 1 after the audit). Impact 3: it hides
+      the true bug rate and undermines every check that trusts the tests.
 
   cascading_failure:
     likelihood: 0.25
     impact: 2
-    source: editorial-calibrated-up
+    source: editorial (set by hand)
     justification: >
-      KG-coverage prior says 0.06 but autonomous-loop agents
-      empirically cascade often (Cemri 2025 MAST documents recovery
-      spirals). Calibrated up to 0.25.
+      Editorial. The April tool-count prior gave 0.06; it was raised to
+      0.25 by hand on the belief that agents running in a loop spiral
+      often. No source in the KG measures this.
 
   logic_error:
     likelihood: 0.55
     impact: 1
-    source: kg-coverage-prior
+    source: editorial
     justification: >
-      Common (41 KG tools); impact = 1 because tests + type-checks
-      typically catch the worst cases pre-merge.
+      Editorial. Likelihood follows the April 2026 tool count (41 tools
+      then, 6 after the audit). Impact 1 assumes that tests and type
+      checks catch the worst cases before merge; the review of 2026-11-21
+      found that assumption at odds with the benchmark results.
 
   context_pollution:
     likelihood: 0.45
     impact: 1
-    source: kg-coverage-prior
+    source: editorial
     justification: >
-      Common in long-horizon agents (36 KG tools). Impact = 1 because
-      degrades over time rather than causing immediate production damage.
+      Editorial. Likelihood follows the April 2026 tool count (36 tools
+      then, 5 after the audit). Impact 1: quality degrades over a session
+      rather than causing immediate production damage.
 
   obsolescence:
     likelihood: 0.35
     impact: 1
-    source: editorial-calibrated-up
+    source: editorial (set by hand)
     justification: >
-      KG-coverage prior says 0.09 (only 6 KG tools) but training-data
-      staleness is empirically frequent — Wang 2024's library-evolution
-      study and DAPLab DAP-03 both flag it as common. Calibrated up.
+      Editorial. The April tool-count prior gave 0.09 (6 tools then, 8
+      after the audit); it was raised by hand. One study supports "not
+      rare" for code completion: Wang et al. (arXiv 2406.09834) report
+      that 25% to 38% of plausible completions for deprecated Python APIs
+      used the deprecated form. That is not a likelihood of this mode.
 
   dependency_blindness:
     likelihood: 0.20
     impact: 1
-    source: editorial-calibrated-up
+    source: editorial (set by hand)
     justification: >
-      KG-coverage prior says 0.04 (4 KG tools) but Liu 2025's "Code
-      Copycat" + practitioner reports suggest the under-tooling reflects
-      under-measurement, not low frequency. Calibrated up but stays
-      modest because impact is lowest (the code works, just non-idiomatic).
+      Editorial. The April tool-count prior gave 0.04 (4 tools then, 1
+      after the audit); it was raised by hand on the belief that few tools
+      means little measurement, not low frequency. No source in the KG
+      measures this. Impact 1: the code works but duplicates what exists.
 
   incomplete_execution:
     likelihood: 0.15
     impact: 1
-    source: kg-coverage-prior
+    source: editorial
     justification: >
-      Occasional in long-horizon tasks (4 KG tools); impact = 1 because
-      visible in the trace and easily retried.
+      Editorial. Likelihood follows the April 2026 tool count (4 tools
+      then, 7 after the audit). Impact 1 assumes the gap is visible in the
+      trace and easily retried; the review of 2026-11-21 found that
+      assumption at odds with the benchmark results.
 
 # ---------------------------------------------------------------------------
-# Resulting priority order (likelihood × impact, descending). Re-derive
+# Resulting priority order (likelihood x impact, descending). Re-derive
 # whenever weights above change. Used as a sanity check by the unit test.
 # ---------------------------------------------------------------------------
 expected_priority_ordering:
@@ -142,3 +171,12 @@ expected_priority_ordering:
   - test_manipulation      # 0.30
   - dependency_blindness   # 0.20
   - incomplete_execution   # 0.15
+
+changelog:
+  - date: 2026-11-21
+    change: >
+      Text only; no weight changed (still version 1, weights of
+      2026-04-30). File relabelled "editorial weights, no empirical
+      calibration"; attributions to Shah 2026, DAPLab, MAST, Liu 2025 and
+      the misread Spracklen figure removed; stale tool counts shown next to
+      the counts after the 2026-11-20 audit.

@@ -7,10 +7,11 @@ authors:
   - Sunghun Kim
 year: 2024
 title: "A Survey on Large Language Models for Code Generation"
-venue: "ACM Transactions on Software Engineering and Methodology (TOSEM)"
+venue: "ACM Transactions on Software Engineering and Methodology (TOSEM), 2026"
 url: https://arxiv.org/abs/2406.00515
 doi: "10.1145/3747588"
 arxiv_id: "2406.00515"
+arxiv_version: "v2"
 semantic_scholar_id: "c8b18682965ff9dccc0130dab3d679f78cefa617"
 citation_count: 837
 tldr: >
@@ -24,6 +25,7 @@ relevance_tags:
   - code-generation
   - landscape
   - background-citation
+provenance: hand-curated
 notes: >
   Must-cite. Landscape anchor for SAICA-KG's background section — the
   canonical "what is the state of LLMs for code" reference when framing

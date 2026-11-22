@@ -1,22 +1,25 @@
 id: huggingface-cli-slopsquat-lanyado-2024
-title: LLM-hallucinated "huggingface-cli" package receives 30k downloads after proof-of-concept squat
+title: 'LLM-hallucinated "huggingface-cli" package downloaded thousands of times after a researcher registered it'
 tagline: >-
-  Bar Lanyado (Lasso Security) found LLMs repeatedly hallucinated a `huggingface-cli` package; he registered it empty on PyPI and got 30K+ downloads in three months — first slopsquat PoC.
+  Bar Lanyado (Lasso Security) saw AI models recommend a `huggingface-cli` package that did not exist, registered it empty on PyPI and counted 15,000 to 30,000 downloads in about three months.
 description: >
-  In December 2023 Bar Lanyado of Lasso Security noticed that multiple
-  generative-AI coding tools repeatedly recommended a nonexistent Python
-  package `huggingface-cli` instead of the real `huggingface[cli]` extra. He
-  registered the name as an empty, harmless package on PyPI. Over the
-  subsequent three months it recorded 30,000+ real downloads, and by
-  February 2024 Alibaba's GraphTranslator project had inadvertently
-  instructed users to install it via its README. Lanyado published the
-  experiment to demonstrate the viability of "slopsquatting" — the
-  deliberate registration of LLM-hallucinated package names as a
-  supply-chain attack vector. The experiment is cited in Spracklen 2024 as
-  a seed observation for the formal slopsquatting study.
+  Bar Lanyado of Lasso Security noticed that generative AI models
+  repeatedly recommended `pip install huggingface-cli`, a package that did
+  not exist; the real tool is installed with
+  `pip install -U "huggingface_hub[cli]"`. He registered the name on PyPI
+  as an empty, harmless package to see whether a hallucinated name could
+  be used to distribute code. The Register (2024-03-28) reports more than
+  15,000 authentic downloads in three months; Simon Willison's summary of
+  Lanyado's post (2024-04-01) gives 30,000. By February 2024 the
+  installation instructions of Alibaba's GraphTranslator project told
+  users to install the fake package. In the same research Lanyado asked
+  four models (GPT-3.5-Turbo, GPT-4, Gemini Pro, Cohere Command) thousands
+  of "how to" questions and measured how often they invented package
+  names. The practice was later named slopsquatting.
 
+kind: event
 incident_date: 2024-03-28
-harm_class: security_breach
+harm_class: user_reported
 reproducibility: confirmed
 
 exhibited_failure_modes:
@@ -41,7 +44,12 @@ mitigated_by:
 - snyk
 
 notes: >
-  The poisoned-payload scenario was not executed (Lanyado's package was
-  empty on purpose) but the 30k download count is an independently verified
-  measure of the blast radius. Canonical grounding incident for
-  `supply_chain_attack` + `fabrication`.
+  The package was empty on purpose, so no code was delivered;
+  `harm_class` is "user_reported" (it was "security_breach", which the
+  schema defines as a confirmed incident with compromise). incident_date
+  is the date of The Register's article. Corrected on 2026-11-21 from the
+  two sources: the real install target is `huggingface_hub[cli]`, not
+  `huggingface[cli]`; the two sources disagree on the download count
+  (15,000 or 30,000) and on the month of registration (December 2023 or
+  January 2024), and both figures are now given. Spracklen et al. cite
+  Lanyado's earlier posts on package hallucination.

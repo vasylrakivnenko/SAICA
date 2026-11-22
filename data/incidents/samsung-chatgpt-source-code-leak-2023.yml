@@ -17,6 +17,7 @@ description: >
   "agent" here is ChatGPT proper rather than a dedicated coding agent,
   the interaction pattern is identical to pasting code into Copilot Chat
   / Cursor Chat / Claude Code prompts.
+kind: event
 incident_date: 2023-03-30
 harm_class: data_loss
 reproducibility: confirmed

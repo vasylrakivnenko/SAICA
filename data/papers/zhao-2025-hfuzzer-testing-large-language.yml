@@ -8,6 +8,7 @@ year: 2025
 title: "HFuzzer: Testing Large Language Models for Package Hallucinations via Phrase-based Fuzzing"
 venue: International Conference on Automated Software Engineering
 arxiv_id: "2509.23835"
+arxiv_version: "v2"
 doi: "10.1109/ASE63991.2025.00225"
 url: https://www.semanticscholar.org/paper/df95b7e84de5ef5bdc2009a0438b8bf32eed4b3e
 semantic_scholar_id: "df95b7e84de5ef5bdc2009a0438b8bf32eed4b3e"
@@ -43,6 +44,7 @@ tldr: >
   thereby generating enough and diverse coding tasks.
 relevance_tags:
   - supply-chain
+provenance: s2-derived
 notes: >
   Proposes HFuzzer, a phrase-based fuzzing framework that systematically tests
   LLMs for package hallucinations by seeding the fuzzer with phrases drawn

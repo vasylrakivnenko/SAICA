@@ -7,6 +7,7 @@ last_updated: 2025-10-26
 url: https://arxiv.org/abs/2503.13657
 license: "arXiv preprint, CC BY-NC-ND 4.0 (per the arXiv abstract page). Labels and definitions below are quoted verbatim with attribution."
 paper_id: cemri-2025-mast
+verified_against_source: 2026-11-21
 scope: >
   Failure modes of multi-agent LLM systems: 14 failure modes in 3 categories,
   derived from expert annotation of 150 traces (kappa = 0.88) and applied to

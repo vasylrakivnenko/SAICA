@@ -11,7 +11,7 @@ authors:
   - Zibin Zheng
 year: 2024
 title: "LLM Hallucinations in Practical Code Generation: Phenomena, Mechanism, and Mitigation"
-venue: "Proceedings of the ACM on Software Engineering (PACMSE / FSE)"
+venue: "Proceedings of the ACM on Software Engineering, vol. 2, issue ISSTA (2025)"
 url: https://arxiv.org/abs/2409.20550
 doi: "10.1145/3728894"
 arxiv_id: "2409.20550"
@@ -29,8 +29,14 @@ relevance_tags:
   - repository-level
   - code-generation
   - mitigation
+provenance: hand-curated
 notes: >
   Must-cite. Repository-level framing is closer to SAICA-KG's agent-context
   scope than function-level hallucination work. Cite as evidence that
   context_pollution and fabrication both intensify at repo scale and for the
   RAG mitigation that maps onto context-locus Tools.
+  The author list is the byline of the published article (ISSTA 2025, DOI
+  above, nine authors, checked against Crossref on 2026-11-21). The arXiv
+  versions v1 and v2 list five authors: Ziyao Zhang, Yanlin Wang, Chong
+  Wang, Jiachi Chen, Zibin Zheng. For that reason the record names no
+  arxiv_version.

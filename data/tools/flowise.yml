@@ -6,8 +6,11 @@ description: >
   UI. Built on LangChain primitives and packaged as a self-hostable service
   for non-coders to compose agent pipelines.
 first_released: '2023-03-31'
-last_updated: '2026-04-23'
-maturity_status: stable
+last_updated: 2026-08-13
+upstream_pushed_at: 2026-08-13
+last_reviewed: 2026-11-21
+maturity_status: deprecated
+archived: true
 published_by: flowise-ai
 repository_url: https://github.com/FlowiseAI/Flowise
 license: Apache-2.0
@@ -26,8 +29,14 @@ implements_techniques:
   - drag-and-drop-builder
   - self-hosted
   - langchain-primitives
-stars: 52185
-stars_updated_at: '2026-04-23'
+stars: 55583
+stars_updated_at: '2026-11-21'
+editorial_notes: >
+  Upstream is archived (checked on GitHub 2026-11-21; last push 2026-08-13).
+  The repository README says "Flowise has been archived" and points to the
+  discussion "Future of Flowise" (github.com/FlowiseAI/Flowise/discussions/6727).
+  Licence: Apache-2.0 outside the enterprise directory, which has its own
+  terms. Status set to deprecated.
 inclusion_rationale: >
   Low-code agent builder cell. Distinguished from langflow by being
   TypeScript/Node-first.

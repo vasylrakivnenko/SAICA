@@ -4,53 +4,112 @@ owner: OWASP Gen AI Security Project
 version: "2026"
 first_published: 2025-12-09
 url: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
-license: "Open (OWASP), CC-BY"
+license: "CC BY-SA 4.0"
+verified_against_source: 2026-11-21
 scope: >
-  The ten most critical security risks facing autonomous and agentic AI
-  applications. Globally peer-reviewed, developed with 100+ industry experts
-  and researchers. The most visible formal taxonomy of agentic AI risk.
+  Ten security risks of autonomous and agentic AI applications, ASI01 to
+  ASI10, published by the OWASP Gen AI Security Project (the document is
+  marked "Version 2026" and dated December 2025). A security list: each
+  entry is a class of attack or weakness, with examples, attack scenarios
+  and mitigations. It is not limited to coding agents.
 
 categories:
   - external_id: ASI01
     label: Agent Goal Hijack
-    description: Attacker-induced diversion of an agent from its user-assigned goal.
+    description: >
+      Attackers "manipulate an agent's objectives, task selection, or
+      decision pathways", for example through prompt-based manipulation,
+      deceptive tool outputs, malicious artefacts, forged agent-to-agent
+      messages or poisoned external data. It works because agents "cannot
+      reliably distinguish instructions from related content".
   - external_id: ASI02
     label: Tool Misuse and Exploitation
-    description: Abuse of the agent's tool surface to exceed intended authority.
+    description: >
+      "Agents can misuse legitimate tools due to prompt injection,
+      misalignment, or unsafe delegation or ambiguous instruction." The
+      agent stays within its authorised privileges but uses a legitimate
+      tool in an unsafe or unintended way, "for example deleting valuable
+      data, over-invoking costly APIs, or exfiltrating information".
+      Privilege escalation belongs to ASI03 and code execution to ASI05.
   - external_id: ASI03
     label: Identity and Privilege Abuse
-    description: Misuse of agent identities or escalation of privileges.
+    description: >
+      Exploits "dynamic trust and delegation in agents to escalate access
+      and bypass controls": delegation chains, role inheritance, control
+      flows and agent context such as cached credentials or conversation
+      history.
   - external_id: ASI04
     label: Agentic Supply Chain Vulnerabilities
     description: >
-      Compromise via the agent's software, tool, model, or data supply chain,
-      including hallucinated-package-name typosquatting (slopsquatting).
+      Arise "when agents, tools, and related artefacts they work with are
+      provided by third parties and may be malicious, compromised, or
+      tampered with in transit": models and weights, tools, plug-ins,
+      datasets, other agents, MCP and A2A interfaces, registries and
+      update channels. Examples in the text include typo-squatted tools
+      and endpoints, a compromised MCP or package registry and a
+      compromised npm package installed by coding agents.
   - external_id: ASI05
     label: Unexpected Code Execution (RCE)
-    description: Agent emits or runs code producing unintended remote execution.
+    description: >
+      Agentic systems, "including popular vibe coding tools", generate and
+      run code. "Attackers exploit code-generation features or embedded
+      tool access to escalate actions into remote code execution (RCE),
+      local misuse, or exploitation of internal systems." One listed
+      example is "code hallucination generating malicious or exploitable
+      constructs".
   - external_id: ASI06
     label: Memory & Context Poisoning
-    description: Attacker manipulation of agent memory or long-context state.
+    description: >
+      "Adversaries corrupt or seed this context with malicious or
+      misleading data, causing future reasoning, planning, or tool use to
+      become biased, unsafe, or aid exfiltration." Context here is what an
+      agent retains, retrieves or reuses (summaries, embeddings, RAG
+      stores), not a one-time prompt.
   - external_id: ASI07
     label: Insecure Inter-Agent Communication
-    description: Weakly authenticated or validated messages between agents.
+    description: >
+      Exchanges between agents "lack proper authentication, integrity, or
+      semantic validation", which allows "interception, spoofing, or
+      manipulation of agent messages and intents".
   - external_id: ASI08
     label: Cascading Failures
-    description: Errors that propagate across agent subsystems or the agent fleet.
+    description: >
+      "A single fault (hallucination, malicious input, corrupted tool, or
+      poisoned memory) propagates across autonomous agents, compounding
+      into system-wide harm." The entry is about the spread and
+      amplification of a fault across agents, tools and workflows, not
+      about the first fault.
   - external_id: ASI09
     label: Human-Agent Trust Exploitation
-    description: Social-engineering of humans by or via an agent.
+    description: >
+      Adversaries or misaligned designs exploit the trust people place in
+      a fluent, expert-sounding agent "to influence user decisions, extract
+      sensitive information, or steer outcomes for malicious purposes".
+      The risk grows when people approve actions without checking them.
   - external_id: ASI10
     label: Rogue Agents
-    description: Unsanctioned or self-modifying agents operating outside policy.
+    description: >
+      "Malicious or compromised AI Agents that deviate from their intended
+      function or authorized scope, acting harmfully, deceptively, or
+      parasitically within multi-agent or human-agent ecosystems." The
+      entry is about the loss of behavioural integrity once the drift has
+      begun, not about the first intrusion.
 
 inclusion_rationale: >
-  OWASP Agentic Top 10 is the single most visible formal taxonomy of
-  agentic AI risk. Ingesting it as a first-class Taxonomy node lets SAICA-KG
-  crosswalk OWASP categories to its FailureMode facets and answer OWASP-keyed
-  queries through the website and JSON API. This is the "OWASP/ATT&CK for
-  AI coding agent supervision" positioning operationalized.
+  OWASP's list of security risks for agentic applications. Having it as a
+  taxonomy node lets readers go from an OWASP entry to the SAICA failure
+  modes it touches. Most entries describe attacks; SAICA
+  modes mostly describe failures an agent makes without an attacker, so
+  only part of the list has a counterpart.
 
 notes: >
-  Full ASI descriptions will be expanded during v0.1 seeding; the category
-  labels here are canonical from the OWASP Gen AI Security Project.
+  Checked on 2026-11-21 against the PDF "OWASP Top 10 for Agentic
+  Applications 2026" (57 pages, created 2025-12-09) downloaded from
+  genai.owasp.org/download/52117. The ten ids and labels match the
+  document. Descriptions were rewritten from each entry's "Description"
+  section; quoted text is copied from it. Two earlier statements were
+  wrong and are removed: ASI04 does not mention slopsquatting or
+  hallucinated package names (it covers typo-squatted tools, endpoints
+  and packages and compromised registries), and ASI02 is not about
+  exceeding granted authority (that is ASI03). The licence field said
+  "CC-BY"; the document states CC BY-SA 4.0.

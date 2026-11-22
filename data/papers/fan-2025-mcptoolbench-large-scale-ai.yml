@@ -8,6 +8,7 @@ year: 2025
 title: "MCPToolBench++: A Large Scale AI Agent Model Context Protocol MCP Tool Use Benchmark"
 venue: arXiv
 arxiv_id: "2508.07575"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2508.07575"
 url: https://www.semanticscholar.org/paper/153e3227cdc8e8b54034b6166a468bd751e117cc
 semantic_scholar_id: "153e3227cdc8e8b54034b6166a468bd751e117cc"
@@ -46,6 +47,7 @@ relevance_tags:
   - agentic-ai
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Introduces MCPToolBench++, a large-scale multi-domain MCP tool use benchmark
   built on a marketplace of over 4k MCP servers across 40+ categories

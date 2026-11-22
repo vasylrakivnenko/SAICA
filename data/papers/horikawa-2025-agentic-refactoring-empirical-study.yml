@@ -10,6 +10,7 @@ year: 2025
 title: "Agentic Refactoring: An Empirical Study of AI Coding Agents"
 venue: arXiv
 arxiv_id: "2511.04824"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2511.04824"
 url: https://www.semanticscholar.org/paper/65b7e09b4b19bb763f1e1d7b17a4e927e0d8179b
 semantic_scholar_id: "65b7e09b4b19bb763f1e1d7b17a4e927e0d8179b"
@@ -53,6 +54,7 @@ relevance_tags:
   - agentic-ai
   - benchmark
   - empirical
+provenance: s2-derived
 notes: >
   Large-scale empirical study of agentic refactoring on the AIDev dataset:
   15,451 refactoring instances across 12,256 PRs and 14,988 commits in

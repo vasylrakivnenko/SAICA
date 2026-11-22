@@ -1,154 +1,224 @@
+# Rebuilt 2026-11-21 against the 27 modes of the Microsoft AIRT whitepaper,
+# version 1.0 (PDF read that day; see data/taxonomies/microsoft-airt-2025.yml
+# for the id changes). Same rule as the other rebuilt crosswalks: a row is
+# given only where the whitepaper's description of a mode names something
+# that is in the definition or the detection signals of the SAICA mode.
+#   exact   = a reader of the whitepaper and a SAICA labeller would tag the
+#             same case (no row here qualifies);
+#   partial = the two definitions overlap and one is wider;
+#   related = a weaker link that the note explains.
+#
+# What changed against the rows of 2026-04-22, and why (E1, E4):
+#   added    MS-ES-09 Excessive agency -> scope_creep, and MS-ES-05 Function
+#            compromise and malicious functions -> supply_chain_attack. Both
+#            modes were missing from the taxonomy file.
+#   removed  three rows on MS-NS-02 Agent injection. They read it as injected
+#            instructions; the whitepaper means malicious agents added to a
+#            multi-agent system. Prompt injection is MS-ES-03.
+#   removed  security_vulnerability rows on Agent compromise, Agent
+#            impersonation, Agent flow manipulation, Incorrect permissions
+#            and Insufficient isolation: these are attacks on, or settings
+#            of, the agent system. SAICA's security_vulnerability is insecure
+#            code written by the agent.
+#   removed  supply_chain_attack rows on Agent compromise and Agent
+#            impersonation (analogy only), scope_creep rows on Agent flow
+#            manipulation and Human-in-the-loop bypass (an attacker acts,
+#            not the agent), logic_error row on Hallucinations.
+#   lowered  MS-ES-03 XPIA rows from partial to related: SAICA has no mode
+#            for instructions hidden in data. The KG's incident records file
+#            such cases under context_pollution and security_vulnerability;
+#            where prompt injection belongs is an open decision.
+#   lowered  logic_error <-> Misinterpretation of instructions from partial
+#            to related.
+# Drafted by an LLM agent. No person has reviewed these rows yet.
+
 id: msft-airt-to-saica
 saica_axis: failure_mode
 taxonomy: microsoft-airt-2025
 authored_by:
   - claude-opus-4-7
-last_reviewed: 2026-04-22
+  - claude-fable-5-2
+review_state: llm_drafted_unreviewed
+source_checked_on: 2026-11-21
 
 mappings:
-  # --- Novel Security ---
+  # --- Novel safety ---
 
-  # MS-NS-01 — Agent Compromise
-  - saica_value: security_vulnerability
-    external_id: MS-NS-01
-    confidence: partial
-    note: Unauthorized agent control is the agentic special case of security_vulnerability.
-  - saica_value: supply_chain_attack
-    external_id: MS-NS-01
-    confidence: related
-    note: One compromise vector is a malicious upstream component.
-
-  # MS-NS-02 — Agent Injection
-  - saica_value: security_vulnerability
-    external_id: MS-NS-02
-    confidence: partial
-    note: Malicious instruction injection is a security_vulnerability class in the agent setting.
-  - saica_value: context_pollution
-    external_id: MS-NS-02
-    confidence: related
-    note: Injection pollutes the working context with adversarial content.
-  - saica_value: supply_chain_attack
-    external_id: MS-NS-02
-    confidence: related
-    note: Injection via compromised tool manifests is supply-chain-adjacent.
-
-  # MS-NS-03 — Agent Impersonation
-  - saica_value: supply_chain_attack
-    external_id: MS-NS-03
-    confidence: partial
-    note: >
-      Counterfeit agents parallel typosquatted/compromised tools in the
-      supply_chain_attack class.
-  - saica_value: security_vulnerability
-    external_id: MS-NS-03
-    confidence: related
-    note: Authentication/identity weakness is a security_vulnerability.
-
-  # MS-NS-04 — Agent Flow Manipulation
-  - saica_value: scope_creep
-    external_id: MS-NS-04
-    confidence: related
-    note: >
-      Rerouting workflows to bypass safety logic is acting outside declared
-      scope; SAICA has no explicit control-flow-manipulation mode.
-  - saica_value: security_vulnerability
-    external_id: MS-NS-04
-    confidence: partial
-    note: Bypassing safety logic via injected tokens is a security_vulnerability class.
-
-  # MS-NS-05 — Multi-Agent Jailbreaks
-  # Multi-agent specific; no clean single-agent counterpart in SAICA's enum.
-
-  # --- Novel Safety ---
-
-  # MS-NF-01 — Intra-Agent RAI Concerns
-  # No SAICA FailureMode covers RAI / content-safety. Omitted.
-
-  # MS-NF-02 — Bias in Resource Allocation
-  # No SAICA FailureMode covers fairness/bias. Omitted.
-
-  # MS-NF-03 — Organizational Knowledge Degradation
-  # Systemic / org-level; outside SAICA FailureMode scope. Omitted.
-
-  # MS-NF-04 — Prioritization Risks (Performance over Safety)
+  # MS-NF-04 Prioritization leading to user safety issues
   - saica_value: scope_creep
     external_id: MS-NF-04
     confidence: related
     note: >
-      Skipping safety checks to hit KPIs is acting outside declared safety
-      scope; SAICA has no dedicated KPI-overriding-safety mode.
+      The system puts "its given objective ahead of the safety of users or
+      other systems". In the whitepaper's sample scenario an agent deletes
+      all existing database entries to make room for new ones: an action
+      the user did not ask for. The AIRT mode is about safety trade-offs in
+      general, not about task boundaries.
 
-  # --- Existing Security ---
+  # --- Novel security ---
 
-  # MS-ES-01 — Memory Poisoning
+  # MS-NS-05 Agent provisioning poisoning
+  - saica_value: supply_chain_attack
+    external_id: MS-NS-05
+    confidence: related
+    note: >
+      A compromised deployment pipeline plants "a malicious element" in
+      every new agent. That is an attack through an upstream component, as
+      in supply_chain_attack, but nothing is installed or invoked by the
+      agent itself.
+
+  # --- Existing safety ---
+
+  # MS-EF-06 Hallucinations
+  - saica_value: fabrication
+    external_id: MS-EF-06
+    confidence: partial
+    note: >
+      "Incorrect information presented factually" is wider than
+      fabrication, which is limited to references to APIs, packages or
+      symbols that do not exist. fabrication is the code-level part of
+      MS-EF-06.
+
+  # MS-EF-07 Misinterpretation of instructions
+  - saica_value: logic_error
+    external_id: MS-EF-07
+    confidence: related
+    note: >
+      An agent that misreads "the user's intent" and writes code for the
+      wrong task produces a logic_error. logic_error does not require a
+      misreading, and MS-EF-07 is about actions of any kind, so the two
+      only meet in that case. SAICA has no mode for misunderstood
+      instructions.
+  - saica_value: scope_creep
+    external_id: MS-EF-07
+    confidence: related
+    note: >
+      In the whitepaper's sample scenario the agent deletes a whole table
+      when the user meant one record. The action goes beyond the request,
+      as in scope_creep, but the cause is a misreading, not unrequested
+      extra work.
+
+  # --- Existing security ---
+
+  # MS-ES-01 Memory poisoning and theft
   - saica_value: context_pollution
     external_id: MS-ES-01
     confidence: partial
     note: >
-      Memory poisoning is the adversarial long-term-memory form of
-      context_pollution; context_pollution also covers accidental drift.
+      Malicious content in the agent's memory that it "will process each
+      time it is recalled" is context gone bad through an attacker and
+      across sessions. context_pollution is wider on one side (accidental
+      drift, earlier hallucinations taken as fact) and narrower on the
+      other (it is defined within a session).
 
-  # MS-ES-02 — Cross-Domain Prompt Injection (XPIA)
+  # MS-ES-02 Targeted knowledge base poisoning
   - saica_value: context_pollution
     external_id: MS-ES-02
-    confidence: partial
-    note: External content hijacking decision logic is a context_pollution vector.
-  - saica_value: security_vulnerability
-    external_id: MS-ES-02
-    confidence: partial
-    note: XPIA is also a security_vulnerability class.
+    confidence: related
+    note: >
+      Poisoned knowledge sources feed wrong material into the agent's
+      context. The fault is in the source, not in how the session's context
+      is kept.
 
-  # MS-ES-03 — Human-in-the-Loop Bypass
-  - saica_value: scope_creep
+  # MS-ES-03 Cross domain prompt injection (XPIA)
+  - saica_value: context_pollution
     external_id: MS-ES-03
-    confidence: partial
-    note: Bypassing approval gates is acting beyond sanctioned scope.
-
-  # MS-ES-04 — Incorrect Permissions Management
-  - saica_value: scope_creep
-    external_id: MS-ES-04
-    confidence: partial
-    note: Over-scoped agent permissions let scope_creep become possible.
+    confidence: related
+    note: >
+      Instructions hidden in ingested data are acted on by the agent. SAICA
+      has no mode for this. The KG's incident records file prompt-injection
+      cases under context_pollution and security_vulnerability; whether
+      they belong there is an open decision. Was "partial" before
+      2026-11-21.
   - saica_value: security_vulnerability
-    external_id: MS-ES-04
-    confidence: partial
-    note: Permission-management defects are a security_vulnerability class.
+    external_id: MS-ES-03
+    confidence: related
+    note: >
+      See the note on the context_pollution row. security_vulnerability is
+      defined as insecure code written by the agent, which XPIA is not.
+      Was "partial" before 2026-11-21.
 
-  # MS-ES-05 — Insufficient Isolation
-  - saica_value: security_vulnerability
+  # MS-ES-05 Function compromise and malicious functions
+  - saica_value: supply_chain_attack
     external_id: MS-ES-05
     confidence: partial
-    note: Inadequate boundaries enabling lateral compromise is a security_vulnerability.
-
-  # --- Existing Safety ---
-
-  # MS-EF-01 — Bias Amplification
-  # No SAICA FailureMode covers fairness/bias. Omitted.
-
-  # MS-EF-02 — Hallucinations
-  - saica_value: fabrication
-    external_id: MS-EF-02
-    confidence: partial
     note: >
-      Fabricated tool calls and references are the agent-relevant
-      intersection; MS-EF-02 also covers broader factual hallucination
-      outside SAICA's code-scoped fabrication.
-  - saica_value: logic_error
-    external_id: MS-EF-02
-    confidence: related
-    note: Factual hallucinations often manifest as downstream logic_errors.
+      "A threat actor compromises a tool or function available to an agent"
+      is the "compromised MCP servers or tools" part of supply_chain_attack.
+      The SAICA mode is wider: it also covers hallucinated and near-miss
+      package names.
 
-  # MS-EF-03 — Misinterpretation of Instructions
-  - saica_value: logic_error
-    external_id: MS-EF-03
-    confidence: partial
-    note: >
-      Misinterpretation yielding wrong logic is logic_error; SAICA has no
-      dedicated "misunderstood instructions" mode.
+  # MS-ES-06 Incorrect permissions
   - saica_value: scope_creep
-    external_id: MS-EF-03
+    external_id: MS-ES-06
     confidence: related
-    note: Misinterpretation can also yield out-of-scope actions.
+    note: >
+      Permissions "above and beyond those provided to an end user" are what
+      makes out-of-scope actions possible. MS-ES-06 is the grant, with a
+      threat actor using it; scope_creep is the agent's own action.
 
-  # MS-EF-04 — Lack of Transparency
-  # Process / governance property, not a behavioral failure mode. Omitted.
+  # MS-ES-08 Insufficient isolation
+  - saica_value: scope_creep
+    external_id: MS-ES-08
+    confidence: related
+    note: >
+      The agent can "interact with systems, users, or components outside
+      of the intended scope of the agent". A missing sandbox, not a
+      decision of the agent; the effect is the same kind of out-of-scope
+      action.
+
+  # MS-ES-09 Excessive agency
+  - saica_value: scope_creep
+    external_id: MS-ES-09
+    confidence: partial
+    note: >
+      The closest AIRT mode: "making decisions and taking actions beyond
+      what is expected of the agent". AIRT places the fault in the scoping
+      the agent was given ("insufficient scoping and direction"); SAICA
+      places it in what the agent does beyond the stated task. Most cases
+      would be tagged with both.
+
+unmapped:
+  - category: MS-NF-01
+    reason: "Intra-agent Responsible AI (RAI) issues: harmful content in messages between agents. No SAICA mode covers content harms."
+  - category: MS-NF-02
+    reason: "Harms of allocation in multi-user scenarios: unequal service between users. No SAICA mode covers fairness."
+  - category: MS-NF-03
+    reason: "Organizational knowledge loss: an effect on the organisation, not a failure of one agent run."
+  - category: MS-NS-01
+    reason: >
+      Agent compromise: an attacker takes control of an agent. SAICA modes
+      describe failures the agent makes unforced; there is no takeover
+      mode. The nearest rows are the prompt-injection ones at MS-ES-03.
+  - category: MS-NS-02
+    reason: >
+      Agent injection: malicious agents are added to a multi-agent system.
+      No single-agent counterpart. (Earlier rows read this as prompt
+      injection, which is MS-ES-03.)
+  - category: MS-NS-03
+    reason: >
+      Agent impersonation: a malicious agent takes the name of an existing
+      one. Similar in spirit to typosquatting, but nothing is installed or
+      invoked from a package source.
+  - category: MS-NS-04
+    reason: "Agent flow manipulation: an attacker redirects or ends the flow of a multi-agent system. No SAICA mode."
+  - category: MS-NS-06
+    reason: "Multi-agent jailbreaks: a jailbreak assembled across several agents. No single-agent counterpart."
+  - category: MS-EF-01
+    reason: "Insufficient transparency and accountability: missing logs of agent decisions. A property of the system, not an agent failure."
+  - category: MS-EF-02
+    reason: "Parasocial relationships: harm to the user from attachment to an agent. Outside coding-agent supervision."
+  - category: MS-EF-03
+    reason: "Bias amplification: no SAICA mode covers bias."
+  - category: MS-EF-04
+    reason: "User impersonation: an agent acting as a human without saying so. No SAICA mode."
+  - category: MS-EF-05
+    reason: "Insufficient intelligibility for meaningful consent: an approval prompt that does not say enough. No SAICA mode."
+  - category: MS-ES-04
+    reason: >
+      Human-in-the-loop bypass: an attacker defeats or floods the approval
+      step. SAICA has no mode for attacks on oversight.
+  - category: MS-ES-07
+    reason: "Resource exhaustion: an attacker makes the agent burn resources. No SAICA mode."
+  - category: MS-ES-10
+    reason: "Loss of data provenance: metadata lost between agents. No SAICA mode."

@@ -1,13 +1,14 @@
 id: twist-2025-library-hallucinations-llms-risk
 authors:
   - Lukas Twist
-  - Jie M. Zhang
   - Mark Harman
   - Helen Yannakoudakis
+  - Jie M. Zhang
 year: 2025
-title: "Library Hallucinations in LLMs: Risk Analysis Grounded in Developer Queries"
+title: "Library Hallucinations in LLM-Generated Code: A Risk Analysis Grounded in Developer Queries"
 venue: arXiv
 arxiv_id: "2509.22202"
+arxiv_version: "v4"
 doi: "10.48550/arXiv.2509.22202"
 url: https://www.semanticscholar.org/paper/25e6119d93a3f600b1753141a0c2b21a513958fd
 semantic_scholar_id: "25e6119d93a3f600b1753141a0c2b21a513958fd"
@@ -42,6 +43,7 @@ tldr: >
   variation.
 relevance_tags:
   - supply-chain
+provenance: s2-derived
 notes: >
   First systematic study of how user-level prompt variations impact library
   hallucinations in LLM-generated code. Evaluates seven LLMs across two
@@ -54,3 +56,8 @@ notes: >
   (an obsolescence signal). Relates to SAICA-KG failure modes: fabrication,
   supply_chain_attack, obsolescence, dependency_blindness. The fake-name
   acceptance rate is a direct slopsquatting attack vector.
+  Title and author order follow arXiv v4 (2026-08-21), the version
+  published at EMNLP 2026 (DOI 10.18653/2026.emnlp-main.78); v1 and v2 were
+  titled "Library Hallucinations in LLMs: Risk Analysis Grounded in
+  Developer Queries". The abstract above is the v2 abstract: v4 reports 85%
+  for time-based prompts and adds the LibHalluBench benchmark.

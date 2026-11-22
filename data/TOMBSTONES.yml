@@ -1,0 +1,941 @@
+# Nodes removed from the knowledge graph.
+#
+# Policy (EDITORIAL_POLICY.md, "Removal and deprecation"): nodes are never
+# silently deleted. Every node removed from data/<kind>/ gets one entry here.
+# An id listed here must never be reused for a different node.
+#
+# Fields: id, kind (tool | failure_mode | paper | taxonomy | crosswalk |
+# incident | recipe), removed_on, reason, successor (node id or null),
+# archived_at (path of the kept copy, if any), evidence (where the check
+# is written down), commit (the commit that deleted the file, if it was
+# deleted in an earlier commit).
+#
+# Coverage: every tool, paper and recipe file deleted from data/ in git
+# history is listed (82 entries back-filled on 2026-11-21 from
+# `git log --diff-filter=D --name-only -- data/`: 75 tools, 6 recipes,
+# 1 paper; `commit` is the commit that deleted the file and `reason` is
+# taken from its message), plus the five incidents retracted on 2026-11-21.
+# The removed files can be read with `git show <commit>^:data/<kind>/<id>.yml`.
+
+tombstones:
+  - id: daplab-cascading-recovery-observation-2026
+    kind: incident
+    removed_on: 2026-11-21
+    reason: >
+      Retracted. The record said the Columbia DAPLab post "9 Critical
+      Failure Patterns of Coding Agents" reported a "Cascading Error
+      Recovery" pattern (fix attempts that add new errors). The post has no
+      such pattern. First retracted on 2026-08-18 in commit 00422e2, which
+      never reached main.
+    successor: null
+    archived_at: archive/retracted-incidents/daplab-cascading-recovery-observation-2026.yml
+    evidence: archive/retracted-incidents/README.md
+
+  - id: daplab-destructive-action-observation-2026
+    kind: incident
+    removed_on: 2026-11-21
+    reason: >
+      Retracted. The record said the DAPLab post catalogued agents running
+      destructive commands (recursive delete, force-push, hook bypass,
+      database DROP) without approval. The post describes nothing of the
+      kind. First retracted on 2026-08-18 in commit 00422e2.
+    successor: null
+    archived_at: archive/retracted-incidents/daplab-destructive-action-observation-2026.yml
+    evidence: archive/retracted-incidents/README.md
+
+  - id: daplab-fabricated-references-observation-2026
+    kind: incident
+    removed_on: 2026-11-21
+    reason: >
+      Retracted. The record said the DAPLab post reported a "Fabricated
+      References" pattern (calls to functions or packages that do not
+      exist). The post has no such pattern; its only related remark is that
+      agents may "hallucinate fake inputs like environment variables or API
+      keys". First retracted on 2026-08-18 in commit 00422e2.
+    successor: null
+    archived_at: archive/retracted-incidents/daplab-fabricated-references-observation-2026.yml
+    evidence: archive/retracted-incidents/README.md
+
+  - id: daplab-incomplete-task-execution-observation-2026
+    kind: incident
+    removed_on: 2026-11-21
+    reason: >
+      Retracted. The record said the DAPLab post found that every agent it
+      tested claimed completion with subtasks undone. The post has no such
+      pattern. First retracted on 2026-08-18 in commit 00422e2.
+    successor: null
+    archived_at: archive/retracted-incidents/daplab-incomplete-task-execution-observation-2026.yml
+    evidence: archive/retracted-incidents/README.md
+
+  - id: daplab-silent-test-passing-observation-2026
+    kind: incident
+    removed_on: 2026-11-21
+    reason: >
+      Retracted. The record said the DAPLab post documented agents editing
+      or weakening failing tests ("Silent Test-Passing Workaround"). The
+      post does not mention tests being edited. First retracted on
+      2026-08-18 in commit 00422e2.
+    successor: null
+    archived_at: archive/retracted-incidents/daplab-silent-test-passing-observation-2026.yml
+    evidence: archive/retracted-incidents/README.md
+
+  # --- Back-filled from git history on 2026-11-21 (oldest first) ---
+
+  - id: agentic-guardrails
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 37.
+    successor: null
+
+  - id: cordum
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 465.
+    successor: null
+
+  - id: langkit
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 984.
+    successor: null
+
+  - id: last-layer
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 126.
+    successor: null
+
+  - id: pipelock
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 340. It was named as mitigator in two slopsquatting
+      incidents; those were pointed at socket first.
+    successor: null
+
+  - id: reins
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 383.
+    successor: null
+
+  - id: rust-docs-mcp-server
+    kind: tool
+    removed_on: 2026-04-23
+    commit: b9b6d40
+    reason: >
+      Removed under the rule that a tool needs at least 1,000 GitHub stars;
+      it had 270.
+    successor: null
+
+  - id: deepteam
+    kind: tool
+    removed_on: 2026-04-30
+    commit: a4a66a4
+    reason: >
+      Duplicate record of the same repository (confident-ai/deepteam); the
+      record confident-ai-deepteam was kept at the time and was itself removed
+      on 2026-11-20.
+    successor: null
+
+  - id: phoenix
+    kind: tool
+    removed_on: 2026-04-30
+    commit: a4a66a4
+    reason: >
+      Duplicate record of the same repository (Arize-ai/phoenix); the record
+      arize-phoenix was kept.
+    successor: arize-phoenix
+
+  - id: cascading-failure-resistant-flow
+    kind: recipe
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      Its stack consisted only of the coding-agent records removed in the same
+      commit (v0.3.1).
+    successor: null
+
+  - id: complete-execution-enforced-flow
+    kind: recipe
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      Its stack consisted only of the coding-agent records removed in the same
+      commit (v0.3.1).
+    successor: null
+
+  - id: scope-creep-bounded-autonomous-agent
+    kind: recipe
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      Its stack consisted only of the coding-agent records removed in the same
+      commit (v0.3.1).
+    successor: null
+
+  - id: aider
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: claude-code
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: cline
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: codex-cli
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: continue-dev
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: cursor
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: devin
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: gemini-cli
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: github-copilot
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: openhands
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: replit-agent
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: sourcegraph-cody
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: swe-agent
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: v0
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: windsurf
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: zed-agent
+    kind: tool
+    removed_on: 2026-05-01
+    commit: d52e782
+    reason: >
+      A coding agent, not a supervisor that is added to a stack. Release
+      v0.3.1 limited the catalog to modular supervisors and removed the 16
+      coding-agent records.
+    successor: null
+
+  - id: observability-first-prototyping
+    kind: recipe
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Its stack fell below two tools when the tag audit of 2026-11-20 removed
+      50 tool records.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: red-team-first-hardening
+    kind: recipe
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Its stack fell below two tools when the tag audit of 2026-11-20 removed
+      50 tool records.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: reinvention-resistant-repo-agent
+    kind: recipe
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Its stack fell below two tools when the tag audit of 2026-11-20 removed
+      50 tool records.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: activepieces
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: agentic-security
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: ai-red-teaming-playground-labs
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: autorag
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: beelzebub
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: black
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: braintrust
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: browser-mcp
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: comfyui
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: confident-ai-deepteam
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: coverage-py
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: coze-loop
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: crewai
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: docetl
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: fuzzyai
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: giskard
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: guidance
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: helicone
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: helm
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: instructor
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: isort
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: judgeval
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: langfuse
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: langsmith
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: lighteval
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: lm-evaluation-harness
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: lmms-eval
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: lmnr
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: logfire
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: magic-mcp
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: manifest
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: mcp-playwright
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: mcp-server-browserbase
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: openai-evals
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: openlit
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: outlines
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: pathway-llm-app
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: pezzo
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: pre-commit
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: prettier
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: promptbench
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: promptflow
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: promptmap
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: ragas
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: ragflow
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: rebuff
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: safe-rlhf
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: skyvern
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: tree-sitter
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: voltagent
+    kind: tool
+    removed_on: 2026-11-20
+    commit: 0f0c1ab
+    reason: >
+      Failure-mode tag audit of 2026-11-20: no documented mechanism that
+      detects or prevents any of the failure modes was found, and tools
+      without such a tag leave the catalog.
+    successor: null
+    evidence: research/fm_tag_audit/final_table.csv
+
+  - id: liu-2025-code-copycat
+    kind: paper
+    removed_on: 2026-11-21
+    commit: 3449d02
+    reason: >
+      Duplicate record of the same paper (arXiv 2504.12608); references were
+      pointed at the kept record.
+    successor: liu-2025-code-copycat-conundrum-demystifying

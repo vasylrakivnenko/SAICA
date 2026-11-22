@@ -1,23 +1,27 @@
 id: copilot-prompt-injection-github-comments-2025
-title: Claude Code, Gemini CLI, and GitHub Copilot Agent all hijacked via malicious GitHub-issue prompts
+title: "Comment and Control: Claude Code Security Review, Gemini CLI Action and GitHub Copilot Agent hijacked through GitHub comments"
 tagline: >-
-  Johns Hopkins researchers showed Claude Code Security Review, Gemini CLI Action, and GitHub Copilot Agent all treat untrusted issue/comment content as instructions, allowing hidden directives.
+  Pull-request titles, issue bodies and comments can make three AI agents on GitHub Actions run commands and leak the repository's secrets. All three vendors confirmed the findings.
 description: >
-  A July 2025 security study led by Aonan Guan (Johns Hopkins) and Orca
-  Security found that at least three production AI-coding workflows —
-  Claude Code's Security Review action, Google's Gemini CLI action, and
-  GitHub's Copilot Agent — accept GitHub issue bodies, comments, and
-  workflow inputs as trusted instruction context. A crafted hidden
-  instruction in an issue body was sufficient to hijack each agent's
-  execution: exfiltrate repository contents, alter pull-request metadata,
-  or trigger actions against the repo. The RoguePilot write-up by Orca
-  demonstrated a full repo-takeover primitive via GitHub Codespaces. The
-  failure class (processing untrusted input as trusted instructions) is a
-  classic prompt-injection pattern, but its instantiation across three
-  independent production agents established it as a cross-vendor design
-  flaw.
-incident_date: 2025-07-15
-harm_class: security_breach
+  On 2026-04-15 security researcher Aonan Guan, with Zhengyu Liu and Gavin
+  Zhong of Johns Hopkins University, published "Comment and Control", a
+  prompt injection method against AI agents that run in GitHub Actions.
+  Text that an outside contributor controls (a pull-request title, an
+  issue body, an issue comment, a hidden HTML comment) is read by the agent
+  as instructions. The write-up shows the method against three agents:
+  Anthropic's Claude Code Security Review (a crafted PR title makes the
+  agent run commands and reveal credentials), Google's Gemini CLI Action
+  (an API key obtained through issue comments) and GitHub Copilot Agent (a
+  payload hidden in an HTML comment scans for secrets and gets past the
+  network firewall; here the victim must first assign the issue to
+  Copilot). SecurityWeek reports that the findings were sent to Anthropic,
+  Google and GitHub, that all three confirmed them, and that bounties of
+  $100, $1,337 and $500 were paid; GitHub classed the issue as a known
+  architectural limitation. The sources report no use of the method
+  outside the researchers' own tests.
+kind: event
+incident_date: 2026-04-15
+harm_class: user_reported
 reproducibility: confirmed
 
 exhibited_failure_modes:
@@ -25,15 +29,13 @@ exhibited_failure_modes:
 - context_pollution
 
 affected_systems:
-- Claude Code Security Review action
-- Google Gemini CLI action
+- Claude Code Security Review (GitHub Action)
+- Google Gemini CLI Action
 - GitHub Copilot Agent
-- GitHub Codespaces
 
 source_urls:
+- https://oddguan.com/blog/comment-and-control-prompt-injection-credential-theft-claude-code-gemini-cli-github-copilot/
 - https://www.securityweek.com/claude-code-gemini-cli-github-copilot-agents-vulnerable-to-prompt-injection-via-comments/
-- https://orca.security/resources/blog/roguepilot-github-copilot-vulnerability/
-- https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents
 
 documented_by: []
 
@@ -42,7 +44,19 @@ mitigated_by:
 - nemo-guardrails
 
 notes: >
-  Date approximates the first public disclosure. Mitigations are
-  conservative — prompt-injection defense is partial across the
-  ecosystem, and none of the listed tools would have "fully prevented"
-  the cross-vendor pattern. They would have reduced blast radius.
+  A vulnerability disclosure with proofs of concept, confirmed by the
+  vendors; `harm_class` is "user_reported" because no compromise outside
+  the tests is reported. Corrected on 2026-11-21 from the two sources.
+  Until then this record merged three separate disclosures into one "July
+  2025 study led by Aonan Guan and Orca Security", dated 2025-07-15, nine
+  months before its main source. The other two are different work and are
+  not described here: Pillar Security's "Rules File Backdoor" (hidden
+  instructions in rules files used by Cursor and GitHub Copilot, published
+  2025-03-18,
+  https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
+  and Orca Security's "RoguePilot" (a GitHub issue that prompt-injects
+  Copilot in Codespaces and leaks a GITHUB_TOKEN, published 2026-02-16,
+  https://orca.security/resources/blog/roguepilot-github-copilot-vulnerability/).
+  The id says 2025 because ids are not changed once published. The listed
+  tools would not have fully prevented the attack; prompt-injection
+  defences are partial.

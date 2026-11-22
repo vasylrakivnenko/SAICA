@@ -7,7 +7,9 @@ description: >
   assertions, adversarial red-team generation, and CI integrations. Used by
   enterprises to gate LLM deployments on pre-prod evals.
 first_released: '2023-04-28'
-last_updated: '2026-04-23'
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: promptfoo
 repository_url: https://github.com/promptfoo/promptfoo
@@ -37,8 +39,10 @@ implements_techniques:
   - red-team-attacks
   - llm-as-judge
   - ci-gates
-stars: 20465
-stars_updated_at: '2026-04-23'
+stars: 27525
+stars_updated_at: '2026-11-21'
+evaluated_on:
+  - saica-bench-2026-11
 inclusion_rationale: >
   Occupies the CLI-driven prompt-eval + red-team cell. Distinct from deepeval
   (Pytest-native unit tests) by leaning into YAML configs and shift-left

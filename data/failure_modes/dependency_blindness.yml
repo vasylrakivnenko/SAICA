@@ -9,6 +9,8 @@ description: >
   drifts from ecosystem conventions. Distinct from Liu 2025's "Code Copycat"
   (intra-generation repetition): dependency_blindness is about
   cross-codebase reinvention.
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - reinvention
@@ -17,6 +19,7 @@ aliases:
 related_modes:
   - fabrication
   - logic_error
+  - obsolescence
 
 prior_work:
   - liu-2025-code-copycat-conundrum-demystifying

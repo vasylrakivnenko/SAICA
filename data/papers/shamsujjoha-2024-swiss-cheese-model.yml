@@ -6,10 +6,11 @@ authors:
   - Liming Zhu
 year: 2024
 title: "Swiss Cheese Model for AI Safety: A Taxonomy and Reference Architecture for Multi-Layered Guardrails of Foundation Model Based Agents"
-venue: International Conference on Software Architecture
+venue: IEEE International Conference on Software Architecture (ICSA 2025)
 url: https://arxiv.org/abs/2408.02205
 doi: "10.1109/ICSA65012.2025.00014"
 arxiv_id: "2408.02205"
+arxiv_version: "v4"
 semantic_scholar_id: "88794317f405c098ab08bbdf43d99024aec1ddfe"
 citation_count: 33
 abstract: >
@@ -42,6 +43,7 @@ relevance_tags:
   - external-taxonomy-seed
   - reference-architecture
   - systematic-literature-review
+provenance: hand-curated
 notes: >
   Primary source for the swiss-cheese-model Taxonomy node in SAICA-KG.
   arXiv v1 2024-08-05, v4 2025-01-27; published at IEEE ICSA 2025 (DOI

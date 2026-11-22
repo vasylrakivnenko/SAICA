@@ -2,16 +2,19 @@ id: pr-agent
 name: pr-agent
 tagline: AI-powered tool for automated pull-request analysis, feedback, and suggestions.
 description: >
-  Qodo (formerly CodiumAI) pr-agent automates PR review using LLMs. Produces
+  pr-agent automates PR review using LLMs. It was published by CodiumAI
+  (now Qodo) and today lives under the GitHub organisation The-PR-Agent. Produces
   structured code review, security hints, and test suggestions gated on a
   maintainer who approves diffs. Canonical exemplar for human-in-the-loop
   code-review supervision.
 first_released: '2023-07-05'
-last_updated: '2026-04-21'
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
-published_by: qodo
-repository_url: https://github.com/Codium-ai/pr-agent
-license: Apache-2.0
+published_by: the-pr-agent
+repository_url: https://github.com/The-PR-Agent/pr-agent
+license: MIT
 control_paradigm: detection
 temporal_phase: post_generation
 autonomy_level: full_hitl
@@ -31,8 +34,15 @@ implements_techniques:
   - security-hints
   - test-suggestions
   - maintainer-gate
-stars: 10968
-stars_updated_at: '2026-04-23'
+stars: 16537
+stars_updated_at: '2026-11-21'
+evaluated_on:
+  - saica-bench-2026-11
+editorial_notes: >
+  The repository moved from Codium-ai/pr-agent to The-PR-Agent/pr-agent
+  (GitHub redirects the old address; checked 2026-11-21). Its description now
+  reads "The Original Open-Source PR Reviewer. This project is not the Qodo
+  free tier." Licence file: MIT (this record said Apache-2.0).
 inclusion_rationale: >
   Code-review supervisor cell — distinct from generic linters / static
   analyzers by reasoning over diff intent and leaving humans as the final

@@ -1,9 +1,9 @@
 id: kota-2025-zero-trust-security-frameworks
 authors:
-  - S. Kota
+  - Sunil Kota
 year: 2025
 title: "Zero-Trust Security Frameworks for Model Context Protocol (MCP) Server Communications"
-venue: International Journal of Innovative Research in Engineering &amp; Multidisciplinary Physical Sciences
+venue: International Journal of Innovative Research in Engineering & Multidisciplinary Physical Sciences
 doi: "10.37082/ijirmps.v13.i6.232959"
 url: https://www.semanticscholar.org/paper/90e083c73a326a4e553d9534c63470f99be413a5
 semantic_scholar_id: "90e083c73a326a4e553d9534c63470f99be413a5"
@@ -43,6 +43,7 @@ relevance_tags:
   - supervision
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Position paper proposing a Zero-Trust Architecture (ZTA) framework for MCP
   server communications, covering identity and device verification, mutual

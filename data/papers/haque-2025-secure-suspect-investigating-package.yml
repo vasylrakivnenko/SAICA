@@ -2,13 +2,14 @@ id: haque-2025-secure-suspect-investigating-package
 authors:
   - Md Nazmul Haque
   - Elizabeth Lin
-  - L. Arkoh
-  - B. Tadesse
+  - Lawrence Arkoh
+  - Biruk Tadesse
   - Bowen Xu
 year: 2025
 title: "Secure or Suspect? Investigating Package Hallucinations of Shell Command in Original and Quantized LLMs"
 venue: arXiv
 arxiv_id: "2512.08213"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2512.08213"
 url: https://www.semanticscholar.org/paper/91cf61ed35840fb8676d5cda64c55267e5a929ae
 semantic_scholar_id: "91cf61ed35840fb8676d5cda64c55267e5a929ae"
@@ -49,6 +50,7 @@ tldr: >
 relevance_tags:
   - supply-chain
   - empirical
+provenance: s2-derived
 notes: >
   First systematic empirical study of how quantization (8-bit and 4-bit vs.
   full-precision) affects package hallucination and vulnerability rates in

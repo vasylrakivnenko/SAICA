@@ -7,7 +7,9 @@ description: >
   navigate, screenshot) through MCP, so agent access to the browser is
   channelled through an auditable tool interface.
 first_released: '2025-03-21'
-last_updated: '2026-04-22'
+last_updated: 2026-11-18
+upstream_pushed_at: 2026-11-18
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: microsoft
 repository_url: https://github.com/microsoft/playwright-mcp
@@ -26,8 +28,8 @@ implements_techniques:
   - mcp-server
   - playwright-wrapper
   - browser-actions
-stars: 31275
-stars_updated_at: '2026-04-23'
+stars: 39980
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Environment-gate for browser-using agents: MCP-mediated access rather than
   direct CDP, enabling per-tool allow-lists + auditing.

@@ -7,12 +7,14 @@ last_updated: 2025-01-27
 url: https://arxiv.org/abs/2408.02205
 license: "arXiv preprint; CC BY-NC-SA 4.0"
 paper_id: shamsujjoha-2024-swiss-cheese-model
+verified_against_source: 2026-11-21
 scope: >
-  A SLR-derived taxonomy of multi-layered runtime guardrails for
-  foundation-model-based agents. Organized along three architectural
-  dimensions (pipelines, artifacts, actions) plus quality attributes that
-  guardrails should satisfy. Evoked as a "Swiss Cheese" defense-in-depth
-  reference architecture for AI safety by design.
+  A taxonomy of runtime guardrails for foundation-model-based agents, built
+  from a systematic literature review. The paper names three dimensions:
+  quality attributes, pipelines and artifacts. It also lists design options
+  for guardrails; of those, this file holds the guardrail actions. The
+  paper uses the taxonomy to propose a multi-layered "Swiss Cheese"
+  reference architecture. The categories describe guardrails, not failures.
 
 categories:
   # --- Top-level dimensions (parents of the categories below) ---
@@ -97,15 +99,15 @@ categories:
 
   # --- Pipelines (where in the request/response flow the guardrail acts) ---
   - external_id: SC-PIPE-01
-    label: Prompt Stage
+    label: Prompts
     description: Incoming user queries analyzed for harmful content and safety alignment before processing.
     parent_id: SC-PIPE
   - external_id: SC-PIPE-02
-    label: Intermediate Results Stage
+    label: Intermediate Results
     description: Outputs at workflow stages verified for accuracy and safety before final generation.
     parent_id: SC-PIPE
   - external_id: SC-PIPE-03
-    label: Final Results Stage
+    label: Final Results
     description: Final agent outputs checked for goal alignment and governance compliance.
     parent_id: SC-PIPE
 
@@ -147,8 +149,8 @@ categories:
     description: Peer or subordinate agents in a multi-agent system.
     parent_id: SC-ART
   - external_id: SC-ART-10
-    label: Foundation Models
-    description: The underlying LLM / FM itself.
+    label: Foundation Models (FMs)
+    description: The underlying LLM / FM itself. The paper writes "FMs".
     parent_id: SC-ART
 
   # --- Actions (what a guardrail can do upon triggering) ---
@@ -206,22 +208,27 @@ categories:
     parent_id: SC-ACT
 
 notes: >
-  Category labels derived from the arXiv v3 HTML; quality-attribute and
-  action lists are canonical. The parent categories SC-QA, SC-PIPE, SC-ART
-  and SC-ACT are SAICA-KG ids for the paper's dimensions (the paper names
-  the dimensions but gives them no ids); they are defined at the top of
-  `categories:` so every parent_id resolves. Pending
-  full-text verification against the final ICSA 2025 version, including the
-  Rules, Sources, Modality, and Underlying-Models dimensions which are
-  deferred to v0.2 expansion.
+  Labels checked on 2026-11-21 against the arXiv v4 PDF (2025-01-27, 12
+  pages): the 14 quality attributes (section A, numbered 1 to 14), the 13
+  guardrail actions (section B.1), the three pipeline targets and the ten
+  artifact targets (section B.2 and Table II). Three labels were corrected
+  to the paper's wording: the pipeline targets are "Prompts",
+  "Intermediate Results" and "Final Results" (this file had added "Stage").
+  The one-line descriptions are SAICA-KG summaries and were not checked
+  sentence by sentence. All ids (SC-QA, SC-PIPE, SC-ART, SC-ACT and their
+  children) are SAICA-KG's; the paper publishes none.
+
+  Not in this file: "Execution Time", which the text of section B.2 lists
+  after the artifacts but Table II does not; and the other design options
+  of section B (rules, applicability scope, modality, underlying models).
 
 inclusion_rationale: >
   The Swiss Cheese Model paper gives SAICA-KG's Tool ontology an external
   architectural anchor for defense-in-depth reasoning: Tool nodes can be
   mapped to (pipeline stage x artifact x action) triples and evaluated
-  against the 14 quality attributes. Strong crosswalks: SC-PIPE-01/02/03
-  aligns directly with SAICA-KG's TemporalPhase partition; SC-ART-* overlaps
-  with LocusOfControl; SC-ACT-* overlaps with ControlParadigm
-  (Block -> prevention, Flag -> detection, Modify/Retry -> correction,
-  Fall-back/Isolate -> recovery). This makes the Swiss Cheese paper a
-  first-class validation anchor for SAICA-KG's axis choices.
+  against the 14 quality attributes. Crosswalks that could be written but
+  do not exist yet: SC-PIPE-01/02/03 against TemporalPhase, SC-ART-* against
+  LocusOfControl, SC-ACT-* against ControlParadigm (Block -> prevention,
+  Flag -> detection, Modify/Retry -> correction, Fall back/Isolate ->
+  recovery). Only the failure-mode crosswalk exists today, and it covers
+  five of the 40 leaf categories.

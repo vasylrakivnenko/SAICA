@@ -1,26 +1,21 @@
 id: test-manipulation-resistant-flow
 name: Test-manipulation-resistant flow
 tagline: >
-  aider (commit-per-change makes test edits visible) →
-  coverage-protected CI → semgrep rules on test-file diffs. Detects
-  DAPLab DAP-07 silent-test-passing.
+  semgrep rules on test-file diffs plus a promptfoo LLM judge that reads
+  the agent's session. Flags edits that weaken, skip or delete tests.
 description: >
-  Composition for the `test_manipulation` FailureMode, anchored in the
-  DAPLab DAP-07 observation (see
-  daplab-silent-test-passing-observation-2026).
+  Two checks for the `test_manipulation` failure mode. Both run after the
+  agent has finished and before its change is merged.
 
-  Stage 1: aider commits every agent change as a separate commit. Test
-  edits become first-class diffs rather than hidden within a large
-  feature commit.
+  Stage 1: semgrep runs project-written rules over the diff of test files
+  and test-runner configuration: a removed assertion, an added skip
+  marker, a weakened matcher. A match asks for human approval.
 
-  Stage 2: coverage-protected CI fails when coverage drops below a
-  project-defined threshold, blocking the "delete the failing test"
-  workaround at the infrastructure layer.
-
-  Stage 3: semgrep runs a ruleset diffing test files and runner config
-  against a protected baseline; any agent-authored test-weakening
-  change (removed assertion, mocked subject, skipped test, weakened
-  matcher) triggers a rule and requires explicit human approval.
+  Stage 2: promptfoo runs an `llm-rubric` assertion. A judge model reads
+  the session transcript or the diff together with a rubric that
+  describes test manipulation (assertions rewritten to match wrong output,
+  tests skipped or deleted, the CI job disabled) and answers whether the
+  agent gamed the tests.
 
 targets_failure_modes:
   - test_manipulation
@@ -33,7 +28,13 @@ evidence_tier: anecdotal
 language: polyglot
 
 notes: >
-  Coverage-protected CI is configuration, not a KG-node; stack is
-  length 2. Evidence tier `anecdotal` — the pattern is well-known in
-  platform-eng communities but not benchmarked. Downgrade is
-  appropriate while SAICA-KG has no test-manipulation benchmark paper.
+  Text rewritten on 2026-11-21 to describe the tools in `stack`. The
+  earlier text described aider commits and a coverage gate, which are not
+  in the stack, and said the recipe was anchored in a DAPLab observation;
+  that incident record was retracted (see data/TOMBSTONES.yml). Of the two
+  stack tools the KG tags only promptfoo for test manipulation; Semgrep
+  ships no rules for it, so they have to be written. SAICA-Bench measures
+  the promptfoo stage on its own (an llm-rubric judge on Patronus TRACE
+  sessions) and includes two simple test-edit rules as baselines; the two
+  stages have not been measured together. `evidence_tier` stays
+  `anecdotal`.

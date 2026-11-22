@@ -7,10 +7,12 @@ description: >
   schema-aware query generation, and auditable execution logs — turning direct
   DB access into a supervised interface.
 first_released: '2024-06-07'
-last_updated: '2026-04-23'
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: google
-repository_url: https://github.com/googleapis/genai-toolbox
+repository_url: https://github.com/googleapis/mcp-toolbox
 license: Apache-2.0
 control_paradigm: prevention
 temporal_phase: post_generation
@@ -26,8 +28,12 @@ implements_techniques:
   - mcp-db-server
   - schema-aware-sql
   - audit-log
-stars: 14769
-stars_updated_at: '2026-04-23'
+stars: 16928
+stars_updated_at: '2026-11-21'
+editorial_notes: >
+  The repository was renamed from googleapis/genai-toolbox to
+  googleapis/mcp-toolbox (GitHub redirects the old address; checked
+  2026-11-21).
 inclusion_rationale: >
   Database-access MCP cell. Differentiated from generic SQL MCPs by
   schema-aware generation and an opinionated safety posture.

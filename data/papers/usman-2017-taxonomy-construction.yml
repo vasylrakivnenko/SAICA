@@ -5,8 +5,9 @@ authors:
   - Jürgen Börstler
   - Emilia Mendes
 year: 2017
-title: "Taxonomies in Software Engineering: A Systematic Mapping Study and a Revised Taxonomy Development Method"
+title: "Taxonomies in software engineering: A Systematic mapping study and a revised taxonomy development method"
 venue: Information and Software Technology
+doi: "10.1016/j.infsof.2017.01.006"
 citation_count: 171
 url: https://www.sciencedirect.com/science/article/abs/pii/S0950584917300713
 relevance_tags:
@@ -16,6 +17,7 @@ relevance_tags:
 tldr: >
   Canonical mapping study on taxonomy construction methods in SE. Grounds
   the methodological spine that SAICA-KG's honest-MECE approach inherits.
+provenance: hand-curated
 notes: >
   Cite as the methodology baseline for SAICA-KG's taxonomy-construction
   justification. Neutralizes "your approach is ad hoc" reviewer critiques.

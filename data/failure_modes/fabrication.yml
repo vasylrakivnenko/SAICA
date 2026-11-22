@@ -6,6 +6,8 @@ description: >
   that do not exist in any reachable dependency or runtime. Syntactically
   plausible, factually false. Distinct from obsolescence (real-but-retired)
   and from dependency blindness (real-and-present-but-ignored).
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - hallucination

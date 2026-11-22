@@ -2,7 +2,7 @@ id: gao-2026-skillreducer-optimizing-llm-agent
 authors:
   - Yudong Gao
   - Zongjie Li
-  - Yuanyuanyuan
+  - Yuanyuan Yuan
   - Zimo Ji
   - Pingchuan Ma
   - Shuai Wang
@@ -10,6 +10,7 @@ year: 2026
 title: "SkillReducer: Optimizing LLM Agent Skills for Token Efficiency"
 venue: arXiv
 arxiv_id: "2603.29919"
+arxiv_version: "v2"
 url: https://www.semanticscholar.org/paper/515bbd3bda703bdf891d373713451f985f6a0bc9
 semantic_scholar_id: "515bbd3bda703bdf891d373713451f985f6a0bc9"
 abstract: >
@@ -44,6 +45,7 @@ relevance_tags:
   - agentic-ai
   - benchmark
   - empirical
+provenance: s2-derived
 notes: >
   Large-scale empirical study of 55,315 publicly available agent skills
   (pre-packaged instruction sets) finding systemic inefficiencies: 26.4% lack

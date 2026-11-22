@@ -3,9 +3,11 @@ name: nono
 tagline: Capability-based sandbox for securely running AI agents with zero setup
 description: nono is a capability-based, multiplexing sandbox tool designed for developers to securely run AI agents. It provides zero-setup security isolation enabling a seamless path from development to production without additional infrastructure or latency overhead.
 first_released: '2026-01-31'
-last_updated: '2026-04-23'
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: experimental
-repository_url: https://github.com/always-further/nono
+repository_url: https://github.com/nolabs-ai/nono
 license: Apache-2.0
 control_paradigm: prevention
 temporal_phase: in_generation
@@ -20,8 +22,11 @@ locus_of_control:
 integration_surfaces:
   - cli
   - library
-stars: 2085
-stars_updated_at: '2026-04-23'
+stars: 5067
+stars_updated_at: '2026-11-21'
+editorial_notes: >
+  The repository moved from always-further/nono to nolabs-ai/nono (GitHub
+  redirects the old address; checked 2026-11-21).
 inclusion_rationale: >
   Occupies prevention × in_generation × fully_autonomous as a capability-based
   sandbox that mediates an agent's syscalls while it is still acting, rather

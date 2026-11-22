@@ -7,7 +7,9 @@ description: >
   space to parseable/interactive DOM elements. Heavily used as a building
   block in browser-agent stacks.
 first_released: '2024-10-31'
-last_updated: '2026-04-21'
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: browser-use
 repository_url: https://github.com/browser-use/browser-use
@@ -28,8 +30,8 @@ implements_techniques:
   - dom-abstraction
   - playwright-wrapper
   - llm-actionable-elements
-stars: 89651
-stars_updated_at: '2026-04-23'
+stars: 121683
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Canonical 'DOM-only' browser-use cell — most other browser agents build on
   top of or differentiate from it.

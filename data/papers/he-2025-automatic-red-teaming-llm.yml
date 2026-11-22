@@ -9,6 +9,7 @@ year: 2025
 title: "Automatic Red Teaming LLM-based Agents with Model Context Protocol Tools"
 venue: arXiv
 arxiv_id: "2509.21011"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2509.21011"
 url: https://www.semanticscholar.org/paper/299ec08b60dbb993f96cf45c011c387477e3f9c8
 semantic_scholar_id: "299ec08b60dbb993f96cf45c011c387477e3f9c8"
@@ -40,6 +41,7 @@ relevance_tags:
   - MCP
   - benchmark
   - red-teaming
+provenance: s2-derived
 notes: >
   Proposes AutoMalTool, an automated red-teaming framework that generates
   malicious MCP tools capable of manipulating the behavior of mainstream

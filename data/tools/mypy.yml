@@ -4,14 +4,16 @@ tagline: Static type checker for Python. Catches mismatched types before runtime
 description: >
   mypy is the original gradual-typing checker for Python, reading PEP 484
   type hints across a project and reporting type-incompatibility,
-  missing-attribute, and contract-mismatch errors before code runs. It
-  guards against logic errors caused by silent type drift and against
-  fabricated APIs (calls to attributes that do not exist). Configuration
-  lives in `pyproject.toml [tool.mypy]`, which the audit detector now
-  recognises.
+  missing-attribute, and contract-mismatch errors before code runs. It flags
+  fabricated APIs (attributes, names and modules that do not exist) and,
+  with the opt-in `deprecated` error code (PEP 702), use of deprecated APIs.
+  Configuration lives in `pyproject.toml [tool.mypy]`, which the audit
+  detector now recognises.
 
 first_released: 2012-04-01
-last_updated: 2026-04-15
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: python
@@ -51,17 +53,22 @@ openssf_scorecard_score:
 
 cited_in: []
 documented_in: []
+evaluated_on:
+  - saica-bench-2026-11
 
 supervises_targets:
   - python
 
 inclusion_rationale: >
-  Occupies detection × post_generation × fully_autonomous for logic_error
-  and fabrication in the Python lane. The reference implementation of
-  PEP 484; missing it leaves the audit detector unable to recognise the
-  most widely-deployed Python type-checking gate.
+  Occupies detection × post_generation × fully_autonomous for fabrication
+  and obsolescence in the Python lane. The 2026-11-20 tag audit removed
+  logic_error: that mode is code that passes the type check and is still
+  wrong, and mypy finds type errors (research/fm_tag_audit/final_table.csv).
+  The reference implementation of PEP 484; missing it leaves the audit
+  detector unable to recognise the most widely-deployed Python type-checking
+  gate.
 editorial_notes: >
   Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
   the audit no longer reports mypy as an unknown tool.
-stars: 18000
-stars_updated_at: '2026-04-23'
+stars: 20734
+stars_updated_at: '2026-11-21'

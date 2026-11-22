@@ -11,7 +11,9 @@ description: >
   a hosted Mend Renovate App is also available for GitHub.
 
 first_released: 2017-03-01
-last_updated: 2026-04-18
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: mend
@@ -70,10 +72,10 @@ supervises_targets:
 inclusion_rationale: >
   Occupies detection x post_generation x graduated_hitl alongside Dependabot
   but with config-first ergonomics and cross-forge reach (GitLab, Bitbucket,
-  Azure DevOps), filling the same MECE cell for teams that are not on GitHub
-  or need update-grouping that Dependabot does not express. Its broader
-  manager coverage (Terraform, Helm, GitHub Actions digests) extends
-  obsolescence mitigation into infrastructure-as-code manifests that pure
+  Azure DevOps), filling the same cell for teams that are not on GitHub or
+  need update-grouping that Dependabot does not express. Its broader manager
+  coverage (Terraform, Helm, GitHub Actions digests) extends obsolescence
+  mitigation into infrastructure-as-code manifests that pure
   application-package tools miss.
-stars: 21353
-stars_updated_at: '2026-04-23'
+stars: 23220
+stars_updated_at: '2026-11-21'

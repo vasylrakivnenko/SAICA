@@ -1,9 +1,29 @@
+# State on 2026-11-21. The ten OWASP ids and labels were checked against the
+# published PDF (see data/taxonomies/owasp-agentic-top-10-2026.yml). The
+# rows below are those drafted on 2026-04-22, with these changes (E1, E4):
+#   ASI04 <-> supply_chain_attack lowered from exact to partial, and its
+#     note corrected: the OWASP text does not mention slopsquatting.
+#   ASI04 <-> fabrication (related) removed: it rested on the same claim.
+#   ASI02 notes corrected: code execution is ASI05 and privilege escalation
+#     is ASI03, so ASI02 is not "broader" in the way the notes said.
+#   ASI08 <-> cascading_failure added as related, with the reason why the
+#     shared name is not a match.
+#   `unmapped` added.
+# The other rows have not been re-judged. Several link an OWASP attack
+# class to security_vulnerability or scope_creep by a looser reading than
+# the one used in the crosswalks rebuilt on 2026-11-21 (daplab, shah,
+# msft-airt); where prompt injection and attacks on agents belong among
+# the SAICA modes is an open decision.
+# Drafted by an LLM. No person has reviewed these rows yet.
+
 id: owasp-to-saica
 saica_axis: failure_mode
 taxonomy: owasp-agentic-top-10-2026
 authored_by:
   - claude-opus-4-7
-last_reviewed: 2026-04-22
+  - claude-fable-5-2
+review_state: llm_drafted_unreviewed
+source_checked_on: 2026-11-21
 
 mappings:
   # ASI01 — Agent Goal Hijack
@@ -26,9 +46,10 @@ mappings:
     external_id: ASI02
     confidence: partial
     note: >
-      Tool misuse that exceeds the user-stated task boundary corresponds to
-      scope_creep; ASI02 is broader (also covers tool-surface exploitation
-      for RCE).
+      ASI02 is a legitimate tool used "in an unsafe or unintended way", for
+      example "deleting valuable data". When the unintended use goes beyond
+      the stated task it is scope_creep. ASI02 is wider: it also covers
+      misuse inside the task and misuse caused by prompt injection.
   - saica_value: security_vulnerability
     external_id: ASI02
     confidence: partial
@@ -37,8 +58,10 @@ mappings:
     external_id: ASI02
     confidence: related
     note: >
-      Incorrect tool argument construction (non-malicious) is logic_error;
-      ASI02 focuses on the exploitation surface.
+      ASI02 includes misuse without an attacker ("misalignment, or unsafe
+      delegation or ambiguous instruction"). A wrong tool call written by
+      the agent can be a logic_error; ASI02 is about the unsafe effect of
+      the call, not about the code being wrong.
 
   # ASI03 — Identity and Privilege Abuse
   - saica_value: security_vulnerability
@@ -55,14 +78,15 @@ mappings:
   # ASI04 — Agentic Supply Chain Vulnerabilities
   - saica_value: supply_chain_attack
     external_id: ASI04
-    confidence: exact
-    note: Direct counterpart; includes slopsquatting per both taxonomies.
-  - saica_value: fabrication
-    external_id: ASI04
-    confidence: related
+    confidence: partial
     note: >
-      Slopsquatting chains fabrication (hallucinated package name) to
-      supply_chain_attack (attacker registers it).
+      The closest OWASP entry: third-party tools, plug-ins, MCP servers,
+      registries and packages that are "malicious, compromised, or tampered
+      with in transit", with typo-squatting among the examples. Not exact
+      in either direction: ASI04 also covers models, datasets and prompt
+      templates, and its text does not mention hallucinated package names
+      (slopsquatting), which the SAICA mode includes. Was "exact" before
+      2026-11-21.
 
   # ASI05 — Unexpected Code Execution (RCE)
   - saica_value: security_vulnerability
@@ -87,6 +111,14 @@ mappings:
     note: Weakly authenticated inter-agent messages are a security-vulnerability class.
 
   # ASI08 — Cascading Failures
+  - saica_value: cascading_failure
+    external_id: ASI08
+    confidence: related
+    note: >
+      Same name, different thing. ASI08 is one fault that "propagates
+      across autonomous agents, compounding into system-wide harm". SAICA's
+      cascading_failure is one agent whose fix attempts add new errors.
+      Both are about errors compounding; neither contains the other.
   - saica_value: context_pollution
     external_id: ASI08
     confidence: related
@@ -98,8 +130,7 @@ mappings:
     confidence: related
     note: A local logic_error can cascade into broader failure when the agent acts on it.
 
-  # ASI09 — Human-Agent Trust Exploitation
-  # No SAICA FailureMode aligns cleanly; omitted rather than forced.
+  # ASI09 — Human-Agent Trust Exploitation: see `unmapped`.
 
   # ASI10 — Rogue Agents
   - saica_value: scope_creep
@@ -108,3 +139,10 @@ mappings:
     note: >
       Self-initiated unsanctioned behavior extends scope_creep beyond a
       single task into persistent policy violation.
+
+unmapped:
+  - category: ASI09
+    reason: >
+      Human-Agent Trust Exploitation: a person is persuaded by an agent to
+      approve or do something harmful. SAICA modes describe what the agent
+      does to code and tasks; none covers manipulation of the human.

@@ -1,18 +1,19 @@
 id: xing-2025-mcp-guard-multi-stage
 authors:
   - Wenpeng Xing
-  - Zhong-Kuo Qi
+  - Zhonghao Qi
   - Yupeng Qin
   - Yilin Li
   - Caini Chang
   - Jiahui Yu
   - Changting Lin
-  - Zhe Xie
+  - Zhenzhen Xie
   - Meng Han
 year: 2025
 title: "MCP-Guard: A Multi-Stage Defense-in-Depth Framework for Securing Model Context Protocol in Agentic AI"
 venue: arXiv
 arxiv_id: "2508.10991"
+arxiv_version: "v4"
 url: https://www.semanticscholar.org/paper/8951ab8938bcc4f92e29a6a9f20ae16878090367
 semantic_scholar_id: "8951ab8938bcc4f92e29a6a9f20ae16878090367"
 citation_count: 10
@@ -43,6 +44,7 @@ relevance_tags:
   - agentic-ai
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Proposes MCP-GUARD, a three-stage layered defense for LLM-tool interactions
   over MCP: lightweight static scanning for overt threats, a deep neural

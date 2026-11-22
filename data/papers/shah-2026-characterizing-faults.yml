@@ -1,6 +1,6 @@
 id: shah-2026-characterizing-faults
 authors:
-  - Mehil B. Shah
+  - Mehil B Shah
   - Mohammad Mehdi Morovati
   - Mohammad Masudur Rahman
   - Foutse Khomh
@@ -8,35 +8,55 @@ year: 2026
 title: "Characterizing Faults in Agentic AI: A Taxonomy of Types, Symptoms, and Root Causes"
 venue: arXiv
 arxiv_id: "2603.06847"
+arxiv_version: "v2"
 url: https://arxiv.org/abs/2603.06847
 semantic_scholar_id: "a82a683a61862e69ac7f3b14924d631a6fbd5165"
 citation_count: 1
 abstract: >
-  Agentic AI systems combine large language model (LLM) reasoning with
-  external tool invocation and long-horizon task execution. We conduct a
-  large-scale empirical study of faults in agentic AI systems, collecting
-  13,602 issues and pull requests from 40 open-source agentic-AI
-  repositories and applying stratified sampling to select 385 faults for
-  in-depth qualitative analysis. Using grounded theory, we derive taxonomies
-  of fault types, observable symptoms, and root causes. We further apply
-  Apriori-based association rule mining to identify statistically significant
-  relationships among faults, symptoms, and root causes, revealing common
-  fault propagation patterns. We validate the taxonomy through a developer
-  study with 145 practitioners. Our analysis identifies 37 distinct fault
-  types grouped into 13 higher-level fault categories, along with 13 classes
-  of observable symptoms and 12 categories of root causes.
+  Agentic AI systems combine LLM-based reasoning, orchestration, tool
+  invocation, and interaction with external environments. These systems
+  introduce faults that are difficult to characterize using existing
+  taxonomies. To address this gap, we present an empirical study of faults
+  in agentic AI systems. We collected 13,602 issues and pull requests from
+  40 repositories and, using stratified sampling, selected 385 faults for
+  analysis. Through grounded theory, we derived taxonomies of fault types,
+  symptoms, and root causes. We then used Apriori-based association rule
+  mining to identify relationships among faults, symptoms, and root causes,
+  and validated the taxonomy through a developer study with 145
+  practitioners. Our analysis produced a taxonomy of 34 fault types,
+  organized into four architectural dimensions. These faults manifested as
+  failures in structured-output interpretation, tool calls, runtime
+  execution, and exception handling, with root causes including data schema
+  mismatches, dependency drift, state management complexity, and model
+  interface instability. Furthermore, association rules showed recurring
+  cross-component propagation, linking structured data, dependency, and
+  state management faults to their symptoms and root causes. Practitioners
+  considered the taxonomy representative of agentic AI failures and
+  suggested refinements related to multi-agent coordination and
+  observability. These findings provide an empirical basis for diagnosing
+  faults and improving reliability in agentic AI systems.
 tldr: >
-  385-fault grounded-theory study over 40 agentic-AI repos yields 37 fault
-  types in 13 categories, 13 symptom classes, and 12 root-cause categories,
-  validated by a 145-practitioner developer study.
+  Study of 385 faults sampled from 13,602 issues and pull requests in 40
+  agentic-AI repositories. arXiv v2 (2026-05-07): 34 fault types in 14
+  categories and four dimensions, 12 symptom categories and 12 root-cause
+  categories, checked in a survey of 145 practitioners.
 relevance_tags:
   - failure-mode-taxonomy
   - agentic-ai
   - empirical
   - external-taxonomy-seed
   - grounded-theory
+provenance: hand-curated
 notes: >
-  Primary source for the shah-2026-agentic-faults Taxonomy node in SAICA-KG.
-  Largest single empirical fault characterization of agentic AI to date
-  (385-fault stratified sample, 40 repos, n=145 practitioner validation).
-  Back-test corpus for SAICA-KG's FailureMode MECE claim.
+  Primary source for the shah-2026-agentic-faults Taxonomy node. The
+  abstract above is the arXiv v2 text (2026-05-07). Version 1 (2026-03-06)
+  reported a different structure: five dimensions, 13 major categories, 37
+  fault categories, 13 symptom classes and 12 root causes; v2 reorganised
+  it into four dimensions, 14 categories, 34 fault types, 12 symptoms and
+  12 root causes. Both versions were read as PDF on 2026-11-21. The paper
+  studies defects reported in closed issues and merged pull requests of 40
+  agentic-AI repositories (234 of the 385 sampled faults come from
+  frameworks, 75 from libraries, 39 from tools, 37 from applications). It
+  does not study what a coding agent does on a user's task, so its
+  categories are evidence about faults in agent software and only
+  indirect evidence about SAICA failure modes.

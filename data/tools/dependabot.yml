@@ -11,7 +11,9 @@ description: >
   graduated-HITL even though scanning itself is autonomous.
 
 first_released: 2015-05-26
-last_updated: 2026-04-15
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: github
@@ -72,5 +74,5 @@ inclusion_rationale: >
   GitHub, which makes it the most-deployed mitigation for stale dependencies
   in practice. Complements Renovate (same cell, more configurable) and
   context-hub (pre_generation prevention via fresh docs).
-stars: 5546
-stars_updated_at: '2026-04-23'
+stars: 5860
+stars_updated_at: '2026-11-21'

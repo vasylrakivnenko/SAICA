@@ -7,7 +7,9 @@ description: >
   enforcement across providers. Benchmarked as significantly faster than
   LiteLLM for high-throughput deployments.
 first_released: '2025-03-19'
-last_updated: '2026-04-23'
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: experimental
 published_by: maxim-hq
 repository_url: https://github.com/maximhq/bifrost
@@ -29,8 +31,8 @@ implements_techniques:
   - rate-limits
   - guardrails
   - spend-caps
-stars: 4209
-stars_updated_at: '2026-04-23'
+stars: 9944
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Gateway cell of prevention: enforces runtime policy (rate limit, PII filter,
   provider failover) as a reverse proxy in front of LLM providers.

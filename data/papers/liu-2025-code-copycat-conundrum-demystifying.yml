@@ -9,13 +9,14 @@ authors:
   - Bingxu An
   - Zhao Wei
   - Yong Xu
-  - Fang Zou
-  - Xing Peng
+  - Fangming Zou
+  - Xin Peng
   - Yiling Lou
 year: 2025
 title: "Code Copycat Conundrum: Demystifying Repetition in LLM-based Code Generation"
 venue: arXiv
 arxiv_id: "2504.12608"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2504.12608"
 url: https://www.semanticscholar.org/paper/9abb51ba135ccec7902d06777efc2f60ecfe262f
 semantic_scholar_id: "9abb51ba135ccec7902d06777efc2f60ecfe262f"
@@ -51,6 +52,7 @@ relevance_tags:
   - failure-mode-taxonomy
   - benchmark
   - empirical
+provenance: s2-derived
 notes: >
   First empirical study of code repetition across 19 SOTA code LLMs on three
   benchmarks; produces a 20-pattern taxonomy of repetition at character,

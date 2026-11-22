@@ -1,13 +1,14 @@
 id: santos-2025-decoding-configuration-ai-coding
 authors:
   - Helio Victor F. Santos
-  - V. Costa
-  - João Eduardo Montandon
-  - Marco Túlio Valente
+  - Vitor Costa
+  - Joao Eduardo Montandon
+  - Marco Tulio Valente
 year: 2025
 title: "Decoding the Configuration of AI Coding Agents: Insights from Claude Code Projects"
 venue: arXiv
 arxiv_id: "2511.09268"
+arxiv_version: "v2"
 doi: "10.48550/arXiv.2511.09268"
 url: https://www.semanticscholar.org/paper/218bfac4d245f01e1d01868e6ae3ae56d741fd27
 semantic_scholar_id: "218bfac4d245f01e1d01868e6ae3ae56d741fd27"
@@ -36,6 +37,7 @@ relevance_tags:
   - coding-agent
   - agentic-ai
   - empirical
+provenance: s2-derived
 notes: >
   Empirical study of 328 configuration files from public Claude Code projects,
   analyzing the software-engineering concerns they encode (architectural

@@ -8,6 +8,8 @@ description: >
   logic_error (which is about the initial bug itself) and from
   context_pollution (which is about session-level state drift rather than
   error-recovery compounding).
+  This mode is a tag, not an exclusive class: one failure can carry several
+  modes (see related_modes).
 
 aliases:
   - recovery-spiral
@@ -28,13 +30,3 @@ detection_signals:
   - Error messages change category across attempts (e.g., ImportError -> TypeError -> AttributeError).
   - Same file is touched N times in rapid succession with diverging diffs.
   - Test pass count decreases monotonically after iteration 2.
-
-crosswalks:
-  - taxonomy: daplab-9-patterns
-    external_id: DAP-04
-    confidence: exact
-    note: DAPLab "Cascading Error Recovery" is the direct counterpart.
-  - taxonomy: mast
-    external_id: FM-1.3
-    confidence: related
-    note: MAST "Step repetition" shows up in recovery spirals, but it is redoing completed work, not fixes that add new errors.

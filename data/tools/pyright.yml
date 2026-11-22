@@ -11,7 +11,9 @@ description: >
   dedicated `pyrightconfig.json`.
 
 first_released: 2019-03-29
-last_updated: 2026-04-15
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: microsoft
@@ -52,6 +54,8 @@ openssf_scorecard_score:
 
 cited_in: []
 documented_in: []
+evaluated_on:
+  - saica-bench-2026-11
 
 supervises_targets:
   - python
@@ -66,5 +70,5 @@ inclusion_rationale: >
 editorial_notes: >
   Added 2026-05-01 to fill the pyproject `[tool.*]` detection path so
   the audit no longer reports pyright as an unknown tool.
-stars: 14000
-stars_updated_at: '2026-04-23'
+stars: 15755
+stars_updated_at: '2026-11-21'

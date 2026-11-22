@@ -8,6 +8,7 @@ year: 2026
 title: "Security Considerations for Artificial Intelligence Agents"
 venue: arXiv
 arxiv_id: "2603.12230"
+arxiv_version: "v2"
 url: https://www.semanticscholar.org/paper/91abd24806296eb10748aec15af67f4ee0b43ee1
 semantic_scholar_id: "91abd24806296eb10748aec15af67f4ee0b43ee1"
 abstract: >
@@ -40,6 +41,7 @@ relevance_tags:
   - agentic-ai
   - benchmark
   - guardrails
+provenance: s2-derived
 notes: >
   Lightly-adapted version of Perplexity's response to NIST/CAISI RFI 2025-0035
   on frontier AI agent security. Maps principal attack surfaces across tools,

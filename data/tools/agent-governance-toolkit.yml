@@ -7,7 +7,9 @@ description: >
   policy engine, execution audit, and approval workflows. Designed as a
   template for enterprise deployments rather than a drop-in library.
 first_released: '2026-03-02'
-last_updated: '2026-04-23'
+last_updated: 2026-11-21
+upstream_pushed_at: 2026-11-21
+last_reviewed: 2026-11-21
 maturity_status: experimental
 published_by: microsoft
 repository_url: https://github.com/microsoft/agent-governance-toolkit
@@ -32,8 +34,8 @@ implements_techniques:
   - policy-engine
   - execution-audit
   - approval-workflows
-stars: 1177
-stars_updated_at: '2026-04-23'
+stars: 6590
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Enterprise governance cell: layers zero-trust identity and policy-engine
   primitives onto agent deployments, complementing runtime guardrails with

@@ -2,18 +2,19 @@ id: xu-2025-ckgfuzzer
 authors:
   - Hanxiang Xu
   - Wei Ma
-  - Ti Zhou
+  - Ting Zhou
   - Yanjie Zhao
   - Kai Chen
   - Qiang Hu
   - Yang Liu
   - Haoyu Wang
-year: 2025
+year: 2024
 title: "CKGFuzzer: LLM-Based Fuzz Driver Generation Enhanced By Code Knowledge Graph"
 venue: "ICSE Companion 2025 (IEEE/ACM 47th ICSE-Companion)"
 url: https://arxiv.org/abs/2411.11532
 doi: "10.1109/ICSE-Companion66252.2025.00079"
 arxiv_id: "2411.11532"
+arxiv_version: "v3"
 semantic_scholar_id: "23b41a14d8d3496f000bfe01a7f0fdee3fdbc7b4"
 citation_count: 16
 tldr: >
@@ -28,6 +29,7 @@ relevance_tags:
   - security
   - agent-tool
   - execution-based-verification
+provenance: hand-curated
 notes: >
   Must-cite. Concrete precedent for "code knowledge graph" as a supervision
   substrate — directly relevant to SAICA-KG's positioning as a KG over

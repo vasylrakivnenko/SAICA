@@ -8,7 +8,9 @@ description: >
   integration with Logfire.
 
 first_released: 2024-10-01
-last_updated: 2026-03-15
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: stable
 
 published_by: pydantic
@@ -50,5 +52,5 @@ inclusion_rationale: >
   Occupies the detection × post_generation × fully_autonomous cell with a
   concrete implementation of validator-retry. Well-known, widely-adopted
   reference point.
-stars: 16567
-stars_updated_at: '2026-04-23'
+stars: 21329
+stars_updated_at: '2026-11-21'

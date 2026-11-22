@@ -1,50 +1,117 @@
 id: daplab-9-patterns
 name: "9 Critical Failure Patterns of Coding Agents"
-owner: Columbia DAPLab (Reya Vir and collaborators)
+owner: "Columbia University DAPLab (blog post by Reya Vir)"
 version: "2026-01"
 first_published: 2026-01-08
 url: https://daplab.cs.columbia.edu/general/2026/01/08/9-critical-failure-patterns-of-coding-agents.html
-license: "Blog post; attribution requested"
+license: "Blog post; no licence is stated on the page (checked 2026-11-21)"
+verified_against_source: 2026-11-21
 scope: >
-  Empirical failure patterns observed across 15+ applications and 5
-  state-of-the-art coding agents (Claude Code, Cline, Cursor, v0, Replit).
+  Nine failure patterns that the authors saw while building 15+ applications
+  with five coding agents and vibe-coding tools (Claude, Cline, Cursor, v0,
+  Replit; testing as of November 2025). The post says it documented
+  "hundreds of failures" during development and grouped them into the nine
+  patterns. It is a blog post about building web applications, not a
+  peer-reviewed study, and it gives no counts per pattern.
 
 categories:
   - external_id: DAP-01
-    label: Incomplete Task Execution
-    description: Agent claims completion while key subtasks remain undone.
+    label: "Presentation & UI Grounding Mismatch"
+    description: >
+      "Agents struggle to translate visual requests into code." They cannot
+      see the interface, so requests such as moving a button, resizing a
+      component or aligning items often give layouts that do not match what
+      the user asked for. Example in the post: a calendar that should be a
+      grid is shown as one vertical line.
   - external_id: DAP-02
-    label: Fabricated References
-    description: Agent emits code referencing non-existent functions or packages.
+    label: "State Management Failures"
+    description: >
+      The agent fails to keep the application's in-memory state correct
+      (cart contents, list order, the current step of a flow), "often fails
+      to manage shared state between components when refactoring" and
+      struggles to decide what state to store. Example: a drag-and-drop
+      reorder that updates only part of the list.
   - external_id: DAP-03
-    label: Stale API Usage
-    description: Agent uses deprecated or removed APIs.
+    label: "Business Logic Mismatch"
+    description: >
+      Agents "often fail to correctly implement" the rules, permissions and
+      calculations of the use case: "code that runs without errors, but it
+      produces the wrong output because the underlying logic is flawed."
+      Example: a 10% discount applied per item instead of to the whole cart.
   - external_id: DAP-04
-    label: Cascading Error Recovery
-    description: Agent's fix attempts introduce new errors that compound.
+    label: "Data Management Errors"
+    description: >
+      Agents "struggle with data logic and fail to understand the data
+      model (even one it generated itself!)". The lack of schema awareness
+      leads to redundant columns or a schema that is not updated when new
+      prompts arrive. Example: passing the wrong record id to an update.
   - external_id: DAP-05
-    label: Context Window Overflow
-    description: Important context is truncated; agent drifts.
+    label: "API & External Service Integration Failures"
+    description: >
+      Agents "frequently fail to call APIs correctly". The agent may prefer
+      code that appears to change the UI over code that works, and "may
+      hallucinate fake inputs like environment variables or API keys
+      instead of asking for the real values". Example: a feature built on a
+      placeholder key, so the call fails and a hard-coded response is shown.
   - external_id: DAP-06
-    label: Tool Misinvocation
-    description: Correct tool, wrong arguments or wrong sequence.
+    label: "Security Vulnerabilities"
+    description: >
+      "Agents often introduce security vulnerabilities – even basic ones."
+      They lack an understanding of data sensitivity and access control and
+      "frequently expose sensitive data like API keys" or get access
+      control wrong. Example: answers from a private admin codebase given
+      to regular users.
   - external_id: DAP-07
-    label: Silent Test-Passing Workaround
-    description: Agent modifies tests or test harness to mask failure.
+    label: "Repeated Code"
+    description: >
+      "Agents often write repeated code, adding duplicate functions with
+      very similar logic rather than abstracting it." Example: the same API
+      set-up code copied into two fetch functions instead of a shared
+      helper.
   - external_id: DAP-08
-    label: Destructive Action
-    description: Agent executes rm/force-push/commit bypass without human approval.
+    label: "Codebase Awareness & Refactoring Issues"
+    description: >
+      "Agents lose context in larger projects": as files are added the
+      agent loses track of the architecture and "may mistakenly edit the
+      wrong component or introduce breaking changes". As a by-product,
+      agents "often re-implement an algorithm from scratch, rather than
+      using a well-established software package". Example: a hand-written
+      Levenshtein distance instead of importing the editdistance library.
   - external_id: DAP-09
-    label: Goal Drift
-    description: Agent's working goal diverges from the user's stated goal.
+    label: "Exception & Error Handling"
+    description: >
+      "The agent prioritizes execution over correctness": it adds "just
+      enough error handling so that the app runs end-to-end without
+      crashing, but fails to inform the user when things go wrong".
+      Example: a caught error logged only to the developer console while
+      the user sees a stuck "Generating…" message.
 
 notes: >
-  Category labels paraphrased for seed. Verify against the original DAPLab
-  post before v0.1 release. Reya Vir is the top co-author candidate identified
-  by the landscape agent.
+  Rebuilt on 2026-11-21 from the live post (HTTP 200, published 2026-01-08)
+  and checked against the earliest Wayback Machine capture (2026-01-17),
+  which lists the same nine headings. Labels are the post's own headings;
+  quoted text in the descriptions is copied from the post. The ids DAP-01
+  to DAP-09 are SAICA-KG's, formed from the post's own numbering 1 to 9;
+  the post publishes no identifiers.
+
+  Retraction. Until 2026-11-21 this file held nine labels that are not in
+  the post: Incomplete Task Execution, Fabricated References, Stale API
+  Usage, Cascading Error Recovery, Context Window Overflow, Tool
+  Misinvocation, Silent Test-Passing Workaround, Destructive Action and
+  Goal Drift. The file's own note called them "paraphrased for seed" and
+  asked for a check that was not done. The post does not describe agents
+  editing tests,
+  running destructive commands, claiming completion with work undone or
+  fix attempts that add new errors. The same ids therefore now name
+  different, real patterns; anything that cited an old DAP id by meaning
+  must be re-read. The correction was first made on 2026-08-18 (commit
+  00422e2) and was lost when the branch was reset on 2026-11-19. Five
+  incident nodes built on the invented labels were retracted; see
+  data/TOMBSTONES.yml and archive/retracted-incidents/README.md.
 
 inclusion_rationale: >
-  Closest spiritual sibling to SAICA-KG — an empirical classification of
-  coding-agent failures. Not a registry and not a KG, which is exactly the
-  gap SAICA-KG fills. Crosswalks from DAPLab patterns to SAICA-KG FailureMode
-  tags are a high-value day-1 artifact.
+  A first-hand account of where coding agents fail when building complete
+  applications. Its patterns are about application quality (UI, state,
+  business rules, data model, integrations), so only some of them have a
+  counterpart among the SAICA failure modes; data/crosswalks/daplab-to-saica.yml
+  lists which and gives a reason for each one that has none.

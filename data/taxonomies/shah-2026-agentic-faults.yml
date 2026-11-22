@@ -1,164 +1,446 @@
 id: shah-2026-agentic-faults
 name: "Characterizing Faults in Agentic AI: A Taxonomy of Types, Symptoms, and Root Causes"
-owner: Shah et al. (arXiv:2603.06847)
-version: "2026-03"
+owner: "Shah, Morovati, Rahman, Khomh (Dalhousie University; Polytechnique Montréal)"
+version: "arXiv v2 (2026-05-07)"
 first_published: 2026-03-06
+last_updated: 2026-05-07
 url: https://arxiv.org/abs/2603.06847
-license: "arXiv preprint; CC-BY"
+license: "arXiv preprint, CC BY 4.0"
 paper_id: shah-2026-characterizing-faults
+verified_against_source: 2026-11-21
 scope: >
-  Grounded-theory taxonomy of faults in agentic AI systems, derived from
-  13,602 issues and PRs across 40 open-source agentic-AI repositories, with
-  stratified sampling to 385 faults and developer-study validation (n=145).
-  Three parallel taxonomies: fault types (5 dimensions, 13 major categories,
-  37 fault subcategories); 13 symptom classes; 12 root-cause categories.
-  This is the empirical corpus SAICA-KG uses for its v0.1 back-test.
+  Taxonomy of faults in agentic AI software, built from 13,602 closed
+  issues and merged pull requests in 40 open-source repositories; 385
+  faults were sampled and coded by hand, and 145 practitioners rated the
+  result. Version 2 of the paper has three lists: 34 fault types in 14
+  categories and four dimensions (Figure 2), 12 symptom categories
+  (Table 1) and 12 root-cause categories (Table 2). The unit of study is a
+  defect in the code of an agent framework, library, tool or application.
+  It is not a failure of a coding agent on a user's task.
 
 categories:
-  # --- High-level fault dimensions ---
+  # --- Four dimensions (Figure 2) ---
   - external_id: SHAH-DIM-01
-    label: Agent Cognition and Orchestration
+    label: "I. Agent Reasoning & Control"
     description: >
-      Failures in cognitive architecture and control flows unique to agentic
-      systems (83 faults in the sample). Covers LLM integration and agent
-      lifecycle/state.
+      86 faults. Faults in the agent's own reasoning and control flow: the
+      LLM-driven logic that decides, iterates and updates state across steps.
   - external_id: SHAH-DIM-02
-    label: Tooling, Integration, and Actuation
+    label: "II. Context & Memory"
     description: >
-      Defects in tool invocation and external-system interaction (66 faults).
-      Covers API usage, external connectivity, resource manipulation,
-      coordination, and observability of tool calls.
+      67 faults. Faults in how agents take in information, keep context
+      artefacts and interpret mixed inputs (model text next to code, files or
+      database records).
   - external_id: SHAH-DIM-03
-    label: Perception, Context, and Memory
+    label: "III. Tooling, Integration & Actuation"
     description: >
-      Faults in information ingestion, context preservation, and input
-      interpretation (72 faults). Covers persistence and input-interpretation
-      logic.
+      62 faults. Faults that arise when agents call tools, APIs and external
+      systems, whose interfaces are strict while the agent's reasoning is not.
   - external_id: SHAH-DIM-04
-    label: Runtime and Environment Grounding
+    label: "IV. System Infrastructure & Reliability"
     description: >
-      Execution environment, dependency stack, and platform-constraint
-      mismatches (87 faults). The single largest fault dimension by count,
-      dominated by dependency management.
-  - external_id: SHAH-DIM-05
-    label: System Reliability and Observability
-    description: >
-      Robustness deficiencies and diagnostic challenges in autonomous systems
-      (67 faults). Covers error recovery, UI/visualization, and documentation.
+      155 faults. System-level faults in the runtime environment, dependencies
+      and operational tooling. The paper notes they are "not intrinsic to
+      agent reasoning or decision-making".
 
-  # --- 13 major fault categories ---
-  - external_id: SHAH-MAJ-01
-    label: LLM Integration Faults
-    description: Faults in how the agent integrates with its LLM (45 faults).
-    parent_id: SHAH-DIM-01
-  - external_id: SHAH-MAJ-02
-    label: Agent Lifecycle and State
-    description: Faults in agent startup, execution, termination, and state tracking (38 faults).
-    parent_id: SHAH-DIM-01
-  - external_id: SHAH-MAJ-03
-    label: Tool Execution and API Usage
-    description: Incorrect or malformed tool/API invocations (17 faults).
-    parent_id: SHAH-DIM-02
-  - external_id: SHAH-MAJ-04
-    label: External Connectivity and Access
-    description: Connection setup and authentication failures (19 faults).
-    parent_id: SHAH-DIM-02
-  - external_id: SHAH-MAJ-05
-    label: Resource Manipulation
-    description: Resource-handling and database-misconfiguration faults (16 faults).
-    parent_id: SHAH-DIM-02
-  - external_id: SHAH-MAJ-06
-    label: System Coordination
-    description: Synchronization errors across components or agents (6 faults).
-    parent_id: SHAH-DIM-02
-  - external_id: SHAH-MAJ-07
-    label: System Observability
-    description: Logging or telemetry defects (8 faults).
-    parent_id: SHAH-DIM-02
-  - external_id: SHAH-MAJ-08
-    label: Context and State Persistence
-    description: Memory-persistence and state-load/save failures (12 faults).
-    parent_id: SHAH-DIM-03
-  - external_id: SHAH-MAJ-09
-    label: Input Interpretation and Logic
-    description: Type handling, validation, encoding, and logic/constraint violations (60 faults).
-    parent_id: SHAH-DIM-03
-  - external_id: SHAH-MAJ-10
-    label: Dependency Management
+  # --- 14 categories (parent = dimension) ---
+  - external_id: SHAH-CAT-01
+    label: "LLM Interaction"
     description: >
-      Dependency specification, import resolution, installation, and package
-      resolver/manager failures (67 faults). The single largest major category.
+      48 faults. Faults at the interface between an agent framework and an LLM
+      provider: wrong model or provider configuration, incompatible API usage,
+      inconsistent token accounting, errors in context-window handling.
+    parent_id: SHAH-DIM-01
+  - external_id: SHAH-CAT-02
+    label: "Agent Lifecycle and State"
+    description: >
+      38 faults. Faults in the execution lifecycle of an agent: incorrect
+      scheduling, improper task delegation, inconsistent state transitions,
+      defective termination logic. Agents may skip tasks, repeat actions, lose
+      intermediate state or loop.
+    parent_id: SHAH-DIM-01
+  - external_id: SHAH-CAT-03
+    label: "Memory Management"
+    description: >
+      8 faults. Faults in the code that stores or retrieves context artefacts:
+      serialization, timestamp handling, persistent storage.
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-CAT-04
+    label: "Input Interpretation"
+    description: >
+      59 faults. Inputs to the agent are parsed, validated, transformed or
+      interpreted incorrectly: wrong assumptions about structure or type,
+      flawed parsing, inconsistent encodings, missing validation.
+    parent_id: SHAH-DIM-02
+  - external_id: SHAH-CAT-05
+    label: "Tool Invocation"
+    description: >
+      11 faults. The agent invokes a defective tool or invokes a tool
+      incorrectly: API-contract violations, unsupported operations, mismatched
+      parameters.
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-CAT-06
+    label: "External Access"
+    description: >
+      19 faults. The agent cannot establish or keep access to an external
+      service: invalid endpoints, misconfigured connections, poor handling of
+      credentials or permissions.
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-CAT-07
+    label: "Resource Interaction"
+    description: >
+      21 faults. Faults around shared resources needed for tool execution:
+      invalid resource paths, wrong filesystem assumptions, misconfigured
+      storage or databases.
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-CAT-08
+    label: "System Coordination"
+    description: >
+      6 faults. Poor coordination of concurrent or asynchronous execution:
+      race conditions and incoherent output.
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-CAT-09
+    label: "Execution Monitoring"
+    description: >
+      5 faults. Logging, tracing or metrics are missing or wrong, so a failure
+      cannot be reconstructed.
+    parent_id: SHAH-DIM-03
+  - external_id: SHAH-CAT-10
+    label: "Dependency & Environment Management"
+    description: >
+      72 faults. Defects in specifying, resolving or installing software
+      dependencies: incompatible versions, missing packages, inconsistent
+      environments, specifications left outdated by upstream changes. The
+      largest category.
     parent_id: SHAH-DIM-04
-  - external_id: SHAH-MAJ-11
-    label: Platform Compatibility
-    description: Environment, platform, API, and integration compatibility mismatches (20 faults).
+  - external_id: SHAH-CAT-11
+    label: "Platform & Integration Compatibility"
+    description: >
+      15 faults. Assumptions about the platform do not hold at run time:
+      operating system, CPU architecture, filesystem limits, system utilities.
     parent_id: SHAH-DIM-04
-  - external_id: SHAH-MAJ-12
-    label: Robustness and Error Recovery
-    description: Exception-handling and implementation defects (49 faults).
-    parent_id: SHAH-DIM-05
-  - external_id: SHAH-MAJ-13
-    label: UI, Visualization, and Documentation Defects
-    description: UI defects (13 faults) and documentation defects (5 faults).
-    parent_id: SHAH-DIM-05
+  - external_id: SHAH-CAT-12
+    label: "Failure Handling & Implementation Robustness"
+    description: >
+      47 faults. Faults in detecting, propagating and handling failures:
+      suppressed exceptions, wrongly propagated error signals, recovery that
+      does not work. They show up as "silent execution failures, incomplete
+      task execution, or systems continuing operation with erroneous internal
+      states".
+    parent_id: SHAH-DIM-04
+  - external_id: SHAH-CAT-13
+    label: "User Interface Defects"
+    description: >
+      13 faults. User-facing interfaces (dashboards, visualisations) show
+      system state or execution context incorrectly.
+    parent_id: SHAH-DIM-04
+  - external_id: SHAH-CAT-14
+    label: "Documentation Issues"
+    description: >
+      8 faults. Documentation describes behaviour, configuration or usage
+      incorrectly.
+    parent_id: SHAH-DIM-04
 
-  # --- Root causes (12 dominant causes identified by Apriori mining) ---
+  # --- 34 fault types (parent = category). The paper gives a count for
+  # each in Figure 2 and no separate definition. ---
+  - external_id: SHAH-FT-01
+    label: "LLM Configuration Error"
+    description: "13 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-01
+  - external_id: SHAH-FT-02
+    label: "LLM Invocation Error"
+    description: "28 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-01
+  - external_id: SHAH-FT-03
+    label: "Token Budget Error"
+    description: "6 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-01
+  - external_id: SHAH-FT-04
+    label: "LLM Authentication Failure"
+    description: "1 fault in the sample (Figure 2)."
+    parent_id: SHAH-CAT-01
+  - external_id: SHAH-FT-05
+    label: "Agent Step Execution Error"
+    description: "26 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-02
+  - external_id: SHAH-FT-06
+    label: "Agent State Transition Error"
+    description: "9 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-02
+  - external_id: SHAH-FT-07
+    label: "Agent Termination Error"
+    description: "3 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-02
+  - external_id: SHAH-FT-08
+    label: "Memory Persistence Failure"
+    description: "8 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-03
+  - external_id: SHAH-FT-09
+    label: "Structured Data Error"
+    description: "46 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-04
+  - external_id: SHAH-FT-10
+    label: "Constraint Violation"
+    description: "7 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-04
+  - external_id: SHAH-FT-11
+    label: "Representation Encoding Error"
+    description: "4 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-04
+  - external_id: SHAH-FT-12
+    label: "Input Validation Error"
+    description: "2 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-04
+  - external_id: SHAH-FT-13
+    label: "Tool Invocation Error"
+    description: "9 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-05
+  - external_id: SHAH-FT-14
+    label: "Tool Configuration Error"
+    description: "2 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-05
+  - external_id: SHAH-FT-15
+    label: "External Connection Error"
+    description: "6 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-06
+  - external_id: SHAH-FT-16
+    label: "External Authentication Failure"
+    description: "8 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-06
+  - external_id: SHAH-FT-17
+    label: "External Authorization Error"
+    description: "5 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-06
+  - external_id: SHAH-FT-18
+    label: "Resource Access Error"
+    description: "16 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-07
+  - external_id: SHAH-FT-19
+    label: "Storage Setup Error"
+    description: "5 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-07
+  - external_id: SHAH-FT-20
+    label: "Synchronization Error"
+    description: "6 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-08
+  - external_id: SHAH-FT-21
+    label: "Execution Monitoring Failure"
+    description: "5 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-09
+  - external_id: SHAH-FT-22
+    label: "Dependency Compatibility Error"
+    description: "34 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-10
+  - external_id: SHAH-FT-23
+    label: "Module Import Failure"
+    description: "15 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-10
+  - external_id: SHAH-FT-24
+    label: "Dependency Installation Failure"
+    description: "14 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-10
+  - external_id: SHAH-FT-25
+    label: "Package Resolver Error"
+    description: "7 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-10
+  - external_id: SHAH-FT-26
+    label: "Environment Configuration Error"
+    description: "2 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-10
+  - external_id: SHAH-FT-27
+    label: "Platform Capability Mismatch"
+    description: "8 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-11
+  - external_id: SHAH-FT-28
+    label: "Unsupported Platform"
+    description: "3 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-11
+  - external_id: SHAH-FT-29
+    label: "Component Integration Error"
+    description: "3 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-11
+  - external_id: SHAH-FT-30
+    label: "Missing Function/Interface"
+    description: "1 fault in the sample (Figure 2)."
+    parent_id: SHAH-CAT-11
+  - external_id: SHAH-FT-31
+    label: "Exception Handling Failure"
+    description: "27 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-12
+  - external_id: SHAH-FT-32
+    label: "Implementation Logic Error"
+    description: "20 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-12
+  - external_id: SHAH-FT-33
+    label: "UI Rendering Defect"
+    description: "13 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-13
+  - external_id: SHAH-FT-34
+    label: "Documentation Defect"
+    description: "8 faults in the sample (Figure 2)."
+    parent_id: SHAH-CAT-14
+
+  # --- 12 symptom categories (Table 1; a separate list, no parent) ---
+  - external_id: SHAH-SYM-01
+    label: "Data and Validation Errors"
+    description: >
+      80 occurrences (22.7%). Intermediate artefacts passed between components
+      cannot be interpreted: parsing failures, schema validation exceptions,
+      malformed values.
+  - external_id: SHAH-SYM-02
+    label: "Runtime Execution Errors"
+    description: >
+      68 occurrences (19.3%). Agent workflows stop unexpectedly or halt:
+      interrupted workflows, failed steps, incomplete reasoning loops.
+  - external_id: SHAH-SYM-03
+    label: "Unhandled Exceptions"
+    description: >
+      45 occurrences (12.8%). Runtime errors propagate without being caught:
+      abrupt termination with a stack trace.
+  - external_id: SHAH-SYM-04
+    label: "Build Errors"
+    description: >
+      32 occurrences (9.1%). Components cannot be compiled or packaged:
+      compilation failures, unresolved imports, CI failures.
+  - external_id: SHAH-SYM-05
+    label: "Dependency Installation Errors"
+    description: >
+      28 occurrences (8.0%). Required libraries cannot be installed:
+      unresolved dependency trees, incompatible versions, missing modules.
+  - external_id: SHAH-SYM-06
+    label: "Agent Behaviour Anomalies"
+    description: >
+      24 occurrences (6.8%). The agent's actions or outputs deviate from the
+      planned workflow: repeated reasoning steps, role violations, loss of
+      conversational context, coordination breakdowns, often without a crash.
+  - external_id: SHAH-SYM-07
+    label: "LLM Interaction Errors"
+    description: >
+      22 occurrences (6.2%). The agent gets no response from its model:
+      rejected API calls, unsupported model invocations, authentication
+      failures, context overflows.
+  - external_id: SHAH-SYM-08
+    label: "Network Connectivity Errors"
+    description: >
+      17 occurrences (4.8%). The agent cannot reach an external service:
+      timeouts, unreachable endpoints, rejected requests.
+  - external_id: SHAH-SYM-09
+    label: "User Interface Errors"
+    description: >
+      15 occurrences (4.3%). Information about the agent's execution is shown
+      incorrectly or incompletely.
+  - external_id: SHAH-SYM-10
+    label: "Tool Invocation Errors"
+    description: >
+      9 occurrences (2.6%). A call to an external function or service fails:
+      runtime errors, interrupted steps, unavailable capabilities.
+  - external_id: SHAH-SYM-11
+    label: "File and Resource Access Errors"
+    description: >
+      9 occurrences (2.6%). The agent cannot read or write an artefact it
+      needs: file not found, read failures, failed saves.
+  - external_id: SHAH-SYM-12
+    label: "Concurrency Errors"
+    description: >
+      3 occurrences (0.9%). Inconsistent output order, merged responses or
+      non-deterministic behaviour when components run at the same time.
+
+  # --- 12 root-cause categories (Table 2; a separate list, no parent) ---
   - external_id: SHAH-RC-01
-    label: Dependency and Integration Failures
-    description: Contract violations between probabilistic artifacts and deterministic interfaces (19.5%).
+    label: "Data Schema Mismatches"
+    description: >
+      101 occurrences (28.0%). Loosely structured producers (LLM outputs, tool
+      return values) meet strictly typed consumers (parsers, validators) under
+      inconsistent assumptions about data representation.
   - external_id: SHAH-RC-02
-    label: Data and Type Handling Failures
-    description: Type mismatches and validation gaps (17.6%).
+    label: "Dependency Drift"
+    description: >
+      79 occurrences (21.9%). External libraries, SDKs and runtimes change
+      independently: they "introduce breaking changes, deprecate interfaces,
+      or alter platform support", which invalidates assumptions built into the
+      framework.
   - external_id: SHAH-RC-03
-    label: Incorrect Token Management
-    description: Tracking and counting errors affecting context windows.
+    label: "State Management Complexity"
+    description: >
+      51 occurrences (14.1%). Execution state (context windows, tool traces,
+      memory structures) is read and written by several components that come
+      to interpret or update it inconsistently.
   - external_id: SHAH-RC-04
-    label: Authentication and Credential Issues
-    description: Fragile token refresh and credential-expiration handling.
+    label: "Model Interface Instability"
+    description: >
+      42 occurrences (11.6%). Assumptions about a model provider's API
+      parameters, response structures and supported behaviour are broken by
+      API changes.
   - external_id: SHAH-RC-05
-    label: Datetime Conversion Errors
-    description: Inappropriate temporal-value transformations.
+    label: "Error Propagation Failures"
+    description: >
+      29 occurrences (8.0%). Errors from LLM calls, tools or external services
+      cross several layers without proper handling, so information about the
+      original failure is lost.
   - external_id: SHAH-RC-06
-    label: State Management Defects
-    description: Inconsistent internal state across interactions.
+    label: "Configuration Ambiguity"
+    description: >
+      15 occurrences (4.2%). Configuration is assembled from several sources
+      (environment variables, files, constructor arguments, defaults) without
+      a clearly defined or enforced schema.
   - external_id: SHAH-RC-07
-    label: Configuration Inconsistencies
-    description: Wrong defaults and misconfiguration.
+    label: "External API Instability"
+    description: >
+      12 occurrences (3.3%). External APIs change their endpoints,
+      authentication or request and response schemas, and the integration code
+      is not updated in time.
   - external_id: SHAH-RC-08
-    label: API Evolution and Schema Drift
-    description: Incompatibilities from upstream API changes.
+    label: "Architectural Coupling"
+    description: >
+      10 occurrences (2.8%). Tight coupling between components and
+      abstractions inside the framework: small internal changes break
+      components that relied on earlier behaviour.
   - external_id: SHAH-RC-09
-    label: Environment-Level Issues
-    description: Platform-specific constraints and virtual-environment problems.
+    label: "Resource Limit Violations"
+    description: >
+      7 occurrences (1.9%). Implicit assumptions about memory use, payload
+      size, context length or API rate limits are exceeded.
   - external_id: SHAH-RC-10
-    label: Documentation Gaps
-    description: Missing or incorrect configuration guidance.
+    label: "Credential Misconfiguration"
+    description: >
+      5 occurrences (1.4%). Missing, invalid or insufficiently scoped
+      credentials stay undetected until they are used.
   - external_id: SHAH-RC-11
-    label: Exception Suppression
-    description: Swallowed errors reducing observability.
+    label: "Concurrency Issues"
+    description: >
+      5 occurrences (1.4%). Asynchronous or parallel execution over shared
+      mutable state without proper synchronisation.
   - external_id: SHAH-RC-12
-    label: Ecosystem Fragility
-    description: Rapid upstream evolution creating tight-coupling vulnerabilities.
+    label: "Documentation Drift"
+    description: >
+      5 occurrences (1.4%). Outdated documentation: documented usage and
+      actual behaviour diverge.
 
 notes: >
-  Top-level structure (5 dimensions, 13 major categories, 12 root causes) is
-  canonical per the arXiv v1 HTML; the 37 fault subcategories are enumerated
-  in the paper and will be expanded into full category rows as a v0.2 task.
-  Symptom-class and full subcategory labels are pending full-text
-  verification. This taxonomy is the empirical back-test corpus: SAICA-KG's
-  FailureMode axis will be evaluated against whether SHAH-* faults map cleanly
-  into its eight-class FailureMode enum.
+  Rebuilt on 2026-11-21 from the arXiv v2 PDF (2026-05-07): Figure 2 for
+  the fault tree, Table 1 for symptoms, Table 2 and section 3.1.3 for root
+  causes. All 76 labels and all counts were compared with the text of the
+  PDF by script. The ids (SHAH-DIM, SHAH-CAT, SHAH-FT, SHAH-SYM, SHAH-RC)
+  are SAICA-KG's; the paper publishes none. Counts are as printed: the
+  fault tree adds up to 370, Table 1 to 352 and Table 2 to 361, while the
+  sample is 385, and the percentages in the tables use the table totals.
+
+  Version history. Version 1 of the paper (2026-03-06) had a different
+  structure: five dimensions, 13 major categories, 37 fault categories, 13
+  symptom classes and 12 root causes with other names. Until 2026-11-21
+  this file followed v1 for the dimensions and the 13 major categories
+  (ids SHAH-MAJ-01 to -13, now replaced by SHAH-CAT-01 to -14). Its 12
+  root-cause labels (for example "Incorrect Token Management", "Datetime
+  Conversion Errors", "Exception Suppression") matched Table 2 of neither
+  version. The ids SHAH-DIM-01 to -04 and SHAH-RC-01 to -12 are kept but
+  now name the v2 entries, so an old reference by id must be re-read. The
+  same rebuild was first made on 2026-08-18 (commit 4977acf) and was lost
+  in the reset of 2026-11-19.
 
 inclusion_rationale: >
-  Shah et al. 2026 is the single most comprehensive empirical fault
-  characterization for agentic AI to date, with a 385-fault grounded-theory
-  sample across 40 real repos — exactly the scale SAICA-KG needs to argue
-  its FailureMode partition is honest-MECE. Intended crosswalks:
-  SHAH-MAJ-10 (Dependency Management) -> obsolescence + supply_chain_attack;
-  SHAH-MAJ-03 (Tool Execution/API Usage) -> logic_error + fabrication (API);
-  SHAH-MAJ-08 (Context/State Persistence) -> context_pollution;
-  SHAH-MAJ-09 (Input Interpretation/Logic) -> logic_error;
-  SHAH-RC-04 (Auth/Credential) -> security_vulnerability;
-  SHAH-RC-08 (API Schema Drift) -> obsolescence.
-  Coverage ratio against SAICA-KG's FailureMode enum is the v0.1 honest-MECE
-  evidence.
+  The largest hand-coded study of faults in agentic AI software that the KG
+  knows of (385 sampled faults, 40 repositories, 145 practitioners). It
+  shows which SAICA failure modes have a neighbour among the defects
+  developers report in agent software and which do not. It cannot show
+  that the SAICA modes are complete or separate, because it studies
+  software defects, not agent behaviour; see data/crosswalks/shah-to-saica.yml.

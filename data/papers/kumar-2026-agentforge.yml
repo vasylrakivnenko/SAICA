@@ -3,13 +3,14 @@ authors:
   - Rajesh Kumar
   - Waqar Ali
   - Junaid Ahmed
-  - Najmah Ali
+  - Najma Imtiaz Ali
   - Shaban Usman
 year: 2026
 title: "AgentForge: Execution-Grounded Multi-Agent LLM Framework for Autonomous Software Engineering"
 venue: arXiv
 url: https://arxiv.org/abs/2604.13120
 arxiv_id: "2604.13120"
+arxiv_version: "v1"
 semantic_scholar_id: "f019c8a7e42aecaa96ef3c4cbd2ecd3aaaa1ac0c"
 citation_count: 0
 tldr: >
@@ -26,6 +27,7 @@ relevance_tags:
   - coding-agent
   - correction
   - verification
+provenance: hand-curated
 notes: >
   Must-cite. Canonical example of "sandbox as first-class verification"
   multi-agent architecture. Grounds SAICA-KG's correction ControlParadigm

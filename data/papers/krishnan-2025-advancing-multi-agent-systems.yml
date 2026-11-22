@@ -1,10 +1,11 @@
 id: krishnan-2025-advancing-multi-agent-systems
 authors:
-  - N. Krishnan
+  - Naveen Krishnan
 year: 2025
 title: "Advancing Multi-Agent Systems Through Model Context Protocol: Architecture, Implementation, and Applications"
 venue: arXiv
 arxiv_id: "2504.21030"
+arxiv_version: "v1"
 doi: "10.48550/arXiv.2504.21030"
 url: https://www.semanticscholar.org/paper/66098cff05d84454084aa442640c98c076f375f2
 semantic_scholar_id: "66098cff05d84454084aa442640c98c076f375f2"
@@ -38,6 +39,7 @@ tldr: >
 relevance_tags:
   - MCP
   - benchmark
+provenance: s2-derived
 notes: >
   Architectural framework paper proposing standardized context sharing and
   coordination mechanisms over the Model Context Protocol (MCP) for

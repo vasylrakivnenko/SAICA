@@ -7,7 +7,9 @@ description: >
   primitives. Positions the frontend as a first-class supervision layer where
   humans confirm or adjust agent-proposed actions.
 first_released: '2023-06-19'
-last_updated: '2026-04-23'
+last_updated: 2026-11-22
+upstream_pushed_at: 2026-11-22
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: copilotkit
 repository_url: https://github.com/CopilotKit/CopilotKit
@@ -27,8 +29,8 @@ implements_techniques:
   - generative-ui
   - hitl-approval
   - typed-actions
-stars: 30389
-stars_updated_at: '2026-04-23'
+stars: 38863
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
   Frontend-HITL cell: materializes the human-in-the-loop pattern as reusable
   React components, complementing backend guardrails.

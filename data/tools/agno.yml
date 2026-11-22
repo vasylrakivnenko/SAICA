@@ -6,11 +6,13 @@ description: >
   memory and knowledge modules. Canonical Pythonic alternative to
   CrewAI/AutoGen for agent orchestration, with a focus on speed of iteration.
 first_released: '2022-05-04'
-last_updated: '2026-04-23'
+last_updated: 2026-11-20
+upstream_pushed_at: 2026-11-20
+last_reviewed: 2026-11-21
 maturity_status: stable
 published_by: agno-agi
 repository_url: https://github.com/agno-agi/agno
-license: MPL-2.0
+license: Apache-2.0
 control_paradigm: prevention
 temporal_phase: pre_generation
 autonomy_level: fully_autonomous
@@ -29,11 +31,11 @@ implements_techniques:
   - multi-agent
   - memory-modules
   - knowledge-modules
-stars: 39620
-stars_updated_at: '2026-04-23'
+stars: 43253
+stars_updated_at: '2026-11-21'
 inclusion_rationale: >
-  Python multi-agent framework cell. Complements crewai / autogen by a
-  pure-Python + module-plugin design.
+  Python multi-agent framework cell. Complements autogen by a pure-Python +
+  module-plugin design.
 provenance:
   source: bulk-curation-20260423
   ingested_at: '2026-04-23'
