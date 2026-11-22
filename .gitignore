@@ -68,3 +68,4 @@ bench/*/results_backup_*/
 .secrets.toml
 *.secrets.toml
 mcp_config.json
+bench/_runs/

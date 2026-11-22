@@ -547,7 +547,8 @@ function classicFindings(): Array<[string, string]> {
       : ' In no mode is one reviewer clearly ahead of the runner-up: the leaders are tied.',
   ]);
   // 2. the three strongest models that ran everywhere
-  const top3 = OVR.rows.filter((r) => r.type === 'baseline_model' && r.n_modes === n).sort((a, b) => b.avg - a.avg).slice(0, 3);
+  const cheapEverywhere = (r: (typeof OVR.rows)[number]) => Object.values(r.cells).every((c) => c.cost1k <= R.cheap_cost1k);
+  const top3 = OVR.rows.filter((r) => r.type === 'baseline_model' && r.n_modes === n && cheapEverywhere(r)).sort((a, b) => b.avg - a.avg).slice(0, 3);
   if (top3.length === 3) {
     const close = MODES.filter((m) => {
       const js = top3.map((r) => r.cells[m.id]?.j).filter((j): j is number => j != null);
@@ -559,12 +560,19 @@ function classicFindings(): Array<[string, string]> {
       ` Average J: ${top3.map((r) => `${r.tool} ${jr(r.avg)}`).join(', ')}. None costs more than ${money(maxCost)} per 1,000 reviews in any mode.`,
     ]);
   }
-  // 3. the modes under the floor
-  if (HARD.length) {
-    const real = HARD.every((s) => s.m.group === 'natural_agent');
+  // 3. the sets of real agent output
+  const real = CLASSIC.filter((s) => s.m.group === 'natural_agent');
+  if (real.length) {
+    const over = real.map((s) => s.rows.filter((r) => r.j >= FLOOR).length);
+    const ranked = real.map((s) => s.rows.length);
+    const none = real.every((s) => s.m.below_floor);
     out.push([
-      `${countWord(HARD.length)} mode${HARD.length === 1 ? '' : 's'} nobody handles yet: ${andList(HARD.map((s) => `${s.m.name} (best J ${jr(s.best.j)})`))}.`,
-      ` No model, program or judge we ran reaches J ${pct(FLOOR, 0)} there.` + (real ? ` ${HARD.length === 1 ? 'It is' : 'These are'} the only ${HARD.length === 1 ? 'set' : 'sets'} of real agent output; the others have planted or model-written failures.` : ''),
+      none
+        ? `${countWord(real.length)} mode${real.length === 1 ? '' : 's'} nobody handles yet: ${andList(real.map((s) => `${s.m.name} (best J ${jr(s.best.j)})`))}.`
+        : `Real agent output is the hard part: the best reviewer reaches J ${andList(real.map((s) => `${jr(s.best.j)} on ${s.m.name} (${s.best.short})`))}.`,
+      none
+        ? ` No model, program or judge we ran reaches J ${pct(FLOOR, 0)} there. These are the only sets of real agent output; the others have planted or model-written failures.`
+        : ` Reviewers at J ${pct(FLOOR, 0)} or more: ${andList(real.map((s, k) => `${over[k]} of ${ranked[k]} on ${s.m.name}`))}. The other sets have planted or model-written failures.`,
     ]);
   }
   // 4. free programs
