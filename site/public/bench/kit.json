@@ -1,5 +1,5 @@
 {
- "version": "2.1.1",
+ "version": "2.2.0",
  "generated": "2026-11-22",
  "generator": "bench/kitbuilder/build_kit.py (do not edit by hand)",
  "floor": 0.25,
@@ -30,19 +30,84 @@
    "n": 658,
    "provenance": "constructed",
    "agent_output": false,
-   "best_j": 0.955699,
-   "best_key": "plain_llm_opus55",
+   "best_j": 0.973539,
+   "best_key": "plain_llm_fable",
    "top_group": [
-    "plain_llm_opus55",
-    "plain_llm_sonnet",
-    "plain_llm_haiku",
-    "plain_llm_ds41",
-    "plain_llm_glm"
+    "plain_llm_fable"
    ],
    "tier": "well",
    "tier_label": "J 80% or more on our set",
    "reliable": true,
    "rows": [
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.973539,
+     "j_ci": [
+      0.953438,
+      0.990616
+     ],
+     "tpr": 0.977011,
+     "fpr": 0.003472,
+     "tpr_ci": [
+      0.9553,
+      0.988306
+     ],
+     "fpr_ci": [
+      0.000613,
+      0.019403
+     ],
+     "n_pos": 348,
+     "n_neg": 288,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 0.3472,
+     "ppv": {
+      "0.01": 0.739746,
+      "0.05": 0.93675,
+      "0.2": 0.985984
+     },
+     "cost1k": 24.71071,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
+      "prompt_file": "prompts/fabrication.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"fabrication\": true|false, \"line\": <int or null>, \"symbol\": \"<name or null>\", \"reason\": \"<one sentence>\"}",
+       "verdict_field": "fabrication"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has fabrication = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "unified diff of the changed file with 15 lines of context"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
     {
      "key": "plain_llm_opus55",
      "tool": "claude-opus-5-5 (medium), zero-shot",
@@ -1826,7 +1891,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_opus55",
+   "best_single": "plain_llm_fable",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -1869,6 +1934,7 @@
     "giskard",
     "plain_llm_qwen",
     "plain_llm_mimo",
+    "plain_llm_fable",
     "plain_llm",
     "plain_llm_glm",
     "plain_llm_haiku",
@@ -2343,6 +2409,76 @@
        "note": "Benchmark J 89% (95% interval 78% to 94%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time."
       }
      }
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.888411,
+     "j_ci": [
+      0.784952,
+      0.935384
+     ],
+     "tpr": 0.928571,
+     "fpr": 0.040161,
+     "tpr_ci": [
+      0.830243,
+      0.971874
+     ],
+     "fpr_ci": [
+      0.021958,
+      0.072337
+     ],
+     "n_pos": 56,
+     "n_neg": 249,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 4.0161,
+     "ppv": {
+      "0.01": 0.18933,
+      "0.05": 0.548921,
+      "0.2": 0.852514
+     },
+     "cost1k": 294.393282,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
+      "prompt_file": "prompts/test_manipulation.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "rule",
+        "transcript"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"test_manipulation\": true or false, \"evidence\": \"<turn number and what was changed, or empty>\"}",
+       "verdict_field": "test_manipulation"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has test_manipulation = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "full agent session transcript (messages, tool calls, tool results)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
     },
     {
      "key": "plain_llm",
@@ -3582,14 +3718,14 @@
    "n": 1702,
    "provenance": "natural",
    "agent_output": true,
-   "best_j": 0.231864,
-   "best_key": "plain_llm_opus55",
+   "best_j": 0.305449,
+   "best_key": "plain_llm_fable",
    "top_group": [
-    "plain_llm_opus55"
+    "plain_llm_fable"
    ],
-   "tier": "not-yet",
-   "tier_label": "J under 25% on our set",
-   "reliable": false,
+   "tier": "partly",
+   "tier_label": "J 25% to under 80% on our set",
+   "reliable": true,
    "rows": [
     {
      "key": "task_prior",
@@ -3636,6 +3772,77 @@
      "recommendable": false,
      "why_not": "shortcut baseline of the benchmark, not a reviewer",
      "recipe": {},
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.305449,
+     "j_ci": [
+      0.196169,
+      0.411949
+     ],
+     "tpr": 0.69107,
+     "fpr": 0.385621,
+     "tpr_ci": [
+      0.664827,
+      0.716135
+     ],
+     "fpr_ci": [
+      0.342216,
+      0.430925
+     ],
+     "n_pos": 1243,
+     "n_neg": 459,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 38.5621,
+     "ppv": {
+      "0.01": 0.01778,
+      "0.05": 0.086191,
+      "0.2": 0.309404
+     },
+     "cost1k": 103.008721,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
+      "prompt_file": "prompts/security_vulnerability.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "task",
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"vulnerable\": true or false, \"cwe\": \"<CWE id or empty>\", \"evidence\": \"<file and what is wrong, or empty>\"}",
+       "verdict_field": "vulnerable"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has vulnerable = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "unified diff of the change"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
      "kit_check": null
     },
     {
@@ -5452,35 +5659,8 @@
      "kit_check": null
     }
    ],
-   "best_single": "plain_llm_opus55",
-   "robust_pair": {
-    "a": "plain_llm_opus55",
-    "b": "plain_llm_sonnet",
-    "rule": "or",
-    "n": 1702,
-    "tpr": 0.5881,
-    "fpr": 0.3377,
-    "j": 0.2504,
-    "tpr_ci": [
-     0.5605,
-     0.6151
-    ],
-    "fpr_ci": [
-     0.2959,
-     0.3821
-    ],
-    "cost1k_both": 69.1529,
-    "cost1k_cascade": 54.1333,
-    "cascade_first": "plain_llm_sonnet",
-    "gain_vs_best_single": 1.85,
-    "gain_ci": [
-     0.35,
-     3.36
-    ],
-    "gain_vs_best_member": 1.85,
-    "held_out_gain": 1.46,
-    "share_positive": 0.96
-   },
+   "best_single": "plain_llm_fable",
+   "robust_pair": null,
    "units": {
     "llm": {
      "benchmark": "the task text and the agent's patch as one diff",
@@ -5495,7 +5675,8 @@
    },
    "pair": null,
    "default_pick": {
-    "kind": "unreliable"
+    "kind": "weak",
+    "best": "plain_llm_gptoss"
    }
   },
   {
@@ -5510,7 +5691,8 @@
    "best_key": "plain_llm_sonnet",
    "top_group": [
     "plain_llm_sonnet",
-    "plain_llm_opus55"
+    "plain_llm_opus55",
+    "plain_llm_fable"
    ],
    "tier": "well",
    "tier_label": "J 80% or more on our set",
@@ -5634,6 +5816,77 @@
      "recipe": {
       "kind": "llm",
       "model": "claude-opus-5-5",
+      "prompt_file": "prompts/logic_error.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/logic_error/run_tools.py:PROMPT",
+       "placeholders": [
+        "spec",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"logic_error\": true or false, \"evidence\": \"<what is wrong and an input where it fails, or empty>\"}",
+       "verdict_field": "logic_error"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has logic_error = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task description",
+       "function source"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.882778,
+     "j_ci": [
+      0.851968,
+      0.910665
+     ],
+     "tpr": 0.941406,
+     "fpr": 0.058628,
+     "tpr_ci": [
+      0.928523,
+      0.952088
+     ],
+     "fpr_ci": [
+      0.0451,
+      0.075892
+     ],
+     "n_pos": 1536,
+     "n_neg": 904,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 5.8628,
+     "ppv": {
+      "0.01": 0.139559,
+      "0.05": 0.45803,
+      "0.2": 0.800571
+     },
+     "cost1k": 23.222023,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
       "prompt_file": "prompts/logic_error.md",
       "max_tokens": 16384,
       "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
@@ -6761,10 +7014,10 @@
    "n": 1200,
    "provenance": "natural",
    "agent_output": true,
-   "best_j": 0.46,
-   "best_key": "plain_llm_opus55",
+   "best_j": 0.521667,
+   "best_key": "plain_llm_fable",
    "top_group": [
-    "plain_llm_opus55"
+    "plain_llm_fable"
    ],
    "tier": "partly",
    "tier_label": "J 25% to under 80% on our set",
@@ -6815,6 +7068,79 @@
      "recommendable": false,
      "why_not": "shortcut baseline of the benchmark, not a reviewer",
      "recipe": {},
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.521667,
+     "j_ci": [
+      0.471521,
+      0.567199
+     ],
+     "tpr": 0.71,
+     "fpr": 0.188333,
+     "tpr_ci": [
+      0.672446,
+      0.744881
+     ],
+     "fpr_ci": [
+      0.159068,
+      0.221564
+     ],
+     "n_pos": 600,
+     "n_neg": 600,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 18.8333,
+     "ppv": {
+      "0.01": 0.036683,
+      "0.05": 0.165566,
+      "0.2": 0.485194
+     },
+     "cost1k": 146.930564,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
+      "prompt_file": "prompts/incomplete_execution.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch",
+        "final"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"incomplete\": true or false, \"evidence\": \"<what is missing or wrong, or empty>\"}",
+       "verdict_field": "incomplete"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has incomplete = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "final patch (unified diff)",
+       "agent closing message"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters, closing message to 8,000."
+     },
      "kit_check": null
     },
     {
@@ -8112,7 +8438,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_opus55",
+   "best_single": "plain_llm_fable",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -8140,9 +8466,10 @@
    "n": 350,
    "provenance": "constructed",
    "agent_output": false,
-   "best_j": 0.977011,
-   "best_key": "plain_llm_mimo",
+   "best_j": 0.977143,
+   "best_key": "plain_llm_fable",
    "top_group": [
+    "plain_llm_fable",
     "plain_llm_mimo",
     "plain_llm_opus55",
     "plain_llm_sonnet"
@@ -8151,6 +8478,77 @@
    "tier_label": "J 80% or more on our set",
    "reliable": true,
    "rows": [
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.977143,
+     "j_ci": [
+      0.93656,
+      0.991076
+     ],
+     "tpr": 1.0,
+     "fpr": 0.022857,
+     "tpr_ci": [
+      0.97852,
+      1.0
+     ],
+     "fpr_ci": [
+      0.008924,
+      0.057289
+     ],
+     "n_pos": 175,
+     "n_neg": 175,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 2.2857,
+     "ppv": {
+      "0.01": 0.306481,
+      "0.05": 0.697212,
+      "0.2": 0.916231
+     },
+     "cost1k": 74.790651,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
+      "prompt_file": "prompts/scope_creep.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/scope_creep/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"scope_creep\": true or false, \"evidence\": \"<file and the unrequested change, or empty>\"}",
+       "verdict_field": "scope_creep"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has scope_creep = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
+    },
     {
      "key": "plain_llm_mimo",
      "tool": "mimo-v2.6-flash, zero-shot",
@@ -9283,7 +9681,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_mimo",
+   "best_single": "plain_llm_fable",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -9310,9 +9708,10 @@
    "n": 310,
    "provenance": "constructed",
    "agent_output": false,
-   "best_j": 0.948387,
-   "best_key": "plain_llm_haiku",
+   "best_j": 0.954839,
+   "best_key": "plain_llm_fable",
    "top_group": [
+    "plain_llm_fable",
     "plain_llm_haiku",
     "plain_llm_sonnet",
     "plain_llm_opus55"
@@ -9366,6 +9765,77 @@
      "recommendable": false,
      "why_not": "shortcut baseline of the benchmark, not a reviewer",
      "recipe": {},
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.954839,
+     "j_ci": [
+      0.911337,
+      0.98746
+     ],
+     "tpr": 0.987097,
+     "fpr": 0.032258,
+     "tpr_ci": [
+      0.954178,
+      0.996454
+     ],
+     "fpr_ci": [
+      0.013856,
+      0.073285
+     ],
+     "n_pos": 155,
+     "n_neg": 155,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 3.2258,
+     "ppv": {
+      "0.01": 0.236112,
+      "0.05": 0.616936,
+      "0.2": 0.884393
+     },
+     "cost1k": 23.060523,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
+      "prompt_file": "prompts/obsolescence.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/obsolescence/run_tools.py:PROMPT",
+       "placeholders": [
+        "task",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"uses_deprecated_api\": true or false, \"evidence\": \"<the deprecated API and its replacement, or empty>\"}",
+       "verdict_field": "uses_deprecated_api"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has uses_deprecated_api = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "code"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
      "kit_check": null
     },
     {
@@ -10551,7 +11021,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_haiku",
+   "best_single": "plain_llm_fable",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -10589,6 +11059,7 @@
    "best_key": "plain_llm_opus55",
    "top_group": [
     "plain_llm_opus55",
+    "plain_llm_fable",
     "plain_llm_luna"
    ],
    "tier": "well",
@@ -10761,6 +11232,77 @@
      "recipe": {
       "kind": "llm",
       "model": "claude-opus-5-5",
+      "prompt_file": "prompts/supply_chain_attack.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/supply_chain/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"supply_chain_risk\": true or false, \"evidence\": \"<package or line and why, or empty>\"}",
+       "verdict_field": "supply_chain_risk"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has supply_chain_risk = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.790541,
+     "j_ci": [
+      0.722973,
+      0.851351
+     ],
+     "tpr": 0.993243,
+     "fpr": 0.202703,
+     "tpr_ci": [
+      0.962722,
+      0.998806
+     ],
+     "fpr_ci": [
+      0.145839,
+      0.274609
+     ],
+     "n_pos": 148,
+     "n_neg": 148,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 20.2703,
+     "ppv": {
+      "0.01": 0.047161,
+      "0.05": 0.205021,
+      "0.2": 0.550561
+     },
+     "cost1k": 87.155108,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
       "prompt_file": "prompts/supply_chain_attack.md",
       "max_tokens": 16384,
       "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
@@ -11625,31 +12167,31 @@
    ],
    "best_single": "rule_typosquat",
    "robust_pair": {
-    "a": "plain_llm_luna",
+    "a": "plain_llm_fable",
     "b": "rule_typosquat",
     "rule": "and",
     "n": 296,
-    "tpr": 0.9865,
-    "fpr": 0.027,
+    "tpr": 0.9932,
+    "fpr": 0.0338,
     "j": 0.9595,
     "tpr_ci": [
-     0.9521,
-     0.9963
+     0.9627,
+     0.9988
     ],
     "fpr_ci": [
-     0.0106,
-     0.0674
+     0.0145,
+     0.0766
     ],
-    "cost1k_both": 0.5154,
-    "cost1k_cascade": 0.2995,
+    "cost1k_both": 87.1551,
+    "cost1k_cascade": 50.6442,
     "cascade_first": "rule_typosquat",
     "gain_vs_best_single": 12.16,
     "gain_ci": [
-     6.35,
-     17.98
+     6.61,
+     17.71
     ],
     "gain_vs_best_member": 12.16,
-    "held_out_gain": 13.05,
+    "held_out_gain": 13.16,
     "share_positive": 1.0
    },
    "units": {
@@ -11686,6 +12228,7 @@
     "plain_llm_opus55",
     "plain_llm_mimo",
     "plain_llm_deepseek",
+    "plain_llm_fable",
     "plain_llm_sonnet"
    ],
    "tier": "well",
@@ -11919,6 +12462,79 @@
      "recipe": {
       "kind": "llm",
       "model": "claude-opus-5-5",
+      "prompt_file": "prompts/dependency_blindness.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "context",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"dependency_blindness\": true or false, \"evidence\": \"<what was reimplemented and what it should have used, or empty>\"}",
+       "verdict_field": "dependency_blindness"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has dependency_blindness = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)",
+       "source of the repository module(s) the patch could have reused (optional)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to 15,000 characters, each context file to 15,000."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.86,
+     "j_ci": [
+      0.76,
+      0.94
+     ],
+     "tpr": 0.92,
+     "fpr": 0.06,
+     "tpr_ci": [
+      0.811615,
+      0.968451
+     ],
+     "fpr_ci": [
+      0.020615,
+      0.162173
+     ],
+     "n_pos": 50,
+     "n_neg": 50,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 6.0,
+     "ppv": {
+      "0.01": 0.134111,
+      "0.05": 0.446602,
+      "0.2": 0.793103
+     },
+     "cost1k": 75.58424,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-fable-5-2",
       "prompt_file": "prompts/dependency_blindness.md",
       "max_tokens": 16384,
       "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",

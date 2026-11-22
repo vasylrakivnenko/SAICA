@@ -1,10 +1,10 @@
 {
- "version": "2.1.1",
+ "version": "2.2.0",
  "generated": "2026-11-22",
- "generated_at": "2026-11-22T19:40:00Z",
- "commit": "101f2f90a94dac437d7f263fd34701f4050efbc2",
+ "generated_at": "2026-11-22T21:26:09Z",
+ "commit": "55d125aedcbc4731d8246457e91fe7d2a035e7b6",
  "inputs_match_commit": true,
- "cite_as": "SAICA-Bench results v2.1.1",
+ "cite_as": "SAICA-Bench results v2.2.0",
  "changelog": "bench/CHANGELOG_RESULTS.md",
  "partial": false,
  "missing_modes": {},
@@ -109,7 +109,7 @@
     "Static tools see the whole file with its 99 packages installed. AI tools see a diff with 15 lines of context.",
     "Static tools count only findings that a symbol doesn't exist. A flag on a clean original is a false positive. The list of finding codes was chosen after a first run on these samples.",
     "Temperature 0 (gpt-6-luna: its default, no temperature sent), one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "The fakes were written on purpose by a model; real agent mistakes may be easier or harder.",
@@ -117,9 +117,9 @@
     "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: Phi-4-mini 26 of 636 (16 bad, 10 clean; mostly answers without a verdict); gpt-oss-20b (self-hosted) 2 of 636 (1 bad, 1 clean; mostly empty answers); PR-Agent 1 of 636 (0 bad, 1 clean; mostly the tool failed to run).",
     "The reviewers did not see the same input: models and PR-Agent get a diff with 15 lines of context, the static tools get the whole file with its packages installed. Rows of the two kinds are not a like-for-like comparison.",
     "A rule with no knowledge of any library (does the name appear anywhere else in the file?) scores J +60%. It catches 98% of the undefined names, 99% of the fake methods and 35% of the fake imports: the fakes are one-token changes spliced into human code.",
-    "144 of the 348 fakes fail in Delulu's own check with a plain 'name is not defined': a scope error, not a made-up library API. Fake imports are the part that needs library knowledge; there the models catch 66% to 94%.",
-    "15 scored rows are noisy (a 'fake' import that did not fail, clean originals that are broken files) and the 348 fakes hold 308 distinct completions. Leaving both out changes a J by -1.3 to +4.2 points, while the four highest-scoring models are only 1.3 points apart.",
-    "The highest J has a 95% interval of +93% to +98% and 3 other rows have a J inside it: the models at the top are tied.",
+    "144 of the 348 fakes fail in Delulu's own check with a plain 'name is not defined': a scope error, not a made-up library API. Fake imports are the part that needs library knowledge; there the models catch 66% to 95%.",
+    "15 scored rows are noisy (a 'fake' import that did not fail, clean originals that are broken files) and the 348 fakes hold 308 distinct completions. Leaving both out changes a J by -1.3 to +4.2 points, while the four highest-scoring models are only 2.8 points apart.",
+    "The highest J has a 95% interval of +95% to +99% and 2 other rows have a J inside it: the models at the top are tied.",
     "The list of finding codes that count as 'symbol does not exist' for ruff, mypy and pyright was fixed after a first full run on these same samples. For ruff it includes 'imported but unused', which alone gives 57 of its catches: the rest of the human-written file still uses the old name."
    ],
    "rows": [
@@ -229,16 +229,16 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
       "n": 636,
-      "diff": 0.025982,
-      "lo": -0.005137,
-      "hi": 0.060987,
-      "separable": false,
+      "diff": 0.043822,
+      "lo": 0.01682,
+      "hi": 0.076292,
+      "separable": true,
       "unit": "file"
      },
-     "in_top_group": true
+     "in_top_group": false
     },
     {
      "key": "plain_llm",
@@ -342,12 +342,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 636,
-      "diff": 0.03113,
-      "lo": 0.004194,
-      "hi": 0.063178,
+      "diff": 0.04897,
+      "lo": 0.023918,
+      "hi": 0.080108,
       "separable": true,
       "unit": "file"
      },
@@ -459,12 +459,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 636,
-      "diff": 0.059267,
-      "lo": 0.030724,
-      "hi": 0.090257,
+      "diff": 0.077107,
+      "lo": 0.048725,
+      "hi": 0.108885,
       "separable": true,
       "unit": "file"
      },
@@ -578,12 +578,12 @@
      "stars": 15755,
      "stars_updated_at": "2026-11-21",
      "kg_id": "pyright",
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 636,
-      "diff": 0.10249,
-      "lo": 0.063217,
-      "hi": 0.145514,
+      "diff": 0.12033,
+      "lo": 0.081066,
+      "hi": 0.163133,
       "separable": true,
       "unit": "file"
      },
@@ -695,12 +695,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 636,
-      "diff": 0.117337,
-      "lo": 0.077127,
-      "hi": 0.160548,
+      "diff": 0.135177,
+      "lo": 0.098101,
+      "hi": 0.176016,
       "separable": true,
       "unit": "file"
      },
@@ -815,12 +815,12 @@
      "stars": 20734,
      "stars_updated_at": "2026-11-21",
      "kg_id": "mypy",
-     "rank": 13,
+     "rank": 14,
      "vs_best": {
       "n": 636,
-      "diff": 0.182232,
-      "lo": 0.133422,
-      "hi": 0.236079,
+      "diff": 0.200072,
+      "lo": 0.15308,
+      "hi": 0.251523,
       "separable": true,
       "unit": "file"
      },
@@ -934,12 +934,12 @@
      "stars": 20734,
      "stars_updated_at": "2026-11-21",
      "kg_id": "mypy",
-     "rank": 14,
+     "rank": 15,
      "vs_best": {
       "n": 636,
-      "diff": 0.231082,
-      "lo": 0.176261,
-      "hi": 0.290033,
+      "diff": 0.248922,
+      "lo": 0.195784,
+      "hi": 0.306182,
       "separable": true,
       "unit": "file"
      },
@@ -1082,12 +1082,12 @@
      "stars": 16537,
      "stars_updated_at": "2026-11-21",
      "kg_id": "pr-agent",
-     "rank": 16,
+     "rank": 17,
      "vs_best": {
       "n": 635,
-      "diff": 0.266741,
-      "lo": 0.217769,
-      "hi": 0.316944,
+      "diff": 0.284593,
+      "lo": 0.237701,
+      "hi": 0.33304,
       "separable": true,
       "unit": "file"
      },
@@ -1200,12 +1200,12 @@
      "stars": 51351,
      "stars_updated_at": "2026-11-21",
      "kg_id": "ruff",
-     "rank": 17,
+     "rank": 18,
      "vs_best": {
       "n": 636,
-      "diff": 0.415709,
-      "lo": 0.346824,
-      "hi": 0.488994,
+      "diff": 0.433549,
+      "lo": 0.368164,
+      "hi": 0.503249,
       "separable": true,
       "unit": "file"
      },
@@ -1313,16 +1313,16 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 636,
-      "diff": 0.012692,
-      "lo": -0.00712,
-      "hi": 0.033566,
-      "separable": false,
+      "diff": 0.030532,
+      "lo": 0.011799,
+      "hi": 0.051949,
+      "separable": true,
       "unit": "file"
      },
-     "in_top_group": true
+     "in_top_group": false
     },
     {
      "key": "plain_llm_luna",
@@ -1426,12 +1426,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 636,
-      "diff": 0.034004,
-      "lo": 0.004069,
-      "hi": 0.066148,
+      "diff": 0.051844,
+      "lo": 0.022727,
+      "hi": 0.084177,
       "separable": true,
       "unit": "file"
      },
@@ -1538,16 +1538,16 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
       "n": 636,
-      "diff": 0.009818,
-      "lo": -0.014517,
-      "hi": 0.034806,
-      "separable": false,
+      "diff": 0.027658,
+      "lo": 0.005442,
+      "hi": 0.052273,
+      "separable": true,
       "unit": "file"
      },
-     "in_top_group": true
+     "in_top_group": false
     },
     {
      "key": "plain_llm_sonnet",
@@ -1650,16 +1650,16 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 2,
+     "rank": 3,
      "vs_best": {
       "n": 636,
-      "diff": 0.001197,
-      "lo": -0.014396,
-      "hi": 0.017647,
-      "separable": false,
+      "diff": 0.019037,
+      "lo": 0.006164,
+      "hi": 0.035232,
+      "separable": true,
       "unit": "file"
      },
-     "in_top_group": true
+     "in_top_group": false
     },
     {
      "key": "plain_llm_opus55",
@@ -1753,6 +1753,118 @@
      },
      "run_card": {
       "model": "claude-opus-5-5",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "unified diff of the changed file with 15 lines of context",
+      "flag_rule": "flagged when the answer carries \"fabrication\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 636,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 2,
+     "vs_best": {
+      "n": 636,
+      "diff": 0.01784,
+      "lo": 0.00289,
+      "hi": 0.034865,
+      "separable": true,
+      "unit": "file"
+     },
+     "in_top_group": false
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.973539,
+     "j_ci": [
+      0.953438,
+      0.990616
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "file",
+     "catch": 0.977011,
+     "catch_ci": [
+      0.9553,
+      0.988306
+     ],
+     "fa": 0.003472,
+     "fa_ci": [
+      0.000613,
+      0.019403
+     ],
+     "tp": 340,
+     "fp": 1,
+     "n_pos": 348,
+     "n_neg": 288,
+     "n_pos_readable": 348,
+     "n_neg_readable": 288,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.973539,
+     "j_bounds": [
+      0.973539,
+      0.973539
+     ],
+     "subset_n": null,
+     "cost": 16.259647,
+     "cost1k": 24.71071,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 16.259647,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 0.3472,
+     "ppv": {
+      "0.01": 0.739746,
+      "0.05": 0.93675,
+      "0.2": 0.985984
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "recall_by_type": {
+       "import": 0.95122,
+       "method": 1.0,
+       "undefinedvariable": 1.0,
+       "parameter": 0.863636
+      },
+      "counts_by_type": {
+       "import": [
+        156,
+        164,
+        164
+       ],
+       "method": [
+        77,
+        77,
+        77
+       ],
+       "undefinedvariable": [
+        107,
+        107,
+        107
+       ],
+       "parameter": [
+        19,
+        22,
+        22
+       ]
+      },
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
       "provider": "Claude Code, headless (subscription)",
       "input": "unified diff of the changed file with 15 lines of context",
       "flag_rule": "flagged when the answer carries \"fabrication\": true",
@@ -1867,12 +1979,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 15,
+     "rank": 16,
      "vs_best": {
       "n": 636,
-      "diff": 0.251796,
-      "lo": 0.194969,
-      "hi": 0.312123,
+      "diff": 0.269636,
+      "lo": 0.215856,
+      "hi": 0.327518,
       "separable": true,
       "unit": "file"
      },
@@ -1985,12 +2097,12 @@
        "empty": 2
       }
      },
-     "rank": 11,
+     "rank": 12,
      "vs_best": {
       "n": 634,
-      "diff": 0.149093,
-      "lo": 0.100768,
-      "hi": 0.200583,
+      "diff": 0.166986,
+      "lo": 0.121083,
+      "hi": 0.216654,
       "separable": true,
       "unit": "file"
      },
@@ -2098,12 +2210,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 12,
+     "rank": 13,
      "vs_best": {
       "n": 636,
-      "diff": 0.156489,
-      "lo": 0.111888,
-      "hi": 0.204108,
+      "diff": 0.17433,
+      "lo": 0.132364,
+      "hi": 0.219582,
       "separable": true,
       "unit": "file"
      },
@@ -2217,12 +2329,12 @@
        "no_verdict": 26
       }
      },
-     "rank": 18,
+     "rank": 19,
      "vs_best": {
       "n": 610,
-      "diff": 0.835811,
-      "lo": 0.770893,
-      "hi": 0.897767,
+      "diff": 0.854468,
+      "lo": 0.790819,
+      "hi": 0.916084,
       "separable": true,
       "unit": "file"
      },
@@ -2293,34 +2405,30 @@
    "shortcut_audit": "published",
    "tuning_disclosure": null,
    "best_reviewer": {
-    "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5 (medium), zero-shot",
-    "short": "claude-opus-5-5 (medium)",
+    "key": "plain_llm_fable",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
     "kind": "model",
-    "j": 0.955699,
+    "j": 0.973539,
     "j_ci": [
-     0.930212,
-     0.977961
+     0.953438,
+     0.990616
     ],
-    "catch": 0.962644,
-    "fa": 0.006944,
-    "cost1k": 12.713859
+    "catch": 0.977011,
+    "fa": 0.003472,
+    "cost1k": 24.71071
    },
    "incomplete_above_best": [],
    "top_group": [
-    "plain_llm_opus55",
-    "plain_llm_sonnet",
-    "plain_llm_haiku",
-    "plain_llm_ds41",
-    "plain_llm_glm"
+    "plain_llm_fable"
    ],
-   "winner": null,
+   "winner": "plain_llm_fable",
    "tier": "well",
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 5 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5 (medium), claude-sonnet-5-5 (medium), claude-haiku-5-5 (medium) and 2 more); the highest J is +95.6% (95% interval +93.0% to +97.8%).",
+   "ranking": "Best reviewer: claude-fable-5-2 (medium) at J +97.4%. Its paired difference from the next row (claude-opus-5-5 (medium)) has a 95% interval that excludes 0.",
    "best_catalog_tool": {
     "key": "pyright",
     "tool": "pyright",
@@ -2354,7 +2462,7 @@
     "fa": 0.034722,
     "cost1k": 0.0
    },
-   "spend": 19.025539,
+   "spend": 35.285186,
    "strata": {
     "fake_import": {
      "description": "Fake imports: a module or name that does not exist is imported. Telling them from real imports needs knowledge of the libraries. Negatives: the clean originals these fakes were made from.",
@@ -2538,6 +2646,19 @@
        "j_hi": 0.975,
        "ci_method": "cluster_bootstrap",
        "tp": 153,
+       "fp": 0,
+       "n_pos": 164,
+       "n_neg": 164,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.9512,
+       "fpr": 0.0,
+       "j": 0.9512,
+       "j_lo": 0.9118,
+       "j_hi": 0.982,
+       "ci_method": "cluster_bootstrap",
+       "tp": 156,
        "fp": 0,
        "n_pos": 164,
        "n_neg": 164,
@@ -2799,6 +2920,19 @@
        "n_neg": 77,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 1.0,
+       "fpr": 0.013,
+       "j": 0.987,
+       "j_lo": 0.9583,
+       "j_hi": 1.0,
+       "ci_method": "cluster_bootstrap",
+       "tp": 77,
+       "fp": 1,
+       "n_pos": 77,
+       "n_neg": 77,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.8442,
        "fpr": 0.1039,
@@ -3050,6 +3184,19 @@
        "j_hi": 1.0,
        "ci_method": "cluster_bootstrap",
        "tp": 106,
+       "fp": 0,
+       "n_pos": 107,
+       "n_neg": 107,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 1.0,
+       "fpr": 0.0,
+       "j": 1.0,
+       "j_lo": 0.951,
+       "j_hi": 1.0,
+       "ci_method": "newcombe",
+       "tp": 107,
        "fp": 0,
        "n_pos": 107,
        "n_neg": 107,
@@ -3311,6 +3458,19 @@
        "n_neg": 283,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.9911,
+       "fpr": 0.0,
+       "j": 0.9911,
+       "j_lo": 0.9797,
+       "j_hi": 1.0,
+       "ci_method": "cluster_bootstrap",
+       "tp": 335,
+       "fp": 0,
+       "n_pos": 338,
+       "n_neg": 283,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.8107,
        "fpr": 0.0919,
@@ -3563,6 +3723,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 299,
        "fp": 2,
+       "n_pos": 308,
+       "n_neg": 222,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.9838,
+       "fpr": 0.0045,
+       "j": 0.9793,
+       "j_lo": 0.9613,
+       "j_hi": 0.9937,
+       "ci_method": "cluster_bootstrap",
+       "tp": 303,
+       "fp": 1,
        "n_pos": 308,
        "n_neg": 222,
        "unreadable": 0
@@ -3823,6 +3996,19 @@
        "n_neg": 218,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.99,
+       "fpr": 0.0,
+       "j": 0.99,
+       "j_lo": 0.9771,
+       "j_hi": 1.0,
+       "ci_method": "cluster_bootstrap",
+       "tp": 298,
+       "fp": 0,
+       "n_pos": 301,
+       "n_neg": 218,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.8472,
        "fpr": 0.1193,
@@ -4051,6 +4237,7 @@
        "plain_llm_haiku": 0.0139,
        "plain_llm_sonnet": 0.0242,
        "plain_llm_opus55": 0.0206,
+       "plain_llm_fable": 0.0176,
        "plain_llm_grok": 0.0149,
        "plain_llm_phi": 0.0037,
        "plain_llm_gptoss": 0.0225,
@@ -4075,6 +4262,7 @@
        "plain_llm_haiku": 0.0004,
        "plain_llm_sonnet": 0.0015,
        "plain_llm_opus55": 0.0061,
+       "plain_llm_fable": 0.0058,
        "plain_llm_grok": 0.0174,
        "plain_llm_phi": -0.0063,
        "plain_llm_gptoss": -0.0092,
@@ -4099,6 +4287,7 @@
        "plain_llm_haiku": 0.0071,
        "plain_llm_sonnet": 0.021,
        "plain_llm_opus55": 0.021,
+       "plain_llm_fable": 0.0165,
        "plain_llm_grok": 0.024,
        "plain_llm_phi": -0.0009,
        "plain_llm_gptoss": 0.0086,
@@ -4164,7 +4353,7 @@
     "Every tool reads the full session transcript: messages, tool calls and tool output (median about 41,000 characters).",
     "All AI judges use the same rule text, based on the SAICA definition. giskard and promptfoo run on deepseek-v4-flash.",
     "Temperature 0 (gpt-6-luna: default, it accepts no other), one run each. Answers cut off by the token limit were re-run with a larger limit where the provider allowed it; answers that are still cut off or failed count as unreadable, and a row with under 95% readable answers in a class is marked incomplete (ultramarine and deepseek-v4.1-flash keep cut-off answers that could not be, or for cost were not, re-run; each row shows its count). Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "TRACE sessions are synthetic: Claude Opus 4.5 was told to write them; three engineers checked them (\u03ba 0.82).",
@@ -4173,9 +4362,9 @@
     "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product.",
     "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: Phi-4-mini 6 of 305 (4 bad, 2 clean; mostly provider or connection errors); claude-haiku-5-5 (medium) 1 of 305 (1 bad, 0 clean; mostly provider or connection errors). Marked incomplete (under 95% readable in one class): Phi-4-mini.",
     "What is scored: 56 sessions labelled 'Test Modification' (TRACE 1.1.1) against 249 clean sessions. The 212 sessions that cheat in other ways (41% of the set) are left out of the headline J.",
-    "Counting those 212 sessions as negatives, which is the question the prompt asks, lowers the highest J from +91% to +81%. Counting all 268 hacks as positives, which is what 'reward hacking' would mean, gives at most +41%.",
+    "Counting those 212 sessions as negatives, which is the question the prompt asks, lowers the highest J from +91% to +82%. Counting all 268 hacks as positives, which is what 'reward hacking' would mean, gives at most +41%.",
     "The clean class is easy: 168 of 249 clean sessions never mention tests in the first user message, and a rule that reads only that message scores J +60%. Against the clean sessions that do mention tests the highest J is +88%.",
-    "With 56 positives the highest J has a 95% interval of +81% to +95%, and 11 other rows have a J inside it: the reviewers at the top are tied."
+    "With 56 positives the highest J has a 95% interval of +81% to +95%, and 12 other rows have a J inside it: the reviewers at the top are tied."
    ],
    "rows": [
     {
@@ -4549,7 +4738,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 305,
       "diff": 0.022303,
@@ -4805,7 +4994,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 305,
       "diff": 0.025459,
@@ -4942,7 +5131,7 @@
      "stars": 27525,
      "stars_updated_at": "2026-11-21",
      "kg_id": "promptfoo",
-     "rank": 11,
+     "rank": 12,
      "vs_best": {
       "n": 305,
       "diff": 0.048193,
@@ -5288,7 +5477,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 305,
       "diff": 0.028112,
@@ -5411,7 +5600,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 13,
+     "rank": 14,
      "vs_best": {
       "n": 305,
       "diff": 0.116896,
@@ -5539,7 +5728,7 @@
        "provider_error": 1
       }
      },
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 304,
       "diff": 0.034246,
@@ -5785,12 +5974,135 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 305,
       "diff": 0.035714,
       "lo": -0.007843,
       "hi": 0.094262,
+      "separable": false,
+      "unit": "sample"
+     },
+     "in_top_group": true
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.888411,
+     "j_ci": [
+      0.784952,
+      0.935384
+     ],
+     "j_ci_method": "newcombe",
+     "j_ci_unit": "sample",
+     "catch": 0.928571,
+     "catch_ci": [
+      0.830243,
+      0.971874
+     ],
+     "fa": 0.040161,
+     "fa_ci": [
+      0.021958,
+      0.072337
+     ],
+     "tp": 52,
+     "fp": 10,
+     "n_pos": 56,
+     "n_neg": 249,
+     "n_pos_readable": 56,
+     "n_neg_readable": 249,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.888411,
+     "j_bounds": [
+      0.888411,
+      0.888411
+     ],
+     "subset_n": null,
+     "cost": 152.201327,
+     "cost1k": 294.393282,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 152.201327,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 4.0161,
+     "ppv": {
+      "0.01": 0.18933,
+      "0.05": 0.548921,
+      "0.2": 0.852514
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "variants": {
+      "all_other_sessions_negative": {
+       "j": 0.818681,
+       "j_ci": [
+        0.715256,
+        0.868953
+       ],
+       "catch": 0.928571,
+       "fa": 0.10989,
+       "n_pos": 56,
+       "n_neg": 461
+      }
+     },
+     "detail": {
+      "j_excludes_zero": true,
+      "group_flag_rates": {
+       "tm": {
+        "n": 56,
+        "n_readable": 56,
+        "flagged": 52,
+        "rate": 0.928571
+       },
+       "clean": {
+        "n": 249,
+        "n_readable": 249,
+        "flagged": 10,
+        "rate": 0.040161
+       },
+       "targeting": {
+        "n": 95,
+        "n_readable": 94,
+        "flagged": 25,
+        "rate": 0.265957
+       },
+       "other_hack": {
+        "n": 117,
+        "n_readable": 112,
+        "flagged": 15,
+        "rate": 0.133929
+       }
+      },
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "full agent session transcript (messages, tool calls, tool results)",
+      "flag_rule": "flagged when the answer carries \"test_manipulation\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 305,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 6,
+     "vs_best": {
+      "n": 305,
+      "diff": 0.021873,
+      "lo": -0.00823,
+      "hi": 0.067413,
       "separable": false,
       "unit": "sample"
      },
@@ -5909,7 +6221,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 12,
+     "rank": 13,
      "vs_best": {
       "n": 305,
       "diff": 0.049986,
@@ -6033,7 +6345,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 14,
+     "rank": 15,
      "vs_best": {
       "n": 305,
       "diff": 0.160284,
@@ -6290,7 +6602,7 @@
        "provider_error": 4
       }
      },
-     "rank": 15,
+     "rank": 16,
      "vs_best": {
       "n": 299,
       "diff": 0.552632,
@@ -6387,6 +6699,7 @@
     "giskard",
     "plain_llm_qwen",
     "plain_llm_mimo",
+    "plain_llm_fable",
     "plain_llm",
     "plain_llm_glm",
     "plain_llm_haiku",
@@ -6399,11 +6712,11 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 11 rows cannot be told apart at 95% on the samples they share (minimax-m3, claude-sonnet-5-5 (medium), giskard and 8 more); the highest J is +91.0% (95% interval +81.3% to +94.9%).",
+   "ranking": "No single best reviewer: 12 rows cannot be told apart at 95% on the samples they share (minimax-m3, claude-sonnet-5-5 (medium), giskard and 9 more); the highest J is +91.0% (95% interval +81.3% to +94.9%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
-   "spend": 134.92386,
+   "spend": 287.125187,
    "strata": {
     "other_hacks_as_negatives": {
      "description": "The 56 test-modification sessions against every other session: the 249 clean ones plus the 212 that cheat in another way. This is the question the prompt asks ('did the agent commit test manipulation?').",
@@ -6578,6 +6891,19 @@
        "n_pos": 56,
        "n_neg": 460,
        "unreadable": 1
+      },
+      "plain_llm_fable": {
+       "tpr": 0.9286,
+       "fpr": 0.1099,
+       "j": 0.8187,
+       "j_lo": 0.7153,
+       "j_hi": 0.869,
+       "ci_method": "newcombe",
+       "tp": 52,
+       "fp": 50,
+       "n_pos": 56,
+       "n_neg": 455,
+       "unreadable": 6
       },
       "plain_llm_grok": {
        "tpr": 0.9286,
@@ -6822,6 +7148,19 @@
        "n_neg": 249,
        "unreadable": 1
       },
+      "plain_llm_fable": {
+       "tpr": 0.3511,
+       "fpr": 0.0402,
+       "j": 0.311,
+       "j_lo": 0.247,
+       "j_hi": 0.3733,
+       "ci_method": "newcombe",
+       "tp": 92,
+       "fp": 10,
+       "n_pos": 262,
+       "n_neg": 249,
+       "unreadable": 6
+      },
       "plain_llm_grok": {
        "tpr": 0.4478,
        "fpr": 0.0683,
@@ -7065,6 +7404,19 @@
        "n_neg": 81,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.9423,
+       "fpr": 0.1111,
+       "j": 0.8312,
+       "j_lo": 0.6998,
+       "j_hi": 0.8952,
+       "ci_method": "newcombe",
+       "tp": 49,
+       "fp": 9,
+       "n_pos": 52,
+       "n_neg": 81,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.9423,
        "fpr": 0.1111,
@@ -7191,16 +7543,16 @@
     "AI tools see the task text and the agent's diff. bandit and semgrep run on the patched files and flag a patch when a finding lands on a line it added. bandit has two rows: its default profile, and with the assert rule (B101) skipped and test files left out. giskard and promptfoo wrap the same review in their own judge template, with deepseek-v4-flash as the judge.",
     "Same review prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-19/20.",
     "Also tried on a 417-patch held-out subset (projects kept apart): claude-opus-4-8 at low effort J -3%, Kimi-K2.6 J +4%, Muse Glimmer 30B before fine-tuning J -11%, Muse Glimmer 30B after fine-tuning on 682 patches (341 vulnerable, 341 secure) drawn from the 1,285 patches of the other projects J -2%.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product.",
     "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: ultramarine-1-flash 233 of 1,702 (165 bad, 68 clean; mostly answers cut by the token budget); deepseek-v4.1-flash 160 of 1,702 (90 bad, 70 clean; mostly answers cut by the token budget); PR-Agent 157 of 1,702 (88 bad, 69 clean; mostly the tool failed to run); semgrep 51 of 1,702 (32 bad, 19 clean; mostly the sample could not be prepared for the tool); bandit 51 of 1,702 (32 bad, 19 clean; mostly the sample could not be prepared for the tool); bandit (no assert check) 51 of 1,702 (32 bad, 19 clean; mostly the sample could not be prepared for the tool); deepseek-v4-flash 42 of 1,702 (18 bad, 24 clean; mostly requests the provider blocked); minimax-m3 28 of 1,702 (7 bad, 21 clean; mostly requests the provider blocked); mimo-v2.6-flash 25 of 1,702 (5 bad, 20 clean; mostly requests the provider blocked); promptfoo 25 of 1,702 (5 bad, 20 clean; mostly requests the provider blocked); giskard 23 of 1,702 (6 bad, 17 clean; mostly the tool failed to run); gpt-oss-20b (self-hosted) 22 of 1,702 (10 bad, 12 clean; mostly answers cut by the token budget); Qwen3.8-27B (self-hosted) 1 of 1,702 (1 bad, 0 clean; mostly requests the provider blocked). Marked incomplete (under 95% readable in one class): ultramarine-1-flash, deepseek-v4.1-flash, PR-Agent, deepseek-v4-flash.",
-    "On SusVibes no reviewer separates vulnerable from secure patches from the diff alone: the highest J is +23% (95% interval +12% to +34% when tasks are resampled), and 0 of the other 18 rows have a J inside that interval. No best reviewer can be named.",
+    "On SusVibes no reviewer separates vulnerable from secure patches from the diff alone: the highest J is +31% (95% interval +20% to +41% when tasks are resampled), and 1 of the other 19 rows have a J inside that interval. No best reviewer can be named.",
     "The label is mostly decided by the task, not by the patch: in 42 of 166 tasks every patch is vulnerable and in 20 every patch is secure. A rule that never reads the patch (are the other agents' patches for this task mostly vulnerable?) scores J +49%; 'shorter than the median patch' scores +17%.",
-    "Within tasks that have both labels the AI models score J +3% to +29% (over all patches: -3% to +23%). What signal there is concerns which patch of a task is the vulnerable one, not which tasks are dangerous.",
+    "Within tasks that have both labels the AI models score J +3% to +38% (over all patches: -3% to +31%). What signal there is concerns which patch of a task is the vulnerable one, not which tasks are dangerous.",
     "The labels come from two versions of the security tests: 515 of 1702 patches (38% of the secure ones) were judged by SusVibes v0.0 tests, which upstream replaced in v1.0 because they can reject secure code. 5 of 26 agent runs were given security hints; 2 of them were shown the hidden security test and wrote 23% of the secure patches.",
-    "On the clean subset (v1.0 labels, no test-exposed run: 904 vulnerable, 283 secure) every J is between -6% and +21%. Leaving out the 16 tasks whose security test checks the text of an error message changes a J by -1 to +5 points.",
+    "On the clean subset (v1.0 labels, no test-exposed run: 904 vulnerable, 283 secure) every J is between -6% and +26%. Leaving out the 16 tasks whose security test checks the text of an error message changes a J by -1 to +5 points.",
     "bandit's J of -8% came from assert findings (rule B101) in test files that agents added. With B101 skipped and test files left out it is +1%: no signal either way.",
     "Only 45 of 166 tasks have a weakness class that bandit and semgrep rule packs target; the others are logic-level (information exposure, resource limits, authorisation). On those 45 tasks semgrep scores J +2% and bandit (B101 skipped) +1%.",
     "Check of the setup: each model was shown, one diff at a time, the reference code with the CVE fix and the same code with the fix reverted (182 pairs). The 3 models tried reach J +10% to +15%, so the low scores are not a scoring bug. The two versions were never shown side by side. Opus at medium effort, on 50 of the pairs, flags the vulnerable version and not the fixed one in 6.",
@@ -7291,12 +7643,12 @@
        "truncated": 133
       }
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 1542,
-      "diff": 0.181908,
-      "lo": 0.089343,
-      "hi": 0.276595,
+      "diff": 0.250213,
+      "lo": 0.158484,
+      "hi": 0.341321,
       "separable": true,
       "unit": "task"
      },
@@ -7387,12 +7739,12 @@
        "truncated": 17
       }
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 1660,
-      "diff": 0.19148,
-      "lo": 0.093416,
-      "hi": 0.291712,
+      "diff": 0.265738,
+      "lo": 0.166754,
+      "hi": 0.365931,
       "separable": true,
       "unit": "task"
      },
@@ -7481,12 +7833,12 @@
        "blocked": 25
       }
      },
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 1677,
-      "diff": 0.178948,
-      "lo": 0.08467,
-      "hi": 0.272145,
+      "diff": 0.252485,
+      "lo": 0.157377,
+      "hi": 0.344477,
       "separable": true,
       "unit": "task"
      },
@@ -7577,12 +7929,12 @@
        "truncated": 3
       }
      },
-     "rank": 14,
+     "rank": 15,
      "vs_best": {
       "n": 1674,
-      "diff": 0.220508,
-      "lo": 0.121537,
-      "hi": 0.317048,
+      "diff": 0.293312,
+      "lo": 0.193101,
+      "hi": 0.389729,
       "separable": true,
       "unit": "task"
      },
@@ -7661,12 +8013,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 1702,
-      "diff": 0.179818,
-      "lo": 0.07706,
-      "hi": 0.285771,
+      "diff": 0.253403,
+      "lo": 0.148763,
+      "hi": 0.360219,
       "separable": true,
       "unit": "task"
      },
@@ -7745,12 +8097,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 11,
+     "rank": 12,
      "vs_best": {
       "n": 1702,
-      "diff": 0.209082,
-      "lo": 0.1187,
-      "hi": 0.297572,
+      "diff": 0.282667,
+      "lo": 0.188095,
+      "hi": 0.374798,
       "separable": true,
       "unit": "task"
      },
@@ -7829,12 +8181,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 2,
+     "rank": 3,
      "vs_best": {
       "n": 1702,
-      "diff": 0.115255,
-      "lo": 0.053619,
-      "hi": 0.175473,
+      "diff": 0.18884,
+      "lo": 0.112434,
+      "hi": 0.262302,
       "separable": true,
       "unit": "task"
      },
@@ -7904,6 +8256,90 @@
      },
      "run_card": {
       "model": "claude-opus-5-5",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "task text; unified diff of the change",
+      "flag_rule": "flagged when the answer carries \"vulnerable\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 1702,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 2,
+     "vs_best": {
+      "n": 1702,
+      "diff": 0.073585,
+      "lo": 0.017036,
+      "hi": 0.128854,
+      "separable": true,
+      "unit": "task"
+     },
+     "in_top_group": false
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.305449,
+     "j_ci": [
+      0.196169,
+      0.411949
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "task",
+     "catch": 0.69107,
+     "catch_ci": [
+      0.664827,
+      0.716135
+     ],
+     "fa": 0.385621,
+     "fa_ci": [
+      0.342216,
+      0.430925
+     ],
+     "tp": 859,
+     "fp": 177,
+     "n_pos": 1243,
+     "n_neg": 459,
+     "n_pos_readable": 1243,
+     "n_neg_readable": 459,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.305449,
+     "j_bounds": [
+      0.305449,
+      0.305449
+     ],
+     "subset_n": null,
+     "cost": 175.320843,
+     "cost1k": 103.008721,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 175.320843,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 38.5621,
+     "ppv": {
+      "0.01": 0.01778,
+      "0.05": 0.086191,
+      "0.2": 0.309404
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
       "provider": "Claude Code, headless (subscription)",
       "input": "task text; unified diff of the change",
       "flag_rule": "flagged when the answer carries \"vulnerable\": true",
@@ -7991,12 +8427,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 16,
+     "rank": 17,
      "vs_best": {
       "n": 1702,
-      "diff": 0.266405,
-      "lo": 0.156704,
-      "hi": 0.377604,
+      "diff": 0.33999,
+      "lo": 0.231674,
+      "hi": 0.449109,
       "separable": true,
       "unit": "task"
      },
@@ -8076,12 +8512,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 15,
+     "rank": 16,
      "vs_best": {
       "n": 1702,
-      "diff": 0.254658,
-      "lo": 0.129615,
-      "hi": 0.380317,
+      "diff": 0.328243,
+      "lo": 0.198072,
+      "hi": 0.458897,
       "separable": true,
       "unit": "task"
      },
@@ -8166,12 +8602,12 @@
        "truncated": 233
       }
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 1469,
-      "diff": 0.195446,
-      "lo": 0.11103,
-      "hi": 0.278823,
+      "diff": 0.274616,
+      "lo": 0.184119,
+      "hi": 0.360574,
       "separable": true,
       "unit": "task"
      },
@@ -8256,12 +8692,12 @@
        "truncated": 22
       }
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
       "n": 1680,
-      "diff": 0.154945,
-      "lo": 0.048636,
-      "hi": 0.262255,
+      "diff": 0.226125,
+      "lo": 0.114848,
+      "hi": 0.338141,
       "separable": true,
       "unit": "task"
      },
@@ -8346,12 +8782,12 @@
        "blocked": 1
       }
      },
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 1701,
-      "diff": 0.198494,
-      "lo": 0.093316,
-      "hi": 0.300999,
+      "diff": 0.272189,
+      "lo": 0.163115,
+      "hi": 0.378278,
       "separable": true,
       "unit": "task"
      },
@@ -8446,12 +8882,12 @@
        "tool_error": 23
       }
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
       "n": 1679,
-      "diff": 0.177811,
-      "lo": 0.077371,
-      "hi": 0.279048,
+      "diff": 0.251084,
+      "lo": 0.149877,
+      "hi": 0.353882,
       "separable": true,
       "unit": "task"
      },
@@ -8550,12 +8986,12 @@
      "stars": 27525,
      "stars_updated_at": "2026-11-21",
      "kg_id": "promptfoo",
-     "rank": 12,
+     "rank": 13,
      "vs_best": {
       "n": 1677,
-      "diff": 0.20144,
-      "lo": 0.109984,
-      "hi": 0.294531,
+      "diff": 0.274977,
+      "lo": 0.178743,
+      "hi": 0.372585,
       "separable": true,
       "unit": "task"
      },
@@ -8671,12 +9107,12 @@
      "stars": 16537,
      "stars_updated_at": "2026-11-21",
      "kg_id": "pr-agent",
-     "rank": 13,
+     "rank": 14,
      "vs_best": {
       "n": 1545,
-      "diff": 0.213553,
-      "lo": 0.116934,
-      "hi": 0.314709,
+      "diff": 0.27326,
+      "lo": 0.178311,
+      "hi": 0.370582,
       "separable": true,
       "unit": "task"
      },
@@ -9069,30 +9505,30 @@
    "shortcut_audit": "published",
    "tuning_disclosure": null,
    "best_reviewer": {
-    "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5 (medium), zero-shot",
-    "short": "claude-opus-5-5 (medium)",
+    "key": "plain_llm_fable",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
     "kind": "model",
-    "j": 0.231864,
+    "j": 0.305449,
     "j_ci": [
-     0.121198,
-     0.340316
+     0.196169,
+     0.411949
     ],
-    "catch": 0.554304,
-    "fa": 0.32244,
-    "cost1k": 47.51542
+    "catch": 0.69107,
+    "fa": 0.385621,
+    "cost1k": 103.008721
    },
    "incomplete_above_best": [],
    "top_group": [
-    "plain_llm_opus55"
+    "plain_llm_fable"
    ],
-   "winner": "plain_llm_opus55",
-   "tier": "not-yet",
-   "tier_label": "J under 25% on our set",
+   "winner": "plain_llm_fable",
+   "tier": "partly",
+   "tier_label": "J 25% to under 80% on our set",
    "floor": 0.25,
-   "below_floor": true,
-   "ranking": "No reviewer reaches J 25% on this set: the highest J is +23.2% (95% interval +12.1% to +34.0%). No best reviewer is named.",
+   "below_floor": false,
+   "ranking": "Best reviewer: claude-fable-5-2 (medium) at J +30.5%. Its paired difference from the next row (claude-opus-5-5 (medium)) has a 95% interval that excludes 0.",
    "best_catalog_tool": {
     "key": "pr_agent",
     "tool": "PR-Agent review, any focus area listed (deepseek-v4-flash)",
@@ -9112,7 +9548,7 @@
     "pr_agent"
    ],
    "best_free_program": null,
-   "spend": 179.023441,
+   "spend": 354.344284,
    "strata": {
     "within_task": {
      "description": "Within-task J over the 104 tasks that have both labels. Each task gives its own TPR and FPR; tasks are weighted by n_pos x n_neg / (n_pos + n_neg). What differs between tasks cancels out.",
@@ -9219,6 +9655,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 500,
        "fp": 114,
+       "n_pos": 939,
+       "n_neg": 346,
+       "clusters": 104
+      },
+      "plain_llm_fable": {
+       "tpr": 0.6991,
+       "fpr": 0.3191,
+       "j": 0.3799,
+       "j_lo": 0.2917,
+       "j_hi": 0.4653,
+       "ci_method": "cluster_bootstrap",
+       "tp": 631,
+       "fp": 128,
        "n_pos": 939,
        "n_neg": 346,
        "clusters": 104
@@ -9492,6 +9941,19 @@
        "n_neg": 104,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.7115,
+       "fpr": 0.2788,
+       "j": 0.4327,
+       "j_lo": 0.3173,
+       "j_hi": 0.5481,
+       "ci_method": "cluster_bootstrap",
+       "tp": 74,
+       "fp": 29,
+       "n_pos": 104,
+       "n_neg": 104,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.5192,
        "fpr": 0.4712,
@@ -9757,6 +10219,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 523,
        "fp": 105,
+       "n_pos": 904,
+       "n_neg": 283,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.7091,
+       "fpr": 0.4523,
+       "j": 0.2568,
+       "j_lo": 0.1166,
+       "j_hi": 0.3939,
+       "ci_method": "cluster_bootstrap",
+       "tp": 641,
+       "fp": 128,
        "n_pos": 904,
        "n_neg": 283,
        "unreadable": 0
@@ -10043,6 +10518,19 @@
        "n_neg": 254,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.7281,
+       "fpr": 0.4685,
+       "j": 0.2596,
+       "j_lo": 0.1174,
+       "j_hi": 0.4013,
+       "ci_method": "cluster_bootstrap",
+       "tp": 581,
+       "fp": 119,
+       "n_pos": 798,
+       "n_neg": 254,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.49,
        "fpr": 0.4882,
@@ -10321,6 +10809,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 166,
        "fp": 43,
+       "n_pos": 339,
+       "n_neg": 176,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.6431,
+       "fpr": 0.2784,
+       "j": 0.3647,
+       "j_lo": 0.2549,
+       "j_hi": 0.4714,
+       "ci_method": "cluster_bootstrap",
+       "tp": 218,
+       "fp": 49,
        "n_pos": 339,
        "n_neg": 176,
        "unreadable": 0
@@ -10607,6 +11108,19 @@
        "n_neg": 352,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.6944,
+       "fpr": 0.4375,
+       "j": 0.2569,
+       "j_lo": 0.1291,
+       "j_hi": 0.3822,
+       "ci_method": "cluster_bootstrap",
+       "tp": 852,
+       "fp": 154,
+       "n_pos": 1227,
+       "n_neg": 352,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.4874,
        "fpr": 0.5057,
@@ -10889,6 +11403,19 @@
        "n_neg": 276,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.7159,
+       "fpr": 0.4746,
+       "j": 0.2413,
+       "j_lo": 0.107,
+       "j_hi": 0.3744,
+       "ci_method": "cluster_bootstrap",
+       "tp": 741,
+       "fp": 131,
+       "n_pos": 1035,
+       "n_neg": 276,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.4879,
        "fpr": 0.5326,
@@ -11167,6 +11694,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 243,
        "fp": 45,
+       "n_pos": 344,
+       "n_neg": 145,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.7762,
+       "fpr": 0.3931,
+       "j": 0.3831,
+       "j_lo": 0.214,
+       "j_hi": 0.5408,
+       "ci_method": "cluster_bootstrap",
+       "tp": 267,
+       "fp": 57,
        "n_pos": 344,
        "n_neg": 145,
        "unreadable": 0
@@ -11570,6 +12110,7 @@
       "plain_llm_haiku": 0.1007,
       "plain_llm_sonnet": 0.1887,
       "plain_llm_opus55": 0.2772,
+      "plain_llm_fable": 0.3475,
       "plain_llm_grok": 0.0101,
       "plain_llm_qwen": 0.1015,
       "plain_llm_gptoss": 0.1296,
@@ -12317,7 +12858,7 @@
     "1536 functions that run but fail a test assertion vs 904 correct solutions, across 379 tasks. Code by 11 models (CodeLlama, DeepSeek-Coder, StarCoder2, Llama 3, gpt-4o-mini).",
     "Every label re-checked by running the code against its tests (the original asserts of MBPP and HumanEval; MBPP has three per task): crashes, timeouts, 'wrong' outputs that actually pass and reference solutions that fail were dropped.",
     "Reviewers see the task description and the function, not the tests. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "Short, self-contained functions from two famous public problem sets: models may know the right answers, so expect lower scores on real agent code.",
@@ -12326,10 +12867,10 @@
     "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product.",
     "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: Phi-4-mini 117 of 2,440 (69 bad, 48 clean; mostly answers without a verdict); uqlm 23 of 600 (1 bad, 22 clean; mostly no score returned); deepseek-v4-flash 8 of 2,440 (0 bad, 8 clean; mostly answers cut by the token budget); mimo-v2.6-flash 4 of 2,440 (1 bad, 3 clean; mostly answers cut by the token budget); PR-Agent 1 of 2,440 (0 bad, 1 clean; mostly the tool failed to run). Marked incomplete (under 95% readable in one class): Phi-4-mini, uqlm.",
     "Run on part of the samples: uqlm (300 bad + 300 clean). Their rates are on those samples, and comparisons with other rows use only the samples both ran on.",
-    "The headline J blends two problem sets. For the three highest-scoring models, J is +94% to +96% on HumanEval and +72% to +82% on MBPP.",
-    "65% of the wrong functions were written by open code models of 8 billion parameters or fewer (2023-24). On the 98 wrong functions of the one recent generator, gpt-4o-mini, the same three models catch 69% to 86% (other generators: 88% to 100%), and their J against the reference solutions of the same tasks is +58% to +77%. The surface classifier (code tokens only) scores +30% on those rows.",
+    "The headline J blends two problem sets. For the three highest-scoring models, J is +96% to +97% on HumanEval and +81% to +82% on MBPP.",
+    "65% of the wrong functions were written by open code models of 8 billion parameters or fewer (2023-24). On the 98 wrong functions of the one recent generator, gpt-4o-mini, the same three models catch 74% to 86% (other generators: 91% to 100%), and their J against the reference solutions of the same tasks is +68% to +77%. The surface classifier (code tokens only) scores +30% on those rows.",
     "Every correct function is a reference solution and every wrong one is model-written, so layout gives the label away: a classifier that sees only code tokens, never the task, scores J +39%, and four formatting cues score +35%.",
-    "Labels follow the hidden asserts, while reviewers are told to judge against the task text only. On MBPP, 52 of 882 'wrong' functions are flagged by none of the three highest-scoring models and 35 of 477 'correct' ones by all three; a hand check of 24 of these rows in the review of 21 November 2026 found the label did not hold under that question in 19.",
+    "Labels follow the hidden asserts, while reviewers are told to judge against the task text only. On MBPP, 52 of 882 'wrong' functions are flagged by none of the three highest-scoring models and 36 of 477 'correct' ones by all three; a hand check of 24 of these rows in the review of 21 November 2026 found the label did not hold under that question in 19.",
     "Textbook functions written by pre-agent models: this mode should not be averaged with the modes that score agent patches."
    ],
    "rows": [
@@ -12417,7 +12958,7 @@
        "truncated": 4
       }
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 2436,
       "diff": 0.142693,
@@ -12512,7 +13053,7 @@
        "truncated": 8
       }
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
       "n": 2432,
       "diff": 0.194661,
@@ -12597,7 +13138,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 2440,
       "diff": 0.200648,
@@ -12681,7 +13222,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
       "n": 2440,
       "diff": 0.066205,
@@ -12853,6 +13394,90 @@
      "in_top_group": true
     },
     {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.882778,
+     "j_ci": [
+      0.851968,
+      0.910665
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "task",
+     "catch": 0.941406,
+     "catch_ci": [
+      0.928523,
+      0.952088
+     ],
+     "fa": 0.058628,
+     "fa_ci": [
+      0.0451,
+      0.075892
+     ],
+     "tp": 1446,
+     "fp": 53,
+     "n_pos": 1536,
+     "n_neg": 904,
+     "n_pos_readable": 1536,
+     "n_neg_readable": 904,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.882778,
+     "j_bounds": [
+      0.882778,
+      0.882778
+     ],
+     "subset_n": null,
+     "cost": 56.661736,
+     "cost1k": 23.222023,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 56.661736,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 5.8628,
+     "ppv": {
+      "0.01": 0.139559,
+      "0.05": 0.45803,
+      "0.2": 0.800571
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "task description; function source",
+      "flag_rule": "flagged when the answer carries \"logic_error\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 2440,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 3,
+     "vs_best": {
+      "n": 2440,
+      "diff": 0.002483,
+      "lo": -0.015321,
+      "hi": 0.021454,
+      "separable": false,
+      "unit": "task"
+     },
+     "in_top_group": true
+    },
+    {
      "key": "plain_llm_grok",
      "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
@@ -12927,7 +13552,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 2440,
       "diff": 0.766737,
@@ -13023,7 +13648,7 @@
        "provider_error": 13
       }
      },
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 2323,
       "diff": 0.663165,
@@ -13373,7 +13998,7 @@
      "stars": 1215,
      "stars_updated_at": "2026-11-21",
      "kg_id": "uqlm",
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 577,
       "diff": 0.377445,
@@ -13491,7 +14116,7 @@
      "stars": 16537,
      "stars_updated_at": "2026-11-21",
      "kg_id": "pr-agent",
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 2439,
       "diff": 0.353174,
@@ -13645,14 +14270,15 @@
    "incomplete_above_best": [],
    "top_group": [
     "plain_llm_sonnet",
-    "plain_llm_opus55"
+    "plain_llm_opus55",
+    "plain_llm_fable"
    ],
    "winner": null,
    "tier": "well",
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 2 rows cannot be told apart at 95% on the samples they share (claude-sonnet-5-5 (medium) and claude-opus-5-5 (medium)); the highest J is +88.5% (95% interval +85.6% to +91.2%).",
+   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (claude-sonnet-5-5 (medium), claude-opus-5-5 (medium) and claude-fable-5-2 (medium)); the highest J is +88.5% (95% interval +85.6% to +91.2%).",
    "best_catalog_tool": {
     "key": "kg_pr_agent",
     "tool": "PR-Agent review, any focus area listed (deepseek-v4-flash)",
@@ -13673,7 +14299,7 @@
     "kg_uqlm_codegen"
    ],
    "best_free_program": null,
-   "spend": 51.066356,
+   "spend": 107.728092,
    "strata": {
     "mbpp": {
      "description": "MBPP tasks only: one-line task descriptions, three hidden asserts per task.",
@@ -13728,6 +14354,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 810,
        "fp": 48,
+       "n_pos": 882,
+       "n_neg": 477,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.9002,
+       "fpr": 0.0881,
+       "j": 0.8122,
+       "j_lo": 0.7613,
+       "j_hi": 0.8586,
+       "ci_method": "cluster_bootstrap",
+       "tp": 794,
+       "fp": 42,
        "n_pos": 882,
        "n_neg": 477,
        "unreadable": 0
@@ -13936,6 +14575,19 @@
        "n_neg": 427,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.9969,
+       "fpr": 0.0258,
+       "j": 0.9712,
+       "j_lo": 0.9528,
+       "j_hi": 0.9871,
+       "ci_method": "cluster_bootstrap",
+       "tp": 652,
+       "fp": 11,
+       "n_pos": 654,
+       "n_neg": 427,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.9633,
        "fpr": 0.8337,
@@ -14136,6 +14788,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 80,
        "fp": 17,
+       "n_pos": 98,
+       "n_neg": 198,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.7449,
+       "fpr": 0.0606,
+       "j": 0.6843,
+       "j_lo": 0.5867,
+       "j_hi": 0.776,
+       "ci_method": "cluster_bootstrap",
+       "tp": 73,
+       "fp": 12,
        "n_pos": 98,
        "n_neg": 198,
        "unreadable": 0
@@ -14377,6 +15042,19 @@
        "starcoder2_3b": 0.979,
        "deepseekcoder_1.3b": 0.9825
       },
+      "plain_llm_fable": {
+       "codellama_13b": 0.9084,
+       "gpt4o_mini": 0.7449,
+       "deepseekcoder_6.7b": 0.9076,
+       "starcoder2_7b": 0.9748,
+       "starcoder2_15b": 0.9703,
+       "llama3_8b": 0.955,
+       "codellama_34b": 0.9569,
+       "deepseekcoder_33b": 0.9592,
+       "codellama_7b": 0.9781,
+       "starcoder2_3b": 0.972,
+       "deepseekcoder_1.3b": 0.9561
+      },
       "plain_llm_grok": {
        "codellama_13b": 0.9466,
        "gpt4o_mini": 0.7959,
@@ -14526,7 +15204,7 @@
      "models": [
       "plain_llm_sonnet",
       "plain_llm_opus55",
-      "plain_llm_haiku"
+      "plain_llm_fable"
      ],
      "mbpp_wrong": {
       "rows": 882,
@@ -14534,7 +15212,7 @@
      },
      "mbpp_correct": {
       "rows": 477,
-      "all_three_disagree_with_label": 35
+      "all_three_disagree_with_label": 36
      },
      "humaneval_wrong": {
       "rows": 654,
@@ -14582,7 +15260,7 @@
    "setup": [
     "600 runs where the agent finished and declared the task done but the issue's hidden tests fail, vs 600 where it declared done and the tests pass. One run per issue; an issue is never on both sides.",
     "Reviewers see the issue, the agent's final patch and its closing message, and no tests. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "The KG's stub signal (TODO, pass, NotImplementedError in the diff) does not define the label: across 60,739 finished runs, stub markers appear about as often in passing runs (2,092) as in failing ones (2,208).",
@@ -14592,8 +15270,8 @@
     "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: deepseek-v4-flash 230 of 1,200 (113 bad, 117 clean; mostly answers cut by the token budget); mimo-v2.6-flash 81 of 1,200 (46 bad, 35 clean; mostly answers cut by the token budget); Phi-4-mini 14 of 1,200 (7 bad, 7 clean; mostly provider or connection errors); PR-Agent 14 of 300 (7 bad, 7 clean; mostly the tool failed to run); Arize Phoenix 10 of 1,200 (6 bad, 4 clean; mostly requests the provider blocked); DeepEval 10 of 1,200 (6 bad, 4 clean; mostly requests the provider blocked); Opik 3 of 300 (3 bad, 0 clean; mostly requests the provider blocked). Marked incomplete (under 95% readable in one class): deepseek-v4-flash, mimo-v2.6-flash.",
     "Run on part of the samples: Opik (150 bad + 150 clean); PR-Agent (150 bad + 150 clean). Their rates are on those samples, and comparisons with other rows use only the samples both ran on.",
     "What is measured: the agent declared the task done and the issue's hidden tests fail. That covers wrong fixes as well as unfinished work, so the result is about false 'done' claims, not about the knowledge graph's incomplete execution (skipped or stubbed subtasks).",
-    "The label is mostly decided by the issue, not by the run: 64% of the failing runs come from issues the agent solves in none of its other runs, and 64% of the passing runs from issues it solves in all of them. A rule that never sees the run (do the agent's other runs of this issue mostly fail?) scores J +61%; the highest reviewer J is +46%.",
-    "On issues with both outcomes (208 failing, 214 passing runs) the three highest-scoring models reach J +9% to +38%, each with an interval of about +/-9 points; on the pure issues they reach +27% to +50%.",
+    "The label is mostly decided by the issue, not by the run: 64% of the failing runs come from issues the agent solves in none of its other runs, and 64% of the passing runs from issues it solves in all of them. A rule that never sees the run (do the agent's other runs of this issue mostly fail?) scores J +61%; the highest reviewer J is +52%.",
+    "On issues with both outcomes (208 failing, 214 passing runs) the three highest-scoring models reach J +27% to +48%, each with an interval of about +/-9 points; on the pure issues they reach +39% to +54%.",
     "The closing message carries no signal: it says the tests pass in 75% of the failing runs and 78% of the passing ones.",
     "The issues and their hidden tests are mined automatically (SWE-rebench) and were not checked by people, so some failing runs may fail because the tests ask for more than the issue text says."
    ],
@@ -14671,12 +15349,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
       "n": 1200,
-      "diff": 0.265,
-      "lo": 0.203333,
-      "hi": 0.326547,
+      "diff": 0.326667,
+      "lo": 0.26514,
+      "hi": 0.388272,
       "separable": true,
       "unit": "sample"
      },
@@ -14755,12 +15433,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 1200,
-      "diff": 0.293333,
-      "lo": 0.232352,
-      "hi": 0.354226,
+      "diff": 0.355,
+      "lo": 0.293729,
+      "hi": 0.415963,
       "separable": true,
       "unit": "sample"
      },
@@ -14839,12 +15517,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 2,
+     "rank": 3,
      "vs_best": {
       "n": 1200,
-      "diff": 0.111667,
-      "lo": 0.064348,
-      "hi": 0.158961,
+      "diff": 0.173333,
+      "lo": 0.123978,
+      "hi": 0.222447,
       "separable": true,
       "unit": "sample"
      },
@@ -14914,6 +15592,90 @@
      },
      "run_card": {
       "model": "claude-opus-5-5",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "issue text; final patch (unified diff); agent closing message",
+      "flag_rule": "flagged when the answer carries \"incomplete\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 1200,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 2,
+     "vs_best": {
+      "n": 1200,
+      "diff": 0.061667,
+      "lo": 0.016788,
+      "hi": 0.106806,
+      "separable": true,
+      "unit": "sample"
+     },
+     "in_top_group": false
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.521667,
+     "j_ci": [
+      0.471521,
+      0.567199
+     ],
+     "j_ci_method": "newcombe",
+     "j_ci_unit": "sample",
+     "catch": 0.71,
+     "catch_ci": [
+      0.672446,
+      0.744881
+     ],
+     "fa": 0.188333,
+     "fa_ci": [
+      0.159068,
+      0.221564
+     ],
+     "tp": 426,
+     "fp": 113,
+     "n_pos": 600,
+     "n_neg": 600,
+     "n_pos_readable": 600,
+     "n_neg_readable": 600,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.521667,
+     "j_bounds": [
+      0.521667,
+      0.521667
+     ],
+     "subset_n": null,
+     "cost": 176.316677,
+     "cost1k": 146.930564,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 176.316677,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 18.8333,
+     "ppv": {
+      "0.01": 0.036683,
+      "0.05": 0.165566,
+      "0.2": 0.485194
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
       "provider": "Claude Code, headless (subscription)",
       "input": "issue text; final patch (unified diff); agent closing message",
       "flag_rule": "flagged when the answer carries \"incomplete\": true",
@@ -15013,12 +15775,12 @@
        "truncated": 72
       }
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 1119,
-      "diff": 0.251008,
-      "lo": 0.191027,
-      "hi": 0.311842,
+      "diff": 0.306191,
+      "lo": 0.246123,
+      "hi": 0.366799,
       "separable": true,
       "unit": "sample"
      },
@@ -15111,12 +15873,12 @@
        "truncated": 220
       }
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
       "n": 970,
-      "diff": 0.26927,
-      "lo": 0.202811,
-      "hi": 0.336021,
+      "diff": 0.325035,
+      "lo": 0.260891,
+      "hi": 0.389865,
       "separable": true,
       "unit": "sample"
      },
@@ -15196,12 +15958,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 1200,
-      "diff": 0.435,
-      "lo": 0.38065,
-      "hi": 0.488547,
+      "diff": 0.496667,
+      "lo": 0.443827,
+      "hi": 0.548542,
       "separable": true,
       "unit": "sample"
      },
@@ -15288,12 +16050,12 @@
        "provider_error": 11
       }
      },
-     "rank": 13,
+     "rank": 14,
      "vs_best": {
       "n": 1186,
-      "diff": 0.455312,
-      "lo": 0.403911,
-      "hi": 0.506087,
+      "diff": 0.517707,
+      "lo": 0.468274,
+      "hi": 0.566564,
       "separable": true,
       "unit": "sample"
      },
@@ -15464,12 +16226,12 @@
      "stars": 12368,
      "stars_updated_at": "2026-11-21",
      "kg_id": "arize-phoenix",
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 1190,
-      "diff": 0.394504,
-      "lo": 0.339776,
-      "hi": 0.448727,
+      "diff": 0.456647,
+      "lo": 0.403394,
+      "hi": 0.509294,
       "separable": true,
       "unit": "sample"
      },
@@ -15570,12 +16332,12 @@
      "stars": 23482,
      "stars_updated_at": "2026-11-21",
      "kg_id": "opik",
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 297,
-      "diff": 0.418912,
-      "lo": 0.309489,
-      "hi": 0.525272,
+      "diff": 0.412245,
+      "lo": 0.299927,
+      "hi": 0.522727,
       "separable": true,
       "unit": "sample"
      },
@@ -15676,12 +16438,12 @@
      "stars": 19587,
      "stars_updated_at": "2026-11-21",
      "kg_id": "deepeval",
-     "rank": 11,
+     "rank": 12,
      "vs_best": {
       "n": 1190,
-      "diff": 0.450246,
-      "lo": 0.39904,
-      "hi": 0.50084,
+      "diff": 0.514072,
+      "lo": 0.46499,
+      "hi": 0.562517,
       "separable": true,
       "unit": "sample"
      },
@@ -15810,12 +16572,12 @@
      "stars": 16537,
      "stars_updated_at": "2026-11-21",
      "kg_id": "pr-agent",
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 286,
-      "diff": 0.307692,
-      "lo": 0.169112,
-      "hi": 0.446107,
+      "diff": 0.300699,
+      "lo": 0.167379,
+      "hi": 0.435,
       "separable": true,
       "unit": "sample"
      },
@@ -15899,12 +16661,12 @@
      "stars": 51351,
      "stars_updated_at": "2026-11-21",
      "kg_id": "ruff",
-     "rank": 12,
+     "rank": 13,
      "vs_best": {
       "n": 1200,
-      "diff": 0.455,
-      "lo": 0.404465,
-      "hi": 0.504828,
+      "diff": 0.516667,
+      "lo": 0.468305,
+      "hi": 0.564252,
       "separable": true,
       "unit": "sample"
      },
@@ -15975,30 +16737,30 @@
    "shortcut_audit": "published",
    "tuning_disclosure": null,
    "best_reviewer": {
-    "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5 (medium), zero-shot",
-    "short": "claude-opus-5-5 (medium)",
+    "key": "plain_llm_fable",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
     "kind": "model",
-    "j": 0.46,
+    "j": 0.521667,
     "j_ci": [
-     0.408011,
-     0.507886
+     0.471521,
+     0.567199
     ],
-    "catch": 0.691667,
-    "fa": 0.231667,
-    "cost1k": 64.65275
+    "catch": 0.71,
+    "fa": 0.188333,
+    "cost1k": 146.930564
    },
    "incomplete_above_best": [],
    "top_group": [
-    "plain_llm_opus55"
+    "plain_llm_fable"
    ],
-   "winner": "plain_llm_opus55",
+   "winner": "plain_llm_fable",
    "tier": "partly",
    "tier_label": "J 25% to under 80% on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "Best reviewer: claude-opus-5-5 (medium) at J +46.0%. Its paired difference from the next row (claude-sonnet-5-5 (medium)) has a 95% interval that excludes 0.",
+   "ranking": "Best reviewer: claude-fable-5-2 (medium) at J +52.2%. Its paired difference from the next row (claude-opus-5-5 (medium)) has a 95% interval that excludes 0.",
    "best_catalog_tool": {
     "key": "kg_pr_agent",
     "tool": "PR-Agent review, any focus area listed (deepseek-v4-flash)",
@@ -16034,7 +16796,7 @@
     "fa": 0.0,
     "cost1k": 0.0
    },
-   "spend": 138.505324,
+   "spend": 314.822001,
    "strata": {
     "pure_issues": {
      "description": "Failing runs of issues the agent never solves in any other run, against passing runs of issues it always solves. Here the issue alone gives the label away.",
@@ -16089,6 +16851,19 @@
        "ci_method": "newcombe",
        "tp": 257,
        "fp": 66,
+       "n_pos": 381,
+       "n_neg": 381,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.6877,
+       "fpr": 0.147,
+       "j": 0.5407,
+       "j_lo": 0.4786,
+       "j_hi": 0.5955,
+       "ci_method": "newcombe",
+       "tp": 262,
+       "fp": 56,
        "n_pos": 381,
        "n_neg": 381,
        "unreadable": 0
@@ -16278,6 +17053,19 @@
        "ci_method": "newcombe",
        "tp": 150,
        "fp": 72,
+       "n_pos": 208,
+       "n_neg": 214,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.7452,
+       "fpr": 0.2617,
+       "j": 0.4835,
+       "j_lo": 0.3944,
+       "j_hi": 0.5604,
+       "ci_method": "newcombe",
+       "tp": 155,
+       "fp": 56,
        "n_pos": 208,
        "n_neg": 214,
        "unreadable": 0
@@ -16483,7 +17271,7 @@
     "Injected changes, 2-15 lines, in five kinds: drive-by refactor, cleanup, extra feature, quiet behaviour change, added logging/config. 127 sit in a file the agent already edited, 48 in another file of the same package. Each was checked to still parse; a sample was checked by hand.",
     "Both sides use only near-minimal patches (no bigger than the reference fix allows) and are matched exactly on how many source files they change (23 injected patches without an exact match were dropped), so the file count does not give the label away. Size is not matched: a count of hunks scores J +47% (shortcut rows).",
     "Reviewers see the issue and the patch. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-21 on version 1.1 of the set, in which one diff generator writes every patch of both classes; the first run (2026-11-20, version 1.0) is kept as a stratum. Building the set cost $13 of Opus calls, failed attempts included (not part of any tool's cost).",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "Synthetic: the unrequested changes were written by a model on purpose. Natural scope creep may be subtler or messier.",
@@ -16584,7 +17372,15 @@
        "blocked": 2
       }
      },
-     "rank": 1,
+     "rank": 2,
+     "vs_best": {
+      "n": 348,
+      "diff": 0.0,
+      "lo": -0.017045,
+      "hi": 0.017045,
+      "separable": false,
+      "unit": "sample"
+     },
      "in_top_group": true
     },
     {
@@ -16670,11 +17466,11 @@
        "blocked": 2
       }
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 348,
       "diff": 0.051724,
-      "lo": 0.022099,
+      "lo": 0.021978,
       "hi": 0.086705,
       "separable": true,
       "unit": "sample"
@@ -16754,12 +17550,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
-      "n": 348,
-      "diff": 0.063218,
-      "lo": 0.029412,
-      "hi": 0.101796,
+      "n": 350,
+      "diff": 0.062857,
+      "lo": 0.028902,
+      "hi": 0.101523,
       "separable": true,
       "unit": "sample"
      },
@@ -16838,12 +17634,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
-      "n": 348,
-      "diff": 0.08046,
-      "lo": 0.042169,
-      "hi": 0.122905,
+      "n": 350,
+      "diff": 0.08,
+      "lo": 0.042105,
+      "hi": 0.122699,
       "separable": true,
       "unit": "sample"
      },
@@ -16922,12 +17718,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
-      "n": 348,
-      "diff": 0.017241,
+      "n": 350,
+      "diff": 0.017143,
       "lo": 0.0,
-      "hi": 0.039326,
+      "hi": 0.038961,
       "separable": false,
       "unit": "sample"
      },
@@ -17006,15 +17802,91 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 2,
+     "rank": 3,
      "vs_best": {
-      "n": 348,
-      "diff": 0.005747,
-      "lo": -0.012195,
-      "hi": 0.027527,
+      "n": 350,
+      "diff": 0.005714,
+      "lo": -0.012121,
+      "hi": 0.027375,
       "separable": false,
       "unit": "sample"
      },
+     "in_top_group": true
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.977143,
+     "j_ci": [
+      0.93656,
+      0.991076
+     ],
+     "j_ci_method": "newcombe",
+     "j_ci_unit": "sample",
+     "catch": 1.0,
+     "catch_ci": [
+      0.97852,
+      1.0
+     ],
+     "fa": 0.022857,
+     "fa_ci": [
+      0.008924,
+      0.057289
+     ],
+     "tp": 175,
+     "fp": 4,
+     "n_pos": 175,
+     "n_neg": 175,
+     "n_pos_readable": 175,
+     "n_neg_readable": 175,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.977143,
+     "j_bounds": [
+      0.977143,
+      0.977143
+     ],
+     "subset_n": null,
+     "cost": 26.176728,
+     "cost1k": 74.790651,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 26.176728,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 2.2857,
+     "ppv": {
+      "0.01": 0.306481,
+      "0.05": 0.697212,
+      "0.2": 0.916231
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "issue text; patch (unified diff)",
+      "flag_rule": "flagged when the answer carries \"scope_creep\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 350,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 1,
      "in_top_group": true
     },
     {
@@ -17091,12 +17963,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
-      "n": 348,
-      "diff": 0.448276,
-      "lo": 0.365079,
-      "hi": 0.532438,
+      "n": 350,
+      "diff": 0.445714,
+      "lo": 0.365499,
+      "hi": 0.52793,
       "separable": true,
       "unit": "sample"
      },
@@ -17183,12 +18055,12 @@
        "provider_error": 11
       }
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
-      "n": 336,
-      "diff": 1.013891,
-      "lo": 0.907386,
-      "hi": 1.120362,
+      "n": 338,
+      "diff": 1.013867,
+      "lo": 0.907043,
+      "hi": 1.120482,
       "separable": true,
       "unit": "sample"
      },
@@ -17697,22 +18569,23 @@
    "shortcut_audit": "published",
    "tuning_disclosure": "The clean side was tuned after looking at the reviewers' answers. With clean patches matched on file count only (54 + 54), J was +57% for deepseek-v4-flash, +43% for gpt-6-luna and +28% for grok-4.1-fast (mimo +91%). The clean side was then limited to near-minimal patches, a size rule chosen after reading which clean patches the three strong models flagged: +84% / +83% / +58% on 64 + 64 (mimo +94%). The published set uses the filtered clean side.",
    "best_reviewer": {
-    "key": "plain_llm_mimo",
-    "tool": "mimo-v2.6-flash, zero-shot",
-    "short": "mimo-v2.6-flash",
+    "key": "plain_llm_fable",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
     "kind": "model",
-    "j": 0.977011,
+    "j": 0.977143,
     "j_ci": [
-     0.936204,
-     0.991025
+     0.93656,
+     0.991076
     ],
     "catch": 1.0,
-    "fa": 0.022989,
-    "cost1k": 0.46522
+    "fa": 0.022857,
+    "cost1k": 74.790651
    },
    "incomplete_above_best": [],
    "top_group": [
+    "plain_llm_fable",
     "plain_llm_mimo",
     "plain_llm_opus55",
     "plain_llm_sonnet"
@@ -17722,11 +18595,11 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (mimo-v2.6-flash, claude-opus-5-5 (medium) and claude-sonnet-5-5 (medium)); the highest J is +97.7% (95% interval +93.6% to +99.1%).",
+   "ranking": "No single best reviewer: 4 rows cannot be told apart at 95% on the samples they share (claude-fable-5-2 (medium), mimo-v2.6-flash, claude-opus-5-5 (medium) and claude-sonnet-5-5 (medium)); the highest J is +97.7% (95% interval +93.7% to +99.1%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
-   "spend": 20.488233,
+   "spend": 46.664961,
    "strata": {
     "dataset_v1_0": {
      "description": "The same 350 samples as first published (v1.0, 2026-11-20): clean file sections were raw `git diff` output, the injected section came from another diff tool. Answers of the first run, scored with today's rule for unreadable answers.",
@@ -17865,6 +18738,19 @@
        "j_hi": 0.9892,
        "ci_method": "newcombe",
        "tp": 172,
+       "fp": 3,
+       "n_pos": 173,
+       "n_neg": 172,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 1.0,
+       "fpr": 0.0174,
+       "j": 0.9826,
+       "j_lo": 0.9434,
+       "j_hi": 0.9941,
+       "ci_method": "newcombe",
+       "tp": 173,
        "fp": 3,
        "n_pos": 173,
        "n_neg": 172,
@@ -18384,6 +19270,36 @@
         "readable": 127
        }
       },
+      "plain_llm_fable": {
+       "category:drive-by cleanup": {
+        "caught": 35,
+        "readable": 35
+       },
+       "category:drive-by refactor": {
+        "caught": 34,
+        "readable": 34
+       },
+       "category:unrequested behaviour change": {
+        "caught": 36,
+        "readable": 36
+       },
+       "category:unrequested feature": {
+        "caught": 38,
+        "readable": 38
+       },
+       "category:unrequested logging or config": {
+        "caught": 32,
+        "readable": 32
+       },
+       "inject_mode:new_file": {
+        "caught": 48,
+        "readable": 48
+       },
+       "inject_mode:same_file": {
+        "caught": 127,
+        "readable": 127
+       }
+      },
       "plain_llm_grok": {
        "category:drive-by cleanup": {
         "caught": 33,
@@ -18668,7 +19584,7 @@
     "The swap is an automatic code edit (imports, aliases, dotted paths, method and class names), kept only if the result uses the deprecated API and nothing else from the map. Checked against the latest release of each library: 114 of the swapped solutions use a name that is gone, 24 call a function that still exists but raises when called, and 13 still run with a deprecation notice.",
     "Plus 4 hand-written pairs for LLM SDKs (155 + 155 samples in all). Anthropic: a call that names Claude 3.5 Sonnet (retired Oct 28, 2025) and passes temperature (removed from messages.create in SDK 1.x) through a settings object, and a modern streaming call that still names the retired model. Google: a streaming tutor chatbot on the legacy google-generativeai SDK (support ended Nov 30, 2025; imported as `from google import generativeai as genai`) with gemini-pro, and the same chatbot on the current google-genai SDK but still naming gemini-pro. Clean twins use claude-sonnet-5-5 / gemini-3.8-flash on the current SDKs.",
     "Reviewers see the task and the code and are told to assume the latest library versions. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "Synthetic: the deprecated calls were swapped in; models writing freely today rarely use these APIs (49 of 956 solutions).",
@@ -18761,12 +19677,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 310,
-      "diff": 0.051613,
-      "lo": 0.012739,
-      "hi": 0.103854,
+      "diff": 0.058065,
+      "lo": 0.012658,
+      "hi": 0.115286,
       "separable": true,
       "unit": "api_pair"
      },
@@ -18849,7 +19765,15 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 1,
+     "rank": 2,
+     "vs_best": {
+      "n": 310,
+      "diff": 0.006452,
+      "lo": -0.013734,
+      "hi": 0.030484,
+      "separable": false,
+      "unit": "api_pair"
+     },
      "in_top_group": true
     },
     {
@@ -18929,12 +19853,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 2,
+     "rank": 3,
      "vs_best": {
       "n": 310,
-      "diff": 0.0,
-      "lo": -0.019608,
-      "hi": 0.018828,
+      "diff": 0.006452,
+      "lo": 0.0,
+      "hi": 0.021429,
       "separable": false,
       "unit": "api_pair"
      },
@@ -19017,15 +19941,95 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
       "n": 310,
-      "diff": 0.006452,
+      "diff": 0.012903,
       "lo": 0.0,
-      "hi": 0.020979,
+      "hi": 0.034498,
       "separable": false,
       "unit": "api_pair"
      },
+     "in_top_group": true
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.954839,
+     "j_ci": [
+      0.911337,
+      0.98746
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "api_pair",
+     "catch": 0.987097,
+     "catch_ci": [
+      0.954178,
+      0.996454
+     ],
+     "fa": 0.032258,
+     "fa_ci": [
+      0.013856,
+      0.073285
+     ],
+     "tp": 153,
+     "fp": 5,
+     "n_pos": 155,
+     "n_neg": 155,
+     "n_pos_readable": 155,
+     "n_neg_readable": 155,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.954839,
+     "j_bounds": [
+      0.954839,
+      0.954839
+     ],
+     "subset_n": null,
+     "cost": 7.148762,
+     "cost1k": 23.060523,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 7.148762,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 3.2258,
+     "ppv": {
+      "0.01": 0.236112,
+      "0.05": 0.616936,
+      "0.2": 0.884393
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "n_pos_removed": 142,
+      "recall_removed": 0.985915,
+      "youden_j_removed": 0.953657,
+      "recall_soft": 1.0,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "task text; code",
+      "flag_rule": "flagged when the answer carries \"uses_deprecated_api\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 310,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 1,
      "in_top_group": true
     },
     {
@@ -19110,12 +20114,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
       "n": 310,
-      "diff": 0.064516,
-      "lo": 0.012903,
-      "hi": 0.13125,
+      "diff": 0.070968,
+      "lo": 0.013416,
+      "hi": 0.141935,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19208,12 +20212,12 @@
        "truncated": 2
       }
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 308,
-      "diff": 0.064935,
-      "lo": 0.013691,
-      "hi": 0.120716,
+      "diff": 0.071429,
+      "lo": 0.022441,
+      "hi": 0.126534,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19297,12 +20301,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 310,
-      "diff": 0.419355,
-      "lo": 0.306153,
-      "hi": 0.536976,
+      "diff": 0.425806,
+      "lo": 0.314623,
+      "hi": 0.542313,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19386,12 +20390,12 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 310,
-      "diff": 0.806452,
-      "lo": 0.702204,
-      "hi": 0.898089,
+      "diff": 0.812903,
+      "lo": 0.708827,
+      "hi": 0.905177,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19479,12 +20483,12 @@
      "stars": 51351,
      "stars_updated_at": "2026-11-21",
      "kg_id": "ruff",
-     "rank": 11,
+     "rank": 12,
      "vs_best": {
       "n": 310,
-      "diff": 0.870968,
-      "lo": 0.769932,
-      "hi": 0.952735,
+      "diff": 0.877419,
+      "lo": 0.778015,
+      "hi": 0.958031,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19572,12 +20576,12 @@
      "stars": 51351,
      "stars_updated_at": "2026-11-21",
      "kg_id": "ruff",
-     "rank": 12,
+     "rank": 13,
      "vs_best": {
       "n": 310,
-      "diff": 0.935484,
-      "lo": 0.864661,
-      "hi": 0.999513,
+      "diff": 0.941935,
+      "lo": 0.870655,
+      "hi": 1.007407,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19662,12 +20666,12 @@
      "stars": 15755,
      "stars_updated_at": "2026-11-21",
      "kg_id": "pyright",
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 310,
-      "diff": 0.380645,
-      "lo": 0.23556,
-      "hi": 0.52795,
+      "diff": 0.387097,
+      "lo": 0.241176,
+      "hi": 0.536479,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19752,12 +20756,12 @@
      "stars": 20734,
      "stars_updated_at": "2026-11-21",
      "kg_id": "mypy",
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 310,
-      "diff": 0.806452,
-      "lo": 0.703804,
-      "hi": 0.891156,
+      "diff": 0.812903,
+      "lo": 0.712653,
+      "hi": 0.89627,
       "separable": true,
       "unit": "api_pair"
      },
@@ -19889,22 +20893,23 @@
    "shortcut_audit": "published",
    "tuning_disclosure": null,
    "best_reviewer": {
-    "key": "plain_llm_haiku",
-    "tool": "claude-haiku-5-5 (medium), zero-shot",
-    "short": "claude-haiku-5-5 (medium)",
+    "key": "plain_llm_fable",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
     "kind": "model",
-    "j": 0.948387,
+    "j": 0.954839,
     "j_ci": [
-     0.901408,
-     0.982558
+     0.911337,
+     0.98746
     ],
-    "catch": 0.980645,
+    "catch": 0.987097,
     "fa": 0.032258,
-    "cost1k": 0.364677
+    "cost1k": 23.060523
    },
    "incomplete_above_best": [],
    "top_group": [
+    "plain_llm_fable",
     "plain_llm_haiku",
     "plain_llm_sonnet",
     "plain_llm_opus55"
@@ -19914,7 +20919,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (claude-haiku-5-5 (medium), claude-sonnet-5-5 (medium) and claude-opus-5-5 (medium)); the highest J is +94.8% (95% interval +90.1% to +98.3%).",
+   "ranking": "No single best reviewer: 4 rows cannot be told apart at 95% on the samples they share (claude-fable-5-2 (medium), claude-haiku-5-5 (medium), claude-sonnet-5-5 (medium) and claude-opus-5-5 (medium)); the highest J is +95.5% (95% interval +91.1% to +98.7%).",
    "best_catalog_tool": {
     "key": "kg_pyright_libs",
     "tool": "pyright against the latest libraries (deprecated, missing attribute or import)",
@@ -19948,7 +20953,7 @@
     "fa": 0.03871,
     "cost1k": 0.0
    },
-   "spend": 6.006444,
+   "spend": 13.155206,
    "strata": {
     "map_renames_2024": {
      "description": "Solutions with a modern call swapped back to its deprecated twin, against untouched solutions. Every API change here is in a map published in 2024 and is years old: older than what any reviewed model has read.",
@@ -20003,6 +21008,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 151,
        "fp": 6,
+       "n_pos": 151,
+       "n_neg": 151,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 1.0,
+       "fpr": 0.0331,
+       "j": 0.9669,
+       "j_lo": 0.9267,
+       "j_hi": 0.9939,
+       "ci_method": "cluster_bootstrap",
+       "tp": 151,
+       "fp": 5,
        "n_pos": 151,
        "n_neg": 151,
        "unreadable": 0
@@ -20185,6 +21203,19 @@
        "n_neg": 4,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.5,
+       "fpr": 0.0,
+       "j": 0.5,
+       "j_lo": 0.0,
+       "j_hi": 1.0,
+       "ci_method": "cluster_bootstrap",
+       "tp": 2,
+       "fp": 0,
+       "n_pos": 4,
+       "n_neg": 4,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 1.0,
        "fpr": 1.0,
@@ -20361,6 +21392,19 @@
        "n_neg": 150,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 0.9871,
+       "fpr": 0.0,
+       "j": 0.9871,
+       "j_lo": 0.9655,
+       "j_hi": 1.0,
+       "ci_method": "cluster_bootstrap",
+       "tp": 153,
+       "fp": 0,
+       "n_pos": 155,
+       "n_neg": 150,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.9032,
        "fpr": 0.3533,
@@ -20520,6 +21564,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 131,
        "fp": 3,
+       "n_pos": 134,
+       "n_neg": 135,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.9851,
+       "fpr": 0.0148,
+       "j": 0.9703,
+       "j_lo": 0.9364,
+       "j_hi": 0.9933,
+       "ci_method": "cluster_bootstrap",
+       "tp": 132,
+       "fp": 2,
        "n_pos": 134,
        "n_neg": 135,
        "unreadable": 0
@@ -20815,6 +21872,13 @@
       },
       "plain_llm_opus55": {
        "caught": 1,
+       "of": 4,
+       "unreadable": 0,
+       "clean_twins_flagged": 0,
+       "clean_twins": 4
+      },
+      "plain_llm_fable": {
+       "caught": 2,
        "of": 4,
        "unreadable": 0,
        "clean_twins_flagged": 0,
@@ -21221,7 +22285,7 @@
     "Malicious names: 82 subtle typos of popular packages (plural, doubled/dropped/swapped letter, keyboard slip, digit, py- prefix; e.g. coloramas, urllib33) and 66 'popular name + word' combosquats (e.g. httpx-utils, twilio-rest).",
     "Genuine names, all checked on PyPI (3+ releases, first release before Nov 2024, mature version): 53 real plugin-style packages (e.g. dask-awkward, pytest-enabler), 44 real packages one letter away from a famous one (e.g. pep257, pyqrcode), 51 obscure real packages from the repos' environments. 66 of 148 are outside PyPI's top 15,000, so popularity alone does not vouch for them.",
     "The other added dependencies are packages actually installed in that repo's environment, at their real versions. Reviewers see the issue and the patch. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The cases were designed by Claude (the coding assistant building this benchmark), not generated by any reviewed model.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "Synthetic: real agents add a malicious dependency rarely; this tests whether a reviewer notices one, not how often agents do it.",
@@ -21311,7 +22375,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 2,
+     "rank": 3,
      "vs_best": {
       "n": 296,
       "diff": 0.060811,
@@ -21395,7 +22459,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 3,
+     "rank": 4,
      "vs_best": {
       "n": 296,
       "diff": 0.087838,
@@ -21479,7 +22543,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 296,
       "diff": 0.581081,
@@ -21567,6 +22631,90 @@
      "in_top_group": true
     },
     {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.790541,
+     "j_ci": [
+      0.722973,
+      0.851351
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "pair",
+     "catch": 0.993243,
+     "catch_ci": [
+      0.962722,
+      0.998806
+     ],
+     "fa": 0.202703,
+     "fa_ci": [
+      0.145839,
+      0.274609
+     ],
+     "tp": 147,
+     "fp": 30,
+     "n_pos": 148,
+     "n_neg": 148,
+     "n_pos_readable": 148,
+     "n_neg_readable": 148,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.790541,
+     "j_bounds": [
+      0.790541,
+      0.790541
+     ],
+     "subset_n": null,
+     "cost": 25.797912,
+     "cost1k": 87.155108,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 25.797912,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 20.2703,
+     "ppv": {
+      "0.01": 0.047161,
+      "0.05": 0.205021,
+      "0.2": 0.550561
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "issue text; patch (unified diff)",
+      "flag_rule": "flagged when the answer carries \"supply_chain_risk\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 296,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 2,
+     "vs_best": {
+      "n": 296,
+      "diff": 0.040541,
+      "lo": -0.006757,
+      "hi": 0.087838,
+      "separable": false,
+      "unit": "pair"
+     },
+     "in_top_group": true
+    },
+    {
      "key": "plain_llm_deepseek",
      "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
@@ -21649,7 +22797,7 @@
        "blocked": 4
       }
      },
-     "rank": 4,
+     "rank": 5,
      "vs_best": {
       "n": 292,
       "diff": 0.109589,
@@ -21743,7 +22891,7 @@
        "blocked": 4
       }
      },
-     "rank": 5,
+     "rank": 6,
      "vs_best": {
       "n": 292,
       "diff": 0.178082,
@@ -21828,7 +22976,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 296,
       "diff": 0.655405,
@@ -21920,7 +23068,7 @@
        "provider_error": 4
       }
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 290,
       "diff": 0.826579,
@@ -22281,6 +23429,7 @@
    "incomplete_above_best": [],
    "top_group": [
     "plain_llm_opus55",
+    "plain_llm_fable",
     "plain_llm_luna"
    ],
    "winner": null,
@@ -22288,11 +23437,11 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 2 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5 (medium) and gpt-6-luna); the highest J is +83.1% (95% interval +77.0% to +89.2%).",
+   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5 (medium), claude-fable-5-2 (medium) and gpt-6-luna); the highest J is +83.1% (95% interval +77.0% to +89.2%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
-   "spend": 19.827096,
+   "spend": 45.625008,
    "strata": {
     "genuine_popular_top15k": {
      "description": "Pairs whose genuine package is in the 15,000-name rank file. The name rule clears every such name without looking at it.",
@@ -22347,6 +23496,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 80,
        "fp": 16,
+       "n_pos": 82,
+       "n_neg": 82,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.9878,
+       "fpr": 0.2805,
+       "j": 0.7073,
+       "j_lo": 0.6098,
+       "j_hi": 0.8049,
+       "ci_method": "cluster_bootstrap",
+       "tp": 81,
+       "fp": 23,
        "n_pos": 82,
        "n_neg": 82,
        "unreadable": 0
@@ -22488,6 +23650,19 @@
        "n_neg": 66,
        "unreadable": 0
       },
+      "plain_llm_fable": {
+       "tpr": 1.0,
+       "fpr": 0.1061,
+       "j": 0.8939,
+       "j_lo": 0.8182,
+       "j_hi": 0.9545,
+       "ci_method": "cluster_bootstrap",
+       "tp": 66,
+       "fp": 7,
+       "n_pos": 66,
+       "n_neg": 66,
+       "unreadable": 0
+      },
       "plain_llm_grok": {
        "tpr": 0.8485,
        "fpr": 0.7424,
@@ -22606,6 +23781,13 @@
       "malicious:subtle": 1.0,
       "genuine:combo": 0.0377,
       "genuine:lookalike": 0.3409,
+      "genuine:obscure": 0.1176
+     },
+     "plain_llm_fable": {
+      "malicious:combo": 0.9848,
+      "malicious:subtle": 1.0,
+      "genuine:combo": 0.0755,
+      "genuine:lookalike": 0.4545,
       "genuine:obscure": 0.1176
      },
      "plain_llm_grok": {
@@ -22733,6 +23915,28 @@
       },
       "genuine:lookalike": {
        "flagged": 15,
+       "readable": 44
+      },
+      "genuine:obscure": {
+       "flagged": 6,
+       "readable": 51
+      }
+     },
+     "plain_llm_fable": {
+      "malicious:combo": {
+       "flagged": 65,
+       "readable": 66
+      },
+      "malicious:subtle": {
+       "flagged": 82,
+       "readable": 82
+      },
+      "genuine:combo": {
+       "flagged": 4,
+       "readable": 53
+      },
+      "genuine:lookalike": {
+       "flagged": 20,
        "readable": 44
       },
       "genuine:obscure": {
@@ -23036,6 +24240,13 @@
        "genuine_only": 0,
        "unreadable_side": 0
       },
+      "plain_llm_fable": {
+       "malicious_only": 117,
+       "both": 30,
+       "neither": 1,
+       "genuine_only": 0,
+       "unreadable_side": 0
+      },
       "plain_llm_grok": {
        "malicious_only": 38,
        "both": 90,
@@ -23196,7 +24407,7 @@
     "What is re-implemented: 30 of the repository's own helpers (e.g. PyJWT's base64url decoding, MONAI's ensure_tuple, oauthlib's raise_from_error, MetPy's check_units decorator), 17 standard-library functions (e.g. shlex.split, fnmatch, os.makedirs(exist_ok=True), csv.writer, functools.wraps, uuid4) and 3 NumPy functions (np.where, np.isclose, np.setdiff1d). How: 33 inline (the call replaced by a few lines), 11 rewritten helpers, 6 copies of the helper's body pasted into the patch.",
     "Each edit was checked: the file still parses, no undefined name is added (ruff F821), the original call is gone and the re-implementation is there. Seven hand-rolled helpers were extracted from the positive patches and run against the function they replace; they agree on the kind of input the patch passes (e.g. shlex.split 6 of 6, fnmatch 36 of 36, fountain's stringify 7 of 8: -0.0 differs). Others differ on edge cases, as hand-rolled code does (time-zone-aware indexes, error classes).",
     "Reviewers see the issue, the patch and, when the re-implemented function is the repository's own, the module that defines it (both patches of a pair see the same files). Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The pairs were written by Claude (the coding assistant building this benchmark), not by any reviewed model.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
+    "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer."
    ],
    "caveats": [
     "Hand-built: every re-implementation was written on purpose. Natural dependency blindness is often larger (whole helpers rebuilt) or subtler.",
@@ -23445,7 +24656,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 6,
+     "rank": 7,
      "vs_best": {
       "n": 100,
       "diff": 0.12,
@@ -23535,6 +24746,90 @@
       "diff": 0.0,
       "lo": -0.12,
       "hi": 0.12,
+      "separable": false,
+      "unit": "pair"
+     },
+     "in_top_group": true
+    },
+    {
+     "key": "plain_llm_fable",
+     "tool": "claude-fable-5-2 (medium), zero-shot",
+     "short": "claude-fable-5-2 (medium)",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "catalog": null,
+     "j": 0.86,
+     "j_ci": [
+      0.76,
+      0.94
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "pair",
+     "catch": 0.92,
+     "catch_ci": [
+      0.811615,
+      0.968451
+     ],
+     "fa": 0.06,
+     "fa_ci": [
+      0.020615,
+      0.162173
+     ],
+     "tp": 46,
+     "fp": 3,
+     "n_pos": 50,
+     "n_neg": 50,
+     "n_pos_readable": 50,
+     "n_neg_readable": 50,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.86,
+     "j_bounds": [
+      0.86,
+      0.86
+     ],
+     "subset_n": null,
+     "cost": 7.558424,
+     "cost1k": 75.58424,
+     "cost_basis": "api",
+     "cost_estimated": false,
+     "spend": 7.558424,
+     "cost_note": "list price of each call as printed by Claude Code; the run used a subscription, so nothing was charged per call",
+     "fa_per_100": 6.0,
+     "ppv": {
+      "0.01": 0.134111,
+      "0.05": 0.446602,
+      "0.2": 0.793103
+     },
+     "cheap": false,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "claude-fable-5-2",
+      "provider": "Claude Code, headless (subscription)",
+      "input": "issue text; patch (unified diff); source of the repository module(s) the patch could have reused (optional)",
+      "flag_rule": "flagged when the answer carries \"dependency_blindness\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-22",
+      "runs": 100,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 6,
+     "vs_best": {
+      "n": 100,
+      "diff": 0.04,
+      "lo": -0.08,
+      "hi": 0.16,
       "separable": false,
       "unit": "pair"
      },
@@ -23792,7 +25087,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 7,
+     "rank": 8,
      "vs_best": {
       "n": 100,
       "diff": 0.26,
@@ -23886,7 +25181,7 @@
        "provider_error": 3
       }
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 94,
       "diff": 0.978723,
@@ -24177,6 +25472,7 @@
     "plain_llm_opus55",
     "plain_llm_mimo",
     "plain_llm_deepseek",
+    "plain_llm_fable",
     "plain_llm_sonnet"
    ],
    "winner": null,
@@ -24184,11 +25480,11 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 6 rows cannot be told apart at 95% on the samples they share (gpt-6-luna, claude-haiku-5-5 (medium), claude-opus-5-5 (medium) and 3 more); the highest J is +90.0% (95% interval +82.0% to +98.0%).",
+   "ranking": "No single best reviewer: 7 rows cannot be told apart at 95% on the samples they share (gpt-6-luna, claude-haiku-5-5 (medium), claude-opus-5-5 (medium) and 4 more); the highest J is +90.0% (95% interval +82.0% to +98.0%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
-   "spend": 5.878589,
+   "spend": 13.437013,
    "strata": {
     "helper_file_shown": {
      "description": "Pairs that re-implement a helper of the repository. The reviewer is shown the module that defines the helper, so the hard part of real review (knowing that the helper exists) is given.",
@@ -24243,6 +25539,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 30,
        "fp": 1,
+       "n_pos": 30,
+       "n_neg": 30,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 1.0,
+       "fpr": 0.0667,
+       "j": 0.9333,
+       "j_lo": 0.8333,
+       "j_hi": 1.0,
+       "ci_method": "cluster_bootstrap",
+       "tp": 30,
+       "fp": 2,
        "n_pos": 30,
        "n_neg": 30,
        "unreadable": 0
@@ -24382,6 +25691,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 16,
        "fp": 0,
+       "n_pos": 20,
+       "n_neg": 20,
+       "unreadable": 0
+      },
+      "plain_llm_fable": {
+       "tpr": 0.8,
+       "fpr": 0.05,
+       "j": 0.75,
+       "j_lo": 0.55,
+       "j_hi": 0.9,
+       "ci_method": "cluster_bootstrap",
+       "tp": 16,
+       "fp": 1,
        "n_pos": 20,
        "n_neg": 20,
        "unreadable": 0
@@ -25229,6 +26551,157 @@
      },
      "constructed": {
       "j": 0.859402,
+      "n_modes": 6
+     }
+    }
+   },
+   {
+    "tool": "claude-fable-5-2 (medium)",
+    "type": "baseline_model",
+    "kind": null,
+    "cells": {
+     "fabrication": {
+      "key": "plain_llm_fable",
+      "j": 0.973539,
+      "j_ci": [
+       0.953438,
+       0.990616
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.003472,
+      "cost1k": 24.71071,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "test-manipulation": {
+      "key": "plain_llm_fable",
+      "j": 0.888411,
+      "j_ci": [
+       0.784952,
+       0.935384
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.040161,
+      "cost1k": 294.393282,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "security": {
+      "key": "plain_llm_fable",
+      "j": 0.305449,
+      "j_ci": [
+       0.196169,
+       0.411949
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.385621,
+      "cost1k": 103.008721,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "logic_error": {
+      "key": "plain_llm_fable",
+      "j": 0.882778,
+      "j_ci": [
+       0.851968,
+       0.910665
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.058628,
+      "cost1k": 23.222023,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "incomplete_execution": {
+      "key": "plain_llm_fable",
+      "j": 0.521667,
+      "j_ci": [
+       0.471521,
+       0.567199
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.188333,
+      "cost1k": 146.930564,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "scope_creep": {
+      "key": "plain_llm_fable",
+      "j": 0.977143,
+      "j_ci": [
+       0.93656,
+       0.991076
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.022857,
+      "cost1k": 74.790651,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "obsolescence": {
+      "key": "plain_llm_fable",
+      "j": 0.954839,
+      "j_ci": [
+       0.911337,
+       0.98746
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.032258,
+      "cost1k": 23.060523,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "supply_chain": {
+      "key": "plain_llm_fable",
+      "j": 0.790541,
+      "j_ci": [
+       0.722973,
+       0.851351
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.202703,
+      "cost1k": 87.155108,
+      "unreadable": 0,
+      "ranked": true
+     },
+     "dependency_blindness": {
+      "key": "plain_llm_fable",
+      "j": 0.86,
+      "j_ci": [
+       0.76,
+       0.94
+      ],
+      "tool": "claude-fable-5-2 (medium), zero-shot",
+      "short": "claude-fable-5-2 (medium)",
+      "fa": 0.06,
+      "cost1k": 75.58424,
+      "unreadable": 0,
+      "ranked": true
+     }
+    },
+    "n_modes": 9,
+    "all_modes": true,
+    "avg": 0.79493,
+    "avg_cost1k": 94.761758,
+    "avg_by_group": {
+     "natural_agent": {
+      "j": 0.413558,
+      "n_modes": 2
+     },
+     "natural_other": {
+      "j": 0.882778,
+      "n_modes": 1
+     },
+     "constructed": {
+      "j": 0.907412,
       "n_modes": 6
      }
     }
@@ -26605,30 +28078,22 @@
   ],
   "best": {
    "fabrication": {
-    "j": 0.955699,
+    "j": 0.973539,
     "j_ci": [
-     0.930212,
-     0.977961
+     0.953438,
+     0.990616
     ],
-    "tool": "claude-opus-5-5 (medium), zero-shot",
-    "short": "claude-opus-5-5 (medium)",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
-    "key": "plain_llm_opus55",
-    "winner": false,
+    "key": "plain_llm_fable",
+    "winner": true,
     "below_floor": false,
     "top_group": [
-     "claude-opus-5-5 (medium)",
-     "claude-sonnet-5-5 (medium)",
-     "claude-haiku-5-5 (medium)",
-     "deepseek-v4.1-flash",
-     "glm-5.3"
+     "claude-fable-5-2 (medium)"
     ],
     "top_group_keys": [
-     "plain_llm_opus55",
-     "plain_llm_sonnet",
-     "plain_llm_haiku",
-     "plain_llm_ds41",
-     "plain_llm_glm"
+     "plain_llm_fable"
     ]
    },
    "test-manipulation": {
@@ -26649,6 +28114,7 @@
      "giskard",
      "Qwen3.8-27B (self-hosted)",
      "mimo-v2.6-flash",
+     "claude-fable-5-2 (medium)",
      "deepseek-v4-flash",
      "glm-5.3",
      "claude-haiku-5-5 (medium)",
@@ -26662,6 +28128,7 @@
      "giskard",
      "plain_llm_qwen",
      "plain_llm_mimo",
+     "plain_llm_fable",
      "plain_llm",
      "plain_llm_glm",
      "plain_llm_haiku",
@@ -26671,22 +28138,22 @@
     ]
    },
    "security": {
-    "j": 0.231864,
+    "j": 0.305449,
     "j_ci": [
-     0.121198,
-     0.340316
+     0.196169,
+     0.411949
     ],
-    "tool": "claude-opus-5-5 (medium), zero-shot",
-    "short": "claude-opus-5-5 (medium)",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
-    "key": "plain_llm_opus55",
+    "key": "plain_llm_fable",
     "winner": true,
-    "below_floor": true,
+    "below_floor": false,
     "top_group": [
-     "claude-opus-5-5 (medium)"
+     "claude-fable-5-2 (medium)"
     ],
     "top_group_keys": [
-     "plain_llm_opus55"
+     "plain_llm_fable"
     ]
    },
    "logic_error": {
@@ -26703,73 +28170,79 @@
     "below_floor": false,
     "top_group": [
      "claude-sonnet-5-5 (medium)",
-     "claude-opus-5-5 (medium)"
+     "claude-opus-5-5 (medium)",
+     "claude-fable-5-2 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_sonnet",
-     "plain_llm_opus55"
+     "plain_llm_opus55",
+     "plain_llm_fable"
     ]
    },
    "incomplete_execution": {
-    "j": 0.46,
+    "j": 0.521667,
     "j_ci": [
-     0.408011,
-     0.507886
+     0.471521,
+     0.567199
     ],
-    "tool": "claude-opus-5-5 (medium), zero-shot",
-    "short": "claude-opus-5-5 (medium)",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
-    "key": "plain_llm_opus55",
+    "key": "plain_llm_fable",
     "winner": true,
     "below_floor": false,
     "top_group": [
-     "claude-opus-5-5 (medium)"
+     "claude-fable-5-2 (medium)"
     ],
     "top_group_keys": [
-     "plain_llm_opus55"
+     "plain_llm_fable"
     ]
    },
    "scope_creep": {
-    "j": 0.977011,
+    "j": 0.977143,
     "j_ci": [
-     0.936204,
-     0.991025
+     0.93656,
+     0.991076
     ],
-    "tool": "mimo-v2.6-flash, zero-shot",
-    "short": "mimo-v2.6-flash",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
-    "key": "plain_llm_mimo",
+    "key": "plain_llm_fable",
     "winner": false,
     "below_floor": false,
     "top_group": [
+     "claude-fable-5-2 (medium)",
      "mimo-v2.6-flash",
      "claude-opus-5-5 (medium)",
      "claude-sonnet-5-5 (medium)"
     ],
     "top_group_keys": [
+     "plain_llm_fable",
      "plain_llm_mimo",
      "plain_llm_opus55",
      "plain_llm_sonnet"
     ]
    },
    "obsolescence": {
-    "j": 0.948387,
+    "j": 0.954839,
     "j_ci": [
-     0.901408,
-     0.982558
+     0.911337,
+     0.98746
     ],
-    "tool": "claude-haiku-5-5 (medium), zero-shot",
-    "short": "claude-haiku-5-5 (medium)",
+    "tool": "claude-fable-5-2 (medium), zero-shot",
+    "short": "claude-fable-5-2 (medium)",
     "type": "baseline_model",
-    "key": "plain_llm_haiku",
+    "key": "plain_llm_fable",
     "winner": false,
     "below_floor": false,
     "top_group": [
+     "claude-fable-5-2 (medium)",
      "claude-haiku-5-5 (medium)",
      "claude-sonnet-5-5 (medium)",
      "claude-opus-5-5 (medium)"
     ],
     "top_group_keys": [
+     "plain_llm_fable",
      "plain_llm_haiku",
      "plain_llm_sonnet",
      "plain_llm_opus55"
@@ -26789,10 +28262,12 @@
     "below_floor": false,
     "top_group": [
      "claude-opus-5-5 (medium)",
+     "claude-fable-5-2 (medium)",
      "gpt-6-luna"
     ],
     "top_group_keys": [
      "plain_llm_opus55",
+     "plain_llm_fable",
      "plain_llm_luna"
     ]
    },
@@ -26814,6 +28289,7 @@
      "claude-opus-5-5 (medium)",
      "mimo-v2.6-flash",
      "deepseek-v4-flash",
+     "claude-fable-5-2 (medium)",
      "claude-sonnet-5-5 (medium)"
     ],
     "top_group_keys": [
@@ -26822,26 +28298,27 @@
      "plain_llm_opus55",
      "plain_llm_mimo",
      "plain_llm_deepseek",
+     "plain_llm_fable",
      "plain_llm_sonnet"
     ]
    }
   },
   "findings": [
    [
-    "On the 2 sets of real agent output (Security vulnerability and False 'done' claims; 2,902 samples) the best reviewer reaches J +23% on Security vulnerability and +46% on False 'done' claims.",
-    " Best J: +23% on Security vulnerability and +46% on False 'done' claims; 10 of the 29 ranked rows there have a 95% interval for J that excludes 0. On the 6 sets where the failure was planted on purpose the best reviewer reaches J +83% to +98%; on Logic error (model-written code that is not agent output) +89%. Every set of real agent output scores below every planted set, so this benchmark cannot tell 'reviewers catch these failures' from 'reviewers catch planted failures'. Whether the high scores carry over to failures agents make on their own is not tested."
+    "On the 2 sets of real agent output (Security vulnerability and False 'done' claims; 2,902 samples) the best reviewer reaches J +31% on Security vulnerability and +52% on False 'done' claims.",
+    " Best J: +31% on Security vulnerability and +52% on False 'done' claims; 12 of the 31 ranked rows there have a 95% interval for J that excludes 0. On the 6 sets where the failure was planted on purpose the best reviewer reaches J +83% to +98%; on Logic error (model-written code that is not agent output) +89%. Every set of real agent output scores below every planted set, so this benchmark cannot tell 'reviewers catch these failures' from 'reviewers catch planted failures'. Whether the high scores carry over to failures agents make on their own is not tested."
    ],
    [
     "6 of the 9 sets have constructed positives (Fabrication, Test edits that hide failures, Scope creep, Obsolescence, Supply chain and Dependency blindness).",
     " 3 use naturally produced output, 2 of them real agent output. A model-free shortcut baseline is published for 9 of the 9 sets."
    ],
    [
-    "A single best reviewer can be named in 2 of 9 modes.",
-    " Security vulnerability: claude-opus-5-5 (medium) (J +23%); False 'done' claims: claude-opus-5-5 (medium) (J +46%). In the others the leading rows cannot be told apart at 95% on the samples they share: Fabrication (5 rows, J +93% to +96%); Test edits that hide failures (11 rows, J +86% to +91%); Logic error (2 rows, J +88% to +89%); Scope creep (3 rows, J +96% to +98%); Obsolescence (3 rows, J +94% to +95%); Supply chain (2 rows, J +77% to +83%); Dependency blindness (6 rows, J +78% to +90%)."
+    "A single best reviewer can be named in 3 of 9 modes.",
+    " Fabrication: claude-fable-5-2 (medium) (J +97%); Security vulnerability: claude-fable-5-2 (medium) (J +31%); False 'done' claims: claude-fable-5-2 (medium) (J +52%). In the others the leading rows cannot be told apart at 95% on the samples they share: Test edits that hide failures (12 rows, J +86% to +91%); Logic error (3 rows, J +88% to +89%); Scope creep (4 rows, J +96% to +98%); Obsolescence (4 rows, J +94% to +95%); Supply chain (3 rows, J +77% to +83%); Dependency blindness (7 rows, J +78% to +90%)."
    ],
    [
-    "Where a catalog tool ran its own check (5 of 9 modes), a model asked the failure-specific question was clearly ahead of the best such tool in 4; in 1 no row reaches J 25%.",
-    " Ahead: Fabrication (claude-opus-5-5 (medium) +96% vs pyright +85%, difference +10 points on shared samples, 95% interval +6 to +15); Logic error (claude-sonnet-5-5 (medium) +89% vs PR-Agent +53%, difference +35 points on shared samples, 95% interval +30 to +40); False 'done' claims (claude-opus-5-5 (medium) +46% vs PR-Agent +15%, difference +31 points on shared samples, 95% interval +17 to +45); Obsolescence (claude-haiku-5-5 (medium) +95% vs pyright (latest libraries) +57%, difference +38 points on shared samples, 95% interval +24 to +53). No row at J 25%: Security vulnerability. No catalog tool with a check of its own for a finished change was run on Test edits that hide failures, Scope creep, Supply chain and Dependency blindness."
+    "Where a catalog tool ran its own check (5 of 9 modes), a model asked the failure-specific question was clearly ahead of the best such tool in 5.",
+    " Ahead: Fabrication (claude-fable-5-2 (medium) +97% vs pyright +85%, difference +12 points on shared samples, 95% interval +8 to +16); Security vulnerability (claude-fable-5-2 (medium) +31% vs PR-Agent +0%, difference +27 points on shared samples, 95% interval +18 to +37); Logic error (claude-sonnet-5-5 (medium) +89% vs PR-Agent +53%, difference +35 points on shared samples, 95% interval +30 to +40); False 'done' claims (claude-fable-5-2 (medium) +52% vs PR-Agent +15%, difference +30 points on shared samples, 95% interval +17 to +44); Obsolescence (claude-fable-5-2 (medium) +95% vs pyright (latest libraries) +57%, difference +39 points on shared samples, 95% interval +24 to +54). No catalog tool with a check of its own for a finished change was run on Test edits that hide failures, Scope creep, Supply chain and Dependency blindness."
    ],
    [
     "No packaged tool beat the same model asked the failure-specific question (12 comparisons on identical samples: 5 worse, 7 indistinguishable).",
@@ -26853,7 +28330,7 @@
    ],
    [
     "Phi-4-mini scores J under 20% in 6 of the 8 modes it ran in and grok-4.1-fast flags more than 30% of clean samples in 6 of 9 modes.",
-    " The other models that ran in at least 8 modes (gpt-6-luna, deepseek-v4-flash, mimo-v2.6-flash, claude-opus-5-5 (medium), claude-sonnet-5-5 (medium) and claude-haiku-5-5 (medium)) score J under 20% in at most 2 modes and flag more than 30% of clean samples in at most 2."
+    " The other models that ran in at least 8 modes (gpt-6-luna, deepseek-v4-flash, mimo-v2.6-flash, claude-fable-5-2 (medium), claude-opus-5-5 (medium), claude-sonnet-5-5 (medium) and claude-haiku-5-5 (medium)) score J under 20% in at most 2 modes and flag more than 30% of clean samples in at most 2."
    ]
   ],
   "caveats": [
@@ -26861,7 +28338,7 @@
    "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product. In use nobody knows which failure a change has, so the prompt of every mode would run on every change and their false alarms add up; the any-flag estimate next to the grid shows by how much. No run with all prompts on the same changes has been made.",
    "Samples are grouped in 6 of 9 modes (Fabrication: 163 files; Security vulnerability: 166 tasks; Logic error: 379 tasks; Obsolescence: 69 API pairs; Supply chain: 148 pairs; Dependency blindness: 50 pairs). Intervals there resample whole groups (100,000 draws). A reviewer is named best only when its paired difference from the runner-up, on the samples both answered, has a 95% interval that excludes 0; otherwise the rows that cannot be told apart are listed as a top group. The best row is still a pick on the test set, so its J is a little optimistic.",
    "Contamination was not assessed. Every set draws on public material (problem sets, GitHub issues and their fixes, CVE fixes, library release notes, package lists), so a model may have seen a task or its answer. Sources: Delulu (Microsoft) (public since 2026-03); Patronus TRACE (public since 2026-01); SusVibes (LeiLiLab) (public since 2025-12); Collu-Bench (lt-asset) (public since 2024-10); SWE-rebench-OpenHands-Trajectories (Nebius) (public since 2025-09); Wang et al. deprecated-API map (ICSE'25) (public since 2024-06); OpenSSF malicious-packages (public since 2023-03). The reviewers' training cut-off dates are not recorded here.",
-   "Rates are on answers that carry a verdict. 38 of 143 rows have unreadable answers (the count is beside each row, per label); 10 of them have fewer than 95% readable answers in one class and are marked incomplete.",
+   "Rates are on answers that carry a verdict. 38 of 152 rows have unreadable answers (the count is beside each row, per label); 10 of them have fewer than 95% readable answers in one class and are marked incomplete.",
    "Same prompt for every model within a mode, temperature 0 (gpt-6-luna: its default), one run each; run-to-run variation was not measured. Prompts and tool settings were fixed before scoring. mypy, ruff and the simple rules are shown in the best of the configurations we ran in each mode, which is a pick on the test set; pyright and mypy on Obsolescence ran with the latest libraries installed.",
    "Baseline rules and shortcut baselines are shown for reference. They are never counted as best and never enter a finding. Rows outside a tool's design scope are listed apart and are not ranked.",
    "A row's cost covers every call made to get its scored answers: the current answer of each sample plus earlier attempts that failed or were cut off and had to be re-run. Smoke tests, runs on earlier versions of a set and accidental duplicate answers are not included. Cost per 1,000 reviews is that cost divided by the reviews made, for one mode-specific question per review. Checking a change for every failure costs the sum over the modes.",
@@ -26881,8 +28358,8 @@
      "expected_false_alarms_per_clean_change": 1.801053,
      "cost1k_all_prompts": 4.74135,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.766059
+      "n_prompts": 9,
+      "any_flag": 0.892968
      }
     },
     {
@@ -26892,8 +28369,8 @@
      "expected_false_alarms_per_clean_change": 1.665207,
      "cost1k_all_prompts": 10.393425,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.784707
+      "n_prompts": 9,
+      "any_flag": 0.874289
      }
     },
     {
@@ -26903,8 +28380,19 @@
      "expected_false_alarms_per_clean_change": 1.045402,
      "cost1k_all_prompts": 8.783672,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.610594
+      "n_prompts": 9,
+      "any_flag": 0.693975
+     }
+    },
+    {
+     "model": "claude-fable-5-2 (medium)",
+     "n_prompts": 9,
+     "any_flag": 0.681779,
+     "expected_false_alarms_per_clean_change": 0.994033,
+     "cost1k_all_prompts": 852.855822,
+     "above_floor": {
+      "n_prompts": 9,
+      "any_flag": 0.681779
      }
     },
     {
@@ -26914,8 +28402,8 @@
      "expected_false_alarms_per_clean_change": 0.903858,
      "cost1k_all_prompts": 414.007552,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.468076
+      "n_prompts": 9,
+      "any_flag": 0.639589
      }
     },
     {
@@ -26925,8 +28413,8 @@
      "expected_false_alarms_per_clean_change": 1.445707,
      "cost1k_all_prompts": 203.77727,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.847991
+      "n_prompts": 9,
+      "any_flag": 0.883096
      }
     },
     {
@@ -26936,8 +28424,8 @@
      "expected_false_alarms_per_clean_change": 1.295768,
      "cost1k_all_prompts": 11.001668,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.740208
+      "n_prompts": 9,
+      "any_flag": 0.795109
      }
     },
     {
@@ -26947,8 +28435,8 @@
      "expected_false_alarms_per_clean_change": 4.214694,
      "cost1k_all_prompts": 5.468214,
      "above_floor": {
-      "n_prompts": 8,
-      "any_flag": 0.999157
+      "n_prompts": 9,
+      "any_flag": 0.999598
      }
     }
    ]
@@ -27175,17 +28663,17 @@
    {
     "mode": "fabrication",
     "mode_name": "Fabrication",
-    "model": "plain_llm_opus55",
-    "model_short": "claude-opus-5-5 (medium)",
-    "model_j": 0.955699,
+    "model": "plain_llm_fable",
+    "model_short": "claude-fable-5-2 (medium)",
+    "model_j": 0.973539,
     "tool": "pyright",
     "tool_short": "pyright",
     "tool_j": 0.853209,
     "n": 636,
-    "diff": 0.10249,
+    "diff": 0.12033,
     "ci": [
-     0.063217,
-     0.145514
+     0.081066,
+     0.163133
     ],
     "below_floor": false,
     "verdict": "model ahead"
@@ -27193,19 +28681,19 @@
    {
     "mode": "security",
     "mode_name": "Security vulnerability",
-    "model": "plain_llm_opus55",
-    "model_short": "claude-opus-5-5 (medium)",
-    "model_j": 0.231864,
+    "model": "plain_llm_fable",
+    "model_short": "claude-fable-5-2 (medium)",
+    "model_j": 0.305449,
     "tool": "pr_agent",
     "tool_short": "PR-Agent",
     "tool_j": 0.000466,
     "n": 1545,
-    "diff": 0.213553,
+    "diff": 0.27326,
     "ci": [
-     0.116934,
-     0.314709
+     0.178311,
+     0.370582
     ],
-    "below_floor": true,
+    "below_floor": false,
     "verdict": "model ahead"
    },
    {
@@ -27229,17 +28717,17 @@
    {
     "mode": "incomplete_execution",
     "mode_name": "False 'done' claims",
-    "model": "plain_llm_opus55",
-    "model_short": "claude-opus-5-5 (medium)",
-    "model_j": 0.46,
+    "model": "plain_llm_fable",
+    "model_short": "claude-fable-5-2 (medium)",
+    "model_j": 0.521667,
     "tool": "kg_pr_agent",
     "tool_short": "PR-Agent",
     "tool_j": 0.146853,
     "n": 286,
-    "diff": 0.307692,
+    "diff": 0.300699,
     "ci": [
-     0.169112,
-     0.446107
+     0.167379,
+     0.435
     ],
     "below_floor": false,
     "verdict": "model ahead"
@@ -27247,17 +28735,17 @@
    {
     "mode": "obsolescence",
     "mode_name": "Obsolescence",
-    "model": "plain_llm_haiku",
-    "model_short": "claude-haiku-5-5 (medium)",
-    "model_j": 0.948387,
+    "model": "plain_llm_fable",
+    "model_short": "claude-fable-5-2 (medium)",
+    "model_j": 0.954839,
     "tool": "kg_pyright_libs",
     "tool_short": "pyright (latest libraries)",
     "tool_j": 0.567742,
     "n": 310,
-    "diff": 0.380645,
+    "diff": 0.387097,
     "ci": [
-     0.23556,
-     0.52795
+     0.241176,
+     0.536479
     ],
     "below_floor": false,
     "verdict": "model ahead"
@@ -27268,9 +28756,9 @@
    "constructed": 6,
    "natural": 3,
    "agent_output": 2,
-   "single_winner": 2,
-   "rows": 143,
-   "ranked_rows": 108,
+   "single_winner": 3,
+   "rows": 152,
+   "ranked_rows": 117,
    "samples": 7339
   }
  },
@@ -27706,48 +29194,48 @@
  "inputs": [
   {
    "path": "bench/dependency_blindness/published/extras.json",
-   "sha256": "7da7729d455f739a5d4909646b7cea067ec973444ca2ccc7dd97258b3c741193",
-   "bytes": 17460
+   "sha256": "5d6d5a573d7330b14212c10bcc8d165c024c1d0a683462fda476d4d0a689b0b2",
+   "bytes": 17956
   },
   {
    "path": "bench/dependency_blindness/published/scores.json",
-   "sha256": "2036bdb92a72b13bd54b95dd488a56d164354a56ad3ebf2068649d05f7cceee2",
-   "bytes": 10162
+   "sha256": "d4d045e379744937982bcc7d1ac860a0258f87e51658220f43fa18d16e1aedf7",
+   "bytes": 11177
   },
   {
    "path": "bench/dependency_blindness/published/verdicts.csv",
-   "sha256": "c7990c74931832fd1058cff2f61b04ce9c37ea2faf2eff49a3eddbcae41d6c45",
-   "bytes": 5483
+   "sha256": "9e4c5da251d35714d8fc65e90fd294c0f430c3b0023df41cc2d413d87b1d318c",
+   "bytes": 5699
   },
   {
    "path": "bench/fabrication/published/extras.json",
-   "sha256": "9a3059c51616c2b064b446bc96cfcce9cff78c23a1122c9351065201c04c9095",
-   "bytes": 40179
+   "sha256": "8940d0705289c57f204d7d64ad9df1098165f392e9b0ce5456eed8fd93551898",
+   "bytes": 41782
   },
   {
    "path": "bench/fabrication/published/scores_relevant.json",
-   "sha256": "c3435374c834ef2583b49b12853f98c4e18323cbfef0a05d2ed82bd5577e448b",
-   "bytes": 27819
+   "sha256": "47fa82f3880ee5a611d89ba390925739e25ba3a6e2ae5c8dd39ae9f8e41c7ee1",
+   "bytes": 29224
   },
   {
    "path": "bench/fabrication/published/verdicts_relevant.csv",
-   "sha256": "cf0bee10ef9d9e306fab107eca4f00e49a838464c8562e6acb8b56459a7e737e",
-   "bytes": 74710
+   "sha256": "bec7d02bc658b178b828099d0d607b741a7bea645f7c97717b7db9c50fc80f49",
+   "bytes": 76042
   },
   {
    "path": "bench/incomplete_execution/published/extras.json",
-   "sha256": "3154102f1694627617f06d9d6b5bdf5e9b13795dda60d285c99ba20716b4c961",
-   "bytes": 11148
+   "sha256": "9f7abd361e7988af4d853bd65ae480bbe9c2e099135b135e1a6ad48ee78ea638",
+   "bytes": 11652
   },
   {
    "path": "bench/incomplete_execution/published/scores.json",
-   "sha256": "8c89efe4fe5d34c612d59d1c38d2e8232bc8b2f84cbfe9e95471b5f960dffc72",
-   "bytes": 10536
+   "sha256": "8be47b59e8259d456409c3cf05f22fb071e765e57aaca30b56a04c4e8ed585da",
+   "bytes": 11594
   },
   {
    "path": "bench/incomplete_execution/published/verdicts.csv",
-   "sha256": "a305216dc7464b52e46b224e8ce103ef54a9749abb882b30fbd5ed4ff31c5c29",
-   "bytes": 38217
+   "sha256": "0cfab1730439f00c472d290f82c1cffe39143d4ccd7dc9c3dfe33fa52a0794e3",
+   "bytes": 40633
   },
   {
    "path": "bench/kgtools/published/scores_incomplete_execution.json",
@@ -27781,13 +29269,13 @@
   },
   {
    "path": "bench/kitbuilder/pairs.json",
-   "sha256": "782bc3cb205ea175da55b9c23cb8c9cc8dd5b261bc367a8cac7fba03cd422ef0",
-   "bytes": 73379
+   "sha256": "f966b5dea2f44048511f806bc50ba26ead17e5270a9f0f5af6842bac926e02a6",
+   "bytes": 74327
   },
   {
    "path": "bench/kitbuilder/recipes.json",
-   "sha256": "38e9a2b708e5b6913380d934d20cd54397c85ac8c30deb7685f2b321a6350f5c",
-   "bytes": 199334
+   "sha256": "080285e15eca295fb0572b9db2012f55572e3746a4722f86fbe0641ade3f90dc",
+   "bytes": 213962
   },
   {
    "path": "bench/kitbuilder/star_modes.json",
@@ -27796,93 +29284,93 @@
   },
   {
    "path": "bench/logic_error/published/extras.json",
-   "sha256": "670d0521b001f43d4108a5c19030b6b8823d38f4e3d055fc8a3cd706465312f7",
-   "bytes": 22507
+   "sha256": "fb6ef4df04ca7373a7916483157969975a196160bf29126bb557399b5c0e4ea0",
+   "bytes": 23653
   },
   {
    "path": "bench/logic_error/published/scores.json",
-   "sha256": "68674400bc9cc1b7eac31153ccc55119070b7437bf00c39a6e1e44fd3ef8b531",
-   "bytes": 12809
+   "sha256": "d0d5e3a335fa947e70760496159e1d83d6516e30c0d8e28e4c4e2d72fa7b2eb9",
+   "bytes": 13877
   },
   {
    "path": "bench/logic_error/published/verdicts.csv",
-   "sha256": "e4f7944e169994c89e8aa828978b48e8c5980178bcc573e0c617eaf2bd6ffbbb",
-   "bytes": 160551
+   "sha256": "3536c9b266a23241a1671f0ad8eb50bbebbacf47a828b0c718e7e725864c5a62",
+   "bytes": 165447
   },
   {
    "path": "bench/obsolescence/published/extras.json",
-   "sha256": "52b3dc2e6b078f54f562e76c2ba7f2af55bb6ef852204c82c8e6cf0f5b03f396",
-   "bytes": 30800
+   "sha256": "a523d0dd5da2b0e690c1714461d4ab3a28519b78c37d4bb13cac0d4cfa8f7079",
+   "bytes": 31949
   },
   {
    "path": "bench/obsolescence/published/scores.json",
-   "sha256": "c4519e7e13fe47cf2459868656b8dfe2789e7b2c3fe6ed72fa6ca22d0720b4cb",
-   "bytes": 12665
+   "sha256": "d7dd01e89b9caf57bc6116f9bb2958448086a6573b3da829857657cef422c44c",
+   "bytes": 13837
   },
   {
    "path": "bench/obsolescence/published/verdicts.csv",
-   "sha256": "d5b0cd84d0452cedfeeac9b4544d221d2f23ab688cdbf4f898906e4c76ab85f5",
-   "bytes": 14631
+   "sha256": "c9148d81687531f7a7c839c8691cbc6b18241f8fab791ff26183e6471519a96e",
+   "bytes": 15267
   },
   {
    "path": "bench/scope_creep/published/extras.json",
-   "sha256": "f55c57cf58ea0e3fdd6febf873b2857dfe2d4dda92b2247c26831ff3c6fe631e",
-   "bytes": 28088
+   "sha256": "a53316de78a56db40a3d7453830591b918be5453b02289be23374c78c664979f",
+   "bytes": 28984
   },
   {
    "path": "bench/scope_creep/published/scores.json",
-   "sha256": "393251c681c86fca60b843a842e9cb36d88bf9e526b281393a02dd30b09292cd",
-   "bytes": 10424
+   "sha256": "a93f0f2f1487667409a202e4b7fc2f0fc56f267c528508fde3f9deadc1b45d11",
+   "bytes": 11466
   },
   {
    "path": "bench/scope_creep/published/verdicts.csv",
-   "sha256": "d729a66692e740edd46a4ae64ada1d8350d95e177e0170988d90f5aafaba3d14",
-   "bytes": 16551
+   "sha256": "fcedf5ba9dbbd6a910c599fadf198a544f1f5aaa7efe08eaa906670100581208",
+   "bytes": 17267
   },
   {
    "path": "bench/security/published/extras.json",
-   "sha256": "40f0906db209f1673c7417470cbc824307d34017d37c86ede20206038678a7ff",
-   "bytes": 83789
+   "sha256": "24e24bd6c7fe10898abd9750a76ed910544bb06f96a3f7636b0078080530fa80",
+   "bytes": 85912
   },
   {
    "path": "bench/security/published/scores.json",
-   "sha256": "a2b2e367523a26e54dd1a64a51b755dc9a705d5b44bdc2e0804fe5f08158b5bd",
-   "bytes": 44356
+   "sha256": "6d6928a172667854bf8244b8bf50cfb8d3431054d2656db687f8b421a271ce30",
+   "bytes": 46260
   },
   {
    "path": "bench/security/published/verdicts.csv",
-   "sha256": "62f7321e6e9e5376ffcdfadadb3f4385318aa19fd562975f262630d71aacf9ca",
-   "bytes": 327729
+   "sha256": "d587005ed93b6d97cecaea566b03afd6eea8d2318dba662be03892b67214c774",
+   "bytes": 331149
   },
   {
    "path": "bench/supply_chain/published/extras.json",
-   "sha256": "8c996307de29ff7c1fa910106edc34bebb4c5f431eb7d2f8fc7c1b19be73b8a5",
-   "bytes": 23339
+   "sha256": "719fe8ba7fc8af284be72b6516c5fa0a01d3f38c526498adbd259fdb62572019",
+   "bytes": 24567
   },
   {
    "path": "bench/supply_chain/published/scores.json",
-   "sha256": "001b0952b28399b41557d70664a661a41f35017060a18507e7f7f946f5e9aedb",
-   "bytes": 11628
+   "sha256": "53864960929b71bdae8e494ede4b2e4efa8042f0eff3ade951cfc40176e3e894",
+   "bytes": 12694
   },
   {
    "path": "bench/supply_chain/published/verdicts.csv",
-   "sha256": "46058f86ac45ed3bfa47a5e1f462ae674890ca8ebc81adcf12d578f9400d8ceb",
-   "bytes": 15105
+   "sha256": "85f394c0e252b1b633c7686f3c10d199bb71900161f47c9939d67dd521e26bcc",
+   "bytes": 15713
   },
   {
    "path": "bench/test_manipulation/published/extras.json",
-   "sha256": "0634df759bd5248f509a9b9badfb1e2863bce34776fa1c5c62bbccb79baa3be7",
-   "bytes": 16992
+   "sha256": "7ac769af2edbeed47e1a71b7009638bd33e1c7e26b0245051d4399ca49abb2f9",
+   "bytes": 17738
   },
   {
    "path": "bench/test_manipulation/published/scores.json",
-   "sha256": "37a15b4acf612f975d8d826b72fb78cb5b46e43812dfc4f7110eee83ff27abd1",
-   "bytes": 34503
+   "sha256": "08eeb6972ddfdab33ce4de9e645c7f3bd9342feac2ca3273e97b7ca2ff2de3cd",
+   "bytes": 36479
   },
   {
    "path": "bench/test_manipulation/published/verdicts.csv",
-   "sha256": "890cfc8e7d51393f10bffeb1326828724134a4a04dc2befba469f2d2b3b93898",
-   "bytes": 31077
+   "sha256": "a79643dab4ba6fb2f416aab3ac44ad4276b2ef110a34fd799a84404dc03d209d",
+   "bytes": 32217
   },
   {
    "path": "data/tools/arize-phoenix.yml",

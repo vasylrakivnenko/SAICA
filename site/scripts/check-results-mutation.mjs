@@ -54,6 +54,8 @@ const C = won[1] ? mode(won[1].id) : null;
 // ---------- mode A: new numbers in every row, a new single winner ----------
 A.rows.forEach((r) => {
   r.j = r4(r.j * 0.61 - 0.0173);
+  // a changed J that rounds to the old floor would read as "the old floor is still shown" in step 5
+  if (Math.round(r.j * 100) === Math.round(original.floor * 100)) r.j = r4(r.j + 0.0213);
   r.j_ci = [r4(r.j - 0.0311), r4(r.j + 0.0289)];
   r.catch = r4(r.catch * 0.83 + 0.011);
   r.fa = r4(r.fa * 0.5 + 0.0207);
