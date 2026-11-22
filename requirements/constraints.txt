@@ -296,7 +296,7 @@ pluggy==1.6.0
     # via
     #   -c requirements.lock.txt
     #   pytest
-pre-commit==4.6.0
+pre-commit==4.7.0
     # via
     #   -c requirements.lock.txt
     #   -r requirements/dev.txt
@@ -348,7 +348,7 @@ pyparsing==3.3.2
     # via
     #   -c requirements.lock.txt
     #   matplotlib
-pytest==9.0.3
+pytest==9.2.0
     # via
     #   -c requirements.lock.txt
     #   -r requirements/dev.txt
