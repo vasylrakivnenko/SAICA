@@ -19,6 +19,9 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 BENCH = REPO / "bench"
+if not (BENCH / "build_report.py").is_file():
+    # The public repository does not carry bench/ yet (scripts/publish_github.sh).
+    pytest.skip("bench/ is not in this checkout", allow_module_level=True)
 sys.path.insert(0, str(BENCH))
 
 import build_report  # noqa: E402

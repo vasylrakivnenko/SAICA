@@ -114,6 +114,12 @@ Read before citing:
 
 ### Rebuilding the results
 
+> **Not on GitHub yet:** the benchmark harness and its per-sample tables
+> (`bench/`) and the newer working notes (`research/`) are not part of the
+> public repository for now, so the `bench/` paths and commands in this
+> README do not work on a clone. The published results are in
+> [`site/public/bench/results.json`](site/public/bench/results.json).
+
 Each mode's harness and notes are under [`bench/<mode>/`](bench/).
 
 - `bench/<mode>/published/` holds the tracked inputs of the report: the
