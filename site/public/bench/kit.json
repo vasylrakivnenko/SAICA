@@ -1,5 +1,5 @@
 {
- "version": "2.0.1",
+ "version": "2.1.0",
  "generated": "2026-11-22",
  "generator": "bench/kitbuilder/build_kit.py (do not edit by hand)",
  "floor": 0.25,
@@ -30,18 +30,226 @@
    "n": 658,
    "provenance": "constructed",
    "agent_output": false,
-   "best_j": 0.943008,
-   "best_key": "plain_llm_ds41",
+   "best_j": 0.955699,
+   "best_key": "plain_llm_opus55",
    "top_group": [
+    "plain_llm_opus55",
+    "plain_llm_sonnet",
+    "plain_llm_haiku",
     "plain_llm_ds41",
-    "plain_llm_glm",
-    "plain_llm",
-    "plain_llm_luna"
+    "plain_llm_glm"
    ],
    "tier": "well",
    "tier_label": "J 80% or more on our set",
    "reliable": true,
    "rows": [
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.955699,
+     "j_ci": [
+      0.930212,
+      0.977961
+     ],
+     "tpr": 0.962644,
+     "fpr": 0.006944,
+     "tpr_ci": [
+      0.937143,
+      0.978041
+     ],
+     "fpr_ci": [
+      0.001906,
+      0.024963
+     ],
+     "n_pos": 348,
+     "n_neg": 288,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 0.6944,
+     "ppv": {
+      "0.01": 0.583385,
+      "0.05": 0.879464,
+      "0.2": 0.971955
+     },
+     "cost1k": 12.713859,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/fabrication.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"fabrication\": true|false, \"line\": <int or null>, \"symbol\": \"<name or null>\", \"reason\": \"<one sentence>\"}",
+       "verdict_field": "fabrication"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has fabrication = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "unified diff of the changed file with 15 lines of context"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.954502,
+     "j_ci": [
+      0.929223,
+      0.976384
+     ],
+     "tpr": 0.968391,
+     "fpr": 0.013889,
+     "tpr_ci": [
+      0.944293,
+      0.98226
+     ],
+     "fpr_ci": [
+      0.005414,
+      0.035162
+     ],
+     "n_pos": 348,
+     "n_neg": 288,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 1.3889,
+     "ppv": {
+      "0.01": 0.413242,
+      "0.05": 0.785852,
+      "0.2": 0.945743
+     },
+     "cost1k": 6.234354,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/fabrication.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"fabrication\": true|false, \"line\": <int or null>, \"symbol\": \"<name or null>\", \"reason\": \"<one sentence>\"}",
+       "verdict_field": "fabrication"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has fabrication = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "unified diff of the changed file with 15 lines of context"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.945881,
+     "j_ci": [
+      0.918893,
+      0.969588
+     ],
+     "tpr": 0.95977,
+     "fpr": 0.013889,
+     "tpr_ci": [
+      0.933613,
+      0.975887
+     ],
+     "fpr_ci": [
+      0.005414,
+      0.035162
+     ],
+     "n_pos": 348,
+     "n_neg": 288,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 1.3889,
+     "ppv": {
+      "0.01": 0.411075,
+      "0.05": 0.784343,
+      "0.2": 0.945283
+     },
+     "cost1k": 0.44528,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/fabrication.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"fabrication\": true|false, \"line\": <int or null>, \"symbol\": \"<name or null>\", \"reason\": \"<one sentence>\"}",
+       "verdict_field": "fabrication"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has fabrication = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "unified diff of the changed file with 15 lines of context"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
     {
      "key": "plain_llm_ds41",
      "tool": "deepseek-v4.1-flash, zero-shot",
@@ -1618,7 +1826,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_ds41",
+   "best_single": "plain_llm_opus55",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -1657,11 +1865,14 @@
    "best_key": "plain_llm_minimax",
    "top_group": [
     "plain_llm_minimax",
+    "plain_llm_sonnet",
     "giskard",
     "plain_llm_qwen",
     "plain_llm_mimo",
     "plain_llm",
     "plain_llm_glm",
+    "plain_llm_haiku",
+    "plain_llm_opus55",
     "promptfoo",
     "plain_llm_grok"
    ],
@@ -1775,6 +1986,76 @@
        "note": "Benchmark J 91% (95% interval 81% to 95%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time."
       }
      }
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.902252,
+     "j_ci": [
+      0.803976,
+      0.942399
+     ],
+     "tpr": 0.946429,
+     "fpr": 0.044177,
+     "tpr_ci": [
+      0.853925,
+      0.981615
+     ],
+     "fpr_ci": [
+      0.024844,
+      0.077361
+     ],
+     "n_pos": 56,
+     "n_neg": 249,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 4.4177,
+     "ppv": {
+      "0.01": 0.177902,
+      "0.05": 0.529977,
+      "0.2": 0.842666
+     },
+     "cost1k": 74.126853,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/test_manipulation.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "rule",
+        "transcript"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"test_manipulation\": true or false, \"evidence\": \"<turn number and what was changed, or empty>\"}",
+       "verdict_field": "test_manipulation"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has test_manipulation = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "full agent session transcript (messages, tool calls, tool results)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
     },
     {
      "key": "giskard",
@@ -2383,6 +2664,146 @@
        "note": "Benchmark J 88% (95% interval 78% to 92%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time."
       }
      }
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.875064,
+     "j_ci": [
+      0.769216,
+      0.924088
+     ],
+     "tpr": 0.927273,
+     "fpr": 0.052209,
+     "tpr_ci": [
+      0.827398,
+      0.971356
+     ],
+     "fpr_ci": [
+      0.030761,
+      0.087263
+     ],
+     "n_pos": 56,
+     "n_neg": 249,
+     "unreadable": 1,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 5.2209,
+     "ppv": {
+      "0.01": 0.152113,
+      "0.05": 0.483145,
+      "0.2": 0.816183
+     },
+     "cost1k": 3.73428,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/test_manipulation.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "rule",
+        "transcript"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"test_manipulation\": true or false, \"evidence\": \"<turn number and what was changed, or empty>\"}",
+       "verdict_field": "test_manipulation"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has test_manipulation = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "full agent session transcript (messages, tool calls, tool results)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.87457,
+     "j_ci": [
+      0.766709,
+      0.927901
+     ],
+     "tpr": 0.910714,
+     "fpr": 0.036145,
+     "tpr_ci": [
+      0.807438,
+      0.961258
+     ],
+     "fpr_ci": [
+      0.01913,
+      0.067254
+     ],
+     "n_pos": 56,
+     "n_neg": 249,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 3.6145,
+     "ppv": {
+      "0.01": 0.202874,
+      "0.05": 0.570098,
+      "0.2": 0.862996
+     },
+     "cost1k": 148.756375,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/test_manipulation.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "rule",
+        "transcript"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"test_manipulation\": true or false, \"evidence\": \"<turn number and what was changed, or empty>\"}",
+       "verdict_field": "test_manipulation"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has test_manipulation = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "full agent session transcript (messages, tool calls, tool results)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
     },
     {
      "key": "promptfoo",
@@ -3161,20 +3582,10 @@
    "n": 1702,
    "provenance": "natural",
    "agent_output": true,
-   "best_j": 0.079274,
-   "best_key": "plain_llm_gptoss",
+   "best_j": 0.231864,
+   "best_key": "plain_llm_opus55",
    "top_group": [
-    "plain_llm_gptoss",
-    "plain_llm_luna",
-    "giskard",
-    "plain_llm_ds41",
-    "plain_llm_mimo",
-    "plain_llm_ultra",
-    "plain_llm_qwen",
-    "plain_llm",
-    "promptfoo",
-    "pr_agent",
-    "plain_llm_minimax"
+    "plain_llm_opus55"
    ],
    "tier": "not-yet",
    "tier_label": "J under 25% on our set",
@@ -3228,6 +3639,77 @@
      "kit_check": null
     },
     {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.231864,
+     "j_ci": [
+      0.121198,
+      0.340316
+     ],
+     "tpr": 0.554304,
+     "fpr": 0.32244,
+     "tpr_ci": [
+      0.526547,
+      0.581727
+     ],
+     "fpr_ci": [
+      0.281305,
+      0.366523
+     ],
+     "n_pos": 1243,
+     "n_neg": 459,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 32.244,
+     "ppv": {
+      "0.01": 0.017068,
+      "0.05": 0.082971,
+      "0.2": 0.300588
+     },
+     "cost1k": 47.51542,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/security_vulnerability.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "task",
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"vulnerable\": true or false, \"cwe\": \"<CWE id or empty>\", \"evidence\": \"<file and what is wrong, or empty>\"}",
+       "verdict_field": "vulnerable"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has vulnerable = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "unified diff of the change"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
      "key": "patch_length",
      "tool": "Patch length: shorter than the median patch (4,142 characters)",
      "short": "Patch length",
@@ -3272,6 +3754,77 @@
      "recommendable": false,
      "why_not": "shortcut baseline of the benchmark, not a reviewer",
      "recipe": {},
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.116609,
+     "j_ci": [
+      0.015492,
+      0.212686
+     ],
+     "tpr": 0.347546,
+     "fpr": 0.230937,
+     "tpr_ci": [
+      0.32158,
+      0.374452
+     ],
+     "fpr_ci": [
+      0.194711,
+      0.271629
+     ],
+     "n_pos": 1243,
+     "n_neg": 459,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 23.0937,
+     "ppv": {
+      "0.01": 0.014974,
+      "0.05": 0.073394,
+      "0.2": 0.27338
+     },
+     "cost1k": 21.637463,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/security_vulnerability.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "task",
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"vulnerable\": true or false, \"cwe\": \"<CWE id or empty>\", \"evidence\": \"<file and what is wrong, or empty>\"}",
+       "verdict_field": "vulnerable"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has vulnerable = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "unified diff of the change"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
      "kit_check": null
     },
     {
@@ -4152,6 +4705,77 @@
      "kit_check": null
     },
     {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.022782,
+     "j_ci": [
+      -0.06617,
+      0.105388
+     ],
+     "tpr": 0.234111,
+     "fpr": 0.211329,
+     "tpr_ci": [
+      0.211412,
+      0.258449
+     ],
+     "fpr_ci": [
+      0.176454,
+      0.250996
+     ],
+     "n_pos": 1243,
+     "n_neg": 459,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 21.1329,
+     "ppv": {
+      "0.01": 0.011066,
+      "0.05": 0.055093,
+      "0.2": 0.216885
+     },
+     "cost1k": 1.125464,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/security_vulnerability.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
+       "placeholders": [
+        "task",
+        "diff"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"vulnerable\": true or false, \"cwe\": \"<CWE id or empty>\", \"evidence\": \"<file and what is wrong, or empty>\"}",
+       "verdict_field": "vulnerable"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has vulnerable = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "unified diff of the change"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
      "key": "promptfoo",
      "tool": "promptfoo llm-rubric (deepseek-v4-flash judge)",
      "short": "promptfoo",
@@ -4828,8 +5452,35 @@
      "kit_check": null
     }
    ],
-   "best_single": "plain_llm_gptoss",
-   "robust_pair": null,
+   "best_single": "plain_llm_opus55",
+   "robust_pair": {
+    "a": "plain_llm_opus55",
+    "b": "plain_llm_sonnet",
+    "rule": "or",
+    "n": 1702,
+    "tpr": 0.5881,
+    "fpr": 0.3377,
+    "j": 0.2504,
+    "tpr_ci": [
+     0.5605,
+     0.6151
+    ],
+    "fpr_ci": [
+     0.2959,
+     0.3821
+    ],
+    "cost1k_both": 69.1529,
+    "cost1k_cascade": 54.1333,
+    "cascade_first": "plain_llm_sonnet",
+    "gain_vs_best_single": 1.85,
+    "gain_ci": [
+     0.35,
+     3.36
+    ],
+    "gain_vs_best_member": 1.85,
+    "held_out_gain": 1.46,
+    "share_positive": 0.96
+   },
    "units": {
     "llm": {
      "benchmark": "the task text and the agent's patch as one diff",
@@ -4855,15 +5506,229 @@
    "n": 2440,
    "provenance": "natural",
    "agent_output": false,
-   "best_j": 0.743398,
-   "best_key": "plain_llm_mimo",
+   "best_j": 0.885261,
+   "best_key": "plain_llm_sonnet",
    "top_group": [
-    "plain_llm_mimo"
+    "plain_llm_sonnet",
+    "plain_llm_opus55"
    ],
-   "tier": "partly",
-   "tier_label": "J 25% to under 80% on our set",
+   "tier": "well",
+   "tier_label": "J 80% or more on our set",
    "reliable": true,
    "rows": [
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.885261,
+     "j_ci": [
+      0.856219,
+      0.911574
+     ],
+     "tpr": 0.961589,
+     "fpr": 0.076327,
+     "tpr_ci": [
+      0.950769,
+      0.970105
+     ],
+     "fpr_ci": [
+      0.060755,
+      0.095485
+     ],
+     "n_pos": 1536,
+     "n_neg": 904,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 7.6327,
+     "ppv": {
+      "0.01": 0.11289,
+      "0.05": 0.398701,
+      "0.2": 0.759011
+     },
+     "cost1k": 5.948434,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/logic_error.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/logic_error/run_tools.py:PROMPT",
+       "placeholders": [
+        "spec",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"logic_error\": true or false, \"evidence\": \"<what is wrong and an input where it fails, or empty>\"}",
+       "verdict_field": "logic_error"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has logic_error = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task description",
+       "function source"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.883435,
+     "j_ci": [
+      0.854035,
+      0.910276
+     ],
+     "tpr": 0.953125,
+     "fpr": 0.06969,
+     "tpr_ci": [
+      0.941377,
+      0.962612
+     ],
+     "fpr_ci": [
+      0.054848,
+      0.088174
+     ],
+     "n_pos": 1536,
+     "n_neg": 904,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 6.969,
+     "ppv": {
+      "0.01": 0.12138,
+      "0.05": 0.418545,
+      "0.2": 0.773713
+     },
+     "cost1k": 11.418103,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/logic_error.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/logic_error/run_tools.py:PROMPT",
+       "placeholders": [
+        "spec",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"logic_error\": true or false, \"evidence\": \"<what is wrong and an input where it fails, or empty>\"}",
+       "verdict_field": "logic_error"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has logic_error = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task description",
+       "function source"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.819057,
+     "j_ci": [
+      0.782822,
+      0.852351
+     ],
+     "tpr": 0.907552,
+     "fpr": 0.088496,
+     "tpr_ci": [
+      0.892032,
+      0.921039
+     ],
+     "fpr_ci": [
+      0.07168,
+      0.108794
+     ],
+     "n_pos": 1536,
+     "n_neg": 904,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 8.8496,
+     "ppv": {
+      "0.01": 0.093865,
+      "0.05": 0.350545,
+      "0.2": 0.719402
+     },
+     "cost1k": 0.423872,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/logic_error.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/logic_error/run_tools.py:PROMPT",
+       "placeholders": [
+        "spec",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"logic_error\": true or false, \"evidence\": \"<what is wrong and an input where it fails, or empty>\"}",
+       "verdict_field": "logic_error"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has logic_error = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task description",
+       "function source"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
     {
      "key": "plain_llm_mimo",
      "tool": "mimo-v2.6-flash, zero-shot",
@@ -5864,7 +6729,7 @@
      "kit_check": null
     }
    ],
-   "best_single": "plain_llm_mimo",
+   "best_single": "plain_llm_sonnet",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -5896,17 +6761,14 @@
    "n": 1200,
    "provenance": "natural",
    "agent_output": true,
-   "best_j": 0.195,
-   "best_key": "plain_llm_luna",
+   "best_j": 0.46,
+   "best_key": "plain_llm_opus55",
    "top_group": [
-    "plain_llm_luna",
-    "plain_llm_deepseek",
-    "plain_llm_mimo",
-    "kg_pr_agent"
+    "plain_llm_opus55"
    ],
-   "tier": "not-yet",
-   "tier_label": "J under 25% on our set",
-   "reliable": false,
+   "tier": "partly",
+   "tier_label": "J 25% to under 80% on our set",
+   "reliable": true,
    "rows": [
     {
      "key": "issue_prior",
@@ -5953,6 +6815,152 @@
      "recommendable": false,
      "why_not": "shortcut baseline of the benchmark, not a reviewer",
      "recipe": {},
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.46,
+     "j_ci": [
+      0.408011,
+      0.507886
+     ],
+     "tpr": 0.691667,
+     "fpr": 0.231667,
+     "tpr_ci": [
+      0.653593,
+      0.727302
+     ],
+     "fpr_ci": [
+      0.199679,
+      0.267068
+     ],
+     "n_pos": 600,
+     "n_neg": 600,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 23.1667,
+     "ppv": {
+      "0.01": 0.029275,
+      "0.05": 0.135798,
+      "0.2": 0.427394
+     },
+     "cost1k": 64.65275,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/incomplete_execution.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch",
+        "final"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"incomplete\": true or false, \"evidence\": \"<what is missing or wrong, or empty>\"}",
+       "verdict_field": "incomplete"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has incomplete = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "final patch (unified diff)",
+       "agent closing message"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters, closing message to 8,000."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.348333,
+     "j_ci": [
+      0.29555,
+      0.398195
+     ],
+     "tpr": 0.56,
+     "fpr": 0.211667,
+     "tpr_ci": [
+      0.520024,
+      0.599213
+     ],
+     "fpr_ci": [
+      0.180868,
+      0.246134
+     ],
+     "n_pos": 600,
+     "n_neg": 600,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 21.1667,
+     "ppv": {
+      "0.01": 0.026028,
+      "0.05": 0.122226,
+      "0.2": 0.398104
+     },
+     "cost1k": 32.020692,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/incomplete_execution.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch",
+        "final"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"incomplete\": true or false, \"evidence\": \"<what is missing or wrong, or empty>\"}",
+       "verdict_field": "incomplete"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has incomplete = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "final patch (unified diff)",
+       "agent closing message"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters, closing message to 8,000."
+     },
      "kit_check": null
     },
     {
@@ -6280,6 +7288,79 @@
        "note": "Benchmark J 20% (95% interval 14% to 25%; 600 bad + 600 clean samples) on the issue, the agent's final patch and the agent's closing message. At commit time this check sees the task file and the commit's diff; the closing message only if the agent writes it to .saica/final_message.txt before committing. So: part of the benchmark input is not available at commit time."
       }
      }
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.166667,
+     "j_ci": [
+      0.11168,
+      0.220231
+     ],
+     "tpr": 0.691667,
+     "fpr": 0.525,
+     "tpr_ci": [
+      0.653593,
+      0.727302
+     ],
+     "fpr_ci": [
+      0.48501,
+      0.564672
+     ],
+     "n_pos": 600,
+     "n_neg": 600,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 52.5,
+     "ppv": {
+      "0.01": 0.013133,
+      "0.05": 0.064844,
+      "0.2": 0.247761
+     },
+     "cost1k": 1.716443,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/incomplete_execution.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch",
+        "final"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"incomplete\": true or false, \"evidence\": \"<what is missing or wrong, or empty>\"}",
+       "verdict_field": "incomplete"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has incomplete = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "final patch (unified diff)",
+       "agent closing message"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters, closing message to 8,000."
+     },
+     "kit_check": null
     },
     {
      "key": "kg_pr_agent",
@@ -7031,7 +8112,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_deepseek",
+   "best_single": "plain_llm_opus55",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -7047,7 +8128,8 @@
    },
    "pair": null,
    "default_pick": {
-    "kind": "unreliable"
+    "kind": "weak",
+    "best": "plain_llm_deepseek"
    }
   },
   {
@@ -7061,7 +8143,9 @@
    "best_j": 0.977011,
    "best_key": "plain_llm_mimo",
    "top_group": [
-    "plain_llm_mimo"
+    "plain_llm_mimo",
+    "plain_llm_opus55",
+    "plain_llm_sonnet"
    ],
    "tier": "well",
    "tier_label": "J 80% or more on our set",
@@ -7172,6 +8256,148 @@
        "note": "Benchmark J 98% (95% interval 94% to 99%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       }
      }
+    },
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.971429,
+     "j_ci": [
+      0.928319,
+      0.986135
+     ],
+     "tpr": 0.994286,
+     "fpr": 0.022857,
+     "tpr_ci": [
+      0.968346,
+      0.998991
+     ],
+     "fpr_ci": [
+      0.008924,
+      0.057289
+     ],
+     "n_pos": 175,
+     "n_neg": 175,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 2.2857,
+     "ppv": {
+      "0.01": 0.305265,
+      "0.05": 0.696001,
+      "0.2": 0.91579
+     },
+     "cost1k": 36.894423,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/scope_creep.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/scope_creep/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"scope_creep\": true or false, \"evidence\": \"<file and the unrequested change, or empty>\"}",
+       "verdict_field": "scope_creep"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has scope_creep = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.96,
+     "j_ci": [
+      0.914374,
+      0.980491
+     ],
+     "tpr": 1.0,
+     "fpr": 0.04,
+     "tpr_ci": [
+      0.97852,
+      1.0
+     ],
+     "fpr_ci": [
+      0.019509,
+      0.080253
+     ],
+     "n_pos": 175,
+     "n_neg": 175,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 4.0,
+     "ppv": {
+      "0.01": 0.201613,
+      "0.05": 0.568182,
+      "0.2": 0.862069
+     },
+     "cost1k": 18.715154,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/scope_creep.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/scope_creep/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"scope_creep\": true or false, \"evidence\": \"<file and the unrequested change, or empty>\"}",
+       "verdict_field": "scope_creep"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has scope_creep = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
     },
     {
      "key": "plain_llm_deepseek",
@@ -7383,6 +8609,77 @@
        "note": "Benchmark J 91% (95% interval 86% to 95%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       }
      }
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.897143,
+     "j_ci": [
+      0.839155,
+      0.933943
+     ],
+     "tpr": 1.0,
+     "fpr": 0.102857,
+     "tpr_ci": [
+      0.97852,
+      1.0
+     ],
+     "fpr_ci": [
+      0.066057,
+      0.156719
+     ],
+     "n_pos": 175,
+     "n_neg": 175,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 10.2857,
+     "ppv": {
+      "0.01": 0.089423,
+      "0.05": 0.338492,
+      "0.2": 0.708502
+     },
+     "cost1k": 0.996874,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/scope_creep.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/scope_creep/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"scope_creep\": true or false, \"evidence\": \"<file and the unrequested change, or empty>\"}",
+       "verdict_field": "scope_creep"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has scope_creep = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
     },
     {
      "key": "plain_llm_grok",
@@ -8013,12 +9310,12 @@
    "n": 310,
    "provenance": "constructed",
    "agent_output": false,
-   "best_j": 0.896774,
-   "best_key": "plain_llm_luna",
+   "best_j": 0.948387,
+   "best_key": "plain_llm_haiku",
    "top_group": [
-    "plain_llm_luna",
-    "plain_llm_mimo",
-    "plain_llm_deepseek"
+    "plain_llm_haiku",
+    "plain_llm_sonnet",
+    "plain_llm_opus55"
    ],
    "tier": "well",
    "tier_label": "J 80% or more on our set",
@@ -8069,6 +9366,219 @@
      "recommendable": false,
      "why_not": "shortcut baseline of the benchmark, not a reviewer",
      "recipe": {},
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.948387,
+     "j_ci": [
+      0.901408,
+      0.982558
+     ],
+     "tpr": 0.980645,
+     "fpr": 0.032258,
+     "tpr_ci": [
+      0.944645,
+      0.993396
+     ],
+     "fpr_ci": [
+      0.013856,
+      0.073285
+     ],
+     "n_pos": 155,
+     "n_neg": 155,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 3.2258,
+     "ppv": {
+      "0.01": 0.234931,
+      "0.05": 0.615385,
+      "0.2": 0.883721
+     },
+     "cost1k": 0.364677,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/obsolescence.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/obsolescence/run_tools.py:PROMPT",
+       "placeholders": [
+        "task",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"uses_deprecated_api\": true or false, \"evidence\": \"<the deprecated API and its replacement, or empty>\"}",
+       "verdict_field": "uses_deprecated_api"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has uses_deprecated_api = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "code"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.948387,
+     "j_ci": [
+      0.902381,
+      0.982427
+     ],
+     "tpr": 0.987097,
+     "fpr": 0.03871,
+     "tpr_ci": [
+      0.954178,
+      0.996454
+     ],
+     "fpr_ci": [
+      0.017859,
+      0.081873
+     ],
+     "n_pos": 155,
+     "n_neg": 155,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 3.871,
+     "ppv": {
+      "0.01": 0.204818,
+      "0.05": 0.573032,
+      "0.2": 0.864406
+     },
+     "cost1k": 6.029913,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/obsolescence.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/obsolescence/run_tools.py:PROMPT",
+       "placeholders": [
+        "task",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"uses_deprecated_api\": true or false, \"evidence\": \"<the deprecated API and its replacement, or empty>\"}",
+       "verdict_field": "uses_deprecated_api"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has uses_deprecated_api = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "code"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.941935,
+     "j_ci": [
+      0.893598,
+      0.979167
+     ],
+     "tpr": 0.980645,
+     "fpr": 0.03871,
+     "tpr_ci": [
+      0.944645,
+      0.993396
+     ],
+     "fpr_ci": [
+      0.017859,
+      0.081873
+     ],
+     "n_pos": 155,
+     "n_neg": 155,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 3.871,
+     "ppv": {
+      "0.01": 0.203752,
+      "0.05": 0.571426,
+      "0.2": 0.863635
+     },
+     "cost1k": 11.889065,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/obsolescence.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/obsolescence/run_tools.py:PROMPT",
+       "placeholders": [
+        "task",
+        "code"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"uses_deprecated_api\": true or false, \"evidence\": \"<the deprecated API and its replacement, or empty>\"}",
+       "verdict_field": "uses_deprecated_api"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has uses_deprecated_api = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "task text",
+       "code"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'."
+     },
      "kit_check": null
     },
     {
@@ -9041,7 +10551,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_luna",
+   "best_single": "plain_llm_haiku",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -9075,14 +10585,14 @@
    "n": 296,
    "provenance": "constructed",
    "agent_output": false,
-   "best_j": 0.77027,
-   "best_key": "plain_llm_luna",
+   "best_j": 0.831081,
+   "best_key": "plain_llm_opus55",
    "top_group": [
-    "plain_llm_luna",
-    "plain_llm_deepseek"
+    "plain_llm_opus55",
+    "plain_llm_luna"
    ],
-   "tier": "partly",
-   "tier_label": "J 25% to under 80% on our set",
+   "tier": "well",
+   "tier_label": "J 80% or more on our set",
    "reliable": true,
    "rows": [
     {
@@ -9205,6 +10715,77 @@
      "kit_check": null
     },
     {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.831081,
+     "j_ci": [
+      0.77027,
+      0.891892
+     ],
+     "tpr": 0.986486,
+     "fpr": 0.155405,
+     "tpr_ci": [
+      0.95207,
+      0.996286
+     ],
+     "fpr_ci": [
+      0.105842,
+      0.222405
+     ],
+     "n_pos": 148,
+     "n_neg": 148,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 15.5405,
+     "ppv": {
+      "0.01": 0.060256,
+      "0.05": 0.250429,
+      "0.2": 0.613446
+     },
+     "cost1k": 42.701878,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/supply_chain_attack.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/supply_chain/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"supply_chain_risk\": true or false, \"evidence\": \"<package or line and why, or empty>\"}",
+       "verdict_field": "supply_chain_risk"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has supply_chain_risk = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
+    },
+    {
      "key": "plain_llm_luna",
      "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
@@ -9308,6 +10889,77 @@
        "note": "Benchmark J 77% (95% interval 70% to 84%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       }
      }
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.743243,
+     "j_ci": [
+      0.668919,
+      0.810811
+     ],
+     "tpr": 0.972973,
+     "fpr": 0.22973,
+     "tpr_ci": [
+      0.932573,
+      0.989441
+     ],
+     "fpr_ci": [
+      0.169309,
+      0.303826
+     ],
+     "n_pos": 148,
+     "n_neg": 148,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 22.973,
+     "ppv": {
+      "0.01": 0.041026,
+      "0.05": 0.182278,
+      "0.2": 0.514285
+     },
+     "cost1k": 1.147078,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/supply_chain_attack.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/supply_chain/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"supply_chain_risk\": true or false, \"evidence\": \"<package or line and why, or empty>\"}",
+       "verdict_field": "supply_chain_risk"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has supply_chain_risk = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
     },
     {
      "key": "plain_llm_deepseek",
@@ -9641,6 +11293,77 @@
      "kit_check": null
     },
     {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.25,
+     "j_ci": [
+      0.182432,
+      0.324324
+     ],
+     "tpr": 1.0,
+     "fpr": 0.75,
+     "tpr_ci": [
+      0.9747,
+      1.0
+     ],
+     "fpr_ci": [
+      0.67451,
+      0.81284
+     ],
+     "n_pos": 148,
+     "n_neg": 148,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 75.0,
+     "ppv": {
+      "0.01": 0.013289,
+      "0.05": 0.065574,
+      "0.2": 0.25
+     },
+     "cost1k": 20.474466,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/supply_chain_attack.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/supply_chain/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"supply_chain_risk\": true or false, \"evidence\": \"<package or line and why, or empty>\"}",
+       "verdict_field": "supply_chain_risk"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has supply_chain_risk = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to its first 20,000 characters."
+     },
+     "kit_check": null
+    },
+    {
      "key": "plain_llm_grok",
      "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
@@ -9926,7 +11649,7 @@
      17.98
     ],
     "gain_vs_best_member": 12.16,
-    "held_out_gain": 13.39,
+    "held_out_gain": 13.05,
     "share_positive": 1.0
    },
    "units": {
@@ -9959,8 +11682,11 @@
    "best_key": "plain_llm_luna",
    "top_group": [
     "plain_llm_luna",
+    "plain_llm_haiku",
+    "plain_llm_opus55",
     "plain_llm_mimo",
-    "plain_llm_deepseek"
+    "plain_llm_deepseek",
+    "plain_llm_sonnet"
    ],
    "tier": "well",
    "tier_label": "J 80% or more on our set",
@@ -10072,6 +11798,152 @@
        "note": "Benchmark J 90% (95% interval 82% to 98%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       }
      }
+    },
+    {
+     "key": "plain_llm_haiku",
+     "tool": "claude-haiku-5-5, zero-shot",
+     "short": "claude-haiku-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.9,
+     "j_ci": [
+      0.82,
+      0.98
+     ],
+     "tpr": 0.94,
+     "fpr": 0.04,
+     "tpr_ci": [
+      0.837827,
+      0.979385
+     ],
+     "fpr_ci": [
+      0.011039,
+      0.134603
+     ],
+     "n_pos": 50,
+     "n_neg": 50,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 4.0,
+     "ppv": {
+      "0.01": 0.191837,
+      "0.05": 0.552941,
+      "0.2": 0.854545
+     },
+     "cost1k": 1.0477,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-haiku-5-5",
+      "prompt_file": "prompts/dependency_blindness.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "context",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"dependency_blindness\": true or false, \"evidence\": \"<what was reimplemented and what it should have used, or empty>\"}",
+       "verdict_field": "dependency_blindness"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has dependency_blindness = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)",
+       "source of the repository module(s) the patch could have reused (optional)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to 15,000 characters, each context file to 15,000."
+     },
+     "kit_check": null
+    },
+    {
+     "key": "plain_llm_opus55",
+     "tool": "claude-opus-5-5, zero-shot",
+     "short": "claude-opus-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.9,
+     "j_ci": [
+      0.82,
+      0.98
+     ],
+     "tpr": 0.92,
+     "fpr": 0.02,
+     "tpr_ci": [
+      0.811615,
+      0.968451
+     ],
+     "fpr_ci": [
+      0.003539,
+      0.104957
+     ],
+     "n_pos": 50,
+     "n_neg": 50,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 2.0,
+     "ppv": {
+      "0.01": 0.317241,
+      "0.05": 0.707692,
+      "0.2": 0.92
+     },
+     "cost1k": 37.46568,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-opus-5-5",
+      "prompt_file": "prompts/dependency_blindness.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "context",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"dependency_blindness\": true or false, \"evidence\": \"<what was reimplemented and what it should have used, or empty>\"}",
+       "verdict_field": "dependency_blindness"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has dependency_blindness = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)",
+       "source of the repository module(s) the patch could have reused (optional)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to 15,000 characters, each context file to 15,000."
+     },
+     "kit_check": null
     },
     {
      "key": "plain_llm_deepseek",
@@ -10288,6 +12160,79 @@
        "note": "Benchmark J 86% (95% interval 76% to 94%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       }
      }
+    },
+    {
+     "key": "plain_llm_sonnet",
+     "tool": "claude-sonnet-5-5, zero-shot",
+     "short": "claude-sonnet-5-5",
+     "type": "baseline_model",
+     "kind": "model",
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.78,
+     "j_ci": [
+      0.66,
+      0.88
+     ],
+     "tpr": 0.82,
+     "fpr": 0.04,
+     "tpr_ci": [
+      0.692037,
+      0.902299
+     ],
+     "fpr_ci": [
+      0.011039,
+      0.134603
+     ],
+     "n_pos": 50,
+     "n_neg": 50,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 4.0,
+     "ppv": {
+      "0.01": 0.171548,
+      "0.05": 0.518987,
+      "0.2": 0.836735
+     },
+     "cost1k": 18.58994,
+     "cost_basis": "api",
+     "estimated": false,
+     "provider": "claude_code",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": false,
+     "why_not": "ran through Claude Code on a subscription; the kit runner calls an API and has no setup for it",
+     "recipe": {
+      "kind": "llm",
+      "model": "claude-sonnet-5-5",
+      "prompt_file": "prompts/dependency_blindness.md",
+      "max_tokens": 16384,
+      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "config": {
+       "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "context",
+        "patch"
+       ],
+       "messages": "one user message (filled template); system prompt 'Answer the user's message in the format it asks for.'",
+       "output_budget_param": "max_tokens",
+       "answer_json": "{\"dependency_blindness\": true or false, \"evidence\": \"<what was reimplemented and what it should have used, or empty>\"}",
+       "verdict_field": "dependency_blindness"
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has dependency_blindness = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)",
+       "source of the repository module(s) the patch could have reused (optional)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to 15,000 characters, each context file to 15,000."
+     },
+     "kit_check": null
     },
     {
      "key": "plain_llm_grok",
@@ -10707,7 +12652,7 @@
      }
     }
    ],
-   "best_single": "plain_llm_luna",
+   "best_single": "plain_llm_opus55",
    "robust_pair": null,
    "units": {
     "llm": {
@@ -10919,7 +12864,8 @@
   "azure": "Azure AI Foundry",
   "hyperbolic": "Hyperbolic",
   "fireworks": "Fireworks",
-  "self_hosted_gpu": "Self-hosted GPU"
+  "self_hosted_gpu": "Self-hosted GPU",
+  "claude_code": "Claude Code, headless (subscription)"
  },
  "recipes_missing": false,
  "pairs_missing": false,
