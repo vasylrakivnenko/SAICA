@@ -5,8 +5,8 @@
 #   bash scripts/publish_github.sh --push     the same, then push it to origin main
 #
 # `main` on this machine keeps everything. The branch `public` is rebuilt from it each time: the commits of
-# `main` after BASE, with every path in EXCLUDE taken out. bench/ does not exist on GitHub; research/ stays
-# exactly as it was at BASE. The rewrite keeps authors, dates and messages, so commits published earlier
+# `main` after BASE, with every path in EXCLUDE taken out. bench/ and the two reports do not exist on GitHub;
+# research/ stays exactly as it was at BASE. The rewrite keeps authors, dates and messages, so commits published earlier
 # come out with the same ids and a later run only adds the new ones (a fast-forward push).
 #
 # Never run `git push origin main`: GitHub refuses it anyway, because the two histories differ after BASE.
@@ -15,7 +15,9 @@
 set -euo pipefail
 
 BASE=537ec698050fb384be71343fd4aeb0a970dc9d97   # last commit that GitHub and local main have in common
-EXCLUDE=(bench research)                         # folders that are not public yet
+# Not public yet: the benchmark harness and per-sample tables, the working notes, and the two internal reports
+# of November 2026 (they describe weaknesses, the security review of the backend and the hosting setup).
+EXCLUDE=(bench research REWIEW_NOV_21.md FIXES_NOV_21.md)
 KEEP_AS_AT_BASE=(research)                       # of those, the ones GitHub already has: left as they are there
 
 cd "$(git rev-parse --show-toplevel)"
