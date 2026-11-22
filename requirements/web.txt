@@ -7,8 +7,8 @@
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 #   pip install -r requirements/web.txt -c requirements/constraints.txt
 -r kg.txt
-fastapi>=0.110
-uvicorn[standard]>=0.29
-openai>=1.50
-numpy>=1.26
-sentence-transformers>=3.0
+fastapi>=0.163.0
+uvicorn[standard]>=0.54.0
+openai>=3.51.0
+numpy>=2.5.4
+sentence-transformers>=6.3.0
