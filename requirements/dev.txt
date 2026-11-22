@@ -1,0 +1,26 @@
+# Everything the test suite and the commit hooks need. This is what the
+# `tests` workflow installs.
+#
+#   python3 -m venv .venv
+#   .venv/bin/pip install -r requirements/dev.txt -c requirements/constraints.txt
+#
+# It leaves out sentence-transformers (and with it torch) on purpose: no test
+# loads the embedding model. Add web.txt or research.txt when you work on
+# those parts.
+-r kg.txt
+-r mcp.txt
+pytest>=8.0
+pre-commit>=3.0
+# The web service and its tests (FastAPI's test client needs httpx).
+fastapi>=0.110
+uvicorn>=0.29
+httpx>=0.27
+openai>=1.50
+numpy>=1.26
+# Imported by the tests of the ingestion pipeline and the cluster study.
+psycopg[binary]>=3.1
+rapidfuzz>=3.9
+umap-learn>=0.5
+scikit-learn>=1.3
+beautifulsoup4>=4.12
+python-dotenv>=1.0

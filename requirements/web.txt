@@ -1,0 +1,14 @@
+# The web service (pipeline/webapp.py): the /api/ask and /api/assess
+# endpoints, optionally serving the built static site. This is what the
+# Replit deployment installs, through pipeline/requirements-web.txt.
+#
+# sentence-transformers pulls in torch. Install the CPU-only build first,
+# otherwise Linux downloads several GB of CUDA libraries:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements/web.txt -c requirements/constraints.txt
+-r kg.txt
+fastapi>=0.110
+uvicorn[standard]>=0.29
+openai>=1.50
+numpy>=1.26
+sentence-transformers>=3.0

@@ -1,0 +1,52 @@
+# The site: type-check, build and link-check, on every pull request and every
+# push to main.
+#
+# The build reads ../data and ../schema, so the whole repository is checked
+# out, and a change under data/ runs this job too.
+#
+# `npm run build` stops on purpose when a file under site/public names an id
+# that is not in data/, or when data/MANIFEST.json is behind data/
+# (site/scripts/check-public-data.mjs).
+
+name: site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # Node version comes from site/.nvmrc (22), the same as the deployment.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      # astro check: type errors fail the job, hints do not.
+      - name: Type-check
+        run: npm run check
+
+      # gen-types + check-public-data + astro build + sitemap
+      - name: Build
+        run: npm run build
+
+      - name: Check that every internal link in dist/ resolves
+        run: npm run check:links
+
+      - name: Check that the committed types match schema/*.json
+        run: git diff --exit-code -- src/lib/types.generated.ts

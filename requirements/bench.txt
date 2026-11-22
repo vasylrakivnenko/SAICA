@@ -1,0 +1,16 @@
+# What the benchmark's own scripts import, outside the tool environments.
+# Scoring (bench/common.py, bench/*/score.py) and the report
+# (bench/build_report.py) need only the Python standard library.
+#
+#   pip install -r requirements/bench.txt -c requirements/constraints.txt
+#
+# The reviewers under test live in their own environments (bench/*/.venv*).
+# Those are not built from this file: what each one held when the published
+# numbers were produced is recorded in the lock file next to it
+# (bench/*/requirements*.lock.txt, written by scripts/freeze_envs.sh).
+#
+# bench/llm_client.py, the relay and the runners that call a model.
+requests>=2.32
+# The sample builders read parquet files: */build_samples.py,
+# scope_creep/inject.py, supply_chain/build_hard.py, labelcheck/build_items.py.
+pyarrow>=25

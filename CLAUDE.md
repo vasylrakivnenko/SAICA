@@ -42,39 +42,55 @@ Files explicitly off-limits unless the task names them:
 Before claiming a task complete, run:
 
 ```bash
-pre-commit run --files <changed paths>
+.venv/bin/pre-commit run --files <changed paths>
 ```
 
-(Or just `git commit` and let the hook fire.) If a hook denies, log the
-denial so the prevention layer is observable:
+(`pre-commit` and `python` are not on PATH; both live in `.venv/bin/`.
+`git commit` does not run these hooks: only the pre-push hook is installed
+in `.git/hooks`.) If a hook denies, log the denial so the prevention layer
+is observable:
 
 ```bash
-python -m pipeline.supervision log \
+.venv/bin/python -m pipeline.supervision log \
     --tool-id <hook-id> \
     --failure-mode <fm-id> \
     --mechanism "blocked-commit-via-pre-commit" \
     --detail "<short, e.g. file:line message>" \
-    --invoked-by claude-code-hook
+    --invoked-by agent-manual
 ```
+
+This is a report you type in; only lines with `recorded_by: hook` were
+observed by a hook (`.venv/bin/python -m pipeline.supervision show` counts
+both).
 
 After fixing the underlying issue, re-stage and commit. Do not bypass
 hooks with `--no-verify`.
 
 ## Tool denials log to `.saica/prevention_log/`
 
-Wired via `.claude/hooks/log_pretool.sh`, which fires on Claude Code's
-`PreToolUse` event and records denials as JSONL. The file format is
-documented in `pipeline/supervision/logger.py`. The log directory is
-gitignored; events stay developer-local.
+`.claude/hooks/pretool_guard.py` is a Claude Code `PreToolUse` hook. When enabled it
+denies a Bash command that skips commit hooks (`--no-verify`, `git commit -n`) and
+asks before an edit under the off-limits paths above. It appends each of its own
+decisions to `.saica/prevention_log/` with `recorded_by: "hook"`. The log directory
+is gitignored; events stay developer-local. The hook is off until you enable it.
 
-To enable the hook, point Claude Code at it from your personal
-`.claude/settings.local.json`:
+To enable it, add this to your personal `.claude/settings.local.json`
+(the same block is in `.claude/hooks/settings.example.json`):
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
-      { "command": ".claude/hooks/log_pretool.sh" }
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pretool_guard.py",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
@@ -82,10 +98,10 @@ To enable the hook, point Claude Code at it from your personal
 
 ## Test discipline
 
-- Run `python -m pytest pipeline/supervision/tests -q` after changing
-  anything under `pipeline/supervision/`.
-- Run `python validator/cli.py` after changing anything under `data/` to
-  confirm the KG still validates with 0 errors.
+- Run `.venv/bin/python -m pytest pipeline/supervision/tests -q` after
+  changing anything under `pipeline/supervision/`.
+- Run `.venv/bin/python validator/cli.py` after changing anything under
+  `data/` to confirm the KG still validates with 0 errors.
 
 ## When in doubt
 

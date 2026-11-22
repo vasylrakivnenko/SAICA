@@ -45,3 +45,26 @@ research/backups/
 # Bulk README dumps written by the research/mining runs (~90 MB, regenerable).
 # Far above check-added-large-files' 2 MB limit; never commit.
 research/mining/*.jsonl
+
+# Local safety snapshots of benchmark caches (never commit)
+bench/_snapshots/
+
+# Benchmark: datasets, raw model answers, caches, logs, usage ledgers and
+# their backups stay on the machine that produced them (several GB, and
+# third-party text). What is published is tracked: bench/<mode>/published/
+# (scores and per-sample verdict tables), bench/pricing.json,
+# bench/gpu_time.json and bench/report/. Do not add a rule that hides those.
+bench/*/data/
+bench/*/results/
+bench/*/results_backup_*/
+
+# Tool environments of the benchmark (.venv, .venv-deps, .venv-libs). What
+# they hold is recorded in the requirements*.lock.txt file next to each one.
+.venv-*/
+
+# Local files that can hold an API key. The templates stay tracked.
+.env.*
+!.env.example
+.secrets.toml
+*.secrets.toml
+mcp_config.json

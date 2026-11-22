@@ -1,19 +1,18 @@
-# Semgrep — static-analysis supervision for SAICA-KG itself.
+# Semgrep static analysis of this repository: on every pull request, on every
+# push to main, and once a week.
 #
-# Rationale: the KG's recommender (saica_recommend(failure_modes=
-# ['security_vulnerability', 'dependency_blindness'])) names Semgrep as
-# the top fit for our stack (CI surface, prevention/detection paradigm,
-# matches our Python + GitHub Actions context). We're installing what we
-# recommend.
+# This is the form Semgrep documents today: its container image plus the
+# `semgrep` command. (The `semgrep/semgrep-action` action used here before is
+# archived.) No Semgrep account or token is needed. The four rule packs are
+# downloaded from semgrep.dev when the job runs; `--metrics=off` sends no usage
+# data. Any finding fails the job (`--error`).
+#
+# The image is pinned by version and digest. To move to a newer one, change
+# both; the digest of a tag is shown on hub.docker.com/r/semgrep/semgrep/tags.
 #
 # References:
-#   - data/tools/semgrep.yml — KG entry
+#   - data/tools/semgrep.yml — catalog entry
 #   - data/failure_modes/security_vulnerability.yml
-#   - data/failure_modes/dependency_blindness.yml
-#
-# Runs on every PR and on push to main; uses Semgrep's hosted "auto" rule
-# config (security + best-practice rule packs). No Semgrep AppSec login
-# required for the auto config — runs fully offline-from-our-side.
 
 name: Semgrep
 
@@ -23,36 +22,29 @@ on:
   push:
     branches: [main]
   schedule:
-    # Weekly run catches new rules + fresh CVE coverage even on quiet weeks.
+    # Weekly run: new rules can find something in code that did not change.
     - cron: "17 6 * * 1"
 
 permissions:
   contents: read
-  pull-requests: write   # so Semgrep can post inline PR findings
 
 jobs:
   semgrep:
     name: scan
     runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:1.185.0@sha256:67518c174185a2043fdbed16c70631b79209499b3671178e7194379b48295a0d
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      # Uses the official Semgrep Action so SAICA-KG's own
-      # `pipeline.audit.detectors.detect_supervision_tools` recognises it
-      # via the canonical `uses: semgrep/semgrep-action` pattern in CI
-      # workflows. Behaviourally equivalent to the Docker-image route.
       - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
-        env:
-          # Anonymous auto config pulls rule packs from semgrep.dev. No
-          # token required. SEMGREP_APP_TOKEN can be added later for the
-          # AppSec UI / managed-policies experience.
-          SEMGREP_RULES: |
-            p/default
-            p/security-audit
-            p/secrets
-            p/owasp-top-ten
+        run: >-
+          semgrep scan
+          --config p/default
+          --config p/security-audit
+          --config p/secrets
+          --config p/owasp-top-ten
+          --error
+          --metrics=off

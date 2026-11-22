@@ -1,24 +1,35 @@
+# The licence below is the code's. Our annotations and the benchmark results
+# are CC-BY-4.0; third-party material keeps its own licence (LICENSE-DATA).
+# `version` and `date-released` are those of the published results
+# (site/public/bench/results.json); tests/test_root_docs_in_sync.py keeps
+# the version in step with that file.
 cff-version: 1.2.0
-message: "If you use SAICA-Bench, its results or the SAICA-KG data, please cite it as below."
+message: "If you use SAICA-Bench, its results or the SAICA-KG data, please cite it as below, with the results version."
 title: SAICA-Bench
 abstract: >-
   SAICA-Bench measures whether supervision tools and language models catch
-  the typical failures of AI coding agents (fabrication, test manipulation,
-  security vulnerabilities, logic errors, incomplete execution, scope creep,
-  obsolescence, supply-chain attacks, dependency blindness). Every reviewer
-  sees the same labelled samples and is scored J = TPR - FPR, with the cost
-  per 1,000 reviews. The repository also holds SAICA-KG, a knowledge graph of
-  failure modes, supervision tools, papers, incidents and external taxonomies.
+  typical failures in the output of AI coding agents (fabrication, test
+  manipulation, security vulnerabilities, logic errors, incomplete execution,
+  scope creep, obsolescence, supply-chain attacks, dependency blindness).
+  Every reviewer sees the same labelled samples and is scored J = TPR - FPR
+  within one failure mode, with a 95% interval and the cost per 1,000
+  reviews. Results are grouped by how the samples were made: real agent
+  output, model-written code, and failures planted on purpose. Models asked
+  directly are told which failure to look for, so their scores are
+  mode-primed estimates. The repository also holds SAICA-KG, the catalog of
+  failure modes, supervision tools, papers, incidents and external
+  taxonomies behind the benchmark. Code: Apache-2.0; annotations and
+  results: CC-BY-4.0 (see LICENSE-DATA).
 type: software
+version: "2.0.0"
+date-released: "2026-11-22"
 authors:
   - given-names: Vasyl
     family-names: Rakivnenko
     affiliation: Stanford University
 url: "https://saica.ai"
 repository-code: "https://github.com/vasylrakivnenko/SAICA"
-license:
-  - Apache-2.0
-  - CC-BY-4.0
+license: Apache-2.0
 keywords:
   - AI coding agents
   - benchmark

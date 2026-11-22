@@ -1,15 +1,7 @@
-# Runtime deps for the web service (pipeline/webapp.py): the /ask + /assess
-# API from pipeline/ask/server.py, optionally serving the built static site.
+# Kept at this path because the Replit deployment build installs it
+# (.replit, [deployment] build). The list lives in requirements/web.txt.
 #
 # Install CPU-only torch FIRST to avoid pulling multi-GB CUDA wheels:
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 #   pip install -r pipeline/requirements-web.txt
-fastapi>=0.110
-uvicorn[standard]>=0.29
-openai>=1.50
-pydantic>=2.7
-numpy>=1.26
-sentence-transformers>=3.0
-pyyaml>=6.0
-ruamel.yaml>=0.18
-requests>=2.32
+-r ../requirements/web.txt

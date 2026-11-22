@@ -1,4 +1,4 @@
-# Running SAICA-KG on Replit
+# Running SAICA-Bench and SAICA-KG on Replit
 
 - The existing Astro website lives in `site/`. The knowledge graph remains in
   the repository's `data/` directory; no database is needed to browse it.
@@ -10,17 +10,25 @@
   with user approval. Tailwind 3 is preserved through PostCSS.
 - `--ignore-lock` keeps Astro in the foreground under Replit's managed workflow;
   otherwise Astro can auto-background itself in an agent environment.
-- Install website dependencies: `npm --prefix site ci`.
+- Install website dependencies: `npm --prefix site ci`. The Node version is
+  pinned in `site/.nvmrc` (22).
 - Build the static website: `npm --prefix site run build`. Output: `site/dist/`.
-  The build regenerates TypeScript definitions from the existing schemas.
+  The build regenerates TypeScript definitions from the existing schemas and
+  stops when a file under `site/public` names an id that is not in `data/`.
+- Type check: `npm --prefix site run check`. Link check after a build:
+  `npm --prefix site run check:links`.
 - Astro configuration resolves the catalog's absolute data path before bundling,
   so both development and production builds load the original YAML corpus.
 
 ## Ask / Assess backend
 
-- `python3 -m pipeline.webapp` runs the FastAPI backend from `pipeline/ask/`
-  under `/api` (`/api/ask`, `/api/assess`, `/api/health`). It is started by the
+- `python3 -m pipeline.webapp` is the one entry point of the FastAPI backend
+  (`--help` prints help). It serves `/api/ask`, `/api/assess` and `/api/health`
+  (which answers `{"ok": true}` and nothing else). It is started by the
   **Ask backend** workflow, which the **Run** button starts alongside the website.
+- `/api/assess` reads a public repository through the GitHub API. It does not
+  use `git`; it needs outbound https to `api.github.com` and
+  `raw.githubusercontent.com`.
 - In development it listens on `127.0.0.1:4322`; Astro's dev server proxies
   `/api` to it (`site/astro.config.mjs`), so the pages call it same-origin.
 - LLM: if `HYPERBOLIC_API_KEY` is set (Replit Secret), the backend uses
@@ -31,8 +39,11 @@
   first Ask request when missing or older than `data/`, never before the port
   opens, so health checks are not blocked.
 - Python deps: `pip install torch --index-url https://download.pytorch.org/whl/cpu`
-  then `pip install -r pipeline/requirements-web.txt`.
-- `SAICA_ASK_BUDGET` caps LLM calls per server process (default 50; resets on restart).
+  then `pip install -r pipeline/requirements-web.txt`. That file points at
+  `requirements/web.txt`, where the list lives.
+- `SAICA_ASK_BUDGET` caps questions per UTC day (default 50). The count lives
+  in the server process, so it also starts again on a restart. The other
+  limits and their defaults are in `pipeline/ask/README.md`.
 
 ## Local CAO swarm
 
@@ -64,5 +75,15 @@
   built site and `/api` on port 5000.
 - Build: installs CPU-only torch and `pipeline/requirements-web.txt`, builds the
   site, and builds the embeddings index. See `[deployment]` in `.replit`.
+- The build installs the newest versions that fit the requirement file; nothing
+  is pinned. Tested versions are in `requirements/constraints.txt`. To use them,
+  add `-c requirements/constraints.txt` to both `pip install` commands of the
+  build line in `.replit` (not done: deployment settings are the owner's).
+- Two more deployment settings to decide (also the owner's, in `.replit`): add
+  `HF_HUB_OFFLINE=1` to the `run` command so the first Ask on a cold instance
+  does not contact huggingface.co; and consider one instance at most, because
+  the daily budgets are counted per process.
+- After publishing, check the deployment with
+  `bash scripts/smoke_check.sh https://saica.ai`.
 - `HYPERBOLIC_API_KEY` must be available to the deployment (Replit Secrets).
 - Publishing settings take effect only when the user publishes again.

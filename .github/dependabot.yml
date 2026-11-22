@@ -1,22 +1,22 @@
-# Dependabot — supply-chain + obsolescence supervision for SAICA-KG itself.
+# Dependabot — version updates for this repository's own dependencies.
 #
-# Rationale: SAICA-KG's own audit (validator/audit) recommended Dependabot
-# as a high-priority supervisor for the dependency_blindness +
-# supply_chain_attack failure modes. This is us eating our own dogfood.
+# Updates run weekly and open pull requests grouped by ecosystem. A new
+# release is proposed only after it has been public for seven days
+# (`cooldown`); that limit does not apply to security updates.
+#
+# Security updates and alerts are a repository setting (Settings → Code
+# security), not part of this file. On 2026-11-21 both were off.
 #
 # References:
-#   - data/tools/dependabot.yml (the KG's entry on this tool)
-#   - validator/backfill_citations.report.md (the citation evidence)
-#
-# Updates run weekly, opening PRs grouped by ecosystem. Versioning is
-# locked to the next-minor by default to keep the noise low; security
-# updates ignore that limit.
+#   - data/tools/dependabot.yml (the catalog entry for this tool)
 
 version: 2
 updates:
-  # Python — agents + audit + ask + extract + sources + validator.
+  # Python — the requirement groups and the pin file (requirements/*.txt).
   - package-ecosystem: "pip"
-    directory: "/pipeline"
+    directory: "/requirements"
+    cooldown:
+      default-days: 7
     schedule:
       interval: "weekly"
       day: "monday"
@@ -27,10 +27,10 @@ updates:
       python-prod:
         applies-to: version-updates
         patterns: ["*"]
-        exclude-patterns: ["pytest", "ruff", "mypy"]
+        exclude-patterns: ["pytest", "pre-commit"]
       python-dev:
         applies-to: version-updates
-        patterns: ["pytest", "ruff", "mypy"]
+        patterns: ["pytest", "pre-commit"]
     commit-message:
       prefix: "deps(py)"
       include: "scope"
@@ -38,6 +38,8 @@ updates:
   # JS / TS — Astro site build + types.
   - package-ecosystem: "npm"
     directory: "/site"
+    cooldown:
+      default-days: 7
     schedule:
       interval: "weekly"
       day: "monday"
@@ -54,6 +56,8 @@ updates:
   # GitHub Actions themselves — keep workflow versions current.
   - package-ecosystem: "github-actions"
     directory: "/"
+    cooldown:
+      default-days: 7
     schedule:
       interval: "weekly"
       day: "monday"

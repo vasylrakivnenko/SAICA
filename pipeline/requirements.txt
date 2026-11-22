@@ -1,10 +1,4 @@
-psycopg[binary]>=3.1
-requests>=2.32
-rapidfuzz>=3.9
-pytest>=8.0
-openai>=1.50
-pydantic>=2.7
-ruamel.yaml>=0.18
-sentence-transformers>=3.0
-umap-learn>=0.5
-scikit-learn>=1.3
+# Kept at this path for older instructions. The ingestion pipeline's list
+# lives in requirements/research.txt; the test suite's in requirements/dev.txt;
+# the MCP server's in requirements/mcp.txt.
+-r ../requirements/research.txt

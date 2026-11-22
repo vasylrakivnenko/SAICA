@@ -1,0 +1,119 @@
+Data licences in this repository
+================================
+
+This file says which licence applies to which data. It is a reading of the
+licence statements recorded in this repository and on the sources' own
+pages. It is not legal advice, and no lawyer has reviewed it. If you plan
+to reuse third-party material, check the source's licence yourself.
+
+The code is licensed separately: Apache-2.0, see the file LICENSE.
+
+
+1. Our own work: CC-BY-4.0
+--------------------------
+
+The following were written or computed for this project and are licensed
+under the Creative Commons Attribution 4.0 International licence
+(https://creativecommons.org/licenses/by/4.0/legalcode):
+
+- The annotations under data/: the tool, failure-mode, paper, incident and
+  recipe records; the facet values and failure-mode tags; the crosswalk
+  mappings in data/crosswalks/; data/MANIFEST.json, data/TOMBSTONES.yml and
+  data/failure_mode_priorities.yml. Text quoted from a third party inside
+  those files is not ours; see section 2.
+- The benchmark results: site/public/bench/results.json, the scores and
+  per-sample verdict tables under bench/*/published/, the frozen copies
+  under bench/report/versions/, and the generated bench/*/RESULTS.md.
+- The benchmark material built for this project: prompts, rules and the
+  hand-written or injected edits of the constructed sets. The patches they
+  were built on are third-party; see section 3.
+- The files generated from the above: SKILLS.md, the two SKILL.md copies,
+  RECOMMENDATIONS.md, recommendations.json, and the JSON files the site
+  serves from them.
+
+Attribution: "SAICA-Bench / SAICA-KG, Vasyl Rakivnenko, https://saica.ai",
+with the results version when you cite results (see CITATION.cff).
+
+
+2. Text from external taxonomies: each keeps its own licence
+------------------------------------------------------------
+
+The files under data/taxonomies/ hold category names, and in some cases
+definitions, taken from published taxonomies. That text is not relicensed
+by section 1. Source and licence as recorded in each file's `license:`
+line (checked against the sources on 2026-11-21):
+
+  data/taxonomies/owasp-agentic-top-10-2026.yml
+      OWASP Top 10 for Agentic Applications 2026 (OWASP Gen AI Security
+      Project). CC BY-SA 4.0: share-alike applies to text copied from it.
+  data/taxonomies/mast.yml
+      MAST, Cemri et al., arXiv 2503.13657. CC BY-NC-ND 4.0:
+      non-commercial, no derivatives. The file quotes the category labels
+      and definitions with attribution.
+  data/taxonomies/swiss-cheese-model.yml
+      Shamsujjoha et al., arXiv 2408.02205. CC BY-NC-SA 4.0:
+      non-commercial, share-alike.
+  data/taxonomies/shah-2026-agentic-faults.yml
+      Shah et al., arXiv 2603.06847. CC BY 4.0.
+  data/taxonomies/microsoft-airt-2025.yml
+      Microsoft AI Red Team whitepaper, version 1.0 (2025-04). No open
+      licence is stated.
+  data/taxonomies/daplab-9-patterns.yml
+      Columbia University DAPLab blog post (2026-01). No licence is stated
+      on the page.
+
+Where a source states no licence, or a non-commercial or no-derivatives
+one, do not assume you may reuse its text because it appears here.
+
+Paper records: 27 of the files under data/papers/ carry author lists and
+one-line summaries taken from Semantic Scholar (`provenance: s2-derived`).
+Semantic Scholar's terms of use were not checked.
+
+
+3. Source datasets of the benchmark: not relicensed, and not in git
+-------------------------------------------------------------------
+
+The benchmark's samples and the raw model answers are not part of this
+repository (bench/*/data/ and bench/*/results/ are not tracked). The
+published per-sample verdict tables hold sample ids, labels and verdicts,
+not the samples' text. Each source keeps its own licence. As recorded in
+this repository:
+
+  SusVibes (LeiLiLab)                          MIT
+      security vulnerability
+  Collu-Bench (lt-asset)                       BSD-3-Clause-Clear
+      logic error
+  SWE-rebench-OpenHands-Trajectories (Nebius)  CC-BY-4.0
+      incomplete execution; the base patches of scope creep, supply chain
+      and dependency blindness
+  Delulu (microsoft/delulu)                    per-row licences, some of
+      fabrication                              them non-commercial (noted
+                                               in the review of 2026-11-21;
+                                               not recorded per row here)
+  Patronus TRACE (PatronusAI/trace-dataset)    CC-BY-SA-4.0, access on
+      test manipulation                        request (same note)
+  Wang et al., deprecated-API map (ICSE'25)    no licence on the source
+      obsolescence                             repository; only API names
+                                               are used
+  OpenSSF malicious-packages                   package names only; licence
+      supply chain                             not recorded here
+
+Before any per-sample release, each source's redistribution terms must be
+checked one by one; where a licence does not allow redistribution, publish
+sample ids and a build script instead of the text.
+
+One tracked file does republish third-party samples:
+bench/labelcheck/site/items.json (70 items for a blind label check). Each
+item names its source dataset and licence (SWE-rebench and
+SWE-rebench-OpenHands-Trajectories, Nebius, CC-BY-4.0; SusVibes, LeiLiLab,
+MIT). The projects the patches come from keep their own licences.
+
+
+4. Research notes
+-----------------
+
+research/ holds working notes. Some folders contain responses of
+third-party services (Semantic Scholar: research/s2_raw/ and
+research/bench_datasets_20261119/s2/raw.json; Elicit: research/elicit_raw/;
+Perplexity reports). Those responses are not ours to license, and the
+services' terms on redistribution were not checked.

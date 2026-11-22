@@ -1,32 +1,37 @@
-# SAICA Index — weekly leaderboard regeneration.
+# SAICA Index — weekly rebuild of the repository ranking shown on the
+# archived /leaderboard/ page.
 #
-# Runs every Sunday at 04:17 UTC: audits every repo in the popular_oss
-# board (curated in data/saica_index/seed_repos.yml), scores each with
-# the formula in pipeline/saica_index/score.py, and writes
-# site/public/saica_index.json.
+# Every Sunday at 04:17 UTC it audits each repository listed in
+# data/saica_index/seed_repos.yml, scores it with the formula in
+# pipeline/saica_index/score.py and writes site/public/saica_index.json.
 #
-# When the JSON changes, the workflow opens a commit on main with the
-# new snapshot. The static site picks it up on next deploy.
+# The result is never pushed to main. When something other than the
+# timestamp changed, the workflow opens (or updates) one pull request on the
+# branch chore/saica-index, so a person decides whether the published
+# snapshot changes. Before the first run the owner must allow workflows to
+# open pull requests: Settings → Actions → General → "Allow GitHub Actions
+# to create and approve pull requests".
 #
-# Manual trigger: `gh workflow run saica-index.yml`. Honors `--limit`
-# via the `limit` input for testing without burning ~17min on the full
-# population.
+# Manual start: `gh workflow run saica-index.yml`. With the `limit` input
+# the run is a test: it writes to a temporary file and opens no pull
+# request.
 
 name: saica-index
 
 on:
   schedule:
-    # Sunday 04:17 UTC — off-peak, doesn't collide with promptfoo (Mon 06:37).
+    # Sunday 04:17 UTC.
     - cron: "17 4 * * 0"
   workflow_dispatch:
     inputs:
       limit:
-        description: "Audit only the first N seeds per board (blank = all)"
+        description: "Test run: audit only the first N repositories (blank = all, and open a pull request)"
         required: false
         default: ""
 
 permissions:
-  contents: write  # we commit the regenerated JSON back to main
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: saica-index
@@ -34,56 +39,79 @@ concurrency:
 
 jobs:
   regenerate:
-    name: regenerate leaderboard JSON
+    name: regenerate the index snapshot
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
-          # `secrets.GITHUB_TOKEN` would lack permission to push the
-          # commit; use `persist-credentials: true` so the default
-          # token (with `contents: write`) is used by the push step.
-          persist-credentials: true
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
-          cache: "pip"
+          cache: pip
+          cache-dependency-path: requirements/constraints.txt
 
+      # The audit and the scoring import pyyaml, pydantic and requests only.
       - name: Install deps
         run: |
           python -m pip install -U pip
-          pip install -r validator/requirements.txt
-          pip install -r pipeline/requirements.txt
+          pip install -r requirements/kg.txt -c requirements/constraints.txt
 
+      # The input reaches the shell through an environment variable, never
+      # through text pasted into the script.
       - name: Run SAICA Index
         env:
-          # Audit analyzer falls back to GitHub REST API when `git` isn't
-          # on PATH; either way, `GITHUB_TOKEN` raises rate limit from
-          # 60/hr → 5000/hr.
+          # Raises the GitHub API rate limit from 60 to 5,000 requests an hour.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIMIT: ${{ github.event.inputs.limit }}
         run: |
-          ARGS=""
-          if [ -n "${{ github.event.inputs.limit }}" ]; then
-            ARGS="--limit ${{ github.event.inputs.limit }}"
+          if [ -n "$LIMIT" ]; then
+            case "$LIMIT" in
+              *[!0-9]*) echo "limit must be a whole number" >&2; exit 2 ;;
+            esac
+            python -m pipeline.saica_index.runner --limit "$LIMIT" --out "$RUNNER_TEMP/saica_index.json"
+            echo "Test run with a limit: the published snapshot is left as it is."
+          else
+            python -m pipeline.saica_index.runner
           fi
-          python -m pipeline.saica_index.runner $ARGS
 
-      - name: Commit regenerated snapshot if changed
+      # The runner stamps the time of the run into the file, so the file
+      # differs every week. Compare everything else.
+      - name: Put the old file back when only the timestamp changed
         run: |
-          git config user.name  "saica-index-bot"
-          git config user.email "saica-index-bot@users.noreply.github.com"
-          if git diff --quiet -- site/public/saica_index.json; then
-            echo "No changes to saica_index.json — skipping commit."
-            exit 0
-          fi
-          git add site/public/saica_index.json
-          git commit -m "chore(saica-index): weekly leaderboard refresh
+          python - <<'PY'
+          import json
+          import subprocess
 
-          Auto-generated by .github/workflows/saica-index.yml.
-          See pipeline/saica_index/score.py for the scoring formula."
-          git push origin HEAD:main
+          path = "site/public/saica_index.json"
+          with open(path, encoding="utf-8") as fh:
+              new = json.load(fh)
+          old = json.loads(subprocess.check_output(["git", "show", f"HEAD:{path}"]))
+          new.pop("generated_at", None)
+          old.pop("generated_at", None)
+          if new == old:
+              subprocess.check_call(["git", "checkout", "--", path])
+              print("Nothing but the timestamp changed: no pull request.")
+          else:
+              print("The snapshot changed: a pull request follows.")
+          PY
+
+      - name: Open a pull request if the snapshot changed
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+        with:
+          commit-message: "chore(saica-index): refresh the index snapshot"
+          title: "chore(saica-index): refresh the index snapshot"
+          branch: chore/saica-index
+          delete-branch: true
+          add-paths: |
+            site/public/saica_index.json
+          body: |
+            Rebuilt by `.github/workflows/saica-index.yml` with
+            `python -m pipeline.saica_index.runner`. Merging this changes the
+            numbers on the archived /leaderboard/ page. The scoring formula
+            is in `pipeline/saica_index/score.py`.
+          labels: |
+            automation

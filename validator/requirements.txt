@@ -1,6 +1,3 @@
-pyyaml>=6.0
-jsonschema>=4.17
-# Optional, used by validator/fetch_github_stars.py for round-trip YAML editing.
-# The script falls back to pyyaml if ruamel.yaml is not installed.
-ruamel.yaml>=0.18
-requests>=2.31
+# Kept at this path for older instructions. The list lives in
+# requirements/kg.txt (pyyaml, pydantic, ruamel.yaml, requests).
+-r ../requirements/kg.txt

@@ -23,8 +23,12 @@
 #     language hygiene; not in the KG but cheap prevention against
 #     style-drift PR noise that reviewers would otherwise have to flag.
 #
-# Denials should be reflected as JSONL events under .saica/prevention_log/.
-# See CLAUDE.md and pipeline/supervision/cli.py for the wiring.
+# No hook in this file writes to .saica/prevention_log/. A failed hook can be
+# reported by hand with `.venv/bin/python -m pipeline.supervision log`
+# (see CLAUDE.md). The commit-stage hooks below run only where they were
+# installed (`.venv/bin/pre-commit install`) or when run by hand
+# (`.venv/bin/pre-commit run --files ...`); on 2026-11-21 only the pre-push
+# hook was installed, so `git commit` ran none of them.
 
 minimum_pre_commit_version: "3.0"
 default_language_version:
@@ -88,15 +92,18 @@ repos:
   #   - incomplete_execution    (pytest fails if "done" doesn't pass tests)
   #   - logic_error             (validator/cli.py catches malformed KG nodes)
   # These run on `git push`, not `git commit`, so day-to-day editing stays
-  # snappy.  Install with:  pre-commit install --hook-type pre-push
+  # snappy.  Install with:  .venv/bin/pre-commit install --hook-type pre-push
+  # (`pre-commit` is not on PATH; it lives in .venv/bin/.)
   - repo: local
     hooks:
       # Pinned to .venv/bin/python on purpose: the project's deps live there
-      # (validator/requirements.txt + pipeline/requirements.txt). `language:
-      # system` runs from the repo root, so this relative path works.
+      # (requirements/dev.txt). `language: system` runs from the repo root,
+      # so this relative path works.
+      # No paths are given: pytest.ini (`testpaths`) lists them, the same
+      # list CI uses.
       - id: pytest
-        name: pytest (pipeline + tests)
-        entry: .venv/bin/python -m pytest pipeline/ tests/ -q
+        name: pytest (tests, pipeline, bench test folders)
+        entry: .venv/bin/python -m pytest -q
         language: system
         pass_filenames: false
         stages: [pre-push]
@@ -104,6 +111,46 @@ repos:
       - id: kg-validator
         name: validator/cli.py — KG schema + cross-node invariants
         entry: .venv/bin/python validator/cli.py
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      # Generated files must equal what their generators write. The same
+      # five checks run in .github/workflows/validate.yml. None reads the
+      # clock or the network. When one fails, regenerate in this order:
+      # generate_schemas, generate_manifest, generate_maturity,
+      # generate_recommendations, generate_skills.
+      - id: kg-schemas-check
+        name: schema/*.json match the models
+        entry: .venv/bin/python -m validator.generate_schemas --check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: kg-manifest-check
+        name: data/MANIFEST.json matches data/
+        entry: .venv/bin/python -m validator.generate_manifest --check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: kg-maturity-check
+        name: site/public/maturity.json matches the tool files
+        entry: .venv/bin/python -m validator.generate_maturity --check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: kg-recommendations-check
+        name: RECOMMENDATIONS.md and recommendations.json match the generator
+        entry: .venv/bin/python -m validator.generate_recommendations --check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: kg-skills-check
+        name: SKILLS.md and the SKILL.md copies match the generator
+        entry: .venv/bin/python -m validator.generate_skills --check
         language: system
         pass_filenames: false
         stages: [pre-push]

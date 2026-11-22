@@ -1,0 +1,11 @@
+# The catalog gate: validator/cli.py, the five generators
+# (generate_schemas, generate_manifest, generate_maturity,
+# generate_recommendations, generate_skills) and the star refresh
+# (validator/fetch_github_stars.py). Nothing else is needed to validate data/.
+#
+#   pip install -r requirements/kg.txt -c requirements/constraints.txt
+pyyaml>=6.0
+pydantic>=2.7
+# Edits YAML files in place and keeps their comments and key order.
+ruamel.yaml>=0.18
+requests>=2.32

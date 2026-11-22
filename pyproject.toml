@@ -1,0 +1,24 @@
+# Tool settings for this repository.
+#
+# There is no [project] table on purpose: the repository is not an
+# installable package. Dependencies are in requirements/ (see README,
+# "Development").
+#
+# The values below are what the commit hooks did before this file existed
+# (ruff and black defaults), written down so that the hooks, an editor and a
+# plain `ruff check` agree. Nothing about the code style changes with it.
+# Open style decisions, for the one tree-wide formatting commit:
+#   - whether to ignore E741, E701 and E702 (most of today's ruff errors are
+#     in bench/) or to fix them;
+#   - a target Python version (not set: ruff and black keep their defaults);
+#   - whether ruff-format replaces black.
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+# ruff's default rule set.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.black]
+line-length = 88

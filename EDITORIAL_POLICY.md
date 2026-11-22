@@ -1,73 +1,116 @@
-# SAICA-KG Editorial Policy
+# SAICA-KG editorial policy
 
-SAICA-KG is a living reference for supervising AI coding agents. It exists to be cited. That requires governance that is credible, transparent, and resistant to capture by any single vendor.
+SAICA-KG is the catalog behind SAICA-Bench: failure modes of AI coding
+agents, the supervision tools that say they address them, and the papers,
+incidents, external taxonomies and recipes around them. This file says
+what goes into the catalog and how it is kept. It describes what is done
+today, not a plan.
 
-## Scope
+## What the catalog claims, and what it does not
 
-In-scope: supervision tools, supervision techniques, papers, benchmarks, external taxonomies, documented incidents, and composition recipes relevant to the governance of AI coding agents.
+- A failure-mode tag on a tool means the tool's own documentation says it
+  addresses that failure. It is a claim, not a measurement.
+- Whether a tool catches a failure is measured by SAICA-Bench, for the
+  tools and modes it ran. Tools **are** ranked there, by measured J within
+  one failure mode. Where a measurement exists, the generated
+  recommendations show it, and a tool is not recommended for a mode where
+  it measured below J 25%.
+- The recommendation lists are otherwise ordered by editorial weights per
+  failure mode (`data/failure_mode_priorities.yml`: no empirical
+  calibration) and by popularity (mostly GitHub stars). The activity band
+  A–F on a tool describes stars, a recent upstream push and integration
+  surfaces. None of these is a level of evidence.
 
-Out-of-scope (v0.1): ranking tools, evaluating tool quality on benchmarks we did not run ourselves, endorsement of specific vendors, subjective "best practice" guidance.
+## How the content is written
 
-## Inclusion criteria
+Most files were drafted by an LLM or a coding agent and then edited by the
+maintainer; fields were not reviewed one by one. About half of the paper
+records were written by a script from Semantic Scholar data. Records say
+how they were made where the schema has a field for it (`provenance` on
+papers, `review_state` on crosswalks, `kind` on incidents). All six
+crosswalks are `llm_drafted_unreviewed`: no person has reviewed a mapping.
+The category names of the six external taxonomies were checked against
+the published sources on 2026-11-21.
 
-A **Tool** is included if it:
-1. Is publicly available (OSS, free tier, or documented commercial API).
-2. Addresses at least one failure mode in the SAICA-KG FailureMode set.
-3. Fits exactly one cell on each of ControlParadigm, TemporalPhase, and AutonomyLevel (MECE axes) — tools that legitimately span modes must be split into multiple Tool nodes.
-4. Cites at least one primary source (paper, documentation, or credible write-up).
+Corrections are welcome and are the normal way the catalog improves; see
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-A **FailureMode** is included if it:
-1. Has at least one citation in the peer-reviewed or credible gray literature.
-2. Is distinguishable in the field from existing modes (not a rename).
+## What goes in
 
-A **Taxonomy** is ingested if it:
-1. Has a named owner (organization or working group).
-2. Publishes a stable identifier for each category.
-3. Is in active use by a community beyond its authors.
+A **tool** is included if it:
 
-## Review cadence
+1. is publicly available (open source, free tier, or a documented
+   commercial product);
+2. says it addresses at least one of the catalog's failure modes;
+3. has one value on each facet (control paradigm, temporal phase, autonomy
+   level, implementation). A tool that spans several values gets the one
+   for its main use; it is not split into several nodes;
+4. links to its repository or documentation. A paper in `cited_in` is
+   wanted but not required; most tools have none today.
 
-- **30-day review** for frontier coding agents (`maturity_status: experimental`).
-- **180-day review** for stable runtime infrastructure.
-- **365-day review** for academic techniques / stable tools.
-- Nodes past their review window are auto-flagged `at_risk`.
+A **failure mode** needs a definition and at least one source. The 11
+modes are overlapping tags: one failure can carry several of them, and the
+catalog does not claim that they are mutually exclusive or complete.
 
-## Maintainer model
+An **external taxonomy** is included when it has a named owner and a
+published source. Where the source gives its categories no identifiers,
+the ids in our file are ours.
 
-v0.1 — single maintainer-in-chief (Vasyl), plus an advisory board of 3–5 invited reviewers from distinct organizations (target: academic + vendor + community).
+An **incident** record must say what kind it is (an event, a study, a
+hypothetical case) and must be supported by the source it cites.
 
-v1.0 target — maintainer rotation every 12 months among advisory-board members; a recorded tie-break rule for disputed merges; public logs of merge decisions.
+## Keeping it current
 
-## Conflict-of-interest rules
+There is no scheduled review. Tool files carry the dates of their last
+checks (`last_reviewed`, `stars_updated_at`, `upstream_pushed_at`); many
+were last checked in April 2026. The gate (`validator/cli.py`) checks
+structure and cross-references on every change; it does not check that a
+description is true.
 
-- Contributors authoring or employed by the organization behind a tool disclose in the PR.
-- Maintainers with a COI on a PR recuse from the merge decision and note the recusal in the merge commit.
-- No vendor has editorial control over categories that classify their own tools.
+## Removal
 
-## Stability commitments
+Nodes can be removed: a tool that no longer fits, a duplicate, a record
+that turned out to be wrong.
 
-Citation durability requires stable identifiers. We commit to:
+- Every node removed from 2026-11-21 on gets an entry in
+  [`data/TOMBSTONES.yml`](data/TOMBSTONES.yml): id, kind, date, reason, and
+  a successor if there is one. The manifest step refuses to drop an id
+  that has no entry.
+- Retracted records are kept, with the reason, under
+  [`archive/retracted-incidents/`](archive/retracted-incidents/).
+- Removals before that date (75 tools, 6 recipes and 1 paper, counted in
+  the review of 2026-11-21) have no tombstone. They are in the git history:
+  `git log --diff-filter=D --name-only -- data/`.
 
-- Node `id` values are immutable once merged.
-- Partition enum values (`ControlParadigm`, `TemporalPhase`, `AutonomyLevel`, `MaturityStatus`) do not change across minor versions.
-- `FailureMode` ids present at v1.0 are stable; new modes may be added in minor releases.
-- Schema field renames require an RFC issue, a 30-day comment period, and a deprecation overlap of at least one minor version.
-- The KG is versioned `YYYY.MM` (e.g., `2026.04`). Agents should be able to query pinned versions.
+## What stays stable
 
-## RFC process
+- A node `id` is not reused for a different node.
+- The 11 failure-mode ids.
+- The catalog carries a version `YYYY.MM` in `data/MANIFEST.json`. There
+  are no tagged releases yet, so a past version can only be reached
+  through the git history.
 
-Structural changes (new node type, new partition value, schema field rename or removal, change to enum semantics) require an RFC issue with:
-- Motivation
-- Proposed change
-- Alternatives considered
-- Migration plan for existing data
+Facet values, tags and descriptions change when they are found to be
+wrong. Schema fields are added as optional fields; a rename or removal is
+announced in the pull request that makes it.
 
-30-day public comment. Merge requires two maintainer approvals + no unresolved objections from the advisory board.
+## Who decides
 
-## Removal and deprecation
+One maintainer (Vasyl Rakivnenko). There is no advisory board and no
+formal RFC process. For a structural change (a new failure mode, a new
+node type, a schema rename), open an issue first.
 
-Nodes are never silently deleted. A removed Tool keeps its node with `maturity_status: abandoned` and, where possible, a `supersedes` pointer to its successor. This preserves citation stability.
+## Conflicts of interest
+
+- A contributor who authors, maintains or is employed by the organization
+  behind a tool says so in the pull request or issue.
+- No vendor decides how its own tool is classified or how its benchmark
+  row is produced. A vendor can ask for a correction or a different
+  configuration through an issue; the request and the answer are public.
+- The benchmark's tool rows were run with settings chosen by this project.
+  Tool authors have not reviewed them.
 
 ## Transparency
 
-All merges are public. Decisions on disputed PRs are recorded in the PR thread. The advisory-board roster is public.
+Every change is in the repository history. Results of the benchmark are
+versioned ([`bench/CHANGELOG_RESULTS.md`](bench/CHANGELOG_RESULTS.md)).
