@@ -1,16 +1,19 @@
-"""Web entrypoint: the /ask + /assess API, optionally serving the static site.
+"""The one server entry point: the Ask / Assess API, optionally with the site.
 
-Wraps :mod:`pipeline.ask.server` without modifying it:
+``python -m pipeline.webapp`` is the only way to run the API
+(``python -m pipeline.ask.server`` runs this same ``main``).
 
-* Maps a hosted OpenAI-compatible provider onto the ``AZURE_KIMI_*`` env vars
-  that ``pipeline.extract.kimi.get_client`` reads. Today that is Hyperbolic:
-  if ``HYPERBOLIC_API_KEY`` is set and ``AZURE_KIMI_API_KEY`` is not, the
-  backend talks to ``https://api.hyperbolic.ai/inference/v1`` using ``ASK_MODEL``
+* Reads ``.env.local`` first, then maps a hosted OpenAI-compatible provider
+  onto the ``AZURE_KIMI_*`` variables that ``pipeline.extract.kimi.get_client``
+  reads. Today that is Hyperbolic: if ``HYPERBOLIC_API_KEY`` is set and
+  ``AZURE_KIMI_API_KEY`` is not, the backend talks to
+  ``https://api.hyperbolic.ai/inference/v1`` using ``ASK_MODEL``
   (default: ``deepseek-v4.1-flash``). Explicit ``AZURE_KIMI_*`` vars always win.
 * Prepares semantic retrieval on the first Ask request, not before opening the
   HTTP port. Cold model downloads must not block publishing health checks.
-* Mounts the API under ``/api`` (``/api/ask``, ``/api/assess``,
-  ``/api/health``) so the site can call it same-origin.
+* Mounts the API (:mod:`pipeline.ask.server`) under ``/api``: ``/api/ask``,
+  ``/api/assess``, ``/api/health``. The limits of the two POST routes, the
+  8 kB body limit and the error format are described there.
 * With ``SERVE_STATIC=1``, also serves ``site/dist`` at ``/`` — one process,
   one port, for production. Every page answers at both ``/x`` and ``/x/``
   with 200 (no slash redirect; pages carry a canonical tag), old underscore
@@ -21,17 +24,22 @@ Wraps :mod:`pipeline.ask.server` without modifying it:
 * Responses are gzipped; data files (``/api/*``, ``/kit/*``, ``*.json`` …)
   carry ``X-Robots-Tag: noindex`` so they stay fetchable but out of search
   results; hashed ``/_astro/*`` assets are cached for a year.
+* The interactive API docs (``/docs``, ``/openapi.json``) are off unless
+  ``SAICA_API_DOCS=1``.
 
 Run::
 
     python -m pipeline.webapp                      # dev: API on 127.0.0.1:4322
+    python -m pipeline.webapp --help               # print help and exit
     SERVE_STATIC=1 ASK_HOST=0.0.0.0 ASK_PORT=5000 python -m pipeline.webapp
 """
 
 from __future__ import annotations
 
+import argparse
 import logging
 import os
+import sys
 from pathlib import Path
 from threading import Lock
 
@@ -234,7 +242,15 @@ def build_app():
 
     api_app = create_app(find_similar=retrieve)
 
-    root = FastAPI(title="SAICA-KG")
+    # No interactive docs on the public origin unless asked for (they load
+    # scripts from a CDN and list every route).
+    docs = os.environ.get("SAICA_API_DOCS") == "1"
+    root = FastAPI(
+        title="SAICA",
+        docs_url="/docs" if docs else None,
+        redoc_url="/redoc" if docs else None,
+        openapi_url="/openapi.json" if docs else None,
+    )
     serve_static = os.environ.get("SERVE_STATIC") == "1"
 
     if serve_static:
@@ -267,14 +283,51 @@ def build_app():
     return root
 
 
-def main() -> None:
+def load_env() -> None:
+    """Read ``.env.local`` into the environment (real variables win)."""
+    from pipeline.config import load_env_once
+
+    load_env_once()
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Start the server. ``--help`` prints help and exits without starting it."""
+    parser = argparse.ArgumentParser(
+        prog="python -m pipeline.webapp",
+        description=(
+            "Serve the SAICA API (/api/ask, /api/assess, /api/health) and, "
+            "with SERVE_STATIC=1, the built site from site/dist."
+        ),
+        epilog=(
+            "Environment: ASK_HOST, ASK_PORT, SERVE_STATIC=1, HYPERBOLIC_API_KEY "
+            "and ASK_MODEL (or AZURE_KIMI_*), FORWARDED_ALLOW_IPS, "
+            "SAICA_ASK_BUDGET, SAICA_ASK_TOKEN_BUDGET, SAICA_ASK_PER_CLIENT, "
+            "SAICA_ASSESS_BUDGET, SAICA_ASSESS_PER_CLIENT, "
+            "SAICA_TRUSTED_PROXY_HOPS, SAICA_CORS_ORIGINS, SAICA_API_DOCS=1. "
+            "Keys are also read from .env.local."
+        ),
+    )
+    parser.add_argument(
+        "--host", default=None, help="address to bind (default: $ASK_HOST or 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="port to bind (default: $ASK_PORT or 4322)",
+    )
+    args = parser.parse_args([] if argv is None else argv)
+
     import uvicorn
 
     logging.basicConfig(level=logging.INFO)
+    # Keys in .env.local must be in the environment before the provider is
+    # chosen; otherwise the start-up line names the wrong one.
+    load_env()
     provider = configure_provider()
     app = build_app()
-    host = os.environ.get("ASK_HOST", "127.0.0.1")
-    port = int(os.environ.get("ASK_PORT", "4322"))
+    host = args.host or os.environ.get("ASK_HOST", "127.0.0.1")
+    port = args.port or int(os.environ.get("ASK_PORT", "4322"))
     log.info(
         "starting on %s:%d — LLM: %s — static site: %s",
         host,
@@ -282,9 +335,12 @@ def main() -> None:
         provider,
         "on" if os.environ.get("SERVE_STATIC") == "1" else "off",
     )
-    # Behind Replit's TLS proxy: take scheme/client from X-Forwarded-* so any
-    # absolute URL the app builds (e.g. FastAPI's slash redirects under /api)
-    # says https. The deployment is reachable only through that proxy.
+    # Behind Replit's TLS proxy: take the scheme from X-Forwarded-Proto so
+    # HSTS and any absolute URL the app builds say https. The proxy's own
+    # address is not known in advance, hence "*". With "*" uvicorn also
+    # rewrites the client address from the *first* X-Forwarded-For entry,
+    # which the caller controls; the API's per-client limits therefore do
+    # not use it (see pipeline.ask.server.client_key).
     uvicorn.run(
         app,
         host=host,
@@ -296,4 +352,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

@@ -7,6 +7,7 @@ Public entrypoint:
 
 from pipeline.audit.analyzer import audit_repo
 from pipeline.audit.schemas import (
+    AuditLimits,
     AuditReport,
     CoverageCell,
     CoverageGrid,
@@ -18,6 +19,7 @@ from pipeline.audit.schemas import (
 )
 
 __all__ = [
+    "AuditLimits",
     "AuditReport",
     "CoverageCell",
     "CoverageGrid",

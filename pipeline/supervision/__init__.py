@@ -1,25 +1,25 @@
-"""Supervision package — prevention-event logging and CLI shims.
+"""Prevention log and the PreToolUse guard.
 
-This package is the home of SAICA-KG's first-party *prevention* layer.
-The KG entries that motivated it:
+Two parts:
 
-- ``data/failure_modes/scope_creep.yml`` — the FM the project's CLAUDE.md
-  guards against (plan-first, scope-respecting working agreement).
-- ``data/failure_modes/security_vulnerability.yml`` — pre-commit hooks like
-  ``detect-private-key`` and ``semgrep`` block insecure code from landing.
-- ``data/tools/semgrep.yml`` — wired as a pre-commit hook; logs denials
-  through :func:`pipeline.supervision.logger.log_prevention`.
-- ``data/tools/dependabot.yml`` — sibling supervisor (citation-style guide
-  for the per-file headers in this package).
+* :mod:`pipeline.supervision.pretool` — the logic of
+  ``.claude/hooks/pretool_guard.py``, a Claude Code ``PreToolUse`` hook that
+  decides by itself: it denies a Bash command that skips commit hooks
+  (``--no-verify``) and asks before an edit under the paths ``CLAUDE.md``
+  lists as off-limits. It is opt-in: nothing runs until the owner adds it
+  to their own settings (``.claude/hooks/settings.example.json``).
+* :mod:`pipeline.supervision.logger` — the JSONL log. Every line says who
+  wrote it (``recorded_by``): the hook itself, or someone at the command
+  line. Only hook lines are observations.
 
-The package is stdlib-only so it can be imported anywhere in the repo
-without dragging in heavy dependencies.
+Standard library only.
 """
 
 from pipeline.supervision.logger import (
     LOG_DIR_DEFAULT,
     log_prevention,
+    observed_events,
     read_events,
 )
 
-__all__ = ["LOG_DIR_DEFAULT", "log_prevention", "read_events"]
+__all__ = ["LOG_DIR_DEFAULT", "log_prevention", "observed_events", "read_events"]

@@ -117,6 +117,7 @@ def test_main_opens_server_without_preparing_embeddings(monkeypatch):
     monkeypatch.setenv("ASK_HOST", "0.0.0.0")
     monkeypatch.setenv("ASK_PORT", "5000")
     monkeypatch.setattr(webapp, "configure_provider", lambda: "test")
+    monkeypatch.setattr(webapp, "load_env", lambda: None)
     app = object()
     monkeypatch.setattr(webapp, "build_app", lambda: app)
     prepare = Mock(side_effect=AssertionError("blocking startup work"))
@@ -275,3 +276,94 @@ def test_security_headers_on_pages_api_and_errors(monkeypatch, tmp_path):
             assert "strict-transport-security" not in r.headers, path
         r = client.get("https://testserver/about/")
         assert r.headers["strict-transport-security"] == "max-age=31536000"
+
+
+# --- entry point, docs, and the API guard as mounted under /api (H3, H8, K11) ---
+
+
+def test_help_prints_and_exits_without_starting_a_server():
+    """`--help` used to start the server on port 4322 and stay there."""
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    root = Path(webapp.__file__).resolve().parent.parent
+    for module in ("pipeline.webapp", "pipeline.ask.server"):
+        done = subprocess.run(
+            [sys.executable, "-m", module, "--help"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        assert done.returncode == 0, (module, done.stderr[-500:])
+        assert done.stdout.startswith("usage: python -m pipeline.webapp"), module
+        assert "Uvicorn running" not in done.stdout + done.stderr
+
+
+def test_ask_server_main_is_the_webapp_main(monkeypatch):
+    from pipeline.ask import server
+
+    seen = []
+    monkeypatch.setattr(webapp, "main", lambda argv=None: seen.append(argv))
+    server.main(["--port", "5001"])
+    assert seen == [["--port", "5001"]]
+    assert not hasattr(server, "app")  # no second app built at import
+
+
+def test_env_file_is_read_before_the_provider_is_chosen(monkeypatch):
+    import uvicorn
+
+    order = []
+    monkeypatch.setattr(webapp, "load_env", lambda: order.append("env"))
+    monkeypatch.setattr(
+        webapp, "configure_provider", lambda: order.append("provider") or "x"
+    )
+    monkeypatch.setattr(webapp, "build_app", lambda: order.append("app") or object())
+    run = Mock()
+    monkeypatch.setattr(uvicorn, "run", run)
+    monkeypatch.delenv("ASK_HOST", raising=False)
+    monkeypatch.delenv("ASK_PORT", raising=False)
+    webapp.main(["--port", "4999"])
+    assert order == ["env", "provider", "app"]
+    assert run.call_args.kwargs["port"] == 4999
+    assert run.call_args.kwargs["host"] == "127.0.0.1"
+
+
+def test_docs_urls_are_off_on_the_site_origin(monkeypatch, tmp_path):
+    monkeypatch.delenv("SAICA_API_DOCS", raising=False)
+    with _seo_client(monkeypatch, tmp_path) as client:
+        for path in (
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+            "/api/docs",
+            "/api/redoc",
+            "/api/openapi.json",
+        ):
+            assert client.get(path).status_code == 404, path
+
+
+def test_api_limits_apply_under_the_api_mount(monkeypatch, tmp_path):
+    monkeypatch.delenv("SAICA_CORS_ORIGINS", raising=False)
+    with _seo_client(monkeypatch, tmp_path) as client:
+        big = client.post(
+            "/api/assess",
+            content=b'{"repo_url": "' + b"x" * 20_000 + b'"}',
+            headers={"Content-Type": "application/json"},
+        )
+        assert big.status_code == 413 and len(big.content) < 300
+        assert big.headers["x-request-id"] == big.json()["request_id"]
+        bad = client.post("/api/assess", json={"repo_url": "https://gitlab.com/o/r"})
+        assert bad.status_code == 400 and "github.com" in bad.json()["detail"]
+        assert client.get("/api/health").json() == {"ok": True}
+        cors = client.options(
+            "/api/ask",
+            headers={
+                "Origin": "https://evil.example",
+                "Access-Control-Request-Method": "POST",
+            },
+        )
+        assert "access-control-allow-origin" not in cors.headers
+        # Static pages are not behind the body limit and carry no request id.
+        assert "x-request-id" not in client.get("/about/").headers

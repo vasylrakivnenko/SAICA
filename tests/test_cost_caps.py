@@ -84,6 +84,98 @@ def test_budget_negative_tokens_are_clamped() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Layer 1b: reserve / record — a call is counted before it is paid for (J9)
+# ---------------------------------------------------------------------------
+
+
+def test_reserve_lets_exactly_max_calls_through() -> None:
+    """With ``consume`` a cap of 2 paid for 3 calls; ``reserve`` stops at 2."""
+    b = CallBudget(max_calls=2)
+    paid = 0
+    for _ in range(5):
+        try:
+            b.reserve()
+        except CostCapExceeded:
+            continue
+        paid += 1  # the request would be sent here
+        b.record(tokens=10)
+    assert paid == 2
+    # Refused calls are not counted.
+    assert b.summary() == "calls=2 tokens≈20"
+
+
+def test_reserve_refuses_before_dispatch_with_zero_budget() -> None:
+    b = CallBudget(max_calls=0)
+    with pytest.raises(CostCapExceeded, match="max_calls=0 reached"):
+        b.reserve()
+    assert b.summary() == "calls=0 tokens≈0"
+
+
+def test_record_never_raises_and_the_token_cap_stops_the_next_call() -> None:
+    b = CallBudget(max_tokens_estimate=1000)
+    b.reserve()
+    b.record(tokens=5000)  # far past the cap: the answer is already paid for
+    assert b.summary() == "calls=1 tokens≈5000"
+    with pytest.raises(CostCapExceeded, match="max_tokens_estimate=1000 reached"):
+        b.reserve()
+    b.record(tokens=-50)  # clamped
+    assert "5000" in b.summary()
+
+
+def test_release_gives_back_a_call_that_was_never_sent() -> None:
+    b = CallBudget(max_calls=1)
+    b.reserve()
+    b.release()
+    b.reserve()  # the slot is free again
+    with pytest.raises(CostCapExceeded):
+        b.reserve()
+    b.release()
+    b.release()  # never below zero
+    assert b.summary() == "calls=0 tokens≈0"
+
+
+def test_reserve_is_safe_across_threads() -> None:
+    from concurrent.futures import ThreadPoolExecutor
+
+    b = CallBudget(max_calls=50)
+
+    def attempt(_: int) -> bool:
+        try:
+            b.reserve()
+        except CostCapExceeded:
+            return False
+        return True
+
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        granted = sum(pool.map(attempt, range(400)))
+    assert granted == 50
+
+
+def test_daily_budget_starts_again_on_a_new_utc_day() -> None:
+    import datetime as dt
+
+    from pipeline.cost_caps import DailyBudget
+
+    day = [dt.date(2026, 11, 21)]
+    b = DailyBudget(max_calls=2, max_tokens_estimate=100, today=lambda: day[0])
+    b.reserve()
+    b.record(tokens=40)
+    b.reserve()
+    with pytest.raises(CostCapExceeded):
+        b.reserve()
+    assert b.summary() == "calls=2 tokens≈40"
+
+    day[0] = dt.date(2026, 11, 22)
+    assert b.summary() == "calls=0 tokens≈0"
+    b.reserve()
+    b.record(tokens=500)  # the token cap closes the rest of this day only
+    with pytest.raises(CostCapExceeded, match="max_tokens_estimate"):
+        b.reserve()
+    day[0] = dt.date(2026, 11, 23)
+    b.reserve()
+
+
+# ---------------------------------------------------------------------------
 # Layer 2: Kimi extract_tool integration
 # ---------------------------------------------------------------------------
 

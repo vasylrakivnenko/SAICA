@@ -1,44 +1,37 @@
-"""Recommendation engine for the SAICA-KG MCP server.
+"""Catalog recommender behind the MCP tool ``saica_recommend`` and the
+generated ``RECOMMENDATIONS.md`` / ``SKILLS.md``.
 
-Two modes, per the v0.2.1 design:
+What it is: a ranking of catalog tools by their tags. A tag
+(``addresses_failure_modes``) is what a tool says it deals with. The
+ranking multiplies an editorial weight per failure mode by the tool's
+popularity (:mod:`pipeline.shared.priorities`). It is not a benchmark.
 
-* **Targeted** — caller passes a list of failure modes; we return supervisors
-  that declare coverage for those failure modes.
-* **Full suite** (default) — caller passes no failure modes; we return the
-  minimum set of supervisors that *together* cover all 11 failure modes.
-  Greedy set cover, then a small depth pad of the highest-evidence
-  remaining supervisors.
+The one place measurements enter: a tool is never offered for a failure
+mode on which SAICA-Bench measured it below the site's floor, and an
+archived tool is offered for nothing
+(:func:`pipeline.maturity.evidence.measured_view`, applied to every tool
+the selection sees). Measured picks are on https://saica.ai/tool-coverage/.
 
-Two filter layers gate every recommendation:
+Two modes:
 
-1. **CODING_AGENT_IDS.** As of v0.3.1 the KG no longer catalogs coding-
-   agent systems themselves (Claude Code, Cursor, Replit Agent, Codex,
-   etc.) — SAICA is for *modular supervisors you add to a stack*, not
-   for the agents that consume that stack. This frozenset is kept as
-   a defense-in-depth safety net: if a coding-agent YAML ever re-lands
-   in ``data/tools/`` (by accident or via an upstream PR), the
-   recommender still won't surface it. Empty on the happy path.
+* **Targeted** — the caller names failure modes; up to three tagged tools
+  come back per mode.
+* **Tiers** — ``minimum`` (one tool), ``optimal`` (three), ``full`` (greedy
+  pick until no tagged tool adds a mode). After the measured floor some
+  modes may have no tool left; ``full`` then reports them as uncovered.
 
-2. **RECOMMENDATION_BLOCKLIST.** A tiny list of tools whose role is too
-   ambiguous to be a confident recommendation regardless of who's asking
-   (e.g. an image-diffusion GUI that incidentally declares ``scope_creep``
-   coverage but doesn't supervise *coding* in any practical sense).
+Two filters are kept from the earlier catalog and match nothing in it
+today: ``CODING_AGENT_IDS`` (never offer a coding agent to a coding agent)
+and ``RECOMMENDATION_BLOCKLIST``.
 """
 
 from __future__ import annotations
 
-import glob
-from pathlib import Path
 from typing import Any
 
-import yaml
-
-from pipeline.shared.priorities import coverage_value, reliability
-from pipeline.shared.trending import effective_stars, is_trending
-
-# Resolve REPO at import time so subprocess invocations from any CWD work.
-REPO = Path(__file__).resolve().parents[2]
-TOOLS_DIR = REPO / "data" / "tools"
+from pipeline import kg
+from pipeline.maturity.evidence import measured_view
+from pipeline.shared.priorities import coverage_value, popularity
 
 # ---------------------------------------------------------------------------
 # Filter layers
@@ -87,21 +80,18 @@ RECOMMENDATION_BLOCKLIST: frozenset[str] = frozenset(
     }
 )
 
-# All 11 failure modes, kept stable here so the full-suite mode doesn't
-# silently drift if a new FM lands in data/failure_modes/.
-ALL_FAILURE_MODES: tuple[str, ...] = (
-    "fabrication",
-    "obsolescence",
-    "dependency_blindness",
-    "logic_error",
-    "security_vulnerability",
-    "scope_creep",
-    "context_pollution",
-    "supply_chain_attack",
-    "cascading_failure",
-    "incomplete_execution",
-    "test_manipulation",
-)
+
+def all_failure_modes() -> tuple[str, ...]:
+    """The failure-mode ids, from ``data/failure_modes/`` (never typed in)."""
+    return kg.failure_mode_ids()
+
+
+def __getattr__(name: str) -> Any:
+    # ``ALL_FAILURE_MODES`` used to be a typed-in tuple. Old imports keep
+    # working and now get the list derived from the data.
+    if name == "ALL_FAILURE_MODES":
+        return all_failure_modes()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -112,18 +102,34 @@ _TOOL_INDEX_CACHE: dict[str, dict[str, Any]] | None = None
 
 
 def _load_tools() -> dict[str, dict[str, Any]]:
-    """Load all tool YAMLs as a dict keyed by id, cached per process."""
+    """Every catalog tool with its tags untouched, keyed and sorted by id.
+
+    Read through :mod:`pipeline.kg` (validated, one error policy) and cached
+    for the process. The generators read this for the "tagged, not listed"
+    table, so the tags here are the catalog's, not the measured view.
+    """
     global _TOOL_INDEX_CACHE
-    if _TOOL_INDEX_CACHE is not None:
-        return _TOOL_INDEX_CACHE
-    out: dict[str, dict[str, Any]] = {}
-    for path in glob.glob(str(TOOLS_DIR / "*.yml")):
-        with open(path, encoding="utf-8") as fh:
-            doc = yaml.safe_load(fh)
-        if isinstance(doc, dict) and doc.get("id"):
-            out[str(doc["id"])] = doc
-    _TOOL_INDEX_CACHE = out
-    return out
+    if _TOOL_INDEX_CACHE is None:
+        _TOOL_INDEX_CACHE = kg.load_tools()
+    return _TOOL_INDEX_CACHE
+
+
+def _reset_index() -> None:
+    global _TOOL_INDEX_CACHE
+    _TOOL_INDEX_CACHE = None
+
+
+kg.on_reset(_reset_index)
+
+
+def _recommendable_tools() -> list[dict[str, Any]]:
+    """The tools as the selection may use them, in id order.
+
+    Each tool's ``addresses_failure_modes`` keeps only the modes it may be
+    offered for: its tags minus the modes where SAICA-Bench measured it
+    below the floor; none when its repository is archived.
+    """
+    return [measured_view(tool) for _, tool in sorted(_load_tools().items())]
 
 
 def _eligible(
@@ -147,24 +153,18 @@ def _score_for_fm(
     tool: dict[str, Any],
     fm: str,
 ) -> tuple[int, int, float]:
-    """Score a tool for a single FM. Higher is better.
+    """Sort key of a tool for one failure mode. Higher is better.
 
-    (paradigm_pref, evidence_tier, effective_stars) — paradigm_pref is +1 for
-    prevention/detection (proactive), 0 for correction/recovery (reactive).
-    Evidence tier is the same 0..3 from the heatmap (declared / + rationale
-    mention / + external citation), folded down to a 0/1 here for ranking
-    simplicity. The third coordinate is *effective* stars: real stars
-    multiplied by ``TRENDING_BOOST`` when the tool's repository is on
-    github.com/trending. This makes a trending tool with 1k stars beat a
-    non-trending peer with up to ~1.43k stars without overriding tools
-    that are genuinely much more popular.
+    ``(paradigm_pref, mentioned, stars)``: 1 for prevention / detection, 0
+    for correction / recovery; 1 when the tool's ``inclusion_rationale``
+    names the mode; then the star count.
     """
     paradigm = str(tool.get("control_paradigm") or "")
     paradigm_pref = 1 if paradigm in ("prevention", "detection") else 0
     rationale = str(tool.get("inclusion_rationale") or "").lower()
     fm_keywords = (fm, fm.replace("_", " "), fm.replace("_", "-"))
-    evidence = 1 if any(k in rationale for k in fm_keywords) else 0
-    return (paradigm_pref, evidence, effective_stars(tool))
+    mentioned = 1 if any(k in rationale for k in fm_keywords) else 0
+    return (paradigm_pref, mentioned, float(tool.get("stars") or 0))
 
 
 def _to_recommendation_dict(tool: dict[str, Any]) -> dict[str, Any]:
@@ -179,7 +179,6 @@ def _to_recommendation_dict(tool: dict[str, Any]) -> dict[str, Any]:
         "integration_surfaces": list(tool.get("integration_surfaces") or []),
         "addresses_failure_modes": list(tool.get("addresses_failure_modes") or []),
         "stars": (int(tool["stars"]) if tool.get("stars") is not None else None),
-        "trending": is_trending(tool),
         "url": f"/tools/{tid}",
         "tagline": tool.get("tagline"),
     }
@@ -211,18 +210,17 @@ def recommend_for_failure_modes(
           }
         }
     """
-    unknown = [fm for fm in failure_modes if fm not in ALL_FAILURE_MODES]
+    known = all_failure_modes()
+    unknown = [fm for fm in failure_modes if fm not in known]
     if unknown:
-        raise ValueError(
-            f"unknown failure_mode(s): {unknown}. Valid: {list(ALL_FAILURE_MODES)}"
-        )
+        raise ValueError(f"unknown failure_mode(s): {unknown}. Valid: {list(known)}")
 
-    tools = _load_tools()
+    tools = _recommendable_tools()
     by_fm: dict[str, list[dict[str, Any]]] = {}
     for fm in failure_modes:
         candidates = [
             t
-            for t in tools.values()
+            for t in tools
             if fm in (t.get("addresses_failure_modes") or [])
             and _eligible(t, agent_kind=agent_kind)
         ]
@@ -236,20 +234,14 @@ def recommend_for_failure_modes(
 
 
 # ---------------------------------------------------------------------------
-# Three-tier coverage modes (replace the prior "full_suite" with-pad design)
+# Tiers
 #
-# All three use weighted greedy selection where the score for adding a tool
-# is sum(priority(fm) for fm in newly-covered) * reliability(tool).
-# Eligibility / blocklist / coding-agent-peer filters are applied identically.
+# All three pick greedily: the next tool is the one with the highest
+#   Σ priority(mode) over the modes it would newly name  ×  (1 + popularity).
 #
-#   minimum (1 tool):  the single highest-scoring tool. Best "starter".
-#   optimal (3 tools): greedy weighted set cover capped at 3. Best
-#                      "responsible kit" — covers the highest-priority FMs
-#                      with the smallest practical stack.
-#   full (variable N): greedy weighted set cover until ALL 11 FMs are
-#                      covered (no pad). Best "MECE coverage" — answers
-#                      "what's the smallest set that addresses every FM
-#                      we know about?". Typically 4-5 tools.
+#   minimum: the first pick only.
+#   optimal: the first three picks.
+#   full:    picks until no tagged tool adds a mode.
 # ---------------------------------------------------------------------------
 
 LEVELS: tuple[str, ...] = ("minimum", "optimal", "full")
@@ -258,10 +250,10 @@ OPTIMAL_K: int = 3
 
 
 def _eligible_pool(agent_kind: str | None) -> list[dict[str, Any]]:
-    """Tools eligible to be recommended given the asker's agent kind."""
+    """Tools that may be offered to this asker and are left with a mode."""
     return [
         t
-        for t in _load_tools().values()
+        for t in _recommendable_tools()
         if _eligible(t, agent_kind=agent_kind)
         and (t.get("addresses_failure_modes") or [])
     ]
@@ -273,8 +265,11 @@ def _greedy_weighted_pick(
     target_fms: set[str],
     already_covered: set[str],
 ) -> tuple[dict[str, Any] | None, float]:
-    """Pick the tool maximising weighted_coverage * reliability over the
-    FMs in ``target_fms`` not yet in ``already_covered``. Returns (tool, score).
+    """The tool with the highest ``coverage_value × (1 + popularity)`` over
+    the modes of ``target_fms`` not yet in ``already_covered``.
+
+    The pool is in id order and a later tool must score strictly higher to
+    win, so a tie goes to the lower id whatever the file system's order.
     """
     remaining = target_fms - already_covered
     best: dict[str, Any] | None = None
@@ -283,37 +278,63 @@ def _greedy_weighted_pick(
         new_value = coverage_value(t, remaining)
         if new_value <= 0:
             continue
-        score = new_value * (1.0 + reliability(t))
+        score = new_value * (1.0 + popularity(t))
         if score > best_score:
             best, best_score = t, score
     return best, best_score
 
 
-def recommend_minimum(*, agent_kind: str | None = None) -> dict[str, Any]:
-    """Return the single highest-priority * reliability tool. Best starter."""
-    pool = _eligible_pool(agent_kind)
-    chosen, _ = _greedy_weighted_pick(
-        pool,
-        target_fms=set(ALL_FAILURE_MODES),
-        already_covered=set(),
+def _summary(selected: list[dict[str, Any]], covered: set[str], total: int) -> str:
+    """One sentence that counts tags as tags."""
+    if not selected:
+        return "No eligible tool found."
+    n = len(selected)
+    whose = "its tags name" if n == 1 else "their tags name"
+    return (
+        f"{n} tool{'' if n == 1 else 's'}; {whose} {len(covered)} of {total} "
+        "failure modes (a tag is the tool's claim, not a measurement)."
     )
-    selected = [chosen] if chosen is not None else []
-    covered = set(chosen.get("addresses_failure_modes") or []) if chosen else set()
+
+
+def _pick(
+    agent_kind: str | None, limit: int | None
+) -> tuple[list[dict[str, Any]], set[str], set[str]]:
+    """Greedy picks, at most ``limit`` (no limit: until nothing adds a mode)."""
+    pool = _eligible_pool(agent_kind)
+    target = set(all_failure_modes())
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+    covered: set[str] = set()
+    while covered != target and (limit is None or len(selected) < limit):
+        candidates = [t for t in pool if t["id"] not in selected_ids]
+        chosen, _ = _greedy_weighted_pick(
+            candidates, target_fms=target, already_covered=covered
+        )
+        if chosen is None:
+            break  # no tagged tool adds a mode
+        selected.append(chosen)
+        selected_ids.add(str(chosen["id"]))
+        covered |= set(chosen.get("addresses_failure_modes") or []) & target
+    return selected, covered, target
+
+
+def _tier(level: str, agent_kind: str | None, limit: int | None) -> dict[str, Any]:
+    selected, covered, target = _pick(agent_kind, limit)
     return {
-        "mode": "minimum",
-        "level": "minimum",
+        "mode": level,
+        "level": level,
         "agent_kind": agent_kind,
         "tools": [_to_recommendation_dict(t) for t in selected],
         "covered_failure_modes": sorted(covered),
-        "uncovered_failure_modes": sorted(set(ALL_FAILURE_MODES) - covered),
-        "coverage_complete": False,
-        "summary": (
-            f"1 tool covers {len(covered)} of {len(ALL_FAILURE_MODES)} "
-            f"failure modes (highest-priority single pick)."
-            if chosen
-            else "No eligible tool found."
-        ),
+        "uncovered_failure_modes": sorted(target - covered),
+        "coverage_complete": covered == target,
+        "summary": _summary(selected, covered, len(target)),
     }
+
+
+def recommend_minimum(*, agent_kind: str | None = None) -> dict[str, Any]:
+    """The single first pick."""
+    return _tier("minimum", agent_kind, 1)
 
 
 def recommend_optimal(
@@ -321,78 +342,19 @@ def recommend_optimal(
     agent_kind: str | None = None,
     k: int = OPTIMAL_K,
 ) -> dict[str, Any]:
-    """Greedy weighted set cover capped at ``k`` tools. Best responsible kit."""
-    pool = _eligible_pool(agent_kind)
-    selected: list[dict[str, Any]] = []
-    selected_ids: set[str] = set()
-    covered: set[str] = set()
-
-    while len(selected) < k:
-        # filter out already-picked tools without rebuilding the whole pool
-        candidates = [t for t in pool if t["id"] not in selected_ids]
-        chosen, _ = _greedy_weighted_pick(
-            candidates,
-            target_fms=set(ALL_FAILURE_MODES),
-            already_covered=covered,
-        )
-        if chosen is None:
-            break
-        selected.append(chosen)
-        selected_ids.add(str(chosen["id"]))
-        covered |= set(chosen.get("addresses_failure_modes") or [])
-
-    return {
-        "mode": "optimal",
-        "level": "optimal",
-        "agent_kind": agent_kind,
-        "k": k,
-        "tools": [_to_recommendation_dict(t) for t in selected],
-        "covered_failure_modes": sorted(covered),
-        "uncovered_failure_modes": sorted(set(ALL_FAILURE_MODES) - covered),
-        "coverage_complete": covered == set(ALL_FAILURE_MODES),
-        "summary": (
-            f"{len(selected)} tools cover {len(covered)} of "
-            f"{len(ALL_FAILURE_MODES)} failure modes "
-            f"(weighted set cover, capped at {k})."
-        ),
-    }
+    """The first ``k`` picks (three by default)."""
+    out = _tier("optimal", agent_kind, k)
+    out["k"] = k
+    return out
 
 
 def recommend_full(*, agent_kind: str | None = None) -> dict[str, Any]:
-    """Greedy weighted set cover until every FM is covered (no pad). MECE."""
-    pool = _eligible_pool(agent_kind)
-    selected: list[dict[str, Any]] = []
-    selected_ids: set[str] = set()
-    covered: set[str] = set()
-    target = set(ALL_FAILURE_MODES)
+    """Picks until no tagged tool adds a mode.
 
-    while covered != target:
-        candidates = [t for t in pool if t["id"] not in selected_ids]
-        chosen, _ = _greedy_weighted_pick(
-            candidates,
-            target_fms=target,
-            already_covered=covered,
-        )
-        if chosen is None:
-            break  # uncoverable
-        selected.append(chosen)
-        selected_ids.add(str(chosen["id"]))
-        covered |= set(chosen.get("addresses_failure_modes") or [])
-
-    return {
-        "mode": "full",
-        "level": "full",
-        "agent_kind": agent_kind,
-        "tools": [_to_recommendation_dict(t) for t in selected],
-        "covered_failure_modes": sorted(covered),
-        "uncovered_failure_modes": sorted(target - covered),
-        "coverage_complete": covered == target,
-        "summary": (
-            f"{len(selected)} tools cover {len(covered)} of "
-            f"{len(ALL_FAILURE_MODES)} failure modes "
-            f"(minimum weighted set cover)."
-        ),
-    }
+    ``coverage_complete`` is false when a mode has no tool left after the
+    measured floor; that mode is then listed in ``uncovered_failure_modes``.
+    """
+    return _tier("full", agent_kind, None)
 
 
 # ---------------------------------------------------------------------------
@@ -428,7 +390,8 @@ def recommend(
 
 
 __all__ = [
-    "ALL_FAILURE_MODES",
+    "ALL_FAILURE_MODES",  # noqa: F822 - served by __getattr__
+    "all_failure_modes",
     "CODING_AGENT_IDS",
     "DEFAULT_LEVEL",
     "LEVELS",

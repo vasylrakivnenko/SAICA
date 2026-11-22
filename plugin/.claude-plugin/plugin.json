@@ -1,15 +1,14 @@
 {
   "name": "saica-supervise",
   "displayName": "SAICA — supervision skill",
-  "description": "Pure-skill plugin distilled from the SAICA-KG corpus: per-failure-mode heuristics for AI coding agents plus three pre-baked supervision-stack tiers (minimum / optimal / full-MECE). Drop-in markdown — zero runtime deps. The full MCP server (saica_lookup, saica_recommend, audit) lives in the parent saicakg repo for power users who want the live API.",
+  "version": "2026.11.0",
+  "description": "One skill file built from the SAICA catalog: for each of the 11 failure modes of AI coding agents, what to watch for and which catalog tools are tagged for it, plus three tool stacks built from those tags. A tag is what a tool says it addresses, not a measurement. Markdown only, no runtime dependencies. The MCP server (saica_lookup, saica_recommend) lives in the repository and needs Python.",
+  "author": {
+    "name": "vasyl",
+    "email": "vasyl@alumni.gsb.stanford.edu"
+  },
   "homepage": "https://github.com/vasylrakivnenko/SAICA",
   "license": "Apache-2.0",
-  "authors": [
-    {
-      "name": "vasyl",
-      "email": "vasyl@alumni.gsb.stanford.edu"
-    }
-  ],
   "keywords": [
     "supervision",
     "ai-agents",

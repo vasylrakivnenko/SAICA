@@ -1,27 +1,29 @@
-"""JSONL prevention-event logger.
+"""JSONL prevention-event log.
 
-KG citations (the supervision-on-supervision chain we want auditable):
+One JSON object per line under ``<repo>/.saica/prevention_log/<date>.jsonl``
+(gitignored, per developer). Fields: ``ts``, ``tool_id``, ``failure_mode``,
+``mechanism``, ``detail``, ``invoked_by``, ``recorded_by`` and, for hook
+events, ``decision``.
 
-- ``data/failure_modes/scope_creep.yml`` — events tagged with this FM are
-  emitted whenever ``CLAUDE.md`` (plan-first / no-unrelated-edits) blocks
-  an action via Claude Code's ``PreToolUse`` hook.
-- ``data/failure_modes/security_vulnerability.yml`` — emitted when
-  ``detect-private-key`` / ``semgrep`` deny a commit.
-- ``data/tools/semgrep.yml`` — control_paradigm: detection, but when wired
-  into ``.pre-commit-config.yaml`` it acts as a *prevention* gate (commit
-  is blocked before it lands), which is exactly the cell SAICA-KG's own
-  self-audit reported as 0/4.
-- ``data/tools/dependabot.yml`` — sibling supervisor used as the
-  citation-style template for these headers.
+``recorded_by`` says who wrote the line, which decides what the line is
+worth as data:
 
-Design constraints (from the agent brief):
+* ``"hook"`` — written by ``.claude/hooks/pretool_guard.py`` at the moment
+  it denied a tool call or asked about one. This is an observation.
+* ``"cli"`` — typed in through ``python -m pipeline.supervision log`` by a
+  person or by an agent following ``CLAUDE.md``. This is a self-report.
+
+Lines written before 2026-11-21 have no ``recorded_by``. All of them came
+from the CLI (the hook of that time could not fire: it waited for a
+``decision`` field that a PreToolUse input never carries), although twelve
+of them say ``invoked_by: claude-code-hook``. :func:`read_events` returns
+them with ``recorded_by: "cli"`` and leaves the files untouched.
+
+Design constraints:
 
 - stdlib only (no ``pydantic``, no ``requests``)
-- one JSON object per line, no header
-- atomic-ish append (open mode ``"a"``); idempotent within the same second
-  on the (ts, tool_id, mechanism) triple
-- log dir defaults to ``<repo_root>/.saica/prevention_log/`` and is
-  gitignored — per-developer, never committed
+- append only; idempotent within the same second on (ts, tool_id, mechanism)
+- the failure-mode id is not checked against the KG here
 """
 
 from __future__ import annotations
@@ -60,6 +62,9 @@ def _find_repo_root(start: Path | None = None) -> Path:
 REPO_ROOT = _find_repo_root()
 LOG_DIR_DEFAULT = REPO_ROOT / ".saica" / "prevention_log"
 
+# Who may write a line: the hook process itself, or the command line.
+RECORDERS = ("hook", "cli")
+
 
 # ---------------------------------------------------------------------------
 # Timestamp helpers
@@ -93,6 +98,8 @@ def log_prevention(
     detail: str = "",
     invoked_by: str = "",
     log_dir: Path | None = None,
+    recorded_by: str = "cli",
+    decision: str | None = None,
 ) -> Path:
     """Append a prevention event to the date-bucketed JSONL log.
 
@@ -111,9 +118,15 @@ def log_prevention(
     detail:
         Human-readable specifics — file path, line, message.
     invoked_by:
-        ``"pre-commit" | "claude-code-hook" | "ci" | "manual"``.
+        What the writer says triggered the event:
+        ``"claude-code-hook" | "pre-commit" | "ci" | "manual" | "agent-manual"``.
     log_dir:
         Override for tests. Defaults to :data:`LOG_DIR_DEFAULT`.
+    recorded_by:
+        ``"hook"`` when a hook process writes its own decision, ``"cli"``
+        for everything typed in. Only the hook passes ``"hook"``.
+    decision:
+        For hook events: ``"deny"`` or ``"ask"``.
 
     Returns
     -------
@@ -127,6 +140,8 @@ def log_prevention(
         raise ValueError("failure_mode is required")
     if not mechanism:
         raise ValueError("mechanism is required")
+    if recorded_by not in RECORDERS:
+        raise ValueError(f"recorded_by must be one of {RECORDERS}")
 
     target_dir = Path(log_dir) if log_dir is not None else LOG_DIR_DEFAULT
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -139,7 +154,10 @@ def log_prevention(
         "mechanism": mechanism,
         "detail": detail,
         "invoked_by": invoked_by,
+        "recorded_by": recorded_by,
     }
+    if decision:
+        event["decision"] = decision
 
     target = target_dir / f"{_date_bucket(ts)}.jsonl"
 
@@ -159,6 +177,9 @@ def log_prevention(
 def read_events(log_dir: Path | None = None) -> list[dict[str, Any]]:
     """Return every event in *log_dir*, sorted by ts descending.
 
+    Every event carries ``recorded_by`` (``"hook"`` or ``"cli"``); see the
+    module docstring. Use :func:`observed_events` for hook events only.
+
     Reads ``*.jsonl`` files and silently skips blank lines and rows that
     fail to parse — the logger is meant to be unobtrusive, never the cause
     of a downstream crash.
@@ -177,14 +198,25 @@ def read_events(log_dir: Path | None = None) -> list[dict[str, Any]]:
                     if not raw:
                         continue
                     try:
-                        events.append(json.loads(raw))
+                        event = json.loads(raw)
                     except json.JSONDecodeError:
                         continue
+                    if not isinstance(event, dict):
+                        continue
+                    # Lines from before the field existed were all typed in.
+                    event.setdefault("recorded_by", "cli")
+                    events.append(event)
         except OSError:
             continue
 
     events.sort(key=lambda e: e.get("ts", ""), reverse=True)
     return events
+
+
+def observed_events(log_dir: Path | None = None) -> list[dict[str, Any]]:
+    """Only the events a hook recorded itself (``recorded_by == "hook"``)."""
+
+    return [e for e in read_events(log_dir) if e.get("recorded_by") == "hook"]
 
 
 # ---------------------------------------------------------------------------

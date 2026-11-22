@@ -14,15 +14,17 @@ the "SAICA helps tools, doesn't evaluate them" stance from v0.3.1.
 
 Pipeline:
 
-  1. ``seeds.load_boards()`` resolves both boards into
-     ``list[SeedRepo]``.
-  2. ``runner.run_index(boards)`` audits each repo via
+  1. ``seeds.load_all_boards()`` reads the seed list into ``SeedRepo`` rows.
+  2. ``runner.run_index()`` audits each repo with
      :func:`pipeline.audit.analyzer.audit_repo`, scores it with
-     :func:`pipeline.saica_index.score.score_report`, and serialises
-     the result.
-  3. The resulting ``IndexSnapshot`` is written to
-     ``site/public/saica_index.json`` so the static leaderboard page
-     can render it without a backend.
+     :func:`pipeline.saica_index.score.score_report` and writes the rows
+     to ``site/public/saica_index.json``, which the leaderboard page reads.
+     A run with ``--limit`` must name another output file.
+
+What the grade can and cannot say: the audit detects fewer than half of
+the catalog's tools and cannot assess some failure modes at all (see the
+"Limits" section of any audit report), so a grade reflects what the audit
+can see, and grade A is out of reach today.
 
 The scoring formula is documented in
 :mod:`pipeline.saica_index.score` (single source of truth).

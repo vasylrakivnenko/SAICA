@@ -18,7 +18,7 @@ import json
 import sys
 from pathlib import Path
 
-from pipeline.audit.analyzer import audit_repo, audit_repo_local
+from pipeline.audit.analyzer import audit_repo, audit_repo_local, distinct_tool_count
 
 
 def _json_dump(report) -> str:
@@ -31,7 +31,11 @@ def _json_dump(report) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m pipeline.audit.cli",
-        description="Audit a public GitHub repo for AI-coding-agent supervision coverage.",
+        description=(
+            "Audit a public GitHub repo: which catalog tools it has wired in and "
+            "which failure modes their tags name. The report states what the "
+            "audit cannot see."
+        ),
     )
     parser.add_argument(
         "repo_url",
@@ -62,7 +66,8 @@ def main(argv: list[str] | None = None) -> int:
             report = audit_repo_local(args.repo_url)
         else:
             report = audit_repo(args.repo_url)
-    except ValueError as exc:
+    except (ValueError, FileNotFoundError) as exc:
+        # A bad URL, or a --local path that is not a directory.
         print(f"error: {exc}", file=sys.stderr)
         return 2
     except RuntimeError as exc:
@@ -78,9 +83,12 @@ def main(argv: list[str] | None = None) -> int:
         tail = {
             "repo_url": report.repo_url,
             "audited_at": report.audited_at.isoformat(),
-            "n_supervision_tools": len(report.stack.supervision_tools),
+            "n_supervision_tools": distinct_tool_count(report.stack),
             "n_failure_modes_covered": len(report.coverage.failure_modes_covered),
             "n_failure_modes_missing": len(report.coverage.failure_modes_missing),
+            "failure_modes_not_assessable": list(
+                report.coverage.failure_modes_not_assessable
+            ),
             "gaps": [
                 {"failure_mode": g.failure_mode, "severity": g.severity}
                 for g in report.gaps

@@ -1,38 +1,38 @@
-"""SAICA-KG MCP server (stdio transport, FastMCP).
+"""SAICA MCP server (stdio transport, FastMCP).
 
 Run as::
 
-    .venv/bin/python -m pipeline.mcp.server
+    .venv/bin/python -m pipeline.mcp.server          # serve on stdio
+    .venv/bin/python -m pipeline.mcp.server --help   # print help and exit
 
 Two tools are exposed:
 
-* ``saica_lookup`` — catalog lookup; returns full ToolRecord for a given id.
-* ``saica_recommend`` — supervision recommendations. Two modes baked in:
-  pass ``failure_modes=[...]`` for targeted recs, or omit it for the
-  full-suite (greedy set-cover over all 11 FMs).
+* ``saica_lookup`` — one catalog entry by id.
+* ``saica_recommend`` — catalog tools ranked by their tags: pass
+  ``failure_modes=[...]`` for up to three tools per mode, or ``level`` for
+  one of three tiers.
 
-Both tools honor a coding-agent filter so a user of one coding agent never
-gets recommendations to install another (Cursor users don't get told to
-install Claude Code, etc.). The asking agent identifies itself via the
-``SAICA_AGENT_KIND`` env var on the MCP server's process — set this once
-in your Claude Code MCP config (see ``mcp_config.example.json``).
+What the ranking is: an editorial weight per failure mode times the
+tool's popularity (stars and maintenance status). A tag is what a tool
+says it addresses. The one measured input: a tool is never offered for a
+mode on which SAICA-Bench measured it below the floor. Measured picks are
+on https://saica.ai/tool-coverage/.
 
-This module is a *thin* transport wrapper: business logic lives in
-``pipeline.mcp.lookup`` and ``pipeline.mcp.recommender``. Keeping the
-server file small means Claude Code's MCP client can import it fast on
-every session start, and tests can exercise the tools without touching
-the MCP machinery.
+This module is a thin transport wrapper: the logic lives in
+``pipeline.mcp.lookup`` and ``pipeline.mcp.recommender`` and is tested
+without the MCP machinery. Dependencies: ``requirements/mcp.txt``.
 """
 
 from __future__ import annotations
 
+import argparse
 import logging
 import os
 from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
 
-from pipeline.mcp._schemas_compat import ToolRecord
+from pipeline.audit.schemas import ToolRecord
 from pipeline.mcp.lookup import saica_lookup as _saica_lookup
 from pipeline.mcp.recommender import recommend as _recommend
 
@@ -55,20 +55,18 @@ def _agent_kind() -> Optional[str]:
 
 @mcp.tool()
 def saica_lookup(tool_id: str) -> ToolRecord:
-    """Look up a SAICA-KG tool by id.
+    """Look up one tool of the SAICA catalog by id.
 
-    Returns the full ToolRecord including control paradigm, temporal phase,
-    autonomy level, integration_surfaces, and the failure modes the tool
-    declares coverage for. Useful after ``saica_recommend`` so you can show
-    the human the full facets of a recommended tool.
+    Returns its record: control paradigm, temporal phase, autonomy level,
+    integration surfaces and the failure modes it is tagged for (what the
+    tool says it addresses; not a measurement).
 
     Args:
-        tool_id: KG tool id, e.g. ``"semgrep"``, ``"promptfoo"``,
-            ``"guardrails-ai"``. Must match the ``id`` field of a
-            ``data/tools/<id>.yml`` file in the repo.
+        tool_id: Catalog id, e.g. ``"semgrep"``, ``"promptfoo"``,
+            ``"guardrails-ai"``: lower-case letters, digits and hyphens.
 
     Raises:
-        ValueError: when ``tool_id`` is not in the KG.
+        ValueError: when ``tool_id`` is malformed or not in the catalog.
     """
     return _saica_lookup(tool_id)
 
@@ -78,55 +76,61 @@ def saica_recommend(
     level: Optional[str] = None,
     failure_modes: Optional[list[str]] = None,
 ) -> dict[str, Any]:
-    """Recommend supervision tools. Three coverage tiers + a targeted mode.
+    """List catalog tools for supervising an AI coding agent, ranked by tags.
 
-    Picks tools by **likelihood × impact** of each failure mode (per
-    ``data/failure_mode_priorities.yml``) multiplied by tool **reliability**
-    (log-stars + trending boost + citation count + maturity).
+    The ranking multiplies an editorial weight per failure mode
+    (``data/failure_mode_priorities.yml``) by the tool's **popularity**
+    (log of GitHub stars plus an adjustment for maintenance status). It is
+    not a benchmark result. A tool is never listed for a failure mode on
+    which SAICA-Bench measured it below the floor; for measured picks see
+    https://saica.ai/tool-coverage/.
 
     Pass ``level`` for one of three tiers:
 
-    * ``"minimum"`` — **1 tool**: the single highest-priority × reliability
-      tool. Best starter; covers the most weighted-priority FMs in one pick.
-    * ``"optimal"`` — **3 tools**: greedy weighted set cover capped at 3.
-      Best "responsible kit" — high coverage, low friction.
-    * ``"full"``    — **N tools (typically 4–5)**: minimum weighted set
-      cover until ALL 11 failure modes are covered. The MECE answer.
+    * ``"minimum"`` — 1 tool: the first greedy pick.
+    * ``"optimal"`` — 3 tools: the first three greedy picks.
+    * ``"full"`` — picks until no tagged tool adds a failure mode. Modes
+      left without a tool are returned in ``uncovered_failure_modes``.
 
-    Or pass ``failure_modes=[...]`` for the targeted mode (3 supervisors
-    per requested FM).
+    Or pass ``failure_modes=[...]`` for up to 3 tagged tools per mode.
 
-    Default (no args) → ``"optimal"``. Cannot pass both ``level`` and
-    ``failure_modes`` in the same call.
-
-    The asking agent's identity is read from the ``SAICA_AGENT_KIND`` env
-    var. If that matches a known coding agent (``cursor``, ``claude-code``,
-    ``windsurf``, ``aider``, ``replit-agent``, …), no peer coding agent is
-    recommended — only supervisors that compose with it.
+    Default (no args) → ``"optimal"``. ``level`` and ``failure_modes``
+    cannot be combined.
 
     Args:
         level: One of ``"minimum"``, ``"optimal"``, ``"full"``.
-            Defaults to ``"optimal"`` when both args are omitted.
-        failure_modes: Optional list of FM ids from SAICA-KG's 11-mode
-            taxonomy (``fabrication``, ``obsolescence``, ``dependency_blindness``,
-            ``logic_error``, ``security_vulnerability``, ``scope_creep``,
-            ``context_pollution``, ``supply_chain_attack``, ``cascading_failure``,
-            ``incomplete_execution``, ``test_manipulation``).
+        failure_modes: Failure-mode ids of the catalog, e.g.
+            ``scope_creep``, ``fabrication``, ``security_vulnerability``.
+            An unknown id raises an error that lists the valid ones.
 
     Returns:
-        Dict with ``mode``/``level``, ``agent_kind``, ``tools`` (list of
-        recommendations), ``covered_failure_modes``, ``uncovered_failure_modes``,
-        ``coverage_complete``, ``summary``. See ``pipeline.mcp.recommender``
-        for the exact shape per mode.
+        Dict with ``mode``/``level``, ``agent_kind``, ``tools``,
+        ``covered_failure_modes``, ``uncovered_failure_modes``,
+        ``coverage_complete`` and ``summary`` (tiers), or
+        ``by_failure_mode`` (targeted).
 
     Raises:
         ValueError: when ``level`` is unknown, ``failure_modes`` contains an
-            unknown FM id, or both args are passed at once.
+            unknown id, or both args are passed at once.
     """
     return _recommend(failure_modes, agent_kind=_agent_kind(), level=level)
 
 
-def main() -> None:  # pragma: no cover - executed only at runtime
+def main(argv: list[str] | None = None) -> None:  # pragma: no cover - runtime entry
+    """Serve on stdio. ``--help`` prints help and exits without serving."""
+    parser = argparse.ArgumentParser(
+        prog="python -m pipeline.mcp.server",
+        description=(
+            "SAICA MCP server on stdio: saica_lookup (one catalog entry) and "
+            "saica_recommend (catalog tools ranked by their tags). It prints "
+            "nothing until an MCP client connects."
+        ),
+        epilog=(
+            "Optional environment: SAICA_AGENT_KIND (the id of the coding "
+            "agent that asks). Dependencies: requirements/mcp.txt."
+        ),
+    )
+    parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO)
     mcp.run()
 

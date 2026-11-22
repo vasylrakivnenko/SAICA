@@ -1,82 +1,50 @@
-"""Failure-mode priority + tool reliability — shared scoring primitives.
+"""Failure-mode priority and tool popularity: the two numbers the catalog
+recommender multiplies.
 
-The MCP recommender, the audit gap-analyzer, and the heatmap generator all
-need a way to ask "how important is this FM?" and "how reliable is this
-tool?". Both questions are answered here so the formulae stay in one place.
+Both are editorial inputs, not measurements:
 
-Inputs:
-  - data/failure_mode_priorities.yml — likelihood + impact per FM, hand-
-    edited and reviewable. See that file's header for the source policy.
-  - The tool's own YAML — stars, trending status (via shared.trending),
-    citation count, maturity_status.
+* ``priority(fm)`` is ``likelihood × impact`` from
+  ``data/failure_mode_priorities.yml`` (hand-set weights; that file says
+  where they come from). Read through :mod:`pipeline.kg`.
+* ``popularity(tool)`` is ``log10(stars + 1)`` plus a fixed adjustment for
+  the tool's ``maturity_status``. It says how well known a tool is and
+  whether it is maintained. It does not say how well it works; where
+  SAICA-Bench measured a tool, that result is used elsewhere
+  (:mod:`pipeline.maturity.evidence`).
 
-Outputs:
-  - priority(fm)   → float in [0, ~3]   (likelihood × impact)
-  - reliability(t) → float in [~0, ~6]  (a log-stars + trending + citation
-                                          + maturity combiner)
-
-The combiners are kept *additive on log-stars*, *bounded on citations and
-maturity*, so a single dimension can't dominate. Any change to weights here
-should bump the version field in the YAML and document the rationale.
+Until 2026-11-21 this score was called "reliability" and had two more
+terms: a bonus per citing paper (2 of 49 tools had one) and a bonus for
+repositories on a May 2026 GitHub-trending snapshot (0 of 49 matched).
+Both are removed. ``reliability`` is kept as an alias of ``popularity``
+for callers that still use the old name.
 """
 
 from __future__ import annotations
 
 import math
-from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
-import yaml
-
-from pipeline.shared.trending import effective_stars, is_trending
-
-REPO = Path(__file__).resolve().parents[2]
-PRIORITIES_PATH = REPO / "data" / "failure_mode_priorities.yml"
+from pipeline import kg
 
 # ---------------------------------------------------------------------------
-# Priority — likelihood × impact, per FM
+# Priority — likelihood × impact, per failure mode
 # ---------------------------------------------------------------------------
 
-_DEFAULT_PRIORITY = 0.0  # for any FM not listed in the YAML
-
-
-@lru_cache(maxsize=1)
-def _load_priorities() -> dict[str, dict[str, Any]]:
-    """Load and cache data/failure_mode_priorities.yml. Raises if file missing."""
-    with PRIORITIES_PATH.open(encoding="utf-8") as fh:
-        doc = yaml.safe_load(fh)
-    return dict(doc.get("priorities") or {})
+_DEFAULT_PRIORITY = 0.0  # for any failure mode not listed in the YAML
 
 
 def priority(failure_mode: str) -> float:
-    """Return likelihood × impact for a single FM. Unknown FMs return 0.0."""
-    rec = _load_priorities().get(failure_mode)
-    if not rec:
-        return _DEFAULT_PRIORITY
-    return float(rec.get("likelihood", 0.0)) * float(rec.get("impact", 0))
+    """Return likelihood × impact for one failure mode. Unknown ids give 0.0."""
+    return kg.load_priorities().get(failure_mode, _DEFAULT_PRIORITY)
 
 
 def all_priorities() -> dict[str, float]:
-    """Return {fm: priority(fm)} for every FM in the YAML, sorted desc by priority."""
-    raw = _load_priorities()
-    return dict(
-        sorted(
-            ((fm, priority(fm)) for fm in raw),
-            key=lambda kv: -kv[1],
-        )
-    )
-
-
-def expected_priority_ordering() -> list[str]:
-    """The ordering committed in the YAML — used by tests to detect drift."""
-    with PRIORITIES_PATH.open(encoding="utf-8") as fh:
-        doc = yaml.safe_load(fh)
-    return list(doc.get("expected_priority_ordering") or [])
+    """``{fm: priority(fm)}`` for every mode in the YAML, highest first."""
+    return dict(sorted(kg.load_priorities().items(), key=lambda kv: -kv[1]))
 
 
 # ---------------------------------------------------------------------------
-# Reliability — per tool
+# Popularity — per tool
 # ---------------------------------------------------------------------------
 
 _MATURITY_SCORE: dict[str, float] = {
@@ -88,54 +56,40 @@ _MATURITY_SCORE: dict[str, float] = {
 }
 
 
-def reliability(tool: dict[str, Any]) -> float:
-    """Return a per-tool reliability score, ~0 to ~6, higher is better.
+def popularity(tool: dict[str, Any]) -> float:
+    """``log10(stars + 1)`` plus the adjustment for ``maturity_status``.
 
-    Combiner (kept simple and bounded):
-      reliability = log10(effective_stars + 1)         # popularity, range 0..5
-                  + 0.30 × len(cited_in)               # citation evidence, capped at 6
-                  + maturity_score                     # see _MATURITY_SCORE
-                  + (0.20 if trending else 0.0)        # secondary trending bump
-                                                       # on top of the trending boost
-                                                       # already baked into
-                                                       # effective_stars
-
-    Notes:
-      - log10 of effective_stars means a 10× difference in popularity
-        adds ~1.0 — meaningful but not crushing.
-      - Citation contribution is capped because we don't want one
-        massively-cited tool to dominate every recommendation.
-      - Maturity can subtract — a deprecated tool with high stars still
-        gets penalised below a fresh stable one.
+    Ten times the stars adds 1.0. A deprecated tool with many stars still
+    ranks below a maintained one with a few thousand.
     """
-    es = max(0.0, float(effective_stars(tool)))
-    log_pop = math.log10(es + 1.0)
-    citations = min(6, len(tool.get("cited_in") or []))
+    stars = max(0.0, float(tool.get("stars") or 0))
     maturity = _MATURITY_SCORE.get(str(tool.get("maturity_status") or ""), 0.0)
-    trending_bump = 0.20 if is_trending(tool) else 0.0
-    return log_pop + 0.30 * citations + maturity + trending_bump
+    return math.log10(stars + 1.0) + maturity
+
+
+# Old name, same function.
+reliability = popularity
 
 
 def coverage_value(tool: dict[str, Any], fms_covered: set[str]) -> float:
-    """Σ priority(fm) over the FMs in ``fms_covered`` that this tool addresses.
+    """Σ priority(fm) over the modes in ``fms_covered`` that the tool is tagged for.
 
-    Used as the "what does this tool buy us?" term in greedy weighted set
-    cover. Caller passes the set of FMs they still care about (e.g.
-    full coverage = all 11; remaining-in-cover = those not yet covered).
+    The "what does this tool add?" term of the greedy pick. The caller
+    passes the modes still open.
     """
     addressed = set(tool.get("addresses_failure_modes") or [])
     return sum(priority(fm) for fm in (addressed & fms_covered))
 
 
 def reset_cache() -> None:
-    """Test helper — invalidate the priorities cache."""
-    _load_priorities.cache_clear()
+    """Test helper: forget the parsed KG (and with it the priorities)."""
+    kg.reset()
 
 
 __all__ = [
     "all_priorities",
     "coverage_value",
-    "expected_priority_ordering",
+    "popularity",
     "priority",
     "reliability",
     "reset_cache",

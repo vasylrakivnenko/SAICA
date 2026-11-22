@@ -1,6 +1,6 @@
 """SAICA Index — orchestrator.
 
-For each ``SeedRepo`` across both boards: call
+For each ``SeedRepo`` of the board: call
 :func:`pipeline.audit.analyzer.audit_repo`, score the result with
 :func:`pipeline.saica_index.score.score_report`, and serialise the
 combined result to a single JSON the leaderboard page consumes.
@@ -48,9 +48,9 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 import time
-from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -90,11 +90,13 @@ def _row_for(seed: SeedRepo, report: AuditReport, score: RepoScore) -> dict[str,
     }
 
 
-def _audit_one(seed: SeedRepo) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+def _audit_one(
+    seed: SeedRepo, github_token: str | None = None
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Audit + score one repo. Returns ``(row, error)``; one of them None."""
     t0 = time.time()
     try:
-        report = audit_repo(seed.url)
+        report = audit_repo(seed.url, github_token=github_token)
     except Exception as exc:  # noqa: BLE001 — anything can go wrong over the network
         log.warning("audit failed: %s — %s", seed.url, exc)
         return None, {"url": seed.url, "board": seed.board, "error": str(exc)}
@@ -118,16 +120,35 @@ def _audit_one(seed: SeedRepo) -> tuple[dict[str, Any] | None, dict[str, Any] | 
 # ---------------------------------------------------------------------------
 
 
+class PartialRunError(ValueError):
+    """A run of a subset was asked to write the published snapshot."""
+
+
+def _same_file(a: Path, b: Path) -> bool:
+    return a.expanduser().resolve() == b.expanduser().resolve()
+
+
 def run_index(
     *,
     out_path: Path = DEFAULT_OUT,
     boards: dict[Board, list[SeedRepo]] | None = None,
     limit: int | None = None,
+    github_token: str | None = None,
 ) -> dict[str, Any]:
     """Audit every seed, score, write JSON, return the same payload.
 
-    ``limit`` (per board) is for fast local iteration.
+    ``limit`` (per board) is for fast local iteration. A limited run never
+    writes the published snapshot (:data:`DEFAULT_OUT`): it raises
+    :class:`PartialRunError` before the first audit. ``github_token`` is
+    sent to the GitHub API only; one audit costs one API call and the
+    anonymous limit is 60 calls per hour.
     """
+    if limit is not None and _same_file(out_path, DEFAULT_OUT):
+        raise PartialRunError(
+            f"--limit {limit} would replace the published snapshot "
+            f"({DEFAULT_OUT}) with a partial board. Pass --out with another "
+            "path for a trial run."
+        )
     if boards is None:
         boards = load_all_boards()
 
@@ -143,7 +164,7 @@ def run_index(
             seeds = seeds[:limit]
         rows: list[dict[str, Any]] = []
         for seed in seeds:
-            row, err = _audit_one(seed)
+            row, err = _audit_one(seed, github_token)
             if row is not None:
                 rows.append(row)
             if err is not None:
@@ -154,7 +175,12 @@ def run_index(
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n")
-    log.info("wrote %s (%d boards, %d errors)", out_path, len(payload["boards"]), len(payload["errors"]))
+    log.info(
+        "wrote %s (%d boards, %d errors)",
+        out_path,
+        len(payload["boards"]),
+        len(payload["errors"]),
+    )
     return payload
 
 
@@ -166,7 +192,15 @@ def run_index(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m pipeline.saica_index.runner",
-        description="Audit + score every seed repo, write site/public/saica_index.json",
+        description=(
+            "Audit and score every seed repo and write the leaderboard JSON. "
+            "With --limit, --out is required: a partial run never writes the "
+            "published snapshot."
+        ),
+        epilog=(
+            "GITHUB_TOKEN, when set, is sent to api.github.com to raise the "
+            "request limit (one call per repo; 60 per hour without a token)."
+        ),
     )
     parser.add_argument(
         "--out",
@@ -178,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
         "--limit",
         type=int,
         default=None,
-        help="Audit only the first N seeds per board (local iteration).",
+        help="Audit only the first N seeds per board (needs --out).",
     )
     parser.add_argument(
         "--boards",
@@ -204,7 +238,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.boards:
         boards = {b: boards[b] for b in args.boards if b in boards}  # type: ignore[misc]
 
-    run_index(out_path=args.out, boards=boards, limit=args.limit)
+    try:
+        run_index(
+            out_path=args.out,
+            boards=boards,
+            limit=args.limit,
+            github_token=os.environ.get("GITHUB_TOKEN") or None,
+        )
+    except PartialRunError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     return 0
 
 

@@ -121,8 +121,15 @@ def test_tier_weights_match_constants() -> None:
 def test_paradigm_diversity_bonus_applied_when_two_paradigms() -> None:
     """Two paradigms covering one FM at tier 1 → 0.40 + 0.10 = 0.50."""
     cells = [
-        CoverageCell(failure_mode="fm_a", paradigm="prevention", tier=1, contributing_tools=["t1"]),
-        CoverageCell(failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t2"]),
+        CoverageCell(
+            failure_mode="fm_a",
+            paradigm="prevention",
+            tier=1,
+            contributing_tools=["t1"],
+        ),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t2"]
+        ),
     ]
     report = _report(cells)
     s = score_report(report, priorities={"fm_a": 1.0})
@@ -132,10 +139,18 @@ def test_paradigm_diversity_bonus_applied_when_two_paradigms() -> None:
 def test_paradigm_bonus_capped_at_one() -> None:
     """Tier 3 + 4 paradigms still tops out at 1.0 (not 1.10)."""
     cells = [
-        CoverageCell(failure_mode="fm_a", paradigm="prevention", tier=3, contributing_tools=["t"]),
-        CoverageCell(failure_mode="fm_a", paradigm="detection", tier=3, contributing_tools=["t"]),
-        CoverageCell(failure_mode="fm_a", paradigm="correction", tier=3, contributing_tools=["t"]),
-        CoverageCell(failure_mode="fm_a", paradigm="recovery", tier=3, contributing_tools=["t"]),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="prevention", tier=3, contributing_tools=["t"]
+        ),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="detection", tier=3, contributing_tools=["t"]
+        ),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="correction", tier=3, contributing_tools=["t"]
+        ),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="recovery", tier=3, contributing_tools=["t"]
+        ),
     ]
     report = _report(cells)
     s = score_report(report, priorities={"fm_a": 1.0})
@@ -150,7 +165,9 @@ def test_priority_weighting() -> None:
     Expected: 2.0 * 0.40 / (2.0 + 1.0 + 1.0) = 0.80 / 4.0 = 0.20.
     """
     cells = [
-        CoverageCell(failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t"]),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t"]
+        ),
     ]
     report = _report(cells)
     s = score_report(report, priorities=_TEST_PRIORITIES)
@@ -161,7 +178,9 @@ def test_priority_weighting() -> None:
 def test_full_coverage_scores_one() -> None:
     """All 3 FMs at tier 3, single paradigm each → 1.00 weighted."""
     cells = [
-        CoverageCell(failure_mode=fm, paradigm="detection", tier=3, contributing_tools=["t"])
+        CoverageCell(
+            failure_mode=fm, paradigm="detection", tier=3, contributing_tools=["t"]
+        )
         for fm in _TEST_PRIORITIES
     ]
     report = _report(cells)
@@ -173,8 +192,12 @@ def test_full_coverage_scores_one() -> None:
 def test_paradigm_counts_distinct_per_fm() -> None:
     """A paradigm covering 2 different FMs counts as 2, not 1."""
     cells = [
-        CoverageCell(failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t"]),
-        CoverageCell(failure_mode="fm_b", paradigm="detection", tier=1, contributing_tools=["t"]),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t"]
+        ),
+        CoverageCell(
+            failure_mode="fm_b", paradigm="detection", tier=1, contributing_tools=["t"]
+        ),
     ]
     report = _report(cells)
     s = score_report(report, priorities=_TEST_PRIORITIES)
@@ -207,7 +230,9 @@ def test_real_priority_table_loads() -> None:
 
 def test_explain_lists_missing_paradigms() -> None:
     cells = [
-        CoverageCell(failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t"]),
+        CoverageCell(
+            failure_mode="fm_a", paradigm="detection", tier=1, contributing_tools=["t"]
+        ),
     ]
     report = _report(cells)
     s = score_report(report, priorities={"fm_a": 1.0})
@@ -215,3 +240,100 @@ def test_explain_lists_missing_paradigms() -> None:
     assert "prevention" in note_text
     assert "correction" in note_text
     assert "recovery" in note_text
+
+
+# ---------------------------------------------------------------------------
+# Runner: a partial run never writes the published snapshot (review H8)
+# ---------------------------------------------------------------------------
+
+
+def _fake_audit(monkeypatch, tokens: list):
+    from pipeline.saica_index import runner
+
+    def audit(url, github_token=None):
+        tokens.append(github_token)
+        return _report(
+            [
+                CoverageCell(
+                    failure_mode="fm_a",
+                    paradigm="detection",
+                    tier=1,
+                    contributing_tools=["x"],
+                )
+            ]
+        )
+
+    monkeypatch.setattr(runner, "audit_repo", audit)
+    monkeypatch.setattr(
+        runner,
+        "load_all_boards",
+        lambda: {
+            "popular_oss": [
+                runner.SeedRepo(
+                    board="popular_oss",
+                    url=f"https://github.com/o/r{i}",
+                    category="c",
+                    name=f"o/r{i}",
+                )
+                for i in range(4)
+            ]
+        },
+    )
+    return runner
+
+
+def test_limited_run_refuses_the_published_snapshot(monkeypatch, tmp_path, capsys):
+    tokens: list = []
+    runner = _fake_audit(monkeypatch, tokens)
+    published = tmp_path / "site" / "public" / "saica_index.json"
+    published.parent.mkdir(parents=True)
+    published.write_text('{"boards": {"popular_oss": ["41 rows"]}}')
+    monkeypatch.setattr(runner, "DEFAULT_OUT", published)
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+
+    # The README's old command: `--limit 5` with the default --out.
+    assert runner.main(["--limit", "2", "--out", str(published), "--quiet"]) == 2
+    assert "partial board" in capsys.readouterr().err
+    assert published.read_text() == '{"boards": {"popular_oss": ["41 rows"]}}'
+    assert tokens == []  # refused before the first audit
+    # The same file through another spelling of its path is refused too.
+    sneaky = published.parent / ".." / "public" / "saica_index.json"
+    with pytest.raises(runner.PartialRunError):
+        runner.run_index(out_path=sneaky, limit=1)
+
+    # A trial run to another file works and is limited.
+    trial = tmp_path / "trial.json"
+    assert runner.main(["--limit", "2", "--out", str(trial), "--quiet"]) == 0
+    import json as _json
+
+    assert len(_json.loads(trial.read_text())["boards"]["popular_oss"]) == 2
+    assert published.read_text() == '{"boards": {"popular_oss": ["41 rows"]}}'
+
+
+def test_full_run_writes_the_snapshot_and_passes_the_token(monkeypatch, tmp_path):
+    tokens: list = []
+    runner = _fake_audit(monkeypatch, tokens)
+    published = tmp_path / "saica_index.json"
+    monkeypatch.setattr(runner, "DEFAULT_OUT", published)
+    monkeypatch.setenv("GITHUB_TOKEN", "t0ken")
+    assert runner.main(["--out", str(published), "--quiet"]) == 0
+    import json as _json
+
+    assert len(_json.loads(published.read_text())["boards"]["popular_oss"]) == 4
+    assert tokens == ["t0ken"] * 4
+
+
+def test_score_notes_use_the_number_of_modes_in_the_table():
+    report = _report(
+        [
+            CoverageCell(
+                failure_mode="fm_a",
+                paradigm="detection",
+                tier=1,
+                contributing_tools=["x"],
+            )
+        ]
+    )
+    score = score_report(report, priorities=_TEST_PRIORITIES)
+    assert score.notes[0].startswith("1/3 failure modes")
+    assert score.failure_modes_total == 3

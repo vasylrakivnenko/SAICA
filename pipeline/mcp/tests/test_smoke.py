@@ -1,23 +1,64 @@
-"""Smoke tests for the SAICA-KG MCP server.
+"""Tests for the MCP server's two tools (pure-function layer) and its module.
 
-These exercise the *pure-function* layer (no MCP transport spin-up). The
-server module is also imported to confirm it has no import-time errors.
+Everything runs on the fixture KG (:mod:`pipeline.shared.kg_fixture`) and
+on a fixed set of "measured" results, so nothing here depends on the
+catalog's current tools or on the benchmark's current numbers.
 """
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 
-from pipeline.mcp._schemas_compat import ToolRecord
+from pipeline import kg
+from pipeline.audit.schemas import ToolRecord
+from pipeline.maturity import evidence as evidence_mod
+from pipeline.maturity.evidence import Evidence
+from pipeline.mcp import recommender
 from pipeline.mcp.lookup import saica_lookup
 from pipeline.mcp.recommender import (
-    ALL_FAILURE_MODES,
     CODING_AGENT_IDS,
     DEFAULT_LEVEL,
     LEVELS,
     RECOMMENDATION_BLOCKLIST,
+    all_failure_modes,
     recommend,
 )
+from pipeline.models import FAILURE_MODE_IDS
+from pipeline.shared import priorities
+from pipeline.shared.kg_fixture import default_tools, tool, write_kg
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _evidence(best: dict[str, dict[str, float]]) -> Evidence:
+    return Evidence(
+        floor=0.25,
+        generated="2026-01-01",
+        source="test",
+        best={
+            tool_id: {fm: {"j": j, "label": tool_id} for fm, j in modes.items()}
+            for tool_id, modes in best.items()
+        },
+    )
+
+
+# promptfoo passed on test_manipulation and failed on security; semgrep
+# failed on security; nothing else was "measured".
+MEASURED = {
+    "promptfoo": {"test_manipulation": 0.86, "security_vulnerability": 0.02},
+    "semgrep": {"security_vulnerability": 0.03},
+}
+
+
+@pytest.fixture(autouse=True)
+def fixture_kg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(evidence_mod, "load_evidence", lambda: _evidence(MEASURED))
+    with kg.use_data_dir(write_kg(tmp_path)):
+        yield
 
 
 # ---------------------------------------------------------------------------
@@ -25,25 +66,79 @@ from pipeline.mcp.recommender import (
 # ---------------------------------------------------------------------------
 
 
-def test_lookup_semgrep_returns_full_tool_record() -> None:
+def test_lookup_returns_the_validated_tool_record() -> None:
     rec = saica_lookup("semgrep")
     assert isinstance(rec, ToolRecord)
-    assert rec.id == "semgrep"
-    assert rec.name  # non-empty
-    assert rec.description  # non-empty
+    assert (rec.id, rec.name, rec.url) == ("semgrep", "Semgrep", "/tools/semgrep")
     assert rec.control_paradigm == "detection"
-    # Surfaces should include at least one pipeline-friendly entry.
-    assert rec.integration_surfaces, "integration_surfaces must not be empty"
-    assert "cli" in rec.integration_surfaces or "ci_app" in rec.integration_surfaces
-    assert rec.url == "/tools/semgrep"
-    assert rec.addresses_failure_modes
+    assert rec.integration_surfaces == ["cli", "ci_app", "library"]
+    # The record shows the catalog's tags, untouched by the measured floor.
+    assert rec.addresses_failure_modes == [
+        "security_vulnerability",
+        "supply_chain_attack",
+    ]
+    assert rec.stars == 12000 and rec.maturity_status == "stable"
 
 
 def test_lookup_unknown_tool_raises_clear_error() -> None:
-    with pytest.raises(ValueError) as ei:
+    with pytest.raises(ValueError, match="nonexistent-tool-foo"):
         saica_lookup("nonexistent-tool-foo")
-    msg = str(ei.value)
-    assert "nonexistent-tool-foo" in msg
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "../failure_modes/scope_creep",
+        "../../docker-compose",
+        "../../.github/workflows/tests",
+        "/etc/passwd",
+        "semgrep.yml",
+        "semgrep/",
+        "Semgrep",
+        "sem grep",
+        "semgrep\n",
+        "-semgrep",
+        "scope_creep",  # a failure mode, not a tool; underscore is not allowed
+        "fabrication",  # well-formed, exists in the KG, but is not a tool
+        "fixture-paper-2025",  # a paper node
+        "",
+        "a" * 101,
+        None,
+        7,
+    ],
+)
+def test_lookup_accepts_only_well_formed_ids_of_existing_tools(bad) -> None:
+    with pytest.raises(ValueError):
+        saica_lookup(bad)
+
+
+def test_lookup_never_touches_the_file_system_for_a_bad_id(tmp_path: Path) -> None:
+    """A YAML file outside data/tools must not be readable through the tool."""
+    secret = kg.default_data_dir().parent / "docker-compose.yml"
+    secret.write_text("id: docker-compose\nname: leaked\n", encoding="utf-8")
+    for attempt in ("../../docker-compose", "docker-compose"):
+        with pytest.raises(ValueError) as excinfo:
+            saica_lookup(attempt)
+        assert "leaked" not in str(excinfo.value)
+
+
+# ---------------------------------------------------------------------------
+# One list of failure modes
+# ---------------------------------------------------------------------------
+
+
+def test_mode_list_is_derived_from_the_data(tmp_path: Path) -> None:
+    assert set(all_failure_modes()) == set(FAILURE_MODE_IDS)
+    assert recommender.ALL_FAILURE_MODES == all_failure_modes()  # old name still works
+    with kg.use_data_dir(
+        write_kg(tmp_path / "two", failure_modes=("fabrication", "scope_creep"))
+    ):
+        assert all_failure_modes() == ("fabrication", "scope_creep")
+        with pytest.raises(ValueError, match="logic_error"):
+            recommend(failure_modes=["logic_error"])
+        full = recommend(level="full")
+        assert full["covered_failure_modes"] == ["fabrication", "scope_creep"]
+        assert "2 of 2 failure modes" in full["summary"]
 
 
 # ---------------------------------------------------------------------------
@@ -51,181 +146,274 @@ def test_lookup_unknown_tool_raises_clear_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_recommend_targeted_returns_per_fm_lists() -> None:
-    out = recommend(failure_modes=["scope_creep"], agent_kind=None)
+def test_recommend_targeted_returns_tagged_tools_per_mode() -> None:
+    out = recommend(failure_modes=["scope_creep", "fabrication"], agent_kind=None)
     assert out["mode"] == "targeted"
-    assert "scope_creep" in out["by_failure_mode"]
-    recs = out["by_failure_mode"]["scope_creep"]
-    assert recs, "should return non-empty recommendations for a populated FM"
-    for r in recs:
-        assert r["tool_id"]
-        assert r["url"].startswith("/tools/")
-        # Every recommendation must actually declare coverage for the FM.
-        assert "scope_creep" in r["addresses_failure_modes"]
+    assert set(out["by_failure_mode"]) == {"scope_creep", "fabrication"}
+    for fm, recs in out["by_failure_mode"].items():
+        assert 1 <= len(recs) <= 3
+        for r in recs:
+            assert fm in r["addresses_failure_modes"]
+            assert r["url"] == f"/tools/{r['tool_id']}"
+            assert "trending" not in r
+    # prevention / detection before recovery, then stars.
+    assert [r["tool_id"] for r in out["by_failure_mode"]["scope_creep"]] == [
+        "litellm",
+        "daytona",
+    ]
 
 
 def test_recommend_targeted_unknown_fm_raises() -> None:
-    with pytest.raises(ValueError) as ei:
+    with pytest.raises(ValueError, match="bogus_fm"):
         recommend(failure_modes=["bogus_fm"], agent_kind=None)
-    assert "bogus_fm" in str(ei.value)
-
-
-def test_recommend_targeted_filters_coding_agent_peers() -> None:
-    """Asking as cursor must never return a coding-agent peer."""
-    out = recommend(failure_modes=["scope_creep"], agent_kind="cursor")
-    for r in out["by_failure_mode"]["scope_creep"]:
-        assert (
-            r["tool_id"] not in CODING_AGENT_IDS
-        ), f"coding-agent peer {r['tool_id']} leaked into recs for cursor"
-        assert r["tool_id"] != "cursor", "must not recommend the asker itself"
 
 
 # ---------------------------------------------------------------------------
-# saica_recommend — three-tier coverage modes
+# The measured floor (kg_gate request 1; review H5)
 # ---------------------------------------------------------------------------
 
 
-def test_recommend_minimum_returns_one_tool() -> None:
-    out = recommend(level="minimum", agent_kind=None)
-    assert out["mode"] == "minimum"
-    assert out["level"] == "minimum"
-    assert len(out["tools"]) == 1
-    assert out["tools"][0][
-        "addresses_failure_modes"
-    ], "picked tool must address something"
+def _pairs(payload: dict) -> set[tuple[str, str]]:
+    """Every (tool, mode) pair a payload offers."""
+    out: set[tuple[str, str]] = set()
+    for rec in payload.get("tools", []):
+        out |= {(rec["tool_id"], fm) for fm in rec["addresses_failure_modes"]}
+    for fm, recs in payload.get("by_failure_mode", {}).items():
+        for rec in recs:
+            out.add((rec["tool_id"], fm))
+            out |= {(rec["tool_id"], m) for m in rec["addresses_failure_modes"]}
+    return out
 
 
-def test_recommend_optimal_returns_at_most_three_tools() -> None:
-    out = recommend(level="optimal", agent_kind=None)
-    assert out["mode"] == "optimal"
-    assert out["level"] == "optimal"
-    assert 1 <= len(out["tools"]) <= 3
+def test_no_tool_is_offered_for_a_mode_it_measured_below_the_floor() -> None:
+    failed = {
+        ("promptfoo", "security_vulnerability"),
+        ("semgrep", "security_vulnerability"),
+    }
+    payloads = [recommend(level=level) for level in LEVELS]
+    payloads.append(recommend(failure_modes=list(all_failure_modes())))
+    for payload in payloads:
+        assert not _pairs(payload) & failed
+    targeted = payloads[-1]["by_failure_mode"]
+    assert "semgrep" not in {r["tool_id"] for r in targeted["security_vulnerability"]}
+    # The same tools are still offered for the modes where they did not fail.
+    assert "semgrep" in {r["tool_id"] for r in targeted["supply_chain_attack"]}
+    assert [r["tool_id"] for r in targeted["test_manipulation"]] == ["promptfoo"]
 
 
-def test_recommend_full_covers_all_failure_modes() -> None:
-    out = recommend(level="full", agent_kind=None)
-    assert out["mode"] == "full"
-    assert out[
-        "coverage_complete"
-    ], f"full did not cover everything; missing: {out['uncovered_failure_modes']}"
-    assert out["uncovered_failure_modes"] == []
+def test_floor_follows_the_evidence(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Change what was measured and the answer changes with it."""
+    before = {
+        r["tool_id"]
+        for r in recommend(failure_modes=["test_manipulation"])["by_failure_mode"][
+            "test_manipulation"
+        ]
+    }
+    assert before == {"promptfoo"}
+    monkeypatch.setattr(
+        evidence_mod,
+        "load_evidence",
+        lambda: _evidence({"promptfoo": {"test_manipulation": 0.1}}),
+    )
+    after = recommend(failure_modes=["test_manipulation"])["by_failure_mode"][
+        "test_manipulation"
+    ]
+    assert after == []
+    full = recommend(level="full")
+    # The only tool tagged for the mode failed on it: the honest answer is
+    # that the mode stays uncovered.
+    assert "test_manipulation" in full["uncovered_failure_modes"]
+    assert full["coverage_complete"] is False
 
 
-def test_recommend_full_no_pad() -> None:
-    """Unlike the prior covering view, full no longer pads beyond cover."""
-    out = recommend(level="full", agent_kind=None)
-    n = len(out["tools"])
-    # Realistic minimum cover for SAICA's KG is 4-6 tools today; we pin
-    # only that it's strictly less than the old pad target of 11.
-    assert n < 11, f"full should not pad to 11; got {n}"
+def test_archived_tool_is_offered_for_nothing(tmp_path: Path) -> None:
+    tools = default_tools()
+    tools["litellm"]["archived"] = True
+    with kg.use_data_dir(write_kg(tmp_path / "archived", tools=tools)):
+        for payload in [recommend(level=level) for level in LEVELS] + [
+            recommend(failure_modes=["scope_creep"])
+        ]:
+            assert "litellm" not in {tool_id for tool_id, _ in _pairs(payload)}
+
+
+def test_catalogue_index_keeps_untouched_tags_and_is_cached() -> None:
+    """The generators read ``_load_tools`` for the "tagged, not listed"
+    table and swap ``_TOOL_INDEX_CACHE``; both names and the raw tags stay."""
+    index = recommender._load_tools()
+    assert recommender._load_tools() is index
+    assert recommender._TOOL_INDEX_CACHE is index
+    assert list(index) == sorted(index)
+    assert "security_vulnerability" in index["semgrep"]["addresses_failure_modes"]
+    # A swapped index is what the selection uses, and the floor still applies.
+    recommender._TOOL_INDEX_CACHE = {"semgrep": index["semgrep"]}
+    try:
+        full = recommend(level="full")
+        assert [t["tool_id"] for t in full["tools"]] == ["semgrep"]
+        assert full["covered_failure_modes"] == ["supply_chain_attack"]
+    finally:
+        recommender._TOOL_INDEX_CACHE = index
+
+
+# ---------------------------------------------------------------------------
+# saica_recommend — tiers
+# ---------------------------------------------------------------------------
+
+
+def test_tiers_have_the_documented_sizes() -> None:
+    minimum, optimal, full = (recommend(level=level) for level in LEVELS)
+    assert [minimum["level"], optimal["level"], full["level"]] == list(LEVELS)
+    assert len(minimum["tools"]) == 1
+    assert len(optimal["tools"]) == 3 and optimal["k"] == 3
+    # The greedy order is one sequence: each tier is a prefix of the next.
+    ids = [t["tool_id"] for t in full["tools"]]
+    assert [t["tool_id"] for t in optimal["tools"]] == ids[:3]
+    assert [t["tool_id"] for t in minimum["tools"]] == ids[:1]
+    assert len(ids) == len(set(ids)) < len(all_failure_modes())
+
+
+def test_full_stops_when_nothing_adds_a_mode_and_reports_what_is_left() -> None:
+    full = recommend(level="full")
+    tagged = {fm for t in full["tools"] for fm in t["addresses_failure_modes"]}
+    assert set(full["covered_failure_modes"]) == tagged
+    assert set(full["covered_failure_modes"]) | set(
+        full["uncovered_failure_modes"]
+    ) == set(all_failure_modes())
+    assert full["coverage_complete"] is (full["uncovered_failure_modes"] == [])
+    # Every pick added at least one mode that the picks before it lacked.
+    seen: set[str] = set()
+    for t in full["tools"]:
+        assert set(t["addresses_failure_modes"]) - seen
+        seen |= set(t["addresses_failure_modes"])
+
+
+def test_summary_counts_tags_as_tags() -> None:
+    for level in LEVELS:
+        out = recommend(level=level)
+        n, covered = len(out["tools"]), len(out["covered_failure_modes"])
+        noun = "tool" if n == 1 else "tools"
+        assert out["summary"].startswith(f"{n} {noun}; ")
+        assert f"name {covered} of 11 failure modes" in out["summary"]
+        assert "claim, not a measurement" in out["summary"]
+        assert "cover" not in out["summary"]
 
 
 def test_recommend_default_is_optimal() -> None:
-    out = recommend(agent_kind=None)
-    assert out["level"] == "optimal" == DEFAULT_LEVEL
+    assert recommend()["level"] == "optimal" == DEFAULT_LEVEL
 
 
-def test_recommend_unknown_level_raises() -> None:
-    with pytest.raises(ValueError) as ei:
-        recommend(level="bogus", agent_kind=None)
-    assert "bogus" in str(ei.value)
-
-
-def test_recommend_both_args_raises() -> None:
+def test_recommend_argument_errors() -> None:
+    with pytest.raises(ValueError, match="bogus"):
+        recommend(level="bogus")
     with pytest.raises(ValueError):
-        recommend(level="optimal", failure_modes=["scope_creep"], agent_kind=None)
+        recommend(level="optimal", failure_modes=["scope_creep"])
 
 
-def test_levels_constant_is_complete() -> None:
-    assert set(LEVELS) == {"minimum", "optimal", "full"}
-
-
-def test_full_suite_filters_coding_agents_for_known_asker() -> None:
-    out = recommend(level="full", agent_kind="claude-code")
-    all_ids = {r["tool_id"] for r in out["tools"]}
-    leaked = all_ids & CODING_AGENT_IDS
-    assert not leaked, f"coding-agent peers leaked: {leaked}"
-    assert "claude-code" not in all_ids
-
-
-def test_recommend_blocks_blocklisted_tools_across_levels() -> None:
-    for level in ("minimum", "optimal", "full"):
-        out = recommend(level=level, agent_kind=None)
-        all_ids = {r["tool_id"] for r in out["tools"]}
-        leaked = all_ids & RECOMMENDATION_BLOCKLIST
-        assert not leaked, f"blocklisted tool leaked at level={level}: {leaked}"
-
-
-def test_summary_is_human_readable_per_level() -> None:
-    for level in ("minimum", "optimal", "full"):
-        out = recommend(level=level, agent_kind="claude-code")
-        assert "failure modes" in out["summary"]
-        assert str(len(out["tools"])) in out["summary"]
+def test_ties_do_not_depend_on_file_order(tmp_path: Path) -> None:
+    """Two tools with the same tags, stars and status: the lower id wins."""
+    tools = {
+        name: tool(name, modes=("fabrication",), stars=500)
+        for name in ("zeta", "alpha", "mid")
+    }
+    with kg.use_data_dir(write_kg(tmp_path / "ties", tools=tools)):
+        assert recommend(level="minimum")["tools"][0]["tool_id"] == "alpha"
+        targeted = recommend(failure_modes=["fabrication"])["by_failure_mode"][
+            "fabrication"
+        ]
+        assert len(targeted) == 3
 
 
 # ---------------------------------------------------------------------------
-# Recommender invariants
+# Popularity (was "reliability")
 # ---------------------------------------------------------------------------
 
 
-def test_all_failure_modes_size() -> None:
-    assert len(ALL_FAILURE_MODES) == 11
+def test_popularity_is_log_stars_plus_status_and_nothing_else() -> None:
+    base = {"stars": 999, "maturity_status": "stable"}
+    assert priorities.popularity(base) == pytest.approx(3.0 + 0.5)
+    assert priorities.popularity({"stars": 0}) == 0.0
+    assert priorities.popularity(
+        {"stars": 999, "maturity_status": "deprecated"}
+    ) == pytest.approx(2.0)
+    # Citations and a trending repository no longer move the score.
+    extras = dict(
+        base, cited_in=["a", "b", "c"], repository_url="https://github.com/x/y"
+    )
+    assert priorities.popularity(extras) == priorities.popularity(base)
+    assert priorities.reliability is priorities.popularity  # old name
 
 
-def test_coding_agent_filter_list_is_sane() -> None:
-    """Spot-check that the filter list has the expected anchors and no obvious
-    over-reach."""
-    assert "cursor" in CODING_AGENT_IDS
-    assert "claude-code" in CODING_AGENT_IDS
-    assert "replit-agent" in CODING_AGENT_IDS
-    # Things that are NOT coding-agent peers.
-    assert "browser-use" not in CODING_AGENT_IDS
-    assert "skyvern" not in CODING_AGENT_IDS
-    assert "copilotkit" not in CODING_AGENT_IDS
-    assert "playwright-mcp" not in CODING_AGENT_IDS
-    assert "magic-mcp" not in CODING_AGENT_IDS
-    assert "mcp-toolbox" not in CODING_AGENT_IDS
-    assert "comfyui" not in CODING_AGENT_IDS  # blocklisted, not filter-listed
-
-
-def test_blocklist_contains_comfyui() -> None:
-    assert "comfyui" in RECOMMENDATION_BLOCKLIST
+def test_priorities_come_from_the_one_loader() -> None:
+    weights = priorities.all_priorities()
+    assert weights == dict(sorted(kg.load_priorities().items(), key=lambda kv: -kv[1]))
+    assert list(weights.values()) == sorted(weights.values(), reverse=True)
+    assert priorities.priority("not_a_mode") == 0.0
+    assert priorities.coverage_value(
+        {"addresses_failure_modes": ["fabrication", "scope_creep"]}, {"fabrication"}
+    ) == pytest.approx(priorities.priority("fabrication"))
 
 
 # ---------------------------------------------------------------------------
-# Server module imports cleanly + tools are registered
+# Filters kept from the earlier catalog
 # ---------------------------------------------------------------------------
 
 
-def test_server_module_imports_and_registers_tools() -> None:
-    from pipeline.mcp import server
+def test_coding_agent_and_blocklist_filters_still_apply(tmp_path: Path) -> None:
+    tools = default_tools()
+    tools["cursor"] = tool("cursor", "prevention", ("scope_creep",), stars=900000)
+    tools["comfyui"] = tool("comfyui", "prevention", ("scope_creep",), stars=900000)
+    assert "cursor" in CODING_AGENT_IDS and "comfyui" in RECOMMENDATION_BLOCKLIST
+    with kg.use_data_dir(write_kg(tmp_path / "agents", tools=tools)):
+        asked_by_agent = recommend(
+            failure_modes=["scope_creep"], agent_kind="claude-code"
+        )
+        assert {
+            r["tool_id"] for r in asked_by_agent["by_failure_mode"]["scope_creep"]
+        } == {
+            "litellm",
+            "daytona",
+        }
+        anonymous = recommend(failure_modes=["scope_creep"])
+        ids = {r["tool_id"] for r in anonymous["by_failure_mode"]["scope_creep"]}
+        assert "cursor" in ids and "comfyui" not in ids
 
-    assert server.mcp is not None
-    assert callable(server.saica_lookup)
-    assert callable(server.saica_recommend)
-    # Old tools must be gone from the module surface.
-    assert not hasattr(server, "saica_preflight")
-    assert not hasattr(server, "saica_audit_repo")
+
+# ---------------------------------------------------------------------------
+# Server module
+# ---------------------------------------------------------------------------
 
 
 def test_server_lists_exactly_two_tools() -> None:
-    """End-to-end: the FastMCP instance reports exactly the two tools we ship."""
     import asyncio
 
-    from pipeline.mcp.server import mcp
+    from pipeline.mcp import server
 
-    tools = asyncio.run(mcp.list_tools())
-    names = {t.name for t in tools}
-    assert names == {
-        "saica_lookup",
-        "saica_recommend",
-    }, f"expected exactly saica_lookup + saica_recommend, got {sorted(names)}"
+    names = {t.name for t in asyncio.run(server.mcp.list_tools())}
+    assert names == {"saica_lookup", "saica_recommend"}
+    assert not hasattr(server, "saica_preflight")
+    assert not hasattr(server, "saica_audit_repo")
+    doc = server.saica_recommend.__doc__
+    assert "popularity" in doc and "reliab" not in doc and "trending" not in doc
+    assert "MECE" not in doc and "ALL 11" not in doc
 
 
 def test_server_reads_agent_kind_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("SAICA_AGENT_KIND", "cursor")
     from pipeline.mcp.server import _agent_kind
 
+    monkeypatch.setenv("SAICA_AGENT_KIND", "cursor")
     assert _agent_kind() == "cursor"
     monkeypatch.delenv("SAICA_AGENT_KIND", raising=False)
     assert _agent_kind() is None
+
+
+def test_help_prints_and_exits_without_serving() -> None:
+    """``--help`` used to start the server and wait on stdin (K11)."""
+    done = subprocess.run(
+        [sys.executable, "-m", "pipeline.mcp.server", "--help"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        stdin=subprocess.DEVNULL,
+    )
+    assert done.returncode == 0
+    assert done.stdout.startswith("usage: python -m pipeline.mcp.server")

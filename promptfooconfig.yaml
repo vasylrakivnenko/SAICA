@@ -1,53 +1,33 @@
-# promptfoo configuration for SAICA-KG self-supervision.
+# promptfoo runner for the two live probes of the Ask endpoint.
 #
-# Why this exists: the KG's recommender (saica_recommend(failure_modes=
-# ['fabrication','scope_creep','logic_error','security_vulnerability',
-# 'test_manipulation'])) names promptfoo as the top fit for the CLI +
-# library + ci_app cell — so we install what we recommend and gate our
-# own /ask backend on it.
+# What this is: a manual, paid check. Each test asks the running Ask
+# backend one question (a real model call) and checks the answer against
+# the KG. Run it only with ASK_API set:
 #
-# References:
-#   - data/tools/promptfoo.yml — KG entry (paradigm=detection,
-#     surfaces=cli/library/ci_app, addresses=fabrication +
-#     security_vulnerability + logic_error + scope_creep +
-#     test_manipulation)
-#   - .github/workflows/promptfoo.yml — the runner (mirrors
-#     .github/workflows/semgrep.yml style)
-#   - evals/_assertions.py — stdlib-only Python helpers used by the
-#     `python:` assertion type
+#     ASK_API=http://127.0.0.1:4322/api/ask npx promptfoo@<pinned version> eval --no-cache
 #
-# Test groups (each backed by a YAML file under evals/):
-#   1. static_invariants     — recommendations.json shape + id resolution
-#                              (no LLM call; uses the `echo` provider)
-#   2. recommendations_quality — coverage / size guarantees per tier
-#   3. ask_probe             — live probe of pipeline.ask.server, only
-#                              runs when the ASK_API env var is set;
-#                              otherwise the suite no-ops it gracefully
+# What this is not: a CI gate, and not a test of anything when ASK_API is
+# unset. In that case both tests FAIL with the reason "NOT RUN" (promptfoo
+# has no "skipped" result), so an unrun probe can never show as passed.
+# The same two probes run under pytest, where "not run" is a real skip:
+# tests/test_ask_live_probe.py.
+#
+# The file-consistency checks that used to live here (ids in
+# recommendations.json resolve, failure modes are known, nothing is listed
+# below the measured floor) test no model. They are plain pytest now:
+# tests/test_recommendations_file.py.
+#
+# The provider is promptfoo's `echo`: the HTTP call to the Ask endpoint is
+# made inside the Python assertion (evals/_assertions.py), which is where
+# the model is asked.
 
-description: SAICA-KG self-supervision — KG-data invariants + (optional) /ask probe
+description: Live probes of the SAICA Ask endpoint (manual, paid, needs ASK_API)
 
-# A trivial pass-through prompt. The first two test groups assert against
-# fixture data via Python helpers, so the model output is irrelevant —
-# the `echo` provider just echoes the rendered prompt back. The ask_probe
-# group overrides the provider per-test (see evals/ask_probe.yaml).
 prompts:
   - "{{question}}"
 
 providers:
-  # `echo` is promptfoo's built-in no-op provider: returns the rendered
-  # prompt verbatim. Perfect for static-data tests where the assertion
-  # examines on-disk fixtures rather than an LLM response. No API key,
-  # no network call, no Kimi cost.
   - id: echo
 
 tests:
-  # Static-data invariants — fast, deterministic, no network.
-  - file://evals/static_invariants.yaml
-
-  # Higher-level coverage/quality guarantees.
-  - file://evals/recommendations_quality.yaml
-
-  # Live /ask probe — gated on ASK_API env var; tests inside this file
-  # use a `skip:` guard so the suite passes cleanly when the var is
-  # unset (e.g. default CI without a Kimi key).
   - file://evals/ask_probe.yaml

@@ -1,324 +1,253 @@
-"""Assertion helpers used by promptfoo's `python:` assertion type.
+"""Checks behind ``tests/test_recommendations_file.py`` and the live
+``/api/ask`` probes.
 
-Cited KG nodes:
-  - data/tools/promptfoo.yml — the supervisor we install (CLI + ci_app surface).
-  - data/failure_modes/*.yml — the canonical 11-FM list these checks defend.
+Two groups:
 
-These helpers are intentionally stdlib-only (no extra Python deps in CI). Each
-function returns a dict in promptfoo's `GradingResult` shape::
+* **File checks** (no model, no network): every tool id and failure-mode
+  id in ``recommendations.json`` exists in the KG, and no tool is listed
+  for a mode on which SAICA-Bench measured it below the floor. They are
+  plain functions that return a list of problems; pytest runs them. They
+  test files, not model behaviour.
+* **Live probes** of the Ask endpoint. These do test a model, cost money,
+  and run only when ``ASK_API`` is set. In pytest an unset ``ASK_API`` is
+  a *skip*. Through promptfoo (which has no "skipped" result) it is a
+  *fail* with the reason "not run": a probe that did not run never
+  reports a pass.
 
-    {"pass": bool, "score": float, "reason": str}
-
-promptfoo invokes them per test row by passing the model output and the test
-context. Most of our static-data checks ignore both inputs and just walk the
-on-disk fixtures (recommendations.json + data/tools/ + data/failure_modes/).
-
-We keep the heavy I/O (directory listings, JSON parse) inside one
-`@functools.lru_cache`'d loader so the suite stays fast even if every single
-test calls the helpers.
+Needs only `requests` and the project's own loaders.
 """
 
 from __future__ import annotations
 
-import functools
-import json
 import os
-from pathlib import Path
+import re
+from typing import Any, Iterator
 
 # ---------------------------------------------------------------------------
-# Locate repo root from this file (evals/_assertions.py → repo root is parent).
-# This keeps helpers usable both when promptfoo runs from the repo root and
-# when CI uses a different cwd.
-# ---------------------------------------------------------------------------
-
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-
-
-def _root() -> Path:
-    # promptfoo sometimes sets PROMPTFOO_CWD; honour it if present so tests
-    # are runnable from arbitrary working directories without surprise.
-    env = os.environ.get("SAICA_REPO_ROOT")
-    return Path(env) if env else _REPO_ROOT
-
-
-@functools.lru_cache(maxsize=1)
-def load_recommendations() -> dict:
-    """Read recommendations.json from the repo root, cached for the run."""
-    path = _root() / "recommendations.json"
-    with path.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
-
-
-@functools.lru_cache(maxsize=1)
-def load_known_tool_ids() -> frozenset[str]:
-    """Every `<id>.yml` under data/tools/ (id == filename stem)."""
-    tools_dir = _root() / "data" / "tools"
-    return frozenset(p.stem for p in tools_dir.glob("*.yml"))
-
-
-@functools.lru_cache(maxsize=1)
-def load_known_failure_modes() -> frozenset[str]:
-    """Canonical SAICA failure-mode ids (filename stems under data/failure_modes/)."""
-    fm_dir = _root() / "data" / "failure_modes"
-    return frozenset(p.stem for p in fm_dir.glob("*.yml"))
-
-
-# Coding-agent ids that should never appear *as* a recommended supervisor for
-# a peer agent — agents are alternatives to each other, not supervisors of
-# each other. The set is exactly the keys under recommendations.by_agent.
-@functools.lru_cache(maxsize=1)
-def peer_agent_ids() -> frozenset[str]:
-    return frozenset(load_recommendations().get("by_agent", {}).keys())
-
-
-def _all_recommendation_blocks() -> list[tuple[str, dict]]:
-    """Yield ``(label, tier_block)`` for every tier across agnostic + by_agent."""
-    rec = load_recommendations()
-    out: list[tuple[str, dict]] = []
-    for tier_name, tier in (rec.get("agnostic") or {}).items():
-        out.append((f"agnostic/{tier_name}", tier))
-    for agent_id, tiers in (rec.get("by_agent") or {}).items():
-        for tier_name, tier in (tiers or {}).items():
-            out.append((f"by_agent/{agent_id}/{tier_name}", tier))
-    return out
-
-
-# ---------------------------------------------------------------------------
-# Assertion bodies. Each returns a GradingResult-shaped dict. These are
-# referenced from YAML via `value: file://evals/_assertions.py:assert_<name>`.
-# (Path is resolved relative to the promptfoo config file — the repo root.)
+# File checks on recommendations.json
 # ---------------------------------------------------------------------------
 
 
-def _ok(reason: str = "ok") -> dict:
-    return {"pass": True, "score": 1.0, "reason": reason}
+def iter_recommendations(
+    node: Any, mode: str | None = None, where: str = ""
+) -> Iterator[tuple[str, str | None, dict]]:
+    """Yield ``(where, failure mode or None, recommendation dict)`` for
+    every dict with a ``tool_id`` anywhere in a payload. ``mode`` is the
+    enclosing ``by_failure_mode`` key, when there is one. The
+    ``not_listed`` table (pairs the floor removed) is not a listing."""
+    if isinstance(node, dict):
+        if isinstance(node.get("tool_id"), str):
+            yield where, mode, node
+        inside_modes = where.endswith("by_failure_mode")
+        for key, value in node.items():
+            if key == "not_listed":
+                continue
+            yield from iter_recommendations(
+                value,
+                key if inside_modes else mode,
+                f"{where}/{key}" if where else str(key),
+            )
+    elif isinstance(node, list):
+        for item in node:
+            yield from iter_recommendations(item, mode, where)
 
 
-def _fail(reason: str) -> dict:
-    return {"pass": False, "score": 0.0, "reason": reason}
-
-
-def assert_tool_ids_resolve(output, context):  # noqa: ARG001 — promptfoo signature
-    """Every tool_id under any recommendation tier must exist in data/tools/."""
-    known = load_known_tool_ids()
-    missing: list[str] = []
-    for label, tier in _all_recommendation_blocks():
-        for tool in tier.get("tools", []) or []:
-            tid = tool.get("tool_id")
-            if tid and tid not in known:
-                missing.append(f"{label}: {tid}")
-    if missing:
-        return _fail(f"unknown tool_ids: {sorted(set(missing))[:8]}")
-    return _ok(f"all tool_ids resolve ({len(known)} known)")
-
-
-def assert_failure_modes_canonical(output, context):  # noqa: ARG001
-    """Every failure_mode mentioned must be one of the 11 canonical ids."""
-    known = load_known_failure_modes()
-    bad: list[str] = []
-    for label, tier in _all_recommendation_blocks():
-        for fm in tier.get("covered_failure_modes", []) or []:
-            if fm not in known:
-                bad.append(f"{label}.covered:{fm}")
-        for fm in tier.get("uncovered_failure_modes", []) or []:
-            if fm not in known:
-                bad.append(f"{label}.uncovered:{fm}")
-        for tool in tier.get("tools", []) or []:
-            for fm in tool.get("addresses_failure_modes", []) or []:
-                if fm not in known:
-                    bad.append(f"{label}.{tool.get('tool_id')}:{fm}")
-    if bad:
-        return _fail(f"non-canonical failure_modes: {sorted(set(bad))[:8]}")
-    return _ok(f"all failure_modes canonical ({len(known)} known)")
-
-
-def assert_blocklist_honoured(output, context):  # noqa: ARG001
-    """No id on the blocklist may appear as a recommended tool."""
-    rec = load_recommendations()
-    block = set(rec.get("blocklist") or [])
-    leaks: list[str] = []
-    for label, tier in _all_recommendation_blocks():
-        for tool in tier.get("tools", []) or []:
-            if tool.get("tool_id") in block:
-                leaks.append(f"{label}:{tool.get('tool_id')}")
-    if leaks:
-        return _fail(f"blocklisted ids leaked into recommendations: {leaks}")
-    return _ok(f"blocklist honoured ({sorted(block)})")
-
-
-def assert_no_peer_agents_recommended(output, context):  # noqa: ARG001
-    """When `agent_kind` is set, recommended tools must not be peer agents.
-
-    A peer agent is any id that appears as a key in `by_agent` — those are
-    coding agents that compete with one another, not supervisors of each
-    other. SAICA's MECE story breaks if we tell a Cursor user to install
-    Cline.
-    """
-    peers = peer_agent_ids()
-    leaks: list[str] = []
-    for label, tier in _all_recommendation_blocks():
-        if not tier.get("agent_kind"):
-            continue
-        ak = tier["agent_kind"]
-        for tool in tier.get("tools", []) or []:
-            tid = tool.get("tool_id")
-            if tid in peers:
-                leaks.append(f"{label}(agent_kind={ak}) -> peer {tid}")
-    if leaks:
-        return _fail(f"peer-agent contamination: {leaks}")
-    return _ok(f"no peer-agent contamination (checked {len(peers)} peer ids)")
-
-
-def assert_optimal_claude_code_coverage(output, context):  # noqa: ARG001
-    """Optimal tier for claude-code should cover >= 8 of 11 failure modes."""
-    rec = load_recommendations()
-    block = (rec.get("by_agent") or {}).get("claude-code", {}).get("optimal")
-    if not block:
-        return _fail("by_agent/claude-code/optimal missing")
-    n = len(block.get("covered_failure_modes") or [])
-    if n < 8:
-        return _fail(f"claude-code optimal covers only {n}/11 FMs (want ≥ 8)")
-    return _ok(f"claude-code optimal covers {n}/11 FMs")
-
-
-def assert_full_tier_coverage_complete(output, context):  # noqa: ARG001
-    """Every full-tier block (agnostic + per-agent) must have coverage_complete=True."""
-    bad: list[str] = []
-    rec = load_recommendations()
-    full = (rec.get("agnostic") or {}).get("full")
-    if not full or not full.get("coverage_complete"):
-        bad.append("agnostic/full")
-    for agent_id, tiers in (rec.get("by_agent") or {}).items():
-        f = (tiers or {}).get("full") or {}
-        if not f.get("coverage_complete"):
-            bad.append(f"by_agent/{agent_id}/full")
-    if bad:
-        return _fail(f"full tier missing coverage_complete: {bad}")
-    return _ok("all full tiers report coverage_complete=true")
-
-
-def assert_minimum_tier_one_tool(output, context):  # noqa: ARG001
-    """The minimum tier must always recommend exactly one tool."""
-    bad: list[str] = []
-    rec = load_recommendations()
-    mn = (rec.get("agnostic") or {}).get("minimum") or {}
-    if len(mn.get("tools") or []) != 1:
-        bad.append(f"agnostic/minimum has {len(mn.get('tools') or [])} tools")
-    for agent_id, tiers in (rec.get("by_agent") or {}).items():
-        m = (tiers or {}).get("minimum") or {}
-        n = len(m.get("tools") or [])
-        if n != 1:
-            bad.append(f"by_agent/{agent_id}/minimum has {n} tools")
-    if bad:
-        return _fail(f"minimum tier wrong size: {bad}")
-    return _ok("every minimum tier returns exactly 1 tool")
-
-
-# ---------------------------------------------------------------------------
-# Helpers reused by ask_probe.yaml — invoked from inline `python:` assertions.
-# ---------------------------------------------------------------------------
-
-
-def assert_answer_cites_known_ids(output, context):  # noqa: ARG001
-    """Every bracketed [id] in the answer must resolve to a known tool or FM."""
-    import re
-
-    if not isinstance(output, str):
-        return _fail(f"non-string output: {type(output).__name__}")
-    known = load_known_tool_ids() | load_known_failure_modes()
-    cited = set(re.findall(r"\[([a-z0-9][a-z0-9_-]{1,60})\]", output))
-    bogus = sorted(c for c in cited if c not in known)
-    if bogus:
-        return _fail(f"answer fabricates ids: {bogus}")
-    return _ok(f"all {len(cited)} cited ids resolve")
-
-
-# ---------------------------------------------------------------------------
-# Live /ask probe — gated on ASK_API env var. We deliberately make the
-# HTTP call from inside the assertion (rather than promptfoo's `http`
-# provider) so the suite can `pass: True, reason: skipped` cleanly when
-# ASK_API is unset, without spurious network errors. promptfoo has no
-# top-level `skip:` field as of v0.121.
-# ---------------------------------------------------------------------------
-
-
-def _ask(question: str) -> tuple[str, dict]:
-    """POST {question} to $ASK_API and return (answer_text, full_json).
-
-    Returns ("", {}) and is the caller's job to surface — this helper does
-    not raise on HTTP errors so a stuck backend reports a clean assertion
-    failure instead of a Python traceback.
-    """
-    import json as _json
-    import urllib.error
-    import urllib.request
-
-    url = os.environ.get("ASK_API", "").strip()
-    if not url:
-        return "", {}
-    body = _json.dumps({"question": question}).encode("utf-8")
-    req = urllib.request.Request(  # noqa: S310 — trusted dev URL
-        url,
-        data=body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
+def unknown_tool_ids(payload: dict, tool_ids: frozenset[str] | set[str]) -> list[str]:
+    """Listed tools that are not in the KG."""
+    return sorted(
+        {
+            f"{where}: {rec['tool_id']}"
+            for where, _, rec in iter_recommendations(payload)
+            if rec["tool_id"] not in tool_ids
+        }
     )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
-            payload = _json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-        return "", {"_error": f"{type(exc).__name__}: {exc}"}
-    return str(payload.get("answer") or ""), payload
 
 
-def _ask_or_skip(question: str):
-    """Return (answer, payload) or a GradingResult dict to short-circuit."""
-    if not os.environ.get("ASK_API", "").strip():
-        return _ok("skipped: ASK_API unset")
-    answer, payload = _ask(question)
-    if "_error" in payload:
-        return _fail(f"/ask call failed: {payload['_error']}")
-    if not answer:
-        return _fail("/ask returned empty answer")
-    return answer, payload
+def unknown_failure_modes(
+    payload: dict, mode_ids: frozenset[str] | set[str] | tuple[str, ...]
+) -> list[str]:
+    """Failure-mode ids used anywhere in the payload that the KG lacks."""
+    known = set(mode_ids)
+    bad: set[str] = set()
+
+    def visit(node: Any, where: str) -> None:
+        if isinstance(node, dict):
+            for key in (
+                "addresses_failure_modes",
+                "covered_failure_modes",
+                "uncovered_failure_modes",
+            ):
+                for fm in node.get(key) or []:
+                    if fm not in known:
+                        bad.add(f"{where}/{key}: {fm}")
+            for key in ("by_failure_mode", "priorities", "measured_j"):
+                table = node.get(key)
+                if isinstance(table, dict):
+                    bad.update(
+                        f"{where}/{key}: {fm}" for fm in table if fm not in known
+                    )
+            for key, value in node.items():
+                visit(value, f"{where}/{key}" if where else str(key))
+        elif isinstance(node, list):
+            for item in node:
+                visit(item, where)
+
+    visit(payload, "")
+    return sorted(bad)
 
 
-def assert_ask_recommends_supervisor(output, context):  # noqa: ARG001
-    """Live: ask for a scope_creep supervisor; expect a known supervisor id."""
-    res = _ask_or_skip(
-        "What tool prevents scope_creep in a Python pipeline using GitHub Actions?",
-    )
-    if isinstance(res, dict):
-        return res
-    answer, _ = res
-    expected_any = ("semgrep", "promptfoo", "langgraph", "guardrails-ai")
-    low = answer.lower()
-    if not any(name in low for name in expected_any):
-        return _fail(
-            f"answer mentions none of {expected_any}; got: {answer[:200]!r}",
+def below_floor_pairs(
+    payload: dict,
+    below_floor: dict[str, dict[str, float]],
+    archived: set[str] | frozenset[str] = frozenset(),
+) -> list[str]:
+    """Listed tool × mode pairs that the measured floor forbids.
+
+    ``below_floor`` is ``{tool id: {failure mode: best measured J}}`` for
+    the pairs measured below the floor; ``archived`` are tools that may
+    not be listed at all.
+    """
+    problems: set[str] = set()
+    for where, mode, rec in iter_recommendations(payload):
+        tool_id = rec["tool_id"]
+        if tool_id in archived:
+            problems.add(f"{where}: {tool_id} is archived")
+        listed = set(rec.get("addresses_failure_modes") or []) | (
+            {mode} if mode else set()
         )
-    # Also assert no fabricated ids.
-    cite_check = assert_answer_cites_known_ids(answer, None)
-    if not cite_check["pass"]:
-        return cite_check
-    return _ok("recommends a known supervisor and cites only known ids")
+        for fm in sorted(listed & set(below_floor.get(tool_id, {}))):
+            problems.add(
+                f"{where}: {tool_id} for {fm} (J {below_floor[tool_id][fm]:+.2f})"
+            )
+    return sorted(problems)
+
+
+# ---------------------------------------------------------------------------
+# Live probes of the Ask endpoint
+# ---------------------------------------------------------------------------
+
+SCOPE_CREEP_QUESTION = (
+    "What tool prevents scope_creep in a Python pipeline using GitHub Actions?"
+)
+TWO_MODES_QUESTION = "What's the difference between fabrication and obsolescence?"
+
+_CITED_ID_RE = re.compile(r"\[([a-z0-9][a-z0-9_-]{1,80})\]")
+
+
+def ask_api() -> str:
+    """The endpoint under test (``ASK_API``), or ``""`` when not set."""
+    return os.environ.get("ASK_API", "").strip()
+
+
+def ask(question: str, url: str | None = None, timeout: float = 90.0) -> str:
+    """POST one question to the Ask endpoint and return the answer text.
+
+    This is a paid call. Raises ``RuntimeError`` with a short reason when
+    the endpoint cannot be reached or returns no answer.
+    """
+    import requests
+
+    url = url or ask_api()
+    if not url:
+        raise RuntimeError("ASK_API is not set")
+    if not url.startswith(("http://", "https://")):
+        raise RuntimeError("ASK_API must be an http(s) URL")
+    try:
+        resp = requests.post(url, json={"question": question}, timeout=timeout)
+        payload = resp.json()
+    except (requests.RequestException, ValueError) as exc:
+        raise RuntimeError(f"ask call failed: {type(exc).__name__}") from exc
+    answer = (
+        str(payload.get("answer") or "").strip() if isinstance(payload, dict) else ""
+    )
+    if not answer:
+        raise RuntimeError(
+            f"the endpoint returned no answer (status {resp.status_code})"
+        )
+    return answer
+
+
+def invented_ids(answer: str, known_ids: frozenset[str] | set[str]) -> list[str]:
+    """Bracketed ids in an answer that are no node of the KG.
+
+    Ask cites tools, failure modes, papers, taxonomies, incidents and
+    recipes, so ``known_ids`` must hold the ids of every kind.
+    """
+    return sorted(set(_CITED_ID_RE.findall(answer)) - set(known_ids))
+
+
+def problems_scope_creep_answer(
+    answer: str, tagged_tools: set[str], known_ids: set[str] | frozenset[str]
+) -> list[str]:
+    """The answer must name a tool the KG tags for scope_creep and cite
+    nothing that is not in the KG."""
+    problems = []
+    low = answer.lower()
+    if not any(tool_id in low for tool_id in tagged_tools):
+        problems.append("names no tool that the catalog tags for scope_creep")
+    bogus = invented_ids(answer, known_ids)
+    if bogus:
+        problems.append(f"cites ids that are not in the KG: {bogus}")
+    return problems
+
+
+def problems_two_modes_answer(
+    answer: str, known_ids: set[str] | frozenset[str]
+) -> list[str]:
+    """The answer must speak of both modes and cite nothing invented."""
+    problems = []
+    low = answer.lower()
+    for mode in ("fabrication", "obsolescence"):
+        if mode not in low:
+            problems.append(f"does not mention {mode}")
+    bogus = invented_ids(answer, known_ids)
+    if bogus:
+        problems.append(f"cites ids that are not in the KG: {bogus}")
+    return problems
+
+
+def _kg_facts() -> tuple[set[str], frozenset[str]]:
+    """(tools tagged for scope_creep, every node id) of the repository KG."""
+    from pipeline import kg
+
+    snapshot = kg.load()
+    tagged = {
+        tool_id
+        for tool_id, tool in snapshot.tool_dicts().items()
+        if "scope_creep" in tool["addresses_failure_modes"]
+    }
+    return tagged, snapshot.ids()
+
+
+# promptfoo entry points (``file://evals/_assertions.py:<name>``). promptfoo
+# has no "skipped" result, so a probe that cannot run fails with the reason.
+
+
+def _grade(problems: list[str], ok: str) -> dict:
+    if problems:
+        return {"pass": False, "score": 0.0, "reason": "; ".join(problems)}
+    return {"pass": True, "score": 1.0, "reason": ok}
+
+
+def _run_probe(question: str, judge) -> dict:
+    if not ask_api():
+        return _grade(["NOT RUN: ASK_API is not set, so no model was asked"], "")
+    try:
+        answer = ask(question)
+    except RuntimeError as exc:
+        return _grade([str(exc)], "")
+    return _grade(judge(answer), "answer checked against the KG")
+
+
+def assert_ask_recommends_supervisor(
+    output, context
+):  # noqa: ARG001 - promptfoo signature
+    tagged, known = _kg_facts()
+    return _run_probe(
+        SCOPE_CREEP_QUESTION, lambda a: problems_scope_creep_answer(a, tagged, known)
+    )
 
 
 def assert_ask_distinguishes_failure_modes(output, context):  # noqa: ARG001
-    """Live: ask the FM-vs-FM question; expect both ids, no third FM fabricated."""
-    res = _ask_or_skip(
-        "What's the difference between fabrication and obsolescence?",
-    )
-    if isinstance(res, dict):
-        return res
-    answer, _ = res
-    low = answer.lower()
-    if "fabrication" not in low or "obsolescence" not in low:
-        return _fail(
-            "answer must mention both 'fabrication' and 'obsolescence'; "
-            f"got: {answer[:200]!r}",
-        )
-    cite_check = assert_answer_cites_known_ids(answer, None)
-    if not cite_check["pass"]:
-        return cite_check
-    return _ok("answer distinguishes both FMs without fabrication")
+    _, known = _kg_facts()
+    return _run_probe(TWO_MODES_QUESTION, lambda a: problems_two_modes_answer(a, known))

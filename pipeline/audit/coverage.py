@@ -1,28 +1,38 @@
 """Coverage grid + gap analysis.
 
 The coverage grid is one tier-0..3 cell per (failure_mode, paradigm).
-Tier rule (per the heatmap in research/plot_tool_fm_heatmap.py):
+The tier counts what the catalog says about the contributing tool, not how
+well the tool works:
 
-    1 — at least one detected tool declares this FM **and** has this paradigm
-    2 — + the contributing tool's inclusion_rationale discusses the FM
-    3 — + the contributing tool has any cited_in/documented_in/evaluated_on
+    1 — at least one detected tool is tagged for this mode **and** has this paradigm
+    2 — + that tool's inclusion_rationale discusses the mode
+    3 — + that tool has any cited_in/documented_in/evaluated_on
 
-Gap analysis then walks the grid and flags FMs the user's stack doesn't
-cover at all (severity ``high``) or covers in only one paradigm
-(severity ``medium``).  For each gap we surface 2-3 ranked
-recommendations from the KG, prioritising tools whose integration
-surfaces match what the user's stack already has.
+Gap analysis then walks the grid. It reports a gap only where the audit
+could have seen coverage and the catalog has something to offer:
+
+* A mode for which the audit has no detection rule for any catalog tool is
+  **not assessable**. It is listed as such and is never a gap: the audit
+  cannot tell whether the repository covers it.
+* A mode that no detected tool covers is a ``high`` gap.
+* A mode covered in one paradigm is a ``medium`` gap only if the catalog
+  holds a tool of the complementary paradigm for that mode. If it holds
+  none, there is nothing to add and no gap is raised.
+
+Suggestions come from the catalog, never from measurements: tools tagged
+for the mode, of the wanted paradigm when one is named, and not written
+for a language the repository does not use.
 """
 
 from __future__ import annotations
 
 from typing import Iterable, get_args
 
+from pipeline.audit.detectors import detectable_tool_ids
 from pipeline.audit.kg import (
     cell_tier,
     load_failure_modes,
     load_tool_index,
-    tools_by_failure_mode,
     tool_url,
 )
 from pipeline.audit.schemas import (
@@ -36,9 +46,35 @@ from pipeline.audit.schemas import (
     Severity,
 )
 from pipeline.mcp.recommender import CODING_AGENT_IDS, RECOMMENDATION_BLOCKLIST
-from pipeline.shared.trending import effective_stars
 
 PARADIGMS: tuple[Paradigm, ...] = get_args(Paradigm)  # ("prevention", "detection", ...)
+
+# If you have detection, the useful addition is prevention, and the other
+# way round; for correction / recovery it is detection.
+COMPLEMENT: dict[str, Paradigm] = {
+    "prevention": "detection",
+    "detection": "prevention",
+    "correction": "detection",
+    "recovery": "detection",
+}
+
+# Values of a tool's ``supervises_targets`` that name a programming
+# language (the others name package ecosystems and are not used here).
+LANGUAGE_NAMES: frozenset[str] = frozenset(
+    {
+        "python",
+        "javascript",
+        "typescript",
+        "go",
+        "rust",
+        "java",
+        "ruby",
+        "php",
+        "csharp",
+        "c",
+        "cpp",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
@@ -57,18 +93,36 @@ def _detected_kg_ids(detected_tools: Iterable[DetectedTool]) -> list[str]:
     return out
 
 
+def tagged_tools(fm: str, kg_index: dict[str, dict]) -> list[dict]:
+    """Catalog tools tagged for ``fm``, in id order."""
+    return [
+        tool
+        for _, tool in sorted(kg_index.items())
+        if fm in (tool.get("addresses_failure_modes") or [])
+    ]
+
+
+def not_assessable_modes(kg_index: dict[str, dict], fm_ids: list[str]) -> list[str]:
+    """Modes for which no catalog tool is detectable by the audit."""
+    detectable = detectable_tool_ids(kg_index)
+    return [
+        fm
+        for fm in fm_ids
+        if not any(tool["id"] in detectable for tool in tagged_tools(fm, kg_index))
+    ]
+
+
 def build_coverage_grid(
     detected_tools: list[DetectedTool],
     kg_index: dict[str, dict] | None = None,
 ) -> CoverageGrid:
     """Build the (FM × paradigm) coverage grid for the user's detected stack."""
-    kg = kg_index or load_tool_index()
+    kg = kg_index if kg_index is not None else load_tool_index()
     fm_ids = load_failure_modes()
     detected_ids = _detected_kg_ids(detected_tools)
 
     cells: list[CoverageCell] = []
     fms_covered: set[str] = set()
-    paradigm_balance: dict[str, int] = {p: 0 for p in PARADIGMS}
     paradigm_fms: dict[str, set[str]] = {p: set() for p in PARADIGMS}
 
     for fm in fm_ids:
@@ -77,19 +131,16 @@ def build_coverage_grid(
             contributing: list[str] = []
             for tid in detected_ids:
                 tool = kg.get(tid)
-                if not tool:
-                    continue
-                if (tool.get("control_paradigm") or "") != paradigm:
+                if not tool or tool.get("control_paradigm") != paradigm:
                     continue
                 t = cell_tier(tool, fm)
                 if t > 0:
                     contributing.append(tid)
-                    if t > tier:
-                        tier = t
+                    tier = max(tier, t)
             cells.append(
                 CoverageCell(
                     failure_mode=fm,
-                    paradigm=paradigm,  # type: ignore[arg-type]
+                    paradigm=paradigm,
                     tier=tier,  # type: ignore[arg-type]
                     contributing_tools=contributing,
                 )
@@ -98,15 +149,14 @@ def build_coverage_grid(
                 fms_covered.add(fm)
                 paradigm_fms[paradigm].add(fm)
 
-    for p, fms in paradigm_fms.items():
-        paradigm_balance[p] = len(fms)
-
     fms_missing = [fm for fm in fm_ids if fm not in fms_covered]
+    blind = set(not_assessable_modes(kg, fm_ids))
     return CoverageGrid(
         cells=cells,
         failure_modes_covered=sorted(fms_covered),
         failure_modes_missing=fms_missing,
-        paradigm_balance=paradigm_balance,
+        paradigm_balance={p: len(fms) for p, fms in paradigm_fms.items()},
+        failure_modes_not_assessable=[fm for fm in fms_missing if fm in blind],
     )
 
 
@@ -154,6 +204,20 @@ def _surface_fit_score(tool: dict, stack_surfaces: set[str]) -> int:
     return len(surfaces & stack_surfaces)
 
 
+def fits_languages(tool: dict, languages: list[str]) -> bool:
+    """False only when the tool is written for other languages.
+
+    A tool with no language among its ``supervises_targets`` fits any
+    repository; so does any tool when no language was detected.
+    """
+    targets = {
+        str(t).lower() for t in (tool.get("supervises_targets") or [])
+    } & LANGUAGE_NAMES
+    if not targets or not languages:
+        return True
+    return bool(targets & set(languages))
+
+
 def recommend_for_gap(
     fm: str,
     stack: DetectedStack,
@@ -161,63 +225,53 @@ def recommend_for_gap(
     top_n: int = 3,
     *,
     detected_ids: set[str] | None = None,
-    preferred_paradigm: Paradigm | None = None,
+    paradigm: Paradigm | None = None,
 ) -> list[Recommendation]:
-    """Return up to ``top_n`` ranked recommendations for a given gap FM."""
-    kg = kg_index or load_tool_index()
+    """Up to ``top_n`` catalog tools tagged for ``fm`` that are not installed.
+
+    With ``paradigm``, only tools of that paradigm. Tools written for a
+    language the repository does not use are left out. Order: surface fit
+    with the stack, then catalog tier, then stars.
+    """
+    kg = kg_index if kg_index is not None else load_tool_index()
     detected_ids = detected_ids or set()
     stack_surfaces = _stack_surfaces(stack)
 
-    # Candidate pool: all KG tools that declare coverage for this FM.
     detected_agent_ids = {d.id for d in stack.agents if d.id}
     asker_is_coding_agent = bool(detected_agent_ids & CODING_AGENT_IDS)
     candidates: list[dict] = []
-    for tool in tools_by_failure_mode(fm):
-        tid = tool.get("id")
-        if not tid or tid in detected_ids:
-            continue
-        # Never recommend a tool we've blocklisted (role too ambiguous).
-        if tid in RECOMMENDATION_BLOCKLIST:
+    for tool in tagged_tools(fm, kg):
+        tid = tool["id"]
+        if tid in detected_ids or tid in RECOMMENDATION_BLOCKLIST:
             continue
         # Don't recommend a peer coding agent to a user who already has one.
-        # (Cursor users shouldn't be told to install Claude Code, etc.)
         if asker_is_coding_agent and tid in CODING_AGENT_IDS:
+            continue
+        if paradigm is not None and tool.get("control_paradigm") != paradigm:
+            continue
+        if not fits_languages(tool, stack.languages):
             continue
         candidates.append(tool)
 
-    if not candidates:
-        return []
-
     def sort_key(tool: dict) -> tuple:
-        paradigm_bonus = (
-            1
-            if (
-                preferred_paradigm
-                and tool.get("control_paradigm") == preferred_paradigm
-            )
-            else 0
+        return (
+            _surface_fit_score(tool, stack_surfaces),
+            cell_tier(tool, fm),
+            float(tool.get("stars") or 0),
         )
-        surface_fit = _surface_fit_score(tool, stack_surfaces)
-        per_fm_tier = cell_tier(tool, fm)
-        # `effective_stars` applies the github-trending boost so a trending tool
-        # wins against a non-trending peer with up to ~+30% more raw stars.
-        return (paradigm_bonus, surface_fit, per_fm_tier, effective_stars(tool))
-
-    ranked = sorted(candidates, key=sort_key, reverse=True)[:top_n]
 
     recs: list[Recommendation] = []
-    for tool in ranked:
-        tid = str(tool.get("id"))
+    for tool in sorted(candidates, key=sort_key, reverse=True)[:top_n]:
+        tid = str(tool["id"])
         surfaces = list(tool.get("integration_surfaces") or [])
-        why = _explain_recommendation(tool, fm, stack_surfaces, surfaces)
         recs.append(
             Recommendation(
                 tool_id=tid,
                 tool_name=str(tool.get("name") or tid),
-                why=why,
-                paradigm=str(tool.get("control_paradigm") or "detection"),  # type: ignore[arg-type]
-                temporal_phase=str(tool.get("temporal_phase") or "post_generation"),
-                autonomy_level=str(tool.get("autonomy_level") or "fully_autonomous"),
+                why=_explain_recommendation(tool, fm, stack_surfaces, surfaces),
+                paradigm=tool["control_paradigm"],
+                temporal_phase=str(tool["temporal_phase"]),
+                autonomy_level=str(tool["autonomy_level"]),
                 integration_surfaces=surfaces,
                 addresses_failure_modes=list(tool.get("addresses_failure_modes") or []),
                 stars=int(tool["stars"]) if tool.get("stars") is not None else None,
@@ -234,14 +288,16 @@ def _explain_recommendation(
     tool_surfaces: list[str],
 ) -> str:
     overlap = sorted(set(tool_surfaces) & stack_surfaces)
-    paradigm = tool.get("control_paradigm") or "detection"
     if overlap:
         surface_phrase = f"integrates via {', '.join(overlap)} (matches your stack)"
     elif tool_surfaces:
         surface_phrase = f"integrates via {', '.join(tool_surfaces[:2])}"
     else:
-        surface_phrase = "general-purpose integration"
-    return f"Adds {paradigm} coverage for {fm.replace('_', ' ')}; " f"{surface_phrase}."
+        surface_phrase = "integration surface not recorded"
+    return (
+        f"Tagged in the catalog as {tool['control_paradigm']} for "
+        f"{fm.replace('_', ' ')}; {surface_phrase}."
+    )
 
 
 def find_gaps(
@@ -249,45 +305,56 @@ def find_gaps(
     stack: DetectedStack,
     kg_index: dict[str, dict] | None = None,
 ) -> list[GapItem]:
-    """Identify FM-level gaps in the user's coverage and attach recommendations."""
-    kg = kg_index or load_tool_index()
+    """Gaps the audit can stand behind, each with catalog suggestions."""
+    kg = kg_index if kg_index is not None else load_tool_index()
     fm_ids = load_failure_modes()
     detected_ids = {d.id for d in stack.supervision_tools if d.in_kg and d.id}
+    detectable = detectable_tool_ids(kg)
+    blind = set(coverage.failure_modes_not_assessable)
 
-    # Index cells by FM for fast lookup.
     by_fm: dict[str, dict[str, CoverageCell]] = {}
     for cell in coverage.cells:
         by_fm.setdefault(cell.failure_mode, {})[cell.paradigm] = cell
 
     gaps: list[GapItem] = []
     for fm in fm_ids:
-        cells = by_fm.get(fm, {})
-        covered_paradigms = [p for p, c in cells.items() if c.tier > 0]
+        if fm in blind:
+            continue
+        label = fm.replace("_", " ")
+        covered_paradigms = [p for p, c in by_fm.get(fm, {}).items() if c.tier > 0]
+        severity: Severity
+        missing_paradigm: Paradigm | None
 
         if not covered_paradigms:
-            severity: Severity = "high"
-            missing_paradigm = None
+            tagged = tagged_tools(fm, kg)
+            seen = sum(1 for t in tagged if t["id"] in detectable)
+            unseen = len(tagged) - seen
+            severity, missing_paradigm = "high", None
             rationale = (
-                f"No detected tool declares coverage for {fm.replace('_', ' ')}."
+                f"None of the {seen} catalog tool{'s' if seen != 1 else ''} that this "
+                f"audit can detect for {label} was found."
             )
-            preferred_paradigm = None
+            if unseen:
+                rationale += (
+                    f" The catalog lists {unseen} more for this mode that the audit "
+                    "cannot detect; if you use one of them, this is not a gap."
+                )
         elif len(covered_paradigms) == 1:
-            # Only one paradigm; flag the most useful complementary one as missing.
             present = covered_paradigms[0]
-            # Heuristic: if you have detection, recommend prevention; if prevention, recommend detection.
-            complement_map = {
-                "prevention": "detection",
-                "detection": "prevention",
-                "correction": "detection",
-                "recovery": "detection",
-            }
-            missing_paradigm = complement_map.get(present, "detection")
+            missing_paradigm = COMPLEMENT.get(present, "detection")
+            on_offer = [
+                t
+                for t in tagged_tools(fm, kg)
+                if t.get("control_paradigm") == missing_paradigm
+            ]
+            if not on_offer:
+                continue  # the catalog has no tool of that paradigm to add
             severity = "medium"
             rationale = (
-                f"Coverage for {fm.replace('_', ' ')} is single-paradigm "
-                f"({present} only); add {missing_paradigm} for defence in depth."
+                f"The detected tools cover {label} in one way only ({present}). "
+                f"The catalog lists {len(on_offer)} {missing_paradigm} "
+                f"tool{'s' if len(on_offer) != 1 else ''} for this mode."
             )
-            preferred_paradigm = missing_paradigm  # type: ignore[assignment]
         else:
             continue
 
@@ -297,12 +364,14 @@ def find_gaps(
             kg,
             top_n=3,
             detected_ids=detected_ids,
-            preferred_paradigm=preferred_paradigm,  # type: ignore[arg-type]
+            paradigm=missing_paradigm,
         )
+        if missing_paradigm is not None and not recs:
+            continue  # nothing of that paradigm fits this repository
         gaps.append(
             GapItem(
                 failure_mode=fm,
-                paradigm=missing_paradigm,  # type: ignore[arg-type]
+                paradigm=missing_paradigm,
                 severity=severity,
                 rationale=rationale,
                 recommendations=recs,
@@ -316,8 +385,12 @@ def find_gaps(
 
 
 __all__ = [
+    "COMPLEMENT",
     "PARADIGMS",
     "build_coverage_grid",
     "find_gaps",
+    "fits_languages",
+    "not_assessable_modes",
     "recommend_for_gap",
+    "tagged_tools",
 ]

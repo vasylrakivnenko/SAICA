@@ -1,26 +1,27 @@
 # SAICA — supervision skill (Claude Code plugin)
 
-A pure-skill plugin distilled from the
-[SAICA-KG](https://github.com/vasylrakivnenko/SAICA) corpus. One file
-of curated guidance the agent reads as context — no MCP server, no
-Python dependency, no `.venv`.
+One skill file built from the
+[SAICA](https://github.com/vasylrakivnenko/SAICA) catalog. The agent reads
+it as context. No MCP server, no Python, no `.venv`.
 
-What you get when this plugin is enabled:
+What the skill contains:
 
-- **Three pre-baked supervision-stack tiers** at the top of the skill —
-  `minimum` (1 tool), `optimal` (3 tools), `full` (the MECE set
-  covering all 11 failure modes). Same picks the SAICA recommender
-  would return; embedded so no runtime call is needed.
-- **Per-failure-mode pre-action heuristics** — for each of the 11
-  known AI-coding failure modes (`fabrication`, `scope_creep`,
-  `security_vulnerability`, etc.): what it is, detection signals,
-  a real-world incident reference, the top 2 supervisors to install,
-  and a hand-curated rule for the agent to follow before acting.
-- **A cross-cutting working agreement** — plan first, scope-respect,
-  no `--no-verify` bypass, cite incident IDs, ask when in doubt.
+- **Three tool stacks built from the catalog's tags**: one tool, three
+  tools, and the fewest tools whose tags name every failure mode that is
+  left after the measured floor. A tag is what a tool says it addresses;
+  it is not a measurement. Where SAICA-Bench measured a tool, the skill
+  shows the result, and a tool is never listed for a failure mode on which
+  it measured below the floor. Measured picks: <https://saica.ai/tool-coverage/>.
+- **A section per failure mode** (`fabrication`, `scope_creep`,
+  `security_vulnerability` and eight more): what it is, signals to look
+  for, a documented case where the catalog has one, catalog tools tagged
+  for it, and a rule to follow before acting.
+- **A working agreement**: plan first, stay in scope, never bypass commit
+  hooks with `--no-verify`, ask when in doubt.
 
-The skill is regenerated from the canonical `SKILLS.md` whenever the
-KG corpus changes. CI drift gate keeps them in sync.
+The skill is generated (`python -m validator.generate_skills`);
+`tests/test_skill_copies_in_sync.py` fails when the copy in this plugin is
+not the generator's output.
 
 ---
 
@@ -31,8 +32,6 @@ KG corpus changes. CI drift gate keeps them in sync.
 /plugin install saica-supervise@saica-kg
 ```
 
-That's it. No clone, no venv, no Python.
-
 ## Install (sideload, for development)
 
 ```bash
@@ -41,74 +40,53 @@ cd SAICA
 claude --plugin-dir ./plugin
 ```
 
----
-
-## What this plugin is NOT
-
-- **It's not the MCP server.** SAICA-KG ships a real MCP server with
-  `saica_lookup`, `saica_recommend(level | failure_modes)`, and audit
-  tools — but that lives in the parent `saicakg` repo
-  (`pipeline/mcp/`) and requires a Python install. We deliberately
-  *don't* ship it via the marketplace because Python-deps inside a
-  marketplace plugin are fragile (no `npm install`-grade UX).
-- **It's not a runtime guard.** This is a context-injection skill.
-  The agent reads it; what it does with the guidance is up to the
-  agent. For runtime enforcement, see the recommended supervisors
-  inside the skill (Dependabot, Semgrep, pre-commit, etc.) and
-  install them in your repo.
-- **It's not the audit (`saica_audit_repo`).** That lives at
-  [`/assess`](https://saica-kg.dev/assess) on the public web app.
+After install the skill is named `saica-supervise:saica-supervise`.
 
 ---
 
-## What's in the file
+## What this plugin is not
 
-After install, the agent has access to a single skill named
-`saica-kg:saica-supervise` — call it explicitly with `/skills` (or
-let the agent auto-invoke based on context). The body covers:
-
-1. The three recommended supervision tiers (minimum / optimal / full)
-2. Per-failure-mode sections (11 of them, priority-descending)
-3. A cross-cutting working agreement
-4. Pointers to the live KG, the audit web page, and the corpus
-
-The skill is ~250 lines — small enough to fit any agent's context
-budget, big enough to be useful per-action.
+- **Not the MCP server.** The repository has a small MCP server with two
+  tools, `saica_lookup` and `saica_recommend`. It needs Python, so it is
+  not shipped through the marketplace; see below.
+- **Not a runtime guard.** The skill is text the agent reads. What the
+  agent does with it is up to the agent. To enforce something, install a
+  tool that checks it.
+- **Not the audit.** The repository audit is a web page,
+  <https://saica.ai/assess/>, and a command
+  (`python -m pipeline.audit.cli <repo-url>`). There is no MCP audit tool.
 
 ---
 
-## Power-user setup (live MCP server)
-
-If you want the live `saica_lookup` / `saica_recommend` MCP tools
-(targeted FM queries, agent-kind filtering, etc.):
+## The MCP server (needs a clone and Python)
 
 ```bash
 git clone https://github.com/vasylrakivnenko/SAICA
 cd SAICA
 python3 -m venv .venv
-.venv/bin/pip install -r pipeline/requirements.txt
+.venv/bin/pip install -r requirements/mcp.txt -c requirements/constraints.txt
+.venv/bin/python -m pipeline.mcp.server --help
 ```
 
-Then add to your `~/.claude.json`:
+Then add it to `~/.claude.json` (replace `<repo>` with the path of your clone):
 
 ```jsonc
 {
   "mcpServers": {
     "saica-kg": {
-      "command": "/path/to/SAICA/.venv/bin/python",
+      "command": "<repo>/.venv/bin/python",
       "args": ["-m", "pipeline.mcp.server"],
-      "cwd": "/path/to/SAICA",
-      "env": { "SAICA_AGENT_KIND": "claude-code" }
+      "cwd": "<repo>"
     }
   }
 }
 ```
 
-See [`pipeline/mcp/README.md`](../pipeline/mcp/README.md) for the
-full power-user documentation.
+See [`pipeline/mcp/README.md`](../pipeline/mcp/README.md).
 
 ---
 
 ## License
 
-Apache-2.0 (code). CC-BY-4.0 (data, including the skill body).
+Apache-2.0 for the code. The licence of the data and of the skill text is
+stated in the repository's README.

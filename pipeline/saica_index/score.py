@@ -22,7 +22,7 @@ FORMULA
 -------
 
 Step 1 — per-failure-mode coverage ``c(f) ∈ [0, 1]``
-    For each of the 11 failure modes ``f``, look at every supervision
+    For each failure mode ``f``, look at every supervision
     tool the audit detected that declares coverage for ``f``. Take the
     *best* evidence tier across those tools (tier ∈ {0, 1, 2, 3} from
     the audit's coverage grid):
@@ -81,12 +81,9 @@ the structure underneath the grade.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from functools import lru_cache
-from pathlib import Path
 from typing import Literal
 
-import yaml
-
+from pipeline import kg
 from pipeline.audit.schemas import AuditReport, CoverageCell, Paradigm
 
 # ---------------------------------------------------------------------------
@@ -119,25 +116,12 @@ GRADE_THRESHOLDS: list[tuple[float, LetterGrade]] = [
 # ---------------------------------------------------------------------------
 
 
-@lru_cache(maxsize=1)
-def load_priorities(path: Path | None = None) -> dict[str, float]:
-    """Load ``failure_mode_priorities.yml`` and return ``{fm_id: priority}``.
+def load_priorities() -> dict[str, float]:
+    """``{fm_id: likelihood × impact}`` from ``failure_mode_priorities.yml``.
 
-    ``priority = likelihood × impact``.
+    Read through :mod:`pipeline.kg`, the one loader of that file.
     """
-    if path is None:
-        path = (
-            Path(__file__).resolve().parent.parent.parent
-            / "data"
-            / "failure_mode_priorities.yml"
-        )
-    raw = yaml.safe_load(path.read_text())
-    out: dict[str, float] = {}
-    for fm_id, rec in (raw.get("priorities") or {}).items():
-        likelihood = float(rec.get("likelihood", 0.0))
-        impact = float(rec.get("impact", 0))
-        out[fm_id] = likelihood * impact
-    return out
+    return kg.load_priorities()
 
 
 # ---------------------------------------------------------------------------
@@ -243,7 +227,7 @@ def score_report(
         is_balanced=is_balanced,
         failure_modes_covered=fms_covered,
         failure_modes_total=len(priorities),
-        notes=_explain(score, fms_covered, paradigm_counts),
+        notes=_explain(score, fms_covered, paradigm_counts, len(priorities)),
     )
 
 
@@ -269,16 +253,15 @@ def _count_paradigms(cells: list[CoverageCell]) -> dict[str, int]:
 
 
 def _explain(
-    score: float, fms_covered: int, paradigm_counts: dict[str, int]
+    score: float, fms_covered: int, paradigm_counts: dict[str, int], fms_total: int
 ) -> list[str]:
     """One- or two-bullet human prose for the leaderboard tooltip."""
     notes: list[str] = []
     notes.append(
-        f"{fms_covered}/11 failure modes guarded by at least one detected tool."
+        f"{fms_covered}/{fms_total} failure modes named in the tags of at least "
+        "one detected tool."
     )
     missing = [p for p in _ALL_PARADIGMS if paradigm_counts.get(p, 0) == 0]
     if missing:
-        notes.append(
-            "No coverage in paradigm(s): " + ", ".join(missing) + "."
-        )
+        notes.append("No coverage in paradigm(s): " + ", ".join(missing) + ".")
     return notes

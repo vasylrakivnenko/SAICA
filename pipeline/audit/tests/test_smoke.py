@@ -1,7 +1,9 @@
 """Smoke tests for the audit analyzer.
 
-These run against the saica-kg repo itself (we have it on disk anyway) and
-against synthetic temp dirs for the per-detector unit tests.
+Detector tests run on small temp directories and on a fixture KG
+(:mod:`pipeline.shared.kg_fixture`), so they do not change when a curator
+adds or removes a tool. Two end-to-end tests audit this repository's own
+files, still against the fixture KG, and check structure only.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from pipeline import kg
 from pipeline.audit.analyzer import audit_repo_local, parse_repo_url
 from pipeline.audit.detectors import (
     detect_agents,
@@ -20,8 +23,24 @@ from pipeline.audit.detectors import (
 )
 from pipeline.audit.kg import load_failure_modes, load_tool_index
 from pipeline.audit.render import to_markdown
+from pipeline.shared.kg_fixture import default_tools, tool, write_kg
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(autouse=True, scope="module")
+def fixture_kg(tmp_path_factory):
+    """Every test in this file reads the fixture KG, not ``data/``."""
+    with kg.use_data_dir(write_kg(tmp_path_factory.mktemp("kg"))):
+        yield
+
+
+def _resolved(detected) -> set[str]:
+    return {d.id for d in detected if d.in_kg}
+
+
+def _unresolved(detected) -> set[str]:
+    return {d.name for d in detected if not d.in_kg}
 
 
 # ---------------------------------------------------------------------------
@@ -48,6 +67,18 @@ def test_parse_repo_url_accepts_dotgit_suffix():
         "https://gitlab.com/owner/repo",  # not github
         "https://github.com/owner",  # no repo
         "https://github.com/owner/repo?x=1",
+        "https://github.com/../..",  # dot segments are not names
+        "https://github.com/owner/..",
+        "https://github.com/owner/.",
+        "https://github.com/./repo",
+        "https://github.com/-owner/repo",
+        "https://github.com/owner/repo/extra",
+        "http://github.com/owner/repo",  # https only
+        "https://github.com.evil.example/owner/repo",
+        "https://evil.example/https://github.com/owner/repo",
+        "https://github.com/owner/re po",
+        "https://user@github.com/owner/repo",
+        "",
     ],
 )
 def test_parse_repo_url_rejects_bad(bad):
@@ -136,20 +167,42 @@ def test_detect_supervision_tools_ci_action(tmp_path: Path):
 
 
 def test_detect_supervision_tools_js_dep(tmp_path: Path):
+    """A dependency resolves when the KG lists the tool, and only then."""
     (tmp_path / "package.json").write_text(
         json.dumps(
             {
                 "dependencies": {
-                    "langfuse": "^1",
-                    "@instructor-ai/instructor": "^0.0.1",
+                    "promptfoo": "^0.100",  # in the fixture KG
+                    "langfuse": "^1",  # recognised, not in the KG
+                    "@instructor-ai/instructor": "^0.0.1",  # same
+                    "left-pad": "^1",  # no rule: ignored
                 },
             }
         )
     )
     detected = detect_supervision_tools(tmp_path)
-    ids = {d.id for d in detected if d.in_kg}
-    assert "langfuse" in ids
-    assert "instructor" in ids
+    assert _resolved(detected) == {"promptfoo"}
+    assert _unresolved(detected) == {"Langfuse", "Instructor"}
+    # A tool that is not in the KG carries no id and adds no coverage.
+    assert all(d.id == "" for d in detected if not d.in_kg)
+
+
+def test_a_detection_resolves_once_the_kg_lists_the_tool(tmp_path: Path):
+    """Same repository, a KG that also holds langfuse: now it resolves."""
+    (tmp_path / "repo").mkdir()
+    (tmp_path / "repo" / "package.json").write_text(
+        json.dumps({"dependencies": {"langfuse": "^1"}})
+    )
+    assert _unresolved(detect_supervision_tools(tmp_path / "repo")) == {"Langfuse"}
+
+    tools = default_tools()
+    tools["langfuse"] = tool("langfuse", modes=("cascading_failure",), name="Langfuse")
+    with kg.use_data_dir(write_kg(tmp_path / "bigger", tools=tools)):
+        detected = detect_supervision_tools(tmp_path / "repo")
+        assert _resolved(detected) == {"langfuse"}
+        assert _unresolved(detected) == set()
+    # Leaving the block puts this module's fixture KG back.
+    assert "langfuse" not in load_tool_index()
 
 
 def test_detect_supervision_tools_pyproject_tool_sections(tmp_path: Path):
@@ -189,17 +242,11 @@ def test_detect_supervision_tools_pyproject_tool_sections(tmp_path: Path):
         ).strip()
     )
     detected = detect_supervision_tools(tmp_path)
-    ids = {d.id for d in detected if d.in_kg}
-    for expected in (
-        "ruff",
-        "mypy",
-        "pyright",
-        "pytest",
-        "coverage-py",
-        "black",
-        "isort",
-    ):
-        assert expected in ids, f"missing {expected} from {ids}"
+    # In the fixture KG: resolved. One entry each, whatever the sub-tables.
+    assert _resolved(detected) == {"ruff", "mypy", "pyright", "pytest"}
+    assert len([d for d in detected if d.in_kg]) == 4
+    # Recognised by a rule, but not catalog tools: reported apart.
+    assert _unresolved(detected) == {"Coverage.py", "Black", "isort"}
 
 
 def test_pyproject_build_only_sections_are_ignored(tmp_path: Path):
@@ -246,9 +293,8 @@ def test_pyproject_eslint_in_package_json_devdeps(tmp_path: Path):
         )
     )
     detected = detect_supervision_tools(tmp_path)
-    ids = {d.id for d in detected if d.in_kg}
-    assert "eslint" in ids
-    assert "prettier" in ids
+    assert _resolved(detected) == {"eslint"}
+    assert _unresolved(detected) == {"Prettier"}
 
 
 # ---------------------------------------------------------------------------
@@ -268,14 +314,21 @@ def test_audit_self_repo_smoke():
     fms = load_failure_modes()
     assert len(report.coverage.cells) == len(fms) * 4  # 4 paradigms
     # All recommendation tool ids exist in the KG.
-    kg = load_tool_index()
+    index = load_tool_index()
     for gap in report.gaps:
         for rec in gap.recommendations:
-            assert rec.tool_id in kg, f"gap rec points at unknown tool: {rec.tool_id}"
+            assert (
+                rec.tool_id in index
+            ), f"gap rec points at unknown tool: {rec.tool_id}"
     # Detected supervision tools all resolve to KG.
     for t in report.stack.supervision_tools:
         assert t.in_kg
-        assert t.id in kg
+        assert t.id in index
+    # Every report says what the audit can and cannot see.
+    assert report.limits is not None
+    assert set(report.limits.detectable_tools) | set(
+        report.limits.undetectable_tools
+    ) == set(index)
 
 
 def test_to_markdown_renders_sections():
@@ -289,5 +342,6 @@ def test_to_markdown_renders_sections():
         "## Detected stack",
         "## Coverage",
         "## Gaps and recommendations",
+        "## Limits of this audit",
     ):
         assert header in md

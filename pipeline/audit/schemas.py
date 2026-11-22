@@ -1,23 +1,24 @@
-"""Shared Pydantic schemas for the audit analyzer + /assess + MCP server.
+"""Pydantic schemas of the audit report and of the MCP lookup record.
 
-THIS FILE IS THE CONTRACT between three parallel implementations:
-  - pipeline/audit/      (the analyzer)
-  - pipeline/mcp/        (the MCP server, exposes saica_audit_repo)
-  - site/src/pages/assess.astro (the web UI, fetches AuditReport JSON)
+This file is the contract between three consumers:
+  - pipeline/audit/      (the analyzer and its CLI)
+  - pipeline/ask/server  (``POST /assess`` returns an :class:`AuditReport`)
+  - site/src/pages/assess.astro (reads the report's JSON keys directly)
 
-Edits here change what /assess renders and what the MCP tool returns. Keep
-field names stable — the Astro page reads JSON keys directly.
+Keep field names stable. New fields are added as optional with a default,
+so a page built against the older shape keeps working.
 
 Design notes:
   * Detection is conservative. Each DetectedTool carries a confidence score
     and the source paths that triggered it, so the UI can show "we detected
     semgrep because we saw .github/workflows/semgrep.yml" rather than a
     bare assertion.
-  * Coverage cells use the same 0–3 evidence tier as the Tool×FM heatmap.
-    This keeps the visual language consistent across the site.
-  * Recommendations include the facets the analyzer used to pick them so a
-    user can see "we recommended promptfoo because it has cli + library +
-    ci_app surfaces and your stack already uses GitHub Actions."
+  * Coverage cells use a 0–3 tier that counts what the catalog *says* about
+    a tool (a tag, a rationale that mentions the mode, a citation). It is
+    not a measurement of how well the tool works.
+  * :class:`AuditLimits` travels with every report: which catalog tools the
+    audit can detect at all, and which failure modes it therefore cannot
+    assess. A mode the audit cannot assess is never reported as a gap.
 """
 
 from __future__ import annotations
@@ -117,6 +118,14 @@ class CoverageGrid(BaseModel):
     paradigm_balance: dict[str, int] = Field(
         description="paradigm → number of FMs the stack covers in that paradigm",
     )
+    failure_modes_not_assessable: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Subset of failure_modes_missing: modes for which the audit has no"
+            " detection rule for any catalog tool. It cannot tell whether the"
+            " repository covers them, so they are not gaps."
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -159,8 +168,40 @@ class GapItem(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class AuditLimits(BaseModel):
+    """What this audit could and could not see. Part of every report."""
+
+    catalog_tools: int = Field(description="Number of tools in the catalog")
+    detectable_tools: list[str] = Field(
+        description="Catalog tool ids the audit has a detection rule for"
+    )
+    undetectable_tools: list[str] = Field(
+        description="Catalog tool ids the audit can never report as installed"
+    )
+    not_assessable_failure_modes: list[str] = Field(
+        description="Modes with no detectable catalog tool (see CoverageGrid)"
+    )
+    files_listed: Optional[int] = Field(
+        default=None,
+        description="Remote audits: files in the repository listing",
+    )
+    files_read: Optional[int] = Field(
+        default=None, description="Remote audits: files downloaded and read"
+    )
+    bytes_read: Optional[int] = Field(
+        default=None, description="Remote audits: bytes downloaded"
+    )
+    truncated: list[str] = Field(
+        default_factory=list,
+        description="Plain sentences, one per cap that cut the fetch short",
+    )
+    notes: list[str] = Field(
+        default_factory=list, description="Plain sentences on what was not read"
+    )
+
+
 class AuditReport(BaseModel):
-    """The thing /assess and saica_audit_repo both return."""
+    """What ``POST /assess`` and the audit CLI return."""
 
     repo_url: str
     audited_at: date
@@ -169,10 +210,14 @@ class AuditReport(BaseModel):
     gaps: list[GapItem]
     summary: str = Field(description="2–3 sentence executive summary")
     markdown: str = Field(description="Full report rendered as Markdown for download")
+    limits: Optional[AuditLimits] = Field(
+        default=None,
+        description="What the audit can detect and what it could not assess",
+    )
 
 
 # ---------------------------------------------------------------------------
-# MCP-only schemas (saica_lookup, saica_preflight)
+# MCP lookup record
 # ---------------------------------------------------------------------------
 
 
@@ -196,34 +241,8 @@ class ToolRecord(BaseModel):
     url: str = Field(description="Site URL, e.g. /tools/promptfoo")
 
 
-class PreflightInput(BaseModel):
-    """Input for saica_preflight."""
-
-    action: str = Field(
-        description="What the agent is about to do, e.g. 'edit src/auth.py'"
-    )
-    context: Optional[str] = Field(
-        default=None,
-        description="Optional surrounding context: file paths, prior diff, task description.",
-    )
-    agent_kind: Optional[str] = Field(
-        default=None,
-        description="Hint about which agent is asking, e.g. 'claude-code'. May change recommendations.",
-    )
-
-
-class PreflightResult(BaseModel):
-    """Return type for saica_preflight."""
-
-    risk_failure_modes: list[str] = Field(
-        description="FM ids the action plausibly triggers"
-    )
-    overall_risk: Severity
-    recommended_supervisors: list[Recommendation]
-    rationale: str
-
-
 __all__ = [
+    "AuditLimits",
     "AuditReport",
     "CoverageCell",
     "CoverageGrid",
@@ -233,8 +252,6 @@ __all__ = [
     "DetectionSource",
     "GapItem",
     "Paradigm",
-    "PreflightInput",
-    "PreflightResult",
     "Recommendation",
     "Severity",
     "Tier",

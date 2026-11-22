@@ -1,30 +1,49 @@
 """Detection rules for the audit analyzer.
 
-Each function takes a path to a checked-out repo root and returns the
-relevant slice of the detected stack.  Detection is **conservative** —
-we'd rather under-claim than tell a user they have a tool installed
-when they don't.
+Each function takes the root of a checked-out (or fetched) repository and
+returns one slice of the detected stack. Detection is **conservative**: it
+is better to miss a tool than to tell a user they have one installed when
+they do not.
+
+What the audit can see, and nothing else:
+
+* files in the repository root and a few fixed sub-folders
+  (``.github/workflows``, ``.circleci``, ``.zed``); a manifest in a
+  sub-package (``python/pyproject.toml``) is not seen;
+* four mechanisms: ``uses:`` steps (and job container images) of GitHub
+  Actions workflows, dependency names in Python and JavaScript manifests, ``[tool.<name>]``
+  tables in ``pyproject.toml``, and a short list of named config files
+  (pre-commit hooks, Dependabot, Renovate, eval configs).
+
+Every path the detectors look at is declared in the tables of this
+module. :func:`fetch_plan` derives from the same tables which files a
+remote fetch must download and which only need to exist, so a remote
+audit and a local one read the same inputs.
 
 Conventions:
-  * Every returned ``DetectedTool`` resolves to a real KG id that exists
-    in ``data/tools/``.  Tools detected by name but not present in the
-    KG are returned with ``in_kg=False`` so they can be flagged for
-    editorial review.
-  * Each detection records the file paths (relative to repo root) that
-    triggered it.  The UI renders these as "we detected X because we
-    saw Y".
-  * ``confidence`` follows the roadmap convention:
-      1.0 — explicit dependency entry or named config file
-      0.7 — file pattern with possible ambiguity
-      0.5 — heuristic only; flag in ``note``
+  * A ``DetectedTool`` whose rule points at an id that is in the KG has
+    ``in_kg=True``. A rule that points at an id the KG does not hold (the
+    catalog dropped it, or never had it) yields ``in_kg=False`` with an
+    empty id; the report lists those separately and they add no coverage.
+  * Each detection records the file paths (relative to the repo root)
+    that triggered it.
+  * ``confidence``: 1.0 for a dependency entry, a workflow step or a
+    named config file; 0.9 for a ``[tool.<name>]`` table.
+  * A commented-out line is not a detection. Workflows and pre-commit
+    configs are parsed as YAML; a file that does not parse falls back to a
+    line scan that skips comment lines (workflows) or yields nothing
+    (pre-commit hooks).
 """
 
 from __future__ import annotations
 
+import fnmatch
 import json
 import re
 from pathlib import Path
+from typing import Any
 
+import yaml
 
 from pipeline.audit.kg import load_tool_index
 from pipeline.audit.schemas import DetectedAgent, DetectedTool
@@ -40,6 +59,9 @@ except ModuleNotFoundError:  # pragma: no cover - py<3.11 fallback
 # Helpers
 # ---------------------------------------------------------------------------
 
+# No detector reads more of a file than this.
+MAX_READ_BYTES = 512_000
+
 
 def _rel(repo_root: Path, p: Path) -> str:
     try:
@@ -48,9 +70,11 @@ def _rel(repo_root: Path, p: Path) -> str:
         return str(p)
 
 
-def _safe_read_text(path: Path, max_bytes: int = 512_000) -> str:
+def _safe_read_text(path: Path, max_bytes: int = MAX_READ_BYTES) -> str:
+    """File content as text; undecodable bytes are replaced, never raised."""
     try:
-        data = path.read_bytes()[:max_bytes]
+        with path.open("rb") as fh:
+            data = fh.read(max_bytes)
         return data.decode("utf-8", errors="replace")
     except OSError:
         return ""
@@ -61,27 +85,43 @@ def _exists(repo_root: Path, *parts: str) -> Path | None:
     return p if p.exists() else None
 
 
-def _glob(repo_root: Path, pattern: str) -> list[Path]:
-    """Glob within the repo root, ignoring vendored / virtualenv directories."""
-    out: list[Path] = []
-    for p in repo_root.glob(pattern):
-        s = str(p)
-        if any(
-            seg in s
-            for seg in (
-                "/.git/",
-                "/node_modules/",
-                "/.venv/",
-                "/venv/",
-                "/__pycache__/",
-                "/dist/",
-                "/build/",
-                "/.tox/",
-            )
-        ):
-            continue
-        out.append(p)
-    return out
+def _as_dict(value: Any) -> dict:
+    """``value`` if it is a mapping, else an empty one."""
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list:
+    return value if isinstance(value, list) else []
+
+
+def _load_toml(path: Path) -> dict:
+    """Parse a TOML file; ``{}`` when it is missing, undecodable or invalid."""
+    if not path.is_file():
+        return {}
+    try:
+        return _as_dict(tomllib.loads(_safe_read_text(path)))
+    except (tomllib.TOMLDecodeError, ValueError, RecursionError):
+        return {}
+
+
+def _load_json_object(path: Path) -> dict:
+    """Parse a JSON file; ``{}`` unless its top level is an object."""
+    if not path.is_file():
+        return {}
+    try:
+        return _as_dict(json.loads(_safe_read_text(path)))
+    except (ValueError, RecursionError):
+        return {}
+
+
+def _load_yaml(path: Path) -> Any:
+    """Parse a YAML file; ``None`` when it is missing or does not parse."""
+    if not path.is_file():
+        return None
+    try:
+        return yaml.safe_load(_safe_read_text(path))
+    except (yaml.YAMLError, ValueError, RecursionError):
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -123,56 +163,69 @@ def detect_languages(repo_root: Path) -> list[str]:
     return langs
 
 
+# Marker files reported as "runtime hints", in display order.
+RUNTIME_HINT_FILES: tuple[str, ...] = (
+    "pyproject.toml",
+    "requirements.txt",
+    "Pipfile",
+    "setup.py",
+    "setup.cfg",
+    "package.json",
+    "tsconfig.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "go.mod",
+    "go.sum",
+    "Cargo.toml",
+    "Cargo.lock",
+    "Dockerfile",
+    "docker-compose.yml",
+    "docker-compose.yaml",
+    "Makefile",
+    ".python-version",
+    ".nvmrc",
+    ".tool-versions",
+)
+
+# (provider, markers). A marker ending in "/" is a folder.
+CI_PROVIDER_MARKERS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("github_actions", (".github/workflows/",)),
+    ("gitlab_ci", (".gitlab-ci.yml",)),
+    ("circle_ci", (".circleci/config.yml",)),
+    ("azure_pipelines", ("azure-pipelines.yml",)),
+    ("travis", (".travis.yml",)),
+    ("jenkins", ("Jenkinsfile",)),
+    ("buildkite", ("buildkite.yml", ".buildkite/")),
+)
+
+# Lock files that name a package manager.
+PACKAGE_MANAGER_LOCKS: tuple[str, ...] = (
+    "poetry.lock",
+    "uv.lock",
+    "pdm.lock",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+)
+
+
+def _marker_present(repo_root: Path, marker: str) -> bool:
+    target = repo_root / marker.rstrip("/")
+    return target.is_dir() if marker.endswith("/") else target.exists()
+
+
 def detect_runtime_hints(repo_root: Path) -> list[str]:
     """Return the marker filenames we actually saw, in canonical order."""
-    seen: list[str] = []
-    candidates = [
-        "pyproject.toml",
-        "requirements.txt",
-        "Pipfile",
-        "setup.py",
-        "setup.cfg",
-        "package.json",
-        "tsconfig.json",
-        "yarn.lock",
-        "pnpm-lock.yaml",
-        "package-lock.json",
-        "go.mod",
-        "go.sum",
-        "Cargo.toml",
-        "Cargo.lock",
-        "Dockerfile",
-        "docker-compose.yml",
-        "docker-compose.yaml",
-        "Makefile",
-        ".python-version",
-        ".nvmrc",
-        ".tool-versions",
-    ]
-    for c in candidates:
-        if (repo_root / c).exists():
-            seen.append(c)
-    return seen
+    return [c for c in RUNTIME_HINT_FILES if (repo_root / c).exists()]
 
 
 def detect_ci_providers(repo_root: Path) -> list[str]:
     """Detect CI/CD providers from config files."""
-    providers: list[str] = []
-    if (repo_root / ".github" / "workflows").is_dir():
-        providers.append("github_actions")
-    if (repo_root / ".gitlab-ci.yml").exists():
-        providers.append("gitlab_ci")
-    if (repo_root / ".circleci" / "config.yml").exists():
-        providers.append("circle_ci")
-    if (repo_root / "azure-pipelines.yml").exists():
-        providers.append("azure_pipelines")
-    if (repo_root / ".travis.yml").exists():
-        providers.append("travis")
-    if (repo_root / "Jenkinsfile").exists():
-        providers.append("jenkins")
-    if (repo_root / "buildkite.yml").exists() or (repo_root / ".buildkite").is_dir():
-        providers.append("buildkite")
-    return providers
+    return [
+        provider
+        for provider, markers in CI_PROVIDER_MARKERS
+        if any(_marker_present(repo_root, m) for m in markers)
+    ]
 
 
 def detect_package_managers(repo_root: Path) -> list[str]:
@@ -342,6 +395,13 @@ _CI_ACTION_RULES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ),
 )
 
+# (kg_id, name, container-image prefixes). A job that runs in the tool's
+# own image (``container: {image: semgrep/semgrep}``, the form Semgrep
+# documents today) uses the tool even without a ``uses:`` step.
+_CI_CONTAINER_RULES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    ("semgrep", "Semgrep", ("semgrep/semgrep", "returntocorp/semgrep")),
+)
+
 # Python distribution-name → KG tool id.
 # Keys are normalized to lower-case dashed form (PEP 503).
 _PY_PKG_TO_TOOL: dict[str, tuple[str, str]] = {
@@ -437,6 +497,61 @@ _EVAL_CONFIG_RULES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
 )
 
 
+# Config files that are themselves the detection (presence is enough).
+DEPENDABOT_FILES: tuple[str, ...] = (
+    ".github/dependabot.yml",
+    ".github/dependabot.yaml",
+)
+RENOVATE_FILES: tuple[str, ...] = (
+    "renovate.json",
+    ".github/renovate.json",
+    ".renovaterc",
+    ".renovaterc.json",
+    ".renovaterc.json5",
+    "renovate.json5",
+)
+PRE_COMMIT_FILES: tuple[str, ...] = (
+    ".pre-commit-config.yaml",
+    ".pre-commit-config.yml",
+)
+
+# pre-commit ``repos[].repo`` (GitHub "owner/name", lower-case) → KG tool id.
+_PRE_COMMIT_REPO_TO_TOOL: dict[str, tuple[str, str]] = {
+    "semgrep/semgrep": ("semgrep", "Semgrep"),
+    "semgrep/pre-commit": ("semgrep", "Semgrep"),
+    "returntocorp/semgrep": ("semgrep", "Semgrep"),
+    "astral-sh/ruff-pre-commit": ("ruff", "Ruff"),
+    "charliermarsh/ruff-pre-commit": ("ruff", "Ruff"),
+    "pre-commit/mirrors-mypy": ("mypy", "mypy"),
+    "pycqa/bandit": ("bandit", "Bandit"),
+    "robertcraigie/pyright-python": ("pyright", "Pyright"),
+    "pre-commit/mirrors-eslint": ("eslint", "ESLint"),
+}
+
+# pre-commit ``hooks[].id`` → KG tool id, for hooks under ``repo: local``.
+_PRE_COMMIT_HOOK_TO_TOOL: dict[str, tuple[str, str]] = {
+    "semgrep": ("semgrep", "Semgrep"),
+    "ruff": ("ruff", "Ruff"),
+    "mypy": ("mypy", "mypy"),
+    "bandit": ("bandit", "Bandit"),
+    "pyright": ("pyright", "Pyright"),
+    "eslint": ("eslint", "ESLint"),
+}
+
+# Files whose *content* the detectors read. Everything else in the tables
+# above is a presence check. A pattern matches paths of the same depth
+# only ("requirements*.txt" does not match "requirements/dev.txt").
+CONTENT_PATTERNS: tuple[str, ...] = (
+    "pyproject.toml",
+    "requirements*.txt",
+    "Pipfile",
+    "setup.py",
+    "package.json",
+    ".github/workflows/*.yml",
+    ".github/workflows/*.yaml",
+) + PRE_COMMIT_FILES
+
+
 def _normalize_pep503(name: str) -> str:
     """PEP 503 normalization: lowercase, runs of [-_.] → single '-'."""
     return re.sub(r"[-_.]+", "-", name).lower()
@@ -452,65 +567,46 @@ def _parse_requirement_line(line: str) -> str | None:
 
 
 def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
-    """Return ``{normalized_pkg_name: [paths]}`` aggregated across Python manifests."""
+    """Return ``{normalized_pkg_name: [paths]}`` aggregated across Python manifests.
+
+    Never raises on an odd manifest: a section of the wrong type is skipped.
+    """
     packages: dict[str, list[str]] = {}
 
     def add(pkg: str, src: Path) -> None:
         norm = _normalize_pep503(pkg)
         packages.setdefault(norm, []).append(_rel(repo_root, src))
 
-    # pyproject.toml — handle both [project.dependencies] (PEP 621) and Poetry.
-    pyproject = repo_root / "pyproject.toml"
-    if pyproject.exists():
-        try:
-            doc = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-        except (OSError, tomllib.TOMLDecodeError):
-            doc = {}
-        # PEP 621
-        proj = doc.get("project") or {}
-        for dep in proj.get("dependencies") or []:
+    def add_requirements(deps: Any, src: Path) -> None:
+        for dep in _as_list(deps):
             name = _parse_requirement_line(str(dep))
             if name:
-                add(name, pyproject)
-        opt = proj.get("optional-dependencies") or {}
-        if isinstance(opt, dict):
-            for group in opt.values():
-                for dep in group or []:
-                    name = _parse_requirement_line(str(dep))
-                    if name:
-                        add(name, pyproject)
-        # Poetry
-        poetry = (doc.get("tool") or {}).get("poetry") or {}
-        for section in ("dependencies", "dev-dependencies"):
-            sect = poetry.get(section) or {}
-            if isinstance(sect, dict):
-                for k in sect.keys():
-                    if str(k).lower() == "python":
-                        continue
-                    add(str(k), pyproject)
-        groups = (
-            (poetry.get("group") or {}) if isinstance(poetry.get("group"), dict) else {}
-        )
-        for grp in groups.values():
-            deps = (grp or {}).get("dependencies") or {}
-            if isinstance(deps, dict):
-                for k in deps.keys():
-                    if str(k).lower() == "python":
-                        continue
-                    add(str(k), pyproject)
-        # PDM / hatch dev groups live under [tool.pdm.dev-dependencies] or [tool.hatch...].
-        pdm_dev = ((doc.get("tool") or {}).get("pdm") or {}).get(
-            "dev-dependencies"
-        ) or {}
-        if isinstance(pdm_dev, dict):
-            for grp in pdm_dev.values():
-                for dep in grp or []:
-                    name = _parse_requirement_line(str(dep))
-                    if name:
-                        add(name, pyproject)
+                add(name, src)
+
+    def add_keys(table: Any, src: Path) -> None:
+        for key in _as_dict(table):
+            if str(key).lower() != "python":
+                add(str(key), src)
+
+    # pyproject.toml — [project] (PEP 621), Poetry, PDM.
+    pyproject = repo_root / "pyproject.toml"
+    doc = _load_toml(pyproject)
+    proj = _as_dict(doc.get("project"))
+    add_requirements(proj.get("dependencies"), pyproject)
+    for group in _as_dict(proj.get("optional-dependencies")).values():
+        add_requirements(group, pyproject)
+    tool_table = _as_dict(doc.get("tool"))
+    poetry = _as_dict(tool_table.get("poetry"))
+    for section in ("dependencies", "dev-dependencies"):
+        add_keys(poetry.get(section), pyproject)
+    for grp in _as_dict(poetry.get("group")).values():
+        add_keys(_as_dict(grp).get("dependencies"), pyproject)
+    pdm_dev = _as_dict(_as_dict(tool_table.get("pdm")).get("dev-dependencies"))
+    for grp in pdm_dev.values():
+        add_requirements(grp, pyproject)
 
     # requirements*.txt
-    for req in repo_root.glob("requirements*.txt"):
+    for req in sorted(repo_root.glob("requirements*.txt")):
         for raw in _safe_read_text(req).splitlines():
             name = _parse_requirement_line(raw)
             if name:
@@ -518,7 +614,7 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
 
     # Pipfile — naive parse: any [packages] / [dev-packages] line "key =".
     pipfile = repo_root / "Pipfile"
-    if pipfile.exists():
+    if pipfile.is_file():
         section = None
         for raw in _safe_read_text(pipfile).splitlines():
             s = raw.strip()
@@ -530,59 +626,41 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
                 if m:
                     add(m.group(1), pipfile)
 
-    # setup.py — best-effort regex scan of install_requires=[...].
+    # setup.py — best-effort scan of install_requires=[...]; comment lines
+    # inside the list are dropped by _parse_requirement_line.
     setup_py = repo_root / "setup.py"
-    if setup_py.exists():
+    if setup_py.is_file():
         text = _safe_read_text(setup_py)
         m = re.search(r"install_requires\s*=\s*\[(.*?)\]", text, re.DOTALL)
         if m:
-            for raw in re.split(r"[,\n]", m.group(1)):
-                raw = raw.strip().strip("'\"")
-                name = _parse_requirement_line(raw)
-                if name:
-                    add(name, setup_py)
+            for line in m.group(1).splitlines():
+                if line.strip().startswith("#"):
+                    continue
+                for raw in line.split(","):
+                    name = _parse_requirement_line(raw.strip().strip("'\""))
+                    if name:
+                        add(name, setup_py)
 
     return packages
 
 
 def _pyproject_tool_sections(repo_root: Path) -> dict[str, str]:
     """Return ``{tool_name: pyproject_path}`` for every ``[tool.<name>]``
-    section declared in the repo's ``pyproject.toml``.
+    table in the repo's ``pyproject.toml``.
 
     Match is on the SECOND path component, so ``[tool.ruff]``,
-    ``[tool.ruff.lint]``, ``[tool.pytest.ini_options]`` etc. all
-    collapse to ``ruff`` / ``pytest`` (one entry per distinct tool).
-    Returns an empty dict when no pyproject.toml exists or when it
-    lacks a ``[tool]`` table.
-
-    Used by Stage-9 supervision detection (v0.4.2): well-maintained
-    Python repos declare their dev-tooling here rather than via
-    ``.pre-commit-config.yaml`` or named GitHub Actions, so scanning
-    only those misses ruff/mypy/pyright/pytest in basically every
-    SDK and framework repo we audit.
+    ``[tool.ruff.lint]``, ``[tool.pytest.ini_options]`` all collapse to
+    ``ruff`` / ``pytest``. Empty when there is no readable ``[tool]`` table.
     """
     pyproject = repo_root / "pyproject.toml"
-    if not pyproject.exists():
-        return {}
-    try:
-        doc = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-    except (OSError, tomllib.TOMLDecodeError, ValueError):
-        return {}
-    tool_table = doc.get("tool")
-    if not isinstance(tool_table, dict):
-        return {}
+    tool_table = _as_dict(_load_toml(pyproject).get("tool"))
     rel_path = _rel(repo_root, pyproject)
-    return {str(name): rel_path for name in tool_table.keys()}
+    return {str(name): rel_path for name in tool_table}
 
 
 def _js_packages_from_package_json(repo_root: Path) -> dict[str, list[str]]:
     pkg_path = repo_root / "package.json"
-    if not pkg_path.exists():
-        return {}
-    try:
-        doc = json.loads(_safe_read_text(pkg_path))
-    except (json.JSONDecodeError, ValueError):
-        return {}
+    doc = _load_json_object(pkg_path)
     out: dict[str, list[str]] = {}
     for section in (
         "dependencies",
@@ -590,36 +668,109 @@ def _js_packages_from_package_json(repo_root: Path) -> dict[str, list[str]]:
         "optionalDependencies",
         "peerDependencies",
     ):
-        deps = doc.get(section) or {}
-        if isinstance(deps, dict):
-            for name in deps.keys():
-                out.setdefault(str(name).lower(), []).append(_rel(repo_root, pkg_path))
+        for name in _as_dict(doc.get(section)):
+            out.setdefault(str(name).lower(), []).append(_rel(repo_root, pkg_path))
     return out
 
 
-def _ci_action_uses(repo_root: Path) -> list[tuple[str, str]]:
-    """Return list of ``(uses_value, source_path)`` from GH Actions workflow files."""
+_USES_LINE_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*['\"]?([^\s'\"#]+)")
+
+
+def _uses_from_workflow(doc: Any) -> list[str]:
+    """``uses:`` values of a parsed workflow: job steps and reusable jobs."""
+    out: list[str] = []
+    for job in _as_dict(_as_dict(doc).get("jobs")).values():
+        job = _as_dict(job)
+        if isinstance(job.get("uses"), str):
+            out.append(job["uses"])
+        for step in _as_list(job.get("steps")):
+            uses = _as_dict(step).get("uses")
+            if isinstance(uses, str):
+                out.append(uses)
+    return out
+
+
+def _container_images(repo_root: Path) -> list[tuple[str, str]]:
+    """``(image, source_path)`` for every job container of parsed workflows."""
     out: list[tuple[str, str]] = []
     workflows_dir = repo_root / ".github" / "workflows"
     if not workflows_dir.is_dir():
         return out
-    for wf in list(workflows_dir.glob("*.yml")) + list(workflows_dir.glob("*.yaml")):
-        text = _safe_read_text(wf)
-        # Cheap line-based scan first (faster + tolerant of malformed YAML).
-        for line in text.splitlines():
-            m = re.search(r"uses:\s*['\"]?([^\s'\"]+)['\"]?", line)
-            if m:
-                out.append((m.group(1), _rel(repo_root, wf)))
+    files = sorted(workflows_dir.glob("*.yml")) + sorted(workflows_dir.glob("*.yaml"))
+    for wf in files:
+        for job in _as_dict(_as_dict(_load_yaml(wf)).get("jobs")).values():
+            container = _as_dict(job).get("container")
+            image = (
+                container
+                if isinstance(container, str)
+                else _as_dict(container).get("image")
+            )
+            if isinstance(image, str):
+                out.append((image.strip(), _rel(repo_root, wf)))
     return out
+
+
+def _ci_action_uses(repo_root: Path) -> list[tuple[str, str]]:
+    """Return ``(uses_value, source_path)`` pairs from GitHub Actions workflows.
+
+    A workflow is parsed as YAML, so a commented-out step or a ``uses:``
+    inside a shell script is not counted. A file that does not parse is
+    scanned line by line, skipping comment lines.
+    """
+    out: list[tuple[str, str]] = []
+    workflows_dir = repo_root / ".github" / "workflows"
+    if not workflows_dir.is_dir():
+        return out
+    files = sorted(workflows_dir.glob("*.yml")) + sorted(workflows_dir.glob("*.yaml"))
+    for wf in files:
+        src = _rel(repo_root, wf)
+        doc = _load_yaml(wf)
+        if isinstance(doc, dict):
+            out.extend((uses.strip(), src) for uses in _uses_from_workflow(doc))
+            continue
+        for line in _safe_read_text(wf).splitlines():
+            if line.lstrip().startswith("#"):
+                continue
+            m = _USES_LINE_RE.match(line)
+            if m:
+                out.append((m.group(1), src))
+    return out
+
+
+_GITHUB_REPO_RE = re.compile(r"github\.com[/:]([^/\s]+)/([^/\s]+?)(?:\.git)?/?$")
+
+
+def _pre_commit_tools(path: Path) -> list[tuple[str, str]]:
+    """``(kg_id, display name)`` for the hooks a pre-commit config declares.
+
+    Reads ``repos[].repo`` and ``repos[].hooks[].id`` of the parsed YAML. A
+    word in a comment, or a file that does not parse, yields nothing.
+    """
+    found: dict[str, str] = {}
+    for repo in _as_list(_as_dict(_load_yaml(path)).get("repos")):
+        repo = _as_dict(repo)
+        url = repo.get("repo")
+        hooks = [_as_dict(h) for h in _as_list(repo.get("hooks"))]
+        if not hooks:
+            continue  # a repo entry without hooks runs nothing
+        m = _GITHUB_REPO_RE.search(url.strip()) if isinstance(url, str) else None
+        if m:
+            target = _PRE_COMMIT_REPO_TO_TOOL.get(f"{m.group(1)}/{m.group(2)}".lower())
+            if target:
+                found.setdefault(*target)
+        elif url == "local":
+            for hook in hooks:
+                target = _PRE_COMMIT_HOOK_TO_TOOL.get(str(hook.get("id") or "").lower())
+                if target:
+                    found.setdefault(*target)
+    return list(found.items())
 
 
 def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
     """Detect supervision tools across all signal sources.
 
-    Returns one :class:`DetectedTool` per (kg_id, source) pair so the same
-    tool found in multiple places (e.g. Python dep + CI workflow) shows up
-    with both rationales rather than getting merged.  Coverage logic later
-    deduplicates by id.
+    Returns one :class:`DetectedTool` per (kg_id, source) pair, so a tool
+    found in two places shows both reasons. Count tools by distinct id.
     """
     kg = load_tool_index()
     out: list[DetectedTool] = []
@@ -641,7 +792,7 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
         out.append(
             DetectedTool(
                 id=kg_id if in_kg else "",
-                name=kg.get(kg_id, {}).get("name", name) if in_kg else name,
+                name=kg[kg_id].get("name", name) if in_kg else name,
                 in_kg=in_kg,
                 detection_source=source,  # type: ignore[arg-type]
                 detection_paths=sorted(set(paths)),
@@ -650,7 +801,7 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
             )
         )
 
-    # --- CI workflow `uses:` lines ----------------------------------------
+    # --- CI workflow `uses:` steps ----------------------------------------
     uses_pairs = _ci_action_uses(repo_root)
     for kg_id, name, prefixes in _CI_ACTION_RULES:
         matched_paths: list[str] = []
@@ -661,45 +812,43 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
         if matched_paths:
             emit(kg_id, name, "ci_workflow", matched_paths, 1.0)
 
+    # --- CI jobs that run in the tool's own container image -----------------
+    images = _container_images(repo_root)
+    for kg_id, name, prefixes in _CI_CONTAINER_RULES:
+        matched_paths = [
+            src
+            for image, src in images
+            if any(
+                image.lower().removeprefix("docker.io/").split(":")[0].split("@")[0]
+                == p
+                for p in prefixes
+            )
+        ]
+        if matched_paths:
+            emit(kg_id, name, "ci_workflow", matched_paths, 1.0)
+
     # --- Dependabot config -------------------------------------------------
-    if (p := _exists(repo_root, ".github", "dependabot.yml")) or (
-        p := _exists(repo_root, ".github", "dependabot.yaml")
-    ):
-        emit("dependabot", "Dependabot", "dependabot", [_rel(repo_root, p)], 1.0)
+    for cand in DEPENDABOT_FILES:
+        if p := _exists(repo_root, *cand.split("/")):
+            emit("dependabot", "Dependabot", "dependabot", [_rel(repo_root, p)], 1.0)
+            break
 
     # --- Renovate config ---------------------------------------------------
-    renovate_paths: list[str] = []
-    for cand in (
-        "renovate.json",
-        ".github/renovate.json",
-        ".renovaterc",
-        ".renovaterc.json",
-        ".renovaterc.json5",
-        "renovate.json5",
-    ):
-        if p := _exists(repo_root, *cand.split("/")):
-            renovate_paths.append(_rel(repo_root, p))
+    renovate_paths = [
+        _rel(repo_root, p)
+        for cand in RENOVATE_FILES
+        if (p := _exists(repo_root, *cand.split("/")))
+    ]
     if renovate_paths:
         emit("renovate", "Renovate", "renovate", renovate_paths, 1.0)
 
-    # --- pre-commit framework itself --------------------------------------
-    if (p := _exists(repo_root, ".pre-commit-config.yaml")) or (
-        p := _exists(repo_root, ".pre-commit-config.yml")
-    ):
-        # The framework itself is `pre-commit`. We ALSO scan for tools
-        # referenced inside the config (semgrep, etc.) below.
-        emit(
-            "pre-commit",
-            "pre-commit",
-            "pre_commit",
-            [_rel(repo_root, p)],
-            1.0,
-            note="Detected the pre-commit framework; underlying hooks also scanned.",
-        )
-        # Look for semgrep among hooks → high-confidence semgrep detection.
-        text = _safe_read_text(p)
-        if re.search(r"semgrep", text, re.IGNORECASE):
-            emit("semgrep", "Semgrep", "pre_commit", [_rel(repo_root, p)], 1.0)
+    # --- pre-commit: the framework, then the hooks it runs -----------------
+    for cand in PRE_COMMIT_FILES:
+        if p := _exists(repo_root, cand):
+            emit("pre-commit", "pre-commit", "pre_commit", [_rel(repo_root, p)], 1.0)
+            for kg_id, name in _pre_commit_tools(p):
+                emit(kg_id, name, "pre_commit", [_rel(repo_root, p)], 1.0)
+            break
 
     # --- Python deps -------------------------------------------------------
     py_pkgs = _python_packages_from_files(repo_root)
@@ -711,16 +860,11 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
     # --- JS deps -----------------------------------------------------------
     js_pkgs = _js_packages_from_package_json(repo_root)
     for pkg_name, paths in js_pkgs.items():
-        key = pkg_name.lower()
-        if key in _JS_PKG_TO_TOOL:
-            kg_id, display = _JS_PKG_TO_TOOL[key]
+        if pkg_name in _JS_PKG_TO_TOOL:
+            kg_id, display = _JS_PKG_TO_TOOL[pkg_name]
             emit(kg_id, display, "dep_file", paths, 1.0)
 
-    # --- pyproject.toml `[tool.<name>]` sections --------------------------
-    # Lifts detection floor on well-maintained Python repos (openai-python,
-    # anthropic-sdk-python, fastapi, pydantic, ruff itself) that declare
-    # ruff / mypy / pyright / pytest etc. here rather than via pre-commit
-    # or named GH Actions. See `_PYPROJECT_TOOL_TO_KG`.
+    # --- pyproject.toml `[tool.<name>]` tables -----------------------------
     for tool_name, src in _pyproject_tool_sections(repo_root).items():
         if tool_name in _PYPROJECT_TOOL_TO_KG:
             kg_id, display = _PYPROJECT_TOOL_TO_KG[tool_name]
@@ -735,25 +879,111 @@ def detect_supervision_tools(repo_root: Path) -> list[DetectedTool]:
 
     # --- Eval configs ------------------------------------------------------
     for kg_id, name, candidates in _EVAL_CONFIG_RULES:
-        matched: list[str] = []
-        for cand in candidates:
-            target = repo_root / cand.rstrip("/")
-            if cand.endswith("/"):
-                if target.is_dir():
-                    matched.append(_rel(repo_root, target) + "/")
-            elif target.exists():
-                matched.append(_rel(repo_root, target))
+        matched = [
+            _rel(repo_root, repo_root / cand.rstrip("/"))
+            + ("/" if cand.endswith("/") else "")
+            for cand in candidates
+            if _marker_present(repo_root, cand)
+        ]
         if matched:
             emit(kg_id, name, "eval_config", matched, 1.0)
 
     return out
 
 
+# ---------------------------------------------------------------------------
+# What the rules can see (used for the report's limits and for remote fetch)
+# ---------------------------------------------------------------------------
+
+
+def rule_target_ids() -> frozenset[str]:
+    """Every tool id some detection rule can emit, in the KG or not."""
+    ids: set[str] = {"dependabot", "renovate", "pre-commit"}
+    ids.update(kg_id for kg_id, _, _ in _CI_ACTION_RULES)
+    ids.update(kg_id for kg_id, _, _ in _CI_CONTAINER_RULES)
+    ids.update(kg_id for kg_id, _, _ in _EVAL_CONFIG_RULES)
+    for table in (
+        _PY_PKG_TO_TOOL,
+        _JS_PKG_TO_TOOL,
+        _PYPROJECT_TOOL_TO_KG,
+        _PRE_COMMIT_REPO_TO_TOOL,
+        _PRE_COMMIT_HOOK_TO_TOOL,
+    ):
+        ids.update(kg_id for kg_id, _ in table.values())
+    return frozenset(ids)
+
+
+def detectable_tool_ids(kg_index: dict[str, dict] | None = None) -> frozenset[str]:
+    """KG tools the audit has at least one detection rule for."""
+    kg = kg_index if kg_index is not None else load_tool_index()
+    return frozenset(rule_target_ids() & set(kg))
+
+
+def presence_markers() -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """``(files, folders)`` the detectors only test for existence.
+
+    Derived from the rule tables, so the list cannot drift from the rules.
+    File entries may be root-level patterns (``*.csproj``).
+    """
+    files: set[str] = set(RUNTIME_HINT_FILES) | set(PACKAGE_MANAGER_LOCKS)
+    files.update(DEPENDABOT_FILES)
+    files.update(RENOVATE_FILES)
+    folders: set[str] = set()
+    markers: list[str] = []
+    markers.extend(m for _, group in LANGUAGE_MARKERS for m in group)
+    markers.extend(m for _, group in CI_PROVIDER_MARKERS for m in group)
+    markers.extend(m for _, _, rules in _AGENT_RULES for m, _ in rules)
+    markers.extend(m for _, _, group in _EVAL_CONFIG_RULES for m in group)
+    for marker in markers:
+        (folders if marker.endswith("/") else files).add(marker.rstrip("/"))
+    files -= {f for f in files if any(_matches(f, pat) for pat in CONTENT_PATTERNS)}
+    return tuple(sorted(files)), tuple(sorted(folders))
+
+
+def _matches(path: str, pattern: str) -> bool:
+    """fnmatch that never lets ``*`` cross a ``/``."""
+    return path.count("/") == pattern.count("/") and fnmatch.fnmatchcase(path, pattern)
+
+
+def fetch_plan(
+    blob_paths: list[str], tree_paths: list[str]
+) -> tuple[list[str], list[str], list[str]]:
+    """Split a repository listing into what a remote audit needs.
+
+    ``blob_paths`` are the files and ``tree_paths`` the folders of the
+    repository, relative to its root. Returns ``(content, files, folders)``:
+    files to download, files that only have to exist (an empty placeholder
+    is enough), and folders that only have to exist. Each list is sorted.
+    """
+    presence_files, presence_dirs = presence_markers()
+    content = sorted(
+        p for p in blob_paths if any(_matches(p, pat) for pat in CONTENT_PATTERNS)
+    )
+    files = sorted(
+        p
+        for p in blob_paths
+        if p not in content and any(_matches(p, pat) for pat in presence_files)
+    )
+    wanted_dirs = set(presence_dirs)
+    folders = sorted(
+        d
+        for d in wanted_dirs
+        if d in tree_paths or any(p.startswith(d + "/") for p in blob_paths)
+    )
+    return content, files, folders
+
+
 __all__ = [
+    "CONTENT_PATTERNS",
+    "MAX_READ_BYTES",
     "detect_agents",
     "detect_ci_providers",
     "detect_languages",
     "detect_package_managers",
     "detect_runtime_hints",
     "detect_supervision_tools",
+    "detectable_tool_ids",
+    "fetch_plan",
+    "presence_markers",
+    "rule_target_ids",
 ]

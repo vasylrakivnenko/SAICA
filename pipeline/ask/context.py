@@ -1,13 +1,13 @@
-"""Turn a list of retrieval hits into a Kimi-ready context block.
+"""Turn a list of retrieval hits into a prompt-ready context block.
 
-Loads each node's YAML from ``data/`` on demand (cached per-process) and
-extracts a compact per-node summary — id, type, name, and the most
-descriptive text field for that node kind. For ``tool`` nodes we also
-carry the declared facets (addresses_failure_modes, control_paradigm,
-temporal_phase, autonomy_level) plus an *inferred* integration-surface
-list so the prompt can hold the LLM to two important rules:
+Each hit is looked up in the KG through :mod:`pipeline.kg` (validated
+nodes, one loader) and reduced to a compact summary: id, type, name and
+the most descriptive text field of that node kind. For ``tool`` nodes the
+declared facets are carried too (addresses_failure_modes,
+control_paradigm, temporal_phase, autonomy_level, integration_surfaces),
+so the prompt can hold the model to two rules:
 
-  1. Don't recommend a tool for a failure mode it doesn't declare coverage for.
+  1. Don't recommend a tool for a failure mode it is not tagged for.
   2. When the user wants pipeline/API integration, don't recommend an
      IDE plugin or hosted web product.
 
@@ -20,17 +20,11 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from functools import lru_cache
-from pathlib import Path
 from typing import Iterable
 
-import yaml
-
-from pipeline.config import REPO_ROOT
+from pipeline import kg
 
 log = logging.getLogger(__name__)
-
-DATA_DIR = REPO_ROOT / "data"
 
 NODE_TYPES: dict[str, tuple[str, str]] = {
     "tool": ("tools", "/tools"),
@@ -52,10 +46,11 @@ PIPELINE_INTENT_RE = re.compile(
     re.IGNORECASE,
 )
 
-# -- integration-surface detector --------------------------------------------
-# Applied to tool YAML (name + tagline + description + rationale). Deliberately
-# precision-biased; over-tagging muddies the answer, under-tagging just means
-# the prompt can't use that hint. Tools can match multiple surfaces.
+# -- integration-surface guesser (not used by the served path) ----------------
+# Ask reads only the ``integration_surfaces`` a tool declares. The rules and
+# the per-id table below guess surfaces from free text; their one caller is
+# ``validator/bulk_annotate_surfaces.py``, which used them once to fill the
+# field in every tool file. They stay here until that script takes them over.
 _SURFACE_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "ide_plugin",
@@ -326,29 +321,21 @@ class NodeContext:
         return f"{prefix}/{self.id}" if prefix else ""
 
 
-def _detect_type_and_path(node_id: str) -> tuple[str, Path] | None:
-    for node_type, (subdir, _) in NODE_TYPES.items():
-        for ext in (".yml", ".yaml"):
-            candidate = DATA_DIR / subdir / f"{node_id}{ext}"
-            if candidate.exists():
-                return node_type, candidate
-    return None
-
-
-@lru_cache(maxsize=512)
 def _load_node_yaml(node_id: str) -> tuple[str, dict] | None:
-    resolved = _detect_type_and_path(node_id)
-    if resolved is None:
+    """``(node type, validated mapping)`` for an id, or ``None``.
+
+    Only the six kinds Ask cites (:data:`NODE_TYPES`) are looked up.
+    """
+    found = kg.load().find(node_id)
+    if found is None or found[0] not in NODE_TYPES:
         return None
-    node_type, path = resolved
-    try:
-        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError) as exc:
-        log.warning("failed to load %s: %s", path, exc)
-        return None
-    if not isinstance(doc, dict):
-        return None
-    return node_type, doc
+    return found
+
+
+def declared_surfaces(data: dict) -> tuple[str, ...]:
+    """The ``integration_surfaces`` a tool node declares (may be empty)."""
+    declared = data.get("integration_surfaces")
+    return tuple(str(s) for s in declared) if isinstance(declared, list) else ()
 
 
 def _extract_description(node_type: str, data: dict) -> str:
@@ -404,7 +391,7 @@ def hydrate(hits: Iterable[tuple[str, float]]) -> list[NodeContext]:
             kwargs["control_paradigm"] = data.get("control_paradigm") or None
             kwargs["temporal_phase"] = data.get("temporal_phase") or None
             kwargs["autonomy_level"] = data.get("autonomy_level") or None
-            kwargs["integration_surfaces"] = _detect_integration_surfaces(data)
+            kwargs["integration_surfaces"] = declared_surfaces(data)
 
         out.append(NodeContext(**kwargs))
     return out
@@ -444,7 +431,7 @@ def render_context_block(nodes: list[NodeContext]) -> str:
 
 
 PROMPT_TEMPLATE = """\
-You are the SAICA-KG assistant. Answer using ONLY the KG node context below.
+You are the SAICA assistant. Answer using ONLY the KG node context below.
 
 RULES — follow all, do not invent content:
 
@@ -463,20 +450,13 @@ RULES — follow all, do not invent content:
    Do not recommend a tool that lacks the declared coverage, even if its
    description sounds relevant.
 
-4. AVOID CIRCULAR RECOMMENDATIONS. Tools whose paradigm is `recovery`
-   and autonomy is `fully_autonomous` are themselves coding agents that
-   self-recover; when the user wants to *supervise* an agent, prefer
-   tools whose paradigm is `prevention` or `detection`, or whose
-   autonomy is `graduated_hitl` / `full_hitl`. Flag explicitly when a
-   retrieved candidate is "the agent itself, not a supervisor".
+4. INTEGRATION-MODE FIT. {integration_rule}
 
-5. INTEGRATION-MODE FIT. {integration_rule}
-
-6. BREADTH. When recommending tools, offer 2–3 options with a one-line
+5. BREADTH. When recommending tools, offer 2–3 options with a one-line
    rationale each (paradigm, phase, surface). Do not pick a single tool
    unless the retrieval genuinely contains only one qualifying match.
 
-7. If the KG truly doesn't support an answer after applying these rules,
+6. If the KG truly doesn't support an answer after applying these rules,
    say "The KG doesn't have this information."
 
 Context:
@@ -552,7 +532,7 @@ def hybrid_retrieve(
         if loaded is None:
             continue
         _, data = loaded
-        if set(_detect_integration_surfaces(data)) & PIPELINE_FRIENDLY:
+        if set(declared_surfaces(data)) & PIPELINE_FRIENDLY:
             # Bias it to sit *after* the base hits but in similarity order.
             added.append((nid, sim))
             seen.add(nid)
@@ -570,4 +550,5 @@ __all__ = [
     "PROMPT_TEMPLATE",
     "_detect_integration_surfaces",
     "_wants_pipeline",
+    "declared_surfaces",
 ]
