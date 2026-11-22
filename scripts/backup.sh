@@ -54,7 +54,9 @@ else sum() { sha256sum "$@"; }; fi
 
 out="$dest_abs/saica-backup-$(date '+%Y%m%d-%H%M%S')"
 
-# Folders that are not in git and cannot be rebuilt from it.
+# Folders that are not in git and cannot be rebuilt from it. (The loops below
+# write ${data_dirs[@]+...}: bash 3.2, the macOS default, treats an empty
+# array as unset under `set -u`.)
 data_dirs=()
 for d in bench/*/data bench/*/results bench/*/results_backup_*; do
   [ -d "$d" ] && data_dirs+=("$d")
@@ -70,7 +72,7 @@ if [ "$dry" -eq 1 ]; then
   echo "Would write to: $out"
   echo "  repo.bundle                   $(git for-each-ref --format='%(refname)' refs/heads refs/tags | wc -l | tr -d ' ') branches and tags, $(git rev-list --all --count) commits"
   echo "  worktree-uncommitted.tar.gz   $n_uncommitted changed or new files"
-  for d in "${data_dirs[@]}"; do
+  for d in ${data_dirs[@]+"${data_dirs[@]}"}; do
     name="$(printf '%s' "$d" | tr '/' '-').tar.gz"
     printf '  %-45s %s\n' "$name" "$(du -sh "$d" | cut -f1)"
   done
@@ -97,7 +99,7 @@ if [ "$n_uncommitted" -gt 0 ]; then
   echo "  worktree-uncommitted.tar.gz ($n_uncommitted files listed)"
 fi
 
-for d in "${data_dirs[@]}"; do
+for d in ${data_dirs[@]+"${data_dirs[@]}"}; do
   name="$(printf '%s' "$d" | tr '/' '-').tar.gz"
   tar -czf "$out/$name" "$d"
   echo "  $name"
@@ -108,7 +110,15 @@ if [ -d research/backups ]; then
   echo "  research-backups.tar.gz"
 fi
 
-( cd "$out" && sum -- *.bundle *.tar.gz > SHA256SUMS )
+(
+  cd "$out"
+  # A clean repository with no bench data has no archive: list what is there.
+  files=(repo.bundle)
+  for f in *.tar.gz; do
+    [ -e "$f" ] && files+=("$f")
+  done
+  sum -- "${files[@]}" > SHA256SUMS
+)
 echo "  SHA256SUMS ($(wc -l < "$out/SHA256SUMS" | tr -d ' ') files)"
 echo "Done: $(du -sh "$out" | cut -f1) in $out"
 echo "Check a copy with: cd \"$out\" && shasum -a 256 -c SHA256SUMS"

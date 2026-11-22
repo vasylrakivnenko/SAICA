@@ -43,13 +43,32 @@ done
 pins() { grep -v '^#' "$1" 2>/dev/null || true; }
 
 freeze() {  # $1 = environment directory; prints name==version lines
-  local py="$1/bin/python" out
+  local py="$1/bin/python" out err
+  err="$(mktemp)"
   if command -v uv >/dev/null 2>&1; then
-    out="$(uv pip freeze --python "$py" 2>/dev/null)"
+    # uv prints an informational line on stderr even when all is well, so
+    # stderr is kept aside and shown only when the listing fails.
+    if ! out="$(uv pip freeze --python "$py" 2>"$err")"; then
+      cat "$err" >&2
+      rm -f "$err"
+      echo "freeze_envs: uv could not list the packages of $1" >&2
+      return 1
+    fi
   elif "$py" -m pip --version >/dev/null 2>&1; then
-    out="$("$py" -m pip freeze --all)"
+    if ! out="$("$py" -m pip freeze --all 2>"$err")"; then
+      cat "$err" >&2
+      rm -f "$err"
+      echo "freeze_envs: pip could not list the packages of $1" >&2
+      return 1
+    fi
   else
+    rm -f "$err"
     echo "freeze_envs: need uv on PATH or pip inside $1" >&2
+    return 1
+  fi
+  rm -f "$err"
+  if [ -z "$out" ]; then
+    echo "freeze_envs: the listing of $1 is empty; refusing to write an empty lock file" >&2
     return 1
   fi
   # An editable install is printed with this machine's path; keep it relative.
@@ -75,7 +94,10 @@ for pair in "${pairs[@]}"; do
     echo "skip     $env_dir (not on this machine; $lock left as it is)"
     continue
   fi
-  body="$(freeze "$env_dir")"
+  if ! body="$(freeze "$env_dir")"; then
+    echo "freeze_envs: stopped at $env_dir; $lock was not touched" >&2
+    exit 1
+  fi
   count="$(printf '%s\n' "$body" | grep -c . || true)"
   if [ "$check" -eq 1 ]; then
     if [ "$body" = "$(pins "$lock")" ]; then
@@ -101,7 +123,10 @@ for pair in "${pairs[@]}"; do
     printf '%s\n' "$body" | sed -n 's#^-e \(\./.*\)$#\1#p' | while IFS= read -r src; do
       top="$(git -C "$src" rev-parse --show-toplevel 2>/dev/null || true)"
       if [ -n "$top" ] && [ "$top" != "$(git rev-parse --show-toplevel)" ]; then
-        echo "# Source install $src: $(git -C "$src" remote get-url origin 2>/dev/null || echo 'no remote') at commit $(git -C "$src" rev-parse HEAD)"
+        # The remote goes into a tracked file: drop any "user:token@" part.
+        remote="$(git -C "$src" remote get-url origin 2>/dev/null || echo 'no remote')"
+        remote="$(printf '%s' "$remote" | sed -E 's#^([a-zA-Z][a-zA-Z0-9+.-]*://)[^/@]*@#\1#; s#^[^/@:]+@##')"
+        echo "# Source install $src: $remote at commit $(git -C "$src" rev-parse HEAD)"
       fi
     done
     printf '%s\n' "$body"

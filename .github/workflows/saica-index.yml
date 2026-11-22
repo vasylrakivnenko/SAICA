@@ -29,9 +29,13 @@ on:
         required: false
         default: ""
 
+# Two jobs, so that the token that can write is never in the job that
+# installs packages and reads other people's repositories. `regenerate` has
+# a read-only token and hands the new snapshot over as an artifact; `open-pr`
+# has the write permission and does nothing but put that file in place and
+# open the pull request.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: saica-index
@@ -42,10 +46,16 @@ jobs:
     name: regenerate the index snapshot
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.compare.outputs.changed }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
@@ -64,7 +74,8 @@ jobs:
       # through text pasted into the script.
       - name: Run SAICA Index
         env:
-          # Raises the GitHub API rate limit from 60 to 5,000 requests an hour.
+          # Read-only here. It raises the GitHub API rate limit from 60 to
+          # 5,000 requests an hour.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LIMIT: ${{ github.event.inputs.limit }}
         run: |
@@ -80,10 +91,12 @@ jobs:
 
       # The runner stamps the time of the run into the file, so the file
       # differs every week. Compare everything else.
-      - name: Put the old file back when only the timestamp changed
+      - name: Compare with the published snapshot, ignoring the timestamp
+        id: compare
         run: |
           python - <<'PY'
           import json
+          import os
           import subprocess
 
           path = "site/public/saica_index.json"
@@ -92,14 +105,58 @@ jobs:
           old = json.loads(subprocess.check_output(["git", "show", f"HEAD:{path}"]))
           new.pop("generated_at", None)
           old.pop("generated_at", None)
-          if new == old:
-              subprocess.check_call(["git", "checkout", "--", path])
-              print("Nothing but the timestamp changed: no pull request.")
-          else:
-              print("The snapshot changed: a pull request follows.")
+          changed = new != old
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"changed={'true' if changed else 'false'}\n")
+          print(
+              "The snapshot changed: a pull request follows."
+              if changed
+              else "Nothing but the timestamp changed: no pull request."
+          )
           PY
 
-      - name: Open a pull request if the snapshot changed
+      - name: Hand the snapshot to the next job
+        if: steps.compare.outputs.changed == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: saica-index-snapshot
+          path: site/public/saica_index.json
+          if-no-files-found: error
+          retention-days: 7
+
+  open-pr:
+    name: open the pull request
+    needs: regenerate
+    if: needs.regenerate.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Fetch the snapshot
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: saica-index-snapshot
+          path: ${{ runner.temp }}/snapshot
+
+      # No package is installed and no project code runs in this job. The
+      # file is copied only if it is the one JSON file expected.
+      - name: Put the snapshot in place
+        run: |
+          src="$RUNNER_TEMP/snapshot/saica_index.json"
+          if [ "$(find "$RUNNER_TEMP/snapshot" -type f | wc -l)" -ne 1 ] || [ ! -f "$src" ]; then
+            echo "Expected exactly one file, saica_index.json, in the artifact." >&2
+            exit 1
+          fi
+          python3 -c 'import json, sys; json.load(open(sys.argv[1], encoding="utf-8"))' "$src"
+          cp "$src" site/public/saica_index.json
+          git status --short
+
+      - name: Open a pull request
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         with:
           commit-message: "chore(saica-index): refresh the index snapshot"
