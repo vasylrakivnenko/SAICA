@@ -14,6 +14,12 @@ const ASK_API =
   (import.meta.env.PUBLIC_ASK_API as string | undefined) ??
   '/api/ask';
 
+// A static host has no backend under /api. Cloudflare Pages sets CF_PAGES=1 in its build (SAICA_STATIC_ONLY=1
+// does the same anywhere else). Unless the build names a backend with PUBLIC_ASK_API, the page says so and the
+// form is switched off, instead of failing when the visitor submits.
+const NO_BACKEND =
+  !import.meta.env.PUBLIC_ASK_API && (process.env.CF_PAGES === '1' || process.env.SAICA_STATIC_ONLY === '1');
+
 const examples: string[] = [
   'What tools prevent package hallucination in Python coding agents?',
   'Which tools help with deprecated API detection?',
@@ -49,6 +55,15 @@ const examples: string[] = [
     topic, the answer says so rather than fabricating.
   </p>
 
+  {NO_BACKEND && (
+    <aside class="mt-6 max-w-3xl rounded border border-amber-300 bg-amber-50 p-4 text-sm" aria-label="Not available here">
+      <strong>Ask is not available on this site.</strong> It needs the project's Python backend, which this
+      deployment does not run. To use it, clone the
+      <a href="https://github.com/vasylrakivnenko/SAICA">repository</a> and start the backend and the site on
+      your machine: <code>python -m pipeline.webapp</code> and <code>npm --prefix site run dev</code>.
+    </aside>
+  )}
+
   <section class="mt-6 max-w-3xl">
     <form id="ask-form" class="font-sans" novalidate>
       <label for="ask-question" class="block text-sm font-semibold mb-2">
@@ -61,6 +76,7 @@ const examples: string[] = [
         required
         minlength="3"
         maxlength="2000"
+        disabled={NO_BACKEND}
         placeholder="e.g. What tools prevent package hallucination in Python coding agents?"
         class="w-full border border-ink/20 rounded p-3 text-base bg-white focus:border-accent focus:outline-none"
       ></textarea>
@@ -69,6 +85,7 @@ const examples: string[] = [
         <button
           id="ask-submit"
           type="submit"
+          disabled={NO_BACKEND}
           class="chip-accent !px-4 !py-1.5 !text-sm cursor-pointer border border-accent/40 hover:bg-accent hover:text-white"
         >
           Ask
@@ -85,6 +102,7 @@ const examples: string[] = [
         {examples.map((q) => (
           <button
             type="button"
+            disabled={NO_BACKEND}
             class="example-q chip hover:bg-paper hover:border-accent/40 cursor-pointer text-left"
             data-question={q}
           >

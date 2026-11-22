@@ -250,8 +250,8 @@ recognise, [open an issue](https://github.com/vasylrakivnenko/SAICA/issues).
 
 ## Development
 
-Python 3.12 or newer (CI and the deployment use 3.12) and Node 22 (see
-`site/.nvmrc`). All commands run from the repository root.
+Python 3.12 or newer (CI uses 3.12) and Node 22 (see `site/.nvmrc`; the
+site build needs Node only). All commands run from the repository root.
 
 ```bash
 python3 -m venv .venv
@@ -299,6 +299,35 @@ npm --prefix site run build && npm --prefix site run check:links
 [`pipeline/ask/README.md`](pipeline/ask/README.md) and
 [`.env.example`](.env.example)). The site works without the API.
 
+### Deploying the site (Cloudflare Pages)
+
+The public site is a static build served by Cloudflare Pages. The API
+above is not part of that deployment.
+
+| Setting in the Pages project | Value |
+|---|---|
+| Root directory | `site` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION` = `22.23.4` (or newer 22) |
+
+The build reads `../data` and `../schema`, so the whole repository has to
+be checked out (the default). It needs no Python and no key.
+Response headers and the redirects from old failure-mode URLs are in
+[`site/public/_headers`](site/public/_headers) and
+[`site/public/_redirects`](site/public/_redirects);
+`tests/test_static_host_files.py` keeps them the same as what
+`pipeline.webapp` does when it serves the site itself.
+
+A build on Cloudflare Pages (it sets `CF_PAGES=1`) has no backend, so the
+`/ask/` and `/assess/` pages say that the feature is not available there
+and switch their forms off. To connect them to a backend hosted
+elsewhere, set `PUBLIC_ASK_API` and `PUBLIC_ASSESS_API` to its URLs in
+the Pages project and add the site's origin to `SAICA_CORS_ORIGINS` on
+the backend (`https://saica.ai` is allowed by default).
+
+After a deploy: `bash scripts/smoke_check.sh https://saica.ai --no-api`.
+
 When a `--check` fails, run the same command without `--check`. For the
 generators the order is schemas, manifest, maturity, recommendations,
 skills. For the results block it is
@@ -324,8 +353,8 @@ The environments used for the benchmark runs are recorded in the
 installed). Two helper scripts for the maintainer:
 `bash scripts/backup.sh <destination-dir>` (a git bundle plus the
 untracked benchmark data, with checksums) and
-`bash scripts/smoke_check.sh <base-url>` (the pages a deployment must
-serve).
+`bash scripts/smoke_check.sh <base-url>` (the pages, headers and redirect
+a deployment must serve; `--no-api` for a static host).
 
 ## SAICA Index — an earlier ranking of repositories
 

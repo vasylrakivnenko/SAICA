@@ -1,0 +1,24 @@
+# Redirects for Cloudflare Pages (https://developers.cloudflare.com/pages/configuration/redirects/).
+# Failure-mode pages moved from the knowledge-graph id (scope_creep) to a hyphenated slug (scope-creep).
+# One pair of lines per failure mode whose id has an underscore; tests/test_static_host_files.py fails when a
+# failure mode in data/failure_modes/ is missing here. The Python server does the same in pipeline/webapp.py.
+# /x/index.html -> /x/ needs no line: Cloudflare Pages redirects it by itself.
+
+/failure-modes/cascading_failure /failure-modes/cascading-failure/ 301
+/failure-modes/cascading_failure/ /failure-modes/cascading-failure/ 301
+/failure-modes/context_pollution /failure-modes/context-pollution/ 301
+/failure-modes/context_pollution/ /failure-modes/context-pollution/ 301
+/failure-modes/dependency_blindness /failure-modes/dependency-blindness/ 301
+/failure-modes/dependency_blindness/ /failure-modes/dependency-blindness/ 301
+/failure-modes/incomplete_execution /failure-modes/incomplete-execution/ 301
+/failure-modes/incomplete_execution/ /failure-modes/incomplete-execution/ 301
+/failure-modes/logic_error /failure-modes/logic-error/ 301
+/failure-modes/logic_error/ /failure-modes/logic-error/ 301
+/failure-modes/scope_creep /failure-modes/scope-creep/ 301
+/failure-modes/scope_creep/ /failure-modes/scope-creep/ 301
+/failure-modes/security_vulnerability /failure-modes/security-vulnerability/ 301
+/failure-modes/security_vulnerability/ /failure-modes/security-vulnerability/ 301
+/failure-modes/supply_chain_attack /failure-modes/supply-chain-attack/ 301
+/failure-modes/supply_chain_attack/ /failure-modes/supply-chain-attack/ 301
+/failure-modes/test_manipulation /failure-modes/test-manipulation/ 301
+/failure-modes/test_manipulation/ /failure-modes/test-manipulation/ 301

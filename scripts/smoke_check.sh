@@ -7,7 +7,8 @@
 #
 # It sends one GET per URL below and reads the answer; it changes nothing.
 # Exit 0 when every required check passes, 1 otherwise.
-# `--no-api` skips /api/health (a static preview has no backend).
+# `--no-api` skips /api/health: use it for a static host (Cloudflare Pages) or a static preview, which
+# have no backend.
 #
 # Run it after every deploy and before pushing a README that links to new
 # pages (review 2026-11-21, D2: push and redeploy are order-sensitive).
@@ -57,11 +58,33 @@ if [ "$with_api" -eq 1 ]; then
   check "/api/health"                  ""             "Ask / Assess backend"
 fi
 
-# Reported, not required: what an old underscore URL does is not decided yet
-# (redirect, or "gone").
+# header <path> <header name> <text its value must contain> <label>
+header() {
+  local path="$1" name="$2" needle="$3" label="$4" value
+  value="$(curl -sS --max-time 30 -A "saica-smoke-check" -o /dev/null -D - "$base$path" 2>/dev/null \
+    | tr -d '\r' | grep -i "^$name:" | head -1 | cut -d: -f2- | sed 's/^ *//')"
+  if printf '%s' "$value" | grep -qi -- "$needle"; then
+    echo "ok    $path  $name: $value  ($label)"
+  else
+    echo "FAIL  $path  $name: ${value:-<not sent>}, expected \"$needle\"  ($label)"
+    failed=$((failed + 1))
+  fi
+}
+
+# The same headers on either host: pipeline/webapp.py sets them when it serves the site, and
+# site/public/_headers sets them on Cloudflare Pages.
+header "/"                      "x-content-type-options" "nosniff"  "baseline header on pages"
+header "/api/v1/snapshot.json"  "x-robots-tag"           "noindex"  "data files stay out of search results"
+
+# An old underscore URL must answer with a permanent redirect to the hyphen URL
+# (pipeline/webapp.py, or site/public/_redirects on Cloudflare Pages).
 old="/failure-modes/scope_creep/"
-code="$(curl -sS --max-time 30 -A "saica-smoke-check" -o /dev/null -w '%{http_code}' "$base$old" 2>/dev/null)" || code="000"
-echo "info  $old  -> HTTP $code  (old underscore URL; not counted)"
+answer="$(curl -sS --max-time 30 -A "saica-smoke-check" -o /dev/null -w '%{http_code} %{redirect_url}' "$base$old" 2>/dev/null)" || answer="000 "
+case "$answer" in
+  30[18]\ */failure-modes/scope-creep/) echo "ok    $old  -> ${answer%% *} ${answer#* }  (old underscore URL)" ;;
+  *) echo "FAIL  $old  -> HTTP ${answer%% *} ${answer#* }  (old underscore URL should redirect to /failure-modes/scope-creep/)"
+     failed=$((failed + 1)) ;;
+esac
 
 if [ "$failed" -gt 0 ]; then
   echo "$failed check(s) failed for $base"

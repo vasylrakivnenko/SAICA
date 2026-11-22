@@ -1,5 +1,10 @@
 # Running SAICA-Bench and SAICA-KG on Replit
 
+> **The public site is not deployed from Replit.** Since 2026-11-21 the plan is a static build on Cloudflare
+> Pages (settings: README, "Deploying the site (Cloudflare Pages)"). This file describes Replit as a workspace:
+> the dev server, the optional backend and the CAO swarm. The "Publishing" section at the end describes the
+> earlier Replit deployment and is kept only for reference.
+
 - The existing Astro website lives in `site/`. The knowledge graph remains in
   the repository's `data/` directory; no database is needed to browse it.
 - Use the **Run** button to start the **Start website** workflow.
@@ -45,7 +50,10 @@
   in the server process, so it also starts again on a restart. The other
   limits and their defaults are in `pipeline/ask/README.md`.
 
-### Proxy setting the deployment must set (since 2026-11-21)
+### Proxy setting a backend deployment must set (since 2026-11-21)
+
+This matters only where the Python backend itself is deployed behind a proxy. A static site on Cloudflare
+Pages has no backend and needs nothing from this section.
 
 The web service believes `X-Forwarded-For` / `X-Forwarded-Proto` only from peers listed in
 `FORWARDED_ALLOW_IPS`. The default is loopback only (it was `*`). Behind Replit's proxy the deployment `run`
@@ -77,7 +85,7 @@ app and read the peer address in the uvicorn access log. `.replit` is not change
   from the API process; use the `client` wrapper to delete only the sessions
   you no longer need while the API is running.
 
-## Publishing
+## Publishing (the earlier Replit deployment; not the current plan)
 
 - Autoscale deployment (switched from Static so /ask and /assess work in
   production). One process, `pipeline.webapp` with `SERVE_STATIC=1`, serves the

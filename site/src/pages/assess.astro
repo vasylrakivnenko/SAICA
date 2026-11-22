@@ -16,6 +16,12 @@ const ASSESS_API =
   (import.meta.env.PUBLIC_ASSESS_API as string | undefined) ??
   '/api/assess';
 
+// A static host has no backend under /api. Cloudflare Pages sets CF_PAGES=1 in its build (SAICA_STATIC_ONLY=1
+// does the same anywhere else). Unless the build names a backend with PUBLIC_ASSESS_API, the page says so and the
+// form is switched off, instead of failing when the visitor submits.
+const NO_BACKEND =
+  !import.meta.env.PUBLIC_ASSESS_API && (process.env.CF_PAGES === '1' || process.env.SAICA_STATIC_ONLY === '1');
+
 const examples: { label: string; slug: string }[] = [
   { label: 'BerriAI/litellm', slug: 'BerriAI/litellm' },
   { label: 'langfuse/langfuse', slug: 'langfuse/langfuse' },
@@ -40,6 +46,15 @@ const examples: { label: string; slug: string }[] = [
     it into your team's docs.
   </p>
 
+  {NO_BACKEND && (
+    <aside class="mt-6 max-w-3xl rounded border border-amber-300 bg-amber-50 p-4 text-sm" aria-label="Not available here">
+      <strong>The repository audit is not available on this site.</strong> It needs the project's Python backend, which this
+      deployment does not run. To use it, clone the
+      <a href="https://github.com/vasylrakivnenko/SAICA">repository</a> and start the backend and the site on
+      your machine: <code>python -m pipeline.webapp</code> and <code>npm --prefix site run dev</code>.
+    </aside>
+  )}
+
   <section class="mt-6 max-w-3xl">
     <form id="assess-form" class="font-sans" novalidate>
       <label for="assess-url" class="block text-sm font-semibold mb-2">
@@ -52,6 +67,7 @@ const examples: { label: string; slug: string }[] = [
         required
         minlength="3"
         maxlength="500"
+        disabled={NO_BACKEND}
         autocomplete="off"
         spellcheck="false"
         placeholder="owner/repo  or  https://github.com/owner/repo"
@@ -62,6 +78,7 @@ const examples: { label: string; slug: string }[] = [
         <button
           id="assess-submit"
           type="submit"
+          disabled={NO_BACKEND}
           class="chip-accent !px-4 !py-1.5 !text-sm cursor-pointer border border-accent/40 hover:bg-accent hover:text-white"
         >
           Audit
@@ -83,6 +100,7 @@ const examples: { label: string; slug: string }[] = [
         {examples.map((ex) => (
           <button
             type="button"
+            disabled={NO_BACKEND}
             class="example-repo chip hover:bg-paper hover:border-accent/40 cursor-pointer"
             data-repo={ex.slug}
           >
