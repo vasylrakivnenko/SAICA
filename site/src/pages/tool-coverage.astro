@@ -6,7 +6,6 @@
 // /tool_fm_heatmap.json is still published. Untested catalog tools are hidden here until they can be scored.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import KitBuilder from "../components/KitBuilder.astro";
-import UnionEstimate from "../components/bench/UnionEstimate.astro";
 import { breadcrumbs } from "../lib/seo";
 const title = "Build a Supervision Kit for Your AI Coding Agent";
 // No score in the search snippet: a benchmark J describes the benchmark input, not the check a reader installs.
@@ -15,6 +14,4 @@ const description = "Pick the failure modes you care about; get a check that sco
 
 <BaseLayout title={title} description={description} jsonld={breadcrumbs([["SAICA-Bench", "/"], ["Supervision kit", "/tool-coverage/"]])}>
   <KitBuilder />
-  <!-- what running every prompt on every change would do to false alarms: an estimate, not a measurement -->
-  <UnionEstimate />
 </BaseLayout>

@@ -11,14 +11,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { confidenceRank, crosswalksOf, graph } from '../../lib/data.ts';
-import { benchId, fmUrl } from '../../lib/seo.ts';
+import { benchId, fmUrl, kgId } from '../../lib/seo.ts';
 import { incidentKind, isEvent } from '../../lib/catalog.ts';
-import { andList, escapeHtml, int, signedPct } from '../../lib/format.ts';
+import { andList, escapeHtml, int, money as usd, pct, signedPct } from '../../lib/format.ts';
 import {
   GENERATED, METHOD, STAR_MODES,
   bestClause, groupOf, modeByFm, samplesOf, topShortcut,
   type Mode,
 } from '../home/bench.ts';
+import { FLOOR, CLASSIC, type ClassicSummary, type Row } from '../home/bench.ts';
 import type { CrosswalkConfidence, FailureMode } from '../../lib/types.ts';
 
 /** Date of the results file (re-exported so pages need one import). */
@@ -473,3 +474,152 @@ export function faqFor(fm: FailureMode): QA[] {
 
 /** Leaderboard mode id for links (re-exported so pages need one import). */
 export { benchId };
+
+// ---------- classic layout of the failure-mode pages ----------
+// Three cards (best overall, best free option, best hybrid tool), one table of all results and a tier label per
+// mode, as on the pages before results v2. Numbers and names come from the results file through bench.ts.
+
+export { FLOOR, pct, int };
+/** At or above this best J a mode counts as caught well (an editorial line, stated on the hub). */
+export const WELL = 0.8;
+/** Whole-number percentage for prose and descriptions. */
+export const pct0 = (x: number) => pct(x, 0);
+export const money = (c: number) => (c === 0 ? 'free' : usd(c));
+
+export type Cat = 'program' | 'hybrid' | 'llm' | 'rule';
+export const CAT_LABEL: Record<Cat, string> = {
+  program: 'Free program',
+  hybrid: 'Hybrid tool',
+  llm: 'LLM reviewer',
+  rule: 'Simple rule',
+};
+const TYPE_CAT: Record<string, Cat> = {
+  deterministic: 'program',
+  llm_based: 'hybrid',
+  hybrid: 'hybrid',
+  prompt_artifact: 'hybrid',
+  baseline_model: 'llm',
+  baseline_rule: 'rule',
+};
+/** "free program", "LLM reviewer": the category label for use mid-sentence. */
+export const catLower = (c: Cat) => CAT_LABEL[c].replace(/^([A-Z])(?=[a-z])/, (x) => x.toLowerCase());
+
+export interface MRow {
+  key: string;
+  tool: string;
+  short: string;
+  cat: Cat;
+  j: number;
+  jCi: [number, number];
+  tpr: number;
+  fpr: number;
+  tprCi: [number, number];
+  fprCi: [number, number];
+  cost: number;
+  cost1k: number;
+  /** Cost scaled up from a partial run (shown with "~", as on the leaderboard). */
+  estimated: boolean;
+  /** Number of samples the rates are on, when the tool ran on a subset only. */
+  subset: number | null;
+  /** Fewer than 95% readable answers in one class (shown with a dagger). */
+  incomplete: boolean;
+  unreadable: number;
+  kgId: string | null;
+  costNote: string;
+}
+
+export interface Measured {
+  benchId: string;
+  fm: string;
+  name: string;
+  n: number;
+  nPos: number;
+  nNeg: number;
+  posLabel: string;
+  dataset: string;
+  summary: string;
+  setup: string[];
+  caveats: string[];
+  rows: MRow[];
+  best: MRow;
+  /** True when the best row is clearly ahead of the runner-up; otherwise it leads a tied group of `tied` rows. */
+  winner: boolean;
+  tied: number;
+  bestFree: MRow | null;
+  bestHybrid: MRow | null;
+  bestLlm: MRow | null;
+  /** What a rule with no understanding of the failure scores on this set. */
+  shortcut: { short: string; j: number } | null;
+}
+
+function toRow(r: Row): MRow {
+  return {
+    key: r.key,
+    tool: r.tool,
+    short: r.short,
+    cat: TYPE_CAT[r.type] ?? 'llm',
+    j: r.j,
+    jCi: r.j_ci,
+    tpr: r.catch,
+    fpr: r.fa,
+    tprCi: r.catch_ci,
+    fprCi: r.fa_ci,
+    cost: r.cost,
+    cost1k: r.cost1k,
+    estimated: Boolean(r.cost_estimated),
+    subset: r.subset_n ? r.subset_n.pos + r.subset_n.neg : null,
+    incomplete: Boolean(r.incomplete),
+    unreadable: r.unreadable ?? 0,
+    kgId: r.kg_id ?? null,
+    costNote: r.cost_note ?? '',
+  };
+}
+
+function toMeasured(s: ClassicSummary): Measured {
+  const m = s.m;
+  const rows = s.listed.map(toRow);
+  const ranked = s.listed.filter((r) => r.ranked).map(toRow);
+  const top = (f: (r: MRow) => boolean) => ranked.find(f) ?? null;
+  return {
+    benchId: m.id,
+    fm: kgId(m.id),
+    name: m.name,
+    n: m.n,
+    nPos: m.n_pos,
+    nNeg: m.n_neg,
+    posLabel: m.pos_label,
+    dataset: m.dataset,
+    summary: m.summary,
+    setup: m.setup ?? [],
+    caveats: m.caveats ?? [],
+    rows,
+    best: toRow(s.best),
+    winner: Boolean(m.winner),
+    tied: m.top_group?.length ?? 1,
+    // a free program inside its design scope, else the best simple rule we wrote for the benchmark
+    bestFree: s.free ? toRow(s.free) : (rows.find((r) => r.cat === 'rule') ?? null),
+    bestHybrid: top((r) => r.cat === 'hybrid'),
+    bestLlm: top((r) => r.cat === 'llm'),
+    shortcut: s.shortcut ? { short: s.shortcut.short, j: s.shortcut.j } : null,
+  };
+}
+const CLASSIC_MEASURED = new Map<string, Measured>(CLASSIC.map((s) => [kgId(s.m.id), toMeasured(s)]));
+/** Measured results for a KG failure-mode id in the classic shape, or null when the mode is not benchmarked. */
+export const classicMeasured = (fmId: string): Measured | null => CLASSIC_MEASURED.get(kgId(fmId)) ?? null;
+
+export type Tier = 'well' | 'partly' | 'not-yet' | 'unmeasured';
+export const TIER_LABEL: Record<Tier, string> = {
+  well: 'Caught well',
+  partly: 'Caught partly',
+  'not-yet': 'Not caught yet',
+  unmeasured: 'Not measured',
+};
+export function tier(fmId: string): Tier {
+  const m = classicMeasured(fmId);
+  if (!m) return 'unmeasured';
+  return m.best.j >= WELL ? 'well' : m.best.j >= FLOOR ? 'partly' : 'not-yet';
+}
+/** Short tool name for prose: "pyright", "deepseek-v4.1-flash", "a typosquat rule". */
+export function proseName(r: MRow): string {
+  return r.cat === 'rule' ? `a ${r.short}` : r.short;
+}

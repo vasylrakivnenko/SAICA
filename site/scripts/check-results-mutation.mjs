@@ -13,7 +13,7 @@
 //   mode C (second mode with a winner, if any): winner removed, top group of two.
 //   file level: version, cite_as, floor, prevalences, first finding, first caveat, method.setting, method.metric,
 //     first threat, the label of the "model" kind, the sample count.
-// What is checked: the new values and sentences are on the pages, the old ones are gone.
+// What is checked: the new values of mode A and the file-level values are on the pages, the old ones are gone.
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -120,95 +120,55 @@ if (!given) {
 }
 
 // ---------- check ----------
+// The pages have the classic layout: one grid on the home page, one table per failure-mode page, a glance table
+// on /findings/ and /tools/, one row per configuration on a tool page. Each must print the changed numbers of
+// mode A and none of the old ones; the file-level values (cite_as, sample count, floor) must follow as well.
 const problems = [];
 const strings = fileStrings(R);
 const pages = new Map(htmlFiles(dist).map((f) => [pagePath(dist, f), read(f)]));
 const text = new Map();
 const textOf = (p) => { if (!text.has(p)) text.set(p, visibleText(pages.get(p))); return text.get(p); };
 const need = (p, what, label = what) => { if (!pages.has(p)) problems.push(`${p}: page not built`); else if (!textOf(p).includes(what)) problems.push(`${p}: does not show the changed ${label}`); };
-const fmPage = (id) => [...pages.keys()].find((p) => /^\/failure-modes\/[^/]+\/$/.test(p) && pages.get(p).includes(`data-ranking-for="${id}"`));
-const pageA = fmPage(A.id), pageB = fmPage(B.id);
-if (!pageA || !pageB) problems.push('no failure-mode page carries data-ranking-for for the changed modes');
+const SLUG = { security: 'security-vulnerability', supply_chain: 'supply-chain-attack' };
+const fmPage = (id) => `/failure-modes/${SLUG[id] ?? id.replace(/_/g, '-')}/`;
+const listed = (m) => m.rows.filter((r) => r.kind !== 'shortcut_baseline');
+const whole = (x) => `${Math.round(x * 100)}%`;
 
-// 1. sentences and labels of the file, page by page
-const everywhere = { '/': 1, '/findings/': 1, '/benchmark/': 1 };
-for (const p of Object.keys(everywhere)) {
-  need(p, A.title, 'set title');
-  need(p, A.tuning_disclosure, 'tuning disclosure');
-  need(p, A.tier_label, 'tier label');
-  need(p, R.method.setting, 'method.setting');
-  need(p, R.cite_as, 'cite_as');
+// 1. home page: the static grid and the data handed to the page script
+need('/', whole(newWinner.j), `best J of ${A.id}`);
+need('/', newWinner.short, `best reviewer of ${A.id}`);
+if (pages.has('/')) {
+  const html = pages.get('/');
+  for (const r of listed(A)) if (!html.includes(`"j":${r.j}`)) problems.push(`/: the page script's data has no row with the changed J ${r.j} (${r.key})`);
+  for (const o of listed(A0)) if (html.includes(`"j":${o.j},`)) problems.push(`/: the page script's data still carries the old J ${o.j} (${o.key})`);
 }
-for (const p of ['/', '/findings/', pageA].filter(Boolean)) need(p, A.ranking, 'ranking sentence');
-for (const p of ['/', '/findings/', '/failure-modes/']) need(p, R.overview.findings[0].join(''), 'first finding');
-for (const p of ['/', '/findings/', '/failure-modes/']) need(p, R.overview.caveats[0], 'first caveat');
-for (const p of ['/', '/findings/', '/benchmark/', '/glossary/']) need(p, R.method.metric.replace(/\.$/, ''), 'method.metric');
-for (const p of ['/failure-modes/', '/tools/', '/about/', '/glossary/', pageA].filter(Boolean)) need(p, R.method.setting, 'method.setting');
-need('/benchmark/', R.threats[0].threat, 'first threat');
-need('/', R.kind_label.model, 'kind label');
-if (pageA) for (const s of [A.title, A.summary, A.tier_label, A.tuning_disclosure]) need(pageA, s);
-need('/failure-modes/', A.tier_label, 'tier label');
-need('/tools/', A.tier_label, 'tier label');
-need('/benchmark/', int(A.n_pos), 'number of bad samples');
-for (const p of ['/', pageA].filter(Boolean)) for (const q of NEW_PREV) need(p, `if ${pct(q, 0)} of changes are bad`, 'prevalence');
 
-// 2. who is named best
-let bestCells = 0;
-for (const [p, html] of pages) {
-  for (const el of elementsWith(html, 'data-best-for', A.id)) {
-    bestCells++;
-    const t = visibleText(el.inner);
-    if (!t.includes(newWinner.short)) problems.push(`${p}: best reviewer of ${A.id} is "${t}", the changed file names ${newWinner.short}`);
-    if (/top group/i.test(t)) problems.push(`${p}: best reviewer of ${A.id} still says "top group"`);
+// 2. the failure-mode page of mode A: every listed row with its changed J, TPR and FPR, none of the old J values
+const pA = fmPage(A.id);
+if (!pages.has(pA)) problems.push(`${pA}: page not built`);
+else {
+  const t = textOf(pA);
+  const newJ = new Set(listed(A).map((r) => pct(r.j)));
+  for (const r of listed(A)) {
+    if (!t.includes(pct(r.j))) problems.push(`${pA}: row ${r.key} does not show the changed J ${pct(r.j)}`);
+    if (!t.includes(pct(r.catch)) || !t.includes(pct(r.fa))) problems.push(`${pA}: row ${r.key} does not show the changed TPR / FPR`);
   }
-  for (const el of elementsWith(html, 'data-best-for', B.id)) {
-    bestCells++;
-    const t = visibleText(el.inner);
-    const named = B.rows.map((r) => r.short).filter((n) => t.includes(n));
-    if (named.length) problems.push(`${p}: ${B.id} is under the floor in the changed file but "${t}" names ${named.join(', ')}`);
-    if (!t.includes(pct(0.26, 0))) problems.push(`${p}: ${B.id} does not state the changed floor ("${t}")`);
-  }
-  if (C) for (const el of elementsWith(html, 'data-best-for', C.id)) {
-    bestCells++;
-    const t = visibleText(el.inner);
-    if (!/top group of 2/i.test(t) || !cPair.every((r) => t.includes(r.short))) problems.push(`${p}: best reviewer of ${C.id} is "${t}", the changed file has a top group of ${cPair.map((r) => r.short).join(' and ')}`);
-  }
+  for (const o of listed(A0)) if (!newJ.has(pct(o.j)) && t.includes(`${pct(o.j)} `)) problems.push(`${pA}: still shows the old J ${pct(o.j)} (${o.key})`);
+  need(pA, int(A.n_pos), 'number of bad samples');
 }
-if (bestCells < 6) problems.push(`only ${bestCells} data-best-for cells found; the pages no longer mark who is best`);
 
-// 3. every row of mode A, in the leaderboard panel and on the failure-mode page
-const old = new Map(A0.rows.map((r) => [r.key, r]));
-const home = pages.get('/') ?? '';
-const start = home.indexOf(`data-panel="${A.id}"`);
-const next = home.indexOf('data-panel="', start + 20);
-const scopes = [['/', start < 0 ? '' : home.slice(start, next < 0 ? undefined : next)], [pageA, pageA ? pages.get(pageA) : '']];
-for (const [p, html] of scopes) {
-  let seen = 0;
-  for (const r of A.rows) {
-    const tr = elementsWith(html, 'data-key', r.key).find((e) => e.tag === 'tr');
-    if (!tr) continue;
-    seen++;
-    const t = visibleText(tr.inner);
-    const o = old.get(r.key);
-    if (!t.includes(signedPct(r.j))) problems.push(`${p}: row ${r.key} does not show the changed J ${signedPct(r.j)}`);
-    if (!t.includes(`${signedPct(r.j_ci[0])} to ${signedPct(r.j_ci[1])}`)) problems.push(`${p}: row ${r.key} does not show the changed interval`);
-    if (signedPct(o.j) !== signedPct(r.j) && t.includes(signedPct(o.j))) problems.push(`${p}: row ${r.key} still shows the old J ${signedPct(o.j)}`);
-    if (!t.includes(pct(r.catch)) || !t.includes(pct(r.fa))) problems.push(`${p}: row ${r.key} does not show the changed TPR / FPR`);
-  }
-  if (seen < A.rows.filter((r) => r.ranked).length) problems.push(`${p}: only ${seen} of the ${A.rows.length} rows of ${A.id} found (tr[data-key])`);
-}
-const island = home.match(/<script type="application\/json" id="lb-data">([\s\S]*?)<\/script>/);
-const chart = island ? JSON.parse(island[1]).modes?.[A.id]?.rows ?? [] : [];
-if (!chart.length) problems.push('/: no chart data for the changed mode');
-if (chart.some((c) => !A.rows.some((r) => r.short === c.short && r.j === c.j))) problems.push('/: the chart data does not carry the changed J values');
-if (chart.filter((c) => c.top).map((c) => c.short).join() !== newWinner.short) problems.push('/: the chart marks another top group than the changed file');
+// 3. the glance tables and the hub
+for (const p of ['/findings/', '/tools/', '/failure-modes/']) need(p, pct(newWinner.j), `best J of ${A.id}`);
+need('/benchmark/', String(A.n_pos), 'number of bad samples');
+need('/benchmark/', 'ZZ-THREAT first threat', 'first threat');
+need('/findings/', `J ${pct(0.26, 0)}`, 'floor');
 
 // 4. tool pages: a catalog tool measured in mode A shows its changed row
 for (const r of A.rows.filter((x) => x.kg_id)) {
   const hit = [...pages].find(([p, html]) => p.startsWith('/tools/') && html.includes(`data-measured="${A.id}/${r.key}"`));
   if (!hit) { problems.push(`no tool page shows the row ${A.id}/${r.key}`); continue; }
   const tr = elementsWith(hit[1], 'data-measured', `${A.id}/${r.key}`)[0];
-  if (!tr || !visibleText(tr.inner).includes(signedPct(r.j))) problems.push(`${hit[0]}: row ${r.key} does not show the changed J`);
+  if (!tr || !visibleText(tr.inner).includes(pct(r.j))) problems.push(`${hit[0]}: row ${r.key} does not show the changed J`);
 }
 
 // 5. old file-level values are gone from the benchmark pages (the file's own sentences set aside)
@@ -217,12 +177,6 @@ const gone = [
   [original.cite_as, 'old cite_as'],
   [int(original.overview.counts.samples), 'old sample count'],
   [`J ${pct(original.floor, 0)}`, 'old floor'],
-  [`reaches J ${pct(original.floor, 0)}`, 'old floor'],
-  ...OLD_PREV.filter((q) => !NEW_PREV.includes(q)).map((q) => [`if ${pct(q, 0)} of changes are bad`, 'old prevalence']),
-  [original.method.setting, 'old method.setting'],
-  [original.overview.findings[0][0], 'old first finding'],
-  [A0.ranking, 'old ranking sentence'],
-  [B0.ranking, 'old ranking sentence'],
 ];
 for (const [p, html] of pages) {
   if (!BENCH_PAGE.test(p)) continue;

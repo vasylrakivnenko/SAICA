@@ -22,10 +22,6 @@ const siteUrl = (Astro.site?.origin ?? 'https://saica.ai').replace(/\/$/, '');
     and write a single prompt for your coding agent that sets it up with the model, prompt and settings of the benchmark run.
   </p>
   <p class="kb-lead">
-    A benchmark score is not a promise about your commits: each reviewer was told which failure to look for and tested on one kind of input.
-    Next to every pick the table says what the benchmark reviewed and what the installed check sees at commit time.
-  </p>
-  <p class="kb-lead">
     It covers the {measured.length} failure modes measured on SAICA-Bench:
     {measured.map((m, i) => <>{i > 0 && (i === measured.length - 1 ? ' and ' : ', ')}<a href={fmUrl(m.fm ?? m.id)}>{m.name.toLowerCase()}</a></>)}.{unmeasured.length > 0 && <> For {unmeasured.map((m, i) => <>{i > 0 && (i === unmeasured.length - 1 ? ' and ' : ', ')}<a href={fmUrl(m.fm ?? m.id)}>{m.name.toLowerCase()}</a></>)}, which no dataset can score yet, it lists the most-starred catalog tools instead.</>}
   </p>
@@ -58,6 +54,7 @@ const siteUrl = (Astro.site?.origin ?? 'https://saica.ai').replace(/\/$/, '');
   <p class="kb-fine" id="kb-summary"></p>
   <p class="kb-fine" id="kb-union"></p>
   <p class="kb-fine" id="kb-rule"></p>
+  <p class="kb-fine">A benchmark score is not a promise about your commits: each reviewer was told which failure to look for and was tested on one kind of input. Hover a pick to see what the benchmark reviewed and what the installed check sees at commit time.</p>
   <div class="kb-gaps" id="kb-gaps" hidden></div>
 
   <div class="kb-actions">
@@ -166,7 +163,6 @@ function toolCell(r) {
 function pickNotes(m, c) {
   const out = [], k = c.tool.kit_check;
   if (c.pair) out.push(['', `Measured pair, either may flag: ${c.pair.gain_points > 0 ? '+' : ''}${c.pair.gain_points} J points over the best single check (95% interval ${c.pair.gain_ci_points[0]} to ${c.pair.gain_ci_points[1]}); both run on every change.`]);
-  if (k.unit) out.push(['', `Benchmark J on ${k.unit.benchmark}. At commit time this check sees ${k.unit.commit}.`]);
   if (k.label) out.push(['kb-flag', k.label.charAt(0).toUpperCase() + k.label.slice(1) + '.']);
   if (c.tool.incomplete) out.push(['kb-flag', 'Under 95% of this row\'s answers were readable.']);
   if (c.tied.length > 1 && !c.pair) out.push(['', `${c.tied.length} checks cannot be told apart from the best that fits (${nm(c.best)}, J ${pct(c.best.j)}); this is the cheapest one the kit can run.`]);
@@ -174,7 +170,7 @@ function pickNotes(m, c) {
 }
 function render() {
   const sel = MODES.filter((m) => state.modes.has(m.id));
-  const head = el('thead', {}, el('tr', {}, ['Failure mode', 'Pick', 'Benchmark J', '95% interval', 'TPR', 'FPR', 'Samples (bad + clean)', 'Cost / 1k'].map((h, i) => el('th', { class: i > 1 ? 'num' : '', scope: 'col', text: h }))));
+  const head = el('thead', {}, el('tr', {}, ['Failure mode', 'Pick', 'J', 'TPR', 'FPR', 'Cost / 1k'].map((h, i) => el('th', { class: i > 1 ? 'num' : '', scope: 'col', text: h }))));
   const body = el('tbody'), gaps = [];
   let n = 0, cost = 0, clean = 1, checks = 0;
   const best = (r) => `${nm(r)} · J ${pct(r.j)}`;
@@ -187,12 +183,14 @@ function render() {
       const x = c.pair || c.tool;
       const k = c.pair ? c.pair.cost1k : c.tool.cost1k; cost += k;
       parts.forEach((r) => { if (r.kit_check.runs) { clean *= 1 - r.fpr; checks++; } });
-      const pick = el('td', { class: 'kb-pickcell' },
+      const kc = c.tool.kit_check;
+      const tip = (kc.unit ? `Benchmark J on ${kc.unit.benchmark}. At commit time this check sees ${kc.unit.commit}. ` : '') + (c.pair ? '' : `95% interval of J: ${interval(c.tool)}; ${samples(c.tool)} bad + clean samples.`);
+      const pick = el('td', { class: 'kb-pickcell', title: tip },
         el('div', { class: 'kb-pick' }, parts.map((r, i) => [i ? el('span', { class: 'kb-then', text: 'or' }) : null, toolCell(r)])),
         pickNotes(m, c).map(([cls, text]) => el('div', { class: 'kb-sub ' + cls, text })));
       body.append(el('tr', {}, el('td', { class: 'kb-mode' }, link), pick, el('td', { class: 'num j', text: pct(x.j) }),
-        el('td', { class: 'num', text: c.pair ? 'see note' : interval(c.tool) }), el('td', { class: 'num', text: pct(x.tpr) }), el('td', { class: 'num', text: pct(x.fpr) }),
-        el('td', { class: 'num', text: c.pair ? String(c.pair.n) : samples(c.tool) }), el('td', { class: 'num', text: (parts.some((r) => r.estimated) ? '~' : '') + money(k) })));
+        el('td', { class: 'num', text: pct(x.tpr) }), el('td', { class: 'num', text: pct(x.fpr) }),
+        el('td', { class: 'num', text: (parts.some((r) => r.estimated) ? '~' : '') + money(k) })));
     } else if (c.kind === 'stars') {
       const top = (c.tools.length ? c.tools : c.records).slice(0, 2).map((t) => `${t.name} ★${kstars(t.stars)}`).join(', ');
       gaps.push([link, 'not benchmarked', top ? `most-starred: ${top}` : '']);

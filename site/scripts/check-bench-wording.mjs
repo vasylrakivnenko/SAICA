@@ -2,14 +2,16 @@
 //   node scripts/check-bench-wording.mjs [out dir] [results.json]
 //   (defaults: dist and public/bench/results.json; `npm run check:wording` after a build)
 //
-// 1. Retired wording. Phrases of the pre-v2 pages must not come back ("best in 8 of 9", "unsolved", an
-//    "upper bound", tier names that sound like verdicts, a "Best tool" heading, an average over modes).
+// 1. Retired wording. Claims of the pre-v2 pages must not come back ("best in 8 of 9", the "4 of 4" wrapper
+//    comparison, an "upper bound", a "Best tool" heading, the "mostly yes, and cheaply" lead).
+//    The layout of those pages is back by the owner's choice (2026-11-22): one grid with an Average column, the
+//    tier names "Caught well / partly / Not caught yet" and the word "unsolved" are allowed again; the caveats
+//    under the grid say what an average and a tier do not mean.
 //    A sentence printed verbatim from the results file is not typed wording and is left out of this search:
 //    the file may say "in 4 of 4 comparisons" about a count it computed.
 // 2. Who is named best. Every element marked data-best-for="<mode>" must follow the file: nobody is named
 //    where the mode is under the floor, the winner where the file names one, a top group otherwise, and never
 //    a baseline rule, a shortcut baseline or any other unranked row.
-// 3. No table has an "Average" column.
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,12 +27,9 @@ const RETIRED = [
   [/\bbest in \d+ of \d+\b/i, 'a count of modes "won"'],
   [/\b\d+ of \d+\b[^.|]{0,40}\bmodes?\b[^.|]{0,40}\b(?:wins?|won|is the best|are the best)\b/i, 'a count of modes "won"'],
   [/\bbelow [^.|]{0,60}\bin 4 of 4\b|\b4 of 4 modes\b/i, 'the old wrapper comparison'],
-  [/\bunsolved\b/i, '"unsolved"'],
-  [/\bcaught well\b|\bpartly caught\b|\bnot yet caught\b|\bnobody handles\b/i, 'a tier name that reads as a verdict'],
   [/\bupper bound\b/i, '"upper bound"'],
   [/\bbest (?:measured )?tool\b|\bbest product\b/i, '"best tool" (say best reviewer or best catalog tool)'],
-  [/mostly yes, and cheaply/i, 'the old findings lead'],
-  [/\baverage J\b|\bavg\.? J\b|\bJ on average\b|\baverage(?:d)? (?:over|across) (?:the )?(?:\w+ )?modes\b(?! is shown)/i, 'an average over modes'],
+  [/short answer: mostly yes/i, 'the old findings lead'],
 ];
 // Sentences that state the rule itself ("no average over modes is shown") are allowed.
 const ALLOWED = [/\bno average (?:over|across) modes\b/gi, /\bno (?:ranking or )?average across failure modes\b/gi];
@@ -69,12 +68,6 @@ for (const file of htmlFiles(DIST)) {
       if (winner && !text.includes(winner.short)) add(page, `${m.id}: the file's winner ${winner.short} is not named ("${text}")`);
       if (!winner && m.top_group.length > 1 && !/top group/i.test(text)) add(page, `${m.id}: no winner in the file, but the cell does not say "top group" ("${text}")`);
     }
-  }
-
-  // 3. no Average column
-  for (const th of html.matchAll(/<th\b[^>]*>([\s\S]*?)<\/th>/gi)) {
-    const t = visibleText(th[1]);
-    if (/^(?:average|avg\b|mean J)/i.test(t)) add(page, `table header "${t}"`);
   }
 }
 

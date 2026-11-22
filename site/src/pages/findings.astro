@@ -1,24 +1,35 @@
 ---
-// /findings: the SAICA-Bench results as one static report (the page to link to). Every number, name and finding
-// comes from /bench/results.json via components/home/bench.ts: the findings and caveats are the file's own
-// sentences, and the per-set text is built from the file's fields by its naming rules (a winner only where the
-// file names one, a top group otherwise, nobody under the floor). Results are shown in one block per provenance
-// group; there is no ranking or average across failure modes.
+// /findings: the SAICA-Bench results as one static report (the page to link to). Every number comes from
+// /bench/results.json via components/home/bench.ts, so the text updates when bench/build_report.py reruns.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BestPerMode from '../components/home/BestPerMode.astro';
-import UnionEstimate from '../components/bench/UnionEstimate.astro';
 import {
-  AUTHOR, CAVEATS, CITE_AS, COUNTS, FINDINGS, GENERATED, GENERATED_LONG, GROUPS, METHOD, MISSING_MODES, PARTIAL, RAN,
-  SOURCES, STAR_MODES, TOTAL_SAMPLES, UNION,
-  modeLinks, rankedRows, rowByKey, rowHref, topShortcut,
+  CLASSIC as SUMMARIES, HARD, FLOOR, STAR_MODES, OVERVIEW as OV, RAN as COUNTS, TOTAL_SAMPLES, SOURCES, GENERATED, GENERATED_LONG, AUTHOR,
+  pct, costLabel, shortName, toolHref, andList, type ClassicSummary as ModeSummary, type Row,
 } from '../components/home/bench';
 import { SITE_NAME, abs, fmUrl, leaderboardUrl, breadcrumbs } from '../lib/seo';
-import { andList, int, signedPct } from '../lib/format';
 
 const headline = 'Can supervision tools and LLMs catch AI coding agent failures?';
-const lead = FINDINGS[0];
-const description = lead ? lead[0] : `Findings of ${SITE_NAME} on ${COUNTS.modes} failure modes of AI coding agents.`;
-const modeNames = GROUPS.flatMap((g) => g.list.map((m) => m.name));
+const byJ = [...SUMMARIES].sort((a, b) => b.best.j - a.best.j);
+const solved = byJ.filter((s) => !HARD.includes(s));
+const solvedMin = Math.round(Math.min(...solved.map((s) => s.best.j)) * 100);
+const solvedMaxCost = Math.max(...solved.map((s) => s.best.cost1k));
+const hardNames = HARD.map((s) => s.m.name.toLowerCase());
+const synthetic = SUMMARIES.filter((s) => /synthetic|hand-built|swapped in/i.test(s.m.dataset));
+const n = (x: number) => x.toLocaleString('en-US');
+
+const description =
+  `In ${solved.length} of ${SUMMARIES.length} coding agent failure modes a reviewer reaches J ${solvedMin}% or more, often a cheap LLM.` +
+  (hardNames.length ? ` ${andList(hardNames).replace(/^./, (c) => c.toUpperCase())} remain unsolved.` : '');
+
+const KIND: Record<string, string> = {
+  baseline_model: 'a model asked directly', baseline_rule: 'a simple rule', deterministic: 'a free program',
+  llm_based: 'an AI-based tool', hybrid: 'a hybrid tool', prompt_artifact: 'a skill',
+};
+const same = (a: Row | null, b: Row | null) => !!a && !!b && a.key === b.key;
+const toolList = (s: ModeSummary) => s.tools.map((r) => `${shortName(s.m, r)} (J ${pct(r.j)})`);
+/** Name for running text: simple rules get an article ("a stub rule"). */
+const said = (s: ModeSummary, r: Row) => { const x = shortName(s.m, r); return r.type === 'baseline_rule' && !/^an? /.test(x) ? 'a ' + x : x; };
 
 const jsonld = [
   {
@@ -29,14 +40,13 @@ const jsonld = [
     author: AUTHOR,
     datePublished: GENERATED,
     dateModified: GENERATED,
-    version: CITE_AS,
     url: abs('/findings/'),
     mainEntityOfPage: abs('/findings/'),
     image: abs('/og.png'),
     inLanguage: 'en',
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: abs('/') },
     isBasedOn: abs('/benchmark/'),
-    keywords: ['AI coding agents', 'AI code review benchmark', 'coding agent failure modes', 'LLM-as-judge', ...modeNames].join(', '),
+    keywords: ['AI coding agents', 'AI code review benchmark', 'coding agent failure modes', 'LLM-as-judge', ...SUMMARIES.map((s) => s.m.name)].join(', '),
   },
   breadcrumbs([[SITE_NAME, '/'], ['Findings', '/findings/']]),
 ];
@@ -44,89 +54,100 @@ const jsonld = [
 
 <BaseLayout title="Can Supervision Tools and LLMs Catch AI Coding Agent Failures?" rawTitle description={description} jsonld={jsonld} ogType="article">
   <article class="fd">
-    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">SAICA-Bench report · {CITE_AS} · built {GENERATED_LONG}</p>
+    <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">SAICA-Bench report · {GENERATED_LONG}</p>
     <h1 class="fd-h1">{headline}</h1>
     <p class="fd-sub">Findings from SAICA-Bench</p>
     <p class="fd-by">Vasyl Rakivnenko, Stanford University</p>
 
-    {PARTIAL && (
-      <p class="fd-p fd-warn">This is a partial build of the results: {MISSING_MODES.length ? andList(MISSING_MODES) : 'some modes'} are missing. Do not cite it.</p>
-    )}
-
     <p class="fd-lead">
       AI coding agents fail in recurring ways: they call functions that don't exist, edit tests until they pass, slip
-      vulnerabilities into working code, or report a task as done when it isn't. SAICA-Bench asks what reviewers
-      flag when they are shown such work. We ran {RAN.models} language models asked directly, {RAN.tools} supervision
-      tools ({RAN.catalogTools} of them from our catalog) and {RAN.baselines} baseline and shortcut rules on
-      {int(TOTAL_SAMPLES)} labelled samples across {COUNTS.modes} failure modes, and scored every verdict against
-      the labels.
+      vulnerabilities into working code, or report a task as done when it isn't. SAICA-Bench asks whether the tools
+      used to supervise them catch those failures. We ran {COUNTS.models} language models, {COUNTS.tools} supervision
+      tools (type checkers, linters, security scanners, AI code reviewers and evaluation frameworks) and {COUNTS.rules}
+      simple rules on {n(TOTAL_SAMPLES)} labelled samples across {SUMMARIES.length} failure modes, and scored every
+      verdict against the labels.
     </p>
-    {lead && (
-      <p class="fd-p" data-lead-finding>
-        <strong>{lead[0]}</strong>{lead[1]}
-      </p>
-    )}
-    <p class="fd-p fd-fine">{METHOD.setting} {METHOD.metric}</p>
+    <p class="fd-p">
+      <strong>The short answer: on planted and model-written failures mostly yes, and cheaply; on real agent output not yet.</strong> In {solved.length} of
+      {SUMMARIES.length} modes the best reviewer reaches J {solvedMin}% or more, for at most
+      {'$' + solvedMaxCost.toFixed(2)} per 1,000 reviews. Free programs are competitive where the failure is a
+      checkable fact. In {andList(HARD.map((s) => s.m.name.toLowerCase()))}, nothing we ran reaches J {pct(FLOOR, 0)}.
+    </p>
+    <p class="fd-p fd-fine">
+      J = TPR − FPR: the share of bad samples a tool flags (true positive rate) minus the share of clean samples it
+      flags (false positive rate). 0% is chance, 100% flags every bad sample and no clean one.
+    </p>
 
     <h2>Key findings</h2>
     <ol class="fd-list">
-      {FINDINGS.map(([head, rest]) => <li><strong>{head}</strong>{rest}</li>)}
+      {OV.findings.map(([lead, rest]) => <li><strong>{lead}</strong>{rest}</li>)}
     </ol>
 
     <h2>Results at a glance</h2>
     <p class="fd-p">
-      One line per failure mode, in one block per kind of set, because where the bad samples come from decides how
-      a score should be read. “Best reviewer” is the best ranked row of any kind; “best catalog tool” is the highest-scoring
-      tool of our catalog running a check of its own. They are different things. Names link to what each failure is; the
-      last column opens the set's full table.
+      The best entry in each failure mode, from the best caught to the least, next to the best free option. Mode names
+      link to what each failure is and how to catch it; the last column opens the mode's full leaderboard.
     </p>
-    <div class="fd-wide"><BestPerMode /></div>
+    <div class="fd-wide"><BestPerMode byJ /></div>
 
-    {UNION && (
+    <h2>Mode by mode</h2>
+    {HARD.length > 0 && <p class="fd-p">From the best caught to the least; the unsolved {HARD.length === 1 ? 'mode follows' : 'modes follow'} in the next section.</p>}
+    {byJ.filter((s) => !HARD.includes(s)).map((s) => {
+      const b = s.best, f = s.free, t = s.tools[0];
+      const bh = toolHref(b), fh = f ? toolHref(f) : null, th = t ? toolHref(t) : null;
+      return (
+        <section class="fd-mode" id={s.m.id}>
+          <h3><a href={s.url}>{s.m.name}</a></h3>
+          <p class="fd-p">
+            {s.m.summary} On {n(s.m.n_pos)} {s.m.pos_label} and {n(s.m.n_neg)} clean samples, the best of
+            {' '}{s.rows.length} entries is {bh ? <a href={bh}>{said(s, b)}</a> : said(s, b)} ({KIND[b.type] ?? b.type}):
+            it flags {pct(b.catch)} of the bad samples and {pct(b.fa)} of the clean ones, J {pct(b.j)}, at
+            {' '}{costLabel(b, s.m)} per 1,000 reviews.
+            {f && !same(f, b) && (
+              <> The best free option is {fh ? <a href={fh}>{said(s, f)}</a> : said(s, f)}, at J {pct(f.j)}.</>
+            )}
+            {f && same(f, b) && <> It is also free.</>}
+            {t && !same(t, b) && !same(t, f) && (
+              <> The best supervision tool is {th ? <a href={th}>{said(s, t)}</a> : said(s, t)}, at J {pct(t.j)}.</>
+            )}
+          </p>
+          <p class="fd-data">
+            Data: {s.m.dataset}. <a href={s.url}>What {s.m.name.toLowerCase()} is →</a> · <a href={s.tab}>Leaderboard →</a> ·
+            {' '}<a href={s.method}>How it was tested →</a>
+          </p>
+        </section>
+      );
+    })}
+
+    {HARD.length > 0 && (
       <>
-        <h2>If the prompt of every mode ran on every change</h2>
+        <h2>Where nothing works yet: {andList(HARD.map((s) => s.m.name.toLowerCase()))}</h2>
         <p class="fd-p">
-          Each score above is for one question about one failure. In use nobody knows which failure a change has, so
-          every question would run on every change and their false alarms add up. This was not run; the table is an
-          estimate.
+          In these modes every reviewer we ran stays close to chance, the dedicated tools included. The checks listed
+          under each, from the mode's caveats, are why we read the low scores as real rather than as a scoring bug.
         </p>
-        <UnionEstimate />
+        {HARD.map((s) => (
+          <section class="fd-mode" id={s.m.id}>
+            <h3><a href={s.url}>{s.m.name}</a></h3>
+            <p class="fd-p">
+              {s.m.summary} On {n(s.m.n_pos)} {s.m.pos_label} and {n(s.m.n_neg)} clean samples, the best of
+              {' '}{s.rows.length} entries, {said(s, s.best)} ({KIND[s.best.type] ?? s.best.type}), reaches only J {pct(s.best.j)}:
+              it flags {pct(s.best.catch)} of the bad samples but also {pct(s.best.fa)} of the clean ones.
+              {s.free && !same(s.free, s.best) && <> The best free option is {said(s, s.free)}, at J {pct(s.free.j)}.</>}
+              {s.tools.length > 0 && <> The supervision tools we ran score {andList(toolList(s))}.</>}
+            </p>
+            <p class="fd-data">
+              Data: {s.m.dataset}. <a href={s.url}>What {s.m.name.toLowerCase()} is →</a> · <a href={s.tab}>Leaderboard →</a> ·
+              {' '}<a href={s.method}>How it was tested →</a>
+            </p>
+            <p class="fd-data">What we checked, and what to keep in mind:</p>
+            <ul class="fd-checks">
+              {s.m.caveats.map((c) => <li>{c}</li>)}
+            </ul>
+          </section>
+        ))}
       </>
     )}
-
-    <h2>Set by set</h2>
-    {GROUPS.map((g) => (
-      <section class="fd-group" data-group={g.id}>
-        <h3 class="fd-gh">{g.label}</h3>
-        <p class="fd-p fd-fine">{g.description}</p>
-        {g.list.map((m) => {
-          const l = modeLinks(m);
-          const tool = m.best_catalog_tool;
-          const toolRow = tool ? rowByKey(m, tool.key) : undefined;
-          const th = toolRow ? rowHref(toolRow) : null;
-          const s = topShortcut(m);
-          return (
-            <section class="fd-mode" id={m.id}>
-              <h4><a href={l.page}>{m.title}</a>{m.title !== m.name && <span class="fd-fm"> · failure mode: {m.name}</span>}</h4>
-              <p class="fd-p">
-                {m.summary} On {int(m.n_pos)} {m.pos_label} and {int(m.n_neg)} clean samples, with {rankedRows(m).length} ranked
-                rows: <span data-ranking-for={m.id}>{m.ranking}</span>
-                {!tool && <> No tool of the catalog ran a check of its own on this set.</>}
-                {tool && !m.below_floor && (
-                  <> The best catalog tool running its own check is {th ? <a href={th}>{tool.short}</a> : tool.short}, at J {signedPct(tool.j)}.</>
-                )}
-                {s && <> A shortcut baseline ({s.short}) scores J {signedPct(s.j)} on the same set.</>}
-              </p>
-              {m.tuning_disclosure && <p class="fd-p fd-fine" data-tuning-for={m.id}>{m.tuning_disclosure}</p>}
-              <p class="fd-data">
-                {m.tier_label} · Data: {m.dataset}. <a href={l.page}>What {m.name.toLowerCase()} is →</a> · <a href={l.tab}>All rows →</a> ·
-                {' '}<a href={l.method}>How it was tested →</a>
-              </p>
-            </section>
-          );
-        })}
-      </section>
-    ))}
 
     {STAR_MODES.length > 0 && (
       <>
@@ -146,33 +167,33 @@ const jsonld = [
 
     <h2>Read before citing</h2>
     <ul class="fd-list fd-muted">
-      {CAVEATS.map((c) => <li>{c}</li>)}
+      {OV.caveats.map((c) => <li>{c}</li>)}
+      {synthetic.length > 0 && (
+        <li>
+          {synthetic.length} of the {SUMMARIES.length} sets are synthetic or hand-built
+          ({andList(synthetic.map((s) => s.m.name))}): the failure was injected into otherwise correct work, so they test
+          whether a reviewer spots it, not how often agents make it.
+        </li>
+      )}
     </ul>
-    <p class="fd-p"><a href="/benchmark/#threats">The full table of threats to validity →</a></p>
 
     <h2>How it was measured</h2>
     <p class="fd-p">
-      Each sample is a task plus what an agent or a model produced for it (a patch, a function or a whole session),
-      labelled bad if it contains the failure and clean if it does not. How the samples of each set were made is
-      stated per set above and on the benchmark page. Every reviewer sees the samples without the labels.
+      Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad
+      if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or
+      expert review, or from matched pairs that differ only in the failure. Every tool reviews the samples of a mode
+      without seeing the labels; every model gets the same fixed prompt, temperature 0 and one run. Cost is what the run
+      cost per 1,000 reviews: API price, GPU time for self-hosted models, $0 for free programs.
     </p>
-    <ul class="fd-list fd-muted">
-      <li>{METHOD.unreadable}</li>
-      <li>{METHOD.intervals}</li>
-      <li>{METHOD.paired}</li>
-      <li>{METHOD.best}</li>
-      <li>{METHOD.tiers}</li>
-      <li>{METHOD.cost} {METHOD.cheap}</li>
-    </ul>
     <p class="fd-p">
       Source datasets: {SOURCES.map((src, i) => <>{i > 0 && (i === SOURCES.length - 1 ? ' and ' : ', ')}<a href={src.url} rel="noopener">{src.name}</a></>)}.
-      The full setup and caveats of each set are in the <a href="/benchmark/">benchmark methodology</a>; the raw
+      The full setup and caveats of each mode are in the <a href="/benchmark/">benchmark methodology</a>; the raw
       numbers are in <a href="/bench/results.json">results.json</a> (CC-BY-4.0).
     </p>
 
     <h2>Cite</h2>
     <p class="fd-p fd-cite">
-      Vasyl Rakivnenko. {headline} Findings from SAICA-Bench. Stanford University, {GENERATED.slice(0, 4)}. {CITE_AS}. https://saica.ai/findings/
+      Vasyl Rakivnenko. {headline} Findings from SAICA-Bench. Stanford University, {GENERATED.slice(0, 4)}. https://saica.ai/findings/
     </p>
 
     <p class="fd-more font-sans text-sm">
@@ -189,13 +210,10 @@ const jsonld = [
   .fd-lead { margin: 1.2rem 0 0; max-width: 48rem; font-size: 1.08rem; }
   .fd-p { margin: .75rem 0 0; max-width: 48rem; }
   .fd-fine { font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #6b7180; }
-  .fd-warn { border: 1px solid #b7791f; background: #fdf6e7; border-radius: 8px; padding: .6rem .8rem; }
   .fd h2 { margin-top: 2.6rem; font-size: 1.3rem; }
-  .fd-gh { margin-top: 1.8rem; margin-bottom: 0; font-size: 1.1rem; }
-  .fd h4 { margin: 1.3rem 0 0; font: 600 1rem ui-sans-serif, system-ui, sans-serif; }
-  .fd h4 a { color: #111418; text-decoration: none; border-bottom: 1px dotted #6b7180; }
-  .fd h4 a:hover { color: #1f3a93; }
-  .fd-fm { font-weight: 400; font-size: 13px; color: #6b7180; }
+  .fd h3 { margin-top: 1.6rem; margin-bottom: 0; font-size: 1.05rem; }
+  .fd h3 a { color: #111418; text-decoration: none; border-bottom: 1px dotted #6b7180; }
+  .fd h3 a:hover { color: #1f3a93; }
   .fd-list { margin: .8rem 0 0; padding-left: 1.3rem; max-width: 48rem; }
   ol.fd-list { list-style: decimal; }
   ul.fd-list { list-style: disc; }
@@ -204,6 +222,8 @@ const jsonld = [
   .fd-wide { margin-top: 1rem; }
   .fd-mode .fd-p { margin-top: .4rem; }
   .fd-data { margin: .35rem 0 0; max-width: 48rem; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #6b7180; }
+  .fd-checks { margin: .6rem 0 0; padding-left: 1.2rem; list-style: disc; max-width: 48rem; font: 14px/1.55 ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .fd-checks li { margin: .35rem 0; }
   .fd-cite { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #4a5160; background: #fff; border: 1px solid rgb(17 20 24 / .1); border-radius: 8px; padding: .7rem .85rem; }
   .fd-more { margin-top: 2.4rem; }
 </style>

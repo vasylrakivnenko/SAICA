@@ -16,7 +16,7 @@
 import results from '../../../public/bench/results.json';
 import { fmUrl, toolUrl, leaderboardUrl, abs, kgId } from '../../lib/seo';
 import { graph } from '../../lib/data';
-import { andList, pct, signedPct } from '../../lib/format';
+import { andList, money, pct, signedPct } from '../../lib/format';
 
 // ---------- shape of results.json (version 2) ----------
 
@@ -71,6 +71,8 @@ export interface Row {
   subset_n: { pos: number; neg: number } | null;
   /** USD per 1,000 reviews. */
   cost1k: number;
+  /** USD for the whole run of this row (list or reported price). */
+  cost: number;
   cost_basis: string;
   cost_estimated: boolean;
   /** USD really spent on this row's run. */
@@ -419,6 +421,8 @@ export const RAN = {
   ),
   catalogTools: distinct(allRows.filter((r) => r.kind === 'catalog_tool').map((r) => r.kg_id ?? r.short)),
   baselines: distinct(allRows.filter(isBaseline).map((r) => r.key)),
+  /** Simple rules written for the benchmark (shortcut baselines not counted). */
+  rules: distinct(allRows.filter((r) => r.kind === 'baseline_rule').map((r) => r.key)),
 };
 export const TOTAL_SAMPLES: number = COUNTS.samples ?? R.modes.reduce((a, m) => a + samplesOf(m), 0);
 
@@ -473,3 +477,158 @@ export const AUTHOR = {
 
 // Number formats for the pages that import everything from here.
 export { andList, int, interval, money, num, pct, plural, signedPct } from '../../lib/format';
+
+// ---------- classic layout ----------
+// The leaderboard grid, the quality-vs-cost charts, the short findings and the per-mode tables of the pages
+// (/, /findings/, /failure-modes/, /benchmark/). One matrix, one number per cell; intervals, unreadable counts and
+// run cards stay in results.json and in tooltips. Everything below is computed from the results file.
+
+const OVR = R.overview as unknown as {
+  modes: Array<{ id: string; name: string }>;
+  rows: Array<OverviewRow & { tool: string; type: string; kind: string | null; avg: number; n_modes: number; all_modes?: boolean }>;
+  best: Record<string, { j: number; tool: string; short: string; type: string; key: string; winner: boolean; below_floor: boolean; top_group: string[] }>;
+  wrapper_comparisons?: Array<{ verdict: string; judge_model?: string }>;
+};
+
+/** USD per 1,000 reviews of a row. */
+export const cost1k = (r: { cost1k: number }, _m?: Mode): number => r.cost1k;
+export const costLabel = (r: { cost1k: number; cost_estimated?: boolean }, _m?: Mode): string => money(r.cost1k, Boolean(r.cost_estimated));
+export const isFree = (r: { cost1k: number }): boolean => r.cost1k === 0;
+/** A supervision tool (not a plain model asked directly, not a rule). */
+export const isTool = (r: { kind: string }): boolean => r.kind === 'catalog_tool' || r.kind === 'uncatalogued_tool';
+export const toolHref = rowHref;
+export const shortName = (_m: Mode, r: { short?: string; tool: string }): string =>
+  r.short ?? r.tool.replace(', asked directly', '').split(' (')[0].split(':')[0];
+/** Rows a mode's table lists: every reviewer and simple rule, highest J first. Shortcut baselines are not listed;
+ *  the table names the top one in a line below it. */
+export const listedRows = (m: Mode): Row[] => m.rows.filter((r) => r.kind !== 'shortcut_baseline').sort((a, b) => b.j - a.j);
+/** Rows with fewer than 95% readable answers in one class (marked with a dagger where they are shown). */
+export const INCOMPLETE_ROWS: number = R.modes.reduce((a, m) => a + m.rows.filter((r) => r.incomplete).length, 0);
+
+export interface ClassicSummary extends Omit<ModeSummary, 'best' | 'free'> {
+  /** The highest-J ranked row (one of a tied group unless m.winner is set). */
+  best: Row;
+  /** Best free catalog program inside its design scope, or null. */
+  free: Row | null;
+  /** Every listed row, highest J first. */
+  listed: Row[];
+  /** Tools only (catalog or not), highest J first. */
+  tools: Row[];
+  /** Highest-J shortcut baseline, or null. */
+  shortcut: Row | null;
+}
+export const CLASSIC: ClassicSummary[] = SUMMARIES.map((s) => ({
+  ...s,
+  best: rowByKey(s.m, s.best.key) as Row,
+  free: s.free ? (rowByKey(s.m, s.free.key) ?? null) : null,
+  listed: listedRows(s.m),
+  tools: listedRows(s.m).filter(isTool),
+  shortcut: topShortcut(s.m),
+})).sort((a, b) => b.best.j - a.best.j);
+/** Mode ids in the order of the results file (the order of the leaderboard tabs). */
+export const FILE_ORDER: string[] = R.modes.map((m) => m.id);
+/** Modes where nothing we ran reaches the floor (J 25%). */
+export const HARD: ClassicSummary[] = CLASSIC.filter((s) => s.m.below_floor);
+
+const NUMBER_WORD = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+const countWord = (n: number): string => NUMBER_WORD[n] ?? String(n);
+const jr = (x: number): string => signedPct(x, 0);
+
+function classicFindings(): Array<[string, string]> {
+  const out: Array<[string, string]> = [];
+  const n = MODES.length;
+  // 1. who leads
+  const modelLead = MODES.filter((m) => OVR.best[m.id]?.type === 'baseline_model');
+  const winners = MODES.filter((m) => m.winner);
+  out.push([
+    `A model asked directly has the highest J in ${modelLead.length === n ? `all ${n}` : `${modelLead.length} of ${n}`} modes.`,
+    winners.length
+      ? ` It is clearly ahead of the runner-up only in ${andList(winners.map((m) => m.name))}; in the other modes the leaders are tied.`
+      : ' In no mode is one reviewer clearly ahead of the runner-up: the leaders are tied.',
+  ]);
+  // 2. the three strongest models that ran everywhere
+  const top3 = OVR.rows.filter((r) => r.type === 'baseline_model' && r.n_modes === n).sort((a, b) => b.avg - a.avg).slice(0, 3);
+  if (top3.length === 3) {
+    const close = MODES.filter((m) => {
+      const js = top3.map((r) => r.cells[m.id]?.j).filter((j): j is number => j != null);
+      return js.length === 3 && Math.max(...js) - Math.min(...js) <= 0.1;
+    }).length;
+    const maxCost = Math.max(...top3.flatMap((r) => Object.values(r.cells).map((c) => c.cost1k)));
+    out.push([
+      `The three strongest cheap models are close: within 10 points of each other in ${close} of ${n} modes.`,
+      ` Average J: ${top3.map((r) => `${r.tool} ${jr(r.avg)}`).join(', ')}. None costs more than ${money(maxCost)} per 1,000 reviews in any mode.`,
+    ]);
+  }
+  // 3. the modes under the floor
+  if (HARD.length) {
+    const real = HARD.every((s) => s.m.group === 'natural_agent');
+    out.push([
+      `${countWord(HARD.length)} mode${HARD.length === 1 ? '' : 's'} nobody handles yet: ${andList(HARD.map((s) => `${s.m.name} (best J ${jr(s.best.j)})`))}.`,
+      ` No model, program or judge we ran reaches J ${pct(FLOOR, 0)} there.` + (real ? ` ${HARD.length === 1 ? 'It is' : 'These are'} the only ${HARD.length === 1 ? 'set' : 'sets'} of real agent output; the others have planted or model-written failures.` : ''),
+    ]);
+  }
+  // 4. free programs
+  const free = CLASSIC.filter((s) => s.free && s.free.j >= 0.5);
+  if (free.length)
+    out.push([
+      `Free programs pay off where the failure is a checkable fact: ${free.map((s) => `${s.free!.short} on ${s.m.name} (${jr(s.free!.j)})`).join('; ')}.`,
+      ' In the other modes no free program we ran inside its design scope reaches J 50%.',
+    ]);
+  // 5. packaged tools against the same model asked directly
+  const wc = OVR.wrapper_comparisons ?? [];
+  if (wc.length) {
+    const count = (v: string) => wc.filter((w) => w.verdict === v).length;
+    const worse = count('worse'), better = count('better'), same = wc.length - worse - better;
+    const judges = [...new Set(wc.map((w) => w.judge_model).filter(Boolean))];
+    out.push([
+      better === 0
+        ? `Wrapping the model in a review tool did not help: in ${wc.length} comparisons on the same samples no tool beat the same model asked directly (${worse} worse, ${same} tied).`
+        : `Wrapping the model in a review tool rarely helped: in ${wc.length} comparisons on the same samples a tool beat the same model asked directly ${better} times (${worse} worse, ${same} tied).`,
+      judges.length === 1 ? ` Every tool ran with ${judges[0]} as its judge model.` : '',
+    ]);
+  }
+  // 6. small and non-reasoning models (the sentence the results file computes)
+  const small = FINDINGS.find(([lead]) => /flags more than|under 20%/.test(lead));
+  if (small) out.push([`Small and non-reasoning models fall short: ${small[0]}`, '']);
+  return out;
+}
+
+function classicCaveats(): string[] {
+  const out = [
+    'J compares tools within a mode. Across modes it only roughly reflects difficulty: each dataset was built differently (real agent runs, model-written code, planted or hand-built failures), so a high J on a planted-failure mode is not as hard-won as a low one on real agent runs.',
+    'Averages weight every mode equally and cover only the modes a tool ran (the number is in brackets).',
+    `Each model was told which failure to look for. Rates are on the answers that carry a verdict` +
+      (INCOMPLETE_ROWS ? `; ${INCOMPLETE_ROWS} entries with fewer than 95% readable answers are marked † in their mode’s tab.` : '.'),
+  ];
+  const withShortcut = CLASSIC.filter((s) => s.shortcut && s.shortcut.j >= FLOOR);
+  if (withShortcut.length) {
+    const ex = [...withShortcut].sort((a, b) => b.shortcut!.j - b.best.j - (a.shortcut!.j - a.best.j))[0];
+    out.push(
+      `A rule that understands nothing about the failure scores J ${pct(FLOOR, 0)} or more on ${withShortcut.length} of ${MODES.length} datasets ` +
+        `(on ${ex.m.name}: ${jr(ex.shortcut!.j)}, against ${jr(ex.best.j)} for the best reviewer), so J 0% is not the real zero. Each mode's tab names its rule.`,
+    );
+  }
+  out.push(
+    'Same prompt style for every model, temperature 0 (gpt-6-luna: its default), one run each. “Tied” means the 95% interval of the difference from the leader includes 0. Simple rules are shown for reference and are never named best.',
+  );
+  return out;
+}
+
+const bestJ = (id: string): number => OVR.best[id]?.j ?? -1;
+/** The Overview tab: reviewer x mode grid, modes from the best caught to the least. */
+export const OVERVIEW = {
+  modes: [...OVR.modes].sort((a, b) => bestJ(b.id) - bestJ(a.id)).map(({ id, name }) => ({ id, name })),
+  // only what the grid and the chart print; the average is the mean of the row's cells
+  rows: OVR.rows.filter((r) => r.kind !== 'shortcut_baseline').map((r) => {
+    const cells = Object.fromEntries(
+      Object.entries(r.cells).map(([id, c]) => [id, { j: c.j, tool: c.tool, short: c.short, fa: c.fa, cost1k: c.cost1k }]),
+    );
+    const js = Object.values(cells).map((c) => c.j);
+    return { tool: r.tool, type: r.type, cells, avg: js.reduce((a, b) => a + b, 0) / js.length, n_modes: js.length };
+  }),
+  best: Object.fromEntries(
+    Object.entries(OVR.best).map(([id, b]) => [id, { j: b.j, tool: b.tool, short: b.short, type: b.type, winner: b.winner, top_group: b.top_group }]),
+  ),
+  findings: classicFindings(),
+  caveats: classicCaveats(),
+};
