@@ -35,7 +35,7 @@ for (const r of OV.rows)
   }
 
 // Static copy of the Overview grid: same markup and inline styles as renderOverview() in the script.
-const short = (t: string) => t.replace(', asked directly', '').split(' (')[0].split(':')[0];
+const short = (t: string) => t.replace(', zero-shot', '').split(' (')[0].split(':')[0];
 const fill = (j: number) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
 const col = (t: string) => `var(${TYPE_VAR[t]})`;
 const cellTip = (name: string, c: { tool: string; j: number; fa: number; cost1k: number }) =>
@@ -250,7 +250,7 @@ function renderChart(m) {
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
     svg.append(c);
-    items.push({ x, y, r: onF ? 6 : 4.5, must: onF, text: !narrow || onF ? r.tool.replace(', asked directly', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)') : '' });
+    items.push({ x, y, r: onF ? 6 : 4.5, must: onF, text: !narrow || onF ? r.tool.replace(', zero-shot', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)') : '' });
   }
   placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
@@ -260,7 +260,7 @@ function renderChart(m) {
 }
 
 function renderOverview() {
-  const short = (t) => t.replace(', asked directly', '').split(' (')[0].split(':')[0];
+  const short = (t) => t.replace(', zero-shot', '').split(' (')[0].split(':')[0];
   const fill = (j) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
   const head = el('thead', {}, el('tr', {}, el('th', { text: 'Reviewer' }),
     OV.modes.map((m) => el('th', { class: 'mcol' }, el('button', { type: 'button', class: 'mlink', text: m.name, 'data-id': m.id }))),

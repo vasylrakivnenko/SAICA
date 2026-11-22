@@ -23,7 +23,7 @@ const description =
   (hardNames.length ? ` ${andList(hardNames).replace(/^./, (c) => c.toUpperCase())} remain unsolved.` : '');
 
 const KIND: Record<string, string> = {
-  baseline_model: 'a model asked directly', baseline_rule: 'a simple rule', deterministic: 'a free program',
+  baseline_model: 'a zero-shot model', baseline_rule: 'a simple rule', deterministic: 'a free program',
   llm_based: 'an AI-based tool', hybrid: 'a hybrid tool', prompt_artifact: 'a skill',
 };
 const same = (a: Row | null, b: Row | null) => !!a && !!b && a.key === b.key;

@@ -494,11 +494,11 @@ const OVR = R.overview as unknown as {
 export const cost1k = (r: { cost1k: number }, _m?: Mode): number => r.cost1k;
 export const costLabel = (r: { cost1k: number; cost_estimated?: boolean }, _m?: Mode): string => money(r.cost1k, Boolean(r.cost_estimated));
 export const isFree = (r: { cost1k: number }): boolean => r.cost1k === 0;
-/** A supervision tool (not a plain model asked directly, not a rule). */
+/** A supervision tool (not a plain zero-shot model, not a rule). */
 export const isTool = (r: { kind: string }): boolean => r.kind === 'catalog_tool' || r.kind === 'uncatalogued_tool';
 export const toolHref = rowHref;
 export const shortName = (_m: Mode, r: { short?: string; tool: string }): string =>
-  r.short ?? r.tool.replace(', asked directly', '').split(' (')[0].split(':')[0];
+  r.short ?? r.tool.replace(', zero-shot', '').split(' (')[0].split(':')[0];
 /** Rows a mode's table lists: every reviewer and simple rule, highest J first. Shortcut baselines are not listed;
  *  the table names the top one in a line below it. */
 export const listedRows = (m: Mode): Row[] => m.rows.filter((r) => r.kind !== 'shortcut_baseline').sort((a, b) => b.j - a.j);
@@ -541,7 +541,7 @@ function classicFindings(): Array<[string, string]> {
   const modelLead = MODES.filter((m) => OVR.best[m.id]?.type === 'baseline_model');
   const winners = MODES.filter((m) => m.winner);
   out.push([
-    `A model asked directly has the highest J in ${modelLead.length === n ? `all ${n}` : `${modelLead.length} of ${n}`} modes.`,
+    `A zero-shot model has the highest J in ${modelLead.length === n ? `all ${n}` : `${modelLead.length} of ${n}`} modes.`,
     winners.length
       ? ` It is clearly ahead of the runner-up only in ${andList(winners.map((m) => m.name))}; in the other modes the leaders are tied.`
       : ' In no mode is one reviewer clearly ahead of the runner-up: the leaders are tied.',
@@ -574,7 +574,7 @@ function classicFindings(): Array<[string, string]> {
       `Free programs pay off where the failure is a checkable fact: ${free.map((s) => `${s.free!.short} on ${s.m.name} (${jr(s.free!.j)})`).join('; ')}.`,
       ' In the other modes no free program we ran inside its design scope reaches J 50%.',
     ]);
-  // 5. packaged tools against the same model asked directly
+  // 5. packaged tools against the same model used zero-shot
   const wc = OVR.wrapper_comparisons ?? [];
   if (wc.length) {
     const count = (v: string) => wc.filter((w) => w.verdict === v).length;
@@ -582,8 +582,8 @@ function classicFindings(): Array<[string, string]> {
     const judges = [...new Set(wc.map((w) => w.judge_model).filter(Boolean))];
     out.push([
       better === 0
-        ? `Wrapping the model in a review tool did not help: in ${wc.length} comparisons on the same samples no tool beat the same model asked directly (${worse} worse, ${same} tied).`
-        : `Wrapping the model in a review tool rarely helped: in ${wc.length} comparisons on the same samples a tool beat the same model asked directly ${better} times (${worse} worse, ${same} tied).`,
+        ? `Wrapping the model in a review tool did not help: in ${wc.length} comparisons on the same samples no tool beat the same model used zero-shot (${worse} worse, ${same} tied).`
+        : `Wrapping the model in a review tool rarely helped: in ${wc.length} comparisons on the same samples a tool beat the same model used zero-shot ${better} times (${worse} worse, ${same} tied).`,
       judges.length === 1 ? ` Every tool ran with ${judges[0]} as its judge model.` : '',
     ]);
   }
