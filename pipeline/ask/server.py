@@ -23,19 +23,26 @@ GitHub requests and a worker), so each is bounded four ways:
    :mod:`pipeline.audit.analyzer`). Audit reports are kept for a day per
    ``owner/repo``; a repeat costs nothing.
 
-How far the client address can be trusted. Behind Replit's proxy the app
-never sees the visitor's socket; the only source is ``X-Forwarded-For``,
-which a visitor can pre-fill. We therefore ignore the left-hand entries
-and use the one written by the nearest proxy (the last; see
-:func:`client_key`). A visitor cannot forge that entry **if** the app is
-reachable only through the proxy and the proxy appends the address it saw.
-We have not verified how Replit builds the header; that needs a probe
-against the live deployment. If a second proxy sits in front, every
-visitor shows the same address and the per-client limit becomes a second
-global limit: it can lock people out, but it cannot be bypassed. The
-daily budget does not depend on the address at all; it is what bounds
-spend. It lives in this process: with several autoscale instances the
-real ceiling is the budget times the number of instances.
+How far the client address can be trusted. The app counts a caller under
+the address of the socket that connected to it. ``X-Forwarded-For`` is
+read only when that socket belongs to a proxy we trust
+(``FORWARDED_ALLOW_IPS``; default: loopback only), because anyone who can
+reach the app directly can write any header. From a trusted proxy we take
+the entry that the proxy itself appended (the last one; ``SAICA_TRUSTED_PROXY_HOPS``
+counts from the right when several trusted proxies are chained) and ignore
+everything to its left, which the visitor controls. See :func:`client_key`.
+
+What cannot be known from here: behind Replit's proxy the app never sees
+the visitor's socket, and we have not verified from which address that
+proxy connects or how it builds the header. Until ``FORWARDED_ALLOW_IPS``
+names that proxy in the deployment, its header is ignored and every
+visitor is counted under the proxy's own address: the per-client limit
+then acts as a second global limit. It can lock people out; it cannot be
+bypassed. Setting ``FORWARDED_ALLOW_IPS=*`` is right only if the app is
+reachable through the proxy and nothing else. The daily budget does not
+depend on the address at all; it is what bounds spend. It lives in this
+process: with several autoscale instances the real ceiling is the budget
+times the number of instances.
 
 Other hardening (review 2026-11-21, H3): request bodies over 8 kB are
 refused before they are parsed; validation errors do not echo the input;
@@ -68,6 +75,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from pipeline.ask.context import NodeContext, build_prompt, hybrid_retrieve, hydrate
 from pipeline.audit.analyzer import (
     AuditError,
+    DetectionAborted,
     FetchUnavailable,
     RepoNotFound,
     RepoTooLarge,
@@ -106,6 +114,11 @@ DEFAULT_CORS_ORIGINS: tuple[str, ...] = (
     "http://127.0.0.1:4321",
 )
 
+# Peers whose ``X-Forwarded-*`` headers are believed, unless
+# ``FORWARDED_ALLOW_IPS`` says otherwise: this machine only.
+DEFAULT_TRUSTED_PROXIES: tuple[str, ...] = ("127.0.0.0/8", "::1/128")
+
+BAD_REPO_URL = "repo_url must look like https://github.com/<owner>/<repo>"
 GENERIC_ERROR = "The service could not complete the request."
 BUSY = "The service is busy. Please try again in a moment."
 
@@ -126,6 +139,63 @@ def _env_int(name: str, default: int, *, minimum: int = 0) -> int:
         return default
 
 
+def trusted_proxies_from_env() -> tuple[str, ...]:
+    """``FORWARDED_ALLOW_IPS`` as a tuple: addresses, networks, or ``*``.
+
+    Unset or empty means :data:`DEFAULT_TRUSTED_PROXIES`. Entries that are
+    not an address or a network are dropped with a warning.
+    """
+    raw = os.environ.get("FORWARDED_ALLOW_IPS", "")
+    entries = [e.strip() for e in raw.split(",") if e.strip()]
+    if not entries:
+        return DEFAULT_TRUSTED_PROXIES
+    out: list[str] = []
+    for entry in entries:
+        if entry == "*":
+            return ("*",)
+        try:
+            ipaddress.ip_network(entry, strict=False)
+        except ValueError:
+            log.warning("FORWARDED_ALLOW_IPS: ignoring %r", entry)
+            continue
+        out.append(entry)
+    return tuple(out) or DEFAULT_TRUSTED_PROXIES
+
+
+def parse_address(text: str | None):
+    """An IP address from ``1.2.3.4``, ``1.2.3.4:567``, ``::1``,
+    ``[::1]`` or ``[::1]:567``; ``None`` for anything else."""
+    if not isinstance(text, str):
+        return None
+    text = text.strip()
+    if text.startswith("["):
+        text = text[1:].split("]", 1)[0]
+    elif text.count(":") == 1:
+        text = text.split(":", 1)[0]  # IPv4 with a port
+    try:
+        address = ipaddress.ip_address(text)
+    except ValueError:
+        return None
+    mapped = getattr(address, "ipv4_mapped", None)
+    return mapped if mapped is not None else address
+
+
+def is_trusted_proxy(peer: str | None, trusted: tuple[str, ...]) -> bool:
+    """Is the socket's peer one of the proxies whose headers we believe?"""
+    if "*" in trusted:
+        return True
+    address = parse_address(peer)
+    if address is None:
+        return False
+    for entry in trusted:
+        try:
+            if address in ipaddress.ip_network(entry, strict=False):
+                return True
+        except (ValueError, TypeError):
+            continue
+    return False
+
+
 @dataclass(frozen=True)
 class Settings:
     """Limits of the API. ``from_env`` reads them once, at start-up."""
@@ -142,6 +212,8 @@ class Settings:
     assess_cache_seconds: float = 86_400.0
     assess_cache_entries: int = 256
     trusted_proxy_hops: int = 1
+    trusted_proxies: tuple[str, ...] = DEFAULT_TRUSTED_PROXIES
+    assess_negative_cache_seconds: float = 300.0
     cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS
     docs: bool = False
 
@@ -171,6 +243,7 @@ class Settings:
             trusted_proxy_hops=_env_int(
                 "SAICA_TRUSTED_PROXY_HOPS", cls.trusted_proxy_hops, minimum=1
             ),
+            trusted_proxies=trusted_proxies_from_env(),
             cors_origins=origins or DEFAULT_CORS_ORIGINS,
             docs=os.environ.get("SAICA_API_DOCS") == "1",
         )
@@ -280,35 +353,45 @@ class DayCache:
                 self._items.popitem(last=False)
 
 
+def _bucket(address) -> str:
+    """IPv6 callers are counted per /64: one subscriber usually holds one."""
+    if address.version == 6:
+        return str(ipaddress.ip_network(f"{address}/64", strict=False).network_address)
+    return str(address)
+
+
 def client_key(
-    scope_client: tuple[str, int] | None, forwarded_for: str | None, hops: int = 1
+    scope_client: tuple[str, int] | None,
+    forwarded_for: list[str] | str | None,
+    hops: int = 1,
+    trusted: tuple[str, ...] = DEFAULT_TRUSTED_PROXIES,
 ) -> str:
     """The address to count a caller under. See the module docstring.
 
-    ``X-Forwarded-For`` is ``client, proxy1, proxy2``: each proxy appends
-    the address that connected to it. With ``hops`` trusted proxies in
-    front of the app, the entry ``hops`` from the right is the one the
-    outermost trusted proxy wrote. Entries further left come from the
-    caller and are ignored. Without the header, the socket's own address
-    is used. IPv6 callers are counted per /64, because one subscriber
-    usually holds a whole /64.
+    The socket's peer address, unless that peer is a trusted proxy and
+    sent ``X-Forwarded-For``. The header is ``client, proxy1, proxy2``:
+    each proxy appends the address that connected to it, so with ``hops``
+    trusted proxies in front of the app the entry ``hops`` from the right
+    is the one the outermost of them wrote. Entries further left come from
+    the caller and are ignored. All lines of the header are read (a caller
+    can send a second line); an entry may carry a port. If the header has
+    fewer entries than ``hops`` or the entry is not an address, the peer
+    itself is used: a caller never gets a bucket of its own by sending
+    something unreadable.
     """
-    candidate = ""
-    if forwarded_for:
-        parts = [p.strip() for p in forwarded_for.split(",") if p.strip()]
-        if parts:
-            candidate = parts[-hops] if len(parts) >= hops else parts[0]
-    if not candidate and scope_client:
-        candidate = scope_client[0]
-    try:
-        address = ipaddress.ip_address(candidate.strip("[]"))
-    except ValueError:
+    peer = parse_address(scope_client[0]) if scope_client else None
+    if peer is None:
         return "unknown"
-    if address.version == 6:
-        if address.ipv4_mapped is not None:
-            return str(address.ipv4_mapped)
-        return str(ipaddress.ip_network(f"{address}/64", strict=False).network_address)
-    return str(address)
+    lines = (
+        [forwarded_for] if isinstance(forwarded_for, str) else list(forwarded_for or [])
+    )
+    if not lines or not is_trusted_proxy(str(peer), trusted):
+        return _bucket(peer)
+    parts = [p.strip() for line in lines for p in line.split(",") if p.strip()]
+    if len(parts) < hops:
+        return _bucket(peer)
+    address = parse_address(parts[-hops])
+    return _bucket(address if address is not None else peer)
 
 
 # ---------------------------------------------------------------------------
@@ -496,6 +579,7 @@ def create_app(
     audit: Callable[[str], Any] = audit_repo,
     assess_budget: CallBudget | None = None,
     settings: Settings | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> FastAPI:
     """Build the API with injected collaborators.
 
@@ -524,7 +608,12 @@ def create_app(
     assess_pool = ThreadPoolExecutor(
         cfg.assess_concurrency, thread_name_prefix="saica-assess"
     )
-    reports = DayCache(cfg.assess_cache_seconds, cfg.assess_cache_entries)
+    reports = DayCache(cfg.assess_cache_seconds, cfg.assess_cache_entries, clock=clock)
+    # Refusals that will not change within minutes (no such repository, too
+    # large, could not be read within limits), as ``(status, detail)``.
+    refusals = DayCache(
+        cfg.assess_negative_cache_seconds, cfg.assess_cache_entries, clock=clock
+    )
 
     # Inner to outer: the guard (request id, body limit), then CORS.
     app.add_middleware(ApiGuard, max_body=MAX_BODY_BYTES)
@@ -578,8 +667,9 @@ def create_app(
     def caller(request: Request) -> str:
         return client_key(
             request.scope.get("client"),
-            request.headers.get("x-forwarded-for"),
+            request.headers.getlist("x-forwarded-for"),
             cfg.trusted_proxy_hops,
+            cfg.trusted_proxies,
         )
 
     async def run_bounded(pool: ThreadPoolExecutor, slots: Slots, timeout: float, fn):
@@ -639,12 +729,19 @@ def create_app(
         run = _AskRun()
 
         def work() -> tuple[str, Any]:
-            hits = hybrid_retrieve(question, k, find_similar=find_similar)
-            run.nodes = hydrate(hits)
-            prompt = build_prompt(question, run.nodes)
+            # Budget bookkeeping happens here, in the worker, so that it is
+            # also right when the handler has stopped waiting (504).
+            try:
+                hits = hybrid_retrieve(question, k, find_similar=find_similar)
+                run.nodes = hydrate(hits)
+                prompt = build_prompt(question, run.nodes)
+            except BaseException:
+                ask_budget.release()  # nothing was sent to the model
+                raise
             run.model_called = True
             answer_text, raw = kimi_call(prompt)
             run.tokens = _extract_total_tokens(raw)
+            ask_budget.record(tokens=run.tokens)  # paid for, whoever still waits
             return answer_text, raw
 
         try:
@@ -655,15 +752,13 @@ def create_app(
             log.error("request %s: ask ran past %.0f s", rid, cfg.ask_wall_clock)
             raise HTTPException(status_code=504, detail=GENERIC_ERROR) from None
         except Exception:  # noqa: BLE001 - logged here, generic text to the client
-            if run.model_called:
-                log.exception("request %s: model call failed", rid)
-            else:
-                ask_budget.release()  # nothing was sent to the model
-                log.exception("request %s: retrieval failed", rid)
+            log.exception(
+                "request %s: %s failed",
+                rid,
+                "model call" if run.model_called else "retrieval",
+            )
             raise HTTPException(status_code=500, detail=GENERIC_ERROR) from None
 
-        # The answer is paid for: record what it cost and return it.
-        ask_budget.record(tokens=run.tokens)
         return Answer(
             answer=answer_text,
             citations=[_node_to_citation(n) for n in run.nodes],
@@ -677,6 +772,7 @@ def create_app(
         try:
             owner, repo = parse_repo_url(req.repo_url)
         except ValueError as exc:
+            # parse_repo_url's own two sentences; nothing of the input.
             raise HTTPException(status_code=400, detail=str(exc)) from None
         rid = _request_id(request)
         key = f"{owner}/{repo}".lower()
@@ -684,6 +780,13 @@ def create_app(
         cached = reports.get(key)
         if cached is not None:
             return JSONResponse(cached, headers={"x-saica-cache": "hit"})
+        refused = refusals.get(key)
+        if refused is not None:
+            raise HTTPException(
+                status_code=refused[0],
+                detail=refused[1],
+                headers={"x-saica-cache": "hit"},
+            )
 
         if not assess_clients.allow(caller(request)):
             raise HTTPException(
@@ -705,8 +808,28 @@ def create_app(
             ) from None
 
         def work() -> dict:
-            report = audit(f"https://github.com/{owner}/{repo}")
-            return report.model_dump(mode="json")
+            # The worker stores its own outcome: a result that arrives after
+            # the handler gave up (504) is kept, not thrown away.
+            try:
+                report = audit(f"https://github.com/{owner}/{repo}")
+                payload = report.model_dump(mode="json")
+            except (RepoNotFound, ValueError) as exc:
+                # No such repository: nothing was audited, give the call back.
+                audits_budget.release()
+                refusals.put(
+                    key,
+                    (
+                        (404, str(exc))
+                        if isinstance(exc, RepoNotFound)
+                        else (400, BAD_REPO_URL)
+                    ),
+                )
+                raise
+            except (RepoTooLarge, DetectionAborted) as exc:
+                refusals.put(key, (422, str(exc)))
+                raise
+            reports.put(key, payload)
+            return payload
 
         try:
             payload = await run_bounded(
@@ -717,11 +840,13 @@ def create_app(
             raise HTTPException(
                 status_code=504, detail="The audit took too long and was stopped."
             ) from None
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from None
+        except ValueError:
+            # Whatever the text says, the client gets the fixed sentence.
+            raise HTTPException(status_code=400, detail=BAD_REPO_URL) from None
         except RepoNotFound as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from None
-        except RepoTooLarge as exc:
+        except (RepoTooLarge, DetectionAborted) as exc:
+            log.warning("request %s: audit of %s: %s", rid, key, exc)
             raise HTTPException(status_code=422, detail=str(exc)) from None
         except FetchUnavailable as exc:
             log.warning("request %s: audit of %s: %s", rid, key, exc)
@@ -733,7 +858,6 @@ def create_app(
             log.exception("request %s: audit of %s failed", rid, key)
             raise HTTPException(status_code=500, detail=GENERIC_ERROR) from None
 
-        reports.put(key, payload)
         return JSONResponse(payload, headers={"x-saica-cache": "miss"})
 
     return app

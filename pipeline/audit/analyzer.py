@@ -8,7 +8,9 @@ Pipeline:
      presence alone matters are created empty; nothing is downloaded for
      them. There is no ``git clone``.
   3. Detect stack: languages, runtime hints, CI, package managers, agents,
-     supervision tools.
+     supervision tools. For a remote audit this step runs in a child
+     process with a wall-clock and a memory limit (:mod:`pipeline.audit.worker`):
+     the files are other people's, and a parser can always be surprised.
   4. Build coverage grid (FM × paradigm × tier).
   5. Compute gaps and catalog suggestions, and the limits of the audit.
   6. Render Markdown.
@@ -27,7 +29,11 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
+import signal
+import subprocess
+import sys
 import tempfile
 import time
 from dataclasses import dataclass, field
@@ -51,6 +57,7 @@ from pipeline.audit.detectors import (
     detectable_tool_ids,
     fetch_plan,
 )
+from pipeline import kg as _kg
 from pipeline.audit.kg import load_tool_index
 from pipeline.audit.render import to_markdown
 from pipeline.audit.schemas import (
@@ -98,6 +105,10 @@ class RepoTooLarge(AuditError):
 
 class FetchUnavailable(AuditError):
     """GitHub could not be reached in time, or its rate limit is used up."""
+
+
+class DetectionAborted(AuditError):
+    """Reading the fetched files took more time or memory than allowed."""
 
 
 # ---------------------------------------------------------------------------
@@ -471,6 +482,75 @@ def _build_stack(repo_root: Path) -> DetectedStack:
     )
 
 
+@dataclass(frozen=True)
+class DetectionLimits:
+    """Hard limits for reading one repository's files."""
+
+    seconds: float = 8.0  # wall clock; the child is killed after it
+    memory_bytes: int = 1_000_000_000
+
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+# The child needs nothing of the server's environment (and none of its keys).
+_CHILD_ENV = ("PATH", "PYTHONPATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "VIRTUAL_ENV")
+
+
+def detect_stack_isolated(
+    repo_root: Path, *, limits: DetectionLimits | None = None
+) -> DetectedStack:
+    """Run the detectors on ``repo_root`` in a child process.
+
+    The child (:mod:`pipeline.audit.worker`) is killed when it runs past
+    ``limits.seconds`` and ends itself when it passes ``limits.memory_bytes``.
+    Either way :class:`DetectionAborted` is raised; its text is safe to
+    show. Nothing a file contains can cost the caller more than that.
+    """
+    limits = limits or DetectionLimits()
+    cmd = [
+        sys.executable,
+        "-m",
+        "pipeline.audit.worker",
+        str(repo_root),
+        str(_kg.default_data_dir()),
+        str(limits.memory_bytes),
+        str(limits.seconds),
+    ]
+    env = {k: os.environ[k] for k in _CHILD_ENV if k in os.environ}
+    started = time.monotonic()
+    proc = subprocess.Popen(
+        cmd,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        cwd=_REPO_ROOT,
+        env=env,
+        start_new_session=True,
+    )
+    try:
+        out, _ = proc.communicate(timeout=limits.seconds)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except (OSError, AttributeError):
+            proc.kill()
+        proc.communicate()
+        log.warning("audit detection killed after %.1f s", time.monotonic() - started)
+        raise DetectionAborted(
+            "The repository's files could not be analysed within the time limit."
+        ) from None
+    if proc.returncode != 0 or len(out) > 5_000_000:
+        log.warning("audit detection ended with code %s", proc.returncode)
+        raise DetectionAborted(
+            "The repository's files could not be analysed within the audit's limits."
+        )
+    try:
+        return DetectedStack.model_validate_json(out)
+    except ValueError:
+        raise DetectionAborted(
+            "The repository's files could not be analysed within the audit's limits."
+        ) from None
+
+
 def distinct_tool_count(stack: DetectedStack) -> int:
     """Catalog tools found, each counted once however often it was seen."""
     return len({t.id for t in stack.supervision_tools if t.in_kg and t.id})
@@ -559,12 +639,16 @@ def audit_repo_local(
     repo_url: Optional[str] = None,
     *,
     fetch_stats: FetchStats | None = None,
+    isolate: bool = False,
+    detection_limits: DetectionLimits | None = None,
 ) -> AuditReport:
     """Audit a directory that is already on disk.
 
     ``repo_url`` is the URL shown in the report; when omitted it is a
     ``file://`` URL of the path. Raises ``FileNotFoundError`` when the
-    path is not a directory.
+    path is not a directory. With ``isolate`` the files are read in a
+    child process under ``detection_limits`` (see
+    :func:`detect_stack_isolated`); use it for content you do not trust.
     """
     root = Path(repo_path).resolve()
     if not root.is_dir():
@@ -575,7 +659,10 @@ def audit_repo_local(
     url = repo_url or root.as_uri()
     kg = load_tool_index()
 
-    stack = _build_stack(root)
+    if isolate:
+        stack = detect_stack_isolated(root, limits=detection_limits)
+    else:
+        stack = _build_stack(root)
     coverage = build_coverage_grid(stack.supervision_tools, kg_index=kg)
     gaps = find_gaps(coverage, stack, kg_index=kg)
     summary = _build_summary(url, stack, coverage, gaps)
@@ -600,12 +687,16 @@ def audit_repo(
     limits: FetchLimits | None = None,
     github_token: str | None = None,
     client: GitHubClient | None = None,
+    isolate: bool = True,
+    detection_limits: DetectionLimits | None = None,
 ) -> AuditReport:
     """Audit a public GitHub repository by URL.
 
     Raises ``ValueError`` for a URL that is not a GitHub repository root
     and :class:`AuditError` (a ``RuntimeError``) when the repository cannot
-    be fetched; the message of either is safe to show to a user.
+    be fetched or its files cannot be read within the limits; the message
+    of either is safe to show to a user. The fetched files are read in a
+    child process (``isolate``), because their content is not trusted.
     """
     owner, repo = parse_repo_url(repo_url)
     with tempfile.TemporaryDirectory(prefix="saica-audit-") as tmp:
@@ -614,12 +705,18 @@ def audit_repo(
             owner, repo, dest, limits=limits, token=github_token, client=client
         )
         return audit_repo_local(
-            dest, repo_url=f"https://github.com/{owner}/{repo}", fetch_stats=stats
+            dest,
+            repo_url=f"https://github.com/{owner}/{repo}",
+            fetch_stats=stats,
+            isolate=isolate,
+            detection_limits=detection_limits,
         )
 
 
 __all__ = [
     "AuditError",
+    "DetectionAborted",
+    "DetectionLimits",
     "FetchLimits",
     "FetchStats",
     "FetchUnavailable",
@@ -630,6 +727,7 @@ __all__ = [
     "audit_repo",
     "audit_repo_local",
     "build_limits",
+    "detect_stack_isolated",
     "distinct_tool_count",
     "fetch_repo",
     "parse_repo_url",

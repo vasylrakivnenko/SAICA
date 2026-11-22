@@ -37,6 +37,7 @@ Conventions:
 
 from __future__ import annotations
 
+import ast
 import fnmatch
 import json
 import re
@@ -114,13 +115,42 @@ def _load_json_object(path: Path) -> dict:
         return {}
 
 
+_SafeBase = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+class _TooCostly(yaml.YAMLError):
+    """The file asks for more expansion than the audit is willing to do."""
+
+
+class _AuditYamlLoader(_SafeBase):  # type: ignore[misc, valid-type]
+    """Safe loader for files from other people's repositories.
+
+    One refusal on top of ``yaml.safe_load``: a merge key (``<<:``) is
+    never expanded. Merging aliases of aliases copies entries, so nine
+    merges over seven levels (356 bytes) cost seconds, and each further
+    level nine times more time and memory. Plain aliases are harmless
+    here: PyYAML shares the object, and the detectors look only two levels
+    deep. A refused workflow is still scanned line by line; a refused
+    pre-commit file yields no hooks. Uses libyaml's parser when PyYAML
+    has it (about ten times faster on large files).
+    """
+
+    def flatten_mapping(self, node: Any) -> None:
+        for key_node, _ in node.value:
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                raise _TooCostly("merge keys are not expanded")
+
+
 def _load_yaml(path: Path) -> Any:
-    """Parse a YAML file; ``None`` when it is missing or does not parse."""
+    """Parse a YAML file; ``None`` when it is missing, does not parse or
+    is refused by :class:`_AuditYamlLoader`."""
     if not path.is_file():
         return None
     try:
-        return yaml.safe_load(_safe_read_text(path))
-    except (yaml.YAMLError, ValueError, RecursionError):
+        return yaml.load(
+            _safe_read_text(path), Loader=_AuditYamlLoader
+        )  # noqa: S506 - a SafeLoader subclass
+    except (yaml.YAMLError, ValueError, RecursionError, MemoryError):
         return None
 
 
@@ -566,6 +596,59 @@ def _parse_requirement_line(line: str) -> str | None:
     return m.group(1) if m else None
 
 
+def _install_requires(text: str) -> list[str]:
+    """Requirement strings of ``install_requires`` in a ``setup.py``.
+
+    The file is parsed as Python, never run: only a list of string
+    literals given as ``install_requires=[...]`` (a keyword argument or an
+    assignment) counts, so a comment or a docstring that mentions the word
+    does not. A file that is not valid Python 3 gets a plain text scan of
+    the first ``install_requires=[ ... ]`` with comment lines skipped; that
+    scan uses ``str.find`` and is linear in the file size.
+    """
+    try:
+        tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError, MemoryError):
+        tree = None
+    if tree is not None:
+        out: list[str] = []
+        for node in ast.walk(tree):
+            value = None
+            if isinstance(node, ast.keyword) and node.arg == "install_requires":
+                value = node.value
+            elif isinstance(node, ast.Assign) and any(
+                isinstance(t, ast.Name) and t.id == "install_requires"
+                for t in node.targets
+            ):
+                value = node.value
+            if isinstance(value, (ast.List, ast.Tuple)):
+                out.extend(
+                    el.value
+                    for el in value.elts
+                    if isinstance(el, ast.Constant) and isinstance(el.value, str)
+                )
+        return out
+
+    lines = [ln for ln in text.splitlines() if not ln.lstrip().startswith("#")]
+    body = "\n".join(lines)
+    at = body.find("install_requires")
+    if at < 0:
+        return []
+    opened = body.find("[", at)
+    if opened < 0 or body[at + len("install_requires") : opened].strip() != "=":
+        return []
+    closed = body.find("]", opened)
+    if closed < 0:
+        return []
+    out = []
+    for line in body[opened + 1 : closed].splitlines():
+        for raw in line.split("#", 1)[0].split(","):
+            raw = raw.strip().strip("'\"")
+            if raw:
+                out.append(raw)
+    return out
+
+
 def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
     """Return ``{normalized_pkg_name: [paths]}`` aggregated across Python manifests.
 
@@ -626,20 +709,13 @@ def _python_packages_from_files(repo_root: Path) -> dict[str, list[str]]:
                 if m:
                     add(m.group(1), pipfile)
 
-    # setup.py — best-effort scan of install_requires=[...]; comment lines
-    # inside the list are dropped by _parse_requirement_line.
+    # setup.py — the strings of ``install_requires=[...]``.
     setup_py = repo_root / "setup.py"
     if setup_py.is_file():
-        text = _safe_read_text(setup_py)
-        m = re.search(r"install_requires\s*=\s*\[(.*?)\]", text, re.DOTALL)
-        if m:
-            for line in m.group(1).splitlines():
-                if line.strip().startswith("#"):
-                    continue
-                for raw in line.split(","):
-                    name = _parse_requirement_line(raw.strip().strip("'\""))
-                    if name:
-                        add(name, setup_py)
+        for dep in _install_requires(_safe_read_text(setup_py)):
+            name = _parse_requirement_line(dep)
+            if name:
+                add(name, setup_py)
 
     return packages
 
@@ -945,6 +1021,15 @@ def _matches(path: str, pattern: str) -> bool:
     return path.count("/") == pattern.count("/") and fnmatch.fnmatchcase(path, pattern)
 
 
+def _slashes(path: str) -> list[int]:
+    """Positions of the first two ``/`` in a path (markers are that deep at most)."""
+    first = path.find("/")
+    if first < 0:
+        return []
+    second = path.find("/", first + 1)
+    return [first] if second < 0 else [first, second]
+
+
 def fetch_plan(
     blob_paths: list[str], tree_paths: list[str]
 ) -> tuple[list[str], list[str], list[str]]:
@@ -956,20 +1041,19 @@ def fetch_plan(
     is enough), and folders that only have to exist. Each list is sorted.
     """
     presence_files, presence_dirs = presence_markers()
-    content = sorted(
-        p for p in blob_paths if any(_matches(p, pat) for pat in CONTENT_PATTERNS)
-    )
-    files = sorted(
-        p
-        for p in blob_paths
-        if p not in content and any(_matches(p, pat) for pat in presence_files)
-    )
-    wanted_dirs = set(presence_dirs)
-    folders = sorted(
-        d
-        for d in wanted_dirs
-        if d in tree_paths or any(p.startswith(d + "/") for p in blob_paths)
-    )
+    content: list[str] = []
+    files: list[str] = []
+    for p in blob_paths:
+        if any(_matches(p, pat) for pat in CONTENT_PATTERNS):
+            content.append(p)
+        elif any(_matches(p, pat) for pat in presence_files):
+            files.append(p)
+    trees = set(tree_paths)
+    # A folder also exists when a listed file lies below it.
+    parents = {p[:i] for p in blob_paths for i in _slashes(p)}
+    folders = sorted(d for d in presence_dirs if d in trees or d in parents)
+    content.sort()
+    files.sort()
     return content, files, folders
 
 

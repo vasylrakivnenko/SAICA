@@ -22,7 +22,8 @@ them with ``recorded_by: "cli"`` and leaves the files untouched.
 Design constraints:
 
 - stdlib only (no ``pydantic``, no ``requests``)
-- append only; idempotent within the same second on (ts, tool_id, mechanism)
+- append only; idempotent within the same second on
+  (ts, tool_id, mechanism, detail)
 - the failure-mode id is not checked against the KG here
 """
 
@@ -225,7 +226,9 @@ def observed_events(log_dir: Path | None = None) -> list[dict[str, Any]]:
 
 
 def _is_duplicate(target: Path, event: dict[str, Any]) -> bool:
-    """True if *event* matches the last line of *target* on (ts, tool_id, mechanism)."""
+    """True if *event* matches the last line of *target* on
+    (ts, tool_id, mechanism, detail). Two different events in one second
+    are both kept; the same event written twice is kept once."""
 
     if not target.exists():
         return False
@@ -252,6 +255,7 @@ def _is_duplicate(target: Path, event: dict[str, Any]) -> bool:
             prev.get("ts") == event["ts"]
             and prev.get("tool_id") == event["tool_id"]
             and prev.get("mechanism") == event["mechanism"]
+            and prev.get("detail", "") == event.get("detail", "")
         ):
             return True
         # Only check the most recent record — duplicates only matter for

@@ -124,11 +124,14 @@ class Audit:
         return _report(self.tmp_path / "empty", repo_url)
 
 
-def _client(**kwargs) -> TestClient:
+def _client(peer: str = "198.51.100.200", **kwargs) -> TestClient:
+    """``peer`` is the address of the socket that reaches the app."""
     kwargs.setdefault("find_similar", Retrieval())
     kwargs.setdefault("kimi_call", Model())
     kwargs.setdefault("settings", Settings())
-    return TestClient(create_app(**kwargs), raise_server_exceptions=False)
+    return TestClient(
+        create_app(**kwargs), raise_server_exceptions=False, client=(peer, 50000)
+    )
 
 
 def _ask(client: TestClient, question: str = "what prevents hallucinations?", **kwargs):
@@ -245,8 +248,10 @@ def test_failed_retrieval_gives_the_reserved_call_back() -> None:
 
 
 def test_per_client_limit_counts_the_address_the_proxy_wrote() -> None:
+    """The app sits behind a trusted proxy (here: loopback)."""
     retrieval, model = Retrieval(), Model()
     client = _client(
+        peer="127.0.0.1",
         find_similar=retrieval,
         kimi_call=model,
         budget=CallBudget(max_calls=100),
@@ -273,34 +278,118 @@ def test_per_client_limit_counts_the_address_the_proxy_wrote() -> None:
     assert "this address" in refused.json()["detail"]
 
 
+def test_forwarded_header_from_an_untrusted_peer_is_ignored() -> None:
+    """Reached directly, 12 of 12 requests passed by varying the header."""
+    model = Model()
+    client = _client(  # the default peer is a public address, not a proxy
+        kimi_call=model,
+        budget=CallBudget(max_calls=100),
+        settings=Settings(ask_per_client_hour=2),
+    )
+    codes = [
+        _ask(client, headers={"X-Forwarded-For": f"203.0.113.{i}"}).status_code
+        for i in range(12)
+    ]
+    assert codes == [200, 200] + [429] * 10
+    assert model.calls == 2
+
+
+def test_second_header_line_and_ports_cannot_split_or_merge_buckets() -> None:
+    client = _client(
+        peer="127.0.0.1",
+        budget=CallBudget(max_calls=100),
+        settings=Settings(ask_per_client_hour=2),
+    )
+
+    def ask_with(lines: list[str]) -> int:
+        headers = [("X-Forwarded-For", line) for line in lines]
+        return client.post("/ask", json={"question": "q"}, headers=headers).status_code
+
+    # The proxy appends its entry as a second line; the caller varies the first.
+    codes = [ask_with([f"9.9.9.{i}", "203.0.113.7"]) for i in range(4)]
+    assert codes == [200, 200, 429, 429]
+    # "ip:port" entries are two different visitors, not one "unknown" bucket.
+    assert ask_with(["198.51.100.1:5555"]) == 200
+    assert ask_with(["198.51.100.2:5555"]) == 200
+    assert [ask_with(["[2001:db8::1]:443"]) for _ in range(3)] == [200, 200, 429]
+
+
+LOOP = ("127.0.0.1", 0)
+PROXY = ("10.1.1.1", 0)
+TRUST_PROXY = ("10.0.0.0/8",)
+
+
 @pytest.mark.parametrize(
-    "peer, forwarded, hops, expected",
+    "peer, forwarded, hops, trusted, expected",
     [
-        (("192.0.2.1", 5), None, 1, "192.0.2.1"),  # no proxy: the socket
-        (("10.1.1.1", 0), "203.0.113.7", 1, "203.0.113.7"),
+        (("192.0.2.1", 5), None, 1, (), "192.0.2.1"),  # no header: the socket
+        # An untrusted peer may write what it likes; it is counted as itself.
+        (("192.0.2.1", 5), ["6.6.6.6"], 1, (), "192.0.2.1"),
+        (("192.0.2.1", 5), ["6.6.6.6"], 1, TRUST_PROXY, "192.0.2.1"),
+        (PROXY, ["203.0.113.7"], 1, TRUST_PROXY, "203.0.113.7"),
         (
-            ("10.1.1.1", 0),
+            PROXY,
             "6.6.6.6, 203.0.113.7",
             1,
+            TRUST_PROXY,
             "203.0.113.7",
         ),  # forged left entry
-        (("10.1.1.1", 0), "6.6.6.6, 203.0.113.7, 10.9.9.9", 2, "203.0.113.7"),
-        (("10.1.1.1", 0), "203.0.113.7", 2, "203.0.113.7"),  # fewer entries than hops
-        (("10.1.1.1", 0), " , ", 1, "10.1.1.1"),
-        (("10.1.1.1", 0), "not-an-address", 1, "unknown"),
-        (None, None, 1, "unknown"),
         (
-            ("10.1.1.1", 0),
-            "2001:db8:1:2:aaaa:bbbb:cccc:dddd",
+            PROXY,
+            ["6.6.6.6", "203.0.113.7"],
             1,
+            TRUST_PROXY,
+            "203.0.113.7",
+        ),  # two header lines
+        (PROXY, ["6.6.6.6, 203.0.113.7, 10.9.9.9"], 2, TRUST_PROXY, "203.0.113.7"),
+        (PROXY, ["203.0.113.7"], 2, TRUST_PROXY, "10.1.1.1"),  # fewer entries than hops
+        (PROXY, [" , "], 1, TRUST_PROXY, "10.1.1.1"),
+        (PROXY, ["not-an-address"], 1, TRUST_PROXY, "10.1.1.1"),  # no shared "unknown"
+        (PROXY, ["203.0.113.7:4711"], 1, TRUST_PROXY, "203.0.113.7"),
+        (PROXY, ["[2001:db8:1:2::1]:4711"], 1, TRUST_PROXY, "2001:db8:1:2::"),
+        (
+            PROXY,
+            ["2001:db8:1:2:aaaa:bbbb:cccc:dddd"],
+            1,
+            TRUST_PROXY,
             "2001:db8:1:2::",
         ),  # per /64
-        (("10.1.1.1", 0), "2001:db8:1:2::1", 1, "2001:db8:1:2::"),
-        (("10.1.1.1", 0), "::ffff:203.0.113.7", 1, "203.0.113.7"),
+        (PROXY, ["::ffff:203.0.113.7"], 1, TRUST_PROXY, "203.0.113.7"),
+        (
+            LOOP,
+            ["203.0.113.7"],
+            1,
+            server.DEFAULT_TRUSTED_PROXIES,
+            "203.0.113.7",
+        ),  # default: loopback
+        (("::1", 0), ["203.0.113.7"], 1, server.DEFAULT_TRUSTED_PROXIES, "203.0.113.7"),
+        (PROXY, ["203.0.113.7"], 1, server.DEFAULT_TRUSTED_PROXIES, "10.1.1.1"),
+        (
+            ("192.0.2.1", 5),
+            ["203.0.113.7"],
+            1,
+            ("*",),
+            "203.0.113.7",
+        ),  # the owner's explicit choice
+        (None, ["203.0.113.7"], 1, ("*",), "unknown"),
+        (("testclient", 5), None, 1, (), "unknown"),
     ],
 )
-def test_client_key(peer, forwarded, hops, expected) -> None:
-    assert client_key(peer, forwarded, hops) == expected
+def test_client_key(peer, forwarded, hops, trusted, expected) -> None:
+    assert client_key(peer, forwarded, hops, trusted) == expected
+
+
+def test_trusted_proxies_from_env(monkeypatch) -> None:
+    monkeypatch.delenv("FORWARDED_ALLOW_IPS", raising=False)
+    assert server.trusted_proxies_from_env() == ("127.0.0.0/8", "::1/128")
+    monkeypatch.setenv("FORWARDED_ALLOW_IPS", "10.0.0.0/8, 192.168.1.5, nonsense")
+    assert server.trusted_proxies_from_env() == ("10.0.0.0/8", "192.168.1.5")
+    monkeypatch.setenv("FORWARDED_ALLOW_IPS", "*")
+    assert server.trusted_proxies_from_env() == ("*",)
+    assert server.is_trusted_proxy("10.2.3.4", ("10.0.0.0/8",)) is True
+    assert server.is_trusted_proxy("11.2.3.4", ("10.0.0.0/8",)) is False
+    assert server.is_trusted_proxy("garbage", ("10.0.0.0/8",)) is False
+    assert server.is_trusted_proxy("garbage", ("*",)) is True
 
 
 def test_per_client_limit_window_and_memory_bound() -> None:
@@ -635,6 +724,7 @@ def test_assess_has_its_own_daily_budget_that_resets(tmp_path: Path) -> None:
 def test_assess_per_client_limit(tmp_path: Path) -> None:
     audit = Audit(tmp_path)
     client = _client(
+        peer="127.0.0.1",
         audit=audit,
         assess_budget=CallBudget(max_calls=50),
         settings=Settings(assess_per_client_hour=2),
@@ -676,39 +766,44 @@ def test_assess_wall_clock_limit(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "error, status, shown",
+    "error, status, shown, cached",
     [
+        # Will not change within minutes: remembered, so a repeat costs nothing.
         (
             RepoNotFound("GitHub has no public repository at that address."),
             404,
             "GitHub has no public repository at that address.",
+            True,
         ),
         (
             RepoTooLarge("The repository's file listing is too large to audit."),
             422,
             "The repository's file listing is too large to audit.",
+            True,
         ),
+        (
+            ValueError("anything"),
+            400,
+            "repo_url must look like https://github.com/<owner>/<repo>",
+            True,
+        ),
+        # May work on the next try: never remembered.
         (
             FetchUnavailable("GitHub could not be reached."),
             503,
             "GitHub could not be reached.",
-        ),
-        (
-            ValueError("repo_url must look like https://github.com/<owner>/<repo>"),
-            400,
-            "repo_url must look like https://github.com/<owner>/<repo>",
+            False,
         ),
         (
             RuntimeError("'str' object has no attribute 'get' in /srv/app/x.py"),
             500,
             server.GENERIC_ERROR,
+            False,
         ),
-        (KeyError("secret-internal-key"), 500, server.GENERIC_ERROR),
+        (KeyError("secret-internal-key"), 500, server.GENERIC_ERROR, False),
     ],
 )
-def test_assess_errors_are_plain_and_failed_audits_are_not_cached(
-    tmp_path: Path, error, status, shown
-) -> None:
+def test_assess_errors_are_plain(tmp_path: Path, error, status, shown, cached) -> None:
     audit = Audit(tmp_path, error=error)
     client = _client(audit=audit, assess_budget=CallBudget(max_calls=10))
     resp = _assess(client)
@@ -716,8 +811,9 @@ def test_assess_errors_are_plain_and_failed_audits_are_not_cached(
     body = resp.json()
     assert body["detail"] == shown and body["request_id"]
     assert "/srv/app" not in resp.text and "secret-internal" not in resp.text
-    _assess(client)
-    assert len(audit.calls) == 2  # an error is not cached
+    again = _assess(client)
+    assert (again.status_code, again.json()["detail"]) == (status, shown)
+    assert len(audit.calls) == (1 if cached else 2)
 
 
 # ---------------------------------------------------------------------------
@@ -837,3 +933,128 @@ def test_pipeline_questions_add_declared_pipeline_friendly_tools() -> None:
         "what is fabrication?", 5, find_similar=find
     ) == [("fabrication", 0.9)]
     assert calls == [(5, None)]
+
+
+# ---------------------------------------------------------------------------
+# Follow-up after the independent review (2026-11-21)
+# ---------------------------------------------------------------------------
+
+
+def test_missing_repositories_do_not_spend_the_daily_budget(tmp_path: Path) -> None:
+    """Budget 3, three requests for repositories that do not exist: every
+    later caller got 429."""
+    audit = Audit(
+        tmp_path, error=RepoNotFound("GitHub has no public repository at that address.")
+    )
+    budget = CallBudget(max_calls=3)
+    client = _client(
+        audit=audit, assess_budget=budget, settings=Settings(assess_per_client_hour=100)
+    )
+    codes = [
+        _assess(client, f"https://github.com/o/missing{i}").status_code
+        for i in range(6)
+    ]
+    assert codes == [404] * 6
+    assert budget.summary() == "calls=0 tokens≈0"
+    audit.error = None
+    assert _assess(client, "https://github.com/o/real").status_code == 200
+    assert budget.summary() == "calls=1 tokens≈0"
+
+
+def test_negative_results_are_cached_for_minutes(tmp_path: Path) -> None:
+    audit = Audit(
+        tmp_path, error=RepoNotFound("GitHub has no public repository at that address.")
+    )
+    now = [1000.0]
+    client = _client(
+        audit=audit,
+        assess_budget=CallBudget(max_calls=10),
+        settings=Settings(assess_per_client_hour=100),
+        clock=lambda: now[0],
+    )
+    first = _assess(client, "https://github.com/o/gone")
+    again = _assess(client, "https://github.com/O/Gone.git")
+    assert (first.status_code, again.status_code) == (404, 404)
+    assert again.json()["detail"] == first.json()["detail"]
+    assert again.headers["x-saica-cache"] == "hit" and len(audit.calls) == 1
+    # A repository created in the meantime is found once the entry has expired.
+    audit.error = None
+    now[0] += 299
+    assert _assess(client, "https://github.com/o/gone").status_code == 404
+    now[0] += 2
+    assert _assess(client, "https://github.com/o/gone").status_code == 200
+    assert len(audit.calls) == 2
+
+
+def test_an_audit_that_cannot_be_read_within_limits_is_a_plain_422_and_cached(
+    tmp_path: Path,
+) -> None:
+    from pipeline.audit.analyzer import DetectionAborted
+
+    text = "The repository's files could not be analysed within the time limit."
+    audit = Audit(tmp_path, error=DetectionAborted(text))
+    budget = CallBudget(max_calls=10)
+    client = _client(audit=audit, assess_budget=budget)
+    responses = [_assess(client, "https://github.com/o/bomb") for _ in range(3)]
+    assert [r.status_code for r in responses] == [422, 422, 422]
+    assert responses[0].json()["detail"] == text
+    # The hostile repository is fetched and parsed once, not once per request.
+    assert len(audit.calls) == 1
+    # It did cost a fetch and a process: this one stays counted.
+    assert budget.summary() == "calls=1 tokens≈0"
+
+
+def test_a_result_that_arrives_after_the_timeout_is_kept(tmp_path: Path) -> None:
+    gate = threading.Event()
+    audit = Audit(tmp_path, gate=gate)
+    client = _client(
+        audit=audit,
+        assess_budget=CallBudget(max_calls=10),
+        settings=Settings(
+            assess_wall_clock=0.2, assess_per_client_hour=1000, assess_concurrency=1
+        ),
+    )
+    assert _assess(client).status_code == 504
+    gate.set()
+    for _ in range(100):
+        late = _assess(client)
+        if late.status_code == 200:
+            break
+        threading.Event().wait(0.05)
+    assert late.status_code == 200 and late.headers["x-saica-cache"] == "hit"
+    assert len(audit.calls) == 1  # the slow audit was not repeated
+
+
+def test_value_error_text_from_inside_the_audit_is_not_shown(tmp_path: Path) -> None:
+    audit = Audit(
+        tmp_path, error=ValueError("internal ValueError text /private/path token=xyz")
+    )
+    resp = _assess(_client(audit=audit, assess_budget=CallBudget(max_calls=5)))
+    assert resp.status_code == 400
+    assert (
+        resp.json()["detail"]
+        == "repo_url must look like https://github.com/<owner>/<repo>"
+    )
+    assert "token=xyz" not in resp.text
+
+
+def test_tokens_of_an_answer_that_came_after_the_timeout_are_recorded() -> None:
+    gate, started = threading.Event(), threading.Event()
+
+    def slow_model(prompt: str):
+        started.set()
+        assert gate.wait(timeout=10)
+        return "late", _response(tokens=4321)
+
+    budget = CallBudget(max_calls=10)
+    client = _client(
+        kimi_call=slow_model, budget=budget, settings=Settings(ask_wall_clock=0.2)
+    )
+    assert _ask(client).status_code == 504
+    assert budget.summary() == "calls=1 tokens≈0"
+    gate.set()
+    for _ in range(100):
+        if budget.summary() == "calls=1 tokens≈4321":
+            break
+        threading.Event().wait(0.05)
+    assert budget.summary() == "calls=1 tokens≈4321"

@@ -20,7 +20,9 @@
   failure-mode URLs 301 to the hyphenated ones, and ``/x/index.html`` 301s
   to ``/x/``.
 * Every response carries nosniff / referrer-policy / x-frame-options, plus
-  HSTS on https requests.
+  HSTS on https requests. Behind a TLS proxy the scheme comes from
+  ``X-Forwarded-Proto``, believed only from the peers in
+  ``FORWARDED_ALLOW_IPS`` (default: loopback).
 * Responses are gzipped; data files (``/api/*``, ``/kit/*``, ``*.json`` …)
   carry ``X-Robots-Tag: noindex`` so they stay fetchable but out of search
   results; hashed ``/_astro/*`` assets are cached for a year.
@@ -104,13 +106,43 @@ class SiteHeaders:
                     headers[key] = value
                 for key, value in SECURITY_HEADERS:
                     headers.setdefault(key, value)
-                # scope["scheme"] is "https" behind Replit's TLS proxy because
-                # uvicorn runs with proxy_headers=True (see main()).
+                # The scheme is https behind a trusted TLS proxy (ForwardedScheme).
                 if scope.get("scheme") == "https":
                     headers.setdefault(*HSTS_HEADER)
             await send(message)
 
         await self.app(scope, receive, send_with_headers)
+
+
+class ForwardedScheme:
+    """Take the scheme from ``X-Forwarded-Proto``, from trusted proxies only.
+
+    Behind a TLS-terminating proxy the app is reached over plain http and
+    learns from this header that the visitor used https (which switches
+    HSTS on). The header is believed only when the socket's peer is one of
+    ``FORWARDED_ALLOW_IPS`` (default: loopback). The client address is
+    never rewritten here: ``scope["client"]`` stays the real peer, and the
+    API's per-client limits read ``X-Forwarded-For`` themselves, under the
+    same rule (``pipeline.ask.server.client_key``).
+    """
+
+    def __init__(self, app, trusted: tuple[str, ...]) -> None:
+        self.app = app
+        self.trusted = trusted
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] == "http":
+            from pipeline.ask.server import is_trusted_proxy
+
+            client = scope.get("client")
+            if client and is_trusted_proxy(client[0], self.trusted):
+                for key, value in scope.get("headers") or []:
+                    if key == b"x-forwarded-proto":
+                        proto = value.decode("latin-1").strip().lower()
+                        if proto in ("http", "https"):
+                            scope["scheme"] = proto
+                        break
+        await self.app(scope, receive, send)
 
 
 def permanent_redirect(scope, path: str):
@@ -280,6 +312,10 @@ def build_app():
     # Inner -> outer: headers are set on the uncompressed response, then gzip.
     root.add_middleware(SiteHeaders)
     root.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=6)
+    from pipeline.ask.server import trusted_proxies_from_env
+
+    # Outermost: decide the scheme before anything looks at it.
+    root.add_middleware(ForwardedScheme, trusted=trusted_proxies_from_env())
     return root
 
 
@@ -335,20 +371,15 @@ def main(argv: list[str] | None = None) -> None:
         provider,
         "on" if os.environ.get("SERVE_STATIC") == "1" else "off",
     )
-    # Behind Replit's TLS proxy: take the scheme from X-Forwarded-Proto so
-    # HSTS and any absolute URL the app builds say https. The proxy's own
-    # address is not known in advance, hence "*". With "*" uvicorn also
-    # rewrites the client address from the *first* X-Forwarded-For entry,
-    # which the caller controls; the API's per-client limits therefore do
-    # not use it (see pipeline.ask.server.client_key).
-    uvicorn.run(
-        app,
-        host=host,
-        port=port,
-        log_level="info",
-        proxy_headers=True,
-        forwarded_allow_ips=os.environ.get("FORWARDED_ALLOW_IPS", "*"),
-    )
+    # uvicorn's own proxy handling stays off. With it and "*", uvicorn takes
+    # the client address from the *first* X-Forwarded-For entry, which the
+    # caller writes: it then shows up in the access log and in
+    # scope["client"]. The app reads the forwarded headers itself and only
+    # from peers named in FORWARDED_ALLOW_IPS (default: loopback); see
+    # ForwardedScheme above and pipeline.ask.server.client_key. Behind
+    # Replit's proxy, set FORWARDED_ALLOW_IPS in the deployment, otherwise
+    # the site sends no HSTS header and all visitors share one rate bucket.
+    uvicorn.run(app, host=host, port=port, log_level="info", proxy_headers=False)
 
 
 if __name__ == "__main__":

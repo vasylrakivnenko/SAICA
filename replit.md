@@ -45,6 +45,15 @@
   in the server process, so it also starts again on a restart. The other
   limits and their defaults are in `pipeline/ask/README.md`.
 
+### Proxy setting the deployment must set (since 2026-11-21)
+
+The web service believes `X-Forwarded-For` / `X-Forwarded-Proto` only from peers listed in
+`FORWARDED_ALLOW_IPS`. The default is loopback only (it was `*`). Behind Replit's proxy the deployment `run`
+command in `.replit` has to set it: `FORWARDED_ALLOW_IPS=*` if the proxy is the only way to reach the app, or
+the proxy's address range. Without it the service is safe but strict: no HSTS header is sent and all visitors
+share one hourly limit for Ask and one for Assess. To find the proxy's address, make one request to the deployed
+app and read the peer address in the uvicorn access log. `.replit` is not changed by this repository's fix round.
+
 ## Local CAO swarm
 
 - CAO is opt-in: start it from the workspace **Shell**, not with **Run** or

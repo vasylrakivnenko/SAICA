@@ -40,7 +40,8 @@ Model (keys may also sit in `.env.local`, which is read at start-up):
   OpenAI-compatible endpoint. These win when both are set.
 
 Server: `ASK_HOST` (default `127.0.0.1`), `ASK_PORT` (default `4322`),
-`SERVE_STATIC=1` (also serve `site/dist`), `FORWARDED_ALLOW_IPS`.
+`SERVE_STATIC=1` (also serve `site/dist`), `FORWARDED_ALLOW_IPS` (which
+peers are trusted proxies; see below).
 
 Limits (each has a default):
 
@@ -61,11 +62,20 @@ The budgets live in the server process. They start again at midnight UTC
 and after a restart, and each instance of an autoscaled deployment has its
 own: the real daily ceiling is the budget times the number of instances.
 
-The client address comes from the last entry of `X-Forwarded-For`, the one
-the nearest proxy wrote; entries further left can be forged by the caller
-and are ignored. This is only as good as the proxy: it must be the only
-way to reach the app and must append the address it saw. That has not been
-checked against the live deployment.
+The client address is the address of the socket that reaches the app.
+`X-Forwarded-For` is read only when that socket belongs to a trusted proxy:
+`FORWARDED_ALLOW_IPS` (addresses, networks, or `*`; default: loopback
+only). From a trusted proxy the app takes the entry the proxy appended
+(the last one) and ignores everything to its left, which a caller can
+forge. The same rule decides whether `X-Forwarded-Proto` is believed
+(HSTS is sent only on https).
+
+Behind a hosting proxy this must be set, or the proxy's headers are
+ignored: every visitor is then counted under the proxy's address (one
+shared hourly limit) and no HSTS header is sent. Use `*` only when the
+proxy is the one way to reach the app. From which address Replit's proxy
+connects, and how it builds the header, has not been checked against the
+live deployment.
 
 ## Responses
 
@@ -89,6 +99,11 @@ model answered.)
 `POST /api/assess`, 200: an `AuditReport` (`pipeline/audit/schemas.py`),
 including `limits`: what the audit can and cannot detect. A repository is
 audited at most once a day; the header `x-saica-cache` says `hit` or `miss`.
+A refusal that will not change soon (no such repository, too large, files
+that could not be read within the limits) is remembered for five minutes.
+A request for a repository that does not exist does not use up the day's
+budget. The repository's files are read in a separate process that is
+stopped after 8 seconds or 1 GB; the server itself never parses them.
 
 Errors are `{"detail": "<one sentence>", "request_id": "<id>"}`. The same
 id is in the `X-Request-ID` header and in the server log, where the cause
@@ -99,6 +114,6 @@ is recorded; the response never carries it.
 | 400 | blank question; a URL that is not a GitHub repository root |
 | 404 | (assess) no public repository at that address |
 | 413 | request body over 8,192 bytes |
-| 422 | the JSON does not have the expected fields; (assess) repository too large to list |
+| 422 | the JSON does not have the expected fields; (assess) repository too large to list, or its files could not be read within the time and memory limits |
 | 429 | per-client limit, all slots busy, or the day's budget is used up |
 | 500 / 502 / 503 / 504 | the model or GitHub failed or took too long |

@@ -129,12 +129,7 @@ def test_main_opens_server_without_preparing_embeddings(monkeypatch):
 
     prepare.assert_not_called()
     run.assert_called_once_with(
-        app,
-        host="0.0.0.0",
-        port=5000,
-        log_level="info",
-        proxy_headers=True,
-        forwarded_allow_ips="*",
+        app, host="0.0.0.0", port=5000, log_level="info", proxy_headers=False
     )
 
 
@@ -367,3 +362,52 @@ def test_api_limits_apply_under_the_api_mount(monkeypatch, tmp_path):
         assert "access-control-allow-origin" not in cors.headers
         # Static pages are not behind the body limit and carry no request id.
         assert "x-request-id" not in client.get("/about/").headers
+
+
+# --- follow-up after the independent review: forwarded headers ---
+
+
+def _client_from(monkeypatch, tmp_path, peer):
+    dist = tmp_path / peer
+    if not dist.exists():
+        dist.mkdir()
+        _seo_site(dist)
+    monkeypatch.setenv("SERVE_STATIC", "1")
+    monkeypatch.setattr(webapp, "SITE_DIST", dist)
+    return TestClient(webapp.build_app(), follow_redirects=False, client=(peer, 40000))
+
+
+def test_forwarded_proto_is_believed_from_a_trusted_proxy_only(monkeypatch, tmp_path):
+    monkeypatch.delenv("FORWARDED_ALLOW_IPS", raising=False)
+    https = {"X-Forwarded-Proto": "https"}
+    with _client_from(monkeypatch, tmp_path, "127.0.0.1") as proxied:
+        assert proxied.get("/about/", headers=https).headers[
+            "strict-transport-security"
+        ]
+        assert "strict-transport-security" not in proxied.get("/about/").headers
+        odd = proxied.get("/about/", headers={"X-Forwarded-Proto": "javascript"})
+        assert "strict-transport-security" not in odd.headers
+    with _client_from(monkeypatch, tmp_path, "203.0.113.9") as direct:
+        assert (
+            "strict-transport-security"
+            not in direct.get("/about/", headers=https).headers
+        )
+    monkeypatch.setenv("FORWARDED_ALLOW_IPS", "203.0.113.0/24")
+    with _client_from(monkeypatch, tmp_path, "203.0.113.9") as named:
+        assert named.get("/about/", headers=https).headers["strict-transport-security"]
+
+
+def test_uvicorn_does_not_rewrite_the_client_address(monkeypatch):
+    """With uvicorn's own proxy handling and "*", the first X-Forwarded-For
+    entry (the caller's text) became the client address in the access log
+    and in ``scope["client"]``."""
+    import uvicorn
+
+    monkeypatch.setattr(webapp, "configure_provider", lambda: "test")
+    monkeypatch.setattr(webapp, "load_env", lambda: None)
+    monkeypatch.setattr(webapp, "build_app", lambda: object())
+    run = Mock()
+    monkeypatch.setattr(uvicorn, "run", run)
+    webapp.main([])
+    assert run.call_args.kwargs["proxy_headers"] is False
+    assert "forwarded_allow_ips" not in run.call_args.kwargs
