@@ -196,7 +196,12 @@ def test_baseline_rules_shortcuts_and_out_of_scope_rows_are_never_best(built):
         ranked = sorted((r for r in m["rows"] if r["ranked"]), key=lambda r: r["rank"])
         assert [r["rank"] for r in ranked] == list(range(1, len(ranked) + 1))
         assert all(a["j"] >= b["j"] for a, b in zip(ranked, ranked[1:]))
-        assert m["best_reviewer"]["key"] == ranked[0]["key"] == m["top_group"][0]
+        # the best reviewer is the highest ranked row that is not incomplete (an incomplete row is never named best)
+        complete = [r for r in ranked if not r["incomplete"]] or ranked
+        assert m["best_reviewer"]["key"] == complete[0]["key"] == m["top_group"][0]
+        assert [x["key"] for x in m["incomplete_above_best"]] == [
+            r["key"] for r in ranked[: ranked.index(complete[0])]
+        ]
         assert all(by[k]["ranked"] for k in m["top_group"])
         t = m["best_catalog_tool"]
         if t:
@@ -223,17 +228,25 @@ def test_a_winner_is_named_only_when_the_paired_interval_excludes_zero(built):
     res, _, src = built
     for m in res["modes"]:
         ranked = sorted((r for r in m["rows"] if r["ranked"]), key=lambda r: r["rank"])
+        best = m["best_reviewer"]["key"]
+        above = {x["key"] for x in m["incomplete_above_best"]}
+        others = [r for r in ranked if r["key"] != best]
         tied = [
             r["key"]
-            for r in ranked[1:]
-            if r["vs_best"] is not None and not r["vs_best"]["separable"]
+            for r in others
+            if r["key"] in above
+            or (r["vs_best"] is not None and not r["vs_best"]["separable"])
         ]
-        assert m["top_group"] == [ranked[0]["key"]] + tied
+        assert m["top_group"] == [best] + tied
         assert (m["winner"] is None) == (len(m["top_group"]) > 1)
-        for r in ranked[1:]:
+        assert all(r["incomplete"] for r in ranked if r["key"] in above)
+        for r in others:
             d = r["vs_best"]
             if d is not None:
-                assert d["separable"] == (d["lo"] > 0 or d["hi"] < 0)
+                # decided at the published precision: a bound that prints as 0.0% does not exclude 0
+                assert d["separable"] == (
+                    round(d["lo"], 3) > 0 or round(d["hi"], 3) < 0
+                )
                 assert (
                     d["n"] <= r["n_pos_readable"] + r["n_neg_readable"]
                 )  # only samples both rows answered
