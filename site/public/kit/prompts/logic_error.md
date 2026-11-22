@@ -47,11 +47,11 @@ Answer with one JSON object only:
 
 | Row key | Published label | Model id as sent | Provider | temperature | Output budget as sent | Reasoning / extra | Streamed | Answers with no verdict | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| `plain_llm_mimo` | mimo-v2.6-flash, asked directly | `mimo-v2.6-flash` | hyperbolic | 0 | max_tokens 16384 | none sent (provider default; these models think before answering) | not recorded | 4 of 2440 |  |
-| `plain_llm_deepseek` | deepseek-v4-flash, asked directly | `deepseek-v4-flash-0731` | hyperbolic | 0 | max_tokens 16384 | none sent (provider default; these models think before answering) | not recorded | 8 of 2440 |  |
-| `plain_llm_luna` | gpt-6-luna, asked directly | `gpt-6-luna` | azure | not sent (service default) | max_completion_tokens 16384 | reasoning model; no reasoning_effort sent and no temperature sent (Azure accepts only its default) | no | 0 of 2440 |  |
-| `plain_llm_grok` | grok-4.1-fast (no reasoning), asked directly | `grok-4-1-fast-non-reasoning` | azure | 0 | max_completion_tokens 8192 | non-reasoning deployment; nothing sent | no | 0 of 2440 |  |
-| `plain_llm_phi` | Phi-4-mini, asked directly | `Phi-4-mini-instruct` | azure | 0 | max_completion_tokens 1024 | none | no | 117 of 2440 |  |
+| `plain_llm_mimo` | mimo-v2.6-flash, zero-shot | `mimo-v2.6-flash` | hyperbolic | 0 | max_tokens 16384 | none sent (provider default; these models think before answering) | not recorded | 4 of 2440 |  |
+| `plain_llm_deepseek` | deepseek-v4-flash, zero-shot | `deepseek-v4-flash-0731` | hyperbolic | 0 | max_tokens 16384 | none sent (provider default; these models think before answering) | not recorded | 8 of 2440 |  |
+| `plain_llm_luna` | gpt-6-luna, zero-shot | `gpt-6-luna` | azure | not sent (service default) | max_completion_tokens 16384 | reasoning model; no reasoning_effort sent and no temperature sent (Azure accepts only its default) | no | 0 of 2440 |  |
+| `plain_llm_grok` | grok-4.1-fast (no reasoning), zero-shot | `grok-4-1-fast-non-reasoning` | azure | 0 | max_completion_tokens 8192 | non-reasoning deployment; nothing sent | no | 0 of 2440 |  |
+| `plain_llm_phi` | Phi-4-mini, zero-shot | `Phi-4-mini-instruct` | azure | 0 | max_completion_tokens 1024 | none | no | 117 of 2440 |  |
 
 Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'.
 

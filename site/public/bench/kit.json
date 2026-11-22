@@ -1,5 +1,5 @@
 {
- "version": "2.0.0",
+ "version": "2.0.1",
  "generated": "2026-11-22",
  "generator": "bench/kitbuilder/build_kit.py (do not edit by hand)",
  "floor": 0.25,
@@ -44,7 +44,7 @@
    "rows": [
     {
      "key": "plain_llm_ds41",
-     "tool": "deepseek-v4.1-flash, asked directly",
+     "tool": "deepseek-v4.1-flash, zero-shot",
      "short": "deepseek-v4.1-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -130,7 +130,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "deepseek-v4.1-flash, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4.1-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4.1-flash, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4.1-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 94% (95% interval 92% to 97%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -148,7 +148,7 @@
     },
     {
      "key": "plain_llm_glm",
-     "tool": "glm-5.3, asked directly",
+     "tool": "glm-5.3, zero-shot",
      "short": "glm-5.3",
      "type": "baseline_model",
      "kind": "model",
@@ -234,7 +234,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "glm-5.3, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `glm-5.3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "glm-5.3, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `glm-5.3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 93% (95% interval 89% to 96%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -252,7 +252,7 @@
     },
     {
      "key": "plain_llm",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -338,7 +338,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 92% (95% interval 89% to 96%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -356,7 +356,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -441,7 +441,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 92% (95% interval 89% to 95%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -459,7 +459,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -545,7 +545,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 90% (95% interval 86% to 93%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -661,7 +661,7 @@
     },
     {
      "key": "plain_llm_minimax",
-     "tool": "minimax-m3, asked directly",
+     "tool": "minimax-m3, zero-shot",
      "short": "minimax-m3",
      "type": "baseline_model",
      "kind": "model",
@@ -747,7 +747,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "minimax-m3, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `minimax-m3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "minimax-m3, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `minimax-m3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 84% (95% interval 80% to 88%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -765,7 +765,7 @@
     },
     {
      "key": "plain_llm_gptoss",
-     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+     "tool": "gpt-oss-20b on one RTX 4090, zero-shot",
      "short": "gpt-oss-20b (self-hosted)",
      "type": "baseline_model",
      "kind": "model",
@@ -852,7 +852,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "gpt-oss-20b on one RTX 4090, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `openai/gpt-oss-20b`, temperature 0, max tokens 16384. Credentials come only from the environment variables SAICA_LOCAL_BASE_URL (your own OpenAI-compatible server (for example vLLM at http://localhost:8000/v1)) and SAICA_LOCAL_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-oss-20b on one RTX 4090, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `openai/gpt-oss-20b`, temperature 0, max tokens 16384. Credentials come only from the environment variables SAICA_LOCAL_BASE_URL (your own OpenAI-compatible server (for example vLLM at http://localhost:8000/v1)) and SAICA_LOCAL_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 81% (95% interval 76% to 85%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context.",
        "Self-hosted: served by vLLM on a GPU you control (we used a rented RunPod RTX 4090 through an SSH tunnel); no third-party API sees the code."
       ],
@@ -1171,7 +1171,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -1257,7 +1257,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 70% (95% interval 65% to 76%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -1515,7 +1515,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -1601,7 +1601,7 @@
        "prompts/fabrication.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/fabrication.md to .saica/prompts/fabrication.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 12% (95% interval 6% to 18%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
       ],
       "entry": {
@@ -1671,7 +1671,7 @@
    "rows": [
     {
      "key": "plain_llm_minimax",
-     "tool": "minimax-m3, asked directly",
+     "tool": "minimax-m3, zero-shot",
      "short": "minimax-m3",
      "type": "baseline_model",
      "kind": "model",
@@ -1759,7 +1759,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "minimax-m3, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `minimax-m3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "minimax-m3, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `minimax-m3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 91% (95% interval 81% to 95%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -1958,7 +1958,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -2046,7 +2046,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 89% (95% interval 78% to 94%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -2065,7 +2065,7 @@
     },
     {
      "key": "plain_llm",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -2153,7 +2153,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 89% (95% interval 79% to 93%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -2172,7 +2172,7 @@
     },
     {
      "key": "plain_llm_glm",
-     "tool": "glm-5.3, asked directly",
+     "tool": "glm-5.3, zero-shot",
      "short": "glm-5.3",
      "type": "baseline_model",
      "kind": "model",
@@ -2260,7 +2260,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "glm-5.3, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `glm-5.3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "glm-5.3, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `glm-5.3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 88% (95% interval 78% to 94%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -2279,7 +2279,7 @@
     },
     {
      "key": "plain_llm_ds41",
-     "tool": "deepseek-v4.1-flash, asked directly",
+     "tool": "deepseek-v4.1-flash, zero-shot",
      "short": "deepseek-v4.1-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -2367,7 +2367,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "deepseek-v4.1-flash, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4.1-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4.1-flash, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4.1-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 88% (95% interval 78% to 92%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -2515,7 +2515,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -2603,7 +2603,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 86% (95% interval 75% to 91%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -2622,7 +2622,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -2709,7 +2709,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 79% (95% interval 70% to 84%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -2728,7 +2728,7 @@
     },
     {
      "key": "plain_llm_gptoss",
-     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+     "tool": "gpt-oss-20b on one RTX 4090, zero-shot",
      "short": "gpt-oss-20b (self-hosted)",
      "type": "baseline_model",
      "kind": "model",
@@ -2817,7 +2817,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "gpt-oss-20b on one RTX 4090, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `openai/gpt-oss-20b`, temperature 0, max tokens 16384. Credentials come only from the environment variables SAICA_LOCAL_BASE_URL (your own OpenAI-compatible server (for example vLLM at http://localhost:8000/v1)) and SAICA_LOCAL_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-oss-20b on one RTX 4090, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `openai/gpt-oss-20b`, temperature 0, max tokens 16384. Credentials come only from the environment variables SAICA_LOCAL_BASE_URL (your own OpenAI-compatible server (for example vLLM at http://localhost:8000/v1)) and SAICA_LOCAL_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 75% (95% interval 62% to 84%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass.",
        "Self-hosted: served by vLLM on a GPU you control (we used a rented RunPod RTX 4090 through an SSH tunnel); no third-party API sees the code."
@@ -3022,7 +3022,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -3110,7 +3110,7 @@
        "prompts/test_manipulation.rule.txt"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/test_manipulation.md to .saica/prompts/test_manipulation.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 35% (95% interval 23% to 49%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time.",
        "This reviewer reads the coding agent's session transcript, not the diff. Download {kit}/prompts/test_manipulation.rule.txt (the benchmark's rule text) to .saica/prompts/ and commit it, and have the agent export its session (one line per event, as the prompt file describes) to .saica/session.txt before each commit. Without that file the check reports an error; it never reports a pass."
       ],
@@ -3276,7 +3276,7 @@
     },
     {
      "key": "plain_llm_gptoss",
-     "tool": "gpt-oss-20b on one RTX 4090, asked directly",
+     "tool": "gpt-oss-20b on one RTX 4090, zero-shot",
      "short": "gpt-oss-20b (self-hosted)",
      "type": "baseline_model",
      "kind": "model",
@@ -3365,7 +3365,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "gpt-oss-20b on one RTX 4090, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `openai/gpt-oss-20b`, temperature 0, max tokens 16384. Credentials come only from the environment variables SAICA_LOCAL_BASE_URL (your own OpenAI-compatible server (for example vLLM at http://localhost:8000/v1)) and SAICA_LOCAL_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-oss-20b on one RTX 4090, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `openai/gpt-oss-20b`, temperature 0, max tokens 16384. Credentials come only from the environment variables SAICA_LOCAL_BASE_URL (your own OpenAI-compatible server (for example vLLM at http://localhost:8000/v1)) and SAICA_LOCAL_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 8% (95% interval -0% to 16%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff.",
        "Self-hosted: served by vLLM on a GPU you control (we used a rented RunPod RTX 4090 through an SSH tunnel); no third-party API sees the code."
       ],
@@ -3384,7 +3384,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -3471,7 +3471,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 5% (95% interval -6% to 16%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -3560,7 +3560,7 @@
     },
     {
      "key": "plain_llm_ds41",
-     "tool": "deepseek-v4.1-flash, asked directly",
+     "tool": "deepseek-v4.1-flash, zero-shot",
      "short": "deepseek-v4.1-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -3648,7 +3648,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "deepseek-v4.1-flash, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4.1-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4.1-flash, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4.1-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 4% (95% interval -6% to 14%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -3666,7 +3666,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -3754,7 +3754,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 4% (95% interval -4% to 12%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -3772,7 +3772,7 @@
     },
     {
      "key": "plain_llm_ultra",
-     "tool": "ultramarine-1-flash (Fireworks), asked directly",
+     "tool": "ultramarine-1-flash (Fireworks), zero-shot",
      "short": "ultramarine-1-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -3860,7 +3860,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "ultramarine-1-flash (Fireworks), asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `accounts/fireworks/models/ultramarine-1-flash-us`, temperature 0, max tokens 16384. Credentials come only from the environment variables FIREWORKS_BASE_URL (https://api.fireworks.ai/inference/v1) and FIREWORKS_API_KEY; ask me to set them, never write a key into a file.",
+       "ultramarine-1-flash (Fireworks), zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `accounts/fireworks/models/ultramarine-1-flash-us`, temperature 0, max tokens 16384. Credentials come only from the environment variables FIREWORKS_BASE_URL (https://api.fireworks.ai/inference/v1) and FIREWORKS_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 3% (95% interval -5% to 12%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -3986,7 +3986,7 @@
     },
     {
      "key": "plain_llm",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -4074,7 +4074,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 3% (95% interval -8% to 13%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -4451,7 +4451,7 @@
     },
     {
      "key": "plain_llm_minimax",
-     "tool": "minimax-m3, asked directly",
+     "tool": "minimax-m3, zero-shot",
      "short": "minimax-m3",
      "type": "baseline_model",
      "kind": "model",
@@ -4539,7 +4539,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "minimax-m3, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `minimax-m3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "minimax-m3, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `minimax-m3`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J -0% (95% interval -8% to 8%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -4557,7 +4557,7 @@
     },
     {
      "key": "plain_llm_gpt41",
-     "tool": "gpt-4.1, asked directly",
+     "tool": "gpt-4.1, zero-shot",
      "short": "gpt-4.1",
      "type": "baseline_model",
      "kind": "model",
@@ -4645,7 +4645,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "gpt-4.1, asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-4.1`, temperature 0, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-4.1, zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-4.1`, temperature 0, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J -2% (95% interval -12% to 7%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -4663,7 +4663,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -4751,7 +4751,7 @@
        "prompts/security_vulnerability.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/security_vulnerability.md to .saica/prompts/security_vulnerability.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J -3% (95% interval -13% to 6%; 1243 bad + 459 clean samples) on the task text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -4866,7 +4866,7 @@
    "rows": [
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -4954,7 +4954,7 @@
        "prompts/logic_error.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 74% (95% interval 69% to 79%; 1536 bad + 904 clean samples) on one Python function and the task it was written for. At commit time this check sees each changed file in full, one request per file, and the task file; not one function with its own task. So: benchmark input not available at commit time."
       ],
       "entry": {
@@ -4972,7 +4972,7 @@
     },
     {
      "key": "plain_llm_deepseek",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -5060,7 +5060,7 @@
        "prompts/logic_error.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 69% (95% interval 64% to 74%; 1536 bad + 904 clean samples) on one Python function and the task it was written for. At commit time this check sees each changed file in full, one request per file, and the task file; not one function with its own task. So: benchmark input not available at commit time."
       ],
       "entry": {
@@ -5078,7 +5078,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -5165,7 +5165,7 @@
        "prompts/logic_error.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 68% (95% interval 63% to 73%; 1536 bad + 904 clean samples) on one Python function and the task it was written for. At commit time this check sees each changed file in full, one request per file, and the task file; not one function with its own task. So: benchmark input not available at commit time."
       ],
       "entry": {
@@ -5473,7 +5473,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -5561,7 +5561,7 @@
        "prompts/logic_error.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 22% (95% interval 17% to 27%; 1536 bad + 904 clean samples) on one Python function and the task it was written for. At commit time this check sees each changed file in full, one request per file, and the task file; not one function with its own task. So: benchmark input not available at commit time."
       ],
       "entry": {
@@ -5579,7 +5579,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -5667,7 +5667,7 @@
        "prompts/logic_error.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/logic_error.md to .saica/prompts/logic_error.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 12% (95% interval 9% to 15%; 1536 bad + 904 clean samples) on one Python function and the task it was written for. At commit time this check sees each changed file in full, one request per file, and the task file; not one function with its own task. So: benchmark input not available at commit time."
       ],
       "entry": {
@@ -5957,7 +5957,7 @@
     },
     {
      "key": "plain_llm_deepseek",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -6047,7 +6047,7 @@
        "prompts/incomplete_execution.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 20% (95% interval 14% to 26%; 600 bad + 600 clean samples) on the issue, the agent's final patch and the agent's closing message. At commit time this check sees the task file and the commit's diff; the closing message only if the agent writes it to .saica/final_message.txt before committing. So: part of the benchmark input is not available at commit time.",
        "This reviewer also reads the agent's closing message. Have the agent write it to .saica/final_message.txt before committing. Without that file the check reports an error; it never reports a pass."
       ],
@@ -6066,7 +6066,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -6156,7 +6156,7 @@
        "prompts/incomplete_execution.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 20% (95% interval 14% to 25%; 600 bad + 600 clean samples) on the issue, the agent's final patch and the agent's closing message. At commit time this check sees the task file and the commit's diff; the closing message only if the agent writes it to .saica/final_message.txt before committing. So: part of the benchmark input is not available at commit time.",
        "This reviewer also reads the agent's closing message. Have the agent write it to .saica/final_message.txt before committing. Without that file the check reports an error; it never reports a pass."
       ],
@@ -6175,7 +6175,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -6264,7 +6264,7 @@
        "prompts/incomplete_execution.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 20% (95% interval 14% to 25%; 600 bad + 600 clean samples) on the issue, the agent's final patch and the agent's closing message. At commit time this check sees the task file and the commit's diff; the closing message only if the agent writes it to .saica/final_message.txt before committing. So: part of the benchmark input is not available at commit time.",
        "This reviewer also reads the agent's closing message. Have the agent write it to .saica/final_message.txt before committing. Without that file the check reports an error; it never reports a pass."
       ],
@@ -6569,7 +6569,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -6659,7 +6659,7 @@
        "prompts/incomplete_execution.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 2% (95% interval -0% to 5%; 600 bad + 600 clean samples) on the issue, the agent's final patch and the agent's closing message. At commit time this check sees the task file and the commit's diff; the closing message only if the agent writes it to .saica/final_message.txt before committing. So: part of the benchmark input is not available at commit time.",
        "This reviewer also reads the agent's closing message. Have the agent write it to .saica/final_message.txt before committing. Without that file the check reports an error; it never reports a pass."
       ],
@@ -6923,7 +6923,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -7013,7 +7013,7 @@
        "prompts/incomplete_execution.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/incomplete_execution.md to .saica/prompts/incomplete_execution.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 0% (95% interval -1% to 1%; 600 bad + 600 clean samples) on the issue, the agent's final patch and the agent's closing message. At commit time this check sees the task file and the commit's diff; the closing message only if the agent writes it to .saica/final_message.txt before committing. So: part of the benchmark input is not available at commit time.",
        "This reviewer also reads the agent's closing message. Have the agent write it to .saica/final_message.txt before committing. Without that file the check reports an error; it never reports a pass."
       ],
@@ -7069,7 +7069,7 @@
    "rows": [
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -7157,7 +7157,7 @@
        "prompts/scope_creep.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 98% (95% interval 94% to 99%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -7175,7 +7175,7 @@
     },
     {
      "key": "plain_llm_deepseek",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -7263,7 +7263,7 @@
        "prompts/scope_creep.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 93% (95% interval 87% to 96%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -7281,7 +7281,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -7368,7 +7368,7 @@
        "prompts/scope_creep.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 91% (95% interval 86% to 95%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -7386,7 +7386,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -7474,7 +7474,7 @@
        "prompts/scope_creep.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 53% (95% interval 44% to 61%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -7881,7 +7881,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -7969,7 +7969,7 @@
        "prompts/scope_creep.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/scope_creep.md to .saica/prompts/scope_creep.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J -4% (95% interval -14% to 7%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -8073,7 +8073,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -8160,7 +8160,7 @@
        "prompts/obsolescence.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 90% (95% interval 83% to 95%; 155 bad + 155 clean samples) on one whole solution file and the coding request. At commit time this check sees each changed file in full, one request per file, and the task file."
       ],
       "entry": {
@@ -8178,7 +8178,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -8266,7 +8266,7 @@
        "prompts/obsolescence.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 88% (95% interval 80% to 95%; 155 bad + 155 clean samples) on one whole solution file and the coding request. At commit time this check sees each changed file in full, one request per file, and the task file."
       ],
       "entry": {
@@ -8284,7 +8284,7 @@
     },
     {
      "key": "plain_llm_deepseek",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -8372,7 +8372,7 @@
        "prompts/obsolescence.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 88% (95% interval 82% to 94%; 155 bad + 155 clean samples) on one whole solution file and the coding request. At commit time this check sees each changed file in full, one request per file, and the task file."
       ],
       "entry": {
@@ -8500,7 +8500,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -8588,7 +8588,7 @@
        "prompts/obsolescence.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 53% (95% interval 41% to 64%; 155 bad + 155 clean samples) on one whole solution file and the coding request. At commit time this check sees each changed file in full, one request per file, and the task file."
       ],
       "entry": {
@@ -8606,7 +8606,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -8694,7 +8694,7 @@
        "prompts/obsolescence.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/obsolescence.md to .saica/prompts/obsolescence.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 14% (95% interval 6% to 24%; 155 bad + 155 clean samples) on one whole solution file and the coding request. At commit time this check sees each changed file in full, one request per file, and the task file."
       ],
       "entry": {
@@ -9206,7 +9206,7 @@
     },
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -9293,7 +9293,7 @@
        "prompts/supply_chain_attack.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 77% (95% interval 70% to 84%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -9311,7 +9311,7 @@
     },
     {
      "key": "plain_llm_deepseek",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -9399,7 +9399,7 @@
        "prompts/supply_chain_attack.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 72% (95% interval 65% to 79%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -9417,7 +9417,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -9505,7 +9505,7 @@
        "prompts/supply_chain_attack.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 65% (95% interval 57% to 73%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -9642,7 +9642,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -9730,7 +9730,7 @@
        "prompts/supply_chain_attack.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 18% (95% interval 9% to 26%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -9748,7 +9748,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -9836,7 +9836,7 @@
        "prompts/supply_chain_attack.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/supply_chain_attack.md to .saica/prompts/supply_chain_attack.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 0% (95% interval -3% to 3%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
       ],
       "entry": {
@@ -9968,7 +9968,7 @@
    "rows": [
     {
      "key": "plain_llm_luna",
-     "tool": "gpt-6-luna, asked directly",
+     "tool": "gpt-6-luna, zero-shot",
      "short": "gpt-6-luna",
      "type": "baseline_model",
      "kind": "model",
@@ -10057,7 +10057,7 @@
        "prompts/dependency_blindness.md"
       ],
       "setup": [
-       "gpt-6-luna, asked directly: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "gpt-6-luna, zero-shot: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-6-luna`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 90% (95% interval 82% to 98%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       ],
       "entry": {
@@ -10075,7 +10075,7 @@
     },
     {
      "key": "plain_llm_deepseek",
-     "tool": "deepseek-v4-flash, asked directly",
+     "tool": "deepseek-v4-flash, zero-shot",
      "short": "deepseek-v4-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -10165,7 +10165,7 @@
        "prompts/dependency_blindness.md"
       ],
       "setup": [
-       "deepseek-v4-flash, asked directly: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "deepseek-v4-flash, zero-shot: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `deepseek-v4-flash-0731`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 86% (95% interval 76% to 94%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       ],
       "entry": {
@@ -10183,7 +10183,7 @@
     },
     {
      "key": "plain_llm_mimo",
-     "tool": "mimo-v2.6-flash, asked directly",
+     "tool": "mimo-v2.6-flash, zero-shot",
      "short": "mimo-v2.6-flash",
      "type": "baseline_model",
      "kind": "model",
@@ -10273,7 +10273,7 @@
        "prompts/dependency_blindness.md"
       ],
       "setup": [
-       "mimo-v2.6-flash, asked directly: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
+       "mimo-v2.6-flash, zero-shot: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `mimo-v2.6-flash`, temperature 0, max tokens 32768. Credentials come only from the environment variables HYPERBOLIC_BASE_URL (https://api.hyperbolic.ai/inference/v1) and HYPERBOLIC_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 86% (95% interval 76% to 94%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       ],
       "entry": {
@@ -10291,7 +10291,7 @@
     },
     {
      "key": "plain_llm_grok",
-     "tool": "grok-4.1-fast (no reasoning), asked directly",
+     "tool": "grok-4.1-fast (no reasoning), zero-shot",
      "short": "grok-4.1-fast",
      "type": "baseline_model",
      "kind": "model",
@@ -10381,7 +10381,7 @@
        "prompts/dependency_blindness.md"
       ],
       "setup": [
-       "grok-4.1-fast (no reasoning), asked directly: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "grok-4.1-fast (no reasoning), zero-shot: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `grok-4-1-fast-non-reasoning`, temperature 0, max tokens 8192. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J 64% (95% interval 50% to 76%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       ],
       "entry": {
@@ -10600,7 +10600,7 @@
     },
     {
      "key": "plain_llm_phi",
-     "tool": "Phi-4-mini, asked directly",
+     "tool": "Phi-4-mini, zero-shot",
      "short": "Phi-4-mini",
      "type": "baseline_model",
      "kind": "model",
@@ -10690,7 +10690,7 @@
        "prompts/dependency_blindness.md"
       ],
       "setup": [
-       "Phi-4-mini, asked directly: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Phi-4-mini, zero-shot: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `Phi-4-mini-instruct`, temperature 0, max tokens 1024. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
        "Benchmark J -6% (95% interval -24% to 11%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
       ],
       "entry": {
@@ -10994,7 +10994,7 @@
       "tpr": 0.956897,
       "fpr": 0.013889,
       "cost1k": 1.106506,
-      "config": "deepseek-v4.1-flash, asked directly",
+      "config": "deepseek-v4.1-flash, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11002,7 +11002,7 @@
       "tpr": 0.946429,
       "fpr": 0.064257,
       "cost1k": 2.398878,
-      "config": "deepseek-v4.1-flash, asked directly",
+      "config": "deepseek-v4.1-flash, zero-shot",
       "estimated": false
      },
      "security": {
@@ -11010,7 +11010,7 @@
       "tpr": 0.474415,
       "fpr": 0.431877,
       "cost1k": 10.324719,
-      "config": "deepseek-v4.1-flash, asked directly",
+      "config": "deepseek-v4.1-flash, zero-shot",
       "estimated": false
      }
     },
@@ -11029,7 +11029,7 @@
       "tpr": 0.954023,
       "fpr": 0.024306,
       "cost1k": 6.230228,
-      "config": "glm-5.3, asked directly",
+      "config": "glm-5.3, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11037,7 +11037,7 @@
       "tpr": 0.892857,
       "fpr": 0.008032,
       "cost1k": 16.628903,
-      "config": "glm-5.3, asked directly",
+      "config": "glm-5.3, zero-shot",
       "estimated": false
      }
     },
@@ -11056,7 +11056,7 @@
       "tpr": 0.945402,
       "fpr": 0.020833,
       "cost1k": 0.383976,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11064,7 +11064,7 @@
       "tpr": 0.964286,
       "fpr": 0.076305,
       "cost1k": 1.116306,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "security": {
@@ -11072,7 +11072,7 @@
       "tpr": 0.444082,
       "fpr": 0.416092,
       "cost1k": 1.506591,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "logic_error": {
@@ -11080,7 +11080,7 @@
       "tpr": 0.907552,
       "fpr": 0.216518,
       "cost1k": 0.308553,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "incomplete_execution": {
@@ -11088,7 +11088,7 @@
       "tpr": 0.726899,
       "fpr": 0.52381,
       "cost1k": 4.948093,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "scope_creep": {
@@ -11096,7 +11096,7 @@
       "tpr": 1.0,
       "fpr": 0.074713,
       "cost1k": 0.418746,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "obsolescence": {
@@ -11104,7 +11104,7 @@
       "tpr": 0.974026,
       "fpr": 0.090909,
       "cost1k": 0.518129,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "supply_chain": {
@@ -11112,7 +11112,7 @@
       "tpr": 0.945205,
       "fpr": 0.226027,
       "cost1k": 0.782642,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      },
      "dependency_blindness": {
@@ -11120,7 +11120,7 @@
       "tpr": 0.88,
       "fpr": 0.02,
       "cost1k": 0.41039,
-      "config": "deepseek-v4-flash, asked directly",
+      "config": "deepseek-v4-flash, zero-shot",
       "estimated": false
      }
     },
@@ -11139,7 +11139,7 @@
       "tpr": 0.942529,
       "fpr": 0.020833,
       "cost1k": 0.204512,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11147,7 +11147,7 @@
       "tpr": 0.982143,
       "fpr": 0.188755,
       "cost1k": 1.188574,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "security": {
@@ -11155,7 +11155,7 @@
       "tpr": 0.594529,
       "fpr": 0.542484,
       "cost1k": 0.895998,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "logic_error": {
@@ -11163,7 +11163,7 @@
       "tpr": 0.892578,
       "fpr": 0.207965,
       "cost1k": 0.152618,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "incomplete_execution": {
@@ -11171,7 +11171,7 @@
       "tpr": 0.596667,
       "fpr": 0.401667,
       "cost1k": 1.049688,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "scope_creep": {
@@ -11179,7 +11179,7 @@
       "tpr": 1.0,
       "fpr": 0.085714,
       "cost1k": 0.328891,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "obsolescence": {
@@ -11187,7 +11187,7 @@
       "tpr": 0.974194,
       "fpr": 0.077419,
       "cost1k": 0.167703,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "supply_chain": {
@@ -11195,7 +11195,7 @@
       "tpr": 0.986486,
       "fpr": 0.216216,
       "cost1k": 0.515355,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      },
      "dependency_blindness": {
@@ -11203,7 +11203,7 @@
       "tpr": 0.96,
       "fpr": 0.06,
       "cost1k": 0.23801,
-      "config": "gpt-6-luna, asked directly",
+      "config": "gpt-6-luna, zero-shot",
       "estimated": false
      }
     },
@@ -11222,7 +11222,7 @@
       "tpr": 0.913793,
       "fpr": 0.017361,
       "cost1k": 0.128825,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11230,7 +11230,7 @@
       "tpr": 0.928571,
       "fpr": 0.040161,
       "cost1k": 1.770911,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "security": {
@@ -11238,7 +11238,7 @@
       "tpr": 0.254443,
       "fpr": 0.214123,
       "cost1k": 0.662921,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "logic_error": {
@@ -11246,7 +11246,7 @@
       "tpr": 0.889902,
       "fpr": 0.146504,
       "cost1k": 0.233221,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "incomplete_execution": {
@@ -11254,7 +11254,7 @@
       "tpr": 0.429603,
       "fpr": 0.230088,
       "cost1k": 4.362564,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "scope_creep": {
@@ -11262,7 +11262,7 @@
       "tpr": 1.0,
       "fpr": 0.022989,
       "cost1k": 0.46522,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "obsolescence": {
@@ -11270,7 +11270,7 @@
       "tpr": 0.916129,
       "fpr": 0.032258,
       "cost1k": 0.248742,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "supply_chain": {
@@ -11278,7 +11278,7 @@
       "tpr": 0.972603,
       "fpr": 0.321918,
       "cost1k": 0.594807,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      },
      "dependency_blindness": {
@@ -11286,7 +11286,7 @@
       "tpr": 0.88,
       "fpr": 0.02,
       "cost1k": 0.31646,
-      "config": "mimo-v2.6-flash, asked directly",
+      "config": "mimo-v2.6-flash, zero-shot",
       "estimated": false
      }
     },
@@ -11340,7 +11340,7 @@
       "tpr": 0.859195,
       "fpr": 0.020833,
       "cost1k": 0.800038,
-      "config": "minimax-m3, asked directly",
+      "config": "minimax-m3, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11348,7 +11348,7 @@
       "tpr": 0.946429,
       "fpr": 0.036145,
       "cost1k": 3.346926,
-      "config": "minimax-m3, asked directly",
+      "config": "minimax-m3, zero-shot",
       "estimated": false
      },
      "security": {
@@ -11356,7 +11356,7 @@
       "tpr": 0.22411,
       "fpr": 0.226027,
       "cost1k": 3.167085,
-      "config": "minimax-m3, asked directly",
+      "config": "minimax-m3, zero-shot",
       "estimated": false
      }
     },
@@ -11375,7 +11375,7 @@
       "tpr": 0.942363,
       "fpr": 0.135889,
       "cost1k": 0.139767,
-      "config": "gpt-oss-20b on one RTX 4090, asked directly",
+      "config": "gpt-oss-20b on one RTX 4090, zero-shot",
       "estimated": true
      },
      "test-manipulation": {
@@ -11383,7 +11383,7 @@
       "tpr": 0.75,
       "fpr": 0.0,
       "cost1k": 0.236224,
-      "config": "gpt-oss-20b on one RTX 4090, asked directly",
+      "config": "gpt-oss-20b on one RTX 4090, zero-shot",
       "estimated": true
      },
      "security": {
@@ -11391,7 +11391,7 @@
       "tpr": 0.280616,
       "fpr": 0.201342,
       "cost1k": 0.993247,
-      "config": "gpt-oss-20b on one RTX 4090, asked directly",
+      "config": "gpt-oss-20b on one RTX 4090, zero-shot",
       "estimated": true
      }
     },
@@ -11480,7 +11480,7 @@
       "tpr": 0.804598,
       "fpr": 0.100694,
       "cost1k": 0.135884,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11488,7 +11488,7 @@
       "tpr": 0.928571,
       "fpr": 0.068273,
       "cost1k": 2.202133,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "security": {
@@ -11496,7 +11496,7 @@
       "tpr": 0.488335,
       "fpr": 0.522876,
       "cost1k": 0.488153,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "logic_error": {
@@ -11504,7 +11504,7 @@
       "tpr": 0.934896,
       "fpr": 0.816372,
       "cost1k": 0.140339,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "incomplete_execution": {
@@ -11512,7 +11512,7 @@
       "tpr": 0.956667,
       "fpr": 0.931667,
       "cost1k": 0.7477,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "scope_creep": {
@@ -11520,7 +11520,7 @@
       "tpr": 0.942857,
       "fpr": 0.411429,
       "cost1k": 0.531214,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "obsolescence": {
@@ -11528,7 +11528,7 @@
       "tpr": 0.903226,
       "fpr": 0.374194,
       "cost1k": 0.124158,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "supply_chain": {
@@ -11536,7 +11536,7 @@
       "tpr": 0.864865,
       "fpr": 0.689189,
       "cost1k": 0.572882,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      },
      "dependency_blindness": {
@@ -11544,7 +11544,7 @@
       "tpr": 0.94,
       "fpr": 0.3,
       "cost1k": 0.52575,
-      "config": "grok-4.1-fast (no reasoning), asked directly",
+      "config": "grok-4.1-fast (no reasoning), zero-shot",
       "estimated": false
      }
     },
@@ -11649,7 +11649,7 @@
       "tpr": 0.822289,
       "fpr": 0.701439,
       "cost1k": 0.053211,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "test-manipulation": {
@@ -11657,7 +11657,7 @@
       "tpr": 0.365385,
       "fpr": 0.012146,
       "cost1k": 0.851981,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "logic_error": {
@@ -11665,7 +11665,7 @@
       "tpr": 0.616905,
       "fpr": 0.397196,
       "cost1k": 0.072554,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "incomplete_execution": {
@@ -11673,7 +11673,7 @@
       "tpr": 0.005059,
       "fpr": 0.005059,
       "cost1k": 0.266727,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "scope_creep": {
@@ -11681,7 +11681,7 @@
       "tpr": 0.407186,
       "fpr": 0.444444,
       "cost1k": 0.187286,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "obsolescence": {
@@ -11689,7 +11689,7 @@
       "tpr": 0.148387,
       "fpr": 0.006452,
       "cost1k": 0.033239,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "supply_chain": {
@@ -11697,7 +11697,7 @@
       "tpr": 0.0,
       "fpr": 0.0,
       "cost1k": 0.194324,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      },
      "dependency_blindness": {
@@ -11705,7 +11705,7 @@
       "tpr": 0.425532,
       "fpr": 0.489362,
       "cost1k": 0.19196,
-      "config": "Phi-4-mini, asked directly",
+      "config": "Phi-4-mini, zero-shot",
       "estimated": false
      }
     },
@@ -11751,7 +11751,7 @@
       "tpr": 0.223562,
       "fpr": 0.189258,
       "cost1k": 5.900539,
-      "config": "ultramarine-1-flash (Fireworks), asked directly",
+      "config": "ultramarine-1-flash (Fireworks), zero-shot",
       "estimated": false
      }
     },
@@ -11808,7 +11808,7 @@
       "tpr": 0.310539,
       "fpr": 0.333333,
       "cost1k": 4.747562,
-      "config": "gpt-4.1, asked directly",
+      "config": "gpt-4.1, zero-shot",
       "estimated": false
      }
     },
