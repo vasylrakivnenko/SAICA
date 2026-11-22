@@ -1,5 +1,5 @@
 {
- "version": "2.1.0",
+ "version": "2.1.1",
  "generated": "2026-11-22",
  "generator": "bench/kitbuilder/build_kit.py (do not edit by hand)",
  "floor": 0.25,
@@ -45,8 +45,8 @@
    "rows": [
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -92,7 +92,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/fabrication.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -114,8 +114,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -161,7 +161,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/fabrication.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -183,8 +183,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -230,7 +230,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/fabrication.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/fabrication/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -1989,8 +1989,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -2036,7 +2036,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/test_manipulation.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -2667,8 +2667,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -2714,7 +2714,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/test_manipulation.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -2737,8 +2737,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -2784,7 +2784,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/test_manipulation.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/test_manipulation/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -3640,8 +3640,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -3687,7 +3687,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/security_vulnerability.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -3758,8 +3758,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -3805,7 +3805,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/security_vulnerability.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -4706,8 +4706,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -4753,7 +4753,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/security_vulnerability.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/security/run_tools.py:PLAIN_PROMPT",
        "placeholders": [
@@ -5518,8 +5518,8 @@
    "rows": [
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -5565,7 +5565,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/logic_error.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/logic_error/run_tools.py:PROMPT",
        "placeholders": [
@@ -5589,8 +5589,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -5636,7 +5636,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/logic_error.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/logic_error/run_tools.py:PROMPT",
        "placeholders": [
@@ -5660,8 +5660,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -5707,7 +5707,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/logic_error.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/logic_error/run_tools.py:PROMPT",
        "placeholders": [
@@ -6819,8 +6819,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -6866,7 +6866,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/incomplete_execution.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
        "placeholders": [
@@ -6892,8 +6892,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -6939,7 +6939,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/incomplete_execution.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
        "placeholders": [
@@ -7291,8 +7291,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -7338,7 +7338,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/incomplete_execution.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/incomplete_execution/run_tools.py:PROMPT",
        "placeholders": [
@@ -8259,8 +8259,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -8306,7 +8306,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/scope_creep.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/scope_creep/run_tools.py:PROMPT",
        "placeholders": [
@@ -8330,8 +8330,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -8377,7 +8377,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/scope_creep.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/scope_creep/run_tools.py:PROMPT",
        "placeholders": [
@@ -8612,8 +8612,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -8659,7 +8659,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/scope_creep.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/scope_creep/run_tools.py:PROMPT",
        "placeholders": [
@@ -9370,8 +9370,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -9417,7 +9417,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/obsolescence.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/obsolescence/run_tools.py:PROMPT",
        "placeholders": [
@@ -9441,8 +9441,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -9488,7 +9488,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/obsolescence.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/obsolescence/run_tools.py:PROMPT",
        "placeholders": [
@@ -9512,8 +9512,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -9559,7 +9559,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/obsolescence.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/obsolescence/run_tools.py:PROMPT",
        "placeholders": [
@@ -10716,8 +10716,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -10763,7 +10763,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/supply_chain_attack.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/supply_chain/run_tools.py:PROMPT",
        "placeholders": [
@@ -10892,8 +10892,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -10939,7 +10939,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/supply_chain_attack.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/supply_chain/run_tools.py:PROMPT",
        "placeholders": [
@@ -11294,8 +11294,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -11341,7 +11341,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/supply_chain_attack.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/supply_chain/run_tools.py:PROMPT",
        "placeholders": [
@@ -11801,8 +11801,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -11848,7 +11848,7 @@
       "model": "claude-haiku-5-5",
       "prompt_file": "prompts/dependency_blindness.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
        "placeholders": [
@@ -11874,8 +11874,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -11921,7 +11921,7 @@
       "model": "claude-opus-5-5",
       "prompt_file": "prompts/dependency_blindness.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
        "placeholders": [
@@ -12163,8 +12163,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -12210,7 +12210,7 @@
       "model": "claude-sonnet-5-5",
       "prompt_file": "prompts/dependency_blindness.md",
       "max_tokens": 16384,
-      "reasoning": "thinking on (Claude Code default; it cannot be switched off for this model)",
+      "reasoning": "thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model)",
       "config": {
        "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
        "placeholders": [

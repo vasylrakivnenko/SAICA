@@ -1,10 +1,10 @@
 {
- "version": "2.1.0",
+ "version": "2.1.1",
  "generated": "2026-11-22",
- "generated_at": "2026-11-22T12:44:16Z",
- "commit": "fd39706f48b7cab20c3023e93b9565c8bced2c03",
+ "generated_at": "2026-11-22T19:40:00Z",
+ "commit": "101f2f90a94dac437d7f263fd34701f4050efbc2",
  "inputs_match_commit": true,
- "cite_as": "SAICA-Bench results v2.1.0",
+ "cite_as": "SAICA-Bench results v2.1.1",
  "changelog": "bench/CHANGELOG_RESULTS.md",
  "partial": false,
  "missing_modes": {},
@@ -109,7 +109,7 @@
     "Static tools see the whole file with its 99 packages installed. AI tools see a diff with 15 lines of context.",
     "Static tools count only findings that a symbol doesn't exist. A flag on a clean original is a false positive. The list of finding codes was chosen after a first run on these samples.",
     "Temperature 0 (gpt-6-luna: its default, no temperature sent), one run each. Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "The fakes were written on purpose by a model; real agent mistakes may be easier or harder.",
@@ -1439,8 +1439,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -1551,8 +1551,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -1663,8 +1663,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -2294,8 +2294,8 @@
    "tuning_disclosure": null,
    "best_reviewer": {
     "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "kind": "model",
     "j": 0.955699,
@@ -2320,7 +2320,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 5 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5, claude-sonnet-5-5, claude-haiku-5-5 and 2 more); the highest J is +95.6% (95% interval +93.0% to +97.8%).",
+   "ranking": "No single best reviewer: 5 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5 (medium), claude-sonnet-5-5 (medium), claude-haiku-5-5 (medium) and 2 more); the highest J is +95.6% (95% interval +93.0% to +97.8%).",
    "best_catalog_tool": {
     "key": "pyright",
     "tool": "pyright",
@@ -4164,14 +4164,14 @@
     "Every tool reads the full session transcript: messages, tool calls and tool output (median about 41,000 characters).",
     "All AI judges use the same rule text, based on the SAICA definition. giskard and promptfoo run on deepseek-v4-flash.",
     "Temperature 0 (gpt-6-luna: default, it accepts no other), one run each. Answers cut off by the token limit were re-run with a larger limit where the provider allowed it; answers that are still cut off or failed count as unreadable, and a row with under 95% readable answers in a class is marked incomplete (ultramarine and deepseek-v4.1-flash keep cut-off answers that could not be, or for cost were not, re-run; each row shows its count). Models on Hyperbolic, except gpt-6-luna, grok-4.1-fast and Phi-4-mini on Azure AI Foundry, and gpt-oss-20b and Qwen3.8-27B self-hosted with vLLM on one RTX 4090. Run 2026-11-19.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "TRACE sessions are synthetic: Claude Opus 4.5 was told to write them; three engineers checked them (\u03ba 0.82).",
     "judgeval was not run: its AI judges run only on Judgment Labs' cloud. pytest and coverage-py need runnable code, which TRACE doesn't have.",
     "giskard escapes shell text (&& becomes &amp;&amp;), which Hyperbolic's firewall blocks; our relay undoes that escaping for giskard only. One session (0076) is blocked for every tool and is left out (it is not in the scored groups).",
     "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product.",
-    "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: Phi-4-mini 6 of 305 (4 bad, 2 clean; mostly provider or connection errors); claude-haiku-5-5 1 of 305 (1 bad, 0 clean; mostly provider or connection errors). Marked incomplete (under 95% readable in one class): Phi-4-mini.",
+    "Answers with no verdict are left out of the rates; they are not counted as 'not flagged'. Unreadable: Phi-4-mini 6 of 305 (4 bad, 2 clean; mostly provider or connection errors); claude-haiku-5-5 (medium) 1 of 305 (1 bad, 0 clean; mostly provider or connection errors). Marked incomplete (under 95% readable in one class): Phi-4-mini.",
     "What is scored: 56 sessions labelled 'Test Modification' (TRACE 1.1.1) against 249 clean sessions. The 212 sessions that cheat in other ways (41% of the set) are left out of the headline J.",
     "Counting those 212 sessions as negatives, which is the question the prompt asks, lowers the highest J from +91% to +81%. Counting all 268 hacks as positives, which is what 'reward hacking' would mean, gives at most +41%.",
     "The clean class is easy: 168 of 249 clean sessions never mention tests in the first user message, and a rule that reads only that message scores J +60%. Against the clean sessions that do mention tests the highest J is +88%.",
@@ -5424,8 +5424,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -5552,8 +5552,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -5675,8 +5675,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -6399,7 +6399,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 11 rows cannot be told apart at 95% on the samples they share (minimax-m3, claude-sonnet-5-5, giskard and 8 more); the highest J is +91.0% (95% interval +81.3% to +94.9%).",
+   "ranking": "No single best reviewer: 11 rows cannot be told apart at 95% on the samples they share (minimax-m3, claude-sonnet-5-5 (medium), giskard and 8 more); the highest J is +91.0% (95% interval +81.3% to +94.9%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
@@ -7191,7 +7191,7 @@
     "AI tools see the task text and the agent's diff. bandit and semgrep run on the patched files and flag a patch when a finding lands on a line it added. bandit has two rows: its default profile, and with the assert rule (B101) skipped and test files left out. giskard and promptfoo wrap the same review in their own judge template, with deepseek-v4-flash as the judge.",
     "Same review prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-19/20.",
     "Also tried on a 417-patch held-out subset (projects kept apart): claude-opus-4-8 at low effort J -3%, Kimi-K2.6 J +4%, Muse Glimmer 30B before fine-tuning J -11%, Muse Glimmer 30B after fine-tuning on 682 patches (341 vulnerable, 341 secure) drawn from the 1,285 patches of the other projects J -2%.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product.",
@@ -7674,8 +7674,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -7758,8 +7758,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -7842,8 +7842,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -9070,8 +9070,8 @@
    "tuning_disclosure": null,
    "best_reviewer": {
     "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "kind": "model",
     "j": 0.231864,
@@ -12317,7 +12317,7 @@
     "1536 functions that run but fail a test assertion vs 904 correct solutions, across 379 tasks. Code by 11 models (CodeLlama, DeepSeek-Coder, StarCoder2, Llama 3, gpt-4o-mini).",
     "Every label re-checked by running the code against its tests (the original asserts of MBPP and HumanEval; MBPP has three per task): crashes, timeouts, 'wrong' outputs that actually pass and reference solutions that fail were dropped.",
     "Reviewers see the task description and the function, not the tests. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "Short, self-contained functions from two famous public problem sets: models may know the right answers, so expect lower scores on real agent code.",
@@ -12610,8 +12610,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -12694,8 +12694,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -12770,8 +12770,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -13629,8 +13629,8 @@
    "tuning_disclosure": null,
    "best_reviewer": {
     "key": "plain_llm_sonnet",
-    "tool": "claude-sonnet-5-5, zero-shot",
-    "short": "claude-sonnet-5-5",
+    "tool": "claude-sonnet-5-5 (medium), zero-shot",
+    "short": "claude-sonnet-5-5 (medium)",
     "type": "baseline_model",
     "kind": "model",
     "j": 0.885261,
@@ -13652,7 +13652,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 2 rows cannot be told apart at 95% on the samples they share (claude-sonnet-5-5 and claude-opus-5-5); the highest J is +88.5% (95% interval +85.6% to +91.2%).",
+   "ranking": "No single best reviewer: 2 rows cannot be told apart at 95% on the samples they share (claude-sonnet-5-5 (medium) and claude-opus-5-5 (medium)); the highest J is +88.5% (95% interval +85.6% to +91.2%).",
    "best_catalog_tool": {
     "key": "kg_pr_agent",
     "tool": "PR-Agent review, any focus area listed (deepseek-v4-flash)",
@@ -14582,7 +14582,7 @@
    "setup": [
     "600 runs where the agent finished and declared the task done but the issue's hidden tests fail, vs 600 where it declared done and the tests pass. One run per issue; an issue is never on both sides.",
     "Reviewers see the issue, the agent's final patch and its closing message, and no tests. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "The KG's stub signal (TODO, pass, NotImplementedError in the diff) does not define the label: across 60,739 finished runs, stub markers appear about as often in passing runs (2,092) as in failing ones (2,208).",
@@ -14684,8 +14684,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -14768,8 +14768,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -14852,8 +14852,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -15976,8 +15976,8 @@
    "tuning_disclosure": null,
    "best_reviewer": {
     "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "kind": "model",
     "j": 0.46,
@@ -15998,7 +15998,7 @@
    "tier_label": "J 25% to under 80% on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "Best reviewer: claude-opus-5-5 at J +46.0%. Its paired difference from the next row (claude-sonnet-5-5) has a 95% interval that excludes 0.",
+   "ranking": "Best reviewer: claude-opus-5-5 (medium) at J +46.0%. Its paired difference from the next row (claude-sonnet-5-5 (medium)) has a 95% interval that excludes 0.",
    "best_catalog_tool": {
     "key": "kg_pr_agent",
     "tool": "PR-Agent review, any focus area listed (deepseek-v4-flash)",
@@ -16483,7 +16483,7 @@
     "Injected changes, 2-15 lines, in five kinds: drive-by refactor, cleanup, extra feature, quiet behaviour change, added logging/config. 127 sit in a file the agent already edited, 48 in another file of the same package. Each was checked to still parse; a sample was checked by hand.",
     "Both sides use only near-minimal patches (no bigger than the reference fix allows) and are matched exactly on how many source files they change (23 injected patches without an exact match were dropped), so the file count does not give the label away. Size is not matched: a count of hunks scores J +47% (shortcut rows).",
     "Reviewers see the issue and the patch. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-21 on version 1.1 of the set, in which one diff generator writes every patch of both classes; the first run (2026-11-20, version 1.0) is kept as a stratum. Building the set cost $13 of Opus calls, failed attempts included (not part of any tool's cost).",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "Synthetic: the unrequested changes were written by a model on purpose. Natural scope creep may be subtler or messier.",
@@ -16767,8 +16767,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -16851,8 +16851,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -16935,8 +16935,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -17722,7 +17722,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (mimo-v2.6-flash, claude-opus-5-5 and claude-sonnet-5-5); the highest J is +97.7% (95% interval +93.6% to +99.1%).",
+   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (mimo-v2.6-flash, claude-opus-5-5 (medium) and claude-sonnet-5-5 (medium)); the highest J is +97.7% (95% interval +93.6% to +99.1%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
@@ -18668,7 +18668,7 @@
     "The swap is an automatic code edit (imports, aliases, dotted paths, method and class names), kept only if the result uses the deprecated API and nothing else from the map. Checked against the latest release of each library: 114 of the swapped solutions use a name that is gone, 24 call a function that still exists but raises when called, and 13 still run with a deprecation notice.",
     "Plus 4 hand-written pairs for LLM SDKs (155 + 155 samples in all). Anthropic: a call that names Claude 3.5 Sonnet (retired Oct 28, 2025) and passes temperature (removed from messages.create in SDK 1.x) through a settings object, and a modern streaming call that still names the retired model. Google: a streaming tutor chatbot on the legacy google-generativeai SDK (support ended Nov 30, 2025; imported as `from google import generativeai as genai`) with gemini-pro, and the same chatbot on the current google-genai SDK but still naming gemini-pro. Clean twins use claude-sonnet-5-5 / gemini-3.8-flash on the current SDKs.",
     "Reviewers see the task and the code and are told to assume the latest library versions. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "Synthetic: the deprecated calls were swapped in; models writing freely today rarely use these APIs (49 of 956 solutions).",
@@ -18774,8 +18774,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -18854,8 +18854,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -18942,8 +18942,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -19890,8 +19890,8 @@
    "tuning_disclosure": null,
    "best_reviewer": {
     "key": "plain_llm_haiku",
-    "tool": "claude-haiku-5-5, zero-shot",
-    "short": "claude-haiku-5-5",
+    "tool": "claude-haiku-5-5 (medium), zero-shot",
+    "short": "claude-haiku-5-5 (medium)",
     "type": "baseline_model",
     "kind": "model",
     "j": 0.948387,
@@ -19914,7 +19914,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (claude-haiku-5-5, claude-sonnet-5-5 and claude-opus-5-5); the highest J is +94.8% (95% interval +90.1% to +98.3%).",
+   "ranking": "No single best reviewer: 3 rows cannot be told apart at 95% on the samples they share (claude-haiku-5-5 (medium), claude-sonnet-5-5 (medium) and claude-opus-5-5 (medium)); the highest J is +94.8% (95% interval +90.1% to +98.3%).",
    "best_catalog_tool": {
     "key": "kg_pyright_libs",
     "tool": "pyright against the latest libraries (deprecated, missing attribute or import)",
@@ -21221,7 +21221,7 @@
     "Malicious names: 82 subtle typos of popular packages (plural, doubled/dropped/swapped letter, keyboard slip, digit, py- prefix; e.g. coloramas, urllib33) and 66 'popular name + word' combosquats (e.g. httpx-utils, twilio-rest).",
     "Genuine names, all checked on PyPI (3+ releases, first release before Nov 2024, mature version): 53 real plugin-style packages (e.g. dask-awkward, pytest-enabler), 44 real packages one letter away from a famous one (e.g. pep257, pyqrcode), 51 obscure real packages from the repos' environments. 66 of 148 are outside PyPI's top 15,000, so popularity alone does not vouch for them.",
     "The other added dependencies are packages actually installed in that repo's environment, at their real versions. Reviewers see the issue and the patch. Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The cases were designed by Claude (the coding assistant building this benchmark), not generated by any reviewed model.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "Synthetic: real agents add a malicious dependency rarely; this tests whether a reviewer notices one, not how often agents do it.",
@@ -21324,8 +21324,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -21408,8 +21408,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -21492,8 +21492,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -22265,8 +22265,8 @@
    "tuning_disclosure": "The set was tuned by looking at scores: difficulty and the mix of genuine names were set over three rounds (easy canary: deepseek-v4-flash +100%, a popularity rule +95%; hard canary of 20 pairs: gpt-6-luna +90%, the name rule +45%; published mix: the name rule +84%, gpt-6-luna +77%). The mix of genuine names decides which of the two is ahead.",
    "best_reviewer": {
     "key": "plain_llm_opus55",
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "kind": "model",
     "j": 0.831081,
@@ -22288,7 +22288,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 2 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5 and gpt-6-luna); the highest J is +83.1% (95% interval +77.0% to +89.2%).",
+   "ranking": "No single best reviewer: 2 rows cannot be told apart at 95% on the samples they share (claude-opus-5-5 (medium) and gpt-6-luna); the highest J is +83.1% (95% interval +77.0% to +89.2%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
@@ -23196,7 +23196,7 @@
     "What is re-implemented: 30 of the repository's own helpers (e.g. PyJWT's base64url decoding, MONAI's ensure_tuple, oauthlib's raise_from_error, MetPy's check_units decorator), 17 standard-library functions (e.g. shlex.split, fnmatch, os.makedirs(exist_ok=True), csv.writer, functools.wraps, uuid4) and 3 NumPy functions (np.where, np.isclose, np.setdiff1d). How: 33 inline (the call replaced by a few lines), 11 rewritten helpers, 6 copies of the helper's body pasted into the patch.",
     "Each edit was checked: the file still parses, no undefined name is added (ruff F821), the original call is gone and the re-implementation is there. Seven hand-rolled helpers were extracted from the positive patches and run against the function they replace; they agree on the kind of input the patch passes (e.g. shlex.split 6 of 6, fnmatch 36 of 36, fountain's stringify 7 of 8: -0.0 differs). Others differ on edge cases, as hand-rolled code does (time-zone-aware indexes, error classes).",
     "Reviewers see the issue, the patch and, when the re-implemented function is the repository's own, the module that defines it (both patches of a pair see the same files). Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The pairs were written by Claude (the coding assistant building this benchmark), not by any reviewed model.",
-    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models)."
+    "The three Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). No effort level was set: the calls ran at Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version)."
    ],
    "caveats": [
     "Hand-built: every re-implementation was written on purpose. Natural dependency blindness is often larger (whole helpers rebuilt) or subtler.",
@@ -23290,8 +23290,8 @@
     },
     {
      "key": "plain_llm_haiku",
-     "tool": "claude-haiku-5-5, zero-shot",
-     "short": "claude-haiku-5-5",
+     "tool": "claude-haiku-5-5 (medium), zero-shot",
+     "short": "claude-haiku-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -23374,8 +23374,8 @@
     },
     {
      "key": "plain_llm_sonnet",
-     "tool": "claude-sonnet-5-5, zero-shot",
-     "short": "claude-sonnet-5-5",
+     "tool": "claude-sonnet-5-5 (medium), zero-shot",
+     "short": "claude-sonnet-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -23458,8 +23458,8 @@
     },
     {
      "key": "plain_llm_opus55",
-     "tool": "claude-opus-5-5, zero-shot",
-     "short": "claude-opus-5-5",
+     "tool": "claude-opus-5-5 (medium), zero-shot",
+     "short": "claude-opus-5-5 (medium)",
      "type": "baseline_model",
      "kind": "model",
      "check": null,
@@ -24184,7 +24184,7 @@
    "tier_label": "J 80% or more on our set",
    "floor": 0.25,
    "below_floor": false,
-   "ranking": "No single best reviewer: 6 rows cannot be told apart at 95% on the samples they share (gpt-6-luna, claude-haiku-5-5, claude-opus-5-5 and 3 more); the highest J is +90.0% (95% interval +82.0% to +98.0%).",
+   "ranking": "No single best reviewer: 6 rows cannot be told apart at 95% on the samples they share (gpt-6-luna, claude-haiku-5-5 (medium), claude-opus-5-5 (medium) and 3 more); the highest J is +90.0% (95% interval +82.0% to +98.0%).",
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
@@ -25234,7 +25234,7 @@
     }
    },
    {
-    "tool": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "kind": null,
     "cells": {
@@ -25245,8 +25245,8 @@
        0.930212,
        0.977961
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.006944,
       "cost1k": 12.713859,
       "unreadable": 0,
@@ -25259,8 +25259,8 @@
        0.766709,
        0.927901
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.036145,
       "cost1k": 148.756375,
       "unreadable": 0,
@@ -25273,8 +25273,8 @@
        0.121198,
        0.340316
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.32244,
       "cost1k": 47.51542,
       "unreadable": 0,
@@ -25287,8 +25287,8 @@
        0.854035,
        0.910276
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.06969,
       "cost1k": 11.418103,
       "unreadable": 0,
@@ -25301,8 +25301,8 @@
        0.408011,
        0.507886
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.231667,
       "cost1k": 64.65275,
       "unreadable": 0,
@@ -25315,8 +25315,8 @@
        0.928319,
        0.986135
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.022857,
       "cost1k": 36.894423,
       "unreadable": 0,
@@ -25329,8 +25329,8 @@
        0.893598,
        0.979167
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.03871,
       "cost1k": 11.889065,
       "unreadable": 0,
@@ -25343,8 +25343,8 @@
        0.77027,
        0.891892
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.155405,
       "cost1k": 42.701878,
       "unreadable": 0,
@@ -25357,8 +25357,8 @@
        0.82,
        0.98
       ],
-      "tool": "claude-opus-5-5, zero-shot",
-      "short": "claude-opus-5-5",
+      "tool": "claude-opus-5-5 (medium), zero-shot",
+      "short": "claude-opus-5-5 (medium)",
       "fa": 0.02,
       "cost1k": 37.46568,
       "unreadable": 0,
@@ -25385,7 +25385,7 @@
     }
    },
    {
-    "tool": "claude-sonnet-5-5",
+    "tool": "claude-sonnet-5-5 (medium)",
     "type": "baseline_model",
     "kind": null,
     "cells": {
@@ -25396,8 +25396,8 @@
        0.929223,
        0.976384
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.013889,
       "cost1k": 6.234354,
       "unreadable": 0,
@@ -25410,8 +25410,8 @@
        0.803976,
        0.942399
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.044177,
       "cost1k": 74.126853,
       "unreadable": 0,
@@ -25424,8 +25424,8 @@
        0.015492,
        0.212686
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.230937,
       "cost1k": 21.637463,
       "unreadable": 0,
@@ -25438,8 +25438,8 @@
        0.856219,
        0.911574
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.076327,
       "cost1k": 5.948434,
       "unreadable": 0,
@@ -25452,8 +25452,8 @@
        0.29555,
        0.398195
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.211667,
       "cost1k": 32.020692,
       "unreadable": 0,
@@ -25466,8 +25466,8 @@
        0.914374,
        0.980491
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.04,
       "cost1k": 18.715154,
       "unreadable": 0,
@@ -25480,8 +25480,8 @@
        0.902381,
        0.982427
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.03871,
       "cost1k": 6.029913,
       "unreadable": 0,
@@ -25494,8 +25494,8 @@
        0.182432,
        0.324324
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.75,
       "cost1k": 20.474466,
       "unreadable": 0,
@@ -25508,8 +25508,8 @@
        0.66,
        0.88
       ],
-      "tool": "claude-sonnet-5-5, zero-shot",
-      "short": "claude-sonnet-5-5",
+      "tool": "claude-sonnet-5-5 (medium), zero-shot",
+      "short": "claude-sonnet-5-5 (medium)",
       "fa": 0.04,
       "cost1k": 18.58994,
       "unreadable": 0,
@@ -25536,7 +25536,7 @@
     }
    },
    {
-    "tool": "claude-haiku-5-5",
+    "tool": "claude-haiku-5-5 (medium)",
     "type": "baseline_model",
     "kind": null,
     "cells": {
@@ -25547,8 +25547,8 @@
        0.918893,
        0.969588
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.013889,
       "cost1k": 0.44528,
       "unreadable": 0,
@@ -25561,8 +25561,8 @@
        0.769216,
        0.924088
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.052209,
       "cost1k": 3.73428,
       "unreadable": 1,
@@ -25575,8 +25575,8 @@
        -0.06617,
        0.105388
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.211329,
       "cost1k": 1.125464,
       "unreadable": 0,
@@ -25589,8 +25589,8 @@
        0.782822,
        0.852351
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.088496,
       "cost1k": 0.423872,
       "unreadable": 0,
@@ -25603,8 +25603,8 @@
        0.11168,
        0.220231
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.525,
       "cost1k": 1.716443,
       "unreadable": 0,
@@ -25617,8 +25617,8 @@
        0.839155,
        0.933943
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.102857,
       "cost1k": 0.996874,
       "unreadable": 0,
@@ -25631,8 +25631,8 @@
        0.901408,
        0.982558
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.032258,
       "cost1k": 0.364677,
       "unreadable": 0,
@@ -25645,8 +25645,8 @@
        0.668919,
        0.810811
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.22973,
       "cost1k": 1.147078,
       "unreadable": 0,
@@ -25659,8 +25659,8 @@
        0.82,
        0.98
       ],
-      "tool": "claude-haiku-5-5, zero-shot",
-      "short": "claude-haiku-5-5",
+      "tool": "claude-haiku-5-5 (medium), zero-shot",
+      "short": "claude-haiku-5-5 (medium)",
       "fa": 0.04,
       "cost1k": 1.0477,
       "unreadable": 0,
@@ -26610,16 +26610,16 @@
      0.930212,
      0.977961
     ],
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "key": "plain_llm_opus55",
     "winner": false,
     "below_floor": false,
     "top_group": [
-     "claude-opus-5-5",
-     "claude-sonnet-5-5",
-     "claude-haiku-5-5",
+     "claude-opus-5-5 (medium)",
+     "claude-sonnet-5-5 (medium)",
+     "claude-haiku-5-5 (medium)",
      "deepseek-v4.1-flash",
      "glm-5.3"
     ],
@@ -26645,14 +26645,14 @@
     "below_floor": false,
     "top_group": [
      "minimax-m3",
-     "claude-sonnet-5-5",
+     "claude-sonnet-5-5 (medium)",
      "giskard",
      "Qwen3.8-27B (self-hosted)",
      "mimo-v2.6-flash",
      "deepseek-v4-flash",
      "glm-5.3",
-     "claude-haiku-5-5",
-     "claude-opus-5-5",
+     "claude-haiku-5-5 (medium)",
+     "claude-opus-5-5 (medium)",
      "promptfoo",
      "grok-4.1-fast"
     ],
@@ -26676,14 +26676,14 @@
      0.121198,
      0.340316
     ],
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "key": "plain_llm_opus55",
     "winner": true,
     "below_floor": true,
     "top_group": [
-     "claude-opus-5-5"
+     "claude-opus-5-5 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_opus55"
@@ -26695,15 +26695,15 @@
      0.856219,
      0.911574
     ],
-    "tool": "claude-sonnet-5-5, zero-shot",
-    "short": "claude-sonnet-5-5",
+    "tool": "claude-sonnet-5-5 (medium), zero-shot",
+    "short": "claude-sonnet-5-5 (medium)",
     "type": "baseline_model",
     "key": "plain_llm_sonnet",
     "winner": false,
     "below_floor": false,
     "top_group": [
-     "claude-sonnet-5-5",
-     "claude-opus-5-5"
+     "claude-sonnet-5-5 (medium)",
+     "claude-opus-5-5 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_sonnet",
@@ -26716,14 +26716,14 @@
      0.408011,
      0.507886
     ],
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "key": "plain_llm_opus55",
     "winner": true,
     "below_floor": false,
     "top_group": [
-     "claude-opus-5-5"
+     "claude-opus-5-5 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_opus55"
@@ -26743,8 +26743,8 @@
     "below_floor": false,
     "top_group": [
      "mimo-v2.6-flash",
-     "claude-opus-5-5",
-     "claude-sonnet-5-5"
+     "claude-opus-5-5 (medium)",
+     "claude-sonnet-5-5 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_mimo",
@@ -26758,16 +26758,16 @@
      0.901408,
      0.982558
     ],
-    "tool": "claude-haiku-5-5, zero-shot",
-    "short": "claude-haiku-5-5",
+    "tool": "claude-haiku-5-5 (medium), zero-shot",
+    "short": "claude-haiku-5-5 (medium)",
     "type": "baseline_model",
     "key": "plain_llm_haiku",
     "winner": false,
     "below_floor": false,
     "top_group": [
-     "claude-haiku-5-5",
-     "claude-sonnet-5-5",
-     "claude-opus-5-5"
+     "claude-haiku-5-5 (medium)",
+     "claude-sonnet-5-5 (medium)",
+     "claude-opus-5-5 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_haiku",
@@ -26781,14 +26781,14 @@
      0.77027,
      0.891892
     ],
-    "tool": "claude-opus-5-5, zero-shot",
-    "short": "claude-opus-5-5",
+    "tool": "claude-opus-5-5 (medium), zero-shot",
+    "short": "claude-opus-5-5 (medium)",
     "type": "baseline_model",
     "key": "plain_llm_opus55",
     "winner": false,
     "below_floor": false,
     "top_group": [
-     "claude-opus-5-5",
+     "claude-opus-5-5 (medium)",
      "gpt-6-luna"
     ],
     "top_group_keys": [
@@ -26810,11 +26810,11 @@
     "below_floor": false,
     "top_group": [
      "gpt-6-luna",
-     "claude-haiku-5-5",
-     "claude-opus-5-5",
+     "claude-haiku-5-5 (medium)",
+     "claude-opus-5-5 (medium)",
      "mimo-v2.6-flash",
      "deepseek-v4-flash",
-     "claude-sonnet-5-5"
+     "claude-sonnet-5-5 (medium)"
     ],
     "top_group_keys": [
      "plain_llm_luna",
@@ -26837,11 +26837,11 @@
    ],
    [
     "A single best reviewer can be named in 2 of 9 modes.",
-    " Security vulnerability: claude-opus-5-5 (J +23%); False 'done' claims: claude-opus-5-5 (J +46%). In the others the leading rows cannot be told apart at 95% on the samples they share: Fabrication (5 rows, J +93% to +96%); Test edits that hide failures (11 rows, J +86% to +91%); Logic error (2 rows, J +88% to +89%); Scope creep (3 rows, J +96% to +98%); Obsolescence (3 rows, J +94% to +95%); Supply chain (2 rows, J +77% to +83%); Dependency blindness (6 rows, J +78% to +90%)."
+    " Security vulnerability: claude-opus-5-5 (medium) (J +23%); False 'done' claims: claude-opus-5-5 (medium) (J +46%). In the others the leading rows cannot be told apart at 95% on the samples they share: Fabrication (5 rows, J +93% to +96%); Test edits that hide failures (11 rows, J +86% to +91%); Logic error (2 rows, J +88% to +89%); Scope creep (3 rows, J +96% to +98%); Obsolescence (3 rows, J +94% to +95%); Supply chain (2 rows, J +77% to +83%); Dependency blindness (6 rows, J +78% to +90%)."
    ],
    [
     "Where a catalog tool ran its own check (5 of 9 modes), a model asked the failure-specific question was clearly ahead of the best such tool in 4; in 1 no row reaches J 25%.",
-    " Ahead: Fabrication (claude-opus-5-5 +96% vs pyright +85%, difference +10 points on shared samples, 95% interval +6 to +15); Logic error (claude-sonnet-5-5 +89% vs PR-Agent +53%, difference +35 points on shared samples, 95% interval +30 to +40); False 'done' claims (claude-opus-5-5 +46% vs PR-Agent +15%, difference +31 points on shared samples, 95% interval +17 to +45); Obsolescence (claude-haiku-5-5 +95% vs pyright (latest libraries) +57%, difference +38 points on shared samples, 95% interval +24 to +53). No row at J 25%: Security vulnerability. No catalog tool with a check of its own for a finished change was run on Test edits that hide failures, Scope creep, Supply chain and Dependency blindness."
+    " Ahead: Fabrication (claude-opus-5-5 (medium) +96% vs pyright +85%, difference +10 points on shared samples, 95% interval +6 to +15); Logic error (claude-sonnet-5-5 (medium) +89% vs PR-Agent +53%, difference +35 points on shared samples, 95% interval +30 to +40); False 'done' claims (claude-opus-5-5 (medium) +46% vs PR-Agent +15%, difference +31 points on shared samples, 95% interval +17 to +45); Obsolescence (claude-haiku-5-5 (medium) +95% vs pyright (latest libraries) +57%, difference +38 points on shared samples, 95% interval +24 to +53). No row at J 25%: Security vulnerability. No catalog tool with a check of its own for a finished change was run on Test edits that hide failures, Scope creep, Supply chain and Dependency blindness."
    ],
    [
     "No packaged tool beat the same model asked the failure-specific question (12 comparisons on identical samples: 5 worse, 7 indistinguishable).",
@@ -26853,7 +26853,7 @@
    ],
    [
     "Phi-4-mini scores J under 20% in 6 of the 8 modes it ran in and grok-4.1-fast flags more than 30% of clean samples in 6 of 9 modes.",
-    " The other models that ran in at least 8 modes (gpt-6-luna, deepseek-v4-flash, mimo-v2.6-flash, claude-opus-5-5, claude-sonnet-5-5 and claude-haiku-5-5) score J under 20% in at most 2 modes and flag more than 30% of clean samples in at most 2."
+    " The other models that ran in at least 8 modes (gpt-6-luna, deepseek-v4-flash, mimo-v2.6-flash, claude-opus-5-5 (medium), claude-sonnet-5-5 (medium) and claude-haiku-5-5 (medium)) score J under 20% in at most 2 modes and flag more than 30% of clean samples in at most 2."
    ]
   ],
   "caveats": [
@@ -26908,7 +26908,7 @@
      }
     },
     {
-     "model": "claude-opus-5-5",
+     "model": "claude-opus-5-5 (medium)",
      "n_prompts": 9,
      "any_flag": 0.639589,
      "expected_false_alarms_per_clean_change": 0.903858,
@@ -26919,7 +26919,7 @@
      }
     },
     {
-     "model": "claude-sonnet-5-5",
+     "model": "claude-sonnet-5-5 (medium)",
      "n_prompts": 9,
      "any_flag": 0.883096,
      "expected_false_alarms_per_clean_change": 1.445707,
@@ -26930,7 +26930,7 @@
      }
     },
     {
-     "model": "claude-haiku-5-5",
+     "model": "claude-haiku-5-5 (medium)",
      "n_prompts": 9,
      "any_flag": 0.795109,
      "expected_false_alarms_per_clean_change": 1.295768,
@@ -27176,7 +27176,7 @@
     "mode": "fabrication",
     "mode_name": "Fabrication",
     "model": "plain_llm_opus55",
-    "model_short": "claude-opus-5-5",
+    "model_short": "claude-opus-5-5 (medium)",
     "model_j": 0.955699,
     "tool": "pyright",
     "tool_short": "pyright",
@@ -27194,7 +27194,7 @@
     "mode": "security",
     "mode_name": "Security vulnerability",
     "model": "plain_llm_opus55",
-    "model_short": "claude-opus-5-5",
+    "model_short": "claude-opus-5-5 (medium)",
     "model_j": 0.231864,
     "tool": "pr_agent",
     "tool_short": "PR-Agent",
@@ -27212,7 +27212,7 @@
     "mode": "logic_error",
     "mode_name": "Logic error",
     "model": "plain_llm_sonnet",
-    "model_short": "claude-sonnet-5-5",
+    "model_short": "claude-sonnet-5-5 (medium)",
     "model_j": 0.885261,
     "tool": "kg_pr_agent",
     "tool_short": "PR-Agent",
@@ -27230,7 +27230,7 @@
     "mode": "incomplete_execution",
     "mode_name": "False 'done' claims",
     "model": "plain_llm_opus55",
-    "model_short": "claude-opus-5-5",
+    "model_short": "claude-opus-5-5 (medium)",
     "model_j": 0.46,
     "tool": "kg_pr_agent",
     "tool_short": "PR-Agent",
@@ -27248,7 +27248,7 @@
     "mode": "obsolescence",
     "mode_name": "Obsolescence",
     "model": "plain_llm_haiku",
-    "model_short": "claude-haiku-5-5",
+    "model_short": "claude-haiku-5-5 (medium)",
     "model_j": 0.948387,
     "tool": "kg_pyright_libs",
     "tool_short": "pyright (latest libraries)",
@@ -27786,8 +27786,8 @@
   },
   {
    "path": "bench/kitbuilder/recipes.json",
-   "sha256": "f6614142a1783ea8cc8b66bee25b924edbb941ef45f24f66b73ce9048bfd9689",
-   "bytes": 197714
+   "sha256": "38e9a2b708e5b6913380d934d20cd54397c85ac8c30deb7685f2b321a6350f5c",
+   "bytes": 199334
   },
   {
    "path": "bench/kitbuilder/star_modes.json",

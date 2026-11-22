@@ -54,9 +54,9 @@ Answer with one JSON object only:
 | `plain_llm_luna` | gpt-6-luna, zero-shot | `gpt-6-luna` | azure | not sent (service default) | max_completion_tokens 16384 | reasoning model; no reasoning_effort sent and no temperature sent (Azure accepts only its default) | no | 0 of 100 |  |
 | `plain_llm_grok` | grok-4.1-fast (no reasoning), zero-shot | `grok-4-1-fast-non-reasoning` | azure | 0 | max_completion_tokens 8192 | non-reasoning deployment; nothing sent | no | 0 of 100 |  |
 | `plain_llm_phi` | Phi-4-mini, zero-shot | `Phi-4-mini-instruct` | azure | 0 | max_completion_tokens 1024 | none | no | 6 of 100 |  |
-| `plain_llm_haiku` | claude-haiku-5-5, zero-shot | `claude-haiku-5-5` | claude_code | not sent (service default) | CLAUDE_CODE_MAX_OUTPUT_TOKENS 16384 | thinking on (Claude Code default; it cannot be switched off for this model) | no | 0 of 100 |  |
-| `plain_llm_sonnet` | claude-sonnet-5-5, zero-shot | `claude-sonnet-5-5` | claude_code | not sent (service default) | CLAUDE_CODE_MAX_OUTPUT_TOKENS 16384 | thinking on (Claude Code default; it cannot be switched off for this model) | no | 0 of 100 |  |
-| `plain_llm_opus55` | claude-opus-5-5, zero-shot | `claude-opus-5-5` | claude_code | not sent (service default) | CLAUDE_CODE_MAX_OUTPUT_TOKENS 16384 | thinking on (Claude Code default; it cannot be switched off for this model) | no | 0 of 100 |  |
+| `plain_llm_haiku` | claude-haiku-5-5 (medium), zero-shot | `claude-haiku-5-5` | claude_code | not sent (service default) | CLAUDE_CODE_MAX_OUTPUT_TOKENS 16384 | thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model) | no | 0 of 100 |  |
+| `plain_llm_sonnet` | claude-sonnet-5-5 (medium), zero-shot | `claude-sonnet-5-5` | claude_code | not sent (service default) | CLAUDE_CODE_MAX_OUTPUT_TOKENS 16384 | thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model) | no | 0 of 100 |  |
+| `plain_llm_opus55` | claude-opus-5-5 (medium), zero-shot | `claude-opus-5-5` | claude_code | not sent (service default) | CLAUDE_CODE_MAX_OUTPUT_TOKENS 16384 | thinking on, effort medium (Claude Code defaults: no effort level was set, and thinking cannot be switched off for this model) | no | 0 of 100 |  |
 
 Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'.
 
