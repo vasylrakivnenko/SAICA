@@ -51,25 +51,7 @@
     "https://github.com/zilliztech/claude-context",
     "https://github.com/zilliztech/memsearch"
   ],
-  "matched_in_kg": [
-    {
-      "tool_id": "zed-agent",
-      "repository_url": "https://github.com/zed-industries/zed",
-      "stars": 80871,
-      "trending_in": [
-        "rust:daily",
-        "rust:weekly"
-      ]
-    },
-    {
-      "tool_id": "codex-cli",
-      "repository_url": "https://github.com/openai/codex",
-      "stars": 79162,
-      "trending_in": [
-        "rust:daily"
-      ]
-    }
-  ],
+  "matched_in_kg": [],
   "new_candidates": [
     {
       "repository_url": "https://github.com/obra/superpowers",

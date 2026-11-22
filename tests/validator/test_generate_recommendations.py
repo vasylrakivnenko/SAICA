@@ -339,6 +339,18 @@ def test_blocklist_applied_to_agnostic_across_levels(payload: dict) -> None:
         assert "comfyui" not in ids
 
 
+def test_printed_blocklist_names_only_live_nodes(payload: dict) -> None:
+    """A block-list id that is no longer a node (comfyui has a tombstone) is
+    still honoured by the recommender but is not printed."""
+    live = set(_recommend.catalogue_tools())
+    assert set(payload["blocklist"]) <= live
+    md = render_markdown(payload)
+    for removed in RECOMMENDATION_BLOCKLIST - live:
+        assert f"`{removed}`" not in md
+    if not payload["blocklist"]:
+        assert "Never listed, whatever their tags" not in md
+
+
 def test_blocklist_applied_to_failure_mode_view(payload: dict) -> None:
     for fm, recs in payload["by_failure_mode"].items():
         ids = {r["tool_id"] for r in recs}

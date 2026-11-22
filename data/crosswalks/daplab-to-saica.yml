@@ -41,12 +41,16 @@ mappings:
   # DAP-06 Security Vulnerabilities
   - saica_value: security_vulnerability
     external_id: DAP-06
-    confidence: exact
+    confidence: partial
     note: >
-      Both describe an agent writing code that introduces a security
-      weakness; the post names exposed API keys and wrong access control,
-      SAICA names leaked secrets and insecure patterns. The post gives two
-      sentences and one example, so the match rests on that short text.
+      The post says agents "often introduce security vulnerabilities" and
+      names exposed API keys and wrong access control; SAICA names leaked
+      secrets and insecure patterns in the emitted code. Partial, not
+      exact: the post gives two sentences and one example, and the example
+      is an application that served answers from a private admin codebase
+      to regular users. That is an access-control failure in the built
+      product, not a vulnerable pattern in the code the agent wrote. Rated
+      `exact` until 2026-11-21.
 
   # DAP-07 Repeated Code
   - saica_value: dependency_blindness

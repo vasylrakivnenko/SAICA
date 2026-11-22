@@ -162,6 +162,7 @@ def make_kg(root: Path) -> Path:
             "taxonomy": "tax-a",
             "authored_by": ["some-model"],
             "review_state": "llm_drafted_unreviewed",
+            "source_checked_on": "2026-11-21",
             "mappings": [
                 {
                     "saica_value": "fabrication",
@@ -177,9 +178,9 @@ def make_kg(root: Path) -> Path:
     )
 
     write_yaml(
-        data / "incidents" / "incident-a.yml",
+        data / "incidents" / "incident-a-2025.yml",
         {
-            "id": "incident-a",
+            "id": "incident-a-2025",
             "title": "An agent deleted a database",
             "description": "A dated real event with a named system.",
             "kind": "event",
@@ -237,10 +238,15 @@ def make_kg(root: Path) -> Path:
                     "removed_on": "2026-11-21",
                     "reason": "Retracted: the source does not say this.",
                     "successor": None,
+                    "archived_at": "archive/retracted/incident-old.yml",
                 }
             ]
         },
     )
+
+    kept = root / "archive" / "retracted" / "incident-old.yml"
+    kept.parent.mkdir(parents=True, exist_ok=True)
+    kept.write_text("id: incident-old\n", encoding="utf-8")
 
     ids: dict[str, Any] = {}
     for kind in (

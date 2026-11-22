@@ -303,9 +303,7 @@
     "source": "site/public/bench/results.json",
     "unmapped_modes": []
   },
-  "blocklist": [
-    "comfyui"
-  ],
+  "blocklist": [],
   "by_agent": {
     "aider": {
       "full": {

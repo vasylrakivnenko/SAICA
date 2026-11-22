@@ -2,70 +2,88 @@
 // /taxonomy-study — cluster-study explorer. Two visualizations:
 //   1. UMAP scatter with shaded convex-hull cluster regions and labels, so
 //      clusters are visible at a glance rather than drowned in a dot cloud.
-//   2. A Sankey-style alluvial diagram across text (K=26) → bipartite (K=7) →
-//      SAICA (K=11), making the fan-in / fan-out pattern legible.
-// Data: /taxonomy_study.json, a frozen file from 2026-04-23 (commit 8b5516f).
+//   2. A Sankey-style alluvial diagram across text clusters → bipartite clusters → SAICA modes,
+//      making the fan-in / fan-out pattern legible.
+// Data: /taxonomy_study.json. The study was designed and first run on 2026-04-23; the file was rebuilt on
+// 2026-11-21 from the corrected taxonomies (track kg_gate). Every count, K and agreement score on the page is
+// read from the file's `summary`, `points` and `clusters`; none is typed here.
 //
 // ARCHIVED (2026-11-21): the page is noindex and opens with a dated banner. Its one positive result is circular
 // (the "tool-based" matrix and the "SAICA match" labels are both read from the same crosswalk:
-// pipeline/taxonomy_cluster/cluster.py build_tool_matrix, compare.py saica_labels_for_rows) and its inputs have
-// changed since. Do not re-run it to refresh the numbers before the design changes (REWIEW_NOV_21.md J1, G4).
+// pipeline/taxonomy_cluster/cluster.py build_tool_matrix, compare.py saica_labels_for_rows). The rebuild did not
+// change the design (REWIEW_NOV_21.md J1, G4).
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ArchivedBanner from "../components/ArchivedBanner.astro";
 import study from "../../public/taxonomy_study.json";
 import { graph } from "../lib/data.ts";
-import { andList } from "../lib/catalog.ts";
+import { andList } from "../lib/format.ts";
 
-// What has changed in the graph since the study: a category counts as changed when its id is gone or its
-// label is different today. Computed at build time, so the banner stays true as data/ moves on.
-const points = study.points as Array<{ id: string; label: string; source_tax_id: string; saica_match: string }>;
+interface Cluster { id: number; size: number }
+const S = study.summary;
+const points = study.points as Array<{ id: string; label: string; source_tax_id: string; saica_match: string; text_cluster: number; bipartite_cluster: number }>;
+const N = points.length;
+const taxNames = Object.values(study.taxonomies as Record<string, { name: string }>).map((t) => t.name);
+const f2 = (x: number) => x.toFixed(2);
+// "more than" / "fewer than" / "as many as" the manual partition, from the two K values.
+const versus = (k: number) => (k > S.k_manual_saica ? "more than" : k < S.k_manual_saica ? "fewer than" : "as many as");
+
+// Drift since the file was built: a category counts as changed when its id is gone or its label is different
+// in the graph today. Computed at build time, so the banner says so when data/ moves on.
 const changedPoint = (p: (typeof points)[number]) => {
   const now = graph.taxonomies[p.source_tax_id]?.categories.find((c) => c.external_id === p.id);
   return !now || now.label.trim() !== p.label.trim();
 };
 const changed = points.filter(changedPoint);
-const allChanged = Object.entries(study.taxonomies as Record<string, { name: string }>)
-  .filter(([id]) => {
-    const own = points.filter((p) => p.source_tax_id === id);
-    return own.length > 0 && own.every(changedPoint);
-  })
-  .map(([, t]) => t.name);
 const categoriesNow = Object.values(graph.taxonomies).reduce((n, t) => n + t.categories.length, 0);
-// Input categories whose labels no source had published: every MAST and DAPLab entry of the April files
-// (research/review_20261121/mast_fix.md; data/TOMBSTONES.yml and the 2026-11-21 rebuild of the DAPLab taxonomy).
-const unsourced = points.filter((p) => p.source_tax_id === "mast" || p.source_tax_id === "daplab-9-patterns").length;
 const unmapped = points.filter((p) => p.saica_match === "__unmapped__").length;
 const modesUsed = new Set(points.map((p) => p.saica_match).filter((m) => m !== "__unmapped__")).size;
-const toolsNow = Object.values(graph.tools);
-const tagsNow = toolsNow.reduce((n, t) => n + t.addresses_failure_modes.length, 0);
-// The catalog the study ran on, counted from git at commit 8b5516f (2026-04-23): data/tools/*.yml files and
-// the entries of their addresses_failure_modes lists.
-const THEN = { tools: 104, tags: 274 };
+
+// Shape of the two partitions, for the takeaways (noise = HDBSCAN id -1, no cluster).
+const real = (list: Cluster[]) => list.filter((c) => c.id !== -1);
+const textClusters = real(study.clusters.text as Cluster[]);
+const bipClusters = real(study.clusters.bipartite as Cluster[]);
+const textNoise = points.filter((p) => p.text_cluster === -1).length;
+const bipNoise = points.filter((p) => p.bipartite_cluster === -1).length;
+const SMALL = 4;
+const smallText = textClusters.filter((c) => c.size <= SMALL).length;
+const sizes = (list: Cluster[]) => list.map((c) => c.size).sort((a, b) => a - b);
+const bipSizes = sizes(bipClusters);
+// How many text clusters feed each tool-based cluster (noise left out on both sides).
+const feeders = bipClusters.map(
+  (b) => new Set(points.filter((p) => p.bipartite_cluster === b.id && p.text_cluster !== -1).map((p) => p.text_cluster)).size,
+).sort((a, b) => a - b);
+
 const STATS: [string, string, string][] = [
-  ["ts-k-text", "26", "K<sub>text</sub> (HDBSCAN)"],
-  ["ts-k-bipartite", "7", "K<sub>bipartite</sub> (tool-based)"],
-  ["ts-k-manual", "11", "K<sub>manual</sub> (SAICA)"],
-  ["ts-ari-bip", "0.52", "ARI<sub>bipartite vs SAICA</sub> (circular, see note)"],
+  ["ts-k-text", String(S.k_text), "K<sub>text</sub> (HDBSCAN)"],
+  ["ts-k-bipartite", String(S.k_bipartite), "K<sub>bipartite</sub> (tool-based)"],
+  ["ts-k-manual", String(S.k_manual_saica), "K<sub>manual</sub> (SAICA)"],
+  ["ts-ari-bip", f2(S.ari_bipartite_saica), "ARI<sub>bipartite vs SAICA</sub> (circular, see note)"],
 ];
 const COLORINGS: [string, string, boolean][] = [
-  ["bipartite", "bipartite cluster (K=7)", true],
-  ["saica", "SAICA match (K=11)", false],
-  ["text", "text cluster (K=26)", false],
+  ["bipartite", `bipartite cluster (K=${S.k_bipartite})`, true],
+  ["saica", `SAICA match (K=${S.k_manual_saica})`, false],
+  ["text", `text cluster (K=${S.k_text})`, false],
   ["taxonomy", "source taxonomy", false],
 ];
-// Descriptions of the pictures only. Two earlier takeaways said the result "confirms" that tool reachability
-// "recovers SAICA's manual partition"; they were removed because that agreement is circular (see the banner).
-const TAKEAWAYS: [string, string][] = [
-  ["Text clustering fragments",
-    "26 clusters, most with only 2–4 members; a large noise bucket (48 categories) holds what the text similarity could not place."],
-  ["Tool-based clustering concentrates",
-    "7 clusters, most of them large. This follows from how the matrix is built: categories mapped to the same failure modes get the same row."],
-  ["Fan-in, left → middle",
-    "every tool-based bar is fed by many text slivers: the text clusters are much finer than the tool-based ones."],
-];
+// Descriptions of the pictures only, each computed from the file; a sentence that does not hold on the file is
+// left out. Two earlier takeaways said the result "confirms" that tool reachability "recovers SAICA's manual
+// partition"; they were removed because that agreement is circular (see the banner).
+const TAKEAWAYS: [string, string][] = [];
+if (textClusters.length > 0) {
+  TAKEAWAYS.push(["Text clustering fragments",
+    `${textClusters.length} clusters, ${smallText} of them with ${SMALL} members or fewer; ${textNoise} of the ${N} categories were left as noise, placed in no cluster.`]);
+}
+if (bipClusters.length > 0) {
+  TAKEAWAYS.push(["Tool-based clustering concentrates",
+    `${bipClusters.length} clusters of ${bipSizes[0]} to ${bipSizes[bipSizes.length - 1]} categories${bipNoise > 0 ? `, ${bipNoise} categories as noise` : ""}. This follows from how the matrix is built: categories mapped to the same failure modes get the same row, and the ${unmapped} categories with no mapping all get an empty one.`]);
+}
+if (feeders.length > 0 && feeders[0] >= 2) {
+  TAKEAWAYS.push(["Fan-in, left → middle",
+    `each tool-based cluster draws its members from ${feeders[0]} to ${feeders[feeders.length - 1]} text clusters: the text clusters are finer than the tool-based ones.`]);
+}
 ---
 
-<BaseLayout title="Taxonomy cluster study (archived, April 2026)" description="Archived study from April 2026: how the categories of 6 AI agent failure taxonomies clustered on an earlier version of the SAICA knowledge graph. Not maintained." noindex>
+<BaseLayout title="Taxonomy cluster study (archived)" description={`Archived study: how ${N} categories of ${taxNames.length} AI agent failure taxonomies cluster, by text and through SAICA's crosswalk. Its positive result is circular. Not maintained.`} noindex>
   <section class="mb-6 max-w-3xl">
     <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
       Archived study
@@ -73,47 +91,52 @@ const TAKEAWAYS: [string, string][] = [
     <h1 class="mt-2">Taxonomy cluster study</h1>
   </section>
 
-  <ArchivedBanner label="Archived study, not maintained" asOf="23 April 2026">
+  <ArchivedBanner label="Archived study, not maintained" asOf="21 November 2026">
     <p>
-      This page shows a study run on the knowledge graph as it was on 23 April 2026. It is kept as a record.
-      Please do not cite its numbers.
+      This page shows a study designed and first run in April 2026. It is kept as a record.
+      The map and every number on this page were rebuilt on 2026-11-21 from the corrected taxonomies ({N}
+      categories of {taxNames.length} taxonomies); the design of the study was not changed. Please do not cite
+      its numbers.
     </p>
     <p class="mt-2">
       <strong>Its main result is circular.</strong> The “tool-based” clustering links a category to a tool only
       through SAICA's own crosswalk: a tool reaches a category when one of the tool's failure-mode tags is mapped
       to that category. The “SAICA match” it is compared with is read from the same crosswalk. So the agreement
-      between the two (ARI 0.52, NMI 0.74) compares the crosswalk with itself. It does not show that the 11
-      failure modes are the right way to divide failures. The project review of 21 November 2026 shuffled the
-      tools' tags at random and got about the same agreement (ARI 0.51 on average over 50 runs).
-      {unmapped} of the {points.length} categories had no mapping at all and count as agreeing with each other,
-      and only {modesUsed} of the 11 modes appear in the comparison. The one independent test on this page,
-      clustering the category texts, agrees weakly with the 11 modes (ARI 0.08).
+      between the two (ARI {f2(S.ari_bipartite_saica)}, NMI {f2(S.nmi_bipartite_saica)}) compares the crosswalk
+      with itself. It does not show that the {S.k_manual_saica} failure modes are the right way to divide failures.
+      {unmapped} of the {N} categories have no mapping at all and count as agreeing with each other{modesUsed < S.k_manual_saica && <>, and only {modesUsed} of the {S.k_manual_saica} modes appear in the comparison</>}.
+      The one independent test on this page, clustering the category texts, gives ARI {f2(S.ari_text_saica)}
+      against the {S.k_manual_saica} modes (0 is what chance gives).
     </p>
     <p class="mt-2">
-      <strong>Its data is out of date.</strong> {changed.length} of the {points.length} categories have since been
-      removed or renamed in the graph{allChanged.length > 0 && <> (among them every entry of {andList(allChanged)})</>},
-      after the labels were checked against the published sources; the graph now holds {categoriesNow} categories.
-      {unsourced} of the {points.length} input categories (the MAST and DAPLab entries) carried labels that no
-      source had published. The study used {THEN.tools} tools with {THEN.tags} failure-mode tags; after the tag audit of 20 November 2026
-      the catalog has {toolsNow.length} tools with {tagsNow} tags.
+      <strong>A shuffle test was run on the April data only.</strong> On the first run of this study (23 April
+      2026, an earlier and partly wrong set of categories) the project review of 21 November 2026 shuffled the
+      tools' tags at random and got about the same agreement as with the real tags (ARI 0.51 on average over 50
+      shuffles, against 0.52). That test was not repeated on the rebuilt data, so no such figure exists for the
+      numbers shown here.
     </p>
+    {changed.length > 0 && (
+      <p class="mt-2">
+        <strong>The graph has moved on since the rebuild.</strong> {changed.length} of the {N} categories have
+        since been removed or renamed in the graph, which now holds {categoriesNow} categories.
+      </p>
+    )}
   </ArchivedBanner>
 
   <section class="mb-6 max-w-3xl">
     <p class="mt-4 leading-7">
       If we let embeddings and HDBSCAN choose how many failure classes there
-      are across the 121 categories ingested from OWASP, MAST, DAPLab,
-      Microsoft AIRT, Swiss Cheese, and Shah 2026, do we converge on SAICA's
-      manual 11, or something different? Two algorithmic methods were tried.
+      are across the {N} categories ingested from {andList(taxNames)}, do we arrive at SAICA's
+      manual {S.k_manual_saica}, or something different? Two algorithmic methods were tried.
       <strong>Text clustering</strong> over MiniLM sentence embeddings of the
       <code>label + description</code> prose landed on
-      <strong>K<sub>text</sub> = 26</strong> — finer than SAICA and weakly
-      agreeing with it (ARI 0.08, NMI 0.38).
+      <strong>K<sub>text</sub> = {S.k_text}</strong>, {versus(S.k_text)} SAICA's {S.k_manual_saica}, with
+      ARI {f2(S.ari_text_saica)} and NMI {f2(S.nmi_text_saica)} against SAICA's labels.
       <strong>Response clustering</strong> over the
       (category &times; tool) bipartite reachability matrix landed on
-      <strong>K<sub>bipartite</sub> = 7</strong>, <em>coarser</em> than SAICA's
-      11, with ARI 0.52 and NMI 0.74 against SAICA's labels. That agreement is
-      built in: the matrix and the labels are both made from the same
+      <strong>K<sub>bipartite</sub> = {S.k_bipartite}</strong>, {versus(S.k_bipartite)} SAICA's
+      {S.k_manual_saica}, with ARI {f2(S.ari_bipartite_saica)} and NMI {f2(S.nmi_bipartite_saica)} against
+      SAICA's labels. That agreement is built in: the matrix and the labels are both made from the same
       crosswalk (see the note above).
     </p>
   </section>
@@ -173,12 +196,12 @@ const TAKEAWAYS: [string, string][] = [
     </div>
     <p class="mt-3 max-w-3xl text-sm text-ink-muted leading-6">
       Each shaded polygon is one cluster's convex hull, colored by partition
-      and labeled with the cluster's proposed name. Dots are the 121 source
+      and labeled with the cluster's proposed name. Dots are the {N} source
       categories at their UMAP-2D coordinates. Light-gray dots are HDBSCAN
       noise (cluster = -1) — they get no hull. Switch the coloring to see how
-      <em>the same</em> 121 points get carved up differently by text
-      clustering (many thin hulls), bipartite clustering (few broad hulls),
-      and SAICA's manual partition (11 modes). Click any dot for its full
+      <em>the same</em> {N} points get carved up differently by text
+      clustering ({S.k_text} clusters), bipartite clustering ({S.k_bipartite} clusters),
+      and SAICA's manual partition ({S.k_manual_saica} modes). Click any dot for its full
       description and fellow cluster members.
     </p>
   </section>
@@ -214,11 +237,11 @@ const TAKEAWAYS: [string, string][] = [
     </div>
     <p class="mt-3 max-w-3xl text-sm text-ink-muted leading-6">
       Three stacked columns, each a vertical inventory of clusters at a
-      different K: text (26 thin slivers) → bipartite (7 tall blocks) →
-      SAICA modes (11). Ribbon thickness = number of categories that belong
+      different K: text ({S.k_text}) → bipartite ({S.k_bipartite}) →
+      SAICA modes ({S.k_manual_saica}); the grey bar of each column holds its noise or
+      unmapped categories. Ribbon thickness = number of categories that belong
       to both the left and right bar; ribbons inherit their source bar's
-      color. Read it left-to-right: many text slivers fan into a handful of
-      bipartite blocks. Those blocks line up with SAICA's modes because both
+      color. Read it left-to-right. Where bipartite blocks line up with SAICA's modes, it is because both
       columns are derived from the same crosswalk, so that part of the picture
       is not evidence for the 11 modes. Hover any bar to light up the ribbons that
       touch it; hover a ribbon to see its size.
@@ -584,15 +607,15 @@ const TAKEAWAYS: [string, string][] = [
     const layout = layoutSankey<Point>({
       items: payload.points,
       columns: [
-        { id: "text", label: "text (K=26)",
+        { id: "text", label: `text (K=${payload.summary.k_text})`,
           key: (p) => String(p.text_cluster),
           barName: (k) => nm(k, payload!.clusters.text, "text"),
           barColor: (k) => k === "-1" ? NOISE_FILL : undefined },
-        { id: "bipartite", label: "bipartite (K=7)",
+        { id: "bipartite", label: `bipartite (K=${payload.summary.k_bipartite})`,
           key: (p) => String(p.bipartite_cluster),
           barName: (k) => nm(k, payload!.clusters.bipartite, "bip"),
           barColor: (k) => k === "-1" ? NOISE_FILL : undefined },
-        { id: "saica", label: "SAICA (K=11)",
+        { id: "saica", label: `SAICA (K=${payload.summary.k_manual_saica})`,
           key: (p) => p.saica_match,
           barName: (k) => k === "__unmapped__" ? "unmapped" : k,
           barColor: (k) => k === "__unmapped__" ? NOISE_FILL : undefined },
@@ -609,7 +632,7 @@ const TAKEAWAYS: [string, string][] = [
     };
     ribbonEls = renderSankeyInto({
       root: sankeySvg, layout, marginX: MARGIN_X, marginY: MARGIN_Y,
-      columnTitles: ["text clusters (K=26)", "bipartite clusters (K=7)", "SAICA modes (K=11)"],
+      columnTitles: [`text clusters (K=${payload.summary.k_text})`, `bipartite clusters (K=${payload.summary.k_bipartite})`, `SAICA modes (K=${payload.summary.k_manual_saica})`],
       onHover: (r, ev) => {
         for (const p of ribbonEls) p.setAttribute("fill-opacity", "0.08");
         (ev.currentTarget as SVGPathElement).setAttribute("fill-opacity", "0.85");

@@ -152,7 +152,9 @@ def build_payload(*, as_of: str | None = None) -> dict[str, Any]:
         },
         "not_listed": removed_pairs(tools, evidence),
         "popularity": popularity_facts(tools),
-        "blocklist": sorted(RECOMMENDATION_BLOCKLIST),
+        # Only block-list entries that are live nodes: naming a removed
+        # node (comfyui has a tombstone) would cite something that is gone.
+        "blocklist": sorted(b for b in RECOMMENDATION_BLOCKLIST if b in tools),
         "priorities": all_priorities(),
         "priorities_label": priorities_label(),
         "by_agent": by_agent,
@@ -418,11 +420,12 @@ def _render_method(payload: dict[str, Any]) -> list[str]:
         )
     out.append("")
     blocklist = ", ".join(f"`{b}`" for b in payload.get("blocklist", []))
-    out.append(
-        f"Never listed, whatever their tags: {blocklist or '_nothing_'}"
-        " (role too unclear to suggest)."
-    )
-    out.append("")
+    if blocklist:
+        out.append(
+            f"Never listed, whatever their tags: {blocklist}"
+            " (role too unclear to suggest)."
+        )
+        out.append("")
     out.append("Weight per failure mode (likelihood × impact, descending):")
     out.append("")
     out.append("| Failure mode | weight |")

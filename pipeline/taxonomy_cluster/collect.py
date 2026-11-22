@@ -214,4 +214,5 @@ def write_corpus(rows: List[CategoryRow], out_path: Path) -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as fh:
         json.dump(rows_to_jsonable(rows), fh, indent=2, sort_keys=False)
+        fh.write("\n")  # end with a newline, as the end-of-file hook expects
     return out_path

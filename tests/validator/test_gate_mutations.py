@@ -550,6 +550,136 @@ def tombstoned_id_in_use(data: Path) -> Expected:
     return f"tool '{src.stem}' has a tombstone but data/tools/{src.stem}.yml exists"
 
 
+# --- holes found by the independent review of 2026-11-21 (8 of 14 seeded
+# --- defects passed) ---------------------------------------------------------
+
+
+def _archive(data: Path, tool_id: str) -> None:
+    edit_yaml(
+        data / "tools" / f"{tool_id}.yml",
+        lambda d: d.update(archived=True, maturity_status="deprecated"),
+    )
+
+
+def archived_tool_in_recipe_stack(data: Path) -> Expected:
+    recipe = _first(data, "recipes")
+    tool_id = read_yaml(recipe)["stack"][0]
+    _archive(data, tool_id)
+    return f"[recipes] {recipe.stem} stack contains '{tool_id}', whose upstream"
+
+
+def archived_tool_as_mitigation(data: Path) -> Expected:
+    incident = _first(data, "incidents")
+    tool_id = _tool(data).stem
+    _archive(data, tool_id)
+    edit_yaml(incident, lambda d: d.update(mitigated_by=[tool_id]))
+    return f"[incidents] {incident.stem} mitigated_by names '{tool_id}', whose"
+
+
+def paper_year_contradicts_arxiv_id(data: Path) -> Expected:
+    src = _first(data, "papers", lambda n: str(n.get("arxiv_id") or "")[:2].isdigit())
+    edit_yaml(src, lambda d: d.update(year=2011))
+    return (f"{src.name} :: year — 2011 contradicts arxiv_id", "first posted in 20")
+
+
+def same_id_on_two_kinds(data: Path) -> Expected:
+    tool_id = _tool(data).stem
+    doc = read_yaml(_first(data, "incidents"))
+    doc["id"] = tool_id
+    write_yaml(data / "incidents" / f"{tool_id}.yml", doc)
+    return f"[incidents] id '{tool_id}' is also the id of a node in tools"
+
+
+def crosswalk_pair_twice(data: Path) -> Expected:
+    src = _first(data, "crosswalks")
+    seen: list[str] = []
+
+    def change(doc: dict[str, Any]) -> None:
+        row = dict(doc["mappings"][0])
+        row["confidence"] = "related" if row["confidence"] != "related" else "partial"
+        doc["mappings"].append(row)
+        seen.extend([row["external_id"], row["saica_value"]])
+
+    edit_yaml(src, change)
+    return f"[crosswalks] {src.stem} maps {seen[0]} to '{seen[1]}' twice"
+
+
+def _published_taxonomy(data: Path) -> Path:
+    return _first(data, "taxonomies", lambda n: bool(n.get("first_published")))
+
+
+def verified_before_publication(data: Path) -> Expected:
+    src = _published_taxonomy(data)
+    edit_yaml(src, lambda d: d.update(verified_against_source="2019-01-01"))
+    return (
+        f"[taxonomies] {src.stem} verified_against_source 2019-01-01 is before"
+        " the taxonomy was published"
+    )
+
+
+def verified_in_the_future(data: Path) -> Expected:
+    src = _published_taxonomy(data)
+    edit_yaml(src, lambda d: d.update(verified_against_source="2099-01-01"))
+    return f"{src.name} :: verified_against_source — 2099-01-01 is in the future"
+
+
+def source_checked_before_publication(data: Path) -> Expected:
+    tax = _published_taxonomy(data)
+    src = _first(data, "crosswalks", lambda n: n.get("taxonomy") == tax.stem)
+    edit_yaml(src, lambda d: d.update(source_checked_on="2019-01-01"))
+    return f"[crosswalks] {src.stem} source_checked_on 2019-01-01 is before taxonomy"
+
+
+def source_checked_in_the_future(data: Path) -> Expected:
+    src = _first(data, "crosswalks")
+    edit_yaml(src, lambda d: d.update(source_checked_on="2099-01-01"))
+    return f"{src.name} :: source_checked_on — 2099-01-01 is in the future"
+
+
+def incident_arxiv_link_is_not_the_cited_paper(data: Path) -> Expected:
+    """The reviewed case: a source link put back to arXiv 2406.08291 while
+    the record cites the paper node for 2406.09834."""
+    paper = _first(data, "papers", lambda n: str(n.get("arxiv_id") or "")[:2].isdigit())
+    incident = _first(data, "incidents")
+    edit_yaml(
+        incident,
+        lambda d: d.update(
+            documented_by=[paper.stem],
+            source_urls=["https://arxiv.org/abs/1106.08291v2"],
+        ),
+    )
+    return (
+        f"[incidents] {incident.stem} source https://arxiv.org/abs/1106.08291v2"
+        " is arXiv 1106.08291, but the paper(s) in documented_by are arXiv"
+    )
+
+
+def tombstone_archive_file_missing(data: Path) -> Expected:
+    path = data / "TOMBSTONES.yml"
+    doc = read_yaml(path) if path.exists() else {"tombstones": []}
+    doc["tombstones"].append(
+        {
+            "id": "zzz-removed",
+            "kind": "incident",
+            "removed_on": "2026-11-21",
+            "reason": "test",
+            "archived_at": "archive/retracted/zzz-no-such-file.yml",
+        }
+    )
+    write_yaml(path, doc)
+    return "archived_at 'archive/retracted/zzz-no-such-file.yml' is not a file"
+
+
+def incident_date_long_before_id_year(data: Path) -> Expected:
+    src = _first(data, "incidents", lambda n: str(n.get("id"))[-4:].isdigit())
+    year = int(src.stem[-4:])
+    edit_yaml(src, lambda d: d.update(incident_date=f"{year - 3}-06-01"))
+    return (
+        f"{src.name} :: incident_date — {year - 3}-06-01 is more than two years"
+        " before the year in the id"
+    )
+
+
 MUTATIONS: list[Callable[[Path], Expected]] = [
     # --- the 18 classes of the 2026-11-21 review (PV-06) ---
     two_files_same_id,
@@ -603,6 +733,19 @@ MUTATIONS: list[Callable[[Path], Expected]] = [
     human_reviewed_without_reviewer,
     node_deleted_without_tombstone,
     tombstoned_id_in_use,
+    # --- independent review of 2026-11-21: holes a to h ---
+    archived_tool_in_recipe_stack,
+    archived_tool_as_mitigation,
+    paper_year_contradicts_arxiv_id,
+    same_id_on_two_kinds,
+    crosswalk_pair_twice,
+    verified_before_publication,
+    verified_in_the_future,
+    source_checked_before_publication,
+    source_checked_in_the_future,
+    incident_arxiv_link_is_not_the_cited_paper,
+    tombstone_archive_file_missing,
+    incident_date_long_before_id_year,
 ]
 IDS = [m.__name__ for m in MUTATIONS]
 
@@ -636,8 +779,13 @@ def test_seeded_defect_fails_the_gate(
 
 @pytest.fixture(scope="module")
 def live_baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str]:
-    base = tmp_path_factory.mktemp("live") / "data"
+    root = tmp_path_factory.mktemp("live")
+    base = root / "data"
     shutil.copytree(LIVE_DATA, base, ignore=shutil.ignore_patterns("saica_index"))
+    # Tombstones name kept copies under archive/, relative to the directory
+    # that holds data/; the gate checks that they exist.
+    if (REPO / "archive").is_dir():
+        shutil.copytree(REPO / "archive", root / "archive")
     _, output = run_gate(base)
     return base, output
 
@@ -651,6 +799,8 @@ def test_seeded_defect_fails_on_copy_of_live_data(
     base, before = live_baseline
     data = tmp_path / "data"
     shutil.copytree(base, data)
+    if (base.parent / "archive").is_dir():
+        shutil.copytree(base.parent / "archive", tmp_path / "archive")
     expected = mutate(data)
     assert not _has_line(before, expected), (
         f"the live data already shows {expected!r}; this case cannot tell"

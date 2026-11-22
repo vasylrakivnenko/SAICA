@@ -161,11 +161,16 @@ def test_taxonomy_verified_against_source_is_a_date() -> None:
 
 
 def test_archived_but_stable_is_a_warning(kg: Path) -> None:
-    edit_yaml(kg / "tools" / "alpha.yml", lambda d: d.update(archived=True))
+    """``gamma`` is in no recipe stack; once no incident names it as a
+    mitigation either, archiving it is only a status contradiction."""
+    edit_yaml(
+        kg / "incidents" / "incident-a-2025.yml", lambda d: d.update(mitigated_by=[])
+    )
+    edit_yaml(kg / "tools" / "gamma.yml", lambda d: d.update(archived=True))
     code, output = run_gate(kg)
-    assert code == 0
+    assert code == 0, output
     assert (
-        "alpha: upstream repository is archived but maturity_status is 'stable'"
+        "gamma: upstream repository is archived but maturity_status is 'stable'"
         in output
     )
 

@@ -35,8 +35,7 @@ source_urls:
 
 documented_by: []
 
-mitigated_by:
-- daytona
+mitigated_by: []
 
 notes: >
   Corrected on 2026-11-21. The record used to cite GitHub issue 15821,
@@ -45,6 +44,9 @@ notes: >
   post-mortem; the issue and the AI Incident Database give 2025-07-21. The
   post-mortem page (anuraag2601.github.io/gemini_cli_disaster.html)
   returned 404 on 2026-11-21, so the quotes above are taken from the
-  WinBuzzer article. A sandboxed filesystem (daytona) or a commit before
-  each change would have made the loss reversible. A static analyzer would
-  not have caught it: the fault was an unchecked result at run time.
+  WinBuzzer article. A sandboxed filesystem or a commit before each change
+  would have made the loss reversible. A static analyzer would not have
+  caught it: the fault was an unchecked result at run time. `mitigated_by`
+  is empty since 2026-11-21: the catalogue's sandbox entry named here
+  before, daytona, is archived upstream, and no maintained tool in the
+  catalogue is recorded as covering this case.

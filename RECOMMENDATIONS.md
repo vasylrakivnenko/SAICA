@@ -179,8 +179,6 @@ Per failure mode: tools with a measured J at or above the floor come first, high
 
 Measured results: `site/public/bench/results.json`, generated 2026-11-22; 11 catalogue tools have at least one measured row; floor J 25%.
 
-Never listed, whatever their tags: `comfyui` (role too unclear to suggest).
-
 Weight per failure mode (likelihood × impact, descending):
 
 | Failure mode | weight |

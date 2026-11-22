@@ -322,6 +322,7 @@ def save_embeddings(
     }
     with meta_path.open("w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=2, sort_keys=False)
+        fh.write("\n")  # end with a newline, as the end-of-file hook expects
     return np_path, meta_path
 
 
@@ -340,6 +341,7 @@ def write_hdbscan_runs(
     }
     with out_path.open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, sort_keys=False)
+        fh.write("\n")  # end with a newline, as the end-of-file hook expects
     return out_path
 
 
@@ -366,4 +368,5 @@ def write_bipartite_runs(
     }
     with out_path.open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, sort_keys=False)
+        fh.write("\n")  # end with a newline, as the end-of-file hook expects
     return out_path

@@ -452,12 +452,32 @@ def file_errors(
         year = node.get("year")
         if isinstance(year, int) and year > as_of.year + 1:
             add("year", f"{year} is in the future")
+        posted = _arxiv_id_year(node.get("arxiv_id"))
+        if isinstance(year, int) and posted is not None and year != posted:
+            # Convention (validator/refresh_paper_metadata.py): year is the
+            # year the work first became public, i.e. the year of arXiv v1,
+            # which is the year in the identifier. A venue year goes in venue.
+            add(
+                "year",
+                f"{year} contradicts arxiv_id {node.get('arxiv_id')}, first"
+                f" posted in {posted}; year is the year of the first arXiv version",
+            )
         if node.get("arxiv_version") and not node.get("arxiv_id"):
             add("arxiv_version", "is set but the record has no arxiv_id")
         if node.get("provenance") == "arxiv-api" and not node.get("arxiv_id"):
             add("provenance", "'arxiv-api' needs an arxiv_id")
         if node.get("provenance") == "crossref-api" and not node.get("doi"):
             add("provenance", "'crossref-api' needs a doi")
+
+    if kind == "incidents":
+        named = re.search(r"-((?:19|20)[0-9]{2})$", str(node.get("id") or ""))
+        happened = _parse_date(node.get("incident_date"))
+        if named and happened and happened.year < int(named.group(1)) - 2:
+            add(
+                "incident_date",
+                f"{happened} is more than two years before the year in the id"
+                f" ({named.group(1)}); one of the two is wrong",
+            )
 
     if kind == "crosswalks":
         state = node.get("review_state")
@@ -545,6 +565,25 @@ def _norm_arxiv(value: Any) -> str | None:
         return None
     text = value.strip().lower().removeprefix("arxiv:")
     return re.sub(r"v[0-9]+$", "", text) or None
+
+
+def _arxiv_id_year(value: Any) -> int | None:
+    """Year in which an arXiv identifier was issued (the year of v1):
+    ``2603.01234`` → 2026, ``cs/0701001`` → 2007, ``hep-th/9901001`` → 1999."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip().lower().removeprefix("arxiv:")
+    match = re.match(r"^(?:[a-z-]+(?:\.[a-z]{2})?/)?([0-9]{2})(0[1-9]|1[0-2])", text)
+    if not match:
+        return None
+    two = int(match.group(1))
+    return 1900 + two if two >= 91 else 2000 + two
+
+
+_ARXIV_LINK_RE = re.compile(
+    r"arxiv\.org/(?:abs|pdf|html)/((?:[a-z-]+(?:\.[a-z]{2})?/)?[0-9]{4}[.0-9]*[0-9])",
+    re.IGNORECASE,
+)
 
 
 def _norm_doi(value: Any) -> str | None:
@@ -667,6 +706,28 @@ def cross_invariants(
     )
     _duplicates("tools", tools, (("repository_url", _norm_url),), err)
 
+    # --- one id, one node, whatever its kind ----------------------------
+    # Ids are cited without their kind (in text, in `[id]` references, in
+    # URLs of the form /<kind>/<id>/), so the same id on two kinds is a trap.
+    kinds_of: dict[str, list[str]] = defaultdict(list)
+    for kind_name, index in (
+        ("tools", tools),
+        ("failure_modes", modes),
+        ("papers", papers),
+        ("taxonomies", taxonomies),
+        ("crosswalks", crosswalks),
+        ("incidents", incidents),
+        ("recipes", recipes),
+    ):
+        for node_id in index:
+            kinds_of[node_id].append(kind_name)
+    for node_id in sorted(kinds_of):
+        if len(kinds_of[node_id]) > 1:
+            err.append(
+                f"[{kinds_of[node_id][-1]}] id '{node_id}' is also the id of a node"
+                f" in {', '.join(kinds_of[node_id][:-1])}; ids are unique across kinds"
+            )
+
     # --- failure modes: the enum and the files must agree ----------------
     for mode_id in sorted(modes):
         if mode_id not in KNOWN_FAILURE_MODE_IDS:
@@ -767,11 +828,26 @@ def cross_invariants(
             unverified_error(f"[crosswalks] {cw_id}", tax_id)
         known_ext_ids = category_ids(tax_id)
         axis_values = AXIS_VALUES.get(str(cw.get("saica_axis")))
+        published = _parse_date(taxonomies[tax_id].get("first_published"))
+        checked_on = _parse_date(cw.get("source_checked_on"))
+        if published and checked_on and checked_on < published:
+            err.append(
+                f"[crosswalks] {cw_id} source_checked_on {checked_on} is before"
+                f" taxonomy '{tax_id}' was published ({published})"
+            )
         mapped: set[str] = set()
+        pairs_seen: set[tuple[Any, Any]] = set()
         for m in cw.get("mappings", []) or []:
             if not isinstance(m, dict):
                 continue
             value = m.get("saica_value")
+            pair = (m.get("external_id"), value)
+            if pair in pairs_seen:
+                err.append(
+                    f"[crosswalks] {cw_id} maps {pair[0]} to '{value}' twice; one"
+                    " row per pair, with one confidence"
+                )
+            pairs_seen.add(pair)
             if axis_values is not None and value not in axis_values:
                 err.append(
                     f"[crosswalks] {cw_id} mapping saica_value '{value}' is not a"
@@ -836,6 +912,13 @@ def cross_invariants(
     # Taxonomy nodes: paper_id must be a known paper, and every category's
     # parent_id must be an external_id defined in the same taxonomy.
     for tax_id, tax in taxonomies.items():
+        published = _parse_date(tax.get("first_published"))
+        verified = _parse_date(tax.get("verified_against_source"))
+        if published and verified and verified < published:
+            err.append(
+                f"[taxonomies] {tax_id} verified_against_source {verified} is"
+                f" before the taxonomy was published ({published})"
+            )
         pid = tax.get("paper_id")
         if pid is not None and pid not in papers:
             err.append(
@@ -967,6 +1050,29 @@ def cross_invariants(
         for tid in _strs(inc.get("mitigated_by")):
             if tid not in tools:
                 err.append(f"[incidents] {inc_id} mitigated_by missing tool '{tid}'")
+            elif tools[tid].get("archived") is True:
+                err.append(
+                    f"[incidents] {inc_id} mitigated_by names '{tid}', whose"
+                    " upstream repository is archived; an unmaintained tool is"
+                    " not a mitigation to point readers to"
+                )
+        # An arXiv link among the sources must be the paper the record cites
+        # (documented_by), when that paper node carries its arXiv id. This
+        # catches a mistyped id offline; `--arxiv` checks the rest.
+        cited_arxiv = {
+            _norm_arxiv(papers[pid].get("arxiv_id"))
+            for pid in _strs(inc.get("documented_by"))
+            if pid in papers and papers[pid].get("arxiv_id")
+        }
+        if cited_arxiv:
+            for url in _strs(inc.get("source_urls")):
+                link = _ARXIV_LINK_RE.search(url)
+                if link and _norm_arxiv(link.group(1)) not in cited_arxiv:
+                    err.append(
+                        f"[incidents] {inc_id} source {url} is arXiv"
+                        f" {_norm_arxiv(link.group(1))}, but the paper(s) in"
+                        f" documented_by are arXiv {', '.join(sorted(cited_arxiv))}"
+                    )
         # An incident "references" a taxonomy when it cites the taxonomy's
         # own source or one of its category ids.
         text = " ".join(
@@ -993,6 +1099,12 @@ def cross_invariants(
         for tid in stack:
             if tid not in tools:
                 err.append(f"[recipes] {rec_id} stack references missing tool '{tid}'")
+            elif tools[tid].get("archived") is True:
+                err.append(
+                    f"[recipes] {rec_id} stack contains '{tid}', whose upstream"
+                    " repository is archived; a recipe may not rest on an"
+                    " unmaintained tool"
+                )
         stack_addresses = {
             fm
             for tid in stack
@@ -1077,6 +1189,12 @@ def _check_tombstones(
             err.append(
                 f"{where} — {entry.get('kind')} '{node_id}' has a tombstone but"
                 f" data/{kind}/{node_id}.yml exists; a removed id is never reused"
+            )
+        kept = entry.get("archived_at")
+        if isinstance(kept, str) and not (data_dir.parent / kept).is_file():
+            err.append(
+                f"{where} — archived_at '{kept}' is not a file (paths are"
+                " relative to the directory that holds data/)"
             )
         successor = entry.get("successor")
         if isinstance(successor, str) and successor not in live.get(kind, {}):

@@ -289,6 +289,7 @@ def write_payload(payload: Dict, out_path: Path = SITE_JSON_PATH) -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, separators=(",", ":"))
+        fh.write("\n")  # end with a newline, as the end-of-file hook expects
     return out_path
 
 
