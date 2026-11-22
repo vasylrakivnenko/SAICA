@@ -7,7 +7,6 @@ strict — we should fail to verify paraphrases.
 
 from __future__ import annotations
 
-import pytest
 
 from pipeline.extract.schemas import ConfidenceField, ToolExtraction
 from pipeline.extract.verify import (
@@ -46,7 +45,9 @@ def _extract_minimal(**overrides) -> ToolExtraction:
         "autonomy_level": _f("fully_autonomous"),
         "addresses_failure_modes": _f(["fabrication"]),
         "locus_of_control": _f(["model"]),
-        "inclusion_rationale": _f("Fills prevention × in_generation × fully_autonomous."),
+        "inclusion_rationale": _f(
+            "Fills prevention × in_generation × fully_autonomous."
+        ),
         "overall_confidence": 0.9,
     }
     fields.update(overrides)
@@ -142,8 +143,8 @@ def test_verify_field_partial_match() -> None:
     cf = _f(
         ["fabrication"],
         evidence=[
-            "hallucinated package imports",   # in source
-            "OWASP LLM Top-10 entry",         # NOT in source
+            "hallucinated package imports",  # in source
+            "OWASP LLM Top-10 entry",  # NOT in source
         ],
     )
     fv = verify_field(
@@ -196,7 +197,7 @@ def test_verify_extraction_flags_invented_quote() -> None:
         addresses_failure_modes=_f(
             ["fabrication", "supply_chain_attack"],
             evidence=[
-                "hallucinated package imports",   # legit
+                "hallucinated package imports",  # legit
                 "Detects malicious typosquatted packages",  # invented
             ],
         ),

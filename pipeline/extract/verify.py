@@ -100,9 +100,7 @@ class ExtractionVerification:
     @property
     def all_verified(self) -> bool:
         """True iff every field with evidence has 100% verified quotes."""
-        return all(
-            fv.all_verified for fv in self.fields.values() if fv.has_evidence
-        )
+        return all(fv.all_verified for fv in self.fields.values() if fv.has_evidence)
 
 
 def verify_quote(quote: str, source_normalised: str) -> bool:
@@ -145,9 +143,7 @@ def verify_extraction(extraction: Any, source_text: str) -> ExtractionVerificati
     for name, _info in type(extraction).model_fields.items():
         value = getattr(extraction, name, None)
         if isinstance(value, ConfidenceField):
-            results.fields[name] = verify_field(
-                name, value, source_normalised=src
-            )
+            results.fields[name] = verify_field(name, value, source_normalised=src)
     return results
 
 

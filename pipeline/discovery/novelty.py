@@ -75,10 +75,10 @@ class CanonicalIds:
     novelty decision.
     """
 
-    github: Optional[str] = None       # 'owner/repo' lowercased
-    arxiv: Optional[str] = None        # bare id, no 'arXiv:' prefix
-    doi: Optional[str] = None          # bare DOI, no 'https://doi.org/'
-    slug: Optional[str] = None         # kebab-case proposed_id, if provided
+    github: Optional[str] = None  # 'owner/repo' lowercased
+    arxiv: Optional[str] = None  # bare id, no 'arXiv:' prefix
+    doi: Optional[str] = None  # bare DOI, no 'https://doi.org/'
+    slug: Optional[str] = None  # kebab-case proposed_id, if provided
 
 
 def extract_canonical_ids(candidate: dict[str, Any]) -> CanonicalIds:
@@ -253,9 +253,7 @@ class NoveltyDecision:
 # ---------------------------------------------------------------------------
 
 
-def _new_evidence(
-    candidate: dict[str, Any], known_tool: dict[str, Any]
-) -> list[str]:
+def _new_evidence(candidate: dict[str, Any], known_tool: dict[str, Any]) -> list[str]:
     """Return short strings naming each kind of new evidence the
     candidate carries that the known tool doesn't.
 

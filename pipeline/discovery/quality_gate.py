@@ -235,8 +235,7 @@ def evaluate(signals: CandidateSignals) -> GateResult:
     # passes the gate even when other enrichment fields are missing.
     # See STARS_EXCEPTIONAL_THRESHOLD docstring for rationale.
     exceptional = (
-        signals.stars is not None
-        and signals.stars >= STARS_EXCEPTIONAL_THRESHOLD
+        signals.stars is not None and signals.stars >= STARS_EXCEPTIONAL_THRESHOLD
     )
     if exceptional and "stars_exceptional" not in passed:
         passed.append("stars_exceptional")
@@ -264,9 +263,7 @@ def evaluate_batch(
 # ---------------------------------------------------------------------------
 
 
-def _explain(
-    decision: GateDecision, passed: list[str], n_signals: int
-) -> str:
+def _explain(decision: GateDecision, passed: list[str], n_signals: int) -> str:
     if decision is GateDecision.PASS:
         return (
             f"PASS — {len(passed)} criteria fired ({', '.join(passed)})"

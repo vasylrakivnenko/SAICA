@@ -8,7 +8,6 @@ the per-criterion thresholds become deliberate.
 
 from __future__ import annotations
 
-import pytest
 
 from pipeline.discovery.quality_gate import (
     AWESOME_LIST_THRESHOLD,
@@ -88,12 +87,8 @@ def test_paper_citations_threshold() -> None:
 
 def test_paper_artifact_link_is_true_or_false() -> None:
     """Boolean-shaped criterion: True passes, False doesn't."""
-    yes = evaluate(
-        CandidateSignals(paper_artifact_link=True, stars=STARS_THRESHOLD)
-    )
-    no = evaluate(
-        CandidateSignals(paper_artifact_link=False, stars=STARS_THRESHOLD)
-    )
+    yes = evaluate(CandidateSignals(paper_artifact_link=True, stars=STARS_THRESHOLD))
+    no = evaluate(CandidateSignals(paper_artifact_link=False, stars=STARS_THRESHOLD))
     assert "paper_artifact" in yes.passed_criteria
     assert "paper_artifact" not in no.passed_criteria
 
@@ -162,11 +157,11 @@ def test_all_signals_present_but_only_one_passes_fails() -> None:
     only criteria above their threshold count toward the pass total."""
     r = evaluate(
         CandidateSignals(
-            stars=10,                      # below
-            paper_citations=0,             # below
+            stars=10,  # below
+            paper_citations=0,  # below
             paper_artifact_link=False,
-            contributor_count=1,           # below
-            awesome_list_count=1,          # below
+            contributor_count=1,  # below
+            awesome_list_count=1,  # below
             org="some-randomer",
         )
     )
@@ -186,10 +181,10 @@ def test_context7_like_candidate_passes_gate() -> None:
     list source. Old ranker buried it; the gate must rescue it."""
     r = evaluate(
         CandidateSignals(
-            stars=25_000,                 # huge — alone passes
-            awesome_list_count=1,         # below threshold
-            contributor_count=20,         # well above threshold
-            org="upstash",                # not alignment-org
+            stars=25_000,  # huge — alone passes
+            awesome_list_count=1,  # below threshold
+            contributor_count=20,  # well above threshold
+            org="upstash",  # not alignment-org
         )
     )
     # stars + contributors + stars_exceptional → 3 passes → PASS
@@ -227,9 +222,9 @@ def test_alignment_org_lone_repo_with_low_stars_passes() -> None:
     the gate as long as one other signal fires."""
     r = evaluate(
         CandidateSignals(
-            stars=200,                    # below
-            contributor_count=5,          # above
-            org="redwoodresearch",        # alignment org
+            stars=200,  # below
+            contributor_count=5,  # above
+            org="redwoodresearch",  # alignment org
         )
     )
     # contributors + alignment_org → 2 passes → PASS
@@ -258,7 +253,9 @@ def test_typical_long_tail_junk_fails() -> None:
 
 def test_evaluate_batch_returns_in_order() -> None:
     cs = [
-        CandidateSignals(stars=STARS_THRESHOLD, awesome_list_count=AWESOME_LIST_THRESHOLD),
+        CandidateSignals(
+            stars=STARS_THRESHOLD, awesome_list_count=AWESOME_LIST_THRESHOLD
+        ),
         CandidateSignals(stars=10),
     ]
     rs = evaluate_batch(cs)

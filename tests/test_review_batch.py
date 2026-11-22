@@ -20,8 +20,18 @@ class ReviewBatchTest(unittest.TestCase):
         (self.repo / "scoped.txt").write_text("committed\n")
         (self.repo / "outside.txt").write_text("untouched\n")
         git(self.repo, "add", ".")
-        git(self.repo, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
-            "-c", "commit.gpgsign=false", "commit", "-qm", "base")
+        git(
+            self.repo,
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "-qm",
+            "base",
+        )
 
     def batch(self, *args):
         return subprocess.run(
@@ -52,8 +62,13 @@ class ReviewBatchTest(unittest.TestCase):
         review = Path(self.output("capture", run))
         patch = review / "candidate.patch"
         self.assertEqual(patch.stat().st_mode & 0o777, 0o400)
-        self.assertEqual(self.output("verify", review).split()[0], git(self.repo, "rev-parse", "HEAD"))
-        self.assertEqual((self.repo / "scoped.txt").read_text(), "local edit excluded\n")
+        self.assertEqual(
+            self.output("verify", review).split()[0],
+            git(self.repo, "rev-parse", "HEAD"),
+        )
+        self.assertEqual(
+            (self.repo / "scoped.txt").read_text(), "local edit excluded\n"
+        )
         git(self.repo, "restore", "scoped.txt")
         git(self.repo, "apply", "--check", str(patch))
         git(self.repo, "apply", str(patch))
@@ -87,8 +102,10 @@ class ReviewBatchTest(unittest.TestCase):
         self.assertEqual(prompt.returncode, 0, prompt.stderr)
         begin, end = b"<<< BEGIN PATCH >>>\n", b"<<< END PATCH >>>\n"
         self.assertTrue(prompt.stdout.endswith(end))
-        self.assertEqual(prompt.stdout.split(begin, 1)[1].removesuffix(end),
-                         (review / "candidate.patch").read_bytes())
+        self.assertEqual(
+            prompt.stdout.split(begin, 1)[1].removesuffix(end),
+            (review / "candidate.patch").read_bytes(),
+        )
         edited.write_text("a" * 8001)
         self.assert_refused(b"too large", "prompt", self.output("capture", run))
         edited.write_bytes(b"edited \x1b\n")
