@@ -5,7 +5,7 @@
 #
 #   pip install -r requirements/kg.txt -c requirements/constraints.txt
 pyyaml>=6.0
-pydantic>=2.7
+pydantic>=2.14.3
 # Edits YAML files in place and keeps their comments and key order.
 ruamel.yaml>=0.18
-requests>=2.32
+requests>=2.34.2

@@ -10,7 +10,7 @@
 # (bench/*/requirements*.lock.txt, written by scripts/freeze_envs.sh).
 #
 # bench/llm_client.py, the relay and the runners that call a model.
-requests>=2.32
+requests>=2.34.2
 # The sample builders read parquet files: */build_samples.py,
 # scope_creep/inject.py, supply_chain/build_hard.py, labelcheck/build_items.py.
 pyarrow>=25
