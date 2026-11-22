@@ -20,15 +20,17 @@ KEEP_AS_AT_BASE=(research)                       # of those, the ones GitHub alr
 
 cd "$(git rev-parse --show-toplevel)"
 git merge-base --is-ancestor "$BASE" main || { echo "BASE is not an ancestor of main" >&2; exit 1; }
-if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-  echo "Commit or stash your changes first: the rewrite needs a clean working tree." >&2
-  exit 1
-fi
+
+# The rewrite runs in a throw-away worktree, so uncommitted changes in this one are neither needed nor touched.
+# Only what is committed on main is published.
+work="$(mktemp -d)"
+trap 'git worktree remove --force "$work" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
+git worktree add --quiet --detach "$work" main
 
 restore=""
 for p in "${KEEP_AS_AT_BASE[@]}"; do restore+=" && git read-tree --prefix=$p/ $BASE:$p"; done
 git branch -f public main >/dev/null
-FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --prune-empty \
+FILTER_BRANCH_SQUELCH_WARNING=1 git -C "$work" filter-branch -f --prune-empty \
   --index-filter "git rm -r -q --cached --ignore-unmatch ${EXCLUDE[*]}$restore" \
   -- "$BASE..public" >/dev/null
 git update-ref -d refs/original/refs/heads/public 2>/dev/null || true
