@@ -301,8 +301,27 @@ npm --prefix site run build && npm --prefix site run check:links
 
 ### Deploying the site (Cloudflare Pages)
 
-The public site is a static build served by Cloudflare Pages. The API
-above is not part of that deployment.
+The public site is a static build served by Cloudflare Pages (project
+`saica`, since 2026-11-22). The API above is not part of that deployment.
+
+The project is a direct upload: build on your machine, then upload the
+build. `CF_PAGES=1` makes the build the one Cloudflare would make.
+
+```bash
+npm --prefix site ci
+CF_PAGES=1 npm --prefix site run build
+(cd site && npx wrangler@4 pages deploy dist --project-name saica --branch main)
+bash scripts/smoke_check.sh https://saica.ai --no-api
+```
+
+`wrangler` reads the Cloudflare credentials from the environment
+(`CLOUDFLARE_ACCOUNT_ID` and a `CLOUDFLARE_API_TOKEN` with the account
+permission "Cloudflare Pages: Edit") or from `wrangler login`. The build
+reads `../data` and `../schema`. It needs no Python and no key.
+
+A direct-upload project cannot be switched to building on every push. For
+that, make a second, Git-connected project with these settings and move
+the domains to it:
 
 | Setting in the Pages project | Value |
 |---|---|
@@ -311,8 +330,6 @@ above is not part of that deployment.
 | Build output directory | `dist` |
 | Environment variable | `NODE_VERSION` = `22.23.4` (or newer 22) |
 
-The build reads `../data` and `../schema`, so the whole repository has to
-be checked out (the default). It needs no Python and no key.
 Response headers and the redirects from old failure-mode URLs are in
 [`site/public/_headers`](site/public/_headers) and
 [`site/public/_redirects`](site/public/_redirects);
@@ -325,8 +342,6 @@ and switch their forms off. To connect them to a backend hosted
 elsewhere, set `PUBLIC_ASK_API` and `PUBLIC_ASSESS_API` to its URLs in
 the Pages project and add the site's origin to `SAICA_CORS_ORIGINS` on
 the backend (`https://saica.ai` is allowed by default).
-
-After a deploy: `bash scripts/smoke_check.sh https://saica.ai --no-api`.
 
 When a `--check` fails, run the same command without `--check`. For the
 generators the order is schemas, manifest, maturity, recommendations,
