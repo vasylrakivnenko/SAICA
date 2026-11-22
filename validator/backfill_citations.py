@@ -81,7 +81,7 @@ REPO = Path(__file__).resolve().parent.parent
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-import yaml as _yaml  # PyYAML for read-only paper loads (validator/cli pattern)
+import yaml as _yaml  # noqa: E402 - PyYAML for read-only paper loads (validator/cli pattern)
 from ruamel.yaml import YAML  # noqa: E402
 
 PAPERS_DIR = REPO / "data" / "papers"
@@ -817,13 +817,18 @@ def main(argv: list[str] | None = None) -> int:
         dry=args.dry,
     )
 
-    report_path = args.report or (REPORT_DIR / "backfill_citations.report.md")
-    report_path.write_text(report, encoding="utf-8")
-
-    try:
-        report_display = report_path.relative_to(REPO)
-    except ValueError:
-        report_display = report_path
+    # A dry run writes nothing, unless --report names a file for the preview.
+    report_path = args.report or (
+        None if args.dry else REPORT_DIR / "backfill_citations.report.md"
+    )
+    if report_path is None:
+        report_display = "not written (dry run)"
+    else:
+        report_path.write_text(report, encoding="utf-8")
+        try:
+            report_display = report_path.relative_to(REPO)
+        except ValueError:
+            report_display = report_path
     print(
         f"backfill_citations: {len(papers)} papers × {len(tools)} tools → "
         f"{len(matches)} matches "

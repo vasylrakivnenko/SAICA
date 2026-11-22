@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/paper.schema.json",
+  "$id": "https://saica.ai/schema/paper.schema.json",
   "title": "Paper",
   "description": "An academic or gray-literature reference used to ground nodes in SAICA-KG.",
   "type": "object",
@@ -62,6 +62,22 @@
       },
       "type": "array",
       "description": "Free tags to help editorial grouping (e.g. 'failure-mode-taxonomy', 'MCP-benchmark')."
+    },
+    "provenance": {
+      "description": "How this record was produced: hand-curated (typed by a person or an agent), s2-derived / elicit-derived (written by a script from a Semantic Scholar or Elicit search dump; year, venue and tldr are that service's), arxiv-api / crossref-api (the whole record was written from that API). When arxiv_version is set, title and authors come from arXiv whatever this field says.",
+      "enum": [
+        "hand-curated",
+        "s2-derived",
+        "elicit-derived",
+        "arxiv-api",
+        "crossref-api"
+      ],
+      "type": "string"
+    },
+    "arxiv_version": {
+      "pattern": "^v[1-9][0-9]*$",
+      "type": "string",
+      "description": "arXiv version whose title and author list this record reproduces (e.g. 'v3'). Requires arxiv_id."
     },
     "notes": {
       "type": "string"

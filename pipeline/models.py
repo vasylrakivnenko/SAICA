@@ -1,8 +1,8 @@
 """Canonical Pydantic v2 models for SAICA-KG nodes.
 
-This module is the SINGLE SOURCE OF TRUTH for the five node types
-(Tool, FailureMode, Paper, Taxonomy, Crosswalk) and their shared
-controlled vocabularies.
+This module is the SINGLE SOURCE OF TRUTH for the seven node types
+(Tool, FailureMode, Paper, Taxonomy, Crosswalk, Incident, Recipe) and
+their shared controlled vocabularies.
 
 From here we derive:
 
@@ -18,6 +18,10 @@ against the committed ``schema/*.json`` files.
 
 Enum values here MUST match ``schema/enums.yml``. That YAML is kept for
 humans (it's citation-annotated); this file is kept for machines.
+``tests/test_schema_enums_yml.py`` fails when the two disagree.
+
+``FAILURE_MODE_IDS`` below is the one list of failure-mode ids for Python
+code. Import it instead of typing the eleven ids again.
 """
 
 from __future__ import annotations
@@ -151,6 +155,55 @@ class SaicaAxis(str, Enum):
     LOCUS_OF_CONTROL = "locus_of_control"
 
 
+class IncidentKind(str, Enum):
+    """What kind of record an Incident node is.
+
+    event: one dated real-world occurrence. study: a measurement reported
+    by a paper or a vendor. hypothetical: a scenario that its own source
+    calls hypothetical. pattern: a summary of a recurring behaviour with
+    no single dated occurrence. Only ``event`` is an incident in the plain
+    sense of the word.
+    """
+
+    EVENT = "event"
+    STUDY = "study"
+    HYPOTHETICAL = "hypothetical"
+    PATTERN = "pattern"
+
+
+class PaperProvenance(str, Enum):
+    """How a Paper record was produced (who or what wrote its fields).
+
+    hand-curated: typed by a person or an agent. s2-derived /
+    elicit-derived: written by a script from a Semantic Scholar or Elicit
+    search dump (authors, year, venue and tldr are that service's, not the
+    paper's own byline or summary). arxiv-api / crossref-api: the whole
+    record was written from that API.
+    """
+
+    HAND_CURATED = "hand-curated"
+    S2_DERIVED = "s2-derived"
+    ELICIT_DERIVED = "elicit-derived"
+    ARXIV_API = "arxiv-api"
+    CROSSREF_API = "crossref-api"
+
+
+class ReviewState(str, Enum):
+    """Whether a person has read a file against its source.
+
+    llm_drafted_unreviewed: drafted by an LLM or an agent; no person has
+    read it against the source. human_reviewed: every row was read against
+    the source by the people named in ``reviewed_by``.
+    """
+
+    LLM_DRAFTED_UNREVIEWED = "llm_drafted_unreviewed"
+    HUMAN_REVIEWED = "human_reviewed"
+
+
+# The one list of failure-mode ids for Python code (declaration order).
+FAILURE_MODE_IDS: tuple[str, ...] = tuple(m.value for m in FailureModeId)
+
+
 # --- Shared field type aliases --------------------------------------------
 
 KebabId = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")]
@@ -273,8 +326,33 @@ class Tool(BaseModel):
     description: str = Field(max_length=800)
 
     first_released: date
-    last_updated: Optional[date] = None
+    last_updated: Optional[date] = Field(
+        default=None,
+        description=(
+            "Legacy field. It holds the upstream push date as copied in"
+            " April 2026 on most nodes and the date of a curator's edit on"
+            " others. Prefer upstream_pushed_at and last_reviewed."
+        ),
+    )
+    upstream_pushed_at: Optional[date] = Field(
+        default=None,
+        description=(
+            "Date of the last push to the upstream repository (GitHub"
+            " `pushed_at`), as seen on last_reviewed."
+        ),
+    )
+    last_reviewed: Optional[date] = Field(
+        default=None,
+        description=(
+            "Date this entry was last checked against its upstream"
+            " (repository state, licence, stars), by a person or a script."
+        ),
+    )
     maturity_status: MaturityStatus
+    archived: Optional[bool] = Field(
+        default=None,
+        description="True when the upstream repository is archived (read-only).",
+    )
 
     published_by: Optional[str] = Field(
         default=None, description="Organization node id."
@@ -374,11 +452,10 @@ class Tool(BaseModel):
     maturity_override: Optional["MaturityOverride"] = Field(
         default=None,
         description=(
-            "Curator override for the auto-computed maturity tier (Stage 9"
-            " of the v2 ingestion pipeline). When present, downstream"
-            " consumers use ``override.tier`` instead of"
-            " ``compute_maturity(tool).tier``. Required to carry a"
-            " justification — overrides are auditable, not invisible."
+            "Curator override of the computed activity band (A to F; see"
+            " pipeline/maturity/score.py). When present, consumers show"
+            " ``override.tier`` instead of the computed band. It must"
+            " carry a justification, so an override can be audited."
         ),
     )
 
@@ -387,26 +464,28 @@ class Tool(BaseModel):
 
 
 class MaturityOverride(BaseModel):
-    """Curator override of the auto-computed maturity tier (Stage 9).
+    """Curator override of the computed activity band.
 
-    The auto-computer reads observable facets (citations, surfaces,
-    recency) and bins to a tier. Sometimes the editor knows better
-    (e.g. an early-stage tool with strong production evidence the YAML
-    doesn't yet capture). This block records that judgment with a
-    required justification so the override is auditable.
+    The score reads stars, a recent upstream push and the number of
+    integration surfaces (plus citations and evaluations where recorded)
+    and bins the tool to a band A to F. When an editor knows the band
+    misleads, this block records another band with a required
+    justification, so the override can be audited. The key is still
+    called ``tier`` (its name before 2026-11-21, when the bands were
+    called 1A, 1B, 2A, 2B, 3, 4); no file used it then.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     tier: str = Field(
-        pattern=r"^(1A|1B|2A|2B|3|4)$",
-        description="One of the six tiers: 1A, 1B, 2A, 2B, 3, 4.",
+        pattern=r"^[A-F]$",
+        description="One of the six activity bands: A, B, C, D, E, F.",
     )
     justification: str = Field(
         min_length=10,
         max_length=400,
         description=(
-            "Why the auto-tier is wrong. Required so future readers"
+            "Why the computed band is wrong. Required so future readers"
             " (or new curators) can reproduce or revisit the decision."
         ),
     )
@@ -503,6 +582,27 @@ class Paper(BaseModel):
         ),
     )
 
+    provenance: Optional[PaperProvenance] = Field(
+        default=None,
+        description=(
+            "How this record was produced: hand-curated (typed by a person"
+            " or an agent), s2-derived / elicit-derived (written by a"
+            " script from a Semantic Scholar or Elicit search dump; year,"
+            " venue and tldr are that service's), arxiv-api / crossref-api"
+            " (the whole record was written from that API). When"
+            " arxiv_version is set, title and authors come from arXiv"
+            " whatever this field says."
+        ),
+    )
+    arxiv_version: Optional[str] = Field(
+        default=None,
+        pattern=r"^v[1-9][0-9]*$",
+        description=(
+            "arXiv version whose title and author list this record"
+            " reproduces (e.g. 'v3'). Requires arxiv_id."
+        ),
+    )
+
     notes: Optional[str] = None
 
 
@@ -558,6 +658,17 @@ class Taxonomy(BaseModel):
 
     categories: list[TaxonomyCategory] = Field(min_length=1)
 
+    verified_against_source: Optional[date] = Field(
+        default=None,
+        description=(
+            "Date on which every category id and label in this file was"
+            " checked against the source (url / paper_id), by a person or"
+            " an agent; say who and how in notes. Leave empty until that"
+            " has happened: a taxonomy whose notes still say its labels"
+            " are unverified cannot be mapped by a crosswalk."
+        ),
+    )
+
     notes: Optional[str] = None
     inclusion_rationale: Optional[str] = None
 
@@ -576,6 +687,20 @@ class CrosswalkMapping(BaseModel):
     note: Optional[str] = None
 
 
+class CrosswalkUnmapped(BaseModel):
+    """A category of the external taxonomy that this crosswalk leaves out on purpose."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    category: str = Field(
+        description="external_id of the category in the external taxonomy.",
+    )
+    reason: str = Field(
+        min_length=1,
+        description="Why the category has no mapping on this axis.",
+    )
+
+
 class Crosswalk(BaseModel):
     """A bulk mapping between a SAICA-KG axis and an external taxonomy's categories."""
 
@@ -585,10 +710,42 @@ class Crosswalk(BaseModel):
     saica_axis: SaicaAxis
     taxonomy: str = Field(description="Taxonomy node id.")
     authored_by: Optional[list[str]] = None
-    reviewed_by: Optional[list[str]] = None
-    last_reviewed: Optional[date] = None
+    reviewed_by: Optional[list[str]] = Field(
+        default=None,
+        description=(
+            "People who read every mapping against the source. Leave empty"
+            " until that has happened."
+        ),
+    )
+    review_state: Optional[ReviewState] = Field(
+        default=None,
+        description=(
+            "llm_drafted_unreviewed: drafted by an LLM or an agent, not yet"
+            " read against the source by a person. human_reviewed: read"
+            " against the source by the people in reviewed_by."
+        ),
+    )
+    last_reviewed: Optional[date] = Field(
+        default=None,
+        description="Date of the last review by the people in reviewed_by.",
+    )
+    source_checked_on: Optional[date] = Field(
+        default=None,
+        description=(
+            "Date the external ids and labels used in this file were last"
+            " compared with the primary source, by a person or an agent."
+            " This is not a review of the mappings themselves."
+        ),
+    )
 
     mappings: list[CrosswalkMapping] = Field(min_length=1)
+    unmapped: Optional[list[CrosswalkUnmapped]] = Field(
+        default=None,
+        description=(
+            "Categories of the external taxonomy that have no mapping on"
+            " this axis, each with the reason."
+        ),
+    )
 
 
 # --- Incident -------------------------------------------------------------
@@ -606,6 +763,16 @@ class Incident(BaseModel):
     title: str
     tagline: Optional[str] = Field(default=None, max_length=200)
     description: str
+    kind: Optional[IncidentKind] = Field(
+        default=None,
+        description=(
+            "What this record is: event (one dated real-world occurrence),"
+            " study (a measurement reported by a paper or a vendor),"
+            " hypothetical (a scenario its own source calls hypothetical),"
+            " pattern (a recurring behaviour with no single dated"
+            " occurrence). Only `event` is an incident in the plain sense."
+        ),
+    )
     incident_date: date
     harm_class: HarmClass
     reproducibility: IncidentReproducibility
@@ -677,20 +844,25 @@ __all__ = [
     "Crosswalk",
     "CrosswalkConfidence",
     "CrosswalkMapping",
+    "CrosswalkUnmapped",
     "EvidenceTier",
+    "FAILURE_MODE_IDS",
     "FailureMode",
     "FailureModeCrosswalk",
     "FailureModeId",
     "HarmClass",
     "Incident",
+    "IncidentKind",
     "IncidentReproducibility",
     "LocusOfControl",
     "MaturityOverride",
     "MaturityStatus",
     "NODE_MODELS",
     "Paper",
+    "PaperProvenance",
     "Provenance",
     "Recipe",
+    "ReviewState",
     "SaicaAxis",
     "TemporalPhase",
     "Taxonomy",

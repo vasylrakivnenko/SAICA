@@ -1,5 +1,10 @@
 # SAICA-KG controlled vocabularies (v0.1)
 # Enum values are citation-stable. IDs here must not change across minor versions.
+#
+# This file is the human-readable copy: labels and descriptions live here.
+# The values themselves are defined in pipeline/models.py, and
+# tests/test_schema_enums_yml.py fails when the two lists differ. No code
+# reads this file.
 
 ControlParadigm:
   description: >
@@ -98,7 +103,9 @@ FailureMode:
   description: >
     Open set of supervision-addressable failure classes. Multi-valued by
     design; a single Tool may address several FailureModes, and a single
-    real-world fault may exhibit multiple modes.
+    real-world fault may exhibit multiple modes. Failure modes are
+    overlapping tags, not a partition: two reviewers may tag the same
+    fault with different modes, and both can be right.
   partition: false
   values:
     fabrication:
@@ -252,3 +259,76 @@ EvidenceTier:
       description: Documented case study or write-up.
     benchmark_validated:
       description: Benchmark evidence against a defined failure mode.
+
+CrosswalkConfidence:
+  description: How closely a SAICA value matches a category of an external taxonomy.
+  partition: true
+  values:
+    exact:
+      description: Same scope; either term can replace the other.
+    partial:
+      description: The scopes overlap; neither contains the other.
+    broader:
+      description: The SAICA value is broader than the external category.
+    narrower:
+      description: The SAICA value is narrower than the external category.
+    related:
+      description: Not the same thing, but a reader of one should know the other.
+
+SaicaAxis:
+  description: The SAICA facet a crosswalk maps an external taxonomy onto.
+  partition: true
+  values:
+    failure_mode:
+      description: The failure-mode tags.
+    control_paradigm:
+      description: Prevention, detection, correction, recovery.
+    temporal_phase:
+      description: Before, during or after the agent's action.
+    autonomy_level:
+      description: How much human approval the setting assumes.
+    locus_of_control:
+      description: Where the intervention acts (model, prompt, context, environment, human).
+
+IncidentKind:
+  description: >
+    What an Incident node is. Only `event` is an incident in the plain
+    sense of the word; the other kinds are kept because they are cited as
+    evidence, and must be labelled as what they are.
+  partition: true
+  values:
+    event:
+      description: One dated real-world occurrence with a named system.
+    study:
+      description: A measurement reported by a paper or a vendor.
+    hypothetical:
+      description: A scenario that its own source calls hypothetical.
+    pattern:
+      description: A summary of a recurring behaviour with no single dated occurrence.
+
+PaperProvenance:
+  description: How a Paper record was produced (who or what wrote its fields).
+  partition: true
+  values:
+    hand-curated:
+      description: Typed by a person or an agent.
+    s2-derived:
+      description: >
+        Written by a script from a Semantic Scholar search dump. Year,
+        venue and tldr are that service's; authors are its author
+        entities unless arxiv_version says the byline came from arXiv.
+    elicit-derived:
+      description: Written by a script from an Elicit search dump.
+    arxiv-api:
+      description: The whole record was written from the arXiv API.
+    crossref-api:
+      description: The whole record was written from the Crossref API.
+
+ReviewState:
+  description: Whether a person has read a file against its source.
+  partition: true
+  values:
+    llm_drafted_unreviewed:
+      description: Drafted by an LLM or an agent; no person has read it against the source.
+    human_reviewed:
+      description: Every row was read against the source by the people named in reviewed_by.

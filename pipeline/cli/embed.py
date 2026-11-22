@@ -15,6 +15,12 @@ Skip drift report (produce just embeddings + projection JSON)::
 
     python -m pipeline.cli.embed --no-drift
 
+Trial run that leaves the published files alone (``embeddings.json`` and
+the drift report go to the given directory instead of ``site/public/`` and
+``research/``)::
+
+    python -m pipeline.cli.embed --out-dir /tmp/embed-trial
+
 On first run the sentence-transformer model (~90 MB) is downloaded into
 ``.cache/st-models/`` — a one-time cost. Subsequent runs are offline.
 """
@@ -25,6 +31,7 @@ import argparse
 import logging
 import sys
 import time
+from pathlib import Path
 
 from pipeline.embeddings.compute import (
     CACHE_DIR,
@@ -65,6 +72,13 @@ def _parse_args(argv=None) -> argparse.Namespace:
         default=20,
         help="Number of tools to list in the drift report (default: 20).",
     )
+    p.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        help="Write embeddings.json and the drift report into this directory"
+        " instead of site/public/ and research/.",
+    )
     p.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging.")
     return p.parse_args(argv)
 
@@ -91,7 +105,10 @@ def main(argv=None) -> int:
     if not args.drift_only:
         t1 = time.perf_counter()
         payload = project_all(store)
-        out = write_embeddings_json(payload, EMBEDDINGS_JSON_PATH)
+        json_path = (
+            args.out_dir / "embeddings.json" if args.out_dir else EMBEDDINGS_JSON_PATH
+        )
+        out = write_embeddings_json(payload, json_path)
         size_kb = out.stat().st_size / 1024
         log.info(
             "Wrote projection JSON → %s (%.1f KB) in %.2fs",
@@ -104,7 +121,11 @@ def main(argv=None) -> int:
         t2 = time.perf_counter()
         tools_store = store.by_type("tool")
         rows = compute_drift(tools_store, top_n=args.top_n_drift)
-        report_path = write_report(rows)
+        if args.out_dir:
+            args.out_dir.mkdir(parents=True, exist_ok=True)
+            report_path = write_report(rows, out_dir=args.out_dir)
+        else:
+            report_path = write_report(rows)
         log.info(
             "Wrote drift report → %s (%d rows) in %.2fs",
             report_path,

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/crosswalk.schema.json",
+  "$id": "https://saica.ai/schema/crosswalk.schema.json",
   "title": "Crosswalk",
   "description": "A bulk mapping between a SAICA-KG axis and an external taxonomy's categories. Complements inline `crosswalks` declared on FailureMode nodes.",
   "type": "object",
@@ -39,11 +39,26 @@
       "items": {
         "type": "string"
       },
-      "type": "array"
+      "type": "array",
+      "description": "People who read every mapping against the source. Leave empty until that has happened."
+    },
+    "review_state": {
+      "description": "llm_drafted_unreviewed: drafted by an LLM or an agent, not yet read against the source by a person. human_reviewed: read against the source by the people in reviewed_by.",
+      "enum": [
+        "llm_drafted_unreviewed",
+        "human_reviewed"
+      ],
+      "type": "string"
     },
     "last_reviewed": {
       "format": "date",
-      "type": "string"
+      "type": "string",
+      "description": "Date of the last review by the people in reviewed_by."
+    },
+    "source_checked_on": {
+      "format": "date",
+      "type": "string",
+      "description": "Date the external ids and labels used in this file were last compared with the primary source, by a person or an agent. This is not a review of the mappings themselves."
     },
     "mappings": {
       "items": {
@@ -80,6 +95,30 @@
       },
       "minItems": 1,
       "type": "array"
+    },
+    "unmapped": {
+      "items": {
+        "type": "object",
+        "required": [
+          "category",
+          "reason"
+        ],
+        "properties": {
+          "category": {
+            "description": "external_id of the category in the external taxonomy.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the category has no mapping on this axis.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A category of the external taxonomy that this crosswalk leaves out on purpose."
+      },
+      "type": "array",
+      "description": "Categories of the external taxonomy that have no mapping on this axis, each with the reason."
     }
   },
   "additionalProperties": false

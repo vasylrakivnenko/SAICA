@@ -6,35 +6,38 @@ SAICA-KG is a *curated knowledge corpus*, not a runtime service. The
 practical way agents consume it is via injection into their context
 (``.claude/skills/``, ``.cursor/rules/``, Replit's skills directory,
 etc.) — not by RPC. This generator distils the highest-priority
-material (failure-mode descriptions, detection signals, top supervisor
-recommendations, real-world incidents, hand-coded pre-action heuristics)
-into a single Markdown file that drops cleanly into any of those
-context-injection spots.
+material (failure-mode descriptions, detection signals, tools tagged for
+each mode with what the benchmark measured, documented incidents,
+hand-written pre-action heuristics) into a single Markdown file that
+drops cleanly into any of those context-injection spots.
 
 It mirrors ``validator/generate_recommendations.py``:
 
-* ``build_payload(today=None) → dict`` — pure data assembly, calls into
-  the existing recommender + priorities helpers.
+* ``build_payload(as_of=None) → dict`` — pure data assembly, calls into
+  the recommender through the measured view (``validator/_recommend.py``):
+  a tool is never listed for a mode where SAICA-Bench measured it below
+  the site's floor.
 * ``render_markdown(payload) → str`` — pure rendering.
 * ``_write_outputs(payload, out_dir)`` / ``_check_outputs(payload, out_dir)``
   for ``--check`` mode.
 * ``main(argv)`` with argparse: ``--check``, ``--out-dir <path>``.
 
-Idempotent: running twice on identical KG state yields byte-identical
-output.
+The file carries the date of ``data/MANIFEST.json``, not today's date:
+running twice on the same repository state gives byte-identical output
+and ``--check`` gives the same answer on every day.
 
 Run from the repo root::
 
-    python -m validator.generate_skills          # write SKILLS.md
-    python -m validator.generate_skills --check  # CI: diff-only
+    python -m validator.generate_skills                   # write SKILLS.md and both SKILL.md copies
+    python -m validator.generate_skills --check           # CI: compare only
+    python -m validator.generate_skills --out-dir /tmp/x  # write SKILLS.md and SKILL.md there only
 """
 
 from __future__ import annotations
 
 import argparse
-import datetime as _dt
 import glob
-import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -48,12 +51,27 @@ from pipeline.mcp.recommender import (
     recommend_optimal,
 )
 from pipeline.shared.priorities import all_priorities
+from validator._recommend import (
+    KIT_BUILDER_URL,
+    annotate,
+    assert_floor,
+    catalogue_tools,
+    describe_block,
+    evidence_phrase,
+    kg_stamp,
+    measured_first,
+    measured_recommender,
+    priorities_label,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MD_PATH = REPO_ROOT / "SKILLS.md"
-MANIFEST_PATH = REPO_ROOT / "data" / "MANIFEST.json"
 FM_DIR = REPO_ROOT / "data" / "failure_modes"
 INCIDENT_DIR = REPO_ROOT / "data" / "incidents"
+
+# Where a tool's page lives on the site. The SKILL.md copies are installed
+# outside this repository, where ``data/tools/<id>.yml`` leads nowhere.
+TOOL_PAGE_URL = "https://saica.ai/tools/{tool_id}/"
 
 # How many supervisors to surface per FM. Two is enough for skim-reading
 # without turning the file into a directory dump; users who want more
@@ -67,6 +85,17 @@ _REPRO_RANK: dict[str, int] = {
     "plausible": 2,
     "anecdotal": 1,
 }
+
+# What an incident node is decides how it may be introduced. Only a dated
+# real-world occurrence is a "real incident"; a measurement is a study; a
+# node that does not say what it is gets a neutral label. Hypotheticals and
+# pattern summaries are never used as the example for a failure mode.
+_KIND_LABEL: dict[str, str] = {
+    "event": "Real incident",
+    "study": "Measured in a study",
+    "": "Documented case",
+}
+_KIND_RANK: dict[str, int] = {"event": 3, "study": 2, "": 1}
 
 
 # ---------------------------------------------------------------------------
@@ -94,8 +123,8 @@ _PRE_ACTION_HEURISTICS: dict[str, str] = {
         "first check whether the surrounding code uses parameterised "
         "queries, escaped templates, and a vetted crypto library. Match "
         "those patterns. Never hardcode secrets — read them from env/"
-        "config. Run a static analyser (semgrep, bandit) on the diff if "
-        "available."
+        "config. If the project has a security scanner configured, run it "
+        "on the diff."
     ),
     "supply_chain_attack": (
         "If you're about to run `pip install <name>` / `npm install "
@@ -162,19 +191,6 @@ _PRE_ACTION_HEURISTICS: dict[str, str] = {
 # ---------------------------------------------------------------------------
 
 
-def _kg_version() -> str:
-    """Return ``kg_version`` from data/MANIFEST.json, or ``"unknown"``."""
-    if not MANIFEST_PATH.exists():
-        return "unknown"
-    try:
-        with MANIFEST_PATH.open(encoding="utf-8") as fh:
-            doc = json.load(fh)
-    except (OSError, json.JSONDecodeError):
-        return "unknown"
-    val = doc.get("kg_version")
-    return str(val) if val else "unknown"
-
-
 def _priorities_version() -> str:
     """Return the version field from data/failure_mode_priorities.yml."""
     path = REPO_ROOT / "data" / "failure_mode_priorities.yml"
@@ -211,21 +227,26 @@ def _load_incidents() -> list[dict[str, Any]]:
 def _pick_headline_incident(
     fm_id: str, incidents: list[dict[str, Any]]
 ) -> dict[str, Any] | None:
-    """Pick the most authoritative incident for ``fm_id``.
+    """Pick the example to show for ``fm_id``.
 
-    Highest reproducibility tier wins; ties broken by most-recent
-    ``incident_date``. Returns ``None`` if no incident lists this FM.
+    A dated real-world event beats a study, which beats a node that does
+    not say what it is; hypotheticals and pattern summaries are never
+    picked. Within a kind the highest reproducibility wins, then the most
+    recent ``incident_date``. Returns ``None`` if nothing qualifies.
     """
     candidates = [
-        inc for inc in incidents if fm_id in (inc.get("exhibited_failure_modes") or [])
+        inc
+        for inc in incidents
+        if fm_id in (inc.get("exhibited_failure_modes") or [])
+        and str(inc.get("kind") or "") in _KIND_RANK
     ]
     if not candidates:
         return None
 
-    def _key(inc: dict[str, Any]) -> tuple[int, str]:
+    def _key(inc: dict[str, Any]) -> tuple[int, int, str]:
         repro = str(inc.get("reproducibility") or "anecdotal").lower()
         date = str(inc.get("incident_date") or "")
-        return (_REPRO_RANK.get(repro, 0), date)
+        return (_KIND_RANK[str(inc.get("kind") or "")], _REPRO_RANK.get(repro, 0), date)
 
     candidates.sort(key=_key, reverse=True)
     return candidates[0]
@@ -248,17 +269,29 @@ def _truncate(text: str, limit: int) -> str:
 # ---------------------------------------------------------------------------
 
 
-def build_payload(*, today: str | None = None) -> dict[str, Any]:
+def build_payload(*, as_of: str | None = None) -> dict[str, Any]:
     """Assemble per-FM data for SKILLS.md rendering.
 
     Per-FM ordering is priority-descending (from
     :func:`pipeline.shared.priorities.all_priorities`). Within each FM,
-    the supervisor recommendations come from
-    :func:`recommend_for_failure_modes` (agnostic asker, top 2).
-    """
-    if today is None:
-        today = _dt.date.today().isoformat()
+    the tools come from :func:`recommend_for_failure_modes` (agnostic
+    asker) through the measured view, measured tools first, top 2.
 
+    ``as_of`` is the date printed in the file; it defaults to the date of
+    ``data/MANIFEST.json`` and never to the clock.
+    """
+    kg_version, manifest_date = kg_stamp()
+    if as_of is None:
+        as_of = manifest_date
+
+    tools = catalogue_tools()
+    with measured_recommender() as evidence:
+        return _build_payload(as_of, kg_version, evidence, tools)
+
+
+def _build_payload(
+    as_of: str, kg_version: str, evidence: Any, tools: dict[str, Any]
+) -> dict[str, Any]:
     fms = _load_failure_modes()
     incidents = _load_incidents()
     incident_index = {str(inc.get("id")): inc for inc in incidents}
@@ -276,13 +309,17 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
     for fm_id in ordered_fms:
         fm_doc = fms[fm_id]
 
-        # Top 2 supervisors for this FM, agnostic.
+        # Every eligible tool tagged for this FM (agnostic asker); tools
+        # with a measured result go first, then the top 2 are kept.
         rec_payload = recommend_for_failure_modes(
             [fm_id],
             agent_kind=None,
-            per_fm=_TOP_SUPERVISORS_PER_FM,
+            per_fm=10_000,
         )
-        supervisors = list(rec_payload["by_failure_mode"].get(fm_id, []))
+        ranked = measured_first(
+            list(rec_payload["by_failure_mode"].get(fm_id, [])), fm_id, evidence
+        )
+        supervisors = [annotate(r, evidence) for r in ranked[:_TOP_SUPERVISORS_PER_FM]]
 
         # Headline incident, if any.
         incident = _pick_headline_incident(fm_id, incidents)
@@ -290,6 +327,7 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
         if incident is not None:
             incident_block = {
                 "id": str(incident.get("id")),
+                "kind": str(incident.get("kind") or ""),
                 "tagline": _normalize_text(str(incident.get("tagline") or "")),
                 "summary": _normalize_text(
                     str(incident.get("summary") or incident.get("description") or "")
@@ -310,22 +348,34 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
             }
         )
 
-    # Three pre-baked recommendation tiers (agnostic, no agent-kind
-    # filter). v0.6: these used to be served by the MCP server's
-    # ``saica_recommend`` tool; baking them into the skill removes the
-    # marketplace plugin's runtime dependency on Python.
+    # Three stacks built from catalogue tags (agnostic, no agent-kind
+    # filter), embedded so the skill needs no service call. The summaries
+    # are rewritten to count tags as tags and measurements as measurements.
     tiers = {
-        "minimum": recommend_minimum(agent_kind=None),
-        "optimal": recommend_optimal(agent_kind=None),
-        "full": recommend_full(agent_kind=None),
+        "minimum": describe_block(recommend_minimum(agent_kind=None), evidence),
+        "optimal": describe_block(recommend_optimal(agent_kind=None), evidence),
+        "full": describe_block(recommend_full(agent_kind=None), evidence),
     }
+    assert_floor(
+        {
+            "failure_modes": {b["id"]: b["supervisors"] for b in fm_blocks},
+            "tiers": tiers,
+        },
+        evidence,
+        tools,
+    )
 
     # Sanity index used by tests — every (incident_id, tool_id) we cite
     # must resolve in the KG. Caller-side asserts use these.
     return {
-        "generated_at": today,
-        "kg_version": _kg_version(),
+        "as_of": as_of,
+        "kg_version": kg_version,
         "priorities_version": _priorities_version(),
+        "priorities_label": priorities_label(),
+        "bench": {
+            "results_generated": evidence.generated,
+            "floor": evidence.floor,
+        },
         "failure_modes": fm_blocks,
         "tiers": tiers,
         "_incident_index_keys": sorted(incident_index.keys()),
@@ -337,8 +387,12 @@ def build_payload(*, today: str | None = None) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def _supervisor_line(rec: dict[str, Any]) -> str:
-    """Render one supervisor as a bullet line."""
+def _supervisor_line(rec: dict[str, Any], fm_id: str | None = None) -> str:
+    """Render one tool as a bullet line, with what was measured.
+
+    ``fm_id`` set: the evidence for that one mode ("measured J +85%" or
+    "tag only, not measured"). Not set: every mode the tool was measured on.
+    """
     tid = rec.get("tool_id") or ""
     name = rec.get("tool_name") or tid or "?"
     paradigm = rec.get("control_paradigm") or "—"
@@ -348,20 +402,20 @@ def _supervisor_line(rec: dict[str, Any]) -> str:
     tagline = _truncate(str(rec.get("tagline") or ""), 110)
     name_link = f"[`{tid}`](data/tools/{tid}.yml)" if tid else f"`{name}`"
     return (
-        f"- {name_link} — {paradigm}/{phase}, surfaces: {surfaces_str}; " f"{tagline}"
+        f"- {name_link} — {evidence_phrase(rec, fm_id)}; {paradigm}/{phase}, "
+        f"surfaces: {surfaces_str}; {tagline}"
     )
 
 
 def _render_tier(level: str, payload: dict[str, Any]) -> list[str]:
-    """Render one tier (minimum / optimal / full) as a Markdown sub-section.
+    """Render one stack (minimum / optimal / full) as a Markdown sub-section.
 
-    Each tier carries a ``summary`` line, the list of recommended
-    supervisors, and (for the ``full`` tier) the union of failure
-    modes covered. Pre-baked into SKILL.md by v0.6 so the agent can
-    consult the recommendation without an MCP roundtrip.
+    Each stack carries a ``summary`` line (how many modes the tags name
+    and how many tool-mode pairs were measured), the tools, and for the
+    ``full`` stack the modes the tags name.
     """
     out: list[str] = []
-    out.append(f"### `{level}` tier")
+    out.append(f"### `{level}`")
     out.append("")
     summary = payload.get("summary")
     if summary:
@@ -369,38 +423,48 @@ def _render_tier(level: str, payload: dict[str, Any]) -> list[str]:
         out.append("")
     tools = payload.get("tools") or []
     if not tools:
-        out.append("- _(no tools — recommender returned empty for this tier)_")
+        out.append("- _(no eligible tool for this stack)_")
         out.append("")
         return out
     for t in tools:
         out.append(_supervisor_line(t))
     out.append("")
     covered = payload.get("covered_failure_modes") or []
+    uncovered = payload.get("uncovered_failure_modes") or []
     if level == "full" and covered:
         out.append(
-            f"Covers {len(covered)} of 11 failure modes: "
+            "Modes named by these tools' tags: "
             + ", ".join(f"`{c}`" for c in covered)
             + "."
         )
+        if uncovered:
+            out.append(
+                "No eligible tool is tagged for: "
+                + ", ".join(f"`{u}`" for u in uncovered)
+                + "."
+            )
         out.append("")
     return out
 
 
-def _render_tiers_section(tiers: dict[str, Any]) -> list[str]:
+def _render_tiers_section(tiers: dict[str, Any], floor: float = 0.25) -> list[str]:
     out: list[str] = []
-    out.append("## Recommended supervision stack — three tiers")
+    out.append("## Tool stacks from the catalogue — three sizes")
     out.append("")
     out.append(
-        "Pre-baked from the SAICA-KG corpus. Pick a tier that matches "
-        "the team's appetite. Same picks the MCP server would return "
-        "from `saica_recommend(level=...)` — embedded here so no "
-        "runtime service call is needed."
+        "Built from the catalogue's tags (what each tool says it addresses), "
+        "an editorial weight per failure mode and each tool's popularity "
+        "(GitHub stars). A tag is a claim, not a measurement. Where "
+        "SAICA-Bench measured a tool the J is shown, and a tool is never "
+        f"listed for a mode where it measured below J {floor:.0%}. For picks "
+        f"built from measured results only, see {KIT_BUILDER_URL}."
     )
     out.append("")
-    out.append("- **`minimum`** — the single best tool to start with.")
-    out.append("- **`optimal`** — three tools, the responsible default.")
+    out.append("- **`minimum`** — one tool.")
+    out.append("- **`optimal`** — three tools.")
     out.append(
-        "- **`full`** — the minimum set that covers all 11 failure " "modes (MECE)."
+        "- **`full`** — the fewest tools whose tags together name every "
+        "failure mode that any eligible tool is tagged for."
     )
     out.append("")
     for level in ("minimum", "optimal", "full"):
@@ -426,25 +490,28 @@ def _render_failure_mode(fm: dict[str, Any]) -> list[str]:
     if incident:
         # Keep the snippet short — full details live in the YAML.
         summary_short = _truncate(incident["summary"], 220)
+        label = _KIND_LABEL.get(str(incident.get("kind") or ""), "Documented case")
         out.append(
-            f"**Real incident:** \"{incident['tagline']}\" — "
+            f"**{label}:** \"{incident['tagline']}\" — "
             f"{summary_short} [`{incident['id']}`]"
         )
     else:
-        out.append("**Real incident:** no documented incident yet.")
+        out.append(
+            "**Real incident:** none recorded for this mode yet (the catalogue "
+            "has no dated real-world event or study tagged with it)."
+        )
     out.append("")
 
     out.append(
-        "**Recommended supervisors "
-        f"(from `saica_recommend(failure_modes=['{fm['id']}'])`):**"
+        "**Tools tagged for this mode** (measured J where SAICA-Bench ran the tool):"
     )
     if fm["supervisors"]:
         for rec in fm["supervisors"]:
-            out.append(_supervisor_line(rec))
+            out.append(_supervisor_line(rec, fm["id"]))
     else:
         out.append(
-            "- _(no eligible supervisor declares coverage; see "
-            "RECOMMENDATIONS.md for the agnostic baseline)_"
+            "- _(no eligible tool is tagged for this mode, or every tagged tool "
+            "measured below the floor)_"
         )
     out.append("")
 
@@ -533,17 +600,22 @@ def render_markdown(payload: dict[str, Any]) -> str:
     )
     out.append("")
 
-    # ---- Recommended supervision stack (three tiers, pre-baked) -------
+    # ---- Tool stacks from the catalogue (three sizes) -----------------
     tiers = payload.get("tiers") or {}
     if tiers:
-        out.extend(_render_tiers_section(tiers))
+        out.extend(
+            _render_tiers_section(
+                tiers, (payload.get("bench") or {}).get("floor", 0.25)
+            )
+        )
 
     # ---- Per-FM sections ------------------------------------------------
     out.append("## Failure modes — what to watch for and what to do")
     out.append("")
     out.append(
-        "One subsection per failure mode, in priority-descending order "
-        "(likelihood × impact, see `data/failure_mode_priorities.yml`)."
+        "One subsection per failure mode, ordered by the weights in "
+        "`data/failure_mode_priorities.yml` (likelihood × impact; "
+        f"{payload.get('priorities_label') or 'set by hand'})."
     )
     out.append("")
 
@@ -582,8 +654,14 @@ def render_markdown(payload: dict[str, Any]) -> str:
     out.append("## Provenance")
     out.append("")
     out.append(
-        f"- Generated from KG version {payload['kg_version']} on "
-        f"{payload['generated_at']} by `validator/generate_skills.py`."
+        f"- Generated from KG version {payload['kg_version']} (manifest of "
+        f"{payload['as_of']}) by `validator/generate_skills.py`."
+    )
+    bench = payload.get("bench") or {}
+    out.append(
+        "- Measured J values: SAICA-Bench results of "
+        f"{bench.get('results_generated') or 'unknown date'}; a tool is not "
+        f"listed for a mode where it measured below J {bench.get('floor', 0.25):.0%}."
     )
     out.append(
         f"- Priorities: `data/failure_mode_priorities.yml` "
@@ -629,15 +707,18 @@ to decide *what to be careful about* when writing or modifying code.
 The failure-mode IDs (snake_case) are the canonical vocabulary —
 quote them verbatim when surfacing concerns.
 
-The skill is **self-contained** — three pre-baked recommendation
-tiers (`minimum` / `optimal` / `full`-MECE) appear right below, so
-the agent doesn't need to call out to a service to get the
-recommended stack. For richer / live querying (per-tool facet
-lookup, agent-kind-aware filtering, repo audit), the parent SAICA-KG
+The skill is **self-contained** — three tool stacks built from the
+catalogue's tags (`minimum` / `optimal` / `full`) appear right below,
+so the agent doesn't need to call out to a service. A tag is what a
+tool says it addresses; measured results are marked as such. For
+live querying (per-tool facet lookup, repo audit), the parent SAICA-KG
 project ships an MCP server separately — see
 https://github.com/vasylrakivnenko/SAICA#claude-code-plugin.
 
 """
+
+
+_TOOL_LINK_RE = re.compile(r"\]\(data/tools/([a-z0-9][a-z0-9-]*)\.yml\)")
 
 
 def _render_plugin_skill(payload: dict[str, Any]) -> str:
@@ -645,18 +726,23 @@ def _render_plugin_skill(payload: dict[str, Any]) -> str:
 
     Drops the SKILLS.md "How this file is meant to be used" preamble
     (humans installing manually need it; plugin users don't) but
-    PRESERVES the v0.6 "Recommended supervision stack" tiers section.
-    Result: frontmatter + a custom plugin preamble + tiers + per-FM
-    sections + working agreement + provenance.
+    keeps the "Tool stacks from the catalogue" section. Result:
+    frontmatter + a custom plugin preamble + stacks + per-FM sections +
+    working agreement + provenance.
     """
     body = _render_text(payload)
-    # Slice from the recommended-stacks header onward — that drops the
-    # SKILLS.md title + "How to use" preamble but keeps everything that
-    # matters (tiers, per-FM sections, working agreement, provenance).
-    marker = "## Recommended supervision stack"
+    # An installed skill sits outside this repository, where the relative
+    # links to data/tools/<id>.yml lead nowhere: point at the site instead.
+    body = _TOOL_LINK_RE.sub(
+        lambda m: f"]({TOOL_PAGE_URL.format(tool_id=m.group(1))})", body
+    )
+    # Slice from the stacks header onward — that drops the SKILLS.md title
+    # + "How to use" preamble but keeps everything that matters (stacks,
+    # per-FM sections, working agreement, provenance).
+    marker = "## Tool stacks from the catalogue"
     i = body.find(marker)
     if i < 0:
-        # Fallback if v0.6 tiers section ever gets removed.
+        # Fallback if the stacks section ever gets removed.
         marker = "## Failure modes"
         i = body.find(marker)
     if i < 0:
@@ -665,18 +751,21 @@ def _render_plugin_skill(payload: dict[str, Any]) -> str:
 
 
 def _write_outputs(payload: dict[str, Any], out_dir: Path) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
     md_path = out_dir / "SKILLS.md"
     md_path.write_text(_render_text(payload), encoding="utf-8")
     rendered_skill = _render_plugin_skill(payload)
     # Mirror to the in-repo SKILL.md copies — but only when this run is
-    # writing the canonical SKILLS.md location at the repo root. Tests
-    # call ``_write_outputs(payload, tmp_path)`` and must not stamp the
-    # real repo files with the test's mocked date.
+    # writing the canonical SKILLS.md location at the repo root. A run
+    # with ``--out-dir`` (tests, trial runs) writes one ``SKILL.md`` next
+    # to its ``SKILLS.md`` and never touches the repository's copies.
     if md_path.resolve() == DEFAULT_MD_PATH.resolve():
         if _PLUGIN_SKILL_PATH.parent.exists():
             _PLUGIN_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
         _PUBLIC_SKILL_PATH.parent.mkdir(parents=True, exist_ok=True)
         _PUBLIC_SKILL_PATH.write_text(rendered_skill, encoding="utf-8")
+    else:
+        (out_dir / "SKILL.md").write_text(rendered_skill, encoding="utf-8")
     return md_path
 
 
@@ -690,16 +779,15 @@ def _check_outputs(payload: dict[str, Any], out_dir: Path) -> int:
             "Run `python -m validator.generate_skills` to regenerate.\n"
         )
         return 1
-    # Same drift check for the plugin SKILL.md and the public skill
-    # mirror — but only when --check is being run against the canonical
-    # repo location. Tests pass an isolated tmp_path; their payload does
-    # not match the repo mirrors (which were generated against the live
-    # 'today' rather than the fixture's pinned date), so we'd otherwise
-    # spuriously fail on the date stamp alone.
-    if md_path.resolve() != DEFAULT_MD_PATH.resolve():
-        return 0
+    # Same drift check for the SKILL.md rendering: against the plugin copy
+    # and the public mirror when --check runs on the repository root,
+    # against the single ``SKILL.md`` of an ``--out-dir`` run otherwise.
     rendered_skill = _render_plugin_skill(payload)
-    for path in (_PLUGIN_SKILL_PATH, _PUBLIC_SKILL_PATH):
+    if md_path.resolve() != DEFAULT_MD_PATH.resolve():
+        mirrors: tuple[Path, ...] = (out_dir / "SKILL.md",)
+    else:
+        mirrors = (_PLUGIN_SKILL_PATH, _PUBLIC_SKILL_PATH)
+    for path in mirrors:
         if path is _PLUGIN_SKILL_PATH and not path.parent.exists():
             continue
         if not path.exists() or path.read_text(encoding="utf-8") != rendered_skill:

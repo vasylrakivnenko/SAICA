@@ -1,22 +1,32 @@
-"""CLI entry point for the taxonomy-clustering study.
+"""CLI entry point for the taxonomy-clustering study (an exploratory note,
+not a validation: see "What this study cannot show" in the report it writes).
+
+Status: dormant since 2026-04-23. The published numbers were computed on
+121 categories, 23 of which no source published (review 2026-11-21, E1,
+J1). Do not re-run it "to refresh the numbers": the tool-reachability arm
+compares the crosswalk with itself, so a refreshed number is still
+circular.
 
 Usage
 -----
 
 ::
 
-    .venv/bin/python -m pipeline.cli.cluster_study
+    .venv/bin/python -m pipeline.cli.cluster_study                 # writes the published files
+    .venv/bin/python -m pipeline.cli.cluster_study --out-dir /tmp/x  # writes everything under /tmp/x
+    .venv/bin/python -m pipeline.cli.cluster_study --offline-encoder --out-dir /tmp/x
 
 End-to-end:
 
-1. Collect the 128-category corpus from ``data/taxonomies/*.yml``
+1. Collect the category corpus from ``data/taxonomies/*.yml``
 2. Embed with ``all-MiniLM-L6-v2`` (reuses ``pipeline.embeddings.compute``)
 3. Run text-HDBSCAN sweep + bootstrap stability; pick canonical setting
 4. Run tool-bipartite HDBSCAN sweep + bootstrap stability; pick canonical
 5. Summarize per-cluster SAICA match + compute ARI/NMI vs SAICA's 11
 6. Render five matplotlib PNGs (UMAP + sweep + agreement heatmap)
-7. Write ``research/taxonomy_clustering/*`` artifacts and the final
-   narrative ``research/TAXONOMY_CLUSTER_STUDY.md``
+7. Write ``research/taxonomy_clustering/*`` artifacts, the narrative
+   ``research/TAXONOMY_CLUSTER_STUDY.md`` and ``site/public/taxonomy_study.json``
+   — or, with ``--out-dir``, the same files inside that directory only.
 
 On first run the sentence-transformers model (~90 MB) is pulled into
 ``.cache/st-models/``. Subsequent runs are fully offline.
@@ -24,11 +34,17 @@ On first run the sentence-transformers model (~90 MB) is pulled into
 Flags
 -----
 
+``--out-dir DIR``
+    Write every output under DIR (``DIR/taxonomy_clustering/``,
+    ``DIR/TAXONOMY_CLUSTER_STUDY.md``, ``DIR/taxonomy_study.json``) and
+    nothing anywhere else.
+
 ``--offline-encoder``
-    Use a deterministic bag-of-words stub encoder instead of MiniLM. Useful
-    for smoke-testing the pipeline without a network fetch. The test suite
-    runs with this stub already; the CLI flag exists for ad-hoc offline
-    experimentation.
+    Use a deterministic bag-of-words stub encoder instead of MiniLM, to
+    smoke-test the pipeline without a network fetch. Its numbers are not
+    the study's, so this flag REQUIRES ``--out-dir``: a stub run refuses to
+    write the published files. The report it writes says "stub encoder" in
+    its first lines.
 
 ``--no-figures``
     Skip matplotlib PNGs (still writes all JSON artifacts + the markdown
@@ -60,6 +76,9 @@ REPORT_PATH = REPO_ROOT / "research" / "TAXONOMY_CLUSTER_STUDY.md"
 
 EXIT_OK = 0
 EXIT_FAIL = 1
+EXIT_USAGE = 2
+
+REPORT_TITLE = "# Taxonomy cluster study — exploratory note"
 
 # Failure-mode count is fixed by the data/ yaml set; we don't hardcode it
 # but we do want to verify the number we quote in the report.
@@ -215,9 +234,43 @@ def render_narrative_report(
     bipartite_agreement: dict,
     text_summaries: Sequence[compare_mod.ClusterSummary],
     bipartite_summaries: Sequence[compare_mod.ClusterSummary],
+    stub_encoder: bool = False,
 ) -> str:
     lines: List[str] = []
-    lines.append("# Data-Driven Validation of the SAICA-KG Failure Taxonomy")
+    lines.append(REPORT_TITLE)
+    lines.append("")
+    if stub_encoder:
+        lines.append(
+            "> **Stub encoder run.** The text embeddings below come from a"
+            " bag-of-words stub, not from the sentence-transformer model. These"
+            " are smoke-test numbers and must not be published."
+        )
+        lines.append("")
+    lines.append("## What this study cannot show")
+    lines.append("")
+    lines.append(
+        "- **The tool-reachability result is circular.** A category counts as"
+        " reachable from a tool when some SAICA mode is both tagged on the tool"
+        " and crosswalked to the category (`pipeline/taxonomy_cluster/cluster.py`,"
+        " `build_tool_matrix`). The labels it is compared with are the majority"
+        " crosswalk mode of each category (`compare.py`,"
+        " `saica_labels_for_rows`). Both sides are functions of the same"
+        " hand-written crosswalk, so their agreement says nothing about the"
+        " taxonomy. A permutation that destroys all tool information gives the"
+        " same agreement (see the committed note at the top of"
+        " `research/TAXONOMY_CLUSTER_STUDY.md`)."
+    )
+    lines.append(
+        "- Categories without a crosswalk stay in the statistic under the label"
+        " `__unmapped__`; unmapped agreeing with unmapped counts as agreement."
+    )
+    lines.append(
+        "- The number of clusters follows `min_cluster_size`; it is set, not found."
+    )
+    lines.append(
+        "- Only the text-embedding arm is independent of the crosswalk. Read its"
+        " ARI as the result."
+    )
     lines.append("")
     lines.append("## Question")
     lines.append("")
@@ -391,8 +444,27 @@ def _parse_args(argv=None) -> argparse.Namespace:
         action="store_true",
         help="Skip matplotlib PNG rendering.",
     )
+    p.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        help="Write every output under this directory instead of research/ and"
+        " site/public/. Required with --offline-encoder.",
+    )
     p.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging.")
     return p.parse_args(argv)
+
+
+def output_paths(out_dir: Path | None) -> tuple[Path, Path, Path]:
+    """``(artefact dir, report path, site JSON path)`` for a run."""
+    if out_dir is None:
+        return OUT_DIR, REPORT_PATH, export_site_mod.SITE_JSON_PATH
+    base = Path(out_dir)
+    return (
+        base / "taxonomy_clustering",
+        base / "TAXONOMY_CLUSTER_STUDY.md",
+        base / "taxonomy_study.json",
+    )
 
 
 def main(argv=None) -> int:
@@ -402,18 +474,31 @@ def main(argv=None) -> int:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
+    if args.offline_encoder and args.out_dir is None:
+        print(
+            "cluster_study: --offline-encoder produces stub numbers and would"
+            " overwrite the published study files\n"
+            f"  {OUT_DIR}/*\n  {REPORT_PATH}\n  {export_site_mod.SITE_JSON_PATH}\n"
+            "Pass --out-dir <scratch directory> to run the stub.",
+            file=sys.stderr,
+        )
+        return EXIT_USAGE
+
+    # Every write below goes through these three paths.
+    artefact_dir, report_path, site_json_path = output_paths(args.out_dir)
+
     t0 = time.perf_counter()
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    artefact_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Corpus
     rows = collect_mod.collect_corpus()
-    corpus_path = collect_mod.write_corpus(rows, OUT_DIR / "corpus.json")
+    corpus_path = collect_mod.write_corpus(rows, artefact_dir / "corpus.json")
     log.info("Collected %d categories -> %s", len(rows), corpus_path)
 
     # 2. Embeddings
     encoder = _StubEncoder() if args.offline_encoder else None
     X = cluster_mod.embed_rows(rows, encoder=encoder)
-    np_path, meta_path = cluster_mod.save_embeddings(rows, X, OUT_DIR)
+    np_path, meta_path = cluster_mod.save_embeddings(rows, X, artefact_dir)
     log.info(
         "Saved embeddings %s (dim=%d) + metadata %s", np_path, X.shape[1], meta_path
     )
@@ -422,7 +507,7 @@ def main(argv=None) -> int:
     text_runs = cluster_mod.run_hdbscan_sweep(X, metric="euclidean")
     text_canonical = cluster_mod.pick_canonical_run(text_runs)
     cluster_mod.write_hdbscan_runs(
-        text_runs, text_canonical, OUT_DIR / "hdbscan_runs.json"
+        text_runs, text_canonical, artefact_dir / "hdbscan_runs.json"
     )
     log.info(
         "Text: canonical mcs=%d, K=%d, bootstrap ARI=%.3f",
@@ -440,7 +525,7 @@ def main(argv=None) -> int:
         bip_mat,
         bip_tools,
         [r.key for r in rows],
-        OUT_DIR / "bipartite_clusters.json",
+        artefact_dir / "bipartite_clusters.json",
     )
     log.info(
         "Bipartite: canonical mcs=%d, K=%d, bootstrap ARI=%.3f",
@@ -466,7 +551,7 @@ def main(argv=None) -> int:
         text_agreement=text_agreement,
         bipartite_agreement=bip_agreement,
         saica_labels=saica_labels,
-        out_path=OUT_DIR / "saica_comparison.json",
+        out_path=artefact_dir / "saica_comparison.json",
     )
     n_manual = len(list(FAILURE_MODES_DIR.glob("*.yml")))
     md = compare_mod.render_comparison_markdown(
@@ -478,7 +563,7 @@ def main(argv=None) -> int:
         n_text=text_canonical.n_clusters,
         n_bipartite=bip_canonical.n_clusters,
     )
-    compare_mod.write_comparison_markdown(md, OUT_DIR / "saica_comparison.md")
+    compare_mod.write_comparison_markdown(md, artefact_dir / "saica_comparison.md")
 
     # 6. Figures
     if not args.no_figures:
@@ -493,33 +578,33 @@ def main(argv=None) -> int:
             figures_mod.plot_umap_by_source(
                 xy,
                 [r.source_tax_id for r in rows],
-                out_path=OUT_DIR / "umap_by_source_taxonomy.png",
+                out_path=artefact_dir / "umap_by_source_taxonomy.png",
             )
         )
         paths.append(
             figures_mod.plot_umap_by_cluster(
                 xy,
                 text_canonical.labels,
-                out_path=OUT_DIR / "umap_by_hdbscan_cluster.png",
+                out_path=artefact_dir / "umap_by_hdbscan_cluster.png",
             )
         )
         paths.append(
             figures_mod.plot_umap_by_saica(
-                xy, saica_labels, out_path=OUT_DIR / "umap_by_saica_match.png"
+                xy, saica_labels, out_path=artefact_dir / "umap_by_saica_match.png"
             )
         )
         # Use text sweep for the count-vs-mcs plot — that's the primary signal.
         paths.append(
             figures_mod.plot_cluster_count_vs_min_size(
                 [r.to_jsonable() for r in text_runs],
-                out_path=OUT_DIR / "cluster_count_vs_min_size.png",
+                out_path=artefact_dir / "cluster_count_vs_min_size.png",
             )
         )
         paths.append(
             figures_mod.plot_agreement_heatmap(
                 text_canonical.labels,
                 saica_labels,
-                out_path=OUT_DIR / "agreement_heatmap.png",
+                out_path=artefact_dir / "agreement_heatmap.png",
             )
         )
         for p in paths:
@@ -540,17 +625,18 @@ def main(argv=None) -> int:
         bipartite_agreement=bip_agreement,
         text_summaries=text_summaries,
         bipartite_summaries=bip_summaries,
+        stub_encoder=bool(args.offline_encoder),
     )
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(report, encoding="utf-8")
-    log.info("Wrote narrative report -> %s", REPORT_PATH)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(report, encoding="utf-8")
+    log.info("Wrote narrative report -> %s", report_path)
 
     # 8. Refresh site-consumable JSON for /taxonomy-study. Best-effort:
     # the study is the source of truth and must not fail if the site
     # export hits an edge case (e.g. missing optional inputs).
     try:
-        payload = export_site_mod.build_payload(research_dir=OUT_DIR)
-        site_path = export_site_mod.write_payload(payload)
+        payload = export_site_mod.build_payload(research_dir=artefact_dir)
+        site_path = export_site_mod.write_payload(payload, out_path=site_json_path)
         log.info("Refreshed site JSON -> %s", site_path)
     except Exception as exc:  # pragma: no cover - export is a best-effort sidecar
         log.warning(

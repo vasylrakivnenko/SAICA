@@ -1,5 +1,22 @@
 # pipeline/sources/ — discovery sources
 
+> **Dormant since 2026-04-23.** These discovery sources feed the Postgres ingestion pipeline (discovery → NLP
+> preprocess → rerank → LLM extraction → graduation), which ran for one night, 2026-04-22/23. Every row in the
+> staging database dates from those hours; 4 of today's 49 tool nodes came through it, and no paper or
+> incident did. The catalogue has been curated by hand and by one-off scripts since. Nothing is scheduled,
+> the Azure model deployment it called returned 404 in November 2026, and several statements below
+> describe a design that was not built or not followed (thresholds, the review gate, the reranker's role):
+> see `research/review_20261121_r2/pipeline_validator.md`, PV-02 to PV-04 and PV-15. The code is kept, not
+> archived (owner decision, 2026-11-21). What is still live in `pipeline/`: `models.py` (the schema
+> source), `config.py`, `cost_caps.py`, `embeddings/compute.py` and `query.py`, `maturity/`, and the served
+> packages `ask/`, `audit/`, `mcp/`, `supervision/`, `saica_index/`, `shared/`, `webapp.py`.
+>
+> Rows these modules ever stored: github 103, perplexity 15, elicit 0 (one call), semantic_scholar 0.
+> Corrections to the text below: the Semantic Scholar key is read from `SEMANTIC_SCHOLAR_API_KEY` (not
+> `S2_API_KEY`); the table is `raw_search_results` (not `raw_results`); fixtures live in
+> `pipeline/sources/tests/fixtures/`. `data/trending.json` was last scraped on 2026-05-01 and none of its
+> repositories is in the catalogue.
+
 Each module in this package wraps one external discovery source. They all
 land their results in the staging Postgres tables (see `pipeline/db.py`)
 *except* `github_trending`, which writes a small JSON snapshot directly to

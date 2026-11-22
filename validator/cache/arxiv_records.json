@@ -1,0 +1,1014 @@
+{
+  "about": "arXiv API records used by `validator/cli.py --arxiv`. Written by that command; do not edit by hand.",
+  "latest": {
+    "2309.07639": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2405.00253": {
+      "checked": "2026-11-21",
+      "version": "v4"
+    },
+    "2406.00515": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2406.08291": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2406.09834": {
+      "checked": "2026-11-21",
+      "version": "v3"
+    },
+    "2406.10279": {
+      "checked": "2026-11-21",
+      "version": "v3"
+    },
+    "2408.02205": {
+      "checked": "2026-11-21",
+      "version": "v4"
+    },
+    "2409.20550": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2411.11532": {
+      "checked": "2026-11-21",
+      "version": "v3"
+    },
+    "2501.07238": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2501.19012": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2502.15212": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2503.13657": {
+      "checked": "2026-11-21",
+      "version": "v3"
+    },
+    "2503.20589": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2504.12608": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2504.20434": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2504.20799": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2504.21030": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2505.02133": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2505.03864": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2506.17772": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2507.03525": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2508.07575": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2508.10991": {
+      "checked": "2026-11-21",
+      "version": "v4"
+    },
+    "2508.11126": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2508.11824": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2508.12566": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2508.14704": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2509.10946": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2509.13941": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2509.21011": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2509.22202": {
+      "checked": "2026-11-21",
+      "version": "v4"
+    },
+    "2509.23835": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2509.25370": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2510.13467": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2510.15994": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2510.23642": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2511.04824": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2511.07584": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2511.09268": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2512.04367": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2512.08213": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2512.12806": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2512.22154": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2601.15195": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2602.20717": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2603.06847": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2603.12230": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2603.25930": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2603.27646": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    },
+    "2603.29919": {
+      "checked": "2026-11-21",
+      "version": "v2"
+    },
+    "2604.01375": {
+      "checked": "2026-11-21",
+      "version": "v4"
+    },
+    "2604.13120": {
+      "checked": "2026-11-21",
+      "version": "v1"
+    }
+  },
+  "records": {
+    "2309.07639v2": {
+      "authors": [
+        "Yizhan Huang",
+        "Yichen Li",
+        "Weibin Wu",
+        "Jianping Zhang",
+        "Michael R. Lyu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2023-09-14",
+      "title": "Your Code Secret Belongs to Me: Neural Code Completion Tools Can Memorize Hard-Coded Credentials"
+    },
+    "2404.00971v3": {
+      "authors": [
+        "Fang Liu",
+        "Yang Liu",
+        "Lin Shi",
+        "Zhen Yang",
+        "Li Zhang",
+        "Xiaoli Lian",
+        "Zhongqi Li",
+        "Yuchi Ma"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-04-01",
+      "title": "Beyond Functional Correctness: Exploring Hallucinations in LLM-Generated Code"
+    },
+    "2405.00253v4": {
+      "authors": [
+        "Yuchen Tian",
+        "Weixiang Yan",
+        "Qian Yang",
+        "Xuandong Zhao",
+        "Qian Chen",
+        "Wen Wang",
+        "Ziyang Luo",
+        "Lei Ma",
+        "Dawn Song"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-04-30",
+      "title": "CodeHalu: Investigating Code Hallucinations in LLMs via Execution-based Verification"
+    },
+    "2406.00515v2": {
+      "authors": [
+        "Juyong Jiang",
+        "Fan Wang",
+        "Jiasi Shen",
+        "Sungju Kim",
+        "Sunghun Kim"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-06-01",
+      "title": "A Survey on Large Language Models for Code Generation"
+    },
+    "2406.08291v1": {
+      "authors": [
+        "Joseph J. Pollacco",
+        "Ruth E. Baker",
+        "Philip K. Maini"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-06-12",
+      "title": "Collective Invasion: When does domain curvature matter?"
+    },
+    "2406.09834v3": {
+      "authors": [
+        "Chong Wang",
+        "Kaifeng Huang",
+        "Jian Zhang",
+        "Yebo Feng",
+        "Lyuye Zhang",
+        "Yang Liu",
+        "Xin Peng"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-06-14",
+      "title": "LLMs Meet Library Evolution: Evaluating Deprecated API Usage in LLM-based Code Completion"
+    },
+    "2406.10279v3": {
+      "authors": [
+        "Joseph Spracklen",
+        "Raveen Wijewickrama",
+        "A H M Nazmus Sakib",
+        "Anindya Maiti",
+        "Bimal Viswanath",
+        "Murtuza Jadliwala"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-06-12",
+      "title": "We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs"
+    },
+    "2408.02205v4": {
+      "authors": [
+        "Md Shamsujjoha",
+        "Qinghua Lu",
+        "Dehai Zhao",
+        "Liming Zhu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-08-05",
+      "title": "Swiss Cheese Model for AI Safety: A Taxonomy and Reference Architecture for Multi-Layered Guardrails of Foundation Model Based Agents"
+    },
+    "2409.20550v2": {
+      "authors": [
+        "Ziyao Zhang",
+        "Yanlin Wang",
+        "Chong Wang",
+        "Jiachi Chen",
+        "Zibin Zheng"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-09-30",
+      "title": "LLM Hallucinations in Practical Code Generation: Phenomena, Mechanism, and Mitigation"
+    },
+    "2411.11532v3": {
+      "authors": [
+        "Hanxiang Xu",
+        "Wei Ma",
+        "Ting Zhou",
+        "Yanjie Zhao",
+        "Kai Chen",
+        "Qiang Hu",
+        "Yang Liu",
+        "Haoyu Wang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2024-11-18",
+      "title": "CKGFuzzer: LLM-Based Fuzz Driver Generation Enhanced By Code Knowledge Graph"
+    },
+    "2501.07238v1": {
+      "authors": [
+        "Blake Bullwinkel",
+        "Amanda Minnich",
+        "Shiven Chawla",
+        "Gary Lopez",
+        "Martin Pouliot",
+        "Whitney Maxwell",
+        "Joris de Gruyter",
+        "Katherine Pratt",
+        "Saphir Qi",
+        "Nina Chikanov",
+        "Roman Lutz",
+        "Raja Sekhar Rao Dheekonda",
+        "Bolor-Erdene Jagdagdorj",
+        "Eugenia Kim",
+        "Justin Song",
+        "Keegan Hines",
+        "Daniel Jones",
+        "Giorgio Severi",
+        "Richard Lundeen",
+        "Sam Vaughan",
+        "Victoria Westerhoff",
+        "Pete Bryan",
+        "Ram Shankar Siva Kumar",
+        "Yonatan Zunger",
+        "Chang Kawaguchi",
+        "Mark Russinovich"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-01-13",
+      "title": "Lessons From Red Teaming 100 Generative AI Products"
+    },
+    "2501.19012v1": {
+      "authors": [
+        "Arjun Krishna",
+        "Erick Galinkin",
+        "Leon Derczynski",
+        "Jeffrey Martin"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-01-31",
+      "title": "Importing Phantoms: Measuring LLM Package Hallucination Vulnerabilities"
+    },
+    "2502.15212v1": {
+      "authors": [
+        "Peter Cihon",
+        "Merlin Stein",
+        "Gagan Bansal",
+        "Sam Manning",
+        "Kevin Xu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-02-21",
+      "title": "Measuring AI agent autonomy: Towards a scalable approach with code inspection"
+    },
+    "2503.13657v3": {
+      "authors": [
+        "Mert Cemri",
+        "Melissa Z. Pan",
+        "Shuyi Yang",
+        "Lakshya A. Agrawal",
+        "Bhavya Chopra",
+        "Rishabh Tiwari",
+        "Kurt Keutzer",
+        "Aditya Parameswaran",
+        "Dan Klein",
+        "Kannan Ramchandran",
+        "Matei Zaharia",
+        "Joseph E. Gonzalez",
+        "Ion Stoica"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-03-17",
+      "title": "Why Do Multi-Agent LLM Systems Fail?"
+    },
+    "2503.20589v1": {
+      "authors": [
+        "Wenchao Gu",
+        "Juntao Chen",
+        "Yanlin Wang",
+        "Tianyue Jiang",
+        "Xingzhe Li",
+        "Mingwei Liu",
+        "Xilin Liu",
+        "Yuchi Ma",
+        "Zibin Zheng"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-03-26",
+      "title": "What to Retrieve for Effective Retrieval-Augmented Code Generation? An Empirical Study and Beyond"
+    },
+    "2504.12608v1": {
+      "authors": [
+        "Mingwei Liu",
+        "Juntao Li",
+        "Ying Wang",
+        "Xueying Du",
+        "Zuoyu Ou",
+        "Qiuyuan Chen",
+        "Bingxu An",
+        "Zhao Wei",
+        "Yong Xu",
+        "Fangming Zou",
+        "Xin Peng",
+        "Yiling Lou"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-04-17",
+      "title": "Code Copycat Conundrum: Demystifying Repetition in LLM-based Code Generation"
+    },
+    "2504.20434v2": {
+      "authors": [
+        "Manish Bhattarai",
+        "Miguel Cordova",
+        "Minh Vu",
+        "Javier Santos",
+        "Ismael Boureima",
+        "Dan O'Malley"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-04-29",
+      "title": "ARCS: Agentic Retrieval-Augmented Code Synthesis with Iterative Refinement"
+    },
+    "2504.20799v2": {
+      "authors": [
+        "Yunseo Lee",
+        "John Youngeun Song",
+        "Dongsun Kim",
+        "Jindae Kim",
+        "Mijung Kim",
+        "Jaechang Nam"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-04-29",
+      "title": "Hallucination by Code Generation LLMs: Taxonomy, Benchmarks, Mitigation, and Challenges"
+    },
+    "2504.21030v1": {
+      "authors": [
+        "Naveen Krishnan"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-04-26",
+      "title": "Advancing Multi-Agent Systems Through Model Context Protocol: Architecture, Implementation, and Applications"
+    },
+    "2505.02133v1": {
+      "authors": [
+        "Nazmus Ashrafi",
+        "Salah Bouktif",
+        "Mohammed Mediani"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-05-04",
+      "title": "Enhancing LLM Code Generation: A Systematic Evaluation of Multi-Agent Collaboration and Runtime Debugging for Improved Accuracy, Reliability, and Latency"
+    },
+    "2505.03864v1": {
+      "authors": [
+        "Qiaomu Li",
+        "Ying Xie"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-05-06",
+      "title": "From Glue-Code to Protocols: A Critical Analysis of A2A and MCP Integration for Scalable Agent Systems"
+    },
+    "2506.17772v1": {
+      "authors": [
+        "Haoran Xue",
+        "Gias Uddin",
+        "Song Wang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-06-21",
+      "title": "PAGENT: Learning to Patch Software Engineering Agents"
+    },
+    "2507.03525v2": {
+      "authors": [
+        "David Manheim",
+        "Aidan Homewood"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-07-04",
+      "title": "Limits of Safe AI Deployment: Differentiating Oversight and Control"
+    },
+    "2508.07575v1": {
+      "authors": [
+        "Shiqing Fan",
+        "Xichen Ding",
+        "Liang Zhang",
+        "Linjian Mo"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-08-11",
+      "title": "MCPToolBench++: A Large Scale AI Agent Model Context Protocol MCP Tool Use Benchmark"
+    },
+    "2508.10991v4": {
+      "authors": [
+        "Wenpeng Xing",
+        "Zhonghao Qi",
+        "Yupeng Qin",
+        "Yilin Li",
+        "Caini Chang",
+        "Jiahui Yu",
+        "Changting Lin",
+        "Zhenzhen Xie",
+        "Meng Han"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-08-14",
+      "title": "MCP-Guard: A Multi-Stage Defense-in-Depth Framework for Securing Model Context Protocol in Agentic AI"
+    },
+    "2508.11126v2": {
+      "authors": [
+        "Huanting Wang",
+        "Jingzhi Gong",
+        "Huawei Zhang",
+        "Jie Xu",
+        "Zheng Wang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-08-15",
+      "title": "AI Agentic Programming: A Survey of Techniques, Challenges, and Opportunities"
+    },
+    "2508.11824v1": {
+      "authors": [
+        "Satyam Kumar Navneet",
+        "Joydeep Chandra"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-08-15",
+      "title": "Rethinking Autonomy: Preventing Failures in AI-Driven Software Engineering"
+    },
+    "2508.12566v1": {
+      "authors": [
+        "Wei Song",
+        "Haonan Zhong",
+        "Ziqi Ding",
+        "Jingling Xue",
+        "Yuekang Li"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-08-18",
+      "title": "Help or Hurdle? Rethinking Model Context Protocol-Augmented Large Language Models"
+    },
+    "2508.14704v1": {
+      "authors": [
+        "Ziyang Luo",
+        "Zhiqi Shen",
+        "Wenzhuo Yang",
+        "Zirui Zhao",
+        "Prathyusha Jwalapuram",
+        "Amrita Saha",
+        "Doyen Sahoo",
+        "Silvio Savarese",
+        "Caiming Xiong",
+        "Junnan Li"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-08-20",
+      "title": "MCP-Universe: Benchmarking Large Language Models with Real-World Model Context Protocol Servers"
+    },
+    "2509.10946v1": {
+      "authors": [
+        "Roberto Morabito",
+        "Guanghan Wu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-09-13",
+      "title": "When the Code Autopilot Breaks: Why LLMs Falter in Embedded Machine Learning"
+    },
+    "2509.13941v1": {
+      "authors": [
+        "Simiao Liu",
+        "Fang Liu",
+        "Liehao Li",
+        "Xin Tan",
+        "Yinghao Zhu",
+        "Xiaoli Lian",
+        "Li Zhang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-09-17",
+      "title": "An Empirical Study on Failures in Automated Issue Solving"
+    },
+    "2509.21011v1": {
+      "authors": [
+        "Ping He",
+        "Changjiang Li",
+        "Binbin Zhao",
+        "Tianyu Du",
+        "Shouling Ji"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-09-25",
+      "title": "Automatic Red Teaming LLM-based Agents with Model Context Protocol Tools"
+    },
+    "2509.22202v4": {
+      "authors": [
+        "Lukas Twist",
+        "Mark Harman",
+        "Helen Yannakoudakis",
+        "Jie M. Zhang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-09-26",
+      "title": "Library Hallucinations in LLM-Generated Code: A Risk Analysis Grounded in Developer Queries"
+    },
+    "2509.23835v2": {
+      "authors": [
+        "Yukai Zhao",
+        "Menghan Wu",
+        "Xing Hu",
+        "Xin Xia"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-09-28",
+      "title": "HFuzzer: Testing Large Language Models for Package Hallucinations via Phrase-based Fuzzing"
+    },
+    "2509.25370v1": {
+      "authors": [
+        "Kunlun Zhu",
+        "Zijia Liu",
+        "Bingxuan Li",
+        "Muxin Tian",
+        "Yingxuan Yang",
+        "Jiaxun Zhang",
+        "Pengrui Han",
+        "Qipeng Xie",
+        "Fuyang Cui",
+        "Weijia Zhang",
+        "Xiaoteng Ma",
+        "Xiaodong Yu",
+        "Gowtham Ramesh",
+        "Jialian Wu",
+        "Zicheng Liu",
+        "Pan Lu",
+        "James Zou",
+        "Jiaxuan You"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-09-29",
+      "title": "Where LLM Agents Fail and How They can Learn From Failures"
+    },
+    "2510.13467v1": {
+      "authors": [
+        "Enhan Li",
+        "Hongyang Du",
+        "Kaibin Huang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-10-15",
+      "title": "NetMCP: Network-Aware Model Context Protocol Platform for LLM Capability Extension"
+    },
+    "2510.15994v2": {
+      "authors": [
+        "Dongsen Zhang",
+        "Zekun Li",
+        "Xu Luo",
+        "Xuannan Liu",
+        "Peipei Li",
+        "Wenjun Xu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-10-14",
+      "title": "MCP Security Bench (MSB): Benchmarking Attacks Against Model Context Protocol in LLM Agents"
+    },
+    "2510.23642v2": {
+      "authors": [
+        "Yuansheng Ni",
+        "Songcheng Cai",
+        "Xiangchao Chen",
+        "Jiarong Liang",
+        "Zhiheng Lyu",
+        "Jiaqi Deng",
+        "Kai Zou",
+        "Ping Nie",
+        "Fei Yuan",
+        "Xiang Yue",
+        "Wenhu Chen"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-10-24",
+      "title": "VisCoder2: Building Multi-Language Visualization Coding Agents"
+    },
+    "2511.04824v2": {
+      "authors": [
+        "Kosei Horikawa",
+        "Hao Li",
+        "Yutaro Kashiwa",
+        "Bram Adams",
+        "Hajimu Iida",
+        "Ahmed E. Hassan"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-11-06",
+      "title": "Agentic Refactoring: An Empirical Study of AI Coding Agents"
+    },
+    "2511.07584v1": {
+      "authors": [
+        "Wuyang Zhang",
+        "Chenkai Zhang",
+        "Zhen Luo",
+        "Jianming Ma",
+        "Wangming Yuan",
+        "Chuqiao Gu",
+        "Chenwei Feng"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-11-10",
+      "title": "SemanticForge: Repository-Level Code Generation through Semantic Knowledge Graphs and Constraint Satisfaction"
+    },
+    "2511.09268v2": {
+      "authors": [
+        "Helio Victor F. Santos",
+        "Vitor Costa",
+        "Joao Eduardo Montandon",
+        "Marco Tulio Valente"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-11-12",
+      "title": "Decoding the Configuration of AI Coding Agents: Insights from Claude Code Projects"
+    },
+    "2512.04367v1": {
+      "authors": [
+        "Yun Piao",
+        "Hongbo Min",
+        "Hang Su",
+        "Leilei Zhang",
+        "Lei Wang",
+        "Yue Yin",
+        "Xiao Wu",
+        "Zhejing Xu",
+        "Liwei Qu",
+        "Hang Li",
+        "Xinxin Zeng",
+        "Wei Tian",
+        "Fei Yu",
+        "Xiaowei Li",
+        "Jiayi Jiang",
+        "Tongxu Liu",
+        "Hao Tian",
+        "Yufei Que",
+        "Xiaobing Tu",
+        "Bing Suo",
+        "Yuebing Li",
+        "Xiangting Chen",
+        "Zeen Zhao",
+        "Jiaming Tang",
+        "Wei Huang",
+        "Xuguang Li",
+        "Jing Zhao",
+        "Jin Li",
+        "Jie Shen",
+        "Jinkui Ren",
+        "Xiantao Zhang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-12-04",
+      "title": "AgentBay: A Hybrid Interaction Sandbox for Seamless Human-AI Intervention in Agentic Systems"
+    },
+    "2512.08213v1": {
+      "authors": [
+        "Md Nazmul Haque",
+        "Elizabeth Lin",
+        "Lawrence Arkoh",
+        "Biruk Tadesse",
+        "Bowen Xu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-12-09",
+      "title": "Secure or Suspect? Investigating Package Hallucinations of Shell Command in Original and Quantized LLMs"
+    },
+    "2512.12806v1": {
+      "authors": [
+        "Boyang Yan"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-12-14",
+      "title": "Fault-Tolerant Sandboxing for AI Coding Agents: A Transactional Approach to Safe Autonomous Execution"
+    },
+    "2512.22154v1": {
+      "authors": [
+        "David Lindner",
+        "Charlie Griffin",
+        "Tomek Korbak",
+        "Roland S. Zimmermann",
+        "Geoffrey Irving",
+        "Sebastian Farquhar",
+        "Alan Cooney"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2025-12-15",
+      "title": "Practical challenges of control monitoring in frontier AI deployments"
+    },
+    "2601.15195v1": {
+      "authors": [
+        "Ramtin Ehsani",
+        "Sakshi Pathak",
+        "Shriya Rawal",
+        "Abdullah Al Mujahid",
+        "Mia Mohammad Imran",
+        "Preetha Chatterjee"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-01-21",
+      "title": "Where Do AI Coding Agents Fail? An Empirical Study of Failed Agentic Pull Requests in GitHub"
+    },
+    "2602.20717v2": {
+      "authors": [
+        "Xiting Liu",
+        "Yuetong Liu",
+        "Yitong Zhang",
+        "Jia Li",
+        "Shi-Min Hu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-02-24",
+      "title": "PackMonitor: Enabling Zero Package Hallucinations Through Decoding-Time Monitoring"
+    },
+    "2603.06847v2": {
+      "authors": [
+        "Mehil B Shah",
+        "Mohammad Mehdi Morovati",
+        "Mohammad Masudur Rahman",
+        "Foutse Khomh"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-03-06",
+      "title": "Characterizing Faults in Agentic AI: A Taxonomy of Types, Symptoms, and Root Causes"
+    },
+    "2603.12230v2": {
+      "authors": [
+        "Ninghui Li",
+        "Kaiyuan Zhang",
+        "Kyle Polley",
+        "Jerry Ma"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-03-12",
+      "title": "Security Considerations for Artificial Intelligence Agents"
+    },
+    "2603.25930v2": {
+      "authors": [
+        "Fatih Bulut",
+        "Carlo DePaolis",
+        "Raghav Batta",
+        "Anjali Mangal"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-03-26",
+      "title": "AVDA: Autonomous Vibe Detection Authoring for Cybersecurity"
+    },
+    "2603.27646v1": {
+      "authors": [
+        "Shi Qiu",
+        "Junyi Deng",
+        "Yiwei Deng",
+        "Haoran Dong",
+        "Jieyu Fu",
+        "Mao Li",
+        "Zeyu Li",
+        "Zhaolong Zhang",
+        "Huiwen Zheng",
+        "Leidong Bao",
+        "Anqi Lv",
+        "Zihan Mo",
+        "Yadi Niu",
+        "Yiyang Peng",
+        "Yu Tian",
+        "Yili Wang",
+        "Ziyu Wang",
+        "Zi-Yu Wang",
+        "Jiashen Wei",
+        "Liuheng Wu",
+        "Aoran Xue",
+        "Leyi Yang",
+        "Guanglu Yuan",
+        "Xiarui Zhan",
+        "Jingjun Zhang",
+        "Zifan Zheng",
+        "Pengfei Liu",
+        "Linrui Zhen",
+        "Kaiyang Li",
+        "Qichang Li",
+        "Ziheng Zhou",
+        "Guo-En Nian",
+        "Yunwei Xiao",
+        "Qing-Hong Cao",
+        "Linjie Dai",
+        "Xu Feng",
+        "Peng Gao",
+        "Ying Gu",
+        "Chang Liu",
+        "Jia Liu",
+        "Ming-xing Luo",
+        "Yan-Qing Ma",
+        "Liang-You Peng",
+        "Huichao Song",
+        "Shufeng Wang",
+        "Chenxu Wang",
+        "Tao Wang",
+        "Yi-Nan Wang",
+        "Chengyin Wu",
+        "Pengwei Zhao",
+        "Hua Xing Zhu"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-03-29",
+      "title": "PRBench: End-to-end Paper Reproduction in Physics Research"
+    },
+    "2603.29919v2": {
+      "authors": [
+        "Yudong Gao",
+        "Zongjie Li",
+        "Yuanyuan Yuan",
+        "Zimo Ji",
+        "Pingchuan Ma",
+        "Shuai Wang"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-03-31",
+      "title": "SkillReducer: Optimizing LLM Agent Skills for Token Efficiency"
+    },
+    "2604.01375v2": {
+      "authors": [
+        "Zhengyang Qi",
+        "Charles Dickens",
+        "Derek Pham",
+        "Amanda Dsouza",
+        "Armin Parchami",
+        "Frederic Sala",
+        "Paroma Varma"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-04-01",
+      "title": "RIFT: A RubrIc Failure Mode Taxonomy and Automated Diagnostics"
+    },
+    "2604.01375v4": {
+      "authors": [
+        "Ankit Aich",
+        "Zhengyang Qi",
+        "Charles Dickens",
+        "Derek Pham",
+        "Esha Sharma",
+        "Josh Viktorov",
+        "Amanda Dsouza",
+        "Armin Parchami",
+        "Frederic Sala",
+        "Paroma Varma"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-04-01",
+      "title": "The Hitchhikers Guide to Rubric Quality Understanding and Enrichment"
+    },
+    "2604.13120v1": {
+      "authors": [
+        "Rajesh Kumar",
+        "Waqar Ali",
+        "Junaid Ahmed",
+        "Najma Imtiaz Ali",
+        "Shaban Usman"
+      ],
+      "fetched": "2026-11-21",
+      "published": "2026-04-13",
+      "title": "AgentForge: Execution-Grounded Multi-Agent LLM Framework for Autonomous Software Engineering"
+    }
+  }
+}

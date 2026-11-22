@@ -1,5 +1,21 @@
 # pipeline/ — SAICA-KG ingestion staging
 
+> **Dormant since 2026-04-23.** The Postgres ingestion pipeline described here (discovery → NLP
+> preprocess → rerank → LLM extraction → graduation) ran for one night, 2026-04-22/23. Every row in the
+> staging database dates from those hours; 4 of today's 49 tool nodes came through it, and no paper or
+> incident did. The catalogue has been curated by hand and by one-off scripts since. Nothing is scheduled,
+> the Azure model deployment it called returned 404 in November 2026, and several statements below
+> describe a design that was not built or not followed (thresholds, the review gate, the reranker's role):
+> see `research/review_20261121_r2/pipeline_validator.md`, PV-02 to PV-04 and PV-15. The code is kept, not
+> archived (owner decision, 2026-11-21). What is still live in `pipeline/`: `models.py` (the schema
+> source), `config.py`, `cost_caps.py`, `embeddings/compute.py` and `query.py`, `maturity/`, and the served
+> packages `ask/`, `audit/`, `mcp/`, `supervision/`, `saica_index/`, `shared/`, `webapp.py`.
+>
+> Safety, added 2026-11-21: `python -m pipeline.cli.db init --drop-first` prints the target database and
+> does nothing without `--yes`; `tests/test_db_smoke.py` runs its round trip only against a database
+> whose name contains `_test`. The local staging database holds the only copy of the 48 paid extractions
+> and has never been backed up (`python -m pipeline.cli.backup` exists and was never used).
+
 Local Postgres infrastructure for landing raw search results, README snapshots,
 and LLM-extracted candidate rows before a reviewer graduates them to canonical
 YAML under `data/`. Architecture: [`research/PIPELINE_ARCHITECTURE.md`](../research/PIPELINE_ARCHITECTURE.md).

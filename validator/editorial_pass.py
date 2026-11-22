@@ -869,6 +869,10 @@ def main() -> int:
         results.append((action, info))
         print(f"  {action:8s} {paper_id}")
 
+    if args.dry:
+        print()
+        print("dry run: no file was written (report included)")
+        return 0
     write_report(REPORT_PATH, results)
     print()
     print(f"report -> {REPORT_PATH}")

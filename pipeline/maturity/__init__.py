@@ -1,29 +1,30 @@
-"""Stage 9 — deterministic maturity tier (Levels-of-Evidence analog).
+"""Activity band of a tool (A–F), computed from its YAML alone.
 
-Borrows the PharmGKB / CPIC notation pattern: each tool gets a tier
-in ``{1A, 1B, 2A, 2B, 3, 4}`` derived from observable facets. The
-mapping is deterministic and re-computable from the YAML alone, so
-the leaderboard / web pages can render tiers without storing them.
+The band is a bin of a score built from stars, a recent upstream push and
+the number of integration surfaces (plus citations and evaluations where
+the catalogue records them). It measures popularity and activity; it is
+not a level of evidence. Until 2026-11-21 the bands were called tiers 1A,
+1B, 2A, 2B, 3, 4, after clinical-evidence levels they did not honour.
 
-Curators may override the computed tier by adding a
-``maturity_override`` block to the tool YAML; the override carries a
-required justification and is rendered publicly so the override is
-auditable.
+Curators may override the computed band with a ``maturity_override``
+block in the tool YAML; it must carry a justification.
 
-See :mod:`pipeline.maturity.score` for the formula. CLI:
-``python -m pipeline.maturity.cli``.
+See :mod:`pipeline.maturity.score` for the formula and
+:mod:`pipeline.maturity.evidence` for what SAICA-Bench measured.
 """
 
 from pipeline.maturity.score import (
+    ActivityBand,
     MaturityScore,
-    MaturityTier,
     compute_maturity,
-    effective_tier,
+    effective_band,
+    reference_date,
 )
 
 __all__ = [
+    "ActivityBand",
     "MaturityScore",
-    "MaturityTier",
     "compute_maturity",
-    "effective_tier",
+    "effective_band",
+    "reference_date",
 ]

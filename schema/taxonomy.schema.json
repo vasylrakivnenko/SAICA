@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/taxonomy.schema.json",
+  "$id": "https://saica.ai/schema/taxonomy.schema.json",
   "title": "Taxonomy",
   "description": "An external failure-mode or risk taxonomy that SAICA-KG cross-walks into its own facets.",
   "type": "object",
@@ -77,6 +77,11 @@
       },
       "minItems": 1,
       "type": "array"
+    },
+    "verified_against_source": {
+      "format": "date",
+      "type": "string",
+      "description": "Date on which every category id and label in this file was checked against the source (url / paper_id), by a person or an agent; say who and how in notes. Leave empty until that has happened: a taxonomy whose notes still say its labels are unverified cannot be mapped by a crosswalk."
     },
     "notes": {
       "type": "string"

@@ -311,3 +311,70 @@ def test_block_scalar_wraps_long_text() -> None:
     out = _block_scalar("a " * 100)
     assert all(line.startswith("  ") or line == "" for line in out.split("\n"))
     assert max(len(line) for line in out.split("\n")) <= 80
+
+
+# --- Review 2026-11-21, E2 step 3: provenance and bylines ------------------
+
+
+def test_written_records_say_how_they_were_produced() -> None:
+    c = _candidate(source="s2:some-query")
+    body, payload = candidate_to_yaml(c, "x-2025-fake", [])
+    assert payload["provenance"] == "s2-derived"
+    assert "provenance: s2-derived" in body
+    c = _candidate(source="elicit:Q1")
+    assert candidate_to_yaml(c, "x-2025-fake", [])[1]["provenance"] == "elicit-derived"
+
+
+def test_arxiv_byline_replaces_search_service_author_entities(tmp_path) -> None:
+    import json
+
+    from validator import graduate_papers as gp
+    from validator.netchecks import ArxivRecords
+
+    cache = tmp_path / "arxiv_records.json"
+    cache.write_text(
+        json.dumps(
+            {
+                "records": {
+                    "2503.13657v3": {
+                        "title": "Why Do Multi-Agent LLM Systems Fail?",
+                        "authors": ["Mert Cemri", "Melissa Z. Pan"],
+                    }
+                },
+                "latest": {"2503.13657": {"version": "v3", "checked": "2026-11-21"}},
+            }
+        )
+    )
+    records = ArxivRecords(cache, offline=True)
+    c = _candidate(
+        source="s2:q",
+        arxiv_id="2503.13657",
+        authors=["M. Cemri", "M. Pan"],
+        title="Why do multi-agent LLM systems fail? MAST",
+    )
+    assert gp.prefer_arxiv_byline(c, records) is True
+    assert c.authors == ["Mert Cemri", "Melissa Z. Pan"]
+    assert c.title == "Why Do Multi-Agent LLM Systems Fail?"
+    body, payload = candidate_to_yaml(c, "cemri-2025-x", [])
+    assert payload["arxiv_version"] == "v3" and payload["provenance"] == "s2-derived"
+    assert 'arxiv_version: "v3"' in body
+
+    unknown = _candidate(source="s2:q", arxiv_id="2501.99999", authors=["A. Entity"])
+    assert gp.prefer_arxiv_byline(unknown, records) is False
+    assert unknown.authors == ["A. Entity"] and unknown.arxiv_version is None
+    assert (
+        gp.prefer_arxiv_byline(_candidate(source="s2:q", arxiv_id=None), records)
+        is False
+    )
+
+
+def test_dry_cli_run_writes_no_report(tmp_path, monkeypatch) -> None:
+    from validator import graduate_papers as gp
+
+    report = tmp_path / "report.md"
+    monkeypatch.setattr(gp, "REPORT_PATH", report)
+    monkeypatch.setattr(gp, "PAPERS_DIR", tmp_path / "papers")
+    (tmp_path / "papers").mkdir()
+    assert gp.main(["--dry", "--limit", "1"]) == 0
+    assert not report.exists()
+    assert list((tmp_path / "papers").iterdir()) == []

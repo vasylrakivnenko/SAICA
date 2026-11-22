@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/recipe.schema.json",
+  "$id": "https://saica.ai/schema/recipe.schema.json",
   "title": "Recipe",
   "description": "An ordered composition of Tools that addresses one or more FailureModes. Recipes are the prescriptive flip-side of Incidents.",
   "type": "object",

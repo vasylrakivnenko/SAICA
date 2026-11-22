@@ -9,7 +9,12 @@ only prints a summary of what worked and what didn't.
 
 Usage::
 
-    python validator/fetch_github_stars.py
+    python validator/fetch_github_stars.py             # fetch and write
+    python validator/fetch_github_stars.py --dry-run   # fetch and print, write nothing
+    python validator/fetch_github_stars.py --help
+
+Until 2026-11-21 the script read no arguments at all, so ``--help`` and
+``--dry-run`` ran the real refresh and rewrote ``data/tools/*.yml``.
 
 If ``GITHUB_TOKEN`` is set, it's sent as a Bearer token (5000 req/hour).
 Otherwise the script uses the 60 req/hour unauthenticated quota, which is
@@ -22,6 +27,7 @@ installed.
 
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import os
 import re
@@ -198,7 +204,19 @@ def fetch_stars(
 # ---------------------------------------------------------------------------
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Refresh `stars` and `stars_updated_at` in data/tools/*.yml"
+        " from the GitHub API."
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Fetch and print the star counts; do not write any file.",
+    )
+    args = parser.parse_args(argv)
+    dry_run: bool = args.dry_run
+
     if not TOOLS_DIR.exists():
         print(f"No tools directory at {TOOLS_DIR}", file=sys.stderr)
         return 2
@@ -237,7 +255,10 @@ def main() -> int:
             results.append(res)
             failures.append(res)
             continue
-        print(f"  {stars:,} stars")
+        print(f"  {stars:,} stars" + (" (dry run, not written)" if dry_run else ""))
+        if dry_run:
+            results.append(FetchResult(tool_id, repo_label, stars))
+            continue
         doc["stars"] = int(stars)
         doc["stars_updated_at"] = today
         try:
@@ -269,7 +290,7 @@ def main() -> int:
 
     total = len(results)
     ok = sum(1 for r in results if r.stars is not None)
-    print(f"\n{ok}/{total} tools updated")
+    print(f"\n{ok}/{total} tools " + ("fetched (dry run)" if dry_run else "updated"))
     if skipped_no_repo:
         print(
             f"No GitHub repo (expected for proprietary tools): {', '.join(skipped_no_repo)}"

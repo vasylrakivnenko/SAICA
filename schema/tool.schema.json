@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/tool.schema.json",
+  "$id": "https://saica.ai/schema/tool.schema.json",
   "title": "Tool",
   "description": "A software artifact that supervises AI coding agents.",
   "type": "object",
@@ -41,7 +41,18 @@
     },
     "last_updated": {
       "format": "date",
-      "type": "string"
+      "type": "string",
+      "description": "Legacy field. It holds the upstream push date as copied in April 2026 on most nodes and the date of a curator's edit on others. Prefer upstream_pushed_at and last_reviewed."
+    },
+    "upstream_pushed_at": {
+      "format": "date",
+      "type": "string",
+      "description": "Date of the last push to the upstream repository (GitHub `pushed_at`), as seen on last_reviewed."
+    },
+    "last_reviewed": {
+      "format": "date",
+      "type": "string",
+      "description": "Date this entry was last checked against its upstream (repository state, licence, stars), by a person or a script."
     },
     "maturity_status": {
       "enum": [
@@ -52,6 +63,10 @@
         "abandoned"
       ],
       "type": "string"
+    },
+    "archived": {
+      "type": "boolean",
+      "description": "True when the upstream repository is archived (read-only)."
     },
     "published_by": {
       "type": "string",
@@ -349,12 +364,12 @@
       ],
       "properties": {
         "tier": {
-          "description": "One of the six tiers: 1A, 1B, 2A, 2B, 3, 4.",
-          "pattern": "^(1A|1B|2A|2B|3|4)$",
+          "description": "One of the six activity bands: A, B, C, D, E, F.",
+          "pattern": "^[A-F]$",
           "type": "string"
         },
         "justification": {
-          "description": "Why the auto-tier is wrong. Required so future readers (or new curators) can reproduce or revisit the decision.",
+          "description": "Why the computed band is wrong. Required so future readers (or new curators) can reproduce or revisit the decision.",
           "maxLength": 400,
           "minLength": 10,
           "type": "string"
@@ -370,7 +385,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Curator override for the auto-computed maturity tier (Stage 9 of the v2 ingestion pipeline). When present, downstream consumers use ``override.tier`` instead of ``compute_maturity(tool).tier``. Required to carry a justification — overrides are auditable, not invisible."
+      "description": "Curator override of the computed activity band (A to F; see pipeline/maturity/score.py). When present, consumers show ``override.tier`` instead of the computed band. It must carry a justification, so an override can be audited."
     }
   },
   "additionalProperties": false

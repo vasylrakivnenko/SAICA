@@ -1,7 +1,13 @@
-"""CLI: human-gated graduation from Postgres candidates to ``data/<kind>/<id>.yml``.
+"""CLI: graduation from Postgres candidates to ``data/<kind>/<id>.yml``.
 
-The LLM never writes YAML. This CLI — invoked by a human reviewer — is the
-only path from Postgres into the canonical ``data/`` tree.
+Dormant since 2026-04-23. Intended as the human-gated path from Postgres
+into ``data/``; in practice it is a gate only at a terminal. When stdin
+is not a TTY every field is decided by the confidence threshold, the file
+is written, and the row is stamped ``graduated`` with ``reviewer = $USER``
+even if the validator has just failed, so that column records who owned
+the shell, not that anyone read the file (review 2026-11-21, J3 / PV-03).
+The validator now rejects a file that still holds a ``REVIEW_REQUIRED``
+marker, which is what this CLI writes for fields nobody accepted.
 
 Flow (per candidate):
 
@@ -50,6 +56,7 @@ except ImportError:
     sys.exit(2)
 
 from pipeline import db
+from pipeline.models import FAILURE_MODE_IDS
 from pipeline.graduate.fallbacks import (
     FALLBACK_ELIGIBLE_FIELDS,
     FallbackResult,
@@ -120,8 +127,7 @@ TOOL_FIELDS = [
         "addresses_failure_modes",
         "addresses_failure_modes",
         True,
-        "subset of fabrication|obsolescence|dependency_blindness|logic_error|"
-        "security_vulnerability|scope_creep|context_pollution|supply_chain_attack",
+        "subset of " + "|".join(FAILURE_MODE_IDS),
     ),
     (
         "locus_of_control",

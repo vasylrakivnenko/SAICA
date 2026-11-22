@@ -73,11 +73,13 @@ class StubEncoder:
 # ---------------------------------------------------------------------------
 
 
-def test_collect_corpus_has_all_128_categories_from_6_taxonomies():
+def test_collect_corpus_reads_every_taxonomy_file():
+    """No count is asserted: the number of categories changes whenever a
+    taxonomy is corrected (121 in April 2026, 183 after the 2026-11-21 fixes)."""
     rows = collect_mod.collect_corpus()
-    # The repo is expected to ship exactly six taxonomy YAMLs.
     source_ids = {r.source_tax_id for r in rows}
-    assert len(source_ids) == 6, f"expected 6 source taxonomies, got {len(source_ids)}"
+    on_disk = {p.stem for p in collect_mod.TAXONOMIES_DIR.glob("*.yml")}
+    assert len(source_ids) == len(on_disk), f"{source_ids} vs files {on_disk}"
     # Every row should have non-empty label + unique (source_tax, external_id).
     seen = set()
     for r in rows:
@@ -158,8 +160,13 @@ def test_crosswalk_map_merges_bulk_and_inline():
     for k, v in cmap.items():
         assert "::" in k
         assert isinstance(v, list) and v
-    # There is at least one mapping for DAP-01 -> incomplete_execution (bulk crosswalk).
-    assert "incomplete_execution" in cmap.get("daplab-9-patterns::DAP-01", [])
+    # Every crosswalk row on disk is in the map. (This used to assert one
+    # specific row, DAP-01 -> incomplete_execution, which turned out to be an
+    # invented mapping and was removed from the data on 2026-11-21.)
+    assert pairs, "no crosswalk rows found"
+    for pair in pairs:
+        key = f"{pair['taxonomy']}::{pair['external_id']}"
+        assert pair["saica_value"] in cmap[key]
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +182,7 @@ def tiny_rows() -> List[collect_mod.CategoryRow]:
     and near-zero across trios, so HDBSCAN sees three dense blobs + some
     noise. Enough signal to exercise the sweep + bootstrap logic.
     """
-    mk = lambda tax, ext, label, desc, cc: collect_mod.CategoryRow(
+    mk = lambda tax, ext, label, desc, cc: collect_mod.CategoryRow(  # noqa: E731
         source_tax_id=tax,
         external_id=ext,
         label=label,
@@ -220,7 +227,7 @@ def test_run_hdbscan_sweep_discovers_three_blobs(tiny_rows):
     assert r3.n_clusters == 3
     # Labels are integers of length 12; non-noise labels fall in [0, K).
     assert len(r3.labels) == 12
-    non_noise = [l for l in r3.labels if l >= 0]
+    non_noise = [lab for lab in r3.labels if lab >= 0]
     assert non_noise and max(non_noise) < r3.n_clusters
     # Bootstrap ARI should be high because blobs are well-separated.
     assert r3.bootstrap_ari >= 0.5
@@ -306,13 +313,17 @@ def test_build_tool_matrix_shape_and_coverage():
 
 
 def test_saica_labels_for_rows_uses_majority_vote():
-    # Two rows: one with explicit majority, one unmapped.
+    # Two rows: one mapped to exactly one mode (picked from the live
+    # crosswalks, whatever they are today), one unmapped.
+    cmap = collect_mod.crosswalk_map(collect_mod.load_crosswalk_pairs())
+    key, modes = next((k, v) for k, v in sorted(cmap.items()) if len(v) == 1)
+    tax_id, external_id = key.split("::", 1)
     rows = [
         collect_mod.CategoryRow(
-            source_tax_id="daplab-9-patterns",
-            external_id="DAP-02",
-            label="Fabricated References",
-            description="Agent emits code referencing non-existent functions or packages.",
+            source_tax_id=tax_id,
+            external_id=external_id,
+            label="A mapped category",
+            description="Its text does not matter for the vote.",
             citation_count_of_parent_taxonomy=0,
         ),
         collect_mod.CategoryRow(
@@ -324,7 +335,7 @@ def test_saica_labels_for_rows_uses_majority_vote():
         ),
     ]
     labels = compare_mod.saica_labels_for_rows(rows)
-    assert labels[0] == "fabrication"
+    assert labels[0] == modes[0]
     assert labels[1] == compare_mod.UNMAPPED
 
 
@@ -382,7 +393,7 @@ def test_agreement_scores_roundtrip_perfect_partition():
 
 
 def test_top_disagreements_skips_noise_and_singletons():
-    make = lambda cid, size, spread, cov: compare_mod.ClusterSummary(
+    make = lambda cid, size, spread, cov: compare_mod.ClusterSummary(  # noqa: E731
         cluster_id=cid,
         size=size,
         proposed_name=f"c{cid}",
@@ -406,3 +417,60 @@ def test_top_disagreements_skips_noise_and_singletons():
     assert -1 not in ids and 0 not in ids
     assert ids[0] == 1  # biggest first
     assert 2 in ids
+
+
+# ---------------------------------------------------------------------------
+# CLI safety (review 2026-11-21, J6): a stub run must not replace published files
+# ---------------------------------------------------------------------------
+
+
+def test_stub_encoder_run_refuses_the_published_paths(capsys):
+    from pipeline.cli import cluster_study
+
+    published = [
+        cluster_study.REPORT_PATH,
+        cluster_study.export_site_mod.SITE_JSON_PATH,
+    ]
+    before = [p.read_bytes() if p.exists() else None for p in published]
+    assert cluster_study.main(["--offline-encoder"]) == cluster_study.EXIT_USAGE
+    assert "--out-dir" in capsys.readouterr().err
+    assert [p.read_bytes() if p.exists() else None for p in published] == before
+
+
+def test_out_dir_keeps_every_output_inside_it(tmp_path: Path):
+    from pipeline.cli import cluster_study
+
+    artefacts, report, site_json = cluster_study.output_paths(tmp_path)
+    for path in (artefacts, report, site_json):
+        assert tmp_path in path.parents
+    default = cluster_study.output_paths(None)
+    assert default == (
+        cluster_study.OUT_DIR,
+        cluster_study.REPORT_PATH,
+        cluster_study.export_site_mod.SITE_JSON_PATH,
+    )
+
+
+def test_report_is_titled_as_a_note_and_states_the_circularity():
+    from pipeline.cli import cluster_study
+
+    run = cluster_mod.ClusteringRun(
+        min_cluster_size=5, n_clusters=3, n_noise=0, labels=[0, 1, 2], bootstrap_ari=0.5
+    )
+    text = cluster_study.render_narrative_report(
+        n_categories=3,
+        n_manual=11,
+        text_runs=[run],
+        bipartite_runs=[run],
+        text_canonical=run,
+        bipartite_canonical=run,
+        text_agreement={"ari": 0.1, "nmi": 0.2},
+        bipartite_agreement={"ari": 0.5, "nmi": 0.7},
+        text_summaries=[],
+        bipartite_summaries=[],
+        stub_encoder=True,
+    )
+    assert text.startswith("# Taxonomy cluster study — exploratory note")
+    assert "Validation" not in text.splitlines()[0]
+    assert "tool-reachability result is circular" in text
+    assert "Stub encoder run" in text

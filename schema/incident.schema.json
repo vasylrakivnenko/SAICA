@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/incident.schema.json",
+  "$id": "https://saica.ai/schema/incident.schema.json",
   "title": "Incident",
   "description": "A documented failure event where an AI coding agent (or analogous system) produced harm. Anchors FailureMode claims in ground truth.",
   "type": "object",
@@ -27,6 +27,16 @@
       "type": "string"
     },
     "description": {
+      "type": "string"
+    },
+    "kind": {
+      "description": "What this record is: event (one dated real-world occurrence), study (a measurement reported by a paper or a vendor), hypothetical (a scenario its own source calls hypothetical), pattern (a recurring behaviour with no single dated occurrence). Only `event` is an incident in the plain sense.",
+      "enum": [
+        "event",
+        "study",
+        "hypothetical",
+        "pattern"
+      ],
       "type": "string"
     },
     "incident_date": {

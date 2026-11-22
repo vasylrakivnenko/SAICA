@@ -19,7 +19,7 @@ import requests
 
 from pipeline.config import load_env_once
 
-USER_AGENT = "saica-kg-pipeline/0.1 (+https://saica-kg.dev)"
+USER_AGENT = "saica-kg-pipeline/0.1 (+https://saica.ai)"
 
 
 def load_env(path: Optional[Path] = None) -> None:

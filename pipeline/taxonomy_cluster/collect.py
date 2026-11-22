@@ -85,7 +85,7 @@ def collect_corpus(
     """Walk the taxonomy YAMLs and produce the flat corpus in a deterministic order.
 
     Order is (1) sorted taxonomy filename, then (2) category order as written
-    in the YAML (which is the authors' intended order). This makes the 128-row
+    in the YAML (which is the authors' intended order). This makes the row
     indexing reproducible across runs.
     """
     citations = _load_paper_citation_counts(papers_dir)

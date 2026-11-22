@@ -24,7 +24,7 @@ Outputs
 Rules
 -----
 * One request per second per host (``sleep 1.1s`` between fetches).
-* Custom User-Agent: ``saica-kg-discovery/0.1 (+https://saica-kg.dev)``.
+* Custom User-Agent: ``saica-kg-discovery/0.1 (+https://saica.ai)``.
 * 404s and parse errors are tolerated — that source is skipped with a note.
 * Top-level READMEs only; no recursion.
 
@@ -63,7 +63,7 @@ REPO = Path(__file__).resolve().parent.parent
 TOOLS_DIR = REPO / "data" / "tools"
 RESEARCH_DIR = REPO / "research"
 
-USER_AGENT = "saica-kg-discovery/0.1 (+https://saica-kg.dev)"
+USER_AGENT = "saica-kg-discovery/0.1 (+https://saica.ai)"
 REQUEST_DELAY = 1.1  # seconds between fetches (per host ≈ github.com)
 
 DEFAULT_SOURCES: list[str] = [
@@ -150,7 +150,11 @@ def _raw_readme_url(source_url: str) -> str | None:
 def fetch_text(url: str, *, timeout: int = 30) -> tuple[str | None, str | None]:
     """Fetch a URL and return (body, error). Tolerates common HTTP errors."""
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    if not url.startswith("https://"):
+        return None, "not an https URL"
     try:
+        # The scheme is checked above; callers pass raw.githubusercontent.com URLs.
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read()
             charset = resp.headers.get_content_charset() or "utf-8"
@@ -407,7 +411,6 @@ def apply_quality_gate(
     """
     from pipeline.discovery.quality_gate import (
         CandidateSignals,
-        GateDecision,
         evaluate,
     )
 

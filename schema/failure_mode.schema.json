@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://saica-kg.dev/schema/failure_mode.schema.json",
+  "$id": "https://saica.ai/schema/failure_mode.schema.json",
   "title": "FailureMode",
   "description": "A supervision-addressable failure class.",
   "type": "object",

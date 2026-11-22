@@ -80,8 +80,8 @@ FAILURE_MODE_KEYWORDS: dict[str, list[str]] = {
         "memory poisoning",
     ],
     "cascading_failure": [
-        # Generic regression-cascade vocabulary used by DAPLab and
-        # follow-on writeups.
+        # Generic regression-cascade vocabulary. (An earlier comment
+        # credited the DAPLab post; that post has no such pattern.)
         "cascading failure",
         "cascading error",
         "regression cascade",

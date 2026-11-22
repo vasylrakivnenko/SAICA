@@ -22,6 +22,7 @@ CLI:
 
     python -m validator.generate_schemas            # write schema/*.json
     python -m validator.generate_schemas --check    # CI mode: diff; exit 1 on mismatch
+    python -m validator.generate_schemas --out-dir /tmp/x   # write (or check) another directory
 """
 
 from __future__ import annotations
@@ -51,43 +52,43 @@ MODEL_OUTPUTS: list[tuple[type, str, str, str]] = [
     (
         Tool,
         "tool.schema.json",
-        "https://saica-kg.dev/schema/tool.schema.json",
+        "https://saica.ai/schema/tool.schema.json",
         "A software artifact that supervises AI coding agents.",
     ),
     (
         FailureMode,
         "failure_mode.schema.json",
-        "https://saica-kg.dev/schema/failure_mode.schema.json",
+        "https://saica.ai/schema/failure_mode.schema.json",
         "A supervision-addressable failure class.",
     ),
     (
         Paper,
         "paper.schema.json",
-        "https://saica-kg.dev/schema/paper.schema.json",
+        "https://saica.ai/schema/paper.schema.json",
         "An academic or gray-literature reference used to ground nodes in SAICA-KG.",
     ),
     (
         Taxonomy,
         "taxonomy.schema.json",
-        "https://saica-kg.dev/schema/taxonomy.schema.json",
+        "https://saica.ai/schema/taxonomy.schema.json",
         "An external failure-mode or risk taxonomy that SAICA-KG cross-walks into its own facets.",
     ),
     (
         Crosswalk,
         "crosswalk.schema.json",
-        "https://saica-kg.dev/schema/crosswalk.schema.json",
+        "https://saica.ai/schema/crosswalk.schema.json",
         "A bulk mapping between a SAICA-KG axis and an external taxonomy's categories. Complements inline `crosswalks` declared on FailureMode nodes.",
     ),
     (
         Incident,
         "incident.schema.json",
-        "https://saica-kg.dev/schema/incident.schema.json",
+        "https://saica.ai/schema/incident.schema.json",
         "A documented failure event where an AI coding agent (or analogous system) produced harm. Anchors FailureMode claims in ground truth.",
     ),
     (
         Recipe,
         "recipe.schema.json",
-        "https://saica-kg.dev/schema/recipe.schema.json",
+        "https://saica.ai/schema/recipe.schema.json",
         "An ordered composition of Tools that addresses one or more FailureModes. Recipes are the prescriptive flip-side of Incidents.",
     ),
 ]
@@ -358,14 +359,25 @@ def format_schema(schema: dict[str, Any]) -> str:
     return json.dumps(schema, indent=2, ensure_ascii=False) + "\n"
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(
+        description="Generate schema/*.json from the Pydantic models in pipeline/models.py."
+    )
     ap.add_argument(
         "--check",
         action="store_true",
         help="Compare regenerated schemas to committed files; exit 1 on mismatch.",
     )
-    args = ap.parse_args()
+    ap.add_argument(
+        "--out-dir",
+        type=Path,
+        default=SCHEMA_DIR,
+        help="Directory to write or check (default: schema/).",
+    )
+    args = ap.parse_args(argv)
+    out_dir: Path = args.out_dir
+    if not args.check:
+        out_dir.mkdir(parents=True, exist_ok=True)
 
     mismatched: list[str] = []
 
@@ -379,7 +391,7 @@ def main() -> int:
         )
         text = format_schema(schema)
 
-        target = SCHEMA_DIR / filename
+        target = out_dir / filename
 
         if args.check:
             if not target.exists():
@@ -390,7 +402,7 @@ def main() -> int:
                 mismatched.append(filename)
         else:
             target.write_text(text)
-            print(f"wrote {target.relative_to(REPO)}")
+            print(f"wrote {target}")
 
     if args.check:
         if mismatched:

@@ -58,16 +58,62 @@ def get_conn() -> Iterator[psycopg.Connection]:
         conn.close()
 
 
-def init_schema(drop_first: bool = False) -> None:
+def target() -> dict[str, str]:
+    """Host, port and database name of the configured DSN.
+
+    Safe to print: user name and password are left out.
+    """
+    from psycopg.conninfo import conninfo_to_dict
+
+    try:
+        info = conninfo_to_dict(_dsn())
+    except psycopg.Error:
+        info = {}
+    return {
+        "host": str(info.get("host") or "localhost"),
+        "port": str(info.get("port") or "5432"),
+        "dbname": str(info.get("dbname") or ""),
+    }
+
+
+def describe_target() -> str:
+    """``host:port/dbname`` of the configured database (no credentials)."""
+    where = target()
+    return f"{where['host']}:{where['port']}/{where['dbname']}"
+
+
+def is_test_database() -> bool:
+    """True when the configured database is named as a test database
+    (its name contains ``_test``)."""
+    return "_test" in target()["dbname"]
+
+
+class RefusedDrop(RuntimeError):
+    """Raised instead of dropping the tables of a non-test database."""
+
+
+def init_schema(drop_first: bool = False, *, allow_non_test: bool = False) -> None:
     """Run ``schema.sql`` against the configured DB.
 
     If ``drop_first`` is true, existing pipeline tables are dropped first so
-    the schema can be re-applied from scratch (useful in tests).
+    the schema can be re-applied from scratch. That deletes every stored
+    row, so it is refused unless the database name contains ``_test`` or
+    the caller passes ``allow_non_test=True`` (the CLI does so only after
+    ``--yes``). The staging database holds the only copy of the April 2026
+    extractions.
     """
+    if drop_first and not allow_non_test and not is_test_database():
+        raise RefusedDrop(
+            f"refusing to drop the pipeline tables of {describe_target()}: the"
+            " database name does not contain '_test'. Point POSTGRES_URL at a"
+            " test database, or pass allow_non_test=True if you mean it."
+        )
     ddl = _SCHEMA_PATH.read_text()
     with get_conn() as conn, conn.cursor() as cur:
         if drop_first:
             for table in _TABLES:
+                # Table names come from the constant _TABLES above, never from input.
+                # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                 cur.execute(f"DROP TABLE IF EXISTS {table} CASCADE;")
         cur.execute(ddl)
         conn.commit()
@@ -305,6 +351,8 @@ def get_pending(kind: str, limit: int = 100) -> list[dict]:
         LIMIT %s
     """
     with get_conn() as conn, conn.cursor(row_factory=dict_row) as cur:
+        # `table` is looked up in the constant _CANDIDATE_KIND_TO_TABLE; `limit` is bound.
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         cur.execute(sql, (limit,))
         return list(cur.fetchall())
 
@@ -356,6 +404,8 @@ def table_counts() -> list[tuple[str, int]]:
     out: list[tuple[str, int]] = []
     with get_conn() as conn, conn.cursor() as cur:
         for table in _TABLES:
+            # Table names come from the constant _TABLES above, never from input.
+            # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
             cur.execute(f"SELECT COUNT(*) FROM {table}")
             row = cur.fetchone()
             out.append((table, int(row[0]) if row else 0))

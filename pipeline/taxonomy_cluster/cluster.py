@@ -123,7 +123,7 @@ def _bootstrap_ari(
         else:
             sub = X[idx]
         labels = _hdbscan(sub, min_cluster_size=min_cluster_size, metric=metric)
-        runs.append({int(i): int(l) for i, l in zip(idx, labels)})
+        runs.append({int(i): int(lab) for i, lab in zip(idx, labels)})
 
     scores: List[float] = []
     for i in range(len(runs)):
@@ -172,15 +172,15 @@ def run_hdbscan_sweep(
     runs: List[ClusteringRun] = []
     for mcs in sweep:
         labels = _hdbscan(X, min_cluster_size=mcs, metric=metric)
-        n_clusters = int(len({int(l) for l in labels if l >= 0}))
-        n_noise = int(sum(1 for l in labels if l < 0))
+        n_clusters = int(len({int(lab) for lab in labels if lab >= 0}))
+        n_noise = int(sum(1 for lab in labels if lab < 0))
         ari = _bootstrap_ari(X, min_cluster_size=mcs, metric=metric)
         runs.append(
             ClusteringRun(
                 min_cluster_size=mcs,
                 n_clusters=n_clusters,
                 n_noise=n_noise,
-                labels=[int(l) for l in labels],
+                labels=[int(lab) for lab in labels],
                 bootstrap_ari=ari,
             )
         )
@@ -213,7 +213,7 @@ def build_tool_matrix(rows: Sequence[CategoryRow]) -> Tuple[np.ndarray, List[str
 
     A category c is marked reachable from tool t if some SAICA FailureMode s
     satisfies both (s in t.addresses_failure_modes) and ((s, c) in crosswalk).
-    Matrix is dense np.ndarray of shape (N, M) dtype=int8 — N=128, M on the
+    Matrix is dense np.ndarray of shape (N, M) dtype=int8 — M on the
     order of a few dozen (only tools that address at least one failure mode
     and where that mode is crosswalked to at least one ingested category).
     """
@@ -283,15 +283,15 @@ def cluster_bipartite(
     runs: List[ClusteringRun] = []
     for mcs in sweep:
         labels = _hdbscan(D, min_cluster_size=mcs, metric="precomputed")
-        n_clusters = int(len({int(l) for l in labels if l >= 0}))
-        n_noise = int(sum(1 for l in labels if l < 0))
+        n_clusters = int(len({int(lab) for lab in labels if lab >= 0}))
+        n_noise = int(sum(1 for lab in labels if lab < 0))
         ari = _bootstrap_ari(D, min_cluster_size=mcs, metric="precomputed")
         runs.append(
             ClusteringRun(
                 min_cluster_size=mcs,
                 n_clusters=n_clusters,
                 n_noise=n_noise,
-                labels=[int(l) for l in labels],
+                labels=[int(lab) for lab in labels],
                 bootstrap_ari=ari,
             )
         )

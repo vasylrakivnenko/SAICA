@@ -36,6 +36,17 @@ Usage
     python -m validator.graduate_papers --dry              # plan only, no writes
     python -m validator.graduate_papers --limit 25         # cap accepted papers
     python -m validator.graduate_papers --from-source s2   # one source only
+
+Status (2026-11-21): dormant; ran once, on 2026-04-30, and wrote 30 of the
+paper nodes. Known limits of what it writes, from the review of 2026-11-21
+(E2, J3): ``authors`` are Semantic Scholar author-entity names, not the
+paper's byline; ``tldr`` is Semantic Scholar's machine summary; nobody
+reviewed the 30 records before they were committed. Records it writes now
+carry ``provenance: s2-derived`` / ``elicit-derived`` and, when the tracked
+arXiv cache (``validator/cache/arxiv_records.json``) has the paper, the
+arXiv title and byline with ``arxiv_version``. Before committing anything
+it writes: ``python validator/cli.py --arxiv`` and read every record.
+``--dry`` writes nothing at all (it used to rewrite the tracked report).
 """
 
 from __future__ import annotations
@@ -61,7 +72,7 @@ REPORT_PATH = REPO / "validator" / "graduate_papers.report.md"
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from pipeline.models import Paper  # noqa: E402
+from pipeline.models import FAILURE_MODE_IDS, Paper  # noqa: E402
 
 # --- Failure-mode keyword index -------------------------------------------
 #
@@ -70,19 +81,8 @@ from pipeline.models import Paper  # noqa: E402
 # pick them up. We surface modes from a keyword scan over (title + tldr +
 # abstract); humans can later refine.
 
-FAILURE_MODES = (
-    "fabrication",
-    "obsolescence",
-    "dependency_blindness",
-    "logic_error",
-    "security_vulnerability",
-    "scope_creep",
-    "context_pollution",
-    "supply_chain_attack",
-    "cascading_failure",
-    "incomplete_execution",
-    "test_manipulation",
-)
+# The one list of failure-mode ids lives in pipeline.models.
+FAILURE_MODES = FAILURE_MODE_IDS
 
 # Keywords -> failure mode id. Multi-token entries are matched as substrings
 # (case-insensitive) on the combined title + tldr + abstract text. Tuned to
@@ -499,6 +499,17 @@ class Candidate:
 
     score: int = 0
     failure_modes: list[str] = field(default_factory=list)
+    # Set when title and authors were replaced by an arXiv record.
+    arxiv_version: str | None = None
+
+    @property
+    def provenance(self) -> str | None:
+        """How a record written from this candidate was produced."""
+        if self.source.startswith("s2"):
+            return "s2-derived"
+        if self.source.startswith("elicit"):
+            return "elicit-derived"
+        return None
 
     def text_blob(self) -> str:
         return " ".join([self.title, self.tldr, self.abstract, self.venue]).lower()
@@ -509,6 +520,40 @@ class Candidate:
             _strip_doi(self.doi),
             _normalize_title(self.title),
         )
+
+
+# --- Bylines --------------------------------------------------------------
+
+
+def prefer_arxiv_byline(c: Candidate, records: Any) -> bool:
+    """Replace ``title`` and ``authors`` with the arXiv record's, when the
+    cache of arXiv records (``validator/cache/arxiv_records.json``, filled
+    by ``validator/cli.py --arxiv``) has the paper.
+
+    Semantic Scholar's ``authors[].name`` are author entities: merged
+    profiles, often initials only, sometimes a different person. The names
+    on the paper are in the arXiv record. Returns True when it replaced
+    them; the candidate then carries ``arxiv_version``.
+    """
+    if not c.arxiv_id or records is None:
+        return False
+    record = records.get(c.arxiv_id, None)
+    if not record or not record.get("authors") or not record.get("title"):
+        return False
+    latest = records.latest.get(c.arxiv_id) or {}
+    c.title = record["title"]
+    c.authors = list(record["authors"])
+    c.arxiv_version = latest.get("version")
+    return True
+
+
+def _arxiv_records() -> Any:
+    """The tracked cache of arXiv records, read offline; None if unavailable."""
+    try:
+        from validator.netchecks import ARXIV_CACHE, ArxivRecords
+    except ImportError:
+        return None
+    return ArxivRecords(ARXIV_CACHE, offline=True)
 
 
 # --- Source loaders -------------------------------------------------------
@@ -910,6 +955,10 @@ def candidate_to_yaml(
         payload["tldr"] = tldr
     if tags:
         payload["relevance_tags"] = tags
+    if c.provenance:
+        payload["provenance"] = c.provenance
+    if c.arxiv_id and c.arxiv_version:
+        payload["arxiv_version"] = c.arxiv_version
     if notes:
         payload["notes"] = notes
 
@@ -955,6 +1004,10 @@ def candidate_to_yaml(
         lines.append("relevance_tags:")
         for t in tags:
             lines.append(f"  - {t}")
+    if c.provenance:
+        lines.append(f"provenance: {c.provenance}")
+    if c.arxiv_id and c.arxiv_version:
+        lines.append(f'arxiv_version: "{c.arxiv_version}"')
     if notes:
         lines.append("notes: >")
         lines.append(_block_scalar(notes))
@@ -1097,9 +1150,13 @@ def run(
     limit: int,
     sources: tuple[str, ...],
     papers_dir: Path = PAPERS_DIR,
-    report_path: Path = REPORT_PATH,
+    report_path: Path | None = REPORT_PATH,
 ) -> dict[str, Any]:
-    """End-to-end orchestration. Returns a summary dict for tests / CLI."""
+    """End-to-end orchestration. Returns a summary dict for tests / CLI.
+
+    ``report_path=None`` writes no report (what ``--dry`` does from the CLI
+    unless ``--report`` names a file).
+    """
     cands = gather_candidates(sources)
     total_loaded = len(cands)
 
@@ -1116,6 +1173,7 @@ def run(
 
     dedup_idx = DedupIndex.from_existing(papers_dir)
     dedup_idx.seed_from_manifest(DATA_DIR / "MANIFEST.json")
+    arxiv_records = _arxiv_records()
 
     accepted: list[tuple[str, Candidate, list[str]]] = []
     skipped_dup: list[tuple[Candidate, str]] = []
@@ -1128,6 +1186,9 @@ def run(
         if reason:
             skipped_dup.append((c, reason))
             continue
+        # The byline on the paper beats the search service's author
+        # entities; do this before the id is built from the first author.
+        prefer_arxiv_byline(c, arxiv_records)
         base_id = make_paper_id(c.authors, c.year, c.title)
         paper_id = dedup_idx.unique_id(base_id)
         modes = c.failure_modes or detect_failure_modes(c.text_blob())
@@ -1144,17 +1205,18 @@ def run(
             (papers_dir / f"{paper_id}.yml").write_text(body)
 
     # Write report
-    write_report(
-        report_path,
-        total_loaded=total_loaded,
-        eligible_count=len(eligible),
-        accepted=accepted,
-        skipped_dup=skipped_dup,
-        skipped_invalid=skipped_invalid,
-        dry=dry,
-        limit=limit,
-        sources=sources,
-    )
+    if report_path is not None:
+        write_report(
+            report_path,
+            total_loaded=total_loaded,
+            eligible_count=len(eligible),
+            accepted=accepted,
+            skipped_dup=skipped_dup,
+            skipped_invalid=skipped_invalid,
+            dry=dry,
+            limit=limit,
+            sources=sources,
+        )
 
     return {
         "loaded": total_loaded,
@@ -1235,6 +1297,13 @@ def main(argv: list[str] | None = None) -> int:
         default="all",
         help="Source filter (default 'all').",
     )
+    ap.add_argument(
+        "--report",
+        type=Path,
+        default=None,
+        help="Where to write the report (default: validator/graduate_papers.report.md;"
+        " with --dry no report is written unless this is given).",
+    )
     args = ap.parse_args(argv)
 
     if args.from_source == "all":
@@ -1242,7 +1311,10 @@ def main(argv: list[str] | None = None) -> int:
     else:
         sources = (args.from_source,)
 
-    summary = run(dry=args.dry, limit=args.limit, sources=sources)
+    report_path = args.report or (None if args.dry else REPORT_PATH)
+    summary = run(
+        dry=args.dry, limit=args.limit, sources=sources, report_path=report_path
+    )
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 

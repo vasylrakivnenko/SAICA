@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CACHE_DIR = REPO_ROOT / ".cache" / "trending"
 
-USER_AGENT = "SAICA-KG-Trending-Bot/0.2 (https://github.com/saica-kg/saica-kg)"
+USER_AGENT = "SAICA-KG-Trending-Bot/0.2 (https://saica.ai)"
 TRENDING_BASE = "https://github.com/trending"
 RAW_README_BASE = "https://raw.githubusercontent.com"
 

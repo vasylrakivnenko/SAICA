@@ -8,10 +8,12 @@ roles.
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+import yaml
 
 from validator import generate_manifest as gm
 
@@ -67,18 +69,22 @@ def test_manifest_includes_canonical_urls_for_tools() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _run_check() -> subprocess.CompletedProcess:
-    """Run ``python -m validator.generate_manifest --check`` from the repo
+def _run(*args: str) -> subprocess.CompletedProcess:
+    """Run ``python -m validator.generate_manifest <args>`` from the repo
     root, returning the completed process. ``cwd`` is pinned so the
     subprocess resolves the committed manifest correctly regardless of
     where pytest was invoked from.
     """
     return subprocess.run(
-        [sys.executable, "-m", "validator.generate_manifest", "--check"],
+        [sys.executable, "-m", "validator.generate_manifest", *args],
         cwd=str(REPO_ROOT),
         capture_output=True,
         text=True,
     )
+
+
+def _run_check(*args: str) -> subprocess.CompletedProcess:
+    return _run("--check", *args)
 
 
 def test_manifest_check_exits_zero_when_fresh() -> None:
@@ -91,29 +97,69 @@ def test_manifest_check_exits_zero_when_fresh() -> None:
 
 
 def test_manifest_check_exits_one_when_out_of_date(tmp_path: Path) -> None:
-    """Tamper with the committed manifest and confirm --check catches it.
+    """Tamper with a copy of the manifest and confirm --check catches it.
 
-    We rewrite the file temporarily, run the CLI, then restore the
-    original. This exercises the real CLI (subprocess), not just the
-    in-memory build function, so we also cover argparse + the stderr diff
-    output.
+    The copy lives in ``tmp_path`` and is passed with ``--manifest``; the
+    tracked ``data/MANIFEST.json`` is never written by a test. This
+    exercises the real CLI (subprocess), not just the in-memory build
+    function, so we also cover argparse + the stderr diff output.
     """
-    original = MANIFEST_PATH.read_text()
-    tampered = json.loads(original)
+    tracked_before = MANIFEST_PATH.read_bytes()
+    fresh = tmp_path / "MANIFEST.json"
+    assert _run("--manifest", str(fresh)).returncode == 0
+    assert _run_check("--manifest", str(fresh)).returncode == 0
+
+    tampered = json.loads(fresh.read_text())
     # Pretend a tool was renamed: drop a known id from the manifest.
     tampered["ids"]["tools"].pop("semgrep", None)
     tampered["counts"]["tools"] -= 1
+    fresh.write_text(json.dumps(tampered, indent=2) + "\n")
 
-    try:
-        MANIFEST_PATH.write_text(json.dumps(tampered, indent=2) + "\n")
-        result = _run_check()
-        assert result.returncode == 1, (
-            f"--check should fail when manifest is stale; got {result.returncode}\n"
-            f"stdout: {result.stdout}\nstderr: {result.stderr}"
-        )
-        assert "drift" in result.stderr.lower() or "semgrep" in result.stderr
-    finally:
-        MANIFEST_PATH.write_text(original)
+    result = _run_check("--manifest", str(fresh))
+    assert result.returncode == 1, (
+        f"--check should fail when manifest is stale; got {result.returncode}\n"
+        f"stdout: {result.stdout}\nstderr: {result.stderr}"
+    )
+    assert "drift" in result.stderr.lower() and "semgrep" in result.stderr
+    assert MANIFEST_PATH.read_bytes() == tracked_before
+
+
+def _copy_of_data(tmp_path: Path) -> Path:
+    data = tmp_path / "data"
+    shutil.copytree(
+        REPO_ROOT / "data", data, ignore=shutil.ignore_patterns("saica_index")
+    )
+    return data
+
+
+def test_write_refuses_to_drop_an_id_without_a_tombstone(tmp_path: Path) -> None:
+    """Rewriting the manifest is not a way around the id lock."""
+    data = _copy_of_data(tmp_path)
+    manifest = data / "MANIFEST.json"
+    manifest.unlink(missing_ok=True)
+    assert _run("--data-dir", str(data)).returncode == 0
+    victim = sorted((data / "incidents").glob("*.yml"))[0]
+    victim.unlink()
+
+    refused = _run("--data-dir", str(data))
+    assert refused.returncode == 1
+    assert victim.stem in refused.stderr and "TOMBSTONES.yml" in refused.stderr
+    assert victim.stem in json.loads(manifest.read_text())["ids"]["incidents"]
+
+    tombstones = data / "TOMBSTONES.yml"
+    doc = yaml.safe_load(tombstones.read_text()) if tombstones.exists() else {}
+    doc.setdefault("tombstones", []).append(
+        {
+            "id": victim.stem,
+            "kind": "incident",
+            "removed_on": "2026-11-21",
+            "reason": "test",
+        }
+    )
+    tombstones.write_text(yaml.safe_dump(doc))
+    allowed = _run("--data-dir", str(data))
+    assert allowed.returncode == 0, allowed.stderr
+    assert victim.stem not in json.loads(manifest.read_text())["ids"]["incidents"]
 
 
 # ---------------------------------------------------------------------------

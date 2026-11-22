@@ -1,119 +1,159 @@
-"""Deterministic maturity-tier scoring (Stage 9 of the v2 ingestion pipeline).
+"""Activity band A–F for a tool (formerly "maturity tier" 1A … 4).
 
-DESIGN
-------
-Each tool gets a tier in ``{1A, 1B, 2A, 2B, 3, 4}`` derived from
-observable facets in its YAML. The notation mirrors clinical-evidence
-levels (PharmGKB, CPIC) so curators reading the KG can map the tier
-to a familiar concept:
-
-  * 1A — peer-reviewed paper *and* heavy substantive use *and* mature
-         development signals
-  * 1B — peer-reviewed paper *and* moderate corroboration
-  * 2A — at least one paper citation *and* active development
-  * 2B — implemented in research, less validation
-  * 3  — active development, no scholarly grounding
-  * 4  — experimental / single-author / low activity / abandoned
-
-WHY DETERMINISTIC
------------------
-Calibrated thresholds cost a labeled holdout (Stage 0a of the v2 spec
-— deferred). Until then we use editor-set thresholds that work today
-and are explicit about being calibration-pending. Every facet is
-observable from the tool YAML alone — no live API calls, no caching
-issues, no flaky CI.
-
-FACETS (only those we already record per-tool today)
-----------------------------------------------------
-+-----------------------------+--------+----------------------------------+
-| Facet                       | Weight | Source field                     |
-+-----------------------------+--------+----------------------------------+
-| Cited in N papers           | 3      | ``cited_in`` (count)             |
-| Documented in M sources     | 2      | ``documented_in`` (count)        |
-| Evaluated on K benchmarks   | 2      | ``evaluated_on`` (count)         |
-| GitHub stars (log-scaled)   | 2      | ``stars``                        |
-| Recent commit (≤ 12 mo)     | 2      | ``last_updated``                 |
-| Integration surfaces        | 0.5/ea | ``integration_surfaces`` (count) |
-| Maturity status             | varies | ``maturity_status`` enum         |
-+-----------------------------+--------+----------------------------------+
-
-CALIBRATION NOTE
+WHAT IT MEASURES
 ----------------
-The current corpus has a sparse citation graph (~95% of tools have
-``cited_in: []``), so without ``integration_surfaces`` as a spreading
-facet the distribution collapsed to a single bin. Tier thresholds
-below were set against the actual score distribution on the
-2026-05-01 corpus (min=1.3, median=4.5, max=8.0) so each tier holds
-~10-30% of the corpus — bell-ish, not flat. Re-tune when:
-  (a) Stage 0a labeled holdout lands (Stage 5 brings real
-      substantive-use signal), or
-  (b) the corpus grows past ~200 tools and the distribution shifts.
+A band is a bin of a score that adds up, from the tool's YAML alone:
 
-``maturity_status`` is editorial input, not raw observation, so it
-acts as a multiplicative gate (``deprecated``/``abandoned`` cap the
-tier at 4 regardless of citations). The other facets sum into a raw
-score; tier bins are set so the distribution across the current 87
-tools roughly matches gut intuition (semgrep → 1B, brand-new
-2-citation tool → 3).
++------------------------------+--------+------------------------------------+
+| Facet                        | Weight | Source field                       |
++------------------------------+--------+------------------------------------+
+| GitHub stars (log scale)     | 0–2    | ``stars``                          |
+| Upstream push in the 12      | 2      | ``upstream_pushed_at`` (older      |
+| months before ``as_of``      |        | nodes: ``last_updated``)           |
+| Integration surfaces         | 0.5/ea | ``integration_surfaces`` (max 5)   |
+| Papers that cite the tool    | 3/ea   | ``cited_in`` (max 4)               |
+| Documentation sources        | 2/ea   | ``documented_in`` (max 3)          |
+| Benchmark evaluations        | 2/ea   | ``evaluated_on`` (max 3)           |
++------------------------------+--------+------------------------------------+
 
-KNOBS — calibrate against a labeled holdout when Stage 0a lands.
+On the 2026-11 data 47 of 49 tools have nothing in the last three rows, so
+in practice the band says how popular a tool is, whether its repository
+was pushed to recently, and how many ways it can be installed. It is NOT a
+level of evidence. No band means that a paper cites the tool or that
+anyone measured it; look at ``cited_in`` and ``evaluated_on`` for that.
+
+The earlier names (1A, 1B, 2A, 2B, 3, 4 → A, B, C, D, E, F) copied
+clinical-evidence levels, and their definitions required citations that 41
+of 49 tools did not have (review 2026-11-21, E9). The thresholds are
+unchanged; only the names and the claims attached to them are.
+
+NO CLOCK
+--------
+``compute_maturity`` takes the reference date as the required ``as_of``
+argument. It never reads today's date, so the same YAML gives the same
+band on every day. Callers that score the whole catalogue pass
+:func:`reference_date` (the newest check date found in the tool files) and
+store it next to the result.
+
+``maturity_status`` is an editor's judgement, so it caps the band:
+``deprecated`` / ``abandoned`` → F, ``at_risk`` → E, ``experimental`` → D.
+An archived upstream repository (``archived: true``) caps at F.
 """
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from datetime import date, timedelta
-from typing import Any, Literal, Optional
+from datetime import date, datetime, timedelta
+from typing import Any, Iterable, Literal
 
-MaturityTier = Literal["1A", "1B", "2A", "2B", "3", "4"]
+ActivityBand = Literal["A", "B", "C", "D", "E", "F"]
 
-# Tunable constants. Names mirror the spec's facet names.
-WEIGHT_PAPER_CITATION = 3.0     # per paper in cited_in, capped
-WEIGHT_DOCUMENTED_IN = 2.0      # per documentation source, capped
-WEIGHT_EVALUATED_ON = 2.0       # per benchmark, capped
-WEIGHT_STARS_FACTOR = 2.0       # log10(stars + 1) * factor
-WEIGHT_RECENT_COMMIT = 2.0      # binary (active or not)
+BANDS: tuple[ActivityBand, ...] = ("A", "B", "C", "D", "E", "F")
+
+# Tunable constants.
+WEIGHT_PAPER_CITATION = 3.0  # per paper in cited_in, capped
+WEIGHT_DOCUMENTED_IN = 2.0  # per documentation source, capped
+WEIGHT_EVALUATED_ON = 2.0  # per benchmark, capped
+WEIGHT_STARS_FACTOR = 2.0  # log10(stars + 1) scaled to 0..2
+WEIGHT_RECENT_PUSH = 2.0  # binary
 WEIGHT_INTEGRATION_SURFACE = 0.5  # per declared surface, capped
 
-CAP_PAPERS = 4                  # ≥4 papers all count the same
+CAP_PAPERS = 4  # ≥4 papers all count the same
 CAP_DOCS = 3
 CAP_EVALS = 3
 CAP_SURFACES = 5
 
-RECENT_COMMIT_WINDOW_DAYS = 365
+RECENT_PUSH_WINDOW_DAYS = 365
 
-# Tier thresholds — score → tier. Order matters; first match wins.
-# Calibrated against the 2026-05-01 corpus (87 tools); see CALIBRATION
-# NOTE in the module docstring. Re-tune when Stage 0a holdout exists
-# or the corpus grows substantially.
-TIER_THRESHOLDS: list[tuple[float, MaturityTier]] = [
-    (7.0, "1A"),
-    (5.5, "1B"),
-    (4.7, "2A"),
-    (4.0, "2B"),
-    (2.5, "3"),
-    (0.0, "4"),
+# Score → band. Order matters; first match wins. Set by hand against the
+# 2026-05-01 catalogue (87 tools) so that no band held most of it.
+BAND_THRESHOLDS: list[tuple[float, ActivityBand]] = [
+    (7.0, "A"),
+    (5.5, "B"),
+    (4.7, "C"),
+    (4.0, "D"),
+    (2.5, "E"),
+    (0.0, "F"),
 ]
 
-# Maturity-status caps. A tool flagged deprecated by the editor cannot
-# be promoted by raw citations.
-STATUS_TIER_CAP: dict[str, MaturityTier] = {
-    "deprecated": "4",
-    "abandoned": "4",
-    "at_risk": "3",
-    "experimental": "2B",
+BAND_MEANING: dict[str, str] = {
+    "A": "score 7.0 or more",
+    "B": "score 5.5 to 6.9",
+    "C": "score 4.7 to 5.4",
+    "D": "score 4.0 to 4.6",
+    "E": "score 2.5 to 3.9",
+    "F": "score below 2.5, or deprecated, abandoned or archived",
 }
+
+SCALE_DESCRIPTION = (
+    "Activity band A to F: a bin of a score that adds GitHub stars (log scale),"
+    " a push to the upstream repository in the 12 months before `as_of`, the"
+    " number of declared integration surfaces and, where the catalogue records"
+    " them, citing papers and benchmark evaluations. It measures popularity"
+    " and activity. It is not a level of evidence: no band means a paper cites"
+    " the tool or that it was measured."
+)
+
+# maturity_status caps. An editor's "deprecated" outranks stars.
+STATUS_BAND_CAP: dict[str, ActivityBand] = {
+    "deprecated": "F",
+    "abandoned": "F",
+    "at_risk": "E",
+    "experimental": "D",
+}
+
+# Fields that say when a tool entry was last looked at, newest first choice.
+_CHECK_DATE_FIELDS = (
+    "last_reviewed",
+    "stars_updated_at",
+    "upstream_pushed_at",
+    "last_updated",
+)
 
 
 @dataclass
 class MaturityScore:
     """Result of scoring one tool YAML."""
 
-    tier: MaturityTier
+    band: ActivityBand
     score: float
     facets: dict[str, float] = field(default_factory=dict)
     notes: list[str] = field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Dates
+# ---------------------------------------------------------------------------
+
+
+def _as_date(value: Any) -> date | None:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value[:10])
+        except ValueError:
+            return None
+    return None
+
+
+def reference_date(tools: Iterable[dict[str, Any]]) -> date | None:
+    """The newest date on which any tool entry was checked or updated.
+
+    This is the ``as_of`` to score a whole catalogue against: it moves only
+    when the data moves, never with the calendar. ``None`` for an empty
+    catalogue or one without dates.
+    """
+    newest: date | None = None
+    for tool in tools:
+        for name in _CHECK_DATE_FIELDS:
+            found = _as_date(tool.get(name))
+            if found is not None and (newest is None or found > newest):
+                newest = found
+    return newest
 
 
 # ---------------------------------------------------------------------------
@@ -129,40 +169,34 @@ def _coerce_count(field_value: Any, *, cap: int) -> int:
 
 
 def _stars_score(stars: Any) -> float:
-    """log10(stars + 1) × WEIGHT_STARS_FACTOR. Caps at log10(100k) = 5."""
-    if not isinstance(stars, (int, float)) or stars <= 0:
+    """log10(stars + 1), capped at 5 (100k stars), scaled to 0..2."""
+    if isinstance(stars, bool) or not isinstance(stars, (int, float)) or stars <= 0:
         return 0.0
     return min(5.0, math.log10(stars + 1)) * WEIGHT_STARS_FACTOR / 5.0
 
 
-def _recent_commit_score(last_updated: Any, *, today: date) -> float:
-    """1 × WEIGHT if ``last_updated`` is within RECENT_COMMIT_WINDOW_DAYS."""
-    if isinstance(last_updated, str):
-        try:
-            last_updated = date.fromisoformat(last_updated)
-        except ValueError:
-            return 0.0
-    if not isinstance(last_updated, date):
+def _recent_push_score(pushed: Any, *, as_of: date) -> float:
+    """``WEIGHT_RECENT_PUSH`` when the last upstream push is within the
+    window before ``as_of``; 0 when it is older, missing or unreadable."""
+    pushed_on = _as_date(pushed)
+    if pushed_on is None:
         return 0.0
-    if today - last_updated <= timedelta(days=RECENT_COMMIT_WINDOW_DAYS):
-        return WEIGHT_RECENT_COMMIT
+    if as_of - pushed_on <= timedelta(days=RECENT_PUSH_WINDOW_DAYS):
+        return WEIGHT_RECENT_PUSH
     return 0.0
 
 
-def compute_maturity(
-    tool: dict[str, Any], *, today: Optional[date] = None
-) -> MaturityScore:
-    """Score one tool dict (loaded from its YAML) and bin to a tier.
+def compute_maturity(tool: dict[str, Any], *, as_of: date) -> MaturityScore:
+    """Score one tool dict (loaded from its YAML) and bin it to a band.
 
-    Pure — no I/O, no live API calls, no caching. Reads only the
-    facets documented above. Missing fields contribute 0.
+    Pure: no I/O, no network, no clock. ``as_of`` is the date the recency
+    facet is judged against. Missing fields contribute 0.
     """
-    if today is None:
-        today = date.today()
+    if not isinstance(as_of, date):
+        raise TypeError("as_of must be a datetime.date")
 
     facets: dict[str, float] = {}
 
-    # Citation-shaped facets — count list lengths up to a cap.
     n_papers = _coerce_count(tool.get("cited_in"), cap=CAP_PAPERS)
     n_docs = _coerce_count(tool.get("documented_in"), cap=CAP_DOCS)
     n_evals = _coerce_count(tool.get("evaluated_on"), cap=CAP_EVALS)
@@ -170,41 +204,35 @@ def compute_maturity(
     facets["documented_in"] = n_docs * WEIGHT_DOCUMENTED_IN
     facets["evaluated_on"] = n_evals * WEIGHT_EVALUATED_ON
 
-    # Integration breadth — proxy for "how usable across stacks." Cheap
-    # spreading facet that distinguishes well-rounded supervisors from
-    # single-surface ones.
     n_surfaces = _coerce_count(tool.get("integration_surfaces"), cap=CAP_SURFACES)
     facets["integration_surfaces"] = n_surfaces * WEIGHT_INTEGRATION_SURFACE
 
-    # Popularity proxy. Stars are noisy but cheap.
     facets["stars"] = _stars_score(tool.get("stars"))
 
-    # Recency.
-    facets["recent_commit"] = _recent_commit_score(
-        tool.get("last_updated"), today=today
+    facets["recent_push"] = _recent_push_score(
+        tool.get("upstream_pushed_at") or tool.get("last_updated"), as_of=as_of
     )
 
     raw_score = sum(facets.values())
 
-    # Bin to tier from thresholds.
-    tier: MaturityTier = "4"
-    for threshold, label in TIER_THRESHOLDS:
+    band: ActivityBand = "F"
+    for threshold, label in BAND_THRESHOLDS:
         if raw_score >= threshold:
-            tier = label
+            band = label
             break
 
-    # Editorial maturity-status cap.
     notes: list[str] = []
     status = str(tool.get("maturity_status") or "").lower()
-    cap = STATUS_TIER_CAP.get(status)
-    if cap is not None and _tier_rank(tier) < _tier_rank(cap):
-        notes.append(
-            f"capped from {tier} to {cap} by maturity_status={status!r}"
-        )
-        tier = cap
+    cap = STATUS_BAND_CAP.get(status)
+    if cap is not None and _band_rank(band) < _band_rank(cap):
+        notes.append(f"capped from {band} to {cap} by maturity_status={status!r}")
+        band = cap
+    if tool.get("archived") is True and band != "F":
+        notes.append(f"capped from {band} to F: the upstream repository is archived")
+        band = "F"
 
     return MaturityScore(
-        tier=tier,
+        band=band,
         score=round(raw_score, 2),
         facets={k: round(v, 2) for k, v in facets.items()},
         notes=notes,
@@ -212,43 +240,40 @@ def compute_maturity(
 
 
 # ---------------------------------------------------------------------------
-# Override resolution (effective tier seen by callers)
+# Override resolution (the band callers should show)
 # ---------------------------------------------------------------------------
 
 
-def effective_tier(tool: dict[str, Any], *, today: Optional[date] = None) -> MaturityTier:
-    """Return the tier downstream consumers should treat as authoritative.
+def effective_band(tool: dict[str, Any], *, as_of: date) -> ActivityBand:
+    """Return the band to show for a tool.
 
-    Resolution order:
-      1. ``maturity_override.tier`` if set in the YAML (curator override).
-      2. ``compute_maturity(tool).tier`` otherwise.
-
-    The override is required to carry a justification (enforced by the
-    Pydantic model — see ``MaturityOverride`` in ``pipeline.models``).
+    1. ``maturity_override.tier`` when the YAML sets a valid band (the
+       override must carry a justification; ``pipeline.models`` enforces it).
+    2. Otherwise ``compute_maturity(tool, as_of=as_of).band``.
     """
     override = tool.get("maturity_override")
     if isinstance(override, dict):
-        ot = override.get("tier")
-        if isinstance(ot, str) and ot in {"1A", "1B", "2A", "2B", "3", "4"}:
-            return ot  # type: ignore[return-value]
-    return compute_maturity(tool, today=today).tier
+        chosen = override.get("tier")
+        if isinstance(chosen, str) and chosen in BANDS:
+            return chosen  # type: ignore[return-value]
+    return compute_maturity(tool, as_of=as_of).band
 
 
-# ---------------------------------------------------------------------------
-# Helper: ordering (for the maturity-status cap)
-# ---------------------------------------------------------------------------
-
-_TIER_ORDER: tuple[MaturityTier, ...] = ("1A", "1B", "2A", "2B", "3", "4")
-
-
-def _tier_rank(t: MaturityTier) -> int:
-    """0 = best (1A), 5 = worst (4). Used to compare two tier labels."""
-    return _TIER_ORDER.index(t)
+def _band_rank(band: ActivityBand) -> int:
+    """0 = A (highest), 5 = F (lowest)."""
+    return BANDS.index(band)
 
 
 __all__ = [
+    "ActivityBand",
+    "BANDS",
+    "BAND_MEANING",
+    "BAND_THRESHOLDS",
     "MaturityScore",
-    "MaturityTier",
+    "RECENT_PUSH_WINDOW_DAYS",
+    "SCALE_DESCRIPTION",
+    "STATUS_BAND_CAP",
     "compute_maturity",
-    "effective_tier",
+    "effective_band",
+    "reference_date",
 ]
