@@ -9,8 +9,8 @@
 # those parts.
 -r kg.txt
 -r mcp.txt
-pytest>=8.0
-pre-commit>=3.0
+pytest>=9.2.0
+pre-commit>=4.7.0
 # The web service and its tests (FastAPI's test client needs httpx).
 fastapi>=0.110
 uvicorn>=0.29
