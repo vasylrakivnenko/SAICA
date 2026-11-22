@@ -6,11 +6,15 @@ they are loaded by path rather than imported as a package.
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import os
+import re
+import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -105,16 +109,21 @@ def tool(command, **kw):
 
 
 def test_example_config_parses():
+    """The example is generated from the benchmark results (tests/kit/test_builder.py checks it against them)."""
     cfg = sc.load_config(KIT / "checks.example.json")
-    ids = [t["id"] for t in cfg["tools"]]
-    assert ids == ["semgrep", "sentrux", "pytest", "dependency-blindness-review"]
-    assert cfg["kit"] == "custom"
-    assert cfg["builtin"] == {"enabled": True, "blocking": False}
-    # The last entry is the LLM-reviewer runner (non-blocking, per commit).
-    review = cfg["tools"][-1]
-    assert review["runs_per_commit"] is True and review["blocking"] is False
-    assert review["command"].startswith("python3 .saica/saica_llm_review.py")
-    assert cfg["tools"][1]["metric"]["name"] == "quality"
+    assert cfg["tools"], "the default kit has at least one check"
+    assert cfg["builtin"] == {
+        "enabled": True,
+        "blocking": False,
+        "tamper_blocking": True,
+    }
+    for t in cfg["tools"]:
+        # nothing in the example blocks a commit, and every entry says where its numbers come from
+        assert t["blocking"] is False
+        assert t["note"] and "Benchmark J" in t["note"]
+        assert t["caught_exit_codes"] == [1]
+        if t["runs_per_commit"]:
+            assert t["command"].startswith("python3 .saica/saica_")
 
 
 def test_config_defaults():
@@ -380,13 +389,105 @@ def test_phantom_import_quiet_without_manifest(repo):
     "command, outcome",
     [
         ("exit 0", "pass"),
-        ("exit 3", "caught"),
+        ("exit 1", "caught"),
+        # Only the listed exit codes (default: 1) are findings. A tool that
+        # fails for its own reasons (pytest 2-5, ruff 2, a shell syntax error)
+        # is an error, never a catch.
+        ("exit 2", "error"),
+        ("exit 3", "error"),
         ("exit 127", "error"),
         ("definitely-not-a-binary-xyz", "error"),
+        ("kill -9 $$", "error"),
     ],
 )
 def test_tool_outcomes(tmp_path, command, outcome):
     assert sc.run_tool(tool(command), ["a.py"], tmp_path)[0] == outcome
+
+
+def test_caught_exit_codes_per_tool(tmp_path):
+    t = tool("exit 100", caught_exit_codes=[100])
+    assert sc.run_tool(t, [], tmp_path)[0] == "caught"
+    t = tool("exit 1", caught_exit_codes=[100])
+    outcome, detail, _ = sc.run_tool(t, [], tmp_path)
+    assert outcome == "error" and "not a finding" in detail and "100" in detail
+    cfg = sc.parse_config(
+        {
+            "tools": [
+                {"id": "a", "failure_modes": ["logic_error"], "command": "true"},
+                {
+                    "id": "b",
+                    "failure_modes": ["logic_error"],
+                    "command": "true",
+                    "caught_exit_codes": [100, 1, 1],
+                },
+            ]
+        }
+    )
+    assert cfg["tools"][0]["caught_exit_codes"] == [1]
+    assert cfg["tools"][1]["caught_exit_codes"] == [1, 100]
+
+
+@pytest.mark.parametrize("codes", [[], [0], [127], [256], [True], ["1"], 1, [1.5]])
+def test_caught_exit_codes_validation(codes):
+    raw = {
+        "tools": [
+            {
+                "id": "a",
+                "failure_modes": ["logic_error"],
+                "command": "true",
+                "caught_exit_codes": codes,
+            }
+        ]
+    }
+    with pytest.raises(sc.SaicaError, match="caught_exit_codes"):
+        sc.parse_config(raw)
+
+
+def test_missing_python_module_is_an_error_not_a_catch(tmp_path):
+    # `python -m <tool>` exits 1 when the tool is not installed: the same code
+    # most tools use for a finding. It must not be logged as a catch.
+    cmd = "%s -m saica_no_such_module_xyz" % shlex.quote(sys.executable)
+    outcome, detail, _ = sc.run_tool(tool(cmd, blocking=True), [], tmp_path)
+    assert outcome == "error" and "No module named" in detail
+
+
+@pytest.mark.parametrize(
+    "command, outcome, detail",
+    [
+        ("echo noise; echo 'ok: nothing found'", "pass", "ok: nothing found"),
+        ("echo 'skipped: no Python files'", "skipped", "skipped: no Python files"),
+        (
+            "echo warn; echo 'flagged: a.py:3 bad'; exit 1",
+            "caught",
+            "flagged: a.py:3 bad",
+        ),
+        ("echo 'error: no API key'; exit 127", "error", "error: no API key"),
+        ("echo 'partial: half was read'; exit 127", "error", "partial: half was read"),
+        ("echo plain output", "pass", ""),
+    ],
+)
+def test_helper_result_lines(tmp_path, command, outcome, detail):
+    assert sc.run_tool(tool(command), [], tmp_path)[:2] == (outcome, detail)
+
+
+def test_timeout_stops_the_tools_children(tmp_path):
+    if os.name != "posix":
+        pytest.skip("process groups are POSIX only")
+    t = tool("sleep 30 & echo $! > child.pid; wait", timeout_s=0.5)
+    start = time.time()
+    outcome, detail, _ = sc.run_tool(t, [], tmp_path)
+    assert outcome == "error" and "timeout" in detail
+    assert time.time() - start < 15
+    pid = int((tmp_path / "child.pid").read_text())
+    for _ in range(50):
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            break
+        time.sleep(0.1)
+    else:
+        os.kill(pid, 9)
+        pytest.fail("the tool's child process survived the timeout")
 
 
 def test_tool_timeout(tmp_path):
@@ -399,6 +500,124 @@ def test_tool_files_substitution_and_skip(tmp_path):
     assert sc.run_tool(t, ["a b.py", "c.py"], tmp_path)[0] == "pass"
     assert (tmp_path / "out.txt").read_text().splitlines() == ["a b.py", "c.py"]
     assert sc.run_tool(t, [], tmp_path)[0] == "skipped"
+    odd = ["-n.py", "it's $(touch PWNED) `touch PWNED2`.py", "semi;colon&.py"]
+    assert sc.run_tool(t, odd, tmp_path)[0] == "pass"
+    assert (tmp_path / "out.txt").read_text().splitlines() == ["./-n.py"] + odd[1:]
+    assert not (tmp_path / "PWNED").exists() and not (tmp_path / "PWNED2").exists()
+
+
+EVIL = "zz\ntouch INJECTED_BY_FILENAME\n.py"
+
+
+@pytest.mark.parametrize(
+    "command, where",
+    [
+        ("echo checked  # benchmark command: use {files} for changed files", "comment"),
+        ("sh -c 'echo {files}'", "single quotes"),
+        ('echo "{files}"', "double quotes"),
+        ("cat <<EOF\n{files}\nEOF", "here-document"),
+        ("echo done #{files_from}", "comment"),
+    ],
+)
+def test_files_placeholder_outside_a_plain_word_is_refused(tmp_path, command, where):
+    """KT-04: a file name must never reach a place where the shell would run it."""
+    outcome, detail, _ = sc.run_tool(tool(command), [EVIL, "a.py"], tmp_path)
+    assert outcome == "error"
+    assert "configuration error" in detail and where in detail
+    assert not (tmp_path / "INJECTED_BY_FILENAME").exists()
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "printf '%s\\n' {files} # trailing words are fine",
+        "printf '%s\\n' 'a # b' {files}",
+        'printf "%s\\n" {files}',
+        "printf '%s\\n' \\# {files}",
+        "printf '%s\\n' x#y {files}",
+    ],
+)
+def test_files_placeholder_as_a_plain_word_is_accepted(tmp_path, command):
+    assert sc.placeholder_problem(command) is None
+    assert sc.run_tool(tool(command), ["a.py"], tmp_path)[0] == "pass"
+
+
+def test_paths_with_control_characters_are_refused_for_files(tmp_path):
+    for bad in (EVIL, "a\rb.py"):
+        t = tool("printf '%s\\n' {files} > out.txt")
+        outcome, detail, _ = sc.run_tool(t, ["ok.py", bad], tmp_path)
+        assert outcome == "error" and "refused" in detail and "{files_from}" in detail
+        assert not (tmp_path / "out.txt").exists()  # the command did not run at all
+    assert not (tmp_path / "INJECTED_BY_FILENAME").exists()
+
+
+def test_files_from_is_a_nul_separated_list(tmp_path):
+    reader = (
+        "import sys; names = open(sys.argv[1], 'rb').read().split(b'\\0'); "
+        "open('out.txt', 'w').write(repr(names))"
+    )
+    t = tool(
+        "%s -c %s {files_from}" % (shlex.quote(sys.executable), shlex.quote(reader))
+    )
+    files = ["a b.py", "-n.py", EVIL]
+    assert sc.run_tool(t, files, tmp_path)[0] == "pass"
+    want = [b"a b.py", b"./-n.py", EVIL.encode(), b""]
+    assert (tmp_path / "out.txt").read_text() == repr(want)
+    assert not (tmp_path / "INJECTED_BY_FILENAME").exists()
+    assert sc.run_tool(t, [], tmp_path)[0] == "skipped"
+
+
+def test_very_long_file_lists(tmp_path):
+    """KT-18: 30,000 paths do not fit on a command line; that must be said, not hidden."""
+    files = [
+        "src/pkg_%05d/module_with_a_long_name_%05d.py" % (i, i) for i in range(30000)
+    ]
+    outcome, detail, _ = sc.run_tool(tool("true {files}"), files, tmp_path)
+    assert outcome == "error" and "too many changed files" in detail
+    assert "{files_from}" in detail
+    count = "import sys; print(len(open(sys.argv[1], 'rb').read().split(b'\\0')) - 1)"
+    t = tool(
+        "%s -c %s {files_from}" % (shlex.quote(sys.executable), shlex.quote(count)),
+        metric={"name": "n", "regex": r"^(\d+)$"},
+    )
+    outcome, _detail, metric = sc.run_tool(t, files, tmp_path)
+    assert outcome == "pass" and metric == 30000
+
+
+def test_newline_path_in_a_scratch_repository(repo):
+    """KT-04 end to end: the builder's old draft comment plus a hostile directory name."""
+    marker = repo / "INJECTED_BY_FILENAME"
+    _write_cfg(
+        repo,
+        [
+            {
+                "id": "draft",
+                "failure_modes": ["fabrication"],
+                "command": "true  # benchmark command: adapt paths, keep the flags; "
+                "use {files} for changed files",
+            },
+            {
+                "id": "plain",
+                "failure_modes": ["logic_error"],
+                "command": "true {files}",
+            },
+        ],
+    )
+    # Tools run in a temporary checkout; SAICA_REPO_ROOT names the real one.
+    evil_dir = repo / "zz\ntouch $SAICA_REPO_ROOT" / "INJECTED_BY_FILENAME\n"
+    evil_dir.mkdir(parents=True)
+    (evil_dir / "x.py").write_text("x = 1\n")
+    gitc(repo, "add", "-A")
+    assert sc.main(["run", "--staged"]) == 0
+    assert not marker.exists()
+    pending = {
+        e["tool_id"]: e for e in sc.read_jsonl(repo / ".saica" / "pending.jsonl")
+    }
+    assert pending["draft"]["outcome"] == "error"
+    assert "configuration error" in pending["draft"]["detail"]
+    # A command without shell operators runs without a shell: the odd name is
+    # one plain argument there, so nothing has to be refused.
+    assert pending["plain"]["outcome"] == "pass"
 
 
 def test_tool_metric(tmp_path):
@@ -452,18 +671,40 @@ def test_not_covered_emission(tmp_path):
         assert selftest.validate_event(e) == []
 
 
-def test_builtins_reduce_not_covered(tmp_path):
+def test_builtins_do_not_count_as_coverage(tmp_path):
+    """KT-09: the built-in heuristics were never benchmarked, so a failure mode
+    that only a built-in watches is still reported as not covered."""
     cfg = sc.parse_config({"tools": []})
     events = sc.evaluate(
         cfg, cs_from({}), tmp_path, {"commit": "staged"}, "manual", verbose=False
     )
-    nc = {e["failure_mode"] for e in events if e["outcome"] == "not_covered"}
-    assert not nc & {"incomplete_execution", "test_manipulation", "fabrication"}
-    assert {
-        e["outcome"]
-        for e in events
-        if e["tool_id"] and e["tool_id"].startswith("saica:")
-    } == {"skipped"}
+    nc = {e["failure_mode"]: e for e in events if e["outcome"] == "not_covered"}
+    assert set(nc) == set(sc.FAILURE_MODES)
+    assert sc.covered_failure_modes(cfg) == set()
+    for fm in ("incomplete_execution", "test_manipulation", "fabrication"):
+        assert "not benchmarked" in nc[fm]["detail"]
+    assert "not benchmarked" not in nc["scope_creep"]["detail"]
+    builtin = [e for e in events if e["tool_id"] and e["tool_id"].startswith("saica:")]
+    assert {e["tool_id"] for e in builtin} == {tid for tid, _fm in sc.BUILTIN_CHECKS}
+    assert {e["outcome"] for e in builtin} == {"skipped"}
+    for e in events:
+        assert selftest.validate_event(e) == []
+
+
+def test_summary_marks_builtins_as_heuristics(tmp_path, capsys):
+    cfg = sc.parse_config({"tools": []})
+    events = sc.evaluate(
+        cfg,
+        cs_from({"a.py": (["x = 1  # TODO"], [])}),
+        tmp_path,
+        {"commit": "staged"},
+        "manual",
+        verbose=False,
+    )
+    sc.print_summary(events, "saica: checks")
+    err = capsys.readouterr().err
+    line = [ln for ln in err.splitlines() if "saica:stub-markers" in ln][0]
+    assert "CAUGHT" in line and "heuristic, not benchmarked" in line
 
 
 # ---------------------------------------------------------------------------
@@ -616,6 +857,201 @@ def test_missing_config_exit_code(repo, capsys):
 
 
 # ---------------------------------------------------------------------------
+# Diff parsing details
+# ---------------------------------------------------------------------------
+
+
+def test_unquote_path():
+    assert sc._unquote_path("plain/name.py") == "plain/name.py"
+    assert sc._unquote_path('"tab\\there.py"') == "tab\there.py"
+    assert sc._unquote_path('"q\\"uote\\\\.py"') == 'q"uote\\.py'
+    assert (
+        sc._unquote_path('"tests/\\303\\274n\\303\\257_test.py"') == "tests/ünï_test.py"
+    )
+    assert sc._unquote_path('"nl\\nname.py"') == "nl\nname.py"
+
+
+def test_diff_lines_are_split_on_newlines_only():
+    text = (
+        "diff --git a/a.py b/a.py\n--- a/a.py\n+++ b/a.py\n@@ -0,0 +1,3 @@\n"
+        "+x = 1\x0c+not a new line\n+y = 2\u2028# TODO still line 2\n+z = 3\r\n"
+    )
+    fd = sc.parse_unified_diff(text)["a.py"]
+    assert [no for no, _t in fd.added] == [1, 2, 3]
+    assert fd.added[2][1] == "z = 3"
+
+
+def test_rename_does_not_report_old_markers(repo):
+    """KT-09: a file that was only moved has no added lines."""
+    _write_cfg(repo, [])
+    (repo / "old_name.py").write_text("def f():\n    return 1  # TODO later\n" * 5)
+    gitc(repo, "add", "-A")
+    gitc(repo, "commit", "-q", "-m", "one")
+    gitc(repo, "mv", "old_name.py", "new_name.py")
+    cs = sc.staged_changeset(repo)
+    assert sc.check_stub_markers(cs) == []
+    assert cs.files == ["new_name.py"]
+    assert sorted(cs.touched) == ["new_name.py", "old_name.py"]
+
+
+def test_non_ascii_paths_are_reported_readably(repo):
+    _write_cfg(repo, [])
+    (repo / "tests").mkdir()
+    (repo / "tests" / "ünï_test.py").write_text("x = 1  # TODO\n")
+    gitc(repo, "add", "-A")
+    hits = sc.check_stub_markers(sc.staged_changeset(repo))
+    assert hits == ["tests/ünï_test.py:1 TODO"]
+
+
+# ---------------------------------------------------------------------------
+# The check that watches the kit itself (KT-08)
+# ---------------------------------------------------------------------------
+
+
+def _tamper(events):
+    return [e for e in events if e["tool_id"] == "saica:kit-tamper"]
+
+
+def _staged_events(repo, config=None):
+    cfg = config or sc.load_config(repo / ".saica" / "checks.json")
+    cs = sc.staged_changeset(repo)
+    return sc.evaluate(
+        cfg, cs, repo, {"commit": "staged"}, "manual", run_tools=False, verbose=False
+    )
+
+
+@pytest.mark.parametrize(
+    "path, kit",
+    [
+        (".saica/checks.json", True),
+        (".saica/saica_check.py", True),
+        (".saica/saica_llm_review.py", True),
+        (".saica/prompts/scope_creep.md", True),
+        (".saica/hooks/pre-commit", True),
+        (".saica/cache/llm/abc.json", True),
+        (".github/workflows/saica-ci.yml", True),
+        (".saica/events.jsonl", True),  # a tracked log could replace the record
+        (".saica/dashboard.html", False),
+        (".saica/task.md", False),
+        (".github/workflows/tests.yml", False),
+        ("src/saica/checks.json", False),
+    ],
+)
+def test_is_kit_path(path, kit):
+    assert sc.is_kit_path(path) is kit
+
+
+def test_kit_tamper_first_install_then_edits(repo):
+    _write_cfg(
+        repo, [{"id": "ok", "failure_modes": ["logic_error"], "command": "true"}]
+    )
+    (repo / "app.py").write_text("x = 1\n")
+    gitc(repo, "add", "-A")
+    ev = _tamper(_staged_events(repo))
+    assert [e["outcome"] for e in ev] == ["pass"]  # nothing was supervising before
+    assert "no kit before" in ev[0]["detail"]
+    assert ev[0]["failure_mode"] == "test_manipulation"
+    gitc(repo, "commit", "-q", "-m", "install kit")
+
+    # An ordinary change: the tamper check passes quietly.
+    (repo / "app.py").write_text("x = 2\n")
+    gitc(repo, "add", "-A")
+    assert [(e["outcome"], e["detail"]) for e in _tamper(_staged_events(repo))] == [
+        ("pass", "")
+    ]
+
+    # The change edits the config (here: it drops the only tool).
+    _write_cfg(repo, [])
+    gitc(repo, "add", "-A")
+    ev = _tamper(_staged_events(repo))
+    assert [e["outcome"] for e in ev] == ["caught"]
+    assert ".saica/checks.json" in ev[0]["detail"]
+    assert all(selftest.validate_event(e) == [] for e in ev)
+    gitc(repo, "commit", "-q", "-m", "weaken", "--no-verify")
+
+    # Deleting the config and touching the workflow are both seen.
+    gitc(repo, "rm", "-q", ".saica/checks.json")
+    (repo / ".github" / "workflows").mkdir(parents=True)
+    (repo / ".github" / "workflows" / "saica-ci.yml").write_text("name: x\n")
+    gitc(repo, "add", "-A")
+    cfg = sc.parse_config({"tools": []})
+    ev = _tamper(_staged_events(repo, cfg))
+    assert [e["outcome"] for e in ev] == ["caught"]
+    assert ".saica/checks.json" in ev[0]["detail"]
+    assert ".github/workflows/saica-ci.yml" in ev[0]["detail"]
+
+
+def test_kit_tamper_cannot_be_switched_off_by_the_same_change(repo):
+    (repo / ".saica" / "checks.json").write_text(
+        json.dumps(
+            {"version": 1, "builtin": {"enabled": True, "blocking": True}, "tools": []}
+        )
+    )
+    gitc(repo, "add", "-A")
+    gitc(repo, "commit", "-q", "-m", "install kit")
+    # The next change turns every built-in off and plants a stub.
+    (repo / ".saica" / "checks.json").write_text(
+        json.dumps({"version": 1, "builtin": {"enabled": False}, "tools": []})
+    )
+    (repo / "app.py").write_text("def f():\n    pass  # TODO\n")
+    gitc(repo, "add", "-A")
+    events = _staged_events(repo)
+    builtin = [e for e in events if e["tool_id"] and e["tool_id"].startswith("saica:")]
+    assert [e["tool_id"] for e in builtin] == ["saica:kit-tamper"]
+    assert builtin[0]["outcome"] == "caught"
+    assert builtin[0]["blocking"] is True  # as configured before this change
+    assert sc.main(["run", "--staged"]) == 1  # so the commit is refused
+    # With the built-ins off before the change as well, nothing runs.
+    gitc(repo, "commit", "-q", "-m", "off", "--no-verify")
+    (repo / "b.py").write_text("y = 1\n")
+    (repo / ".saica" / "extra.py").write_text("")
+    gitc(repo, "add", "-A")
+    assert [e for e in _staged_events(repo) if e["tool_id"]] == []
+
+
+def test_kit_tamper_hook_config_lines(repo):
+    _write_cfg(repo, [])
+    (repo / ".pre-commit-config.yaml").write_text(
+        "repos:\n  - repo: local\n    hooks:\n      - id: saica\n"
+        "        entry: python3 .saica/saica_check.py run --staged\n      - id: other\n"
+    )
+    gitc(repo, "add", "-A")
+    gitc(repo, "commit", "-q", "-m", "install")
+    text = (repo / ".pre-commit-config.yaml").read_text()
+    (repo / ".pre-commit-config.yaml").write_text(text + "      - id: black\n")
+    gitc(repo, "add", "-A")
+    assert sc.check_kit_tamper(sc.staged_changeset(repo)) == []
+    (repo / ".pre-commit-config.yaml").write_text(
+        "repos:\n  - repo: local\n    hooks:\n      - id: other\n"
+    )
+    gitc(repo, "add", "-A")
+    assert sc.check_kit_tamper(sc.staged_changeset(repo)) == [".pre-commit-config.yaml"]
+
+
+def test_run_commit_records_kit_tamper(repo):
+    _write_cfg(repo, [])
+    gitc(repo, "add", "-A")
+    gitc(repo, "commit", "-q", "-m", "install kit")
+    cfg_copy = repo.parent / "trusted-checks.json"
+    cfg_copy.write_text((repo / ".saica" / "checks.json").read_text())
+    (repo / ".saica" / "checks.json").write_text(
+        json.dumps({"version": 1, "builtin": {"enabled": False}, "tools": []})
+    )
+    gitc(repo, "add", "-A")
+    gitc(repo, "commit", "-q", "-m", "switch the kit off")
+    # CI takes the config from the base ref, so the change is judged by the old
+    # rules; a change to the kit itself stops the job until a person looks.
+    assert (
+        sc.main(
+            ["--config", str(cfg_copy), "run", "--commit", "HEAD", "--source", "ci"]
+        )
+        == 1
+    )
+    events = sc.read_jsonl(repo / ".saica" / "events.jsonl")
+    assert [e["outcome"] for e in _tamper(events)] == ["caught"]
+
+
+# ---------------------------------------------------------------------------
 # Agent detection
 # ---------------------------------------------------------------------------
 
@@ -714,6 +1150,98 @@ def test_hook_files_match_embedded_copies():
     assert (KIT / "hooks" / "pre-commit").read_text() == sc.PRE_COMMIT_HOOK
     assert (KIT / "hooks" / "post-commit").read_text() == sc.POST_COMMIT_HOOK
     assert os.access(KIT / "hooks" / "pre-commit", os.X_OK)
+
+
+def test_install_hooks_refuses_a_shared_hooks_directory(repo, tmp_path, capsys):
+    """KT-13: with a global core.hooksPath one install would change every repository."""
+    shared = tmp_path / "home" / ".githooks"
+    gitc(repo, "config", "--global", "core.hooksPath", str(shared))
+    assert sc.main(["install-hooks"]) == 1
+    err = capsys.readouterr().err
+    assert "refusing to install" in err and "core.hooksPath" in err
+    assert not shared.exists()
+    assert sc.main(["install-hooks", "--force"]) == 1
+    assert not shared.exists()
+    # A hooks directory of its own (inside the repository) is fine.
+    gitc(repo, "config", "--local", "core.hooksPath", ".git/hooks")
+    assert sc.main(["install-hooks"]) == 0
+    assert (repo / ".git" / "hooks" / "pre-commit").is_file()
+    assert not shared.exists()
+
+
+def test_install_hooks_inside_the_work_tree_is_allowed(repo):
+    gitc(repo, "config", "--local", "core.hooksPath", ".githooks")
+    assert sc.main(["install-hooks"]) == 0
+    assert os.access(repo / ".githooks" / "pre-commit", os.X_OK)
+
+
+def test_install_hooks_replaces_an_earlier_kit_hook(repo, monkeypatch):
+    hooks = repo / ".git" / "hooks"
+    hooks.mkdir(exist_ok=True)
+    old = "#!/bin/sh\n# an earlier kit hook\nexec python3 .saica/saica_check.py run --staged\n"
+    (hooks / "pre-commit").write_text(old)
+    assert sc.main(["install-hooks"]) == 1  # unknown text: refused
+    monkeypatch.setattr(
+        sc, "EARLIER_KIT_HOOKS", {hashlib.sha256(old.encode()).hexdigest()}
+    )
+    assert sc.main(["install-hooks"]) == 0
+    assert (hooks / "pre-commit").read_text() == sc.PRE_COMMIT_HOOK
+    assert not (hooks / "pre-commit.saica-backup").exists()
+
+
+def test_hooks_pick_a_python_that_is_new_enough(repo, tmp_path):
+    """KT-18: a `python3` that is too old (or a stub that fails) must not be used."""
+    _write_cfg(repo, [])
+    kit_dir = repo / ".saica"
+    (kit_dir / "saica_check.py").write_text((KIT / "saica_check.py").read_text())
+    fake = tmp_path / "fakebin"
+    fake.mkdir()
+    (fake / "python3").write_text("#!/bin/sh\nexit 1\n")  # e.g. the Windows Store stub
+    (fake / "python3").chmod(0o755)
+    real = fake / "python"
+    real.write_text('#!/bin/sh\nexec %s "$@"\n' % shlex.quote(sys.executable))
+    real.chmod(0o755)
+    env = dict(os.environ, PATH="%s:/usr/bin:/bin" % fake)
+    (repo / "a.py").write_text("x = 1\n")
+    gitc(repo, "add", "-A")
+    r = subprocess.run(
+        ["sh", str(KIT / "hooks" / "pre-commit")],
+        cwd=repo,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert r.returncode == 0, r.stderr
+    assert "saica: checks for staged changes" in r.stderr
+    assert "NOT checked" not in r.stderr
+
+
+# ---------------------------------------------------------------------------
+# One contract, four copies (KT-20)
+# ---------------------------------------------------------------------------
+
+
+def _js_list(text, name):
+    m = re.search(r"var %s = \[(.*?)\];" % name, text, re.S)
+    assert m, name
+    return re.findall(r"'([a-z_]+)'", m.group(1))
+
+
+def test_contract_lists_agree_across_the_kit_files():
+    dash = (KIT / "dashboard.html").read_text()
+    readme = (KIT / "README.md").read_text()
+    assert list(selftest.FAILURE_MODES) == list(sc.FAILURE_MODES)
+    assert _js_list(dash, "FMS") == list(sc.FAILURE_MODES)
+    assert set(selftest.OUTCOMES) == set(sc.OUTCOMES)
+    assert _js_list(dash, "OUTCOMES") == list(sc.OUTCOMES)
+    assert set(selftest.SOURCES) == set(sc.SOURCES)
+    for fm in sc.FAILURE_MODES:
+        assert "`%s`" % fm in readme
+    for outcome in sc.OUTCOMES:
+        assert "`%s`" % outcome in readme
+    for tid, fm in sc.BUILTIN_CHECKS:
+        assert "`%s`" % tid in readme, tid
+        assert fm in sc.FAILURE_MODES
 
 
 # ---------------------------------------------------------------------------

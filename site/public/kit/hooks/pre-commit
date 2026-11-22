@@ -17,13 +17,14 @@ if [ ! -f "$runner" ]; then
   exit 0
 fi
 PY=""
-if command -v python3 >/dev/null 2>&1; then
-  PY=python3
-elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
-  PY=python
-fi
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
+    PY=$cand
+    break
+  fi
+done
 if [ -z "$PY" ]; then
-  warn "python3 not found on PATH."
+  warn "no Python 3.9 or newer found on PATH (tried python3, python)."
   exit 0
 fi
 exec "$PY" "$runner" run --staged --source pre-commit

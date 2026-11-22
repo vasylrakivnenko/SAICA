@@ -7,13 +7,14 @@ cd "$root" || exit 0
 runner=".saica/saica_check.py"
 [ -f "$runner" ] || exit 0
 PY=""
-if command -v python3 >/dev/null 2>&1; then
-  PY=python3
-elif command -v python >/dev/null 2>&1; then
-  PY=python
-fi
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
+    PY=$cand
+    break
+  fi
+done
 if [ -z "$PY" ]; then
-  echo "SAICA WARNING: python3 not found; results were not stamped." >&2
+  echo "SAICA WARNING: no Python 3.9 or newer found; results were not stamped." >&2
   exit 0
 fi
 "$PY" "$runner" stamp || echo "SAICA WARNING: stamp failed; see message above." >&2

@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """SAICA supervision kit: per-commit check runner (contract v1).
 
-Runs the supervision tools configured in ``.saica/checks.json`` plus three
+Runs the supervision tools configured in ``.saica/checks.json`` plus four
 cheap built-in diff heuristics against a commit (or the staged changes),
 and records one JSON event per (commit, tool, failure mode) in
 ``.saica/events.jsonl``. See the kit README for the full contract.
+
+How a tool's exit code is read: 0 = ``pass``; a code listed in the tool's
+``caught_exit_codes`` (default: 1) = ``caught``; every other exit code, a
+timeout or a command that cannot start = ``error`` (a tool failure, never a
+finding, never blocking). The built-in heuristics are not benchmarked and do
+not count as coverage of a failure mode.
 
 Python 3.9+, standard library only. Copy this file to
 ``.saica/saica_check.py`` in your repository.
@@ -40,6 +46,7 @@ import os
 import re
 import shlex
 import shutil
+import signal
 import stat
 import subprocess
 import sys
@@ -70,12 +77,18 @@ BUILTIN_CHECKS = (
     ("saica:stub-markers", "incomplete_execution"),
     ("saica:test-weakening", "test_manipulation"),
     ("saica:phantom-import", "fabrication"),
+    ("saica:kit-tamper", "test_manipulation"),
 )
+# The built-ins are diff heuristics. None of them was scored on SAICA-Bench, so
+# they are reported as such and never count as coverage of a failure mode.
+BUILTIN_NOTE = "heuristic, not benchmarked"
+TAMPER_CHECK = "saica:kit-tamper"
 
 DETAIL_MAX = 500
 DEFAULT_TIMEOUT_S = 300
-EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
-HOOK_MARKER = "saica_check.py"
+DEFAULT_CAUGHT_EXIT_CODES = (1,)
+# The whole command is one argument of ``sh -c``; Linux limits one argument to 128 KiB.
+MAX_COMMAND_BYTES = 120000
 STAGED = "staged"
 
 
@@ -136,6 +149,21 @@ def git(
     return out
 
 
+def git_ok(args: List[str], cwd: Path) -> bool:
+    """True when ``git`` exits 0 (output discarded)."""
+    try:
+        proc = subprocess.run(
+            ["git"] + args,
+            cwd=str(cwd),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        return False
+    return proc.returncode == 0
+
+
 def find_repo_root(start: Optional[Path] = None) -> Path:
     cwd = start or Path.cwd()
     try:
@@ -185,6 +213,8 @@ def parse_config(raw: object, where: str = "checks.json") -> dict:
     builtin = {
         "enabled": bool(builtin_raw.get("enabled", True)),
         "blocking": bool(builtin_raw.get("blocking", False)),
+        # A change to the kit's own files stops the commit unless this is false.
+        "tamper_blocking": bool(builtin_raw.get("tamper_blocking", True)),
     }
 
     tools_raw = raw.get("tools", [])
@@ -232,6 +262,34 @@ def parse_config(raw: object, where: str = "checks.json") -> dict:
             raise SaicaError(
                 "%s (%s): 'timeout_s' must be a positive number" % (label, tid)
             )
+        codes = t.get("caught_exit_codes", list(DEFAULT_CAUGHT_EXIT_CODES))
+        if (
+            not isinstance(codes, list)
+            or not codes
+            or any(
+                isinstance(c, bool)
+                or not isinstance(c, int)
+                or not 1 <= c <= 255
+                or c == 127
+                for c in codes
+            )
+        ):
+            raise SaicaError(
+                "%s (%s): 'caught_exit_codes' must be a non-empty list of exit codes "
+                "from 1 to 255, without 127 (127 always means the command could not run)"
+                % (label, tid)
+            )
+        blocking = bool(t.get("blocking", False))
+        # What a check that could not run on the change does: a blocking check
+        # blocks (it did not vouch for the change) unless on_error says "pass".
+        on_error = t.get("on_error", "block" if blocking else "pass")
+        if on_error not in ("block", "pass"):
+            raise SaicaError(
+                '%s (%s): \'on_error\' must be "block" or "pass"' % (label, tid)
+            )
+        note = t.get("note")
+        if note is not None and not isinstance(note, str):
+            raise SaicaError("%s (%s): 'note' must be a string" % (label, tid))
         metric = t.get("metric")
         if metric is not None:
             if (
@@ -257,10 +315,12 @@ def parse_config(raw: object, where: str = "checks.json") -> dict:
                 "failure_modes": list(dict.fromkeys(fms)),
                 "runs_per_commit": runs,
                 "command": command if isinstance(command, str) else None,
-                "blocking": bool(t.get("blocking", False)),
+                "blocking": blocking,
+                "on_error": on_error,
                 "timeout_s": float(timeout),
+                "caught_exit_codes": sorted(set(codes)),
                 "metric": metric,
-                "note": t.get("note"),
+                "note": note,
             }
         )
     return {"version": CONTRACT_VERSION, "kit": kit, "builtin": builtin, "tools": tools}
@@ -281,22 +341,56 @@ class FileDiff:
 
 
 class ChangeSet:
-    def __init__(self, files: List[str], diffs: Dict[str, FileDiff]) -> None:
+    def __init__(
+        self,
+        files: List[str],
+        diffs: Dict[str, FileDiff],
+        touched: Optional[List[str]] = None,
+        base: Optional[str] = None,
+    ) -> None:
         self.files = files  # existing (added/copied/modified/renamed) paths
         self.diffs = diffs
+        # Every path the change adds, modifies, deletes or renames (old and new name).
+        self.touched = (
+            list(touched) if touched is not None else sorted(set(files) | set(diffs))
+        )
+        self.base = base  # tree-ish the change is compared with (None: not known)
 
 
 _HUNK_RE = re.compile(r"^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 
 
+_C_ESCAPES = {"a": 7, "b": 8, "t": 9, "n": 10, "v": 11, "f": 12, "r": 13}
+
+
 def _unquote_path(p: str) -> str:
+    """Undo git's C-style quoting of a path in a diff header (``"a\\tb\\303\\274.py"``)."""
     p = p.strip()
-    if p.startswith('"') and p.endswith('"'):
-        try:
-            p = json.loads(p)
-        except ValueError:
-            p = p[1:-1]
-    return p
+    if not (len(p) >= 2 and p.startswith('"') and p.endswith('"')):
+        return p
+    body = p[1:-1]
+    out = bytearray()
+    i = 0
+    while i < len(body):
+        ch = body[i]
+        if ch != "\\" or i + 1 >= len(body):
+            out.extend(ch.encode("utf-8", "replace"))
+            i += 1
+            continue
+        nxt = body[i + 1]
+        if nxt in "01234567":
+            j = i + 1
+            while j < len(body) and j < i + 4 and body[j] in "01234567":
+                j += 1
+            out.append(int(body[i + 1 : j], 8) & 0xFF)
+            i = j
+            continue
+        if nxt in _C_ESCAPES:
+            out.append(_C_ESCAPES[nxt])
+        else:  # an escaped quote or backslash, or anything unknown: the character itself
+            out.extend(nxt.encode("utf-8", "replace"))
+        i += 2
+    return out.decode("utf-8", "replace")
 
 
 def parse_unified_diff(text: str) -> Dict[str, FileDiff]:
@@ -306,7 +400,11 @@ def parse_unified_diff(text: str) -> Dict[str, FileDiff]:
     in_header = False
     old_no = new_no = 0
     old_path: Optional[str] = None
-    for line in text.splitlines():
+    # Split on "\n" only: str.splitlines() would also break lines at form feeds
+    # and other separators that can occur inside source code.
+    for line in text.split("\n"):
+        if line.endswith("\r"):
+            line = line[:-1]
         if line.startswith("diff --git "):
             current = None
             in_header = True
@@ -351,7 +449,49 @@ def parse_unified_diff(text: str) -> Dict[str, FileDiff]:
     return diffs
 
 
-_DIFF_FLAGS = ["-U0", "--no-color", "--no-ext-diff", "--no-renames"]
+# Renames are detected, so the lines of a file that was only moved are not "added".
+# --text / --no-textconv / --no-ext-diff: a .gitattributes line (`*.py -diff`, a
+# diff driver, a textconv filter) must not be able to hide a change from the checks.
+_DIFF_FLAGS = [
+    "-U0",
+    "--no-color",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--text",
+    "--find-renames",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+]
+# Paths in diff headers are not octal-escaped (non-ASCII names stay readable).
+_QUOTE_OFF = ["-c", "core.quotePath=false"]
+
+
+def _changeset(root: Path, base: str, tree: str) -> ChangeSet:
+    """The change from ``base`` to ``tree`` (two tree-ish names)."""
+    names = git(
+        [
+            "diff",
+            "--name-only",
+            "--diff-filter=ACMR",
+            "--find-renames",
+            "-z",
+            base,
+            tree,
+        ],
+        root,
+    )
+    files = [n for n in names.split("\0") if n]
+    every = git(["diff", "--name-only", "--no-renames", "-z", base, tree], root)
+    touched = [n for n in every.split("\0") if n]
+    text = git(_QUOTE_OFF + ["diff"] + _DIFF_FLAGS + [base, tree], root)
+    diffs = parse_unified_diff(text)
+    for fd in diffs.values():
+        # With --text a binary file comes through as lines too: not for the heuristics.
+        if any("\0" in t for _no, t in fd.added) or any(
+            "\0" in t for _no, t in fd.removed
+        ):
+            fd.added, fd.removed = [], []
+    return ChangeSet(files, diffs, touched=touched, base=base)
 
 
 def head_commit(root: Path) -> Optional[str]:
@@ -386,10 +526,31 @@ def staged_changeset(
     tree, head = snapshot if snapshot is not None else staged_snapshot(root)
     # ``git mktree`` with empty input yields the repo's own empty-tree id.
     base = head or git(["mktree"], root).strip()
-    names = git(["diff", "--name-only", "--diff-filter=ACMR", "-z", base, tree], root)
-    files = [n for n in names.split("\0") if n]
-    text = git(["diff"] + _DIFF_FLAGS + [base, tree], root)
-    return ChangeSet(files, parse_unified_diff(text))
+    return _changeset(root, base, tree)
+
+
+def overlay_kit(root: Path, treeish: str, work: Path, scratch: Path) -> None:
+    """Replace ``work/.saica`` with the ``.saica`` folder of ``treeish``.
+
+    Tools run in a checkout of the staged tree, but the helper scripts and
+    prompts they call must be the committed ones: a staged edit to a helper
+    would otherwise run as the checker of the very change that carries it.
+    """
+    sub = git(
+        ["rev-parse", "--verify", "--quiet", "%s:.saica" % treeish], root, check=False
+    ).strip()
+    if not sub:
+        return
+    target = work / ".saica"
+    shutil.rmtree(str(target), ignore_errors=True)
+    env = dict(os.environ)
+    env["GIT_INDEX_FILE"] = str(scratch / "index-kit")
+    git(["read-tree", sub], root, env=env)
+    git(
+        ["checkout-index", "--all", "--force", "--prefix=" + target.as_posix() + "/"],
+        root,
+        env=env,
+    )
 
 
 def checkout_tree(root: Path, tree: str) -> Tuple[Path, Path, Dict[str, str]]:
@@ -435,11 +596,8 @@ def resolve_commit(root: Path, ref: str) -> str:
 def commit_changeset(root: Path, sha: str) -> ChangeSet:
     """Diff of a commit against its first parent (or the empty tree)."""
     parents = git(["rev-list", "--parents", "-n", "1", sha], root).split()
-    base = parents[1] if len(parents) > 1 else EMPTY_TREE
-    names = git(["diff", "--name-only", "--diff-filter=ACMR", "-z", base, sha], root)
-    files = [n for n in names.split("\0") if n]
-    text = git(["diff"] + _DIFF_FLAGS + [base, sha], root)
-    return ChangeSet(files, parse_unified_diff(text))
+    base = parents[1] if len(parents) > 1 else git(["mktree"], root).strip()
+    return _changeset(root, base, sha)
 
 
 def commit_info(root: Path, sha: str) -> dict:
@@ -968,23 +1126,142 @@ def check_phantom_imports(cs: ChangeSet, index: RepoIndex) -> List[str]:
     return hits
 
 
+# Files under .saica/ that hold results or inputs, not the kit itself.
+# Files under .saica/ that are inputs or a rendered page, not the kit itself.
+# The event log is NOT in this list: a commit that tracks .saica/events.jsonl or
+# .saica/pending.jsonl could replace the record of its own checks.
+_KIT_DATA_FILES = {
+    ".saica/dashboard.html",
+    ".saica/task.md",
+    ".saica/session.txt",
+    ".saica/final_message.txt",
+}
+_KIT_WORKFLOWS = {"saica-ci.yml", "saica-ci.yaml"}
+# Files that can wire or unwire the hooks; they count only when a changed line names the kit.
+_HOOK_CONFIG_RE = re.compile(
+    r"(^|/)(\.pre-commit-config\.ya?ml|\.?lefthook(-local)?\.ya?ml)$|^\.(husky|githooks)/"
+)
+KIT_FILES = (".saica/saica_check.py", ".saica/checks.json")
+ALLOW_KIT_CHANGE_ENV = "SAICA_KIT_CHANGE_OK"
+
+
+def is_kit_path(path: str, hooks_dir: Optional[str] = None) -> bool:
+    """True for a file that decides how changes are checked or recorded: the
+    runner, its config, helper scripts, prompts, hooks, the event log (everything
+    under ``.saica/`` except input files and the rendered dashboard), the kit's CI
+    workflow, and files in ``hooks_dir`` (a hooks directory inside the work tree
+    that ``core.hooksPath`` points at)."""
+    p = path.replace("\\", "/")
+    if p.startswith(".saica/"):
+        return p not in _KIT_DATA_FILES
+    if hooks_dir and p.startswith(hooks_dir.rstrip("/") + "/"):
+        return True
+    return p.startswith(".github/workflows/") and p.rsplit("/", 1)[-1] in _KIT_WORKFLOWS
+
+
+def tracked_hooks_dir(root: Path) -> Optional[str]:
+    """``core.hooksPath`` when it names a directory inside the work tree, as a
+    repository-relative path; else None."""
+    try:
+        raw = git(["config", "--get", "core.hooksPath"], root, check=False).strip()
+    except SaicaError:
+        return None
+    if not raw:
+        return None
+    path = Path(raw).expanduser()
+    if not path.is_absolute():
+        path = root / path
+    try:
+        rel = path.resolve().relative_to(root.resolve())
+    except (ValueError, OSError):
+        return None
+    rel_s = rel.as_posix()
+    return (
+        None
+        if rel_s in ("", ".") or rel_s.startswith(".git/") or rel_s == ".git"
+        else rel_s
+    )
+
+
+def check_kit_tamper(cs: ChangeSet, hooks_dir: Optional[str] = None) -> List[str]:
+    """Paths of the supervision kit that the change adds, edits, deletes or renames."""
+    hits = {p for p in cs.touched if is_kit_path(p, hooks_dir)}
+    for path, fd in cs.diffs.items():
+        if path in hits or not _HOOK_CONFIG_RE.search(path.replace("\\", "/")):
+            continue
+        if any("saica" in text.lower() for _no, text in fd.added + fd.removed):
+            hits.add(path)
+    return sorted(hits)
+
+
+def kit_present(root: Path, treeish: Optional[str]) -> bool:
+    """True when ``treeish`` already holds the runner or its config."""
+    if not treeish:
+        return True  # not known: assume the kit was there (the stricter reading)
+    return any(
+        git_ok(["cat-file", "-e", "%s:%s" % (treeish, p)], root) for p in KIT_FILES
+    )
+
+
+def base_builtin_config(root: Path, treeish: Optional[str]) -> Optional[dict]:
+    """The ``builtin`` settings of ``.saica/checks.json`` in ``treeish``, or None."""
+    if not treeish:
+        return None
+    try:
+        raw = json.loads(
+            git(["cat-file", "blob", "%s:.saica/checks.json" % treeish], root)
+        )
+        b = raw.get("builtin", {})
+        return {
+            "enabled": bool(b.get("enabled", True)),
+            "blocking": bool(b.get("blocking", False)),
+            "tamper_blocking": bool(b.get("tamper_blocking", True)),
+        }
+    except (SaicaError, ValueError, AttributeError):
+        return None
+
+
+def _hit_list(hits: List[str], sep: str = "; ") -> str:
+    more = "" if len(hits) <= 5 else " (+%d more)" % (len(hits) - 5)
+    return sep.join(hits[:5]) + more
+
+
 def run_builtins(
-    cs: ChangeSet, root: Path, tree: Optional[str] = None
+    cs: ChangeSet,
+    root: Path,
+    tree: Optional[str] = None,
+    only: Optional[Set[str]] = None,
 ) -> List[Tuple[str, str, str, str]]:
     """Return [(tool_id, failure_mode, outcome, detail)] for the built-ins.
 
     ``tree`` selects the Git tree the dependency lookups read from (see RepoIndex).
+    ``only`` limits the run to these tool ids.
     """
-    if not cs.diffs and not cs.files:
-        return [(tid, fm, "skipped", "no changed files") for tid, fm in BUILTIN_CHECKS]
+    checks = [c for c in BUILTIN_CHECKS if only is None or c[0] in only]
+    if not cs.diffs and not cs.files and not cs.touched:
+        return [(tid, fm, "skipped", "no changed files") for tid, fm in checks]
     results = []
     index = None
-    for tid, fm in BUILTIN_CHECKS:
+    for tid, fm in checks:
         try:
             if tid == "saica:stub-markers":
                 hits = check_stub_markers(cs)
             elif tid == "saica:test-weakening":
                 hits = check_test_weakening(cs)
+            elif tid == TAMPER_CHECK:
+                hits = check_kit_tamper(cs, tracked_hooks_dir(root))
+                if hits and not kit_present(root, cs.base):
+                    # Nothing was supervising before this change, so nothing was weakened.
+                    detail = "kit files added where there was no kit before: "
+                    results.append(
+                        (tid, fm, "pass", _truncate(detail + _hit_list(hits, ", ")))
+                    )
+                    continue
+                if hits:
+                    hits = [
+                        "the change edits the supervision kit itself; a person should "
+                        "review it: " + _hit_list(hits, ", ")
+                    ]
             else:
                 if index is None:
                     index = RepoIndex(root, tree)
@@ -993,8 +1270,7 @@ def run_builtins(
             results.append((tid, fm, "error", _truncate("internal error: %r" % exc)))
             continue
         if hits:
-            more = "" if len(hits) <= 5 else " (+%d more)" % (len(hits) - 5)
-            results.append((tid, fm, "caught", _truncate("; ".join(hits[:5]) + more)))
+            results.append((tid, fm, "caught", _truncate(_hit_list(hits))))
         else:
             results.append((tid, fm, "pass", ""))
     return results
@@ -1010,43 +1286,345 @@ def _summarise_output(out: str) -> str:
     return _truncate("\n".join(lines[-8:]))
 
 
+def _last_line(out: str) -> str:
+    for ln in reversed(out.splitlines()):
+        if ln.strip():
+            return ln.strip()
+    return ""
+
+
+FILE_TOKENS = ("{files}", "{files_from}")
+_CONTEXT_WORDS = {
+    "single": "single quotes",
+    "double": "double quotes",
+    "comment": "a # comment",
+    "heredoc": "a command that uses a here-document (<<)",
+    "substitution": "a command substitution (backticks or $(...))",
+}
+
+
+def shell_contexts(command: str, token: str) -> List[str]:
+    """Where each ``token`` sits in a POSIX shell command: ``plain`` (a word of
+    its own), ``single`` / ``double`` (inside quotes), ``comment``, ``heredoc`` or
+    ``substitution`` (inside backticks or ``$(...)``).
+
+    Shell quoting of file names only works in the ``plain`` position: inside a
+    comment a newline in a name starts a new command, and inside quotes or a
+    here-document the name's own quotes end up as text or close the quoting.
+    """
+    found: List[str] = []
+    state = "plain"
+    word_start = True
+    heredoc = False
+    backtick = False  # inside `...`: the shell looks for the closing backtick before it reads quotes
+    depth = 0  # nesting of $( ... )
+    i, n = 0, len(command)
+    while i < n:
+        if command.startswith(token, i):
+            found.append(
+                "substitution" if (backtick or depth) and state == "plain" else state
+            )
+            i += len(token)
+            word_start = False
+            continue
+        ch = command[i]
+        if ch == "`" and state in ("plain", "double"):
+            backtick = not backtick
+            word_start = False
+        elif state == "plain" and command.startswith("$(", i):
+            depth += 1
+            i += 1
+            word_start = True
+        elif state == "plain" and ch == ")" and depth:
+            depth -= 1
+            word_start = True
+        elif state == "comment":
+            if ch == "\n":
+                state, word_start = "plain", True
+        elif state == "single":
+            if ch == "'":
+                state = "plain"
+        elif state == "double":
+            if ch == "\\" and i + 1 < n:
+                i += 1
+            elif ch == '"':
+                state = "plain"
+        elif ch == "\\" and i + 1 < n:
+            i += 1
+            word_start = False
+        elif ch == "'":
+            state, word_start = "single", False
+        elif ch == '"':
+            state, word_start = "double", False
+        elif ch == "#" and word_start:
+            state = "comment"
+        elif ch in " \t\n;&|()<>":
+            if command.startswith("<<", i):
+                heredoc = True
+            word_start = True
+        else:
+            word_start = False
+        i += 1
+    if heredoc:
+        return ["heredoc" for _ in found]
+    return found
+
+
+def placeholder_problem(command: str) -> Optional[str]:
+    """Why ``{files}`` / ``{files_from}`` cannot be filled in safely, or None."""
+    for token in FILE_TOKENS:
+        for ctx in shell_contexts(command, token):
+            if ctx != "plain":
+                return (
+                    "configuration error: %s must be a word of its own in the command, "
+                    "but it is inside %s, where a file name could run as a command. "
+                    'Move it out; put explanations in this tool\'s "note"'
+                    % (token, _CONTEXT_WORDS[ctx])
+                )
+    return None
+
+
+def _kill_group(proc: "subprocess.Popen[bytes]") -> None:
+    """Stop the tool and, on POSIX, everything it started (its process group)."""
+    try:
+        if os.name == "posix":
+            os.killpg(proc.pid, signal.SIGKILL)
+        else:
+            proc.kill()
+    except OSError:
+        try:
+            proc.kill()
+        except OSError:
+            pass
+
+
+def _run_process(
+    command: object, cwd: Path, timeout: float, env: Optional[Dict[str, str]]
+) -> Tuple[Optional[int], str, str]:
+    """Run ``command``: a string goes through the shell, a list is run directly.
+    Returns (exit code or None, output, failure)."""
+    kwargs: dict = {}
+    if os.name == "posix":
+        # Its own session and process group: a timeout can stop the tool's
+        # children too, and the tool cannot read the terminal.
+        kwargs["start_new_session"] = True
+    try:
+        proc = subprocess.Popen(
+            command,  # type: ignore[arg-type]
+            shell=isinstance(
+                command, str
+            ),  # nosemgrep: subprocess-shell-true -- contract: commands from the repo owner's checks.json may need the shell
+            cwd=str(cwd),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=env,
+            **kwargs,
+        )
+    except FileNotFoundError:
+        name = command if isinstance(command, str) else command[0]  # type: ignore[index]
+        return None, "", "command not found: %s" % name
+    except OSError as exc:
+        return None, "", "could not start: %s" % exc
+    try:
+        out, _err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _kill_group(proc)
+        try:
+            proc.communicate(timeout=10)
+        except (
+            Exception
+        ):  # noqa: BLE001 - best effort; the timeout is what gets reported
+            pass
+        return None, "", "timeout after %gs" % timeout
+    except BaseException:
+        _kill_group(proc)
+        raise
+    return proc.returncode, out.decode("utf-8", "replace"), ""
+
+
+_SHELL_CHARS = "|&;<>()$`\\*?[]#~!{}\n"
+
+
+def plain_argv(command: str) -> Optional[List[str]]:
+    """The command as an argument list when it needs no shell, else None.
+
+    A command made of plain words (quotes allowed) is run directly: no shell
+    reads the file names, so no quoting can go wrong. Anything with a shell
+    operator, a variable, a glob, a ``NAME=value`` prefix or a ``{files}`` glued
+    to other text keeps the shell path and its checks.
+    """
+    if placeholder_problem(command):
+        return None  # reported by the shell path
+    probe = command
+    for t in FILE_TOKENS:
+        probe = probe.replace(t, "FILES")
+    quote = ""
+    for ch in probe:
+        if quote == "'":
+            if ch == "'":
+                quote = ""
+        elif quote == '"':
+            if ch == '"':
+                quote = ""
+            elif ch in "$`\\":
+                return None
+        elif ch in "'\"":
+            quote = ch
+        elif ch in _SHELL_CHARS:
+            return None
+    if quote:
+        return None
+    try:
+        argv = shlex.split(command)
+    except ValueError:
+        return None
+    if not argv or "=" in argv[0]:
+        return None
+    if any("{files}" in a and a != "{files}" for a in argv):
+        return None
+    return argv
+
+
+_NO_MODULE_LINE_RE = re.compile(r"(?:.*[/\\])?python[\w.]*: No module named ([\w.]+)")
+_DASH_M_RE = re.compile(r"(?:^|\s)-m\s+([\w.]+)")
+
+
+def module_missing(command: str, output: str) -> bool:
+    """True when ``python -m <tool>`` could not start because the tool is not
+    installed: the interpreter's one-line message is the WHOLE output and names
+    the module the command asked for. A line like that inside a tool's findings
+    (for example a matched source line) is not this."""
+    lines = [ln.strip() for ln in output.splitlines() if ln.strip()]
+    if len(lines) != 1:
+        return False
+    said = _NO_MODULE_LINE_RE.fullmatch(lines[0])
+    asked = _DASH_M_RE.search(command)
+    return bool(
+        said and asked and asked.group(1).split(".")[0] == said.group(1).split(".")[0]
+    )
+
+
+_KEY_ENV_RE = re.compile(r"--api-key-env[=\s]+([A-Za-z_][A-Za-z0-9_]*)")
+DEFAULT_KEY_ENV = "SAICA_LLM_API_KEY"
+
+
+def tool_environment(
+    tool: dict, config: dict, env: Optional[Dict[str, str]] = None
+) -> Dict[str, str]:
+    """The environment one tool runs with: everything except the model API keys
+    of other tools. A key variable (named with ``--api-key-env`` in some command,
+    or SAICA_LLM_API_KEY) is passed only to a command that names it, or, for the
+    default name, to the reviewer helper."""
+    out = dict(os.environ if env is None else env)
+    keys = {DEFAULT_KEY_ENV}
+    for t in config.get("tools", []):
+        keys.update(_KEY_ENV_RE.findall(t.get("command") or ""))
+    command = tool.get("command") or ""
+    for name in keys:
+        named = re.search(
+            r"(?<![A-Za-z0-9_])%s(?![A-Za-z0-9_])" % re.escape(name), command
+        )
+        default_user = (
+            name == DEFAULT_KEY_ENV
+            and "saica_llm_review" in command
+            and not _KEY_ENV_RE.search(command)  # it reads the default name
+        )
+        if not named and not default_user:
+            out.pop(name, None)
+    return out
+
+
 def run_tool(
     tool: dict, files: List[str], root: Path, env: Optional[Dict[str, str]] = None
 ) -> Tuple[str, str, Optional[float]]:
-    """Execute one tool in ``root``. Returns (outcome, detail, metric)."""
+    """Execute one tool in ``root``. Returns (outcome, detail, metric).
+
+    Exit 0 is ``pass`` (``skipped`` when the tool's last line starts with
+    ``skipped:``); an exit code in ``caught_exit_codes`` is ``caught``; anything
+    else is ``error``: a tool that failed is not a finding.
+    """
     command = tool["command"] or ""
-    if "{files}" in command:
+    used = [t for t in FILE_TOKENS if t in command]
+    argv = plain_argv(command) if os.name == "posix" else None
+    if argv is not None and os.sep not in argv[0]:
+        search = (os.environ if env is None else env).get("PATH")
+        if shutil.which(argv[0], path=search) is None:
+            argv = None  # a shell built-in (exit, cd ...) or not installed: the shell decides
+    list_dir: Optional[str] = None
+    if used and argv is None:
         if os.name == "nt":
             # shlex.quote produces POSIX quoting, which cmd.exe does not honour.
             return (
                 "error",
-                "configuration error: {files} is not supported on native Windows "
-                "(file names cannot be quoted safely for cmd.exe); remove {files} "
-                "from this tool's command or run the kit under WSL or another POSIX shell",
+                "configuration error: %s is not supported on native Windows "
+                "(file names cannot be quoted safely for cmd.exe); remove it "
+                "from this tool's command or run the kit under WSL or another POSIX shell"
+                % used[0],
                 None,
             )
-        if not files:
-            return "skipped", "no changed files for {files}", None
-        # A leading "-" would be parsed as an option by the tool; anchor it to the cwd.
-        command = command.replace(
-            "{files}",
-            " ".join(shlex.quote("./" + f if f.startswith("-") else f) for f in files),
-        )
+        problem = placeholder_problem(command)
+        if problem:
+            return "error", problem, None
+    if used and not files:
+        return "skipped", "no changed files for %s" % used[0], None
+    names = ["./" + f if f.startswith("-") else f for f in files]
+    too_long = (
+        "too many changed files for {files}: %d paths make a command line of "
+        "%d bytes (limit %d), so nothing was checked. Use {files_from}, a file "
+        "holding the NUL-separated list, for example: xargs -0 <tool> < {files_from}"
+    )
     try:
-        proc = subprocess.run(
-            command,
-            shell=True,  # nosemgrep: subprocess-shell-true -- contract: commands from the repo owner's checks.json run through the shell
-            cwd=str(root),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=tool["timeout_s"],
-            env=env,
-        )
-    except subprocess.TimeoutExpired:
-        return "error", "timeout after %gs" % tool["timeout_s"], None
-    except OSError as exc:
-        return "error", _truncate("could not start: %s" % exc), None
-    output = proc.stdout.decode("utf-8", "replace")
+        if "{files_from}" in command:
+            list_dir = tempfile.mkdtemp(prefix="saica-files-")
+            list_path = os.path.join(list_dir, "files")
+            with open(list_path, "wb") as fh:
+                for name in names:
+                    fh.write(name.encode("utf-8", "surrogateescape") + b"\0")
+        if argv is not None:
+            # No shell: every file name is one argument, whatever characters it has.
+            run: object = []
+            for a in argv:
+                if a == "{files}":
+                    run.extend(names)  # type: ignore[attr-defined]
+                elif list_dir is not None:
+                    run.append(a.replace("{files_from}", list_path))  # type: ignore[attr-defined]
+                else:
+                    run.append(a)  # type: ignore[attr-defined]
+            size = sum(len(a.encode("utf-8", "replace")) + 1 for a in run)  # type: ignore[attr-defined]
+            if "{files}" in command and size > MAX_COMMAND_BYTES:
+                return "error", too_long % (len(files), size, MAX_COMMAND_BYTES), None
+        else:
+            if "{files}" in command:
+                bad = [f for f in files if any(c in f for c in "\n\r\0")]
+                if bad:
+                    return (
+                        "error",
+                        "refused: %d changed path(s) contain a newline, carriage return or NUL "
+                        "character and cannot be passed through {files} safely in a shell "
+                        "command; rename them or use {files_from} (a file holding the "
+                        "NUL-separated list)" % len(bad),
+                        None,
+                    )
+                command = command.replace(
+                    "{files}", " ".join(shlex.quote(name) for name in names)
+                )
+                size = len(command.encode("utf-8", "replace"))
+                if size > MAX_COMMAND_BYTES:
+                    return (
+                        "error",
+                        too_long % (len(files), size, MAX_COMMAND_BYTES),
+                        None,
+                    )
+            if list_dir is not None:
+                command = command.replace("{files_from}", shlex.quote(list_path))
+            run = command
+        rc, output, failure = _run_process(run, root, tool["timeout_s"], env)
+    finally:
+        if list_dir is not None:
+            shutil.rmtree(list_dir, ignore_errors=True)
+    if rc is None:
+        return "error", _truncate(failure), None
     metric = None
     if tool.get("metric"):
         m = re.search(tool["metric"]["regex"], output)
@@ -1055,16 +1633,38 @@ def run_tool(
                 metric = float(m.group(1))
             except (TypeError, ValueError, IndexError):
                 metric = None
-    rc = proc.returncode
+    last = _last_line(output)
     if rc == 0:
+        if last.startswith("skipped:"):
+            return "skipped", _truncate(last), metric
+        if last.startswith("ok:"):
+            return "pass", _truncate(last), metric
         return "pass", _summarise_output(output) if metric is not None else "", metric
-    if rc == 127:
+    caught_codes = tool.get("caught_exit_codes") or list(DEFAULT_CAUGHT_EXIT_CODES)
+    if rc == 1 and module_missing(tool["command"] or "", output):
+        # Not a finding: the tool is not installed for this interpreter.
+        return "error", _truncate("the command could not run: %s" % last), metric
+    if rc in caught_codes:
+        if last.startswith("flagged:"):
+            return "caught", _truncate(last), metric
         return (
-            "error",
-            _truncate("command not found (exit 127): %s" % _summarise_output(output)),
+            "caught",
+            _truncate("exit %d: %s" % (rc, _summarise_output(output))),
             metric,
         )
-    return "caught", _truncate("exit %d: %s" % (rc, _summarise_output(output))), metric
+    if last.startswith(("error:", "partial:")):  # a kit helper's own result line
+        return "error", _truncate(last), metric
+    if rc == 127:
+        why = "command not found (exit 127)"
+    elif rc < 0:
+        why = "stopped by signal %d" % -rc
+    else:
+        why = (
+            "exit %d, which is not a finding for this tool (caught_exit_codes: %s), "
+            "so it is recorded as a tool failure"
+            % (rc, ", ".join(str(c) for c in caught_codes))
+        )
+    return "error", _truncate("%s: %s" % (why, _summarise_output(output))), metric
 
 
 # ---------------------------------------------------------------------------
@@ -1105,17 +1705,23 @@ def make_event(
 
 
 def covered_failure_modes(config: dict) -> Set[str]:
+    """Failure modes that a configured tool checks on every commit.
+
+    The built-in heuristics do not count: none of them was scored on
+    SAICA-Bench, so a mode they alone watch is still reported as not covered.
+    """
     covered: Set[str] = set()
     for t in config["tools"]:
         if t["runs_per_commit"]:
             covered.update(t["failure_modes"])
-    if config["builtin"]["enabled"]:
-        covered.update(fm for _tid, fm in BUILTIN_CHECKS)
     return covered
 
 
 def not_covered_events(config: dict, meta: dict, source: str) -> List[dict]:
     covered = covered_failure_modes(config)
+    heuristic = (
+        {fm for _tid, fm in BUILTIN_CHECKS} if config["builtin"]["enabled"] else set()
+    )
     return [
         make_event(
             meta=meta,
@@ -1125,7 +1731,13 @@ def not_covered_events(config: dict, meta: dict, source: str) -> List[dict]:
             failure_mode=fm,
             outcome="not_covered",
             blocking=False,
-            detail="no configured runnable tool or built-in covers this failure mode",
+            detail="no configured runnable tool covers this failure mode"
+            + (
+                " (a built-in heuristic watches it; heuristics are not benchmarked "
+                "and do not count as coverage)"
+                if fm in heuristic
+                else ""
+            ),
         )
         for fm in FAILURE_MODES
         if fm not in covered
@@ -1153,8 +1765,33 @@ def evaluate(
     """
     kit = config["kit"]
     events: List[dict] = []
-    if config["builtin"]["enabled"]:
-        for tid, fm, outcome, detail in run_builtins(cs, root, tree):
+    builtin = config["builtin"]
+    # A change must not be able to switch off the check that watches the kit:
+    # the tamper check also runs when the built-ins were on before this change.
+    before = base_builtin_config(root, cs.base)
+    only: Optional[Set[str]] = None
+    run_builtin = builtin["enabled"]
+    if not run_builtin and before and before["enabled"]:
+        run_builtin, only = True, {TAMPER_CHECK}
+    if run_builtin:
+        for tid, fm, outcome, detail in run_builtins(cs, root, tree, only=only):
+            blocking = builtin["blocking"] and builtin["enabled"]
+            if tid == TAMPER_CHECK:
+                # A change to the kit itself stops the commit by default
+                # (builtin.tamper_blocking), by the settings in force before the change too.
+                blocking = blocking or (
+                    builtin["enabled"] and builtin.get("tamper_blocking", True)
+                )
+                if before and before["enabled"]:
+                    blocking = (
+                        blocking or before["blocking"] or before["tamper_blocking"]
+                    )
+                if outcome == "caught" and os.environ.get(ALLOW_KIT_CHANGE_ENV) == "1":
+                    blocking = False
+                    detail = (
+                        _truncate(detail, DETAIL_MAX - 60)
+                        + " (allowed by %s=1)" % ALLOW_KIT_CHANGE_ENV
+                    )
             events.append(
                 make_event(
                     meta=meta,
@@ -1163,7 +1800,7 @@ def evaluate(
                     tool_id=tid,
                     failure_mode=fm,
                     outcome=outcome,
-                    blocking=config["builtin"]["blocking"],
+                    blocking=blocking,
                     detail=detail,
                 )
             )
@@ -1186,7 +1823,10 @@ def evaluate(
             if verbose:
                 print("saica: running %s ..." % tool["id"], file=sys.stderr)
             outcome, detail, metric = run_tool(
-                tool, files, tool_root or root, env=tool_env
+                tool,
+                files,
+                tool_root or root,
+                env=tool_environment(tool, config, tool_env),
             )
         for fm in tool["failure_modes"]:
             events.append(
@@ -1234,8 +1874,19 @@ def read_jsonl(path: Path) -> List[dict]:
     return events
 
 
-def blocking_failures(events: List[dict]) -> List[dict]:
-    return [e for e in events if e["outcome"] == "caught" and e["blocking"]]
+def blocking_failures(events: List[dict], config: Optional[dict] = None) -> List[dict]:
+    """Events that stop a commit: a blocking check that caught something, and a
+    check that could not run on the change (``error``) when its ``on_error`` is
+    ``block`` (the default for a blocking check): it did not vouch for the change."""
+    on_error = {
+        t["id"]: t.get("on_error", "pass") for t in (config or {}).get("tools", [])
+    }
+    return [
+        e
+        for e in events
+        if (e["outcome"] == "caught" and e["blocking"])
+        or (e["outcome"] == "error" and on_error.get(e["tool_id"]) == "block")
+    ]
 
 
 def print_summary(events: List[dict], header: str) -> None:
@@ -1250,14 +1901,16 @@ def print_summary(events: List[dict], header: str) -> None:
         seen.add(key)
         flag = {"caught": "CAUGHT", "error": "ERROR"}.get(e["outcome"], e["outcome"])
         line = "  %-22s %-12s" % (e["tool_id"], flag)
-        if e["blocking"] and e["outcome"] == "caught":
+        if e["blocking"] and e["outcome"] in ("caught", "error"):
             line += " [blocking]"
+        if str(e["tool_id"]).startswith("saica:"):
+            line += " (%s)" % BUILTIN_NOTE
         if e["outcome"] in ("caught", "error") and e["detail"]:
             line += "  " + e["detail"].splitlines()[0][:160]
         print(line, file=sys.stderr)
     gaps = [e["failure_mode"] for e in events if e["outcome"] == "not_covered"]
     if gaps:
-        print("  not covered: " + ", ".join(gaps), file=sys.stderr)
+        print("  no configured tool covers: " + ", ".join(gaps), file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -1276,11 +1929,63 @@ class Ctx:
         )
         if not self.config_path.is_absolute():
             self.config_path = Path.cwd() / self.config_path
-        self.events_path = self.saica / "events.jsonl"
+        self.config_explicit = bool(getattr(args, "config", None))
+        self.events_explicit = bool(getattr(args, "events", None))
+        self.events_path = (
+            Path(args.events) if self.events_explicit else self.saica / "events.jsonl"
+        )
+        if not self.events_path.is_absolute():
+            self.events_path = Path.cwd() / self.events_path
         self.pending_path = self.saica / "pending.jsonl"
 
     def config(self) -> dict:
         return load_config(self.config_path)
+
+    def staged_config(self, head: Optional[str]) -> dict:
+        """The config a staged change is judged by: the committed one (HEAD), so
+        that neither an unstaged edit nor the change itself can weaken its own
+        checks. Before the kit's first commit: the staged file, then the
+        working-tree file. ``--config`` always wins."""
+        if self.config_explicit:
+            return self.config()
+        for treeish, where in ((head, "HEAD"), ("", "the index")):
+            if treeish is None:
+                continue
+            spec = "%s:.saica/checks.json" % treeish
+            if not git_ok(["cat-file", "-e", spec], self.root):
+                continue
+            label = ".saica/checks.json in %s" % where
+            try:
+                raw = json.loads(git(["cat-file", "blob", spec], self.root))
+            except ValueError as exc:
+                raise SaicaError("%s is not valid JSON: %s" % (label, exc))
+            return parse_config(raw, label)
+        return self.config()
+
+    def check_log(self, path: Path, explicit: bool = False) -> None:
+        """Refuse an event log a commit could forge or throw away: a symbolic
+        link, a file tracked by git, or (for the default place) a path that leads
+        out of the repository."""
+        if path.is_symlink():
+            raise SaicaError(
+                "%s is a symbolic link; the event log must be a regular file, or the "
+                "record of the checks could be sent anywhere. Remove the link" % path
+            )
+        try:
+            rel = (path.parent.resolve() / path.name).relative_to(self.root.resolve())
+        except (ValueError, OSError):
+            if explicit:
+                return  # e.g. a CI temp folder named with --events
+            raise SaicaError(
+                "%s leads outside the repository (is .saica a symbolic link?); the event "
+                "log must be a regular file inside it" % path
+            )
+        if git_ok(["ls-files", "--error-unmatch", "--", rel.as_posix()], self.root):
+            raise SaicaError(
+                "%s is tracked by git, so a commit could replace the record of its own "
+                "checks. Run `git rm --cached %s` and add it to .gitignore"
+                % (rel.as_posix(), rel.as_posix())
+            )
 
     def pending_meta_path(self) -> Path:
         """Sidecar for pending.jsonl (snapshot tree + old HEAD), kept in the git dir.
@@ -1310,12 +2015,16 @@ def cmd_run(args: argparse.Namespace) -> int:
     ctx = Ctx(args)
     if args.staged:
         meta_path = ctx.pending_meta_path()
+        ctx.check_log(ctx.pending_path)
+        ctx.check_log(ctx.events_path, ctx.events_explicit)
         _discard(ctx.pending_path)  # leftovers from an aborted commit
         _discard(meta_path)
-        config = ctx.config()  # always the original repo's config
         source = args.source or "pre-commit"
         snapshot = staged_snapshot(ctx.root)
         tree, old_head = snapshot
+        config = ctx.staged_config(
+            old_head
+        )  # the committed config, not the change's own
         cs = staged_changeset(ctx.root, snapshot)
         tmp_base: Optional[Path] = None
         tool_root: Optional[Path] = None
@@ -1323,6 +2032,13 @@ def cmd_run(args: argparse.Namespace) -> int:
         try:
             if any(t["runs_per_commit"] for t in config["tools"]):
                 tmp_base, tool_root, tool_env = checkout_tree(ctx.root, tree)
+                if (
+                    not ctx.config_explicit
+                    and old_head
+                    and kit_present(ctx.root, old_head)
+                ):
+                    # helper scripts and prompts: the committed ones too
+                    overlay_kit(ctx.root, old_head, tool_root, tmp_base)
             events = evaluate(
                 config,
                 cs,
@@ -1358,6 +2074,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         label = "staged changes"
     else:
         config = ctx.config()
+        ctx.check_log(ctx.events_path, ctx.events_explicit)
         sha = resolve_commit(ctx.root, args.commit)
         source = args.source or "manual"
         cs = commit_changeset(ctx.root, sha)
@@ -1367,22 +2084,41 @@ def cmd_run(args: argparse.Namespace) -> int:
         append_jsonl(ctx.events_path, events)
         label = sha[:12]
     print_summary(events, "saica: checks for %s (%s)" % (label, source))
-    blockers = blocking_failures(events)
+    blockers = blocking_failures(events, config)
     if blockers and not args.no_block:
-        tools = sorted({e["tool_id"] for e in blockers})
-        print(
-            "saica: BLOCKED by %s. Fix the findings above and try again."
-            % ", ".join(tools),
-            file=sys.stderr,
-        )
+        caught = sorted({e["tool_id"] for e in blockers if e["outcome"] == "caught"})
+        failed = sorted({e["tool_id"] for e in blockers if e["outcome"] == "error"})
+        if caught:
+            print(
+                "saica: BLOCKED by %s. Fix the findings above and try again."
+                % ", ".join(caught),
+                file=sys.stderr,
+            )
+        if failed:
+            print(
+                "saica: BLOCKED: %s could not run on this change (see ERROR above), and a "
+                "blocking check that did not run does not let a commit through. Fix the cause, "
+                'or set "on_error": "pass" for that check in .saica/checks.json.'
+                % ", ".join(failed),
+                file=sys.stderr,
+            )
+        if TAMPER_CHECK in caught:
+            print(
+                "saica: this change edits the supervision kit itself. If that is intended, "
+                "commit it on its own with %s=1 (it is still recorded)."
+                % ALLOW_KIT_CHANGE_ENV,
+                file=sys.stderr,
+            )
         return 1
     return 0
 
 
 def cmd_stamp(args: argparse.Namespace) -> int:
     ctx = Ctx(args)
-    if not ctx.pending_path.is_file():
+    if not ctx.pending_path.is_file() and not ctx.pending_path.is_symlink():
         return 0
+    ctx.check_log(ctx.pending_path)
+    ctx.check_log(ctx.events_path, ctx.events_explicit)
     meta_path = ctx.pending_meta_path()
     reason = None
     snap: object = None
@@ -1441,6 +2177,7 @@ def cmd_replay(args: argparse.Namespace) -> int:
     config = ctx.config()
     if args.last < 1:
         raise SaicaError("--last must be >= 1")
+    ctx.check_log(ctx.events_path, ctx.events_explicit)
     shas = git(["rev-list", "--max-count=%d" % args.last, "HEAD"], ctx.root).split()
     done = {
         e.get("commit")
@@ -1537,13 +2274,14 @@ if [ ! -f "$runner" ]; then
   exit 0
 fi
 PY=""
-if command -v python3 >/dev/null 2>&1; then
-  PY=python3
-elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
-  PY=python
-fi
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
+    PY=$cand
+    break
+  fi
+done
 if [ -z "$PY" ]; then
-  warn "python3 not found on PATH."
+  warn "no Python 3.9 or newer found on PATH (tried python3, python)."
   exit 0
 fi
 exec "$PY" "$runner" run --staged --source pre-commit
@@ -1558,13 +2296,14 @@ cd "$root" || exit 0
 runner=".saica/saica_check.py"
 [ -f "$runner" ] || exit 0
 PY=""
-if command -v python3 >/dev/null 2>&1; then
-  PY=python3
-elif command -v python >/dev/null 2>&1; then
-  PY=python
-fi
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c 'import sys; sys.exit(sys.version_info < (3, 9))' 2>/dev/null; then
+    PY=$cand
+    break
+  fi
+done
 if [ -z "$PY" ]; then
-  echo "SAICA WARNING: python3 not found; results were not stamped." >&2
+  echo "SAICA WARNING: no Python 3.9 or newer found; results were not stamped." >&2
   exit 0
 fi
 "$PY" "$runner" stamp || echo "SAICA WARNING: stamp failed; see message above." >&2
@@ -1584,6 +2323,14 @@ def _builtin_hook(name: str) -> str:
     return PRE_COMMIT_HOOK if name == "pre-commit" else POST_COMMIT_HOOK
 
 
+# sha256 of hook files that earlier versions of the kit installed (LF line
+# endings). They are replaced without --force, like the current ones.
+EARLIER_KIT_HOOKS = {
+    "765120e7e5b238eedf2f12cb1342637f9345af17b82563b73d0265dff074738d",  # pre-commit, 2026-11-19
+    "6754127dd9f73a86b8915c0a7ba8aeaf7a4ff048e59057e274e35f6e71140080",  # post-commit, 2026-11-19
+}
+
+
 def _is_exact_hook(existing: bytes, candidates: List[str]) -> bool:
     """True only if the file is byte-for-byte a kit hook (LF or CRLF line endings)."""
     for text in candidates:
@@ -1591,6 +2338,19 @@ def _is_exact_hook(existing: bytes, candidates: List[str]) -> bool:
         if existing == lf or existing == lf.replace(b"\n", b"\r\n"):
             return True
     return False
+
+
+def _is_earlier_kit_hook(existing: bytes) -> bool:
+    lf = existing.replace(b"\r\n", b"\n")
+    return hashlib.sha256(lf).hexdigest() in EARLIER_KIT_HOOKS
+
+
+def _is_inside(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+    except (ValueError, OSError):
+        return False
+    return True
 
 
 def _backup_hook(target: Path, name: str, data: bytes) -> Path:
@@ -1617,6 +2377,25 @@ def cmd_install_hooks(args: argparse.Namespace) -> int:
     hooks_dir = Path(git(["rev-parse", "--git-path", "hooks"], ctx.root).strip())
     if not hooks_dir.is_absolute():
         hooks_dir = ctx.root / hooks_dir
+    git_dir = Path(git(["rev-parse", "--git-common-dir"], ctx.root).strip())
+    if not git_dir.is_absolute():
+        git_dir = ctx.root / git_dir
+    if not (_is_inside(hooks_dir, git_dir) or _is_inside(hooks_dir, ctx.root)):
+        # core.hooksPath set globally (or to a shared folder): hooks written
+        # there would run in every repository that uses the same folder.
+        print(
+            "saica: refusing to install: this repository's hooks directory is\n"
+            "  %s\n"
+            "which is outside the repository (core.hooksPath points there). Hooks "
+            "installed there would run in every repository that shares it.\n"
+            "Give this repository its own hooks directory and run install-hooks again:\n"
+            "  git config --local core.hooksPath .git/hooks\n"
+            "or add these calls to the shared hooks yourself:\n"
+            "  pre-commit:   python3 .saica/saica_check.py run --staged --source pre-commit\n"
+            "  post-commit:  python3 .saica/saica_check.py stamp" % hooks_dir,
+            file=sys.stderr,
+        )
+        return 1
     hooks_dir.mkdir(parents=True, exist_ok=True)
     uses_framework = (ctx.root / ".pre-commit-config.yaml").is_file()
     rc = 0
@@ -1627,7 +2406,9 @@ def cmd_install_hooks(args: argparse.Namespace) -> int:
             existing_bytes = target.read_bytes()
             existing = existing_bytes.decode("utf-8", "replace")
             identical = _is_exact_hook(existing_bytes, [content])
-            is_kit = _is_exact_hook(existing_bytes, [content, _builtin_hook(name)])
+            is_kit = _is_exact_hook(
+                existing_bytes, [content, _builtin_hook(name)]
+            ) or _is_earlier_kit_hook(existing_bytes)
             if not is_kit and not args.force:
                 print(
                     "saica: refusing to overwrite existing %s (not an exact kit hook). "
@@ -1673,7 +2454,15 @@ def build_parser() -> argparse.ArgumentParser:
         description="SAICA supervision kit: run per-commit checks and log events (contract v1).",
     )
     p.add_argument(
-        "--config", help="path to checks.json (default: <repo>/.saica/checks.json)"
+        "--config",
+        help="path to checks.json (default: <repo>/.saica/checks.json; for run --staged "
+        "the committed version of that file)",
+    )
+    p.add_argument(
+        "--events",
+        metavar="PATH",
+        help="event log to write and read (default: <repo>/.saica/events.jsonl). CI "
+        "writes it outside the checkout so that a commit cannot replace it",
     )
     sub = p.add_subparsers(dest="cmd", metavar="COMMAND")
     sub.required = True

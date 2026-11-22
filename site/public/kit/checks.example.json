@@ -1,53 +1,87 @@
 {
   "version": 1,
-  "kit": "custom",
+  "kit": "saica-default",
   "builtin": {
     "enabled": true,
     "blocking": false
   },
   "tools": [
     {
-      "id": "semgrep",
+      "id": "fabrication-gpt-6-luna",
       "failure_modes": [
-        "security_vulnerability"
+        "fabrication"
       ],
       "runs_per_commit": true,
-      "command": "semgrep scan --config auto --error --quiet {files}",
-      "blocking": true,
-      "timeout_s": 300
-    },
-    {
-      "id": "sentrux",
-      "failure_modes": [
-        "dependency_blindness"
-      ],
-      "runs_per_commit": true,
-      "command": "sentrux gate",
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/fabrication.md --model gpt-6-luna --api-base-env AZURE_AI_BASE_URL --api-key-env AZURE_AI_API_KEY --api-style azure --max-tokens 32768 --timeout 540 --per-file --context-lines 15",
       "blocking": false,
-      "metric": {
-        "name": "quality",
-        "regex": "quality[^0-9]*([0-9]+(?:\\.[0-9]+)?)"
-      }
+      "timeout_s": 600,
+      "note": "Benchmark J 92% (95% interval 89% to 95%; 348 bad + 288 clean samples) on the diff of one file with 15 lines of context around one inserted completion. At commit time this check sees one request per changed file: that file's diff with 15 lines of context."
     },
     {
-      "id": "pytest",
+      "id": "test-manipulation-deepseek-v4-flash",
+      "failure_modes": [
+        "test_manipulation"
+      ],
+      "runs_per_commit": true,
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/test_manipulation.md --model deepseek-v4-flash-0731 --api-base-env HYPERBOLIC_BASE_URL --api-key-env HYPERBOLIC_API_KEY --api-style openai --temperature 0 --max-tokens 32768 --stream --timeout 540 --fill rule=.saica/prompts/test_manipulation.rule.txt --fill transcript=.saica/session.txt",
+      "blocking": false,
+      "timeout_s": 600,
+      "note": "Benchmark J 89% (95% interval 79% to 93%; 56 bad + 249 clean samples) on the coding agent's whole session transcript (messages, tool calls, tool results). At commit time this check sees nothing of the session unless the agent exports it to .saica/session.txt before each commit; in CI there is none. So: benchmark input not available at commit time."
+    },
+    {
+      "id": "logic-error-mimo-v2-6-flash",
       "failure_modes": [
         "logic_error"
       ],
       "runs_per_commit": true,
-      "command": "python3 -m pytest -q -x",
-      "blocking": true,
-      "timeout_s": 600
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/logic_error.md --model mimo-v2.6-flash --api-base-env HYPERBOLIC_BASE_URL --api-key-env HYPERBOLIC_API_KEY --api-style openai --temperature 0 --max-tokens 32768 --stream --timeout 540 --whole-file",
+      "blocking": false,
+      "timeout_s": 600,
+      "note": "Benchmark J 74% (95% interval 69% to 79%; 1536 bad + 904 clean samples) on one Python function and the task it was written for. At commit time this check sees each changed file in full, one request per file, and the task file; not one function with its own task. So: benchmark input not available at commit time."
     },
     {
-      "id": "dependency-blindness-review",
+      "id": "scope-creep-mimo-v2-6-flash",
+      "failure_modes": [
+        "scope_creep"
+      ],
+      "runs_per_commit": true,
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/scope_creep.md --model mimo-v2.6-flash --api-base-env HYPERBOLIC_BASE_URL --api-key-env HYPERBOLIC_API_KEY --api-style openai --temperature 0 --max-tokens 32768 --stream --timeout 540",
+      "blocking": false,
+      "timeout_s": 600,
+      "note": "Benchmark J 98% (95% interval 94% to 99%; 175 bad + 175 clean samples) on the issue text and the agent's patch as one diff. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
+    },
+    {
+      "id": "obsolescence-gpt-6-luna",
+      "failure_modes": [
+        "obsolescence"
+      ],
+      "runs_per_commit": true,
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/obsolescence.md --model gpt-6-luna --api-base-env AZURE_AI_BASE_URL --api-key-env AZURE_AI_API_KEY --api-style azure --max-tokens 32768 --timeout 540 --whole-file",
+      "blocking": false,
+      "timeout_s": 600,
+      "note": "Benchmark J 90% (95% interval 83% to 95%; 155 bad + 155 clean samples) on one whole solution file and the coding request. At commit time this check sees each changed file in full, one request per file, and the task file."
+    },
+    {
+      "id": "supply-chain-attack-gpt-6-luna",
+      "failure_modes": [
+        "supply_chain_attack"
+      ],
+      "runs_per_commit": true,
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/supply_chain_attack.md --model gpt-6-luna --api-base-env AZURE_AI_BASE_URL --api-key-env AZURE_AI_API_KEY --api-style azure --max-tokens 32768 --timeout 540",
+      "blocking": false,
+      "timeout_s": 600,
+      "note": "Benchmark J 77% (95% interval 70% to 84%; 148 bad + 148 clean samples) on the issue text and the agent's patch, dependency manifest included. At commit time this check sees the task file (.saica/task.md) and the commit's diff."
+    },
+    {
+      "id": "dependency-blindness-gpt-6-luna",
       "failure_modes": [
         "dependency_blindness"
       ],
       "runs_per_commit": true,
-      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.md --model gpt-6-luna --api-style azure --api-base-env SAICA_LLM_API_BASE --api-key-env SAICA_LLM_API_KEY",
+      "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.md --model gpt-6-luna --api-base-env AZURE_AI_BASE_URL --api-key-env AZURE_AI_API_KEY --api-style azure --max-tokens 32768 --timeout 540",
       "blocking": false,
-      "timeout_s": 300
+      "timeout_s": 600,
+      "note": "Benchmark J 90% (95% interval 82% to 98%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
     }
   ]
 }

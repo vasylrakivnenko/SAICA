@@ -7,17 +7,25 @@ Three parts:
   hooks into it with a test checks.json (built-ins plus fake ``sh`` tools, no
   real supervision tools needed), installs the hooks and proves that
   (a) a planted stub is ``caught`` after stamp, (b) a failing blocking tool
-  blocks the commit, (c) events.jsonl matches the contract, (d) uncovered
-  failure modes get ``not_covered`` events, (e) ``dashboard`` embeds events.
+  blocks the commit while a tool that crashes (exit 2) is an ``error`` and
+  blocks nothing, (c) events.jsonl matches the contract, (d) failure modes
+  without a configured tool get ``not_covered`` events (the built-in
+  heuristics do not count as coverage), (e) ``dashboard`` embeds events,
+  (f) a commit that edits the kit's own config is ``caught`` by
+  ``saica:kit-tamper``.
 * llm (runs with sandbox; skipped if saica_llm_review.py is not next to this
   file): a local fake OpenAI-compatible server proves saica_llm_review.py maps
   flagged / ok / malformed / streamed / combined answers to exit 1 / 0 / 127 /
-  1 / 1, redacts the key, and that saica_check.py records caught / error for
-  it in both the pre-commit temp checkout and a CI-style ``run --commit``.
-  No network access beyond 127.0.0.1 and no paid API calls.
+  1 / 1, redacts the key, never reports an unfilled prompt or a cut diff as
+  ok, leaves lock files and ``.saica/`` out of the request, answers a repeated
+  request from its verdict cache, and that saica_check.py records caught /
+  error for it in both the pre-commit temp checkout and a CI-style
+  ``run --commit``. No network access beyond 127.0.0.1 and no paid API calls.
 * repo: checks a real install (default: the current repo): .saica/checks.json
-  is valid, hooks are installed and call the runner, runnable tools' binaries
-  are on PATH (warning only), and the dashboard template is present.
+  is valid, hooks are installed and call the runner, no command still holds a
+  ``<placeholder>`` or a ``{files}`` in a place where a file name could run as
+  a command, runnable tools' binaries are on PATH (warning only), and the
+  dashboard template is present.
 
 Usage::
 
@@ -221,6 +229,27 @@ SANDBOX_CONFIG = {
             },
         },
         {
+            # A tool that fails for its own reasons (exit 2): an error, never a
+            # finding. on_error "pass": its failures do not stop a commit.
+            "id": "fake-crash",
+            "failure_modes": ["obsolescence"],
+            "runs_per_commit": True,
+            "command": "sh -c 'echo usage error >&2; exit 2'",
+            "blocking": True,
+            "on_error": "pass",
+            "timeout_s": 30,
+        },
+        {
+            # A blocking check that cannot run (exit 2 while BREAK_ME exists)
+            # did not vouch for the change: by default that stops the commit.
+            "id": "fake-broken-gate",
+            "failure_modes": ["supply_chain_attack"],
+            "runs_per_commit": True,
+            "command": "sh -c 'test ! -e BREAK_ME || exit 2'",
+            "blocking": True,
+            "timeout_s": 30,
+        },
+        {
             "id": "fake-platform",
             "failure_modes": ["scope_creep"],
             "runs_per_commit": False,
@@ -228,12 +257,20 @@ SANDBOX_CONFIG = {
         },
     ],
 }
+# Failure modes with a configured tool that runs per commit. The built-in
+# heuristics (stub markers, test weakening, phantom imports, kit tamper) are not
+# benchmarked and do not count as coverage.
 SANDBOX_COVERED = {
     "security_vulnerability",
     "logic_error",
-    "incomplete_execution",
-    "test_manipulation",
-    "fabrication",
+    "obsolescence",
+    "supply_chain_attack",
+}
+BUILTIN_IDS = {
+    "saica:stub-markers",
+    "saica:test-weakening",
+    "saica:phantom-import",
+    "saica:kit-tamper",
 }
 
 
@@ -372,6 +409,12 @@ def _sandbox_steps(report: Report, runner: Path, tmp: Path) -> None:
         bool(metric) and metric[0]["metric"] == 7.5,
         "(a) tool metric parsed from output",
     )
+    crash = [e for e in events if e["commit"] == head and e["tool_id"] == "fake-crash"]
+    report.check(
+        len(crash) == 1 and crash[0]["outcome"] == "error" and crash[0]["blocking"],
+        "(b) a tool that exits 2 is recorded as 'error'; with on_error \"pass\" it did not block",
+        repr(crash),
+    )
 
     # (b) blocking fake tool fails -> commit blocked.
     before = len(_read_events(events_path))
@@ -400,6 +443,19 @@ def _sandbox_steps(report: Report, runner: Path, tmp: Path) -> None:
     # Recover: unblock and commit; stale pending must be discarded.
     git("rm", "-q", "--cached", "BLOCK_ME")
     (repo / "BLOCK_ME").unlink()
+    # A blocking check that could not run on the change blocks too.
+    (repo / "BREAK_ME").write_text("trigger\n", encoding="utf-8")
+    git("add", "BREAK_ME")
+    r = git("commit", "-q", "-m", "Should be blocked: the gate cannot run")
+    report.check(
+        r.returncode != 0
+        and git("rev-parse", "HEAD").stdout.strip() == head
+        and "could not run on this change" in r.stdout,
+        "(b) a blocking tool that could not run (error) blocks the commit and says why",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()[-300:]),
+    )
+    git("rm", "-q", "--cached", "BREAK_ME")
+    (repo / "BREAK_ME").unlink()
     r = git("commit", "-q", "-m", "Add feature")
     report.check(
         r.returncode == 0,
@@ -458,9 +514,19 @@ def _sandbox_steps(report: Report, runner: Path, tmp: Path) -> None:
     }
     report.check(
         got == expected,
-        "(d) not_covered events for exactly the %d uncovered failure modes"
-        % len(expected),
+        "(d) not_covered events for exactly the %d failure modes without a "
+        "configured tool (built-in heuristics do not count)" % len(expected),
         "got %s" % sorted(got),
+    )
+    builtin_ids = {
+        e["tool_id"]
+        for e in events
+        if e["commit"] == head2 and str(e["tool_id"]).startswith("saica:")
+    }
+    report.check(
+        builtin_ids == BUILTIN_IDS,
+        "(d) the %d built-in heuristics each record an event" % len(BUILTIN_IDS),
+        "got %s" % sorted(builtin_ids),
     )
     nr = [e for e in events if e["commit"] == head2 and e["tool_id"] == "fake-platform"]
     report.check(
@@ -498,6 +564,38 @@ def _sandbox_steps(report: Report, runner: Path, tmp: Path) -> None:
         r.returncode == 0 and bool(replayed),
         "replay --last 5 writes replay events",
         r.stdout.strip(),
+    )
+
+    # (f) a commit that edits the kit's own config is judged by the committed
+    # config, is stopped, and goes through only when a person says so.
+    weaker = dict(SANDBOX_CONFIG, builtin={"enabled": False}, tools=[])
+    (saica / "checks.json").write_text(json.dumps(weaker, indent=2), encoding="utf-8")
+    git("add", ".saica/checks.json")
+    before = git("rev-parse", "HEAD").stdout.strip()
+    r = git("commit", "-q", "-m", "Drop every configured tool")
+    report.check(
+        r.returncode != 0
+        and git("rev-parse", "HEAD").stdout.strip() == before
+        and "saica:kit-tamper" in r.stdout,
+        "(f) a commit that switches the kit off is blocked by saica:kit-tamper",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()[-300:]),
+    )
+    allow = dict(env, SAICA_KIT_CHANGE_OK="1")
+    r = _run(["git", "commit", "-q", "-m", "Drop every configured tool"], repo, allow)
+    head3 = git("rev-parse", "HEAD").stdout.strip()
+    tamper = [
+        e
+        for e in _read_events(events_path)
+        if e["commit"] == head3 and e["tool_id"] == "saica:kit-tamper"
+    ]
+    report.check(
+        r.returncode == 0
+        and head3 != before
+        and len(tamper) == 1
+        and tamper[0]["outcome"] == "caught"
+        and ".saica/checks.json" in tamper[0]["detail"],
+        "(f) with SAICA_KIT_CHANGE_OK=1 the kit change is committed and still recorded as 'caught'",
+        "%s %r" % (r.stdout.strip()[-200:], tamper),
     )
 
 
@@ -716,6 +814,9 @@ def _llm_steps(
         env.pop(k, None)
     env["SAICA_LLM_API_BASE"] = "http://127.0.0.1:%d/v1" % server.server_address[1]
     env["SAICA_LLM_API_KEY"] = LLM_FAKE_KEY
+    # The verdict cache lives in the sandbox, never in a real repository.
+    cache_dir = tmp / "verdict-cache"
+    env["SAICA_CACHE_DIR"] = str(cache_dir)
     env["NO_PROXY"] = env["no_proxy"] = "127.0.0.1,localhost"
     py = sys.executable
 
@@ -749,10 +850,17 @@ def _llm_steps(
     )
 
     def review(
-        *extra: str, model: str, prompt: str = ".saica/prompts/dependency_blindness.md"
+        *extra: str,
+        model: str,
+        prompt: str = ".saica/prompts/dependency_blindness.md",
+        cache: bool = False,
     ) -> Tuple[subprocess.CompletedProcess, Optional[dict]]:
+        # --no-cache unless a check is about the cache: every other check needs
+        # its request to reach the fake API.
         before = len(seen)
         cmd = [py, ".saica/saica_llm_review.py", "--prompt", prompt, "--model", model]
+        if not cache:
+            cmd.append("--no-cache")
         r = _run(cmd + list(extra), repo, env)
         return r, (seen[-1] if len(seen) > before else None)
 
@@ -828,20 +936,128 @@ def _llm_steps(
         "exit %d: %s" % (r.returncode, r.stdout.strip()),
     )
     n = len(seen)
-    r, _req = review("--dry-run", model="fake-ok", prompt=".saica/prompts/unknown.txt")
+    r, _req = review(model="fake-ok", prompt=".saica/prompts/unknown.txt")
+    r2, _req = review("--dry-run", model="fake-ok", prompt=".saica/prompts/unknown.txt")
+    report.check(
+        r.returncode == LLM_ERROR_EXIT
+        and r2.returncode == LLM_ERROR_EXIT
+        and len(seen) == n
+        and "needs --fill NAME=FILE for {nope}" in r.stdout
+        and "needs --fill NAME=FILE for {nope}" in r2.stdout,
+        "llm: a placeholder with no value is an error before any request (also with --dry-run)",
+        "exit %d / %d: %s" % (r.returncode, r2.returncode, r.stdout.strip()[:300]),
+    )
+    r, _req = review(
+        "--dry-run",
+        "--allow-empty",
+        "nope",
+        model="fake-ok",
+        prompt=".saica/prompts/unknown.txt",
+    )
     report.check(
         r.returncode == 0
         and len(seen) == n
         and "COMMITTED_MARKER" in r.stdout
-        and "{nope}" in r.stdout
         and "Extra: \n" in r.stdout,
-        "llm: --dry-run prints the prompt without a call; unknown placeholder warned + emptied",
+        "llm: --dry-run prints the prompt without a call; --allow-empty leaves a placeholder empty",
         r.stdout.strip()[:300],
     )
+    (tmp / "empty.diff").write_text("", encoding="utf-8")
+    r, _req = review("--diff-file", str(tmp / "empty.diff"), model="fake-ok")
+    report.check(
+        r.returncode == 0
+        and r.stdout.strip().startswith("skipped:")
+        and len(seen) == n,
+        "llm: an empty change is 'skipped' (exit 0) without a request",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    r, _req = review("--max-diff-chars", "60", model="fake-ok")
+    result = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
+    report.check(
+        r.returncode == LLM_ERROR_EXIT and result.startswith("partial:"),
+        "llm: a diff cut at --max-diff-chars is 'partial' (exit %d), never ok"
+        % LLM_ERROR_EXIT,
+        "exit %d: %s" % (r.returncode, result),
+    )
+
+    # Left-out files, one request per file, and the verdict cache. The extra
+    # files are unstaged again afterwards, so the runner checks below see the
+    # same staged change as the checks above.
+    (repo / "package-lock.json").write_text(
+        '{"lock": "LOCK_MARKER"}\n', encoding="utf-8"
+    )
+    (saica / "notes.txt").write_text("KIT_MARKER\n", encoding="utf-8")
+    git("add", "package-lock.json", ".saica/notes.txt")
+    r, req = review("--staged", model="fake-ok")
+    sent = _prompt_of(req)
+    result = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
+    report.check(
+        r.returncode == LLM_ERROR_EXIT
+        and result.startswith("partial:")
+        and "STAGED_MARKER" in sent
+        and "LOCK_MARKER" not in sent
+        and "KIT_MARKER" not in sent
+        and "package-lock.json (left out by default)" in result,
+        "llm: lock files and .saica/ are not sent; a change that touches them is "
+        "'partial', never ok, and the files are named",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    accept = ("--exclude", "package-lock.json", "--exclude", ".saica/")
+    r, req = review("--staged", *accept, model="fake-ok")
+    report.check(
+        r.returncode == 0
+        and r.stdout.strip().startswith("ok:")
+        and "LOCK_MARKER" not in _prompt_of(req)
+        and "2 files left out" in r.stdout,
+        "llm: --exclude names paths that may be left out on purpose (ok, files named)",
+        "exit %d: %s" % (r.returncode, r.stdout.strip()),
+    )
+    (repo / "util.py").write_text(
+        "def helper():\n    return 1  # UTIL_MARKER\n", encoding="utf-8"
+    )
+    git("add", "util.py")
+    n = len(seen)
+    r, _req = review("--staged", "--per-file", *accept, model="fake-ok")
+    sent_all = [_prompt_of(s) for s in seen[n:]]
+    report.check(
+        r.returncode == 0
+        and len(sent_all) == 2
+        and sum("UTIL_MARKER" in s for s in sent_all) == 1
+        and sum("STAGED_MARKER" in s for s in sent_all) == 1
+        and "2 file(s) reviewed" in r.stdout,
+        "llm: --per-file makes one request per changed file",
+        "exit %d, %d request(s): %s" % (r.returncode, len(sent_all), r.stdout.strip()),
+    )
+    n = len(seen)
+    r, _req = review("--staged", "--per-file", *accept, model="fake-ok", cache=True)
+    first = len(seen) - n
+    r2, _req = review("--staged", "--per-file", *accept, model="fake-ok", cache=True)
+    report.check(
+        r.returncode == 0
+        and r2.returncode == 0
+        and first == 2
+        and len(seen) == n + 2
+        and "(cached)" in r2.stdout
+        and cache_dir.is_dir(),
+        "llm: an identical second run is answered from the verdict cache (no request)",
+        "exit %d / %d, %d + %d request(s): %s"
+        % (
+            r.returncode,
+            r2.returncode,
+            first,
+            len(seen) - n - first,
+            r2.stdout.strip(),
+        ),
+    )
+    git("reset", "-q", "--", "package-lock.json", ".saica/notes.txt", "util.py")
+    for extra in (repo / "package-lock.json", saica / "notes.txt", repo / "util.py"):
+        extra.unlink()
 
     # Through the real runner: pre-commit temp checkout, then CI-style --commit.
     shutil.copy2(str(reviewer.parent / "saica_check.py"), str(saica / "saica_check.py"))
-    base_cmd = "%s .saica/saica_llm_review.py --prompt .saica/prompts/%s --model %s"
+    base_cmd = (
+        "%s .saica/saica_llm_review.py --no-cache --prompt .saica/prompts/%s --model %s"
+    )
     config = {
         "version": 1,
         "kit": "selftest",
@@ -861,6 +1077,7 @@ def _llm_steps(
                 "command": base_cmd
                 % (shlex.quote(py), "scope_creep.md", "fake-malformed"),
                 "blocking": True,
+                "on_error": "pass",
                 "timeout_s": 60,
             },
         ],
@@ -886,7 +1103,7 @@ def _llm_steps(
         and pending.get("llm-flag", {}).get("outcome") == "caught"
         and pending.get("llm-broken", {}).get("outcome") == "error",
         "llm via saica_check run --staged: flagged -> caught, unreadable -> error "
-        "(not blocking)",
+        "(on_error pass: not blocking)",
         "exit %d; %s"
         % (r.returncode, {k: v.get("outcome") for k, v in pending.items()}),
     )
@@ -951,6 +1168,11 @@ def _command_binary(command: str) -> Optional[str]:
             continue  # FOO=bar env assignment
         return tok
     return None
+
+
+# An unfilled placeholder such as <file> or <set from the tool docs>. A real
+# redirection (`<input.txt`, `< in > out`) has a dot, a slash or a space after "<".
+_PLACEHOLDER_RE = re.compile(r"<[A-Za-z][A-Za-z0-9 _,;:'-]*>")
 
 
 def _active_lines(text: str) -> List[str]:
@@ -1163,6 +1385,21 @@ def run_repo(report: Report, root: Path) -> None:
         for tool in config["tools"]:
             if not tool["runs_per_commit"]:
                 continue
+            command = tool["command"] or ""
+            left = _PLACEHOLDER_RE.search(command)
+            report.check(
+                left is None,
+                "tool %s: command has no unfilled <placeholder>" % tool["id"],
+                "replace %s with the real value, or set runs_per_commit to false"
+                % (left.group(0) if left else ""),
+            )
+            problem = getattr(runner, "placeholder_problem", lambda _c: None)(command)
+            report.check(
+                problem is None,
+                "tool %s: {files} is used where file names are quoted safely"
+                % tool["id"],
+                problem or "",
+            )
             binary = _command_binary(tool["command"] or "")
             if binary and shutil.which(binary) is None and not (root / binary).exists():
                 report.warn(

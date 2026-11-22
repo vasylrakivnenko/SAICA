@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
 <title>SAICA supervision dashboard</title>
 <style>
   /* Palette mirrors site/tailwind.config.mjs (ink / paper / accent) and the
@@ -287,7 +288,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Coverage reflects configured checks; heuristic checks are signals, not verdicts.</span>
+    <span>Coverage counts configured checks only; the built-in saica:* checks are heuristics, not benchmarked.</span>
     <span>SAICA supervision kit &middot; contract v1</span>
   </div>
 </footer>
@@ -445,6 +446,8 @@
     return { commits: commits, events: kept };
   }
 
+  function isBuiltin(tool) { return typeof tool === 'string' && tool.indexOf('saica:') === 0; }
+
   function rowKey(e) { return view === 'fm' ? e.fm : (e.tool === null ? NO_TOOL : e.tool); }
 
   function rowsFor(events) {
@@ -465,7 +468,7 @@
     if (hasNone) tools.push(NO_TOOL);
     return tools;
   }
-  function rowLabel(r) { return view === 'fm' ? fmName(r) : (r === NO_TOOL ? 'no tool (uncovered FMs)' : r); }
+  function rowLabel(r) { return view === 'fm' ? fmName(r) : (r === NO_TOOL ? 'no tool (uncovered FMs)' : (isBuiltin(r) ? r + ' (heuristic)' : r)); }
 
   function aggregate(list) {
     var best = null;
@@ -529,7 +532,8 @@
         catchCommits[e.commit] = 1;
         if (e.blocking) blocked[e.commit] = 1;
       }
-      if (e.outcome === 'pass' || e.outcome === 'caught') covered[e.fm] = 1;
+      // Built-in checks (saica:*) are heuristics, not benchmarked: they do not count as coverage.
+      if ((e.outcome === 'pass' || e.outcome === 'caught') && !isBuiltin(e.tool)) covered[e.fm] = 1;
     });
     var ag = D.commits.filter(function (c) { return c.agent; }), hu = D.commits.filter(function (c) { return !c.agent; });
     var agC = ag.filter(function (c) { return catchCommits[c.sha]; }).length, huC = hu.filter(function (c) { return catchCommits[c.sha]; }).length;
@@ -539,7 +543,7 @@
     k.appendChild(kpi('Catches', String(nCatches), Object.keys(catchCommits).length + ' commits with ≥ 1 catch'));
     k.appendChild(kpi('Catch rate · agent', pct(agC, ag.length), agC + ' of ' + ag.length + ' agent commits', ag.length ? 100 * agC / ag.length : 0));
     k.appendChild(kpi('Catch rate · human', pct(huC, hu.length), huC + ' of ' + hu.length + ' human commits', hu.length ? 100 * huC / hu.length : 0));
-    k.appendChild(kpi('Failure modes covered', nCovered + '/' + FMS.length, 'with a check that completed (pass or caught)', 100 * nCovered / FMS.length));
+    k.appendChild(kpi('Failure modes covered', nCovered + '/' + FMS.length, 'by a configured check that completed; built-in heuristics do not count', 100 * nCovered / FMS.length));
     k.appendChild(kpi('Blocking catches', String(Object.keys(blocked).length), 'commits where a blocking check caught'));
   }
 
@@ -602,17 +606,20 @@
     if (focusPos.c >= commits.length) focusPos.c = commits.length - 1;
     rows.forEach(function (r, ri) {
       // Gap = row has events but none that completed (pass or caught); error/skipped do not count.
-      var ran = 0, caught = 0, gapKind = null, any = 0;
+      // In the failure-mode view a row counts as covered only by a configured check; a built-in heuristic alone is a gap.
+      var ran = 0, caught = 0, gapKind = null, any = 0, heuristic = 0;
       D.events.forEach(function (e) {
         if (rowKey(e) !== r) return;
         any++;
-        if (e.outcome === 'pass' || e.outcome === 'caught') ran++;
+        if (e.outcome === 'pass' || e.outcome === 'caught') {
+          if (view === 'fm' && isBuiltin(e.tool)) heuristic++; else ran++;
+        }
         if (e.outcome === 'caught') caught++;
         if (e.outcome === 'not_covered') gapKind = 'not covered';
         else if (e.outcome === 'not_runnable' && gapKind !== 'not covered') gapKind = 'not runnable';
       });
       var isGap = view === 'fm' ? ran === 0 : (r === NO_TOOL || (any > 0 && ran === 0));
-      var kind = gapKind || (any ? 'no completed run' : 'no data');
+      var kind = heuristic ? 'heuristic only, not benchmarked' : (gapKind || (any ? 'no completed run' : 'no data'));
       var rl = el('div', { class: 'rl' }, [el('span', { class: 'txt', text: rowLabel(r) })]);
       if (isGap) rl.appendChild(el('span', { class: 'gaptag' }, ['gap', kind ? el('span', { class: 'gapkind', text: ' · ' + kind }) : null]));
       else if (caught) rl.appendChild(el('span', { class: 'rowcount', title: caught + ' catches', text: caught + '×' }));
@@ -645,10 +652,11 @@
       return el('span', null, [el('span', { class: 'sw ' + cls, style: style || null, text: glyph || '' }), text]);
     }
     lg.appendChild(item('s-caught', GLYPH.caught, 'Caught — a check flagged something'));
-    lg.appendChild(item('s-error', GLYPH.error, 'Error — tool missing or timed out'));
+    lg.appendChild(item('s-error', GLYPH.error, 'Error — the tool did not run or failed (not a finding)'));
     lg.appendChild(item('s-pass', '', 'Pass'));
     lg.appendChild(item('s-skipped', '', 'Skipped — nothing to check'));
     lg.appendChild(item('s-gap', '', 'Not runnable / not covered — gap in the kit'));
+    lg.appendChild(el('span', null, ['saica:* checks are heuristics, not benchmarked; they do not count as coverage']));
     lg.appendChild(item('', '', 'No data', 'box-shadow:inset 0 0 0 1px var(--line-strong)'));
     var agents = {};
     D.commits.forEach(function (c) { if (c.agent) agents[c.agent] = 1; });

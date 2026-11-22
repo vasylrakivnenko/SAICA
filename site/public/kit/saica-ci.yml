@@ -1,18 +1,42 @@
 # SAICA supervision kit: CI backstop (contract v1).
 #
 # Install at .github/workflows/saica-ci.yml. Runs the same checks as the
-# pre-commit hook on every commit of a push / pull request, so commits made
-# with `git commit --no-verify` (or without the hooks installed) are still
-# checked and logged.
+# pre-commit hook in CI, so commits made with `git commit --no-verify` (or
+# without the hooks installed) are still checked and logged.
+#
+# What is checked, and with which rules:
+#   * pull request: all of its commits, on every push to it. A harmless
+#     follow-up commit must not clear a finding in an earlier one. LLM verdicts
+#     are cached, so a commit that was already reviewed is not paid for again.
+#   * push to the default branch: each new commit on the branch's first-parent
+#     line. A merge commit is checked once, as one change (the whole merged
+#     branch); the commits inside it were checked in their pull request.
+#     Pushes to other branches are not checked: open a pull request.
+#   * The kit itself (runner, checks.json, helper scripts, prompts under
+#     .saica/) is taken from the BASE of the change, never from the change
+#     under review. A commit that edits the kit is therefore judged by the old
+#     rules, and the built-in check `saica:kit-tamper` records it as caught.
+#     Add a CODEOWNERS rule for `.saica/` and this file so that such changes
+#     need a person's review.
+#   * LLM reviewer verdicts are cached by (endpoint, model, settings, prompt,
+#     diff), so a commit that was already reviewed in an earlier run of the
+#     same branch is not paid for again.
+#   * The event log and the dashboard are written outside the checkout
+#     ($RUNNER_TEMP/saica-out), so a commit cannot replace or discard the
+#     record of its own checks.
+#
+# What this workflow cannot do: on `pull_request` GitHub runs the workflow
+# file of the pull request itself, so a pull request that edits this file
+# decides how it is checked. Protect it with CODEOWNERS / branch rules, or
+# run the checks from a workflow that the pull request cannot change.
 #
 # IMPORTANT: this template does not install your supervision tools. Your
 # coding agent must add the install steps for every tool in
 # .saica/checks.json (see "Install supervision tools" below), otherwise those
-# checks are recorded as `error` (exit 127, command not found).
+# checks are recorded as `error`. The job warns when a tool only produced
+# errors.
 #
-# Actions are pinned to major tags for readability. For stronger supply-chain
-# protection, pin each `uses:` to a full commit SHA (keep the tag as a
-# comment) and remove the `nosemgrep` markers.
+# Actions are pinned to full commit SHAs (the tag is in the comment).
 name: saica-ci
 
 on:
@@ -24,32 +48,51 @@ permissions:
 
 jobs:
   saica:
+    # Pushes: the default branch only. Other branches are checked through
+    # their pull request, so a commit is not checked twice.
+    if: github.event_name == 'pull_request' || github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # nosemgrep: github-actions-mutable-action-tag
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-python@v5  # nosemgrep: github-actions-mutable-action-tag
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
 
+      # Verdicts of the LLM reviewer, kept outside the work tree so that a
+      # commit cannot ship its own verdict.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ runner.temp }}/saica-cache
+          key: saica-verdicts-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            saica-verdicts-
+
       # --- Install supervision tools (ADD YOURS HERE) ----------------------
       # Your agent adds one step per runnable tool in .saica/checks.json, e.g.:
-      # - name: Install semgrep
-      #   run: python -m pip install semgrep
+      # - name: Install mypy
+      #   run: python -m pip install mypy==<pinned version>
+      # API keys of LLM reviewers go into the `env` of the next step, from
+      # repository secrets, under the names your checks.json uses.
       # ----------------------------------------------------------------------
 
       - name: Run SAICA checks for each commit
         id: checks
         env:
           EVENT_NAME: ${{ github.event_name }}
-          PUSH_BEFORE: ${{ github.event.before }}
+          EVENT_BEFORE: ${{ github.event.before }}
           PUSH_DELETED: ${{ github.event.deleted }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MAX_COMMITS: "50"
+          SAICA_CACHE_DIR: ${{ runner.temp }}/saica-cache
+          SAICA_OUT: ${{ runner.temp }}/saica-out
+          # Python 3.11+: do not put a script's own folder on the import path.
+          PYTHONSAFEPATH: "1"
         run: |
           set -eu
 
@@ -65,54 +108,46 @@ jobs:
             exit 1
           }
 
-          # resolve LABEL SHA: the commit must exist locally (one fetch attempt
-          # if it does not, e.g. the old tip of a force-push); otherwise fail.
+          # have SHA: true when the commit exists locally (one fetch attempt if
+          # it does not, e.g. the old tip of a force-push).
+          have() {
+            [ -n "$1" ] || return 1
+            if ! git cat-file -e "$1^{commit}" 2>/dev/null; then
+              git fetch --quiet --no-tags origin "$1" 2>/dev/null || true
+            fi
+            git cat-file -e "$1^{commit}" 2>/dev/null
+          }
           resolve() {
             [ -n "$2" ] || fail "$1 SHA is empty; cannot determine the commit range."
-            if ! git cat-file -e "$2^{commit}" 2>/dev/null; then
-              git fetch --quiet --no-tags origin "$2" 2>/dev/null || true
-            fi
-            git cat-file -e "$2^{commit}" 2>/dev/null \
-              || fail "$1 SHA $2 cannot be resolved to a commit; cannot determine the commit range (no commits were checked)."
+            have "$2" || fail "$1 SHA $2 cannot be resolved to a commit; cannot determine the commit range (no commits were checked)."
           }
 
-          # Copy the runner + config out of the tree so each commit can be
-          # checked out (and its tools run against its own files).
-          kit="$RUNNER_TEMP/saica"
-          mkdir -p "$kit"
-          cp .saica/saica_check.py .saica/checks.json "$kit/"
-          if [ -f .saica/dashboard.template.html ]; then
-            cp .saica/dashboard.template.html "$kit/"
-          fi
-
           # Build the rev-list arguments ("$@") for the commits this event
-          # introduced. Merge commits are included. There is no HEAD fallback:
-          # anything that cannot be resolved fails the step.
+          # introduced, and name the commit the kit is taken from (base).
+          # There is no HEAD fallback: anything that cannot be resolved fails.
+          base=""
           case "$EVENT_NAME" in
             pull_request)
               resolve "pull request base" "$PR_BASE"
               resolve "pull request head" "$PR_HEAD"
+              base=$PR_BASE
+              # Always the whole pull request: a later commit must not clear a
+              # finding in an earlier one. The verdict cache keeps this cheap.
               set -- "$PR_HEAD" "^$PR_BASE"
               ;;
             push)
               resolve "pushed commit" "$GITHUB_SHA"
-              [ -n "$PUSH_BEFORE" ] || fail "push event has no 'before' SHA; cannot determine the commit range."
-              if [ -n "${PUSH_BEFORE//0/}" ]; then
-                # Existing ref updated: everything new since the old tip.
-                resolve "push 'before'" "$PUSH_BEFORE"
-                set -- "$GITHUB_SHA" "^$PUSH_BEFORE"
-              elif [ -z "$DEFAULT_BRANCH" ]; then
-                fail "new ref pushed but the default branch name is unknown; cannot determine a baseline."
-              elif [ "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH" ]; then
-                # Newly created default branch: there is no baseline, so its
-                # whole history is new.
-                echo "::notice title=SAICA CI::Default branch '$DEFAULT_BRANCH' was just created; checking its full history."
-                set -- "$GITHUB_SHA"
+              [ -n "${EVENT_BEFORE:-}" ] || fail "push event has no 'before' SHA; cannot determine the commit range."
+              if [ -n "${EVENT_BEFORE//0/}" ]; then
+                # Existing branch updated: the new first-parent commits.
+                resolve "push 'before'" "$EVENT_BEFORE"
+                base=$EVENT_BEFORE
+                set -- --first-parent "$GITHUB_SHA" "^$EVENT_BEFORE"
               else
-                # New branch or tag: baseline is the default branch history.
-                base=$(git rev-parse --verify --quiet "refs/remotes/origin/$DEFAULT_BRANCH^{commit}") \
-                  || fail "new ref pushed but origin/$DEFAULT_BRANCH cannot be resolved; cannot determine a baseline."
-                set -- "$GITHUB_SHA" "^$base"
+                # Newly created default branch: there is no baseline, so its
+                # whole first-parent history is new and the kit has no base.
+                echo "::notice title=SAICA CI::Branch '$GITHUB_REF' was just created; checking its full history."
+                set -- --first-parent "$GITHUB_SHA"
               fi
               ;;
             *)
@@ -132,35 +167,103 @@ jobs:
           fi
           echo "Checking $total commit(s): $*"
 
+          # The kit comes from the base of the change, not from the change.
+          kit="$RUNNER_TEMP/saica-kit"
+          rm -rf "$kit"
+          mkdir -p "$kit"
+          trusted=0
+          if [ -n "$base" ] \
+            && git cat-file -e "$base:.saica/saica_check.py" 2>/dev/null \
+            && git cat-file -e "$base:.saica/checks.json" 2>/dev/null; then
+            git archive "$base" .saica | tar -x -C "$kit"
+            trusted=1
+            echo "Kit (runner, checks.json, helper scripts, prompts) taken from the base commit $base."
+          else
+            [ -f .saica/saica_check.py ] && [ -f .saica/checks.json ] \
+              || fail "no .saica/saica_check.py and .saica/checks.json in the base commit or in the checked-out commit."
+            cp -R .saica "$kit/.saica"
+            echo "::warning title=SAICA CI::The base of this change has no SAICA kit, so the kit files of the change itself are used. Review .saica/ and this workflow by hand."
+          fi
+          echo "$kit" > "$RUNNER_TEMP/saica-kit-path"
+          # Results go outside the checkout: a commit cannot track, replace or
+          # redirect a file that is not in the work tree.
+          rm -rf "$SAICA_OUT"
+          mkdir -p "$SAICA_OUT"
+
           start=$(git rev-parse HEAD)
           blocked=0
           for sha in $commits; do
-            if ! git checkout --quiet --detach "$sha"; then
-              git checkout --quiet --detach "$start" || true
+            if ! git checkout --quiet --force --detach "$sha"; then
+              git checkout --quiet --force --detach "$start" || true
               fail "could not check out $sha; this commit and any after it were not checked."
             fi
-            python3 "$kit/saica_check.py" --config "$kit/checks.json" \
-              run --commit "$sha" --source ci || blocked=1
+            if [ "$trusted" = "1" ]; then
+              # Helper scripts and prompts are read from .saica/ in the work
+              # tree: replace the commit's copy with the base's.
+              rm -rf .saica
+              cp -R "$kit/.saica" .saica
+            fi
+            python3 "$kit/.saica/saica_check.py" --config "$kit/.saica/checks.json" \
+              --events "$SAICA_OUT/events.jsonl" run --commit "$sha" --source ci || blocked=1
           done
           echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
-          git checkout --quiet --detach "$start" \
+          git checkout --quiet --force --detach "$start" \
             || fail "could not restore the original checkout ($start) after the checks."
+
+      - name: Summarise
+        if: always()
+        env:
+          SAICA_OUT: ${{ runner.temp }}/saica-out
+        run: |
+          # A tool that only produced errors did not check anything: say so.
+          python3 - <<'PY'
+          import collections, json, os
+
+          path = os.path.join(os.environ.get("SAICA_OUT", ".saica"), "events.jsonl")
+          rows = collections.defaultdict(collections.Counter)
+          first_error = {}
+          if os.path.exists(path):
+              for line in open(path, encoding="utf-8", errors="replace"):
+                  try:
+                      e = json.loads(line)
+                  except ValueError:
+                      continue
+                  if e.get("source") != "ci" or not e.get("tool_id"):
+                      continue
+                  rows[e["tool_id"]][e.get("outcome")] += 1
+                  if e.get("outcome") == "error":
+                      first_error.setdefault(e["tool_id"], (e.get("detail") or "").splitlines()[0][:200] if e.get("detail") else "")
+          out = ["### SAICA checks", "", "| check | pass | caught | error | skipped |", "|---|---|---|---|---|"]
+          for tool, c in sorted(rows.items()):
+              out.append("| %s | %d | %d | %d | %d |" % (tool, c["pass"], c["caught"], c["error"], c["skipped"]))
+              if c["error"] and not (c["pass"] or c["caught"]):
+                  print("::warning title=SAICA CI::%s did not check any commit (%d errors): %s" % (tool, c["error"], first_error.get(tool, "")))
+          if not rows:
+              out.append("| (no events) | | | | |")
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              with open(summary, "a", encoding="utf-8") as fh:
+                  fh.write("\n".join(out) + "\n")
+          PY
 
       - name: Build dashboard
         if: always()
+        env:
+          SAICA_OUT: ${{ runner.temp }}/saica-out
         run: |
-          template=".saica/dashboard.template.html"
-          [ -f "$RUNNER_TEMP/saica/dashboard.template.html" ] && template="$RUNNER_TEMP/saica/dashboard.template.html"
-          python3 .saica/saica_check.py dashboard --template "$template" || true
+          kit=$(cat "$RUNNER_TEMP/saica-kit-path" 2>/dev/null || true)
+          [ -n "$kit" ] && [ -f "$kit/.saica/saica_check.py" ] || kit="."
+          python3 "$kit/.saica/saica_check.py" --events "$SAICA_OUT/events.jsonl" \
+            dashboard --out "$SAICA_OUT/dashboard.html" || true
 
       - name: Upload events and dashboard
         if: always()
-        uses: actions/upload-artifact@v4  # nosemgrep: github-actions-mutable-action-tag
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: saica-results
           path: |
-            .saica/events.jsonl
-            .saica/dashboard.html
+            ${{ runner.temp }}/saica-out/events.jsonl
+            ${{ runner.temp }}/saica-out/dashboard.html
           if-no-files-found: warn
 
       # --- Optional: publish the dashboard to GitHub Pages ------------------
@@ -169,7 +272,7 @@ jobs:
       # Pages site exposes commit subjects and check details.
       # - name: Prepare Pages content
       #   if: always() && github.ref == 'refs/heads/main'
-      #   run: mkdir -p _site && cp .saica/dashboard.html _site/index.html
+      #   run: mkdir -p _site && cp "$RUNNER_TEMP/saica-out/dashboard.html" _site/index.html
       # - uses: actions/upload-pages-artifact@v3
       #   if: always() && github.ref == 'refs/heads/main'
       #   with:
@@ -178,8 +281,11 @@ jobs:
       #   if: always() && github.ref == 'refs/heads/main'
       # ----------------------------------------------------------------------
 
-      - name: Fail if a blocking check caught something
+      # Also when a blocking check could not run on a commit, and when a commit
+      # edits the kit itself (saica:kit-tamper blocks by default): a person
+      # reviews that change and merges it on purpose.
+      - name: Fail if a blocking check caught something or could not run
         if: steps.checks.outputs.blocked == '1'
         run: |
-          echo "A blocking SAICA check caught a problem; see the step log and the saica-results artifact."
+          echo "A blocking SAICA check caught a problem or could not run; see the step log and the saica-results artifact."
           exit 1
