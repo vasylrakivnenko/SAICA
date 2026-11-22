@@ -1,0 +1,119 @@
+---
+// Reviewer x failure-mode grid of J, one block per provenance group (results.overview.groups). There is no
+// column or row that averages over modes and no ordering by score: J compares reviewers inside one mode only.
+// Each cell shows J with its 95% interval; a cell of a row that is not ranked in that mode is marked. The last
+// row of a block says who is best in each mode by the file's rules (a winner, a top group, or nobody under the
+// floor). Baseline rules and shortcut baselines sit under a separate heading and are never best.
+import {
+  GROUPS, OVERVIEW_ROWS, TYPE_LABEL, TYPE_VAR,
+  bestLabel, bestState, modeLinks, rowByKey, rowHref,
+  type Mode, type OverviewRow,
+} from '../home/bench';
+import { interval, signedPct } from '../../lib/format';
+
+const fill = (j: number) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
+const isReference = (r: OverviewRow) => r.kind === 'baseline_rule' || r.kind === 'shortcut_baseline';
+const inGroup = (r: OverviewRow, modes: Mode[]) => modes.some((m) => r.cells[m.id]);
+/** Tool page of an overview row, found through the row behind one of its cells. */
+const hrefOf = (r: OverviewRow, modes: Mode[]): string | null => {
+  for (const m of modes) {
+    const c = r.cells[m.id];
+    const row = c ? rowByKey(m, c.key) : undefined;
+    if (row && row.kind === 'catalog_tool') return rowHref(row);
+  }
+  return null;
+};
+const types = [...new Set(OVERVIEW_ROWS.map((r) => r.type))];
+---
+
+<div class="og">
+  {GROUPS.map((g) => {
+    const reviewers = OVERVIEW_ROWS.filter((r) => !isReference(r) && inGroup(r, g.list));
+    const reference = OVERVIEW_ROWS.filter((r) => isReference(r) && inGroup(r, g.list));
+    const line = (r: OverviewRow) => {
+      const href = hrefOf(r, g.list);
+      return (
+        <tr>
+          <th scope="row" class="rname">
+            <i class="dot" style={`background:var(${TYPE_VAR[r.type] ?? '--t-base'})`} aria-hidden="true"></i>
+            {href ? <a href={href}>{r.tool}</a> : r.tool}
+          </th>
+          {g.list.map((m) => {
+            const c = r.cells[m.id];
+            if (!c) return <td class="na"><span class="sr-only">not run</span><span aria-hidden="true">·</span></td>;
+            return (
+              <td class={'cell' + (c.ranked ? '' : ' unranked')} style={c.ranked ? `background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}` : ''} data-cell={`${m.id}/${c.key}`}>
+                {signedPct(c.j, 0)}
+                <span class="ci">{interval(c.j_ci, 0, true)}</span>
+                {!c.ranked && <span class="ci">not ranked</span>}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    };
+    return (
+      <section class="og-group" data-group={g.id}>
+        <h3>{g.label}</h3>
+        <p class="og-desc">{g.description}</p>
+        <div class="og-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Reviewer</th>
+                {g.list.map((m) => (
+                  <th scope="col" class="mcol">
+                    <a href={modeLinks(m).tab}>{m.title}</a>
+                    {m.title !== m.name && <span class="ci">{m.name}</span>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {reviewers.map(line)}
+              <tr class="best">
+                <th scope="row">Best reviewer</th>
+                {g.list.map((m) => <td class="bestcell" data-best-for={m.id} data-best-state={bestState(m)}>{bestLabel(m)}</td>)}
+              </tr>
+              {reference.length > 0 && (
+                <tr class="refhead"><th scope="row" colspan={g.list.length + 1}>For reference, never counted as best</th></tr>
+              )}
+              {reference.map(line)}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
+  })}
+  <p class="og-legend">
+    {types.map((t) => <span><i class="dot" style={`background:var(${TYPE_VAR[t] ?? '--t-base'})`}></i>{TYPE_LABEL[t] ?? t}</span>)}
+    <span>Each cell: J and its 95% interval · darker = higher J · “·” = not run</span>
+  </p>
+</div>
+
+<style>
+  .og { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; }
+  .og-group + .og-group { margin-top: 1.6rem; }
+  .og h3 { margin: 0; font: 600 15px ui-sans-serif, system-ui, sans-serif; color: #111418; }
+  .og-desc { margin: .15rem 0 .4rem; max-width: 80ch; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .og-wrap { overflow-x: auto; padding-bottom: 4px; }
+  .og table { border-collapse: collapse; font: 13.5px/1.3 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .og th, .og td { padding: .4rem .5rem; border-bottom: 1px solid rgb(17 20 24 / .08); text-align: left; vertical-align: top; }
+  .og thead th { font-size: 12.5px; font-weight: 600; color: #4a5160; vertical-align: bottom; }
+  .og th.mcol { text-align: center; min-width: 7.5rem; max-width: 10rem; }
+  .og th.mcol a { color: inherit; text-decoration: none; border-bottom: 1px dotted #6b7180; }
+  .og th.mcol a:hover, .og th.mcol a:focus-visible { color: #1f3a93; }
+  .og th.rname { font-weight: 500; white-space: nowrap; min-width: 10rem; }
+  .og th.rname a { color: inherit; text-decoration: none; }
+  .og th.rname a:hover, .og th.rname a:focus-visible { color: #1f3a93; text-decoration: underline; }
+  .og td.cell { text-align: center; font-weight: 600; white-space: nowrap; }
+  .og td.cell.unranked { color: #6b7180; font-weight: 500; }
+  .og td.na { text-align: center; color: #9a9fab; }
+  .og .ci { display: block; font-size: 11px; font-weight: 400; opacity: .85; }
+  .og tr.best th, .og tr.best td { border-top: 2px solid rgb(17 20 24 / .12); font-size: 12.5px; }
+  .og td.bestcell { text-align: center; max-width: 10rem; }
+  .og tr.refhead th { font-size: 12px; font-weight: 600; color: #6b7180; padding-top: .7rem; }
+  .og .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+  .og-legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: .7rem 0 0; font: 12.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .og-legend span { display: inline-flex; align-items: center; }
+</style>

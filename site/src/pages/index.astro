@@ -1,435 +1,362 @@
 ---
-// SAICA-Bench home: the leaderboard. Data: /bench/results.json, written by
-// bench/build_report.py from each failure mode's results. An Overview tab (results.overview: reviewer x mode
-// grid, quality-vs-cost chart, findings) and one tab per mode. The best-tool-per-mode table lives on /tools/.
+// SAICA-Bench home: the leaderboard. Data: /bench/results.json (bench/build_report.py), read through
+// components/home/bench.ts. Every panel is rendered once, here, at build time: an Overview (first finding,
+// reviewer x mode grid in one block per provenance group, the any-flag estimate, findings, caveats), one panel
+// per measured failure mode (facts, the results table with run cards, a J-versus-cost chart) and one per mode
+// that is not benchmarked (catalog tools by GitHub stars). The script at the bottom only switches panels, sorts
+// the static rows and draws the chart from a slim data island; it renders no table.
+//
+// There is no average over modes, no ordering of modes by score and no "best" taken from the first row:
+// who is best in a mode is what the file says (a winner, a top group, or nobody under the floor).
 import BaseLayout from '../layouts/BaseLayout.astro';
-import results from '../../public/bench/results.json';
-import { OVERVIEW as OV, MODES, SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, AUTHOR, pct, money, toolPage } from '../components/home/bench';
-import { SITE_NAME, abs, fmUrl } from '../lib/seo';
+import ModeFacts from '../components/bench/ModeFacts.astro';
+import OverviewGrid from '../components/bench/OverviewGrid.astro';
+import ResultsTable from '../components/bench/ResultsTable.astro';
+import UnionEstimate from '../components/bench/UnionEstimate.astro';
+import {
+  AUTHOR, CAVEATS, CITE_AS, COUNTS, FINDINGS, GENERATED_LONG, GROUPS, METHOD, MISSING_MODES, MODES, PARTIAL, STAR_MODES,
+  TYPE_LABEL, TYPE_VAR, UNION,
+  modeLinks, rankedRows, toolPage, unrankedRows,
+} from '../components/home/bench';
+import { KG_TO_BENCH, SITE_NAME, abs, fmUrl, jsonLd } from '../lib/seo';
+import { andList, int } from '../lib/format';
 
-// SEO: the Overview tab (grid, legend, findings, caveats) is rendered here at build time,
-// so the page has its results in static HTML; the inline script below re-renders them identically and adds the rest.
-const hi = [...SUMMARIES].sort((a, b) => b.best.j - a.best.j);
 const title = 'SAICA-Bench: AI Code Review Benchmark for Coding Agent Failures';
-const description = `Which LLMs, AI code reviewers and free tools catch coding agent failures? Measured on ${MODES.length} failure modes: best J ${Math.round(hi[0].best.j * 100)}% on ${hi[0].m.name.toLowerCase()}, ${Math.round(hi[hi.length - 1].best.j * 100)}% on ${hi[hi.length - 1].m.name.toLowerCase()}.`;
+const description =
+  `What do LLMs, AI code reviewers and free tools flag in the work of AI coding agents? ${COUNTS.modes} failure modes, ` +
+  `${int(COUNTS.ranked_rows)} ranked rows, ${int(COUNTS.samples)} labelled samples; ${COUNTS.agent_output} of the sets are real agent output.`;
 const jsonld = [
   { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: abs('/'), description, inLanguage: 'en', creator: AUTHOR },
   {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Failure modes of AI coding agents measured on SAICA-Bench',
-    numberOfItems: SUMMARIES.length,
-    itemListElement: SUMMARIES.map((s, i) => ({ '@type': 'ListItem', position: i + 1, name: s.m.name, url: abs(s.url) })),
+    numberOfItems: MODES.length,
+    itemListElement: MODES.map((m, i) => ({ '@type': 'ListItem', position: i + 1, name: m.name, url: abs(modeLinks(m).page) })),
   },
 ];
+const lead = FINDINGS[0];
 
-// Links the inline script cannot compute itself (it has no imports): failure-mode page per tab, tool page per catalog id
-// (only ids the catalog has a page for), and the catalog id behind each Overview grid row (the grid carries names only).
-const FM_URL = Object.fromEntries([...MODES, ...STAR_MODES].map((m) => [m.id, fmUrl(m.id)]));
-const ids = new Set([...MODES.flatMap((m) => m.rows.map((r) => r.kg_id)), ...STAR_MODES.flatMap((m) => m.tools.map((t) => t.id))]);
-const TOOL_URL = Object.fromEntries([...ids].map((id) => [id, toolPage(id)]).filter(([, u]) => u));
-const OV_KG: Record<string, string> = {};
-for (const r of OV.rows)
-  for (const [mid, c] of Object.entries(r.cells)) {
-    const kg = MODES.find((m) => m.id === mid)?.rows.find((x) => x.tool === c.tool)?.kg_id;
-    if (kg && TOOL_URL[kg]) { OV_KG[r.tool] = kg; break; }
-  }
-
-// Static copy of the Overview grid: same markup and inline styles as renderOverview() in the script.
-const short = (t: string) => t.replace(', asked directly', '').split(' (')[0].split(':')[0];
-const fill = (j: number) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
-const col = (t: string) => `var(${TYPE_VAR[t]})`;
-const cellTip = (name: string, c: { tool: string; j: number; fa: number; cost1k: number }) =>
-  `${name} · ${c.tool}: J ${pct(c.j)}, FPR ${pct(c.fa)}, ` + (c.cost1k === 0 ? 'free' : `${money(c.cost1k)} per 1,000 reviews`);
-const ovTypes = [...new Set(OV.rows.map((r) => r.type))];
+// What the script needs to draw one mode's chart: a slim copy of the rows (no run cards, strata, tables, notes).
+const chartData = {
+  alias: KG_TO_BENCH,
+  typeLabel: TYPE_LABEL,
+  modes: Object.fromEntries(
+    MODES.map((m) => [
+      m.id,
+      {
+        title: m.title,
+        rows: m.rows.map((r) => ({
+          short: r.short,
+          type: r.type,
+          ranked: r.ranked,
+          top: !m.below_floor && m.top_group.includes(r.key),
+          j: r.j,
+          lo: r.j_ci[0],
+          hi: r.j_ci[1],
+          cost: r.cost1k,
+          est: r.cost_estimated,
+        })),
+      },
+    ]),
+  ),
+};
+const MECH: Record<string, string> = { detects: 'Detects', prevents: 'Prevents', records: 'Records only' };
+const fin = (v: unknown) => (v === true ? 'yes' : v === false ? 'no' : 'unclear');
 ---
 
 <BaseLayout title={title} rawTitle description={description} jsonld={jsonld}>
   <div class="lb">
     <h1>Leaderboard</h1>
-    <p class="tagline">Can Language Models catch coding agents' failures?</p>
-    <p class="byline">Vasyl Rakivnenko, Stanford University</p>
-    <p class="lead">How often each supervision tool flags a failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).</p>
+    <p class="tagline">What do reviewers flag in the work of AI coding agents?</p>
+    <p class="byline">Vasyl Rakivnenko, Stanford University · {CITE_AS}, built {GENERATED_LONG}</p>
+    <p class="lead">{METHOD.metric}</p>
+    <p class="lead"><b>The setting:</b> {METHOD.setting}</p>
+    {PARTIAL && <p class="lead warn">This is a partial build of the results: {MISSING_MODES.length ? andList(MISSING_MODES) : 'some modes'} are missing. Do not cite it.</p>}
 
-    <div class="tabs" role="tablist" id="lb-tabs"></div>
+    <div class="tabs" role="tablist" id="lb-tabs" aria-label="Overview and one tab per failure mode">
+      <button role="tab" type="button" id="lb-tab-overview" data-id="overview" aria-controls="lb-panel-overview" aria-selected="true">Overview</button>
+      {GROUPS.map((g) => (
+        <>
+          <span class="tab-group" role="presentation">{g.label}:</span>
+          {g.list.map((m) => (
+            <button role="tab" type="button" id={`lb-tab-${m.id}`} data-id={m.id} aria-controls={`lb-panel-${m.id}`} aria-selected="false" tabindex="-1">{m.name}</button>
+          ))}
+        </>
+      ))}
+      {STAR_MODES.length > 0 && <span class="tab-group" role="presentation">Not benchmarked:</span>}
+      {STAR_MODES.map((m) => (
+        <button role="tab" type="button" id={`lb-tab-${m.id}`} data-id={m.id} aria-controls={`lb-panel-${m.id}`} aria-selected="false" tabindex="-1">{m.name}</button>
+      ))}
+    </div>
 
-    <section id="lb-ov">
-      <p class="fine ov-intro">J for each reviewer that ran on several failure modes. The bottom row names the best tool in each mode, of any type. Hover a cell for the exact tool, its false positive rate and cost; click a mode to open its tab.</p>
-      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Reviewer</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the tool ran (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i>{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={`${b.tool}: J ${pct(b.j)}`}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}</td>; })}<td></td></tr></tbody></table></div>
-      <div class="legend" id="lb-ov-legend">{ovTypes.map((t) => <span><i style={`background:${col(t)}`}></i>{TYPE_LABEL[t]}</span>)}<span>Darker cell = higher J · “·” = not run</span></div>
-      <h2>Average quality vs average cost</h2>
-      <p class="fine">Each point is one reviewer’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the tool ran on only 3 of them.</p>
-      <div class="ov-modes" id="lb-ov-modes" role="group" aria-label="Failure modes included in the averages"></div>
-      <div class="chart" id="lb-ov-chart"></div>
-      <h2>What the grid says</h2>
-      <ul class="findings" id="lb-ov-findings">{OV.findings.map(([lead, rest]) => <li><b>{lead}</b>{rest}</li>)}</ul>
+    <section class="panel" role="tabpanel" id="lb-panel-overview" aria-labelledby="lb-tab-overview" data-panel="overview">
+      {lead && <p class="first" data-lead-finding><b>{lead[0]}</b>{lead[1]}</p>}
+
+      <h2>Reviewer by failure mode, one block per kind of set</h2>
+      <p class="fine">
+        J for each reviewer that ran on several failure modes, with its 95% interval. The blocks are not comparable
+        with each other and no average over modes is shown: where the bad samples of a set come from explains most of
+        the difference between sets. A mode's name opens its tab.
+      </p>
+      <OverviewGrid />
+
+      {UNION && (
+        <>
+          <h2>If the prompt of every mode ran on every change</h2>
+          <p class="fine">
+            Each cell above is the answer to one question about one failure. In use every question would run on every
+            change. This table estimates what that does to false alarms; it was not measured.
+          </p>
+          <UnionEstimate />
+        </>
+      )}
+
+      <h2>What the results say</h2>
+      <ul class="findings">{FINDINGS.map(([head, rest]) => <li><b>{head}</b>{rest}</li>)}</ul>
       <h2>Read before citing</h2>
-      <ul class="ov-caveats" id="lb-ov-caveats">{OV.caveats.map((c) => <li>{c}</li>)}</ul>
+      <ul class="ov-caveats">{CAVEATS.map((c) => <li>{c}</li>)}</ul>
+      <p class="fine"><a href="/benchmark/#threats">Threats to validity, with what was measured and what was not →</a></p>
     </section>
 
-    <section id="lb-star" hidden>
-      <p class="fine ov-intro" id="lb-star-intro"></p>
-      <div class="tbl-wrap"><table id="lb-star-table"></table></div>
-      <p class="fine" id="lb-star-note"></p>
-    </section>
+    {MODES.map((m) => (
+      <section class="panel" role="tabpanel" id={`lb-panel-${m.id}`} aria-labelledby={`lb-tab-${m.id}`} data-panel={m.id} hidden>
+        <h2 class="mode-h">{m.title}{m.title !== m.name && <span class="fm"> · failure mode: {m.name}</span>}</h2>
+        <p class="fine">{m.summary} Data: {m.dataset}.</p>
+        <ModeFacts m={m} />
+        <ResultsTable m={m} />
+        <h3>J against cost</h3>
+        <p class="fine">
+          Each point is one row: J with its 95% interval (the vertical line) against cost per 1,000 reviews. Filled
+          points are ranked reviewers, hollow ones are reference rows. Overlapping intervals mean the rows cannot be
+          told apart by this picture; the table marks the top group.
+        </p>
+        <div class="chart" data-chart={m.id} role="img" aria-label={`${m.title}: J with 95% interval against cost per 1,000 reviews, ${rankedRows(m).length} ranked rows and ${unrankedRows(m).length} reference rows`}></div>
+        <p class="more"><a href={modeLinks(m).page}>About {m.name.toLowerCase()}, with parts of this set scored apart →</a> · <a href={modeLinks(m).method}>How this set was built →</a> · <a href="/benchmark/#threats">Threats to validity →</a></p>
+      </section>
+    ))}
 
-    <div id="lb-mode" hidden>
-    <div class="controls">
-      <div class="types" id="lb-types" role="group" aria-label="Filter by type"></div>
-      <label><input type="checkbox" id="lb-stars" checked /> Show GitHub stars</label>
-      <span class="mode-note" id="lb-note"></span>
-    </div>
+    {STAR_MODES.map((m) => (
+      <section class="panel" role="tabpanel" id={`lb-panel-${m.id}`} aria-labelledby={`lb-tab-${m.id}`} data-panel={m.id} hidden>
+        <h2 class="mode-h">{m.name}</h2>
+        <p class="fine">
+          Not benchmarked yet: no public dataset with confirmed labels exists for {m.name.toLowerCase()}, so these are
+          the SAICA catalog's tools tagged for it, by GitHub stars. Stars measure popularity, not what a tool
+          catches, and a tag is the catalog's claim, not a test result. {m.description}
+          {' '}<a href={fmUrl(m.id)}>About {m.name.toLowerCase()} →</a>
+        </p>
+        <div class="tbl-wrap">
+          <table class="lb-star">
+            <thead>
+              <tr><th scope="col">Tool</th><th scope="col">How it addresses this</th><th scope="col">Mechanism</th><th scope="col">Checks a finished change</th><th scope="col" class="num">Stars</th></tr>
+            </thead>
+            <tbody>
+              {[...m.tools].sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0)).map((t) => {
+                const href = toolPage(t.id) ?? t.repository_url ?? null;
+                return (
+                  <tr>
+                    <th scope="row">{href ? <a href={href}>{t.name}</a> : t.name}</th>
+                    <td class="how">{t.how}</td>
+                    <td>{MECH[t.mechanism ?? ''] ?? t.mechanism}</td>
+                    <td>{fin(t.runs_on_finished_change)}</td>
+                    <td class="num">{t.stars ? int(t.stars) : '—'}{t.stars_updated_at && <span class="sub">as of {t.stars_updated_at}</span>}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p class="fine">Detects = flags it after the fact; prevents = stops it during a run; records only = keeps traces a person could inspect. {m.note}</p>
+      </section>
+    ))}
 
-    <div class="tbl-wrap">
-      <table id="lb-table">
-        <thead>
-          <tr>
-            <th class="num">#</th>
-            <th>Tool</th>
-            <th>Type</th>
-            <th class="num"><button class="sort" data-k="j" type="button" data-tip="J = TPR − FPR. 0% = no better than chance, 100% = flags every bad sample and no clean one">J</button></th>
-            <th class="num"><button class="sort" data-k="catch" type="button" data-tip="True positive rate (recall)">TPR</button></th>
-            <th class="num"><button class="sort" data-k="fa" type="button" data-tip="False positive rate">FPR</button></th>
-            <th class="num"><button class="sort" data-k="cost" type="button" data-tip="Cost per 1,000 reviews, averaged over our run">Cost</button></th>
-            <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <p class="fine">
-      <b>Cost / 1k reviews</b>: what the tool costs to review 1,000 items of this mode (code changes, functions or agent sessions), averaged
-      over our run. API models: price reported by the API (Azure and Fireworks: list price × tokens). Self-hosted: GPU time at $0.89/h while
-      requests ran. Free programs: $0. Hover a cost for the run total, a rate for its 95% confidence interval. Stars are a popularity
-      reference only, not part of the score.
-    </p>
-
-    <h2>Quality vs cost</h2>
-    <p class="fine">Up is better, left is cheaper. The dashed line is the Pareto frontier: nothing cheaper scores higher.</p>
-    <div class="chart" id="lb-chart"></div>
-    <div class="legend" id="lb-legend"></div>
-    </div>
-
+    <p class="legend">{Object.entries(TYPE_LABEL).filter(([t]) => MODES.some((m) => m.rows.some((r) => r.type === t))).map(([t, label]) => <span><i style={`background:var(${TYPE_VAR[t] ?? '--t-base'})`}></i>{label}</span>)}</p>
     <p class="more"><a href="/benchmark/">How each failure mode is tested →</a> · <a href="/findings/">Findings report →</a> · <a href="/graph/">Knowledge graph of supervision tools →</a></p>
   </div>
+  <script type="application/json" id="lb-data" set:html={jsonLd(chartData)} />
 </BaseLayout>
 
-<script is:inline define:vars={{ results, FM_URL, TOOL_URL, OV_KG }}>
-const DATA = results.modes, TYPE_LABEL = results.type_label, OV = results.overview, STAR = results.star_modes || [];
-const TYPE_VAR = {deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule'};
-const isBaseline = (r) => r.type === 'baseline_model' || r.type === 'baseline_rule';
-const pct = (x) => (x * 100).toFixed(1) + '%';
-const money = (c) => (c === 0 ? '$0' : '$' + c.toFixed(2));
-const col = (t) => `var(${TYPE_VAR[t]})`;
-const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) { if (k === 'text') e.textContent = v; else if (k === 'style') e.style.cssText = v; else e.setAttribute(k, v); }
-  kids.flat().forEach((k) => k != null && e.append(k)); return e; };
-const svgEl = (tag, attrs = {}) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
-// Tool name -> its page on this site when the catalog has one, else its GitHub repo; GitHub stays one click away in the stars cell.
-const toolLink = (kgId, repo, text) => kgId && TOOL_URL[kgId] ? el('a', { href: TOOL_URL[kgId], text }) : repo ? el('a', { href: repo, rel: 'noopener', text }) : text;
-const starsCell = (n, repo) => { if (!n) return '—'; const t = n.toLocaleString('en-US'); return repo ? el('a', { href: repo, rel: 'noopener', class: 'gh', text: t }) : t; };
-const fmLink = (m, sep) => FM_URL[m.id] ? [sep, el('a', { href: FM_URL[m.id], text: `About ${m.name.toLowerCase()} →` })] : [];
-const ALL_TYPES = Object.keys(TYPE_LABEL).filter((t) => DATA.some((m) => m.rows.some((r) => r.type === t)));
-const state = { mode: OV ? 'overview' : DATA[0].id, key: 'j', types: new Set(ALL_TYPES), stars: true };
-const store = (k, v) => { try { localStorage.setItem('saica-lb-' + k, JSON.stringify(v)); } catch (e) {} };
-const load = (k, d) => { try { const v = localStorage.getItem('saica-lb-' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
-state.stars = load('stars', true);
-const savedTypes = load('types', null); if (Array.isArray(savedTypes) && savedTypes.length) state.types = new Set(savedTypes.filter((t) => ALL_TYPES.includes(t)));
+<script>
+  import { money, signedPct } from '../lib/format';
 
-function rowsFor(m) { return m.rows.filter((r) => state.types.has(r.type)); }
-function pareto(rows) { return rows.filter((r) => !rows.some((o) => o !== r && o.cost <= r.cost && o.j > r.j)).sort((a, b) => a.cost - b.cost); }
+  interface ChartRow { short: string; type: string; ranked: boolean; top: boolean; j: number; lo: number; hi: number; cost: number; est: boolean }
+  interface Data { alias: Record<string, string>; typeLabel: Record<string, string>; modes: Record<string, { title: string; rows: ChartRow[] }> }
+  const DATA = JSON.parse(document.getElementById('lb-data')?.textContent ?? '{}') as Data;
+  const TYPE_VAR: Record<string, string> = { deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule' };
 
-// Point labels: try right of the dot, above-right, below-right, then the same on the left, then a step or two further;
-// a spot is taken when it overlaps another label, another dot or the dashed frontier (which leaves every frontier point
-// horizontally to the right, so a frontier label lands above its segment instead of on it).
-function placeLabels(svg, items, segs, X0, W, H) {
-  const boxes = items.map((it, i) => ({ a: it.x - it.r - 1, b: it.x + it.r + 1, top: it.y - it.r - 1, bot: it.y + it.r + 1, own: i })).concat(segs);
-  // frontier labels first (always drawn), then the rest wherever there is still room
-  const order = items.map((it, i) => i).sort((p, q) => (items[q].must ? 1 : 0) - (items[p].must ? 1 : 0));
-  order.forEach((i) => { const it = items[i]; if (!it.text) return;
-    // a label wider than 60% of the plot is cut with an ellipsis (the dot's tooltip has the full name)
-    const maxc = Math.min(44, Math.floor((W - X0) * 0.6 / 6.3)), text = it.text.length > maxc ? it.text.slice(0, maxc - 1).trimEnd() + '…' : it.text;
-    const w = text.length * 6.3, g = it.r + 3;
-    const cands = [];
-    for (const side of [1, -1]) for (const by of [it.y + 4, it.y - it.r - 2, it.y + it.r + 12]) cands.push([side, by]);
-    for (let k = 2; k <= 3; k++) for (const side of [1, -1]) cands.push([side, it.y + 4 + 13 * k], [side, it.y + 4 - 13 * k]); // stay near the dot
-    const box = ([side, by]) => { const lx = it.x + side * g; return { lx, side, by, a: side > 0 ? lx : lx - w, b: side > 0 ? lx + w : lx, top: by - 10, bot: by + 3 }; };
-    const inside = (c) => c.a >= X0 && c.b <= W - 2 && c.top >= 0 && c.bot <= H;
-    // overlap cost: another label 4, a dot 2, a frontier segment 1 (a thin dashed line under text still reads)
-    const hits = (c) => boxes.reduce((n, p) => n + (p.own !== i && c.a < p.b && c.b > p.a && c.top < p.bot && c.bot > p.top ? (p.lx !== undefined ? 4 : p.own !== undefined ? 2 : 1) : 0), 0);
-    // first free spot; if none is free (a dense cluster, a long label crossing a frontier step), the cheapest in-bounds one
-    const fit = cands.map(box).filter(inside).map((c) => [c, hits(c)]);
-    const free = fit.find(([, h]) => h === 0);
-    if (!free && !it.must) return; // no room near the dot: leave it unlabelled (hover / focus shows the name) rather than overprint
-    const c = (free || fit.sort((x, y) => x[1] - y[1])[0] || [box(cands[0])])[0];
-    const label = svgEl('text', { class: 'lbl', x: c.lx, y: c.by, 'text-anchor': c.side > 0 ? 'start' : 'end' }); label.textContent = text; svg.append(label);
-    boxes.push(c); });
-}
-// Boxes covering the dashed frontier path (H then V between consecutive frontier points), for placeLabels.
-function frontierSegs(pts) { const s = [];
-  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
-    s.push({ a: x0, b: x1, top: y0 - 2, bot: y0 + 2 }, { a: x1 - 2, b: x1 + 2, top: Math.min(y0, y1), bot: Math.max(y0, y1) }); }
-  return s; }
+  const tabs = document.getElementById('lb-tabs') as HTMLElement;
+  const buttons = Array.from(tabs.querySelectorAll<HTMLButtonElement>('button[role="tab"]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('.lb .panel'));
+  const valid = (id: string) => buttons.some((b) => b.dataset.id === id);
+  // A tab also answers to the knowledge-graph id of its failure mode (#test_manipulation, #security_vulnerability).
+  const tabFor = (id: string): string | null => (valid(id) ? id : valid(DATA.alias?.[id] ?? '') ? DATA.alias[id] : null);
+  let current = 'overview';
 
-function renderTable(m) {
-  const asc = state.key === 'fa' || state.key === 'cost';
-  const rows = [...rowsFor(m)].sort((a, b) => {
-    const av = a[state.key] ?? -1, bv = b[state.key] ?? -1; return asc ? av - bv : bv - av; });
-  const tb = document.querySelector('#lb-table tbody');
-  tb.replaceChildren(...rows.map((r, i) => el('tr', { class: isBaseline(r) ? 'baseline' : '' },
-    el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', {}, toolLink(r.kg_id, r.repository_url, r.tool)),
-    el('td', {}, el('span', { class: 'pill', style: `color:${col(r.type)}`, text: TYPE_LABEL[r.type] })),
-    el('td', { class: 'num j' }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j)),
-    el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
-    el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
-    el('td', { class: 'num', 'data-tip': `${money(r.cost)} for all ${m.n} reviews in this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_note && r.cost_note.includes('estimated') ? '~' : '') + money(r.cost / m.n * 1000) }),
-    el('td', { class: 'num col-stars', 'data-tip': r.stars_updated_at ? `as of ${r.stars_updated_at}` : '' }, starsCell(r.stars, r.repository_url)))));
-  document.querySelectorAll('#lb-table .sort').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.k === state.key)));
-  document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
-  document.getElementById('lb-note').replaceChildren(`${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`, ...fmLink(m, ' · '));
-}
-
-function renderChart(m) {
-  const box = document.getElementById('lb-chart'); box.replaceChildren();
-  const rows = rowsFor(m); if (!rows.length) return;
-  const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.48)));
-  const narrow = W < 560, M = { l: 46, r: 16, t: 12, b: 44 }, freeW = 54;
-  const per1k = (r) => r.cost / m.n * 1000; const paid = rows.filter((r) => r.cost > 0);
-  const lo = paid.length ? Math.min(...paid.map(per1k)) : 0.1, hi = paid.length ? Math.max(...paid.map(per1k)) : 1;
-  const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi)));
-  const x0 = M.l + freeW + 14, x1 = W - M.r, L = (v) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
-  const xs = (r) => (r.cost === 0 ? M.l + freeW / 2 : x0 + L(per1k(r)) * (x1 - x0));
-  // floor at -100%, not 0: a tool scoring below chance (negative J) was drawn under the x axis, over its tick labels
-  const jmin = Math.max(-1, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10 - 0.05);
-  const ys = (j) => M.t + (1 - (j - jmin) / (1 - jmin)) * (H - M.t - M.b);
-  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${m.name}: J versus cost per 1,000 reviews` });
-  svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
-  for (let j = Math.ceil(jmin * 10) / 10; j <= 1.0001; j += 0.1) { const y = ys(j);
-    svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
-    const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
-  for (let v = xmin; v <= xmax * 1.0001; v *= 10) { const x = x0 + L(v) * (x1 - x0);
-    const t = svgEl('text', { x, y: H - M.b + 17, 'text-anchor': 'middle' }); t.textContent = '$' + (v < 1 ? v.toFixed(v < 0.1 ? 2 : 1) : v.toFixed(0)); svg.append(t); }
-  const tf = svgEl('text', { x: M.l + freeW / 2, y: H - M.b + 17, 'text-anchor': 'middle' }); tf.textContent = 'free'; svg.append(tf);
-  svg.append(svgEl('line', { class: 'axis', x1: M.l, x2: x1, y1: H - M.b, y2: H - M.b }));
-  const xl = svgEl('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle' }); xl.textContent = 'Cost per 1,000 reviews (log scale)'; svg.append(xl);
-  const front = pareto(rows);
-  if (front.length > 1) { let d = ''; front.forEach((r, i) => { d += i === 0 ? `M${xs(r)},${ys(r.j)}` : `H${xs(r)}V${ys(r.j)}`; }); svg.append(svgEl('path', { class: 'front', d })); }
-  const tip = el('div', { class: 'tip', hidden: '' }); const items = [];
-  for (const r of [...rows].sort((a, b) => b.j - a.j)) {
-    const x = xs(r), y = ys(r.j), onF = front.includes(r);
-    const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · TPR ${pct(r.catch)} · FPR ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost / m.n * 1000)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)} for ${m.n} reviews)`);
-      const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
-    c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
-    c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
-    svg.append(c);
-    items.push({ x, y, r: onF ? 6 : 4.5, must: onF, text: !narrow || onF ? r.tool.replace(', asked directly', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)') : '' });
+  function show(id: string): void {
+    current = id;
+    for (const b of buttons) {
+      const on = b.dataset.id === id;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+    }
+    for (const p of panels) p.hidden = p.dataset.panel !== id;
+    const active = buttons.find((b) => b.dataset.id === id);
+    if (active && tabs.scrollWidth > tabs.clientWidth) active.scrollIntoView({ block: 'nearest', inline: 'center' });
+    draw(id);
   }
-  placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
-  box.append(svg, tip);
-  const types = [...new Set(rows.map((r) => r.type))];
-  document.getElementById('lb-legend').replaceChildren(...types.map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
-    el('span', {}, el('i', { class: 'fl' }), 'Pareto frontier'));
-}
-
-function renderOverview() {
-  const short = (t) => t.replace(', asked directly', '').split(' (')[0].split(':')[0];
-  const fill = (j) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
-  const head = el('thead', {}, el('tr', {}, el('th', { text: 'Reviewer' }),
-    OV.modes.map((m) => el('th', { class: 'mcol' }, el('button', { type: 'button', class: 'mlink', text: m.name, 'data-id': m.id }))),
-    el('th', { class: 'num', 'data-tip': 'Mean J over the modes the tool ran (number of modes in brackets)' }, 'Average')));
-  const body = OV.rows.map((r) => el('tr', {},
-    el('td', { class: 'rname' }, el('i', { class: 'dot', style: `background:${col(r.type)}` }), OV_KG[r.tool] ? el('a', { href: TOOL_URL[OV_KG[r.tool]], text: r.tool }) : r.tool),
-    OV.modes.map((m) => { const c = r.cells[m.id];
-      if (!c) return el('td', { class: 'na', 'data-tip': 'not run on this mode', text: '·' });
-      return el('td', { class: 'cell' + (c.j < 0.05 ? ' low' : ''), style: `background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`,
-        'data-tip': `${m.name} · ${c.tool}: J ${pct(c.j)}, FPR ${pct(c.fa)}, ` + (c.cost1k === 0 ? 'free' : `${money(c.cost1k)} per 1,000 reviews`), text: Math.round(c.j * 100) + '%' }); }),
-    el('td', { class: 'num avg' }, `${Math.round(r.avg * 100)}%`, el('span', { class: 'nm', text: ` (${r.n_modes})` }))));
-  const best = el('tr', { class: 'best' }, el('td', {}, el('b', { text: 'Best in this mode' })),
-    OV.modes.map((m) => { const b = OV.best[m.id];
-      return el('td', { class: 'cell', 'data-tip': `${b.tool}: J ${pct(b.j)}` }, el('b', { text: Math.round(b.j * 100) + '%' }), el('br'), b.short || short(b.tool)); }),
-    el('td', {}));
-  document.getElementById('lb-ov-table').replaceChildren(head, el('tbody', {}, body, best));
-  document.querySelectorAll('#lb-ov-table .mlink').forEach((b) => b.addEventListener('click', () => { go(b.dataset.id); tabs.scrollIntoView({ block: 'start' }); }));
-  document.getElementById('lb-ov-legend').replaceChildren(
-    ...[...new Set(OV.rows.map((r) => r.type))].map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
-    el('span', { text: 'Darker cell = higher J · “·” = not run' }));
-  document.getElementById('lb-ov-findings').replaceChildren(...OV.findings.map(([lead, rest]) => el('li', {}, el('b', { text: lead }), rest)));
-  document.getElementById('lb-ov-caveats').replaceChildren(...OV.caveats.map((c) => el('li', { text: c })));
-}
-
-const OV_DEFAULT_OFF = ['security', 'incomplete_execution'];
-const ovSel = new Set(OV ? (() => { const saved = load('ovModes', null); const ids = OV.modes.map((m) => m.id);
-  return Array.isArray(saved) ? saved.filter((id) => ids.includes(id)) : ids.filter((id) => !OV_DEFAULT_OFF.includes(id)); })() : []);
-function renderOvModes() {
-  const box = document.getElementById('lb-ov-modes');
-  box.replaceChildren(...OV.modes.map((m) => { const cb = el('input', { type: 'checkbox', value: m.id });
-    cb.checked = ovSel.has(m.id);
-    cb.addEventListener('change', () => { if (cb.checked) ovSel.add(m.id); else ovSel.delete(m.id); store('ovModes', [...ovSel]); renderOvChart(); });
-    return el('label', {}, cb, m.name); }));
-}
-function renderOvChart() {
-  const BLUE = '#1f3a93';
-  const box = document.getElementById('lb-ov-chart'); box.replaceChildren();
-  const sel = OV.modes.map((m) => m.id).filter((id) => ovSel.has(id));
-  if (!sel.length) { box.append(el('p', { class: 'fine', text: 'Check at least one failure mode to draw the chart.' })); return; }
-  const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
-  const rows = OV.rows.map((r) => { const cs = sel.map((id) => r.cells[id]).filter(Boolean);
-    return cs.length ? { ...r, j: mean(cs.map((c) => c.j)), c: mean(cs.map((c) => c.cost1k)), n: cs.length } : null; }).filter(Boolean);
-  if (!rows.length) { box.append(el('p', { class: 'fine', text: 'No reviewer in the grid ran on the checked modes.' })); return; }
-  const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.48)));
-  const narrow = W < 560, M = { l: 56, r: 16, t: 12, b: 44 }, freeW = 54; // l: room for the rotated "Average J" title left of the ticks
-  const paid = rows.filter((r) => r.c > 0);
-  const lo = paid.length ? Math.min(...paid.map((r) => r.c)) : 0.1, hi = paid.length ? Math.max(...paid.map((r) => r.c)) : 1;
-  const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi)));
-  const x0 = M.l + freeW + 14, x1 = W - M.r, L = (v) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
-  const xs = (r) => (r.c === 0 ? M.l + freeW / 2 : x0 + L(r.c) * (x1 - x0));
-  const jlo = Math.max(-1, Math.floor(Math.min(...rows.map((r) => r.j)) * 10) / 10), jhi = Math.min(1, Math.ceil(Math.max(...rows.map((r) => r.j)) * 10) / 10 + 0.05);
-  const ys = (j) => M.t + (1 - (j - jlo) / (jhi - jlo)) * (H - M.t - M.b);
-  const shade = (j) => `color-mix(in srgb, ${BLUE} ${Math.round(Math.max(0, j) * 85)}%, #fff)`;
-  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Average J versus average cost per 1,000 reviews for each reviewer, with the Pareto frontier' });
-  svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
-  for (let j = Math.ceil(jlo * 10) / 10; j <= jhi + 0.0001; j += 0.1) { const y = ys(j);
-    svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
-    const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
-  for (let v = xmin; v <= xmax * 1.0001; v *= 10) { const x = x0 + L(v) * (x1 - x0);
-    const t = svgEl('text', { x, y: H - M.b + 17, 'text-anchor': 'middle' }); t.textContent = '$' + (v < 1 ? v.toFixed(v < 0.1 ? 2 : 1) : v.toFixed(0)); svg.append(t); }
-  const tf = svgEl('text', { x: M.l + freeW / 2, y: H - M.b + 17, 'text-anchor': 'middle' }); tf.textContent = 'free'; svg.append(tf);
-  svg.append(svgEl('line', { class: 'axis', x1: M.l, x2: x1, y1: H - M.b, y2: H - M.b }));
-  const xl = svgEl('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle' }); xl.textContent = 'Average cost per 1,000 reviews (log scale)'; svg.append(xl);
-  const yl = svgEl('text', { x: 12, y: (M.t + H - M.b) / 2, transform: `rotate(-90 12 ${(M.t + H - M.b) / 2})`, 'text-anchor': 'middle' }); yl.textContent = 'Average J'; svg.append(yl);
-  const front = rows.filter((r) => !rows.some((o) => o !== r && o.c <= r.c && o.j > r.j)).sort((a, b) => a.c - b.c);
-  if (front.length > 1) { let d = ''; front.forEach((r, i) => { d += i === 0 ? `M${xs(r)},${ys(r.j)}` : `H${xs(r)}V${ys(r.j)}`; });
-    svg.append(svgEl('path', { d, fill: 'none', stroke: BLUE, 'stroke-width': 2, 'stroke-dasharray': '5 4', opacity: 0.7 })); }
-  const tip = el('div', { class: 'tip', hidden: '' }); const items = [];
-  for (const r of [...rows].sort((a, b) => b.j - a.j)) {
-    const x = xs(r), y = ys(r.j), onF = front.includes(r);
-    const c = svgEl('circle', { cx: x, cy: y, r: onF ? 7 : 5.5, tabindex: 0, style: `fill:${shade(r.j)};stroke:${BLUE};stroke-width:${onF ? 2.5 : 1.25};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `Average J ${pct(r.j)} over ${r.n} of the ${sel.length} checked mode${sel.length === 1 ? '' : 's'}`, el('br'),
-        r.c === 0 ? 'Free: $0' : `Average cost: ${money(r.c)} per 1,000 reviews`, el('br'), onF ? 'On the frontier' : '');
-      const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
-    c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
-    c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
-    svg.append(c);
-    items.push({ x, y, r: onF ? 7 : 5.5, must: onF, text: !narrow || onF ? r.tool + (r.n < sel.length ? ` (${r.n} of ${sel.length})` : '') : '' });
+  function go(id: string): void {
+    history.replaceState(null, '', '#' + id);
+    show(id);
   }
-  placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
-  box.append(svg, tip);
-}
+  for (const b of buttons) b.addEventListener('click', () => go(b.dataset.id ?? 'overview'));
+  // Keyboard: arrow keys / Home / End move between tabs (WAI-ARIA tabs pattern).
+  tabs.addEventListener('keydown', (e) => {
+    const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (i < 0) return;
+    const n = ({ ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: buttons.length - 1 } as Record<string, number>)[e.key];
+    if (n === undefined) return;
+    e.preventDefault();
+    const b = buttons[(n + buttons.length) % buttons.length];
+    go(b.dataset.id ?? 'overview');
+    b.focus();
+  });
+  window.addEventListener('hashchange', () => {
+    const id = tabFor(location.hash.slice(1));
+    if (id && id !== current) { show(id); tabs.scrollIntoView({ block: 'start' }); }
+  });
 
-function renderStar(m) {
-  const MECH = { detects: 'Detects', prevents: 'Prevents', records: 'Records only' };
-  const fin = (v) => (v === true ? 'yes' : v === false ? 'no' : 'unclear');
-  document.getElementById('lb-star-intro').replaceChildren(`Not benchmarked yet: no public dataset with confirmed labels exists for ${m.name.toLowerCase()}, so these are the SAICA catalog's tools tagged for it, ranked by GitHub stars. Stars measure popularity, not how well a tool catches the failure. ${m.description || ''}`, ...fmLink(m, ' '));
-  const head = el('thead', {}, el('tr', {}, el('th', { class: 'num', text: '#' }), el('th', { text: 'Tool' }), el('th', { text: 'How it addresses this' }),
-    el('th', { 'data-tip': 'Detects = flags it after the fact; Prevents = stops it during a run; Records only = keeps traces you could inspect', text: 'Mechanism' }),
-    el('th', { 'data-tip': 'Can it check a finished change or saved session, rather than only working inside a run or an agent built with it?', text: 'On a finished change' }),
-    el('th', { class: 'num', text: '★ Stars' })));
-  const tools = [...m.tools].sort((a, b) => (b.stars || 0) - (a.stars || 0));
-  const body = el('tbody', {}, tools.map((t, i) => el('tr', { class: t.mechanism === 'records' ? 'baseline' : '' },
-    el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', {}, toolLink(t.id, t.repository_url, t.name)),
-    el('td', { class: 'how', text: t.how || '' }),
-    el('td', {}, el('span', { class: 'pill', style: 'color:#1f3a93', text: MECH[t.mechanism] || t.mechanism })),
-    el('td', { text: fin(t.runs_on_finished_change) }),
-    el('td', { class: 'num', 'data-tip': t.stars_updated_at ? `as of ${t.stars_updated_at}` : '' }, starsCell(t.stars, t.repository_url)))));
-  document.getElementById('lb-star-table').replaceChildren(head, body);
-  document.getElementById('lb-star-note').textContent = m.note || '';
-}
+  // Sorting: reorder the static rows of a ranked table by the clicked column. The rank column keeps the file's rank.
+  document.querySelectorAll<HTMLTableElement>('.lb table[data-rt="ranked"]').forEach((table) => {
+    const body = table.tBodies[0];
+    table.querySelectorAll<HTMLButtonElement>('.rt-sort').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.k ?? 'j';
+        const asc = k === 'fpr' || k === 'cost';
+        const rows = Array.from(body.rows).sort((a, b) => {
+          const d = Number(a.dataset[k]) - Number(b.dataset[k]);
+          return asc ? d : -d;
+        });
+        rows.forEach((r) => body.appendChild(r));
+        table.querySelectorAll('.rt-sort').forEach((o) => o.setAttribute('aria-pressed', String(o === btn)));
+      });
+    });
+  });
 
-function render() {
-  const ov = state.mode === 'overview', star = STAR.find((m) => m.id === state.mode);
-  document.querySelectorAll('#lb-tabs button').forEach((b) => { const on = b.dataset.id === state.mode; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
-  revealTab();
-  document.getElementById('lb-ov').hidden = !ov;
-  document.getElementById('lb-star').hidden = !star;
-  document.getElementById('lb-mode').hidden = ov || !!star;
-  if (ov) { renderOvChart(); return; }
-  if (star) { renderStar(star); return; }
-  const m = DATA.find((d) => d.id === state.mode);
-  renderTable(m); renderChart(m);
-}
-function go(id) { state.mode = id; history.replaceState(null, '', '#' + id); render(); }
-const tabs = document.getElementById('lb-tabs');
-// Phones: the tabs are one horizontally scrolling strip; keep the active tab visible and fade the edge while more follow.
-function tabEdge() { tabs.classList.toggle('more', tabs.scrollLeft + tabs.clientWidth < tabs.scrollWidth - 2); }
-function revealTab() { const a = tabs.querySelector('[aria-selected="true"]');
-  if (a && tabs.scrollWidth > tabs.clientWidth && (a.offsetLeft < tabs.scrollLeft || a.offsetLeft + a.offsetWidth > tabs.scrollLeft + tabs.clientWidth))
-    tabs.scrollLeft = a.offsetLeft - (tabs.clientWidth - a.offsetWidth) / 2;
-  tabEdge(); }
-tabs.addEventListener('scroll', tabEdge, { passive: true });
-// Keyboard: arrow keys / Home / End move between tabs (WAI-ARIA tabs pattern).
-tabs.addEventListener('keydown', (e) => { const bs = [...tabs.querySelectorAll('button')], i = bs.indexOf(document.activeElement); if (i < 0) return;
-  const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: bs.length - 1 }[e.key]; if (n === undefined) return;
-  e.preventDefault(); const b = bs[(n + bs.length) % bs.length]; go(b.dataset.id); b.focus(); });
-const tabDefs = (OV ? [{ id: 'overview', name: 'Overview' }] : []).concat(DATA, STAR);
-tabDefs.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => go(m.id)); tabs.append(b); });
-if (OV) { renderOverview(); renderOvModes(); }
-document.querySelectorAll('#lb-table .sort').forEach((b) => b.addEventListener('click', () => { state.key = b.dataset.k; render(); }));
-const cs = document.getElementById('lb-stars'); cs.checked = state.stars;
-const typesBox = document.getElementById('lb-types');
-const allBtn = el('button', { type: 'button', class: 'chip', text: 'All types' });
-allBtn.addEventListener('click', () => { state.types = new Set(ALL_TYPES); syncTypes(); });
-typesBox.append(allBtn);
-ALL_TYPES.forEach((t) => { const b = el('button', { type: 'button', class: 'chip', 'data-t': t }, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t]);
-  b.addEventListener('click', () => { if (state.types.size === ALL_TYPES.length) state.types = new Set([t]); else if (state.types.has(t)) { state.types.delete(t); if (!state.types.size) state.types = new Set(ALL_TYPES); } else state.types.add(t); syncTypes(); });
-  typesBox.append(b); });
-function syncTypes() { typesBox.querySelectorAll('.chip[data-t]').forEach((b) => b.setAttribute('aria-pressed', String(state.types.has(b.dataset.t) && state.types.size < ALL_TYPES.length)));
-  allBtn.setAttribute('aria-pressed', String(state.types.size === ALL_TYPES.length)); store('types', [...state.types]); render(); }
-cs.addEventListener('change', () => { state.stars = cs.checked; store('stars', cs.checked); render(); });
-const validTab = (id) => DATA.some((d) => d.id === id) || STAR.some((d) => d.id === id) || (OV && id === 'overview');
-const h = location.hash.slice(1); if (validTab(h)) state.mode = h;
-window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (!validTab(id) || id === state.mode) return;
-  state.mode = id; render(); tabs.scrollIntoView({ block: 'start' }); });
-let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 100); });
-syncTypes();
+  // Chart of one mode: J with its 95% interval against cost per 1,000 reviews (log scale; free rows in a band).
+  const NS = 'http://www.w3.org/2000/svg';
+  const svgEl = (tag: string, attrs: Record<string, string | number>): SVGElement => {
+    const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+    return e;
+  };
+  function draw(id: string): void {
+    const box = document.querySelector<HTMLElement>(`.lb .chart[data-chart="${CSS.escape(id)}"]`);
+    const mode = DATA.modes?.[id];
+    if (!box || !mode) return;
+    box.replaceChildren();
+    const rows = mode.rows;
+    const W = Math.max(320, box.clientWidth), H = Math.round(Math.min(420, Math.max(280, W * 0.46)));
+    const M = { l: 48, r: 14, t: 12, b: 44 }, freeW = 56;
+    const paid = rows.filter((r) => r.cost > 0);
+    const lo = paid.length ? Math.min(...paid.map((r) => r.cost)) : 0.1, hi = paid.length ? Math.max(...paid.map((r) => r.cost)) : 1;
+    const xmin = Math.pow(10, Math.floor(Math.log10(lo))), xmax = Math.pow(10, Math.ceil(Math.log10(hi) + 1e-9));
+    const x0 = M.l + freeW + 14, x1 = W - M.r;
+    const L = (v: number) => (Math.log10(v) - Math.log10(xmin)) / (Math.log10(xmax) - Math.log10(xmin) || 1);
+    const xs = (r: ChartRow) => (r.cost === 0 ? M.l + freeW / 2 : x0 + L(r.cost) * (x1 - x0));
+    const jmin = Math.max(-1, Math.floor(Math.min(0, ...rows.map((r) => r.lo)) * 10) / 10);
+    const ys = (j: number) => M.t + (1 - (j - jmin) / (1 - jmin)) * (H - M.t - M.b);
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+    svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
+    for (let j = Math.ceil(jmin * 10) / 10; j <= 1.0001; j += 0.1) {
+      const y = ys(j);
+      svg.append(svgEl('line', { class: Math.abs(j) < 1e-9 ? 'axis' : 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
+      const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' });
+      t.textContent = signedPct(j, 0);
+      svg.append(t);
+    }
+    for (let v = xmin; v <= xmax * 1.0001; v *= 10) {
+      const t = svgEl('text', { x: x0 + L(v) * (x1 - x0), y: H - M.b + 17, 'text-anchor': 'middle' });
+      t.textContent = '$' + (v < 1 ? v.toFixed(v < 0.1 ? 2 : 1) : v.toFixed(0));
+      svg.append(t);
+    }
+    const tf = svgEl('text', { x: M.l + freeW / 2, y: H - M.b + 17, 'text-anchor': 'middle' });
+    tf.textContent = 'free';
+    svg.append(tf);
+    const xl = svgEl('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle' });
+    xl.textContent = 'Cost per 1,000 reviews (log scale)';
+    svg.append(xl);
+    const tip = document.createElement('div');
+    tip.className = 'tip';
+    tip.hidden = true;
+    for (const r of [...rows].sort((a, b) => Number(a.ranked) - Number(b.ranked) || a.j - b.j)) {
+      const x = xs(r), y = ys(r.j), colour = `var(${TYPE_VAR[r.type] ?? '--t-base'})`;
+      svg.append(svgEl('line', { x1: x, x2: x, y1: ys(r.hi), y2: ys(r.lo), style: `stroke:${colour};stroke-width:1.5;opacity:${r.ranked ? 0.55 : 0.3}` }));
+      const c = svgEl('circle', { cx: x, cy: y, r: r.top ? 6 : 4.5, tabindex: 0, style: `fill:${r.ranked ? colour : '#fff'};stroke:${colour};stroke-width:${r.top ? 2.5 : 1.5};cursor:pointer` });
+      const open = () => {
+        tip.hidden = false;
+        const b = document.createElement('b');
+        b.textContent = r.short;
+        tip.replaceChildren(b, `J ${signedPct(r.j)} (95% interval ${signedPct(r.lo)} to ${signedPct(r.hi)})`, document.createElement('br'),
+          r.cost === 0 ? 'Free' : `${money(r.cost, r.est)} per 1,000 reviews`, document.createElement('br'),
+          `${DATA.typeLabel?.[r.type] ?? r.type}${r.ranked ? (r.top ? ' · in the top group' : '') : ' · not ranked'}`);
+        const s = box.clientWidth / W;
+        let left = x * s + 12;
+        if (left + 240 > box.clientWidth) left = x * s - 252;
+        tip.style.left = Math.max(0, left) + 'px';
+        tip.style.top = Math.max(0, y * s - 10) + 'px';
+      };
+      const close = () => { tip.hidden = true; };
+      c.addEventListener('mouseenter', open);
+      c.addEventListener('focus', open);
+      c.addEventListener('mouseleave', close);
+      c.addEventListener('blur', close);
+      svg.append(c);
+      if (r.top) {
+        const right = x + 10 + r.short.length * 6.3 < x1;
+        const label = svgEl('text', { class: 'lbl', x: right ? x + 10 : x - 10, y: y + 4, 'text-anchor': right ? 'start' : 'end' });
+        label.textContent = r.short;
+        svg.append(label);
+      }
+    }
+    box.append(svg, tip);
+  }
+
+  const first = tabFor(location.hash.slice(1));
+  if (first) show(first);
+  let rt: number | undefined;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = window.setTimeout(() => draw(current), 120); });
 </script>
 
 <style is:global>
-  .lb { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; --frontier: #b5532a; }
+  .lb { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; }
   .lb h1 { margin: 0; }
   .lb h2 { font-size: 1.15rem; margin-top: 2.2rem; }
+  .lb h3 { font-size: 1rem; margin-top: 1.6rem; }
+  .lb .mode-h { margin-top: .4rem; }
+  .lb .mode-h .fm { font-weight: 400; font-size: 14px; color: #6b7180; }
   .lb .tagline { margin: .45rem 0 0; font: 500 18px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418; }
   .lb .byline { margin: .2rem 0 0; font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; color: #6b7180; }
-  .lb .lead { margin: 1rem 0 0; color: #4a5160; max-width: none; font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; text-align: left; }
+  .lb .lead { margin: .8rem 0 0; color: #4a5160; max-width: 90ch; font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; text-align: left; }
   .lb .lead b { color: #111418; font-weight: 600; }
+  .lb .lead.warn { border: 1px solid #b7791f; background: #fdf6e7; border-radius: 8px; padding: .5rem .7rem; }
+  .lb .first { margin: 0 0 .4rem; max-width: 86ch; font: 15.5px/1.6 ui-sans-serif, system-ui, sans-serif; color: #111418; }
   /* sheet tabs (like a spreadsheet's): grey tabs with rounded tops on a baseline; the active tab is white, joins the
-     baseline and has a blue top edge */
+     baseline and has a blue top edge. Small labels name the provenance group of the tabs that follow. */
   .lb .tabs { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 3px; border-bottom: 1px solid rgb(17 20 24 / .15); margin: 1.4rem 0 .9rem; padding: 0 2px; font-family: ui-sans-serif, system-ui, sans-serif; }
   .lb .tabs button { background: #f3f1ec; border: 1px solid rgb(17 20 24 / .12); border-bottom: 0; border-top: 2px solid transparent; border-radius: 7px 7px 0 0; padding: .4rem .8rem .45rem; font-size: 14px; font-weight: 500; color: #4a5160; cursor: pointer; margin-bottom: -1px; line-height: 1.3; }
   .lb .tabs button:hover { background: #fff; color: #111418; }
   .lb .tabs button[aria-selected="true"] { background: #fff; color: #1f3a93; font-weight: 600; border-top-color: #1f3a93; position: relative; padding-bottom: calc(.45rem + 1px); }
-  .lb .controls { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: center; font: 14px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-bottom: .6rem; }
-  .lb .controls label { display: inline-flex; gap: .4rem; align-items: center; cursor: pointer; }
-  .lb .types { display: flex; flex-wrap: wrap; gap: 6px; }
-  .lb .chip { display: inline-flex; align-items: center; gap: 6px; font: 13px ui-sans-serif, system-ui, sans-serif; color: #4a5160; background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
-  .lb .chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .lb .chip[aria-pressed="true"] { border-color: #1f3a93; background: #e4ebf7; color: #1f3a93; }
-  .lb .chip:focus-visible, .lb .tabs button:focus-visible, .lb .sort:focus-visible { outline: 2px solid #1f3a93; outline-offset: 2px; }
-  .lb .mode-note { color: #6b7180; font-size: 13px; }
-  .lb .tbl-wrap { overflow-x: auto; }
-  .lb table { width: 100%; border-collapse: collapse; font: 14px ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
-  .lb th, .lb td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); white-space: nowrap; }
-  .lb th { font-size: 12px; font-weight: 600; color: #4a5160; text-transform: uppercase; letter-spacing: .04em; }
-  .lb .num { text-align: right; }
-  .lb td.rank { color: #6b7180; }
-  .lb td.j { font-weight: 600; }
-  .lb tr.baseline td:nth-child(2) { color: #4a5160; }
-  .lb .bar { display: inline-block; height: 6px; border-radius: 3px; background: #1f3a93; opacity: .75; vertical-align: middle; margin-right: 8px; }
-  .lb .pill { font-size: 12px; font-weight: 500; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; }
-  .lb .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
-  .lb .sort[aria-pressed="true"]::after { content: " ↓"; }
-  .lb table.no-stars .col-stars { display: none; }
-  .lb .sort[data-tip], .lb td[data-tip] { position: relative; }
-  .lb td[data-tip]:not([data-tip=""]) { cursor: help; }
-  .lb .sort[data-tip]:hover::before, .lb .sort[data-tip]:focus-visible::before, .lb td[data-tip]:not([data-tip=""]):hover::before {
-    content: attr(data-tip); position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; width: 230px; white-space: normal;
-    text-align: left; text-transform: none; letter-spacing: 0; font: 400 12.5px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418;
-    background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 7px 9px; box-shadow: 0 6px 18px rgb(0 0 0 / .12); pointer-events: none; }
-  .lb .tbl-wrap { padding-bottom: 4px; }
-  .lb .fine { font: 13px ui-sans-serif, system-ui, sans-serif; color: #6b7180; margin-top: .6rem; max-width: 80ch; }
+  .lb .tabs button:focus-visible { outline: 2px solid #1f3a93; outline-offset: 2px; }
+  .lb .tabs .tab-group { align-self: center; margin: 0 .15rem 0 .7rem; font-size: 11.5px; color: #6b7180; white-space: nowrap; }
+  .lb .tbl-wrap { overflow-x: auto; padding-bottom: 4px; }
+  .lb table.lb-star { width: 100%; border-collapse: collapse; font: 14px ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .lb table.lb-star th, .lb table.lb-star td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); vertical-align: top; }
+  .lb table.lb-star thead th { font-size: 12px; font-weight: 600; color: #4a5160; white-space: nowrap; }
+  .lb table.lb-star tbody th { font-weight: 500; white-space: nowrap; }
+  .lb table.lb-star .num { text-align: right; white-space: nowrap; }
+  .lb table.lb-star .sub { display: block; font-size: 11px; color: #6b7180; }
+  .lb table.lb-star td.how { min-width: 260px; max-width: 460px; color: #4a5160; font-size: 13px; line-height: 1.4; }
+  .lb .fine { font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #6b7180; margin-top: .6rem; max-width: 86ch; }
   .lb .chart { position: relative; min-height: 280px; margin-top: .5rem; }
   .lb .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
   .lb .chart text { font: 11.5px ui-sans-serif, system-ui, sans-serif; fill: #6b7180; }
@@ -437,52 +364,21 @@ syncTypes();
   .lb .chart .grid { stroke: rgb(17 20 24 / .08); }
   .lb .chart .axis { stroke: rgb(17 20 24 / .3); }
   .lb .chart .band { fill: #e4ebf7; }
-  .lb .chart .front { stroke: var(--frontier); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
-  .lb .tip { position: absolute; pointer-events: none; background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 6px 9px; font: 12.5px ui-sans-serif, system-ui, sans-serif; box-shadow: 0 6px 18px rgb(0 0 0 / .12); max-width: 230px; }
+  .lb .tip { position: absolute; pointer-events: none; background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 6px 9px; font: 12.5px ui-sans-serif, system-ui, sans-serif; box-shadow: 0 6px 18px rgb(0 0 0 / .12); max-width: 240px; }
   .lb .tip b { display: block; }
-  .lb .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font: 12.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-top: .4rem; }
+  .lb .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font: 12.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-top: 1.6rem; }
   .lb .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .lb .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-  .lb .legend i.fl { width: 18px; height: 0; border-top: 2px dashed var(--frontier); border-radius: 0; }
-  .lb .more { margin-top: 2rem; font: 14px ui-sans-serif, system-ui, sans-serif; }
-  .lb .ov-intro { margin: 0 0 .8rem; }
-  .lb #lb-star-table td.how { white-space: normal; min-width: 260px; max-width: 460px; color: #4a5160; font-size: 13px; line-height: 1.4; }
-  .lb table.ov th { white-space: normal; vertical-align: bottom; text-transform: none; letter-spacing: 0; font-size: 12.5px; line-height: 1.25; min-width: 66px; }
-  .lb table.ov th.mcol { text-align: center; }
-  .lb table.ov .mlink { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; border-bottom: 1px dotted #6b7180; text-align: center; }
-  .lb table.ov .mlink:hover, .lb table.ov .mlink:focus-visible { color: #1f3a93; }
-  .lb table.ov th:first-child, .lb table.ov td:first-child { position: sticky; left: 0; background: #fff; z-index: 2; min-width: 150px; }
-  .lb table.ov td.cell { text-align: center; font-weight: 600; padding: .45rem .35rem; }
-  .lb table.ov td.cell.low { color: #6b7180; font-weight: 500; }
-  .lb table.ov td.na { text-align: center; color: #9a9fab; }
-  .lb table.ov td.avg { color: #4a5160; }
-  .lb table.ov .nm { color: #6b7180; font-size: 12px; }
-  .lb table.ov td.rname a { color: inherit; text-decoration: none; }
-  .lb table.ov td.rname a:hover, .lb table.ov td.rname a:focus-visible { color: #1f3a93; text-decoration: underline; }
-  .lb td a.gh { color: inherit; }
-  .lb td a.gh:hover { color: #1f3a93; }
-  .lb table.ov .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
-  .lb table.ov tr.best td { border-top: 2px solid rgb(17 20 24 / .12); font-size: 12.5px; vertical-align: top; }
-  .lb table.ov tr.best td.cell { font-weight: 500; white-space: normal; line-height: 1.3; }
-  .lb .findings, .lb .ov-caveats { font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; max-width: 78ch; padding-left: 1.2rem; }
+  .lb .more { margin-top: 1.2rem; font: 14px ui-sans-serif, system-ui, sans-serif; }
+  .lb .findings, .lb .ov-caveats { font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; max-width: 86ch; padding-left: 1.2rem; list-style: disc; }
   .lb .findings li, .lb .ov-caveats li { margin: .45rem 0; }
   .lb .ov-caveats { font-size: 14px; color: #4a5160; }
-  /* mode checkboxes: an even 3-column grid of small cards (2 on phones); only the box itself turns blue when ticked */
-  .lb .ov-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem .55rem; max-width: 48rem; margin: .7rem 0 .8rem; font: 13.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
-  .lb .ov-modes label { display: flex; align-items: center; gap: .55rem; margin: 0; padding: .45rem .7rem; border: 1px solid rgb(17 20 24 / .12); border-radius: 8px; background: #fff; cursor: pointer; transition: background-color .15s, border-color .15s; }
-  .lb .ov-modes label:hover { border-color: rgb(31 58 147 / .55); }
-  .lb .ov-modes input { accent-color: #1f3a93; width: 15px; height: 15px; margin: 0; cursor: pointer; flex: none; }
   @media (max-width: 640px) {
-    .lb .ov-modes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    /* phones: the sheet tabs become one scrolling strip instead of wrapping into five or six rows. A scroller clips
-       the -1px overlap, so the baseline is drawn as a background and under each inactive tab instead. */
+    /* phones: the tabs become one scrolling strip instead of wrapping into many rows */
     .lb .tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; border-bottom: 0; scrollbar-width: none;
       background: linear-gradient(rgb(17 20 24 / .15), rgb(17 20 24 / .15)) left bottom / 100% 1px no-repeat; }
     .lb .tabs::-webkit-scrollbar { display: none; }
-    .lb .tabs.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
     .lb .tabs button { flex: none; margin-bottom: 0; box-shadow: inset 0 -1px rgb(17 20 24 / .15); }
     .lb .tabs button[aria-selected="true"] { box-shadow: none; }
-    /* long tool names wrap so the J column is not pushed off screen */
-    .lb #lb-table td:nth-child(2) { white-space: normal; min-width: 9.5rem; }
   }
 </style>

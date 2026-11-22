@@ -2,20 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { graph, facetLabel, FACET_LABELS } from '../../lib/data.ts';
 import { breadcrumbs, clip, toolUrl } from '../../lib/seo.ts';
-import { measuredFor } from '../../lib/catalog.ts';
+import { BAND_COLORS, activityBand, measuredFor } from '../../lib/catalog.ts';
 import BestPerMode from '../../components/home/BestPerMode.astro';
-import { GENERATED_LONG } from '../../components/home/bench';
-import maturityData from '../../../public/maturity.json';
-
-const maturityTools = (maturityData as { tools: Record<string, { tier: string; is_override: boolean }> }).tools;
-const TIER_COLORS: Record<string, string> = {
-  '1A': 'bg-emerald-600 text-white',
-  '1B': 'bg-emerald-500 text-white',
-  '2A': 'bg-amber-400 text-stone-900',
-  '2B': 'bg-amber-300 text-stone-900',
-  '3':  'bg-orange-400 text-stone-900',
-  '4':  'bg-stone-400 text-white',
-};
+import { CITE_AS, GENERATED_LONG, METHOD } from '../../components/home/bench';
 
 // Default render order: by stars desc (tools without stars last), then by name.
 const tools = Object.values(graph.tools).slice().sort((a, b) => {
@@ -33,6 +22,8 @@ const failureModeOptions = Object.values(graph.failureModes)
 const cpValues = Object.keys(FACET_LABELS.control_paradigm);
 const tpValues = Object.keys(FACET_LABELS.temporal_phase);
 const alValues = Object.keys(FACET_LABELS.autonomy_level);
+// Only the implementation types that occur in the catalog, in the schema's order.
+const implValues = Object.keys(FACET_LABELS.implementation).filter((v) => tools.some((t) => t.implementation === v));
 
 const measuredIds = new Set(tools.filter((t) => measuredFor(t.id).length > 0).map((t) => t.id));
 const description = clip(
@@ -55,23 +46,26 @@ function formatStars(n: number | undefined): string {
   <p class="text-ink-muted mt-2 max-w-3xl">
     {tools.length} tools, most of them open source, that can supervise an AI coding agent: linters and type checkers, AI code
     reviewers, LLM eval frameworks, sandboxes and guardrails. Each is classified by control paradigm (prevent, detect,
-    correct or recover), when it acts (before, during or after generation) and how much human review it needs, and
-    tagged with the <a href="/failure-modes/">failure modes</a> it addresses. {measuredIds.size} of them are measured
-    on the <a href="/">SAICA-Bench leaderboard</a>; their pages show the numbers. Filters and sorting are
+    correct or recover), when it acts (before, during or after generation), how much human review it needs and how
+    its check is carried out (a program, a model, or both), and tagged with the
+    <a href="/failure-modes/">failure modes</a> it addresses. A tag is the catalog's claim, not a test result:
+    {measuredIds.size} of the tools have rows on the <a href="/">SAICA-Bench leaderboard</a>, and their pages show
+    those rows with the configuration that was run. Filters and sorting are
     keyboard-accessible and client-side.
   </p>
 
   <section class="mt-8" aria-labelledby="best-per-mode">
-    <h2 id="best-per-mode" class="text-xl">Best measured tool per failure mode</h2>
+    <h2 id="best-per-mode" class="text-xl">What was measured, per failure mode</h2>
     <p class="text-ink-muted mt-2 max-w-3xl">
-      The top entry in each failure mode on the <a href="/">SAICA-Bench leaderboard</a>, with its true and false positive
-      rates and cost per 1,000 reviews, next to the best free option; the <a href="/findings/">findings report</a> explains
-      what the numbers mean. A mode's name opens what it is and how to catch it; “All →” opens its leaderboard tab.
+      For each measured failure mode: the best reviewer of any kind on the <a href="/">SAICA-Bench leaderboard</a>,
+      and, as a separate thing, the highest-scoring tool of this catalog that ran a check of its own. The sets are grouped by
+      where their bad samples come from, because scores are not comparable across groups; the
+      <a href="/findings/">findings report</a> explains what the numbers mean. {METHOD.setting}
     </p>
     <div class="mt-3 rounded-md border border-ink/10 bg-white p-3">
-      <BestPerMode legend />
+      <BestPerMode />
     </div>
-    <p class="mt-2 text-xs font-sans text-ink-faint">J = TPR − FPR (0% = chance, 100% = perfect). Results as of {GENERATED_LONG}.</p>
+    <p class="mt-2 text-xs font-sans text-ink-faint max-w-3xl">{METHOD.best} {CITE_AS}, built {GENERATED_LONG}.</p>
   </section>
 
   <h2 class="mt-10 text-xl">All tools</h2>
@@ -107,6 +101,15 @@ function formatStars(n: number | undefined): string {
       <select id="f-al" name="al" class="mt-1 w-full rounded border border-ink/15 bg-white px-2 py-1 text-sm">
         <option value="">Any</option>
         {alValues.map((v) => <option value={v}>{facetLabel('autonomy_level', v)}</option>)}
+      </select>
+    </div>
+    <div>
+      <label for="f-impl" class="block text-xs font-sans font-semibold uppercase tracking-wide text-ink-faint">
+        Implementation
+      </label>
+      <select id="f-impl" name="impl" class="mt-1 w-full rounded border border-ink/15 bg-white px-2 py-1 text-sm">
+        <option value="">Any</option>
+        {implValues.map((v) => <option value={v}>{facetLabel('implementation', v)}</option>)}
       </select>
     </div>
     <div>
@@ -163,10 +166,11 @@ function formatStars(n: number | undefined): string {
         data-cp={t.control_paradigm}
         data-tp={t.temporal_phase}
         data-al={t.autonomy_level}
+        data-impl={t.implementation ?? ''}
         data-fm={t.addresses_failure_modes.join(' ')}
         data-name={t.name.toLowerCase()}
         data-stars={typeof t.stars === 'number' ? String(t.stars) : ''}
-        data-last-updated={t.last_updated ?? ''}
+        data-last-updated={t.upstream_pushed_at ?? t.last_updated ?? ''}
       >
         <div class="flex items-baseline justify-between gap-2">
           <h2 class="m-0 text-lg">
@@ -178,15 +182,16 @@ function formatStars(n: number | undefined): string {
                 <span aria-hidden="true">★</span> {formatStars(t.stars)}
               </span>
             )}
-            {maturityTools[t.id] && (
+            {activityBand(t.id) && (
               <span
-                class={`inline-flex items-center rounded px-1.5 py-0.5 font-sans text-[10px] font-bold ${TIER_COLORS[maturityTools[t.id].tier] ?? 'bg-stone-300'}`}
-                title={`Maturity tier${maturityTools[t.id].is_override ? ' (curator override)' : ''}`}
+                class={`inline-flex items-center rounded px-1.5 py-0.5 font-sans text-[10px] font-bold ${BAND_COLORS[activityBand(t.id)!.band] ?? 'bg-stone-300'}`}
+                title={`Activity band (stars, recent push, integration surfaces)${activityBand(t.id)!.isOverride ? ', curator override' : ''}`}
               >
-                {maturityTools[t.id].tier}
+                {activityBand(t.id)!.band}
               </span>
             )}
             <span>{t.maturity_status}</span>
+            {t.archived && <span class="rounded border border-ink/20 px-1.5 py-0.5" data-archived>Upstream archived</span>}
           </span>
         </div>
         <p class="mt-1 text-sm text-ink-muted">{t.tagline ?? clip(t.description, 160)}</p>
@@ -197,6 +202,7 @@ function formatStars(n: number | undefined): string {
           <span class="chip-accent">{facetLabel('control_paradigm', t.control_paradigm)}</span>
           <span class="chip-accent">{facetLabel('temporal_phase', t.temporal_phase)}</span>
           <span class="chip-accent">{facetLabel('autonomy_level', t.autonomy_level)}</span>
+          {t.implementation && <span class="chip-accent">{facetLabel('implementation', t.implementation)}</span>}
         </div>
         <div class="mt-2 flex flex-wrap gap-1.5">
           {t.addresses_failure_modes.map((fm) => (
@@ -232,6 +238,7 @@ function formatStars(n: number | undefined): string {
       const cp = (form.elements.namedItem('cp') as HTMLSelectElement).value;
       const tp = (form.elements.namedItem('tp') as HTMLSelectElement).value;
       const al = (form.elements.namedItem('al') as HTMLSelectElement).value;
+      const impl = (form.elements.namedItem('impl') as HTMLSelectElement).value;
       const fm = (form.elements.namedItem('fm') as HTMLSelectElement).value;
       const sort = (form.elements.namedItem('sort') as HTMLSelectElement).value || 'stars';
       const minStarsRaw = (form.elements.namedItem('min_stars') as HTMLInputElement).value.trim();
@@ -244,12 +251,13 @@ function formatStars(n: number | undefined): string {
         const okCp = !cp || card.dataset.cp === cp;
         const okTp = !tp || card.dataset.tp === tp;
         const okAl = !al || card.dataset.al === al;
+        const okImpl = !impl || card.dataset.impl === impl;
         const fmList = (card.dataset.fm ?? '').split(' ').filter(Boolean);
         const okFm = !fm || fmList.includes(fm);
         const s = starsOf(card);
         // Tools without stars pass when min_stars is inactive; fail when it's set.
         const okStars = !minStarsActive || (s !== null && s >= (minStars as number));
-        const show = okCp && okTp && okAl && okFm && okStars;
+        const show = okCp && okTp && okAl && okImpl && okFm && okStars;
         card.style.display = show ? '' : 'none';
         if (show) matched++;
       }

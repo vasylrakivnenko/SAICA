@@ -7,7 +7,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import MeasuredResults from '../../components/fm/MeasuredResults.astro';
 import NotMeasured from '../../components/fm/NotMeasured.astro';
-import { graph, paperLabel } from '../../lib/data.ts';
+import { crosswalkReviews, graph, paperLabel } from '../../lib/data.ts';
+import { reviewNote } from '../../lib/catalog.ts';
 import { abs, breadcrumbs, clip, fmSlug, fmUrl, toolUrl, SITE_NAME } from '../../lib/seo.ts';
 import type { FailureMode } from '../../lib/types.ts';
 import {
@@ -15,17 +16,17 @@ import {
   altNames,
   copyFor,
   crosswalksFor,
+  descriptionFor,
   faqFor,
   html,
   incidentsFor,
   measured,
   otherNames,
-  pct,
-  proseName,
   sameAsName,
   starMode,
   text,
 } from '../../components/fm/fm.ts';
+import { signedPct } from '../../lib/format.ts';
 
 export function getStaticPaths() {
   return Object.values(graph.failureModes).map((fm) => ({
@@ -43,15 +44,23 @@ const m = measured(fm.id);
 const s = m ? null : starMode(fm.id);
 const url = fmUrl(fm.id);
 const names = otherNames(fm);
-const description = clip(c.description(m, s), 155);
+const description = clip(descriptionFor(fm.id, m, s), 155);
 const faq = faqFor(fm);
-const incidents = incidentsFor(fm.id);
+// Only records of kind `event` are incidents in the plain sense; study findings, reported patterns and
+// hypothetical scenarios are listed apart.
+const records = incidentsFor(fm.id);
+const incidents = records.filter((i) => i.event);
+const otherRecords = records.filter((i) => !i.event && i.classified);
+const unclassified = records.filter((i) => !i.classified);
 const priorWork = fm.prior_work.map((id) => graph.papers[id]).filter(Boolean);
 const related = fm.related_modes.map((id) => graph.failureModes[id]).filter(Boolean);
 
-// Catalog tools tagged with this mode, most-starred first, with this mode's measured J where we ran them.
-const measuredJ = new Map<string, number>();
-for (const r of m?.rows ?? []) if (r.kgId && !measuredJ.has(r.kgId)) measuredJ.set(r.kgId, r.j);
+// Catalog tools tagged with this mode, most-starred first. A tag is the catalog's claim; where SAICA-Bench ran
+// the tool on this mode its measured J is the evidence (best ranked row of the tool, else its best unranked row).
+const measuredJ = new Map<string, { j: number; ranked: boolean }>();
+for (const r of [...(m?.rows ?? [])].sort((a, b) => Number(b.ranked) - Number(a.ranked) || b.j - a.j)) {
+  if (r.kg_id && !measuredJ.has(r.kg_id)) measuredJ.set(r.kg_id, { j: r.j, ranked: r.ranked });
+}
 const tools = (graph.toolsByFailureMode[fm.id] ?? [])
   .map((id) => graph.tools[id])
   .filter(Boolean)
@@ -66,10 +75,11 @@ const taxa = [...new Set(xw.map((x) => x.taxonomy))].map((t) => ({
   related: xw.filter((x) => x.taxonomy === t && x.confidence === 'related'),
 }));
 taxa.sort((a, b) => b.strong.length - a.strong.length || a.name.localeCompare(b.name));
+// Review state of each taxonomy's crosswalk file, printed on its card.
+const xwReview = (taxonomyId: string): string[] => [...new Set(crosswalkReviews(taxonomyId).map((r) => reviewNote(r.state)).filter(Boolean))];
 
 const atAGlance = m
-  ? `On SAICA-Bench the best detector, ${proseName(m.best)}, scores J ${pct(m.best.j)}` +
-    (m.bestFree && m.bestFree.key !== m.best.key ? `; the best free option, ${proseName(m.bestFree)}, scores J ${pct(m.bestFree.j)}.` : '.')
+  ? `On SAICA-Bench: ${m.ranking}`
   : 'Not benchmarked yet (no dataset with confirmed labels exists); the tools below are listed by GitHub stars, not measured.';
 
 const jsonld = [
@@ -137,7 +147,7 @@ const conf = (x: string) => (x === 'exact' ? 'chip-accent' : 'chip');
     )}
   </div>
 
-  {m ? <MeasuredResults m={m} subject={c.subject} note={c.measuredNote} /> : <NotMeasured s={s} subject={c.subject} fmId={fm.id} />}
+  {m ? <MeasuredResults m={m} subject={c.subject} /> : <NotMeasured s={s} subject={c.subject} fmId={fm.id} />}
 
   {fm.detection_signals.length > 0 && (
     <section aria-labelledby="detect" class="max-w-3xl">
@@ -164,6 +174,44 @@ const conf = (x: string) => (x === 'exact' ? 'chip-accent' : 'chip');
     </section>
   )}
 
+  {otherRecords.length > 0 && (
+    <section aria-labelledby="records" class="max-w-3xl">
+      <h2 id="records">Studies and reported patterns</h2>
+      <p class="text-sm text-ink-muted">
+        Records in the catalog that are not single dated incidents: findings of a study, recurring behaviour
+        that was reported, or scenarios a source describes as hypothetical.
+      </p>
+      <ul class="mt-2 space-y-3">
+        {otherRecords.map((i) => (
+          <li>
+            <a href={`/incidents/${i.id}/`} class="font-sans font-semibold">{i.title}</a>
+            <span class="ml-1 font-sans text-xs text-ink-faint">{i.kindLabel} · {i.date}</span>
+            <p class="mt-0.5 text-sm leading-6 text-ink-muted" set:html={html(i.summary)} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {unclassified.length > 0 && (
+    <section aria-labelledby="unclassified" class="max-w-3xl">
+      <h2 id="unclassified">Related records in the catalog</h2>
+      <p class="text-sm text-ink-muted">
+        Records tagged with {fm.name.toLowerCase()} that are not yet sorted into dated incidents, study findings
+        and reported patterns.
+      </p>
+      <ul class="mt-2 space-y-3">
+        {unclassified.map((i) => (
+          <li>
+            <a href={`/incidents/${i.id}/`} class="font-sans font-semibold">{i.title}</a>
+            <span class="ml-1 font-sans text-xs text-ink-faint">{i.date}{i.harm && ` · ${i.harm.replace(/_/g, ' ')}`}</span>
+            <p class="mt-0.5 text-sm leading-6 text-ink-muted" set:html={html(i.summary)} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
   <section aria-labelledby="tools" class="max-w-3xl">
     <h2 id="tools">Tools in the catalog that address it</h2>
     {tools.length === 0 ? (
@@ -172,14 +220,14 @@ const conf = (x: string) => (x === 'exact' ? 'chip-accent' : 'chip');
       <>
         <p class="text-sm text-ink-muted">
           {tools.length} tool{tools.length === 1 ? ' is' : 's are'} tagged with {fm.name.toLowerCase()} in the
-          catalog, most-starred first. A tag says what a tool is for, not how well it works; the measured J is shown
-          where SAICA-Bench ran the tool on this mode.
+          catalog, most-starred first. A tag is the catalog's claim about what a tool is for; it is not a test
+          result. Where SAICA-Bench ran the tool on this mode, the measured J is shown: that row is the evidence.
         </p>
         <ul class="mt-3 divide-y divide-ink/10 border-y border-ink/10">
           {tools.map((t) => (
             <li class="py-2 flex flex-wrap items-baseline gap-x-2">
               <a href={toolUrl(t.id)} class="font-sans font-semibold">{t.name}</a>
-              {measuredJ.has(t.id) && <span class="chip-accent">measured J {pct(measuredJ.get(t.id)!)}</span>}
+              {measuredJ.has(t.id) && <span class="chip-accent">measured J {signedPct(measuredJ.get(t.id)!.j)}{!measuredJ.get(t.id)!.ranked && ' (not ranked: outside its design scope)'}</span>}
               {t.tagline && <span class="text-sm text-ink-muted">{t.tagline}</span>}
             </li>
           ))}
@@ -199,6 +247,7 @@ const conf = (x: string) => (x === 'exact' ? 'chip-accent' : 'chip');
         {taxa.map((t) => (
           <li class="card !p-4">
             <a href={`/taxonomies/${t.id}/`} class="font-sans font-semibold">{t.name}</a>
+            {xwReview(t.id).map((note) => <p class="mt-1 font-sans text-xs text-ink-muted" data-review-note>{note}</p>)}
             {t.strong.length > 0 && (
               <ul class="mt-2 space-y-1.5">
                 {t.strong.map((x) => (

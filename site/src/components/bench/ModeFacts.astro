@@ -1,0 +1,62 @@
+---
+// What a reader needs before looking at a mode's numbers, all from results.json: where the bad samples come
+// from (provenance group, who made them, where the label comes from), what one sample is, how many there are,
+// who is best by the file's rules (mode.ranking, one ready sentence), what a shortcut baseline scores, whether
+// the set was tuned while looking at ranked reviewers (mode.tuning_disclosure), and the link to the threats
+// table. Used on the leaderboard's mode panels, the benchmark cards and the failure-mode pages.
+import { groupOf, topShortcut, type Mode } from '../home/bench';
+import { int, pct, signedPct } from '../../lib/format';
+
+interface Props {
+  m: Mode;
+  /** Leave out the ranking sentence where the page prints it itself. */
+  ranking?: boolean;
+}
+const { m, ranking = true } = Astro.props;
+const g = groupOf(m);
+const s = topShortcut(m);
+---
+
+<div class="mf" data-mode-facts={m.id}>
+  {ranking && <p class="mf-ranking" data-ranking-for={m.id}>{m.ranking}</p>}
+  <dl>
+    <dt>Bad samples</dt>
+    <dd>
+      <strong>{g?.label ?? m.group}.</strong> {m.provenance.author}. Label: {m.provenance.label_source}.
+      Clean samples: {m.provenance.negatives}.
+    </dd>
+    <dt>One sample</dt>
+    <dd>{m.unit}.</dd>
+    <dt>Samples scored</dt>
+    <dd>
+      {int(m.n_pos)} {m.pos_label} and {int(m.n_neg)} clean ({pct(m.prevalence, 0)} of the set is bad){m.n_not_scored > 0 && <>; {int(m.n_not_scored)} more are not scored</>}.
+    </dd>
+    <dt>Measure</dt>
+    <dd data-tier-for={m.id}>{m.tier_label}.</dd>
+    <dt>Shortcut baseline</dt>
+    <dd>
+      {s ? (
+        <>A rule with no understanding of the failure scores J {signedPct(s.j)} here ({s.short}). Read reviewer scores against it, not against 0.</>
+      ) : (
+        <>None is published for this set ({m.shortcut_audit}).</>
+      )}
+    </dd>
+    {m.tuning_disclosure && (
+      <>
+        <dt>Tuning</dt>
+        <dd data-tuning-for={m.id}>{m.tuning_disclosure}</dd>
+      </>
+    )}
+  </dl>
+  <p class="mf-threats"><a href="/benchmark/#threats">Threats to validity that apply to this set →</a></p>
+</div>
+
+<style>
+  .mf { max-width: 56rem; font: 13.5px/1.5 ui-sans-serif, system-ui, sans-serif; color: #111418; }
+  .mf-ranking { margin: 0 0 .5rem; font-weight: 600; font-size: 14.5px; }
+  .mf dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .25rem .9rem; margin: 0; }
+  .mf dt { color: #6b7180; }
+  .mf dd { margin: 0; }
+  .mf-threats { margin: .5rem 0 0; font-size: 13px; }
+  @media (max-width: 560px) { .mf dl { grid-template-columns: 1fr; } .mf dt { margin-top: .3rem; } }
+</style>

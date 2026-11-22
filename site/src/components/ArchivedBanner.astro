@@ -1,0 +1,17 @@
+---
+// Dated notice at the top of a page that is kept for the record but no longer maintained
+// (owner decision, 2026-11-21: label such pages, do not delete them). A page that uses it must also pass
+// `noindex` to BaseLayout, which keeps it out of search results and out of the sitemap.
+interface Props {
+  /** What the page is, in a few words. */
+  label?: string;
+  /** Date of the data or snapshot the page shows, in words ("23 April 2026"). */
+  asOf: string;
+}
+const { label = 'Archived experiment, not maintained', asOf } = Astro.props;
+---
+
+<aside class="archived-banner mb-6 max-w-3xl rounded border border-amber-300 bg-amber-50 p-4" aria-label="Archived page">
+  <p class="font-sans text-sm font-semibold text-ink">{label} · data as of {asOf}</p>
+  <div class="mt-1 text-sm leading-6 text-ink"><slot /></div>
+</aside>

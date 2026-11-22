@@ -40,8 +40,8 @@ const examples: string[] = [
     agent looking for context, the right artifact is
     <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/SKILLS.md">SKILLS.md</a>
     (drop it into your skills / rules directory). For one-shot stack analysis,
-    see <a href="/assess/">/assess</a>; for ranked recommendations, see
-    <a href="/tool-coverage/">/tool-coverage</a>.
+    see <a href="/assess/">/assess</a>; to pick measured checks for your own project, see the
+    <a href="/tool-coverage/">supervision kit</a>.
   </p>
   <p class="mt-2 text-sm text-ink-muted max-w-3xl">
     Answers cite node ids in brackets like <code>[guardrails-ai]</code> — each
@@ -121,17 +121,19 @@ const examples: string[] = [
 
   <section id="ask-error" class="mt-10 max-w-3xl hidden" role="alert">
     <div class="border border-red-300 bg-red-50 text-red-900 p-4 rounded">
-      <div class="font-sans font-semibold mb-1">Couldn't reach the /ask backend</div>
+      <div class="font-sans font-semibold mb-1">The question could not be answered</div>
       <div id="ask-error-detail" class="text-sm"></div>
-      <div class="text-sm mt-2">
-        The backend is a separate FastAPI service. Start it with
+      {/* Shown by the script in a development build only: visitors cannot start a server. */}
+      <div id="ask-error-dev" class="text-sm mt-2 hidden">
+        Developer note: the backend is a separate FastAPI service. Start it with
         <code>python -m pipeline.webapp</code> and try again.
+        <span id="ask-error-raw" class="block mt-1 font-mono text-xs break-words"></span>
       </div>
     </div>
   </section>
 </BaseLayout>
 
-<script is:inline define:vars={{ ASK_API }}>
+<script is:inline define:vars={{ ASK_API, DEV: import.meta.env.DEV }}>
   const form = document.getElementById('ask-form');
   const questionEl = document.getElementById('ask-question');
   const submitBtn = document.getElementById('ask-submit');
@@ -143,6 +145,9 @@ const examples: string[] = [
   const metaEl = document.getElementById('ask-meta');
   const errorWrap = document.getElementById('ask-error');
   const errorDetail = document.getElementById('ask-error-detail');
+  const errorDev = document.getElementById('ask-error-dev');
+  const errorRaw = document.getElementById('ask-error-raw');
+  const TIMEOUT_MS = 60000;
 
   // ---- URL builders: citation type -> site route -----------------------
   const TYPE_ROUTES = {
@@ -154,14 +159,21 @@ const examples: string[] = [
     recipe: '/recipes',
   };
 
+  // Page URL of a cited node, in the site's one canonical form (hyphenated failure-mode slug, trailing slash;
+  // see lib/seo.ts). The backend also sends a `url`, but with underscore ids and no slash, which resolves only
+  // through its own redirect; it is not used. A node type without a page gets no link.
+  function nodeUrl(c) {
+    const route = TYPE_ROUTES[c.type];
+    if (!route || c.id == null) return null;
+    const id = c.type === 'failure_mode' ? String(c.id).replace(/_/g, '-') : String(c.id);
+    return `${route}/${encodeURIComponent(id)}/`;
+  }
+
   // Map each citation id -> (type, url, name) once, so the answer renderer
   // can turn "[guardrails-ai]" into a link without hitting the backend twice.
   function buildCitationIndex(citations) {
     const idx = new Map();
-    for (const c of citations || []) {
-      const url = c.url || (TYPE_ROUTES[c.type] ? `${TYPE_ROUTES[c.type]}/${c.id}` : null);
-      idx.set(c.id, { ...c, url });
-    }
+    for (const c of citations || []) idx.set(c.id, { ...c, url: nodeUrl(c) });
     return idx;
   }
 
@@ -201,10 +213,10 @@ const examples: string[] = [
   function renderCitations(citations) {
     citationsEl.innerHTML = '';
     for (const c of citations) {
-      const url = c.url || (TYPE_ROUTES[c.type] ? `${TYPE_ROUTES[c.type]}/${c.id}` : null);
-      const a = document.createElement('a');
+      const url = nodeUrl(c);
+      const a = document.createElement(url ? 'a' : 'span');
       a.className = 'chip hover:border-accent/40';
-      a.href = url || '#';
+      if (url) a.href = url;
       a.title = c.snippet || '';
       a.innerHTML = `<span class="text-ink-faint">${escapeHtml(c.type)}</span> ${escapeHtml(c.id)}`;
       citationsEl.appendChild(a);
@@ -215,14 +227,46 @@ const examples: string[] = [
     rawEl.innerHTML = '';
     for (const c of citations) {
       const li = document.createElement('li');
-      const url = c.url || (TYPE_ROUTES[c.type] ? `${TYPE_ROUTES[c.type]}/${c.id}` : null);
+      const url = nodeUrl(c);
       const sim = typeof c.similarity === 'number' ? c.similarity.toFixed(3) : '—';
       li.innerHTML =
-        `<a href="${escapeHtml(url || '#')}" class="font-semibold">${escapeHtml(c.name || c.id)}</a> ` +
+        (url
+          ? `<a href="${escapeHtml(url)}" class="font-semibold">${escapeHtml(c.name || c.id)}</a> `
+          : `<span class="font-semibold">${escapeHtml(c.name || c.id)}</span> `) +
         `<span class="text-ink-faint">(${escapeHtml(c.type)}, sim ${sim})</span>` +
         (c.snippet ? `<div class="text-ink-muted mt-1">${escapeHtml(c.snippet)}</div>` : '');
       rawEl.appendChild(li);
     }
+  }
+
+  // ---- Errors: what a visitor is told, by cause --------------------------
+  // The raw response and the "start the server" hint are shown in a development build only.
+  function showError(message, raw) {
+    errorDetail.textContent = message;
+    if (DEV) {
+      errorRaw.textContent = raw || '';
+      errorDev.classList.remove('hidden');
+    }
+    errorWrap.classList.remove('hidden');
+  }
+  const UNAVAILABLE = 'The question service is not available right now. Please try again in a few minutes.';
+  async function httpError(resp) {
+    const text = await resp.text().catch(() => '');
+    let detail = '';
+    let ref = '';
+    try {
+      const body = JSON.parse(text);
+      // The API's `detail` is a sentence written for the reader. Anything that looks like server internals
+      // (an old or foreign server) is not shown.
+      if (body && typeof body.detail === 'string' && body.detail.length >= 12 && body.detail.length <= 300 && body.detail.includes(' ') && !/pipeline\.|traceback|[{}]/i.test(body.detail)) detail = body.detail;
+      if (body && typeof body.request_id === 'string' && /^[\w-]{4,64}$/.test(body.request_id)) ref = ` (Reference: ${body.request_id})`;
+    } catch { /* not JSON */ }
+    const raw = `HTTP ${resp.status}: ${text || resp.statusText}`;
+    // 429 has three causes (per-address limit, busy, day's budget): the API's sentence says which.
+    if (resp.status === 429) return [(detail || 'This demo has used up its question budget for now. Please try again later.') + ref, raw];
+    if ([400, 413, 422].includes(resp.status)) return [(detail || 'The question could not be read. Please rephrase it and try again.') + ref, raw];
+    if (resp.status === 503 || resp.status === 504) return [(detail || UNAVAILABLE) + ref, raw];
+    return [UNAVAILABLE + ref, raw];
   }
 
   // ---- Submit handler ---------------------------------------------------
@@ -233,15 +277,19 @@ const examples: string[] = [
     submitBtn.disabled = true;
     submitBtn.classList.add('opacity-60');
 
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);
     try {
       const resp = await fetch(ASK_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
+        signal: abort.signal,
       });
       if (!resp.ok) {
-        const text = await resp.text().catch(() => '');
-        throw new Error(`backend returned ${resp.status}: ${text || resp.statusText}`);
+        showError(...(await httpError(resp)));
+        statusEl.textContent = '';
+        return;
       }
       const data = await resp.json();
 
@@ -249,17 +297,22 @@ const examples: string[] = [
       answerEl.innerHTML = `<p>${renderAnswer(data.answer || '', citationIndex)}</p>`;
       renderCitations(data.citations || []);
       renderRaw(data.citations || []);
+      // `kimi_tokens_used` is the field's name in the backend's response whatever model answered.
       metaEl.textContent =
-        `model: ${data.model || 'Kimi-K2.5'} · ` +
-        `tokens: ${data.kimi_tokens_used ?? '—'} · ` +
+        `model: ${data.model || 'not reported'} · ` +
+        `tokens: ${data.tokens_used ?? data.kimi_tokens_used ?? '—'} · ` +
         `${(data.citations || []).length} hits`;
       answerWrap.classList.remove('hidden');
       statusEl.textContent = '';
     } catch (err) {
-      errorDetail.textContent = String(err && err.message ? err.message : err);
-      errorWrap.classList.remove('hidden');
+      const timedOut = err && err.name === 'AbortError';
+      showError(
+        timedOut ? `No answer after ${TIMEOUT_MS / 1000} seconds. Please try again.` : UNAVAILABLE,
+        String(err && err.message ? err.message : err),
+      );
       statusEl.textContent = '';
     } finally {
+      clearTimeout(timer);
       submitBtn.disabled = false;
       submitBtn.classList.remove('opacity-60');
     }

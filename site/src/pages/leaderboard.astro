@@ -7,11 +7,17 @@
 // Technical methodology is in a collapsible footer block so the
 // landing page reads cleanly for non-technical visitors.
 //
-// Reads /saica_index.json (regenerated weekly by
-// .github/workflows/saica-index.yml). Scoring: pipeline/saica_index/score.py.
+// Reads /saica_index.json, a frozen snapshot from 2026-05-02 (the weekly workflow meant to refresh it,
+// .github/workflows/saica-index.yml, has not produced a newer one). Scoring: pipeline/saica_index/score.py.
+//
+// ARCHIVED (2026-11-21): the page is noindex, opens with a dated banner and is not linked from the navigation.
+// It grades repositories by catalog tags, which the tag audit of 2026-11-20 cut from 253 to 93, and the
+// benchmark now measures what tools catch instead (REWIEW_NOV_21.md G5, F1 step 3).
 
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ArchivedBanner from "../components/ArchivedBanner.astro";
 import snapshot from "../../public/saica_index.json";
+import { graph } from "../lib/data.ts";
 
 const title = "SAICA Supervision Index";
 
@@ -46,6 +52,24 @@ const generated = new Date(data.generated_at).toLocaleString("en-US", {
   dateStyle: "long",
   timeZone: "UTC",
 });
+const generatedDmy = new Date(data.generated_at).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+// For the banner. Tag counts before the audit are from git (commit 0f0c1ab^, 2026-11-20): 99 tool files with
+// 253 addresses_failure_modes entries. Today's numbers are counted from data/.
+const BEFORE_AUDIT = { tools: 99, tags: 253 };
+const toolsNow = Object.values(graph.tools);
+const tagsNow = toolsNow.reduce((n, t) => n + t.addresses_failure_modes.length, 0);
+// The same project listed under two names with the same score (a known error in the seed list).
+const repoKey = (name: string) => name.split("/").pop()!.toLowerCase();
+const twice = rows.filter(
+  (r, i) => rows.findIndex((o) => repoKey(o.name) === repoKey(r.name) && o.score === r.score) !== i,
+);
+const twiceOf = (r: Row) => rows.find((o) => repoKey(o.name) === repoKey(r.name) && o.score === r.score)!;
 
 // Bar gradient per (under-the-hood) grade. Grade pills no longer
 // rendered on rows — top 3 get a podium medal instead, the rest just
@@ -99,7 +123,29 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
 );
 ---
 
-<BaseLayout title={title} noindex>
+<BaseLayout title={`${title} (archived, May 2026)`} description="Archived experiment from May 2026 that graded open-source repositories by the supervision tools they had installed. Not maintained." noindex>
+  <div class="mx-auto max-w-3xl">
+    <ArchivedBanner asOf={generatedDmy}>
+      <p>
+        The SAICA Supervision Index was an experiment from May 2026. It graded {rows.length} open-source
+        repositories by which supervision tools they had installed, using the catalog's failure-mode tags as they
+        were then. It has not been updated since {generatedDmy}. Please do not use these grades.
+      </p>
+      <p class="mt-2">
+        Two things have changed. The tags the grades rely on were audited on 20 November 2026 and most were
+        removed ({BEFORE_AUDIT.tags} tags on {BEFORE_AUDIT.tools} tools before, {tagsNow} tags on {toolsNow.length}
+        tools now). And a tag says what a tool is built for, not what it catches: the
+        <a href="/">SAICA-Bench leaderboard</a> measures that directly.
+      </p>
+      {twice.map((r) => (
+        <p class="mt-2">
+          Known error: <code>{twiceOf(r).name}</code> and <code>{r.name}</code> are the same project under two names
+          (same score), so it takes two places in the ranking.
+        </p>
+      ))}
+    </ArchivedBanner>
+  </div>
+
   {/* ──────────────  Hero  ────────────── */}
   <section class="mx-auto max-w-3xl text-center pt-6 pb-10">
     <h1 class="!mb-4 text-4xl md:text-5xl font-semibold tracking-tight">
@@ -129,12 +175,12 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
       <a
         href="https://github.com/vasylrakivnenko/SAICA/blob/main/data/saica_index/seed_repos.yml"
         rel="noopener"
-        class="rounded border border-ink/20 px-4 py-1.5 font-medium no-underline hover:bg-paper-soft"
+        class="rounded border border-ink/20 px-4 py-1.5 font-medium no-underline hover:bg-paper-alt"
       >Add a repo</a>
       <a
         href="https://github.com/vasylrakivnenko/SAICA/blob/main/pipeline/saica_index/score.py"
         rel="noopener"
-        class="rounded border border-ink/20 px-4 py-1.5 font-medium no-underline hover:bg-paper-soft"
+        class="rounded border border-ink/20 px-4 py-1.5 font-medium no-underline hover:bg-paper-alt"
       >Code</a>
     </div>
 
@@ -320,7 +366,7 @@ const categories: Array<[string, Row[]]> = [...grouped.entries()].sort(
       land in C/D, an A should feel earned.
     </p>
 
-    <details class="mt-6 rounded border border-ink/10 bg-paper-soft p-4">
+    <details class="mt-6 rounded border border-ink/10 bg-paper-alt p-4">
       <summary class="cursor-pointer text-sm font-semibold">
         Technical formula (for the curious)
       </summary>

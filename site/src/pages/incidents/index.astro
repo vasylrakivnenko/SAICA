@@ -3,13 +3,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import InlineCode from '../../components/InlineCode.astro';
 import { graph, failureModeLabel } from '../../lib/data.ts';
 import { breadcrumbs, clip, fmUrl } from '../../lib/seo.ts';
+import { incidentKind, isEvent } from '../../lib/catalog.ts';
 
 // Newest incidents first.
 const incidents = Object.values(graph.incidents)
   .slice()
   .sort((a, b) => b.incident_date.localeCompare(a.incident_date));
+// Only records of kind `event` are incidents in the plain sense (Incident.kind); the rest are study findings,
+// reported patterns or hypothetical scenarios, and are labelled as such.
+const events = incidents.filter(isEvent).length;
+const others = incidents.length - events;
+const classified = incidents.filter((i) => i.kind).length;
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 const description = clip(
-  `${incidents.length} real incidents where AI coding agents caused harm (deleted databases, hallucinated packages, prompt injection, leaked secrets), by failure mode.`,
+  events > 0
+    ? `${plural(events, 'real incident', 'real incidents')} where AI coding agents caused harm, and ${plural(others, 'related record', 'related records')} (study findings, reported patterns), by failure mode.`
+    : `${plural(incidents.length, 'record', 'records')} of AI coding agent failures (incidents, study findings and reported patterns), by failure mode.`,
   155,
 );
 const jsonld = breadcrumbs([
@@ -18,12 +27,15 @@ const jsonld = breadcrumbs([
 ]);
 ---
 
-<BaseLayout title="AI coding agent incidents: real-world failures" description={description} jsonld={jsonld}>
+<BaseLayout title="AI coding agent incidents and reported failures" description={description} jsonld={jsonld}>
   <h1>AI coding agent incidents</h1>
   <p class="text-ink-muted mt-2 max-w-3xl">
-    {incidents.length} documented failure events where AI coding agents (or analogous
-    systems) produced harm. Each incident is tagged with the <a href="/failure-modes/">failure modes</a> it exhibited
-    and the <a href="/tools/">tools</a> whose supervision would plausibly prevent recurrence.
+    {incidents.length} records of AI coding agents (or similar systems) failing.
+    {classified === 0
+      ? <>They are not yet sorted into dated incidents, study findings and reported patterns.</>
+      : <>{plural(events, 'is a dated real-world incident', 'are dated real-world incidents')}; the other {others} are study findings, reported patterns or hypothetical scenarios, and each record says which it is.</>}
+    Each is tagged with the <a href="/failure-modes/">failure modes</a> it shows and the
+    <a href="/tools/">tools</a> whose supervision could plausibly have prevented it.
   </p>
 
   <ul class="mt-6 divide-y divide-ink/10 border-y border-ink/10">
@@ -39,7 +51,8 @@ const jsonld = breadcrumbs([
         </div>
         {inc.tagline && <p class="mt-1 text-ink-muted"><InlineCode text={inc.tagline} /></p>}
         <div class="mt-2 flex flex-wrap gap-1.5">
-          <span class="chip-accent" title="Harm class">{inc.harm_class.replace(/_/g, ' ')}</span>
+          {inc.kind && <span class={isEvent(inc) ? 'chip-accent' : 'chip'} title="Kind of record">{incidentKind(inc).label}</span>}
+          {isEvent(inc) && <span class="chip-accent" title="Harm class">{inc.harm_class.replace(/_/g, ' ')}</span>}
           <span class="chip-accent" title="Reproducibility">{inc.reproducibility}</span>
           {inc.exhibited_failure_modes.map((fm) => (
             <a class="chip no-underline hover:text-accent" href={fmUrl(fm)} title="Failure mode">{failureModeLabel(fm)}</a>

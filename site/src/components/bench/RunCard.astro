@@ -1,0 +1,110 @@
+---
+// Run card of one results row: how the tool or model was run for the number beside it (results.json
+// rows[].run_card plus the row's own check, scope, sample and cost fields). Shown next to every row of a results
+// table and on tool pages, so a reader sees the configuration a score belongs to. Every value comes from the file;
+// only the field captions are written here. Unknown fields are printed under their own name, so a field the
+// report builder adds later still shows.
+import type { Mode, Row } from '../home/bench';
+import { int, money, pct } from '../../lib/format';
+
+interface Props {
+  row: Row;
+  m: Mode;
+  /** Render the card open, without the summary line (tool pages). */
+  open?: boolean;
+}
+const { row, m, open = false } = Astro.props;
+const card = row.run_card ?? {};
+
+const CAPTION: Record<string, string> = {
+  version: 'Version',
+  model: 'Model',
+  judge_model: 'Judge model',
+  provider: 'Provider',
+  input: 'What it was shown',
+  flag_rule: 'Counts as flagged when',
+  temperature: 'Temperature',
+  max_tokens: 'Output token limit',
+  first_run_date: 'First run',
+  run_date: 'Run date',
+};
+const SKIP = new Set(['deviations', 'runs', 'failed_runs', 'failed_share', 'failed_causes']);
+const caption = (k: string) => CAPTION[k] ?? k.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+const show = (v: unknown) => (typeof v === 'object' ? JSON.stringify(v) : String(v));
+const causes = (c?: Record<string, number>) =>
+  c && Object.keys(c).length
+    ? ': ' + Object.entries(c).map(([k, n]) => `${k.replace(/_/g, ' ')} ${int(n)}`).join(', ')
+    : '';
+
+const facts: Array<[string, string]> = [];
+for (const [k, v] of Object.entries(card)) {
+  if (SKIP.has(k) || v === null || v === undefined || v === '') continue;
+  facts.push([caption(k), show(v)]);
+}
+if (row.check) facts.push(['Check', row.check === 'our rubric' ? 'our rubric: the tool ran the rule text we wrote, not a check of its own' : 'own check: the tool ran its own built-in check']);
+if (row.catalog) facts.push(['Catalog', row.catalog]);
+if (row.scope_note) facts.push(['Design scope', `${row.scope}: ${row.scope_note}`]);
+if (typeof card.runs === 'number') {
+  const failed = typeof card.failed_runs === 'number' ? card.failed_runs : 0;
+  facts.push([
+    'Runs',
+    `${int(card.runs)}; failed ${int(failed)}` +
+      (typeof card.failed_share === 'number' ? ` (${pct(card.failed_share)})` : '') +
+      causes(card.failed_causes),
+  ]);
+}
+facts.push([
+  'Samples',
+  row.subset_n
+    ? `a subset: ${int(row.subset_n.pos)} bad and ${int(row.subset_n.neg)} clean of the set's ${int(m.n_pos)} and ${int(m.n_neg)}`
+    : `${int(row.n_pos)} bad, ${int(row.n_neg)} clean`,
+]);
+facts.push([
+  'Answers with no verdict',
+  `${int(row.unreadable)} (${int(row.unreadable_pos)} bad, ${int(row.unreadable_neg)} clean)` +
+    causes(row.unreadable_causes) +
+    (row.incomplete ? '; under 95% of one class was readable' : ''),
+]);
+facts.push([
+  'Cost',
+  row.cost1k === 0
+    ? 'free'
+    : `${money(row.cost1k, row.cost_estimated)} per 1,000 reviews (${row.cost_basis}); ${money(row.spend)} spent on this run` +
+      (row.cost_note ? `. ${row.cost_note.replace(/^./, (c) => c.toUpperCase())}` : ''),
+]);
+const deviations = Array.isArray(card.deviations) ? (card.deviations as string[]) : [];
+---
+
+{open ? (
+  <div class="rc">
+    <dl>{facts.map(([k, v]) => <><dt>{k}</dt><dd>{v}</dd></>)}</dl>
+    {deviations.length > 0 && (
+      <>
+        <p class="rc-h">How this run differs from the tool's defaults</p>
+        <ul>{deviations.map((d) => <li>{d}</li>)}</ul>
+      </>
+    )}
+  </div>
+) : (
+  <details class="rc">
+    <summary>Run card</summary>
+    <dl>{facts.map(([k, v]) => <><dt>{k}</dt><dd>{v}</dd></>)}</dl>
+    {deviations.length > 0 && (
+      <>
+        <p class="rc-h">How this run differs from the tool's defaults</p>
+        <ul>{deviations.map((d) => <li>{d}</li>)}</ul>
+      </>
+    )}
+  </details>
+)}
+
+<style>
+  .rc { font: 12.5px/1.45 ui-sans-serif, system-ui, sans-serif; color: #4a5160; white-space: normal; max-width: 38rem; }
+  details.rc { margin-top: 2px; }
+  .rc summary { cursor: pointer; color: #1f3a93; font-size: 12px; width: max-content; }
+  .rc dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 10px; margin: 6px 0 0; }
+  .rc dt { color: #6b7180; }
+  .rc dd { margin: 0; color: #111418; overflow-wrap: anywhere; }
+  .rc-h { margin: 8px 0 2px; color: #6b7180; }
+  .rc ul { margin: 0; padding-left: 1.1rem; list-style: disc; color: #111418; }
+</style>

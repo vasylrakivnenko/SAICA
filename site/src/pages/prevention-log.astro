@@ -11,26 +11,41 @@
 // gitignored so private repo paths never ship to this site. The committed
 // sample exists only so the page renders something out of the box.
 //
-// Mirrors /tool-coverage's fetch + escapeHtml + sticky-thead conventions.
+//
+// ARCHIVED (2026-11-21): the page is noindex, opens with a dated banner and is not linked from the navigation.
+// The events it shows are typed-in sample data, not events recorded by a hook (REWIEW_NOV_21.md G5, H6).
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ArchivedBanner from "../components/ArchivedBanner.astro";
 const title = "Prevention log";
 ---
 
-<BaseLayout title={title} noindex>
+<BaseLayout title={`${title} (archived demo)`} description="Archived demo from April 2026 of a viewer for supervision events. The events shown are sample data. Not maintained." noindex>
   <section class="mb-6 max-w-3xl">
     <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-      Supervision Telemetry
+      Archived demo
     </p>
     <h1 class="mt-2">Prevention log</h1>
-    <p class="mt-4 leading-7">
-      Every event below represents a failure that was caught before it landed —
-      a commit blocked, a destructive command denied, a vulnerable dependency
-      flagged. The lines are produced by
+  </section>
+
+  <ArchivedBanner label="Archived demo, not maintained" asOf="April 2026">
+    <p>
+      This page was a demo of a viewer for supervision events. The events below are sample data that was typed
+      in to show the format (<code>/prevention_log_sample.jsonl</code>); no hook recorded them, and they are not
+      failures caught in a real project. A page on a public site also cannot read a log on your machine, so it
+      never showed anyone's own events.
+    </p>
+    <p class="mt-2">
+      For what tools and models catch when measured, see the <a href="/">SAICA-Bench leaderboard</a>; to set up
+      checks for your own project, see the <a href="/tool-coverage/">supervision kit</a>.
+    </p>
+  </ArchivedBanner>
+
+  <section class="mb-6 max-w-3xl">
+    <p class="leading-7">
+      The viewer was built for lines written by
       <code>pipeline/supervision/logger.py</code>, which appends one JSON
-      object per prevented event to a date-stamped JSONL file. This page
-      reads <code>/prevention_log_sample.jsonl</code> (a committed demo
-      slice); production runs read your local
-      <code>.saica/prevention_log/</code> directory.
+      object per event to a date-stamped JSONL file. This page
+      reads only <code>/prevention_log_sample.jsonl</code>, the sample.
     </p>
   </section>
 
@@ -41,12 +56,13 @@ const title = "Prevention log";
       </summary>
       <div class="mt-3 text-sm leading-7 text-ink-muted">
         <p>
-          The supervisor writes to
-          <code>~/.saica/prevention_log/&lt;YYYY-MM-DD&gt;.jsonl</code>
-          (gitignored). To inspect today's events from a shell:
+          The logger writes to
+          <code>.saica/prevention_log/&lt;YYYY-MM-DD&gt;.jsonl</code> in the
+          repository it runs in (gitignored). To inspect today's events from
+          the repository root:
         </p>
-        <pre class="mt-2 bg-paper-alt border border-ink/10 rounded p-3 text-xs overflow-x-auto"><code>cat ~/.saica/prevention_log/$(date -u +%Y-%m-%d).jsonl | jq .
-ls -la ~/.saica/prevention_log/   # one file per UTC day</code></pre>
+        <pre class="mt-2 bg-paper-alt border border-ink/10 rounded p-3 text-xs overflow-x-auto"><code>cat .saica/prevention_log/$(date -u +%Y-%m-%d).jsonl | jq .
+ls -la .saica/prevention_log/   # one file per UTC day</code></pre>
         <p class="mt-3">
           To preview your local log on this page during development, drop a
           symlink or copy at
@@ -133,14 +149,14 @@ ls -la ~/.saica/prevention_log/   # one file per UTC day</code></pre>
       patch a CVE. Detection-only events (a scanner that warns but doesn't
       block) are out of scope; this log is deliberately narrow so the
       headline number is meaningful. The producer module is
-      <code>pipeline/supervision/logger.py</code>; see also
-      <a href="/tool-coverage/">/tool-coverage</a> for which tools cover
-      which failure modes in the KG.
+      <code>pipeline/supervision/logger.py</code>.
     </p>
   </section>
 </BaseLayout>
 
 <script>
+  import { escapeHtml } from "../lib/format";
+
   interface Event {
     ts: string;
     tool_id: string;
@@ -166,12 +182,6 @@ ls -la ~/.saica/prevention_log/   # one file per UTC day</code></pre>
   let events: Event[] = [];
   let sortKey: SortKey = "ts";
   let sortDesc = true;
-
-  function escapeHtml(s: string): string {
-    return String(s)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
 
   function fmtDisplay(s: string): string {
     if (!s) return "";

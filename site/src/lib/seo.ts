@@ -26,6 +26,18 @@ export const toolUrl = (toolId: string): string => `/tools/${toolId}/`;
 /** Leaderboard tab for a failure mode (leaderboard mode id or KG id). */
 export const leaderboardUrl = (id: string): string => `/#${benchId(id)}`;
 
+/** Site section of each knowledge-graph node kind that has pages: URL directory and display names. */
+export const SECTIONS: Record<string, { dir: string; label: string; one: string }> = {
+  tool: { dir: 'tools', label: 'Tools', one: 'tool' },
+  failure_mode: { dir: 'failure-modes', label: 'Failure modes', one: 'failure mode' },
+  paper: { dir: 'papers', label: 'Papers', one: 'paper' },
+  taxonomy: { dir: 'taxonomies', label: 'Taxonomies', one: 'taxonomy' },
+  incident: { dir: 'incidents', label: 'Incidents', one: 'incident record' },
+  recipe: { dir: 'recipes', label: 'Recipes', one: 'recipe' },
+};
+/** URL slug of a node inside its section (failure modes use hyphens, every other kind uses its id). */
+export const nodeSlug = (kind: string, id: string): string => (kind === 'failure_mode' ? fmSlug(id) : id);
+
 /** Absolute URL on the production site, with a trailing slash for page paths. */
 export function abs(path: string): string {
   const u = new URL(path, SITE);

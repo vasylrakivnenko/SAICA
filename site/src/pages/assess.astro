@@ -98,9 +98,11 @@ const examples: { label: string; slug: string }[] = [
     <div class="border border-red-300 bg-red-50 text-red-900 p-4 rounded">
       <div class="font-sans font-semibold mb-1">Couldn't run the audit</div>
       <div id="assess-error-detail" class="text-sm"></div>
-      <div class="text-sm mt-2">
-        The backend is a separate FastAPI service. Start it with
+      {/* Shown by the script in a development build only: visitors cannot start a server. */}
+      <div id="assess-error-dev" class="text-sm mt-2 hidden">
+        Developer note: the backend is a separate FastAPI service. Start it with
         <code>python -m pipeline.webapp</code> and try again.
+        <span id="assess-error-raw" class="block mt-1 font-mono text-xs break-words"></span>
       </div>
     </div>
   </section>
@@ -128,6 +130,7 @@ const examples: { label: string; slug: string }[] = [
         </button>
       </div>
       <p id="report-summary" class="leading-relaxed"></p>
+      <div id="report-limits" class="mt-3 border-t border-ink/10 pt-3 text-sm text-ink-muted hidden"></div>
     </div>
 
     <!-- Detected stack -->
@@ -169,10 +172,11 @@ const examples: { label: string; slug: string }[] = [
         <h2>Coverage heatmap</h2>
         <p class="text-sm leading-7 text-ink-muted">
           Rows are the supervision tools we detected in your repo. Columns are
-          the 11 failure modes from SAICA-KG. Cell color uses the same
-          per-mapping evidence tier as
-          <a href="/tool-coverage/">/tool-coverage</a>: 0 (not addressed),
-          1 (declared), 2 (rationale discusses FM), 3 (external citation).
+          the 11 failure modes from SAICA-KG. Cell color shows how well the
+          catalog documents each tag: 0 (not addressed),
+          1 (declared), 2 (rationale discusses FM), 3 (external citation). A tag
+          says what a tool is built for, not what it catches; measured results
+          are on the <a href="/">SAICA-Bench leaderboard</a>.
         </p>
       </div>
 
@@ -214,7 +218,7 @@ const examples: { label: string; slug: string }[] = [
   </section>
 </BaseLayout>
 
-<script is:inline define:vars={{ ASSESS_API }}>
+<script is:inline define:vars={{ ASSESS_API, DEV: import.meta.env.DEV }}>
   // ---- DOM refs -----------------------------------------------------------
   const form = document.getElementById('assess-form');
   const urlEl = document.getElementById('assess-url');
@@ -222,7 +226,11 @@ const examples: { label: string; slug: string }[] = [
   const statusEl = document.getElementById('assess-status');
   const errorWrap = document.getElementById('assess-error');
   const errorDetail = document.getElementById('assess-error-detail');
+  const errorDev = document.getElementById('assess-error-dev');
+  const errorRaw = document.getElementById('assess-error-raw');
   const reportWrap = document.getElementById('assess-report');
+  // An audit clones the repository first (the backend allows that 60 s, then tries the GitHub API).
+  const TIMEOUT_MS = 120000;
 
   // ---- Constants (mirror /tool-coverage) ----------------------------------
   const TIER_BG = {
@@ -349,7 +357,7 @@ const examples: { label: string; slug: string }[] = [
       const moreCount = (t.detection_paths || []).length - 3;
       const morePath = moreCount > 0 ? ` (+${moreCount} more)` : '';
       const link = t.in_kg && t.id
-        ? `<a href="/tools/${encodeURIComponent(t.id)}" class="font-semibold">${escapeHtml(t.name || t.id)}</a>`
+        ? `<a href="/tools/${encodeURIComponent(t.id)}/" class="font-semibold">${escapeHtml(t.name || t.id)}</a>`
         : `<span class="font-semibold">${escapeHtml(t.name || t.id || '?')}</span>`;
       li.innerHTML =
         link
@@ -365,7 +373,14 @@ const examples: { label: string; slug: string }[] = [
   // Build a per-tool tier per-FM map by walking CoverageGrid.cells, taking
   // the max tier across paradigms for each (tool, FM) pair.
   function buildToolFmTiers(report) {
-    const tools = report.stack && report.stack.supervision_tools || [];
+    // The API lists a tool once per place it was seen; the heatmap gets one row per tool.
+    const seen = new Set();
+    const tools = (report.stack && report.stack.supervision_tools || []).filter((t) => {
+      const k = t.id || t.name;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
     const cells = (report.coverage && report.coverage.cells) || [];
     const fmsCovered = (report.coverage && report.coverage.failure_modes_covered) || [];
     const fmsMissing = (report.coverage && report.coverage.failure_modes_missing) || [];
@@ -388,7 +403,8 @@ const examples: { label: string; slug: string }[] = [
         if (tier > prev) row.set(cell.failure_mode, tier);
       }
     }
-    return { tools, fms, grid };
+    const notAssessable = new Set((report.coverage && report.coverage.failure_modes_not_assessable) || []);
+    return { tools, fms, grid, notAssessable };
   }
 
   function renderHeatmap(report) {
@@ -396,7 +412,7 @@ const examples: { label: string; slug: string }[] = [
     const empty = document.getElementById('heatmap-empty');
     const head = document.getElementById('heatmap-head');
     const body = document.getElementById('heatmap-body');
-    const { tools, fms, grid } = buildToolFmTiers(report);
+    const { tools, fms, grid, notAssessable } = buildToolFmTiers(report);
 
     if (!tools.length) {
       wrap.classList.add('hidden');
@@ -422,17 +438,21 @@ const examples: { label: string; slug: string }[] = [
       const row = grid.get(tid) || new Map();
       const cells = fms.map((fm) => {
         const tier = row.get(fm) || 0;
+        // No detection rule exists for any tool of this mode: the audit cannot say, which is not "uncovered".
+        if (!tier && notAssessable.has(fm)) {
+          return `<td class="text-center align-middle p-0 text-xs text-ink-faint" style="height:2.25rem; min-width:2.25rem" title="${escapeHtml(fmtDisplay(fm))}: the audit has no detection rule for this failure mode">n/a</td>`;
+        }
         const bg = TIER_BG[tier];
         const fg = TIER_FG[tier];
         const tip = `${escapeHtml(t.name || tid)} × ${escapeHtml(fmtDisplay(fm))}: tier ${tier} — ${TIER_LABEL[tier]}`;
         const content = tier === 0 ? '' : String(tier);
         const inner = tier > 0 && t.in_kg && t.id
-          ? `<a href="/tools/${encodeURIComponent(t.id)}" title="${tip}" class="block w-full h-full no-underline leading-none" style="color:${fg}">${content}</a>`
+          ? `<a href="/tools/${encodeURIComponent(t.id)}/" title="${tip}" class="block w-full h-full no-underline leading-none" style="color:${fg}">${content}</a>`
           : `<span title="${tip}" class="block w-full h-full" style="color:${fg}">${content || '&nbsp;'}</span>`;
         return `<td class="text-center align-middle p-0" style="background:${bg}; height:2.25rem; min-width:2.25rem">${inner}</td>`;
       }).join('');
       const labelCell = t.in_kg && t.id
-        ? `<a href="/tools/${encodeURIComponent(t.id)}" class="text-ink hover:text-accent">${escapeHtml(t.name || tid)}</a>`
+        ? `<a href="/tools/${encodeURIComponent(t.id)}/" class="text-ink hover:text-accent">${escapeHtml(t.name || tid)}</a>`
         : `<span class="text-ink">${escapeHtml(t.name || tid)}</span>`;
       return `<tr class="border-t border-ink/10">`
         + `<td class="px-3 py-1.5 sticky left-0 bg-white z-10 border-r border-ink/10">${labelCell}</td>`
@@ -464,7 +484,8 @@ const examples: { label: string; slug: string }[] = [
         const stars = fmtStars(r.stars);
         const surfaces = (r.integration_surfaces || []).slice(0, 3).map((s) =>
           `<span class="chip text-[10px]">${escapeHtml(s)}</span>`).join(' ');
-        const url = r.url || `/tools/${encodeURIComponent(r.tool_id)}`;
+        // Canonical tool page URL (trailing slash); the backend's own `url` has none.
+        const url = `/tools/${encodeURIComponent(r.tool_id)}/`;
         return `<div class="border border-ink/10 rounded p-3 bg-paper-alt">`
           + `<div class="flex flex-wrap items-baseline justify-between gap-2 mb-1">`
           + `<a href="${escapeHtml(url)}" class="font-semibold text-ink hover:text-accent">${escapeHtml(r.tool_name || r.tool_id)}</a>`
@@ -506,6 +527,34 @@ const examples: { label: string; slug: string }[] = [
     link.textContent = report.repo_url.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
     audited.textContent = `Audited ${report.audited_at || ''}`;
     summary.textContent = report.summary || '';
+    // What the audit could and could not see (report.limits, when the API sends it).
+    const limitsEl = document.getElementById('report-limits');
+    const L = report.limits;
+    limitsEl.replaceChildren();
+    limitsEl.classList.toggle('hidden', !L);
+    if (L) {
+      const lines = [];
+      const detectable = Array.isArray(L.detectable_tools) ? L.detectable_tools.length : null;
+      if (detectable !== null && typeof L.catalog_tools === 'number') {
+        lines.push(`The audit can detect ${detectable} of the ${L.catalog_tools} catalog tools; a tool it cannot detect is never reported, present or not.`);
+      }
+      const na = Array.isArray(L.not_assessable_failure_modes) ? L.not_assessable_failure_modes : [];
+      if (na.length) lines.push(`Not assessable (no detection rule for any tool): ${na.map(fmtDisplay).join(', ')}.`);
+      if (typeof L.files_read === 'number' && typeof L.files_listed === 'number') lines.push(`Files read: ${L.files_read} of ${L.files_listed} listed.`);
+      for (const t of (Array.isArray(L.truncated) ? L.truncated : [])) lines.push(String(t));
+      for (const n of (Array.isArray(L.notes) ? L.notes : [])) lines.push(String(n));
+      const head = document.createElement('div');
+      head.className = 'text-xs font-sans uppercase tracking-widest text-ink-faint';
+      head.textContent = 'What this audit can and cannot see';
+      const ul = document.createElement('ul');
+      ul.className = 'mt-1 list-disc pl-5 space-y-1';
+      for (const line of lines) {
+        const li = document.createElement('li');
+        li.textContent = line;
+        ul.appendChild(li);
+      }
+      limitsEl.append(head, ul);
+    }
   }
 
   function repoSlug(url) {
@@ -555,14 +604,45 @@ const examples: { label: string; slug: string }[] = [
     reportWrap.classList.remove('hidden');
   }
 
+  // ---- Errors: what a visitor is told, by cause --------------------------
+  // The raw response and the "start the server" hint are shown in a development build only.
+  function showError(message, raw) {
+    errorDetail.textContent = message;
+    errorDev.classList.add('hidden');
+    if (DEV && raw) {
+      errorRaw.textContent = raw;
+      errorDev.classList.remove('hidden');
+    }
+    errorWrap.classList.remove('hidden');
+  }
+  const UNAVAILABLE = 'The audit service is not available right now. Please try again in a few minutes.';
+  async function httpError(resp) {
+    const text = await resp.text().catch(() => '');
+    let detail = '';
+    let ref = '';
+    try {
+      const body = JSON.parse(text);
+      // The API's `detail` is a sentence written for the reader. Anything that looks like server internals
+      // (an old or foreign server) is not shown.
+      if (body && typeof body.detail === 'string' && body.detail.length >= 12 && body.detail.length <= 300 && body.detail.includes(' ') && !/pipeline\.|traceback|[{}]/i.test(body.detail)) detail = body.detail;
+      if (body && typeof body.request_id === 'string' && /^[\w-]{4,64}$/.test(body.request_id)) ref = ` (Reference: ${body.request_id})`;
+    } catch { /* not JSON */ }
+    const raw = `HTTP ${resp.status}: ${text || resp.statusText}`;
+    // 429 has three causes (per-address limit, busy, day's budget): the API's sentence says which.
+    if (resp.status === 429) return [(detail || 'This demo has used up its audit budget for now. Please try again later.') + ref, raw];
+    if ([400, 404, 413, 422].includes(resp.status)) {
+      return [(detail || 'That repository could not be audited. Check that it is public and spelled owner/repo.') + ref, raw];
+    }
+    if (resp.status === 503 || resp.status === 504) return [(detail || UNAVAILABLE) + ref, raw];
+    return [UNAVAILABLE + ref, raw];
+  }
+
   // ---- Submit handler ---------------------------------------------------
   async function runAudit(rawUrl) {
     const repoUrl = normalizeRepoUrl(rawUrl);
     if (!repoUrl) {
       statusEl.textContent = '';
-      errorDetail.textContent =
-        `Couldn't parse "${rawUrl}" as a GitHub repo. Try owner/repo or https://github.com/owner/repo.`;
-      errorWrap.classList.remove('hidden');
+      showError(`Couldn't parse "${rawUrl}" as a GitHub repo. Try owner/repo or https://github.com/owner/repo.`, '');
       reportWrap.classList.add('hidden');
       return;
     }
@@ -572,21 +652,19 @@ const examples: { label: string; slug: string }[] = [
     submitBtn.disabled = true;
     submitBtn.classList.add('opacity-60');
 
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);
     try {
       const resp = await fetch(ASSESS_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repo_url: repoUrl }),
+        signal: abort.signal,
       });
       if (!resp.ok) {
-        let detail = '';
-        try {
-          const body = await resp.json();
-          detail = body && body.detail ? body.detail : JSON.stringify(body);
-        } catch {
-          detail = await resp.text().catch(() => '');
-        }
-        throw new Error(`backend returned ${resp.status}: ${detail || resp.statusText}`);
+        showError(...(await httpError(resp)));
+        statusEl.textContent = '';
+        return;
       }
       const data = await resp.json();
       renderReport(data);
@@ -595,10 +673,14 @@ const examples: { label: string; slug: string }[] = [
       reportWrap.setAttribute('tabindex', '-1');
       reportWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
-      errorDetail.textContent = String(err && err.message ? err.message : err);
-      errorWrap.classList.remove('hidden');
+      const timedOut = err && err.name === 'AbortError';
+      showError(
+        timedOut ? `The audit did not finish within ${TIMEOUT_MS / 1000} seconds. Please try again, or try a smaller repository.` : UNAVAILABLE,
+        String(err && err.message ? err.message : err),
+      );
       statusEl.textContent = '';
     } finally {
+      clearTimeout(timer);
       submitBtn.disabled = false;
       submitBtn.classList.remove('opacity-60');
     }
@@ -625,5 +707,3 @@ const examples: { label: string; slug: string }[] = [
 
   document.getElementById('download-md').addEventListener('click', downloadMarkdown);
 </script>
-</content>
-</invoke>

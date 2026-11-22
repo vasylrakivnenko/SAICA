@@ -1,9 +1,12 @@
 import type { APIRoute } from 'astro';
-import { graph, counts, DISCLAIMER } from '../../../lib/data.ts';
+import { graph, counts, crosswalkEdges, DISCLAIMER } from '../../../lib/data.ts';
+import { jsonResponse } from '../../../lib/api.ts';
 
-// The full-graph snapshot — the contract Agent 5's Cytoscape viz will fetch.
-export const GET: APIRoute = () => {
-  const body = {
+// The full knowledge graph in one file: every node as loaded from data/, plus the crosswalk mappings as one
+// flat list. `kg_version` and `kg_last_updated` are read from data/MANIFEST.json (lib/data.ts), so two builds
+// of the same data give the same file. The /graph/ page reads the much smaller /api/v1/graph.json.
+export const GET: APIRoute = () =>
+  jsonResponse({
     kg_version: graph.kgVersion,
     kg_last_updated: graph.kgLastUpdated,
     counts: counts(),
@@ -17,8 +20,5 @@ export const GET: APIRoute = () => {
       incidents: graph.incidents,
       recipes: graph.recipes,
     },
-  };
-  return new Response(JSON.stringify(body, null, 2), {
-    headers: { 'content-type': 'application/json; charset=utf-8' },
+    crosswalk_edges: crosswalkEdges,
   });
-};

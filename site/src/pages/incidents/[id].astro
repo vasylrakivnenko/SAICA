@@ -4,6 +4,7 @@ import InlineCode from '../../components/InlineCode.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
 import { graph, paperLabel } from '../../lib/data.ts';
 import { breadcrumbs, clip, fmUrl, toolUrl } from '../../lib/seo.ts';
+import { incidentKind, isEvent } from '../../lib/catalog.ts';
 import type { Incident } from '../../lib/types.ts';
 
 export function getStaticPaths() {
@@ -23,6 +24,8 @@ const mitigatedByTools = (incident.mitigated_by ?? [])
   .map((id) => graph.tools[id])
   .filter(Boolean);
 const affected = incident.affected_systems ?? [];
+// What the record is (Incident.kind): only `event` is an incident in the plain sense.
+const kind = incidentKind(incident);
 const desc = clip(incident.tagline ?? incident.description, 155);
 const jsonld = breadcrumbs([
   ['SAICA-Bench', '/'],
@@ -45,10 +48,13 @@ function prettyDomain(url: string): string {
   </p>
   <h1 class="mt-1">{incident.title}</h1>
   {incident.tagline && <p class="mt-2 text-lg text-ink-muted"><InlineCode text={incident.tagline} /></p>}
+  {!isEvent(incident) && <p class="mt-2 font-sans text-sm text-ink-muted">{kind.note}</p>}
 
   <div class="mt-4 flex flex-wrap gap-2">
-    <span class="chip-accent" title="Incident date">{incident.incident_date}</span>
-    <span class="chip-accent" title="Harm class">{incident.harm_class.replace(/_/g, ' ')}</span>
+    {incident.kind && <span class={isEvent(incident) ? 'chip-accent' : 'chip'} title="Kind of record">{kind.label}</span>}
+    <span class="chip-accent" title={isEvent(incident) ? 'Incident date' : 'Date'}>{incident.incident_date}</span>
+    {/* A harm class describes what an event did; a study or a scenario did no harm of its own. */}
+    {isEvent(incident) && <span class="chip-accent" title="Harm class">{incident.harm_class.replace(/_/g, ' ')}</span>}
     <span class="chip-accent" title="Reproducibility">{incident.reproducibility}</span>
   </div>
 
@@ -137,10 +143,16 @@ function prettyDomain(url: string): string {
       <dl class="kv">
         <dt>ID</dt>
         <dd><code>{incident.id}</code></dd>
+        <dt>Kind</dt>
+        <dd>{kind.label}</dd>
         <dt>Date</dt>
         <dd>{incident.incident_date}</dd>
-        <dt>Harm class</dt>
-        <dd>{incident.harm_class.replace(/_/g, ' ')}</dd>
+        {isEvent(incident) && (
+          <>
+            <dt>Harm class</dt>
+            <dd>{incident.harm_class.replace(/_/g, ' ')}</dd>
+          </>
+        )}
         <dt>Reproducibility</dt>
         <dd>{incident.reproducibility}</dd>
         <dt>Failure modes</dt>

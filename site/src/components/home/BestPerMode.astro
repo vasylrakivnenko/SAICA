@@ -1,90 +1,90 @@
 ---
-// Best tool per failure mode, rendered at build time (crawlable without JS). Used on /tools/ (above the catalog) and
-// on /findings/. Each mode links to its failure-mode page and its leaderboard tab.
-import { SUMMARIES, TYPE_LABEL, TYPE_VAR, pct, costLabel, shortName, toolHref } from './bench';
+// One line per measured failure mode, in one block per provenance group (real agent output, model-written code,
+// planted failures): who is best, by the file's rules, and what the best catalog tool and the best shortcut
+// baseline score. Rendered at build time; used on /findings/, /tools/ and the leaderboard's overview.
+//
+// "Best reviewer" and "best catalog tool" are two different things (results.method.best): the first is the
+// best ranked row of any kind, named alone only when the file names a winner, otherwise as a top group, and not
+// at all under the floor; the second is the best tool of the catalog that ran its own check. A shortcut
+// baseline is never either.
+import {
+  GROUPS, bestLabel, bestState, highestJ, modeLinks, rowByKey, rowHref, topShortcut,
+  type Mode,
+} from './bench';
+import { pct, signedPct } from '../../lib/format';
 
-interface Props {
-  /** Order rows by best J (solved first) instead of the leaderboard's mode order. */
-  byJ?: boolean;
-  /** Show a key for the type dots under the table (for pages without the leaderboard's legend). */
-  legend?: boolean;
-}
-const { byJ = false, legend = false } = Astro.props;
-const rows = byJ ? [...SUMMARIES].sort((a, b) => b.best.j - a.best.j) : SUMMARIES;
-const types = [...new Set(rows.flatMap((s) => (s.free ? [s.best.type, s.free.type] : [s.best.type])))];
+const catalogCell = (m: Mode) => {
+  const t = m.best_catalog_tool;
+  if (!t) return { text: 'none ran a check of its own', href: null as string | null, j: '' };
+  if (m.below_floor) return { text: `none reaches J ${pct(m.floor, 0)}`, href: null, j: '' };
+  const row = rowByKey(m, t.key);
+  return { text: t.short, href: row ? rowHref(row) : null, j: signedPct(t.j) };
+};
 ---
 
-<div class="bpm-wrap">
-  <table class="bpm">
-    <thead>
-      <tr>
-        <th>Failure mode</th>
-        <th>Best tool</th>
-        <th class="num">J</th>
-        <th class="num">TPR</th>
-        <th class="num">FPR</th>
-        <th class="num">Cost / 1k</th>
-        <th>Best free option</th>
-        <th><span class="sr-only">Leaderboard tab</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      {rows.map((s) => {
-        const b = s.best, f = s.free, bh = toolHref(b), fh = f ? toolHref(f) : null;
-        return (
-          <tr>
-            <td class="mode"><a href={s.url}>{s.m.name}</a></td>
-            <td class="tool" title={b.tool}>
-              <i class="dot" style={`background:var(${TYPE_VAR[b.type]})`} title={TYPE_LABEL[b.type]}></i>
-              {bh ? <a href={bh}>{shortName(s.m, b)}</a> : shortName(s.m, b)}
-            </td>
-            <td class="num j">{pct(b.j)}</td>
-            <td class="num">{pct(b.catch)}</td>
-            <td class="num">{pct(b.fa)}</td>
-            <td class="num">{costLabel(b, s.m)}</td>
-            <td class="free" title={f ? f.tool : ''}>
-              {f ? (
-                <>
-                  {fh ? <a href={fh}>{shortName(s.m, f)}</a> : shortName(s.m, f)}
-                  <span class="fj">J {pct(f.j)}</span>
-                </>
-              ) : (
-                '—'
-              )}
-            </td>
-            <td class="tab"><a href={s.tab}>All {s.rows.length} →</a></td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
+<div class="bpm">
+  {GROUPS.map((g) => (
+    <section class="bpm-group" data-group={g.id}>
+      <h3>{g.label}</h3>
+      <p class="bpm-desc">{g.description}</p>
+      <div class="bpm-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">What the set scores</th>
+              <th scope="col">Best reviewer</th>
+              <th scope="col" class="num">Highest J</th>
+              <th scope="col">Best catalog tool, own check</th>
+              <th scope="col">Shortcut baseline</th>
+              <th scope="col"><span class="sr-only">All rows</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {g.list.map((m) => {
+              const l = modeLinks(m);
+              const c = catalogCell(m);
+              const s = topShortcut(m);
+              return (
+                <tr data-mode={m.id}>
+                  <th scope="row" class="mode">
+                    <a href={l.page}>{m.title}</a>
+                    {m.title !== m.name && <span class="fm">failure mode: {m.name}</span>}
+                    <span class="fm">{m.tier_label}</span>
+                  </th>
+                  <td class="best" data-best-for={m.id} data-best-state={bestState(m)}>{bestLabel(m)}</td>
+                  <td class="num j" data-highest-j-for={m.id}>{highestJ(m)}</td>
+                  <td class="cat" data-catalog-best-for={m.id}>
+                    {c.href ? <a href={c.href}>{c.text}</a> : c.text}{c.j && <span class="fj"> {c.j}</span>}
+                  </td>
+                  <td class="short" data-shortcut-for={m.id}>{s ? <>{signedPct(s.j)} <span class="fj">{s.short}</span></> : 'none published'}</td>
+                  <td class="tab"><a href={l.tab}>All rows →</a></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ))}
 </div>
-{legend && (
-  <p class="bpm-legend">
-    {types.map((t) => <span><i class="dot" style={`background:var(${TYPE_VAR[t]})`}></i>{TYPE_LABEL[t]}</span>)}
-  </p>
-)}
 
 <style>
-  .bpm-wrap, .bpm-legend {
-    --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab;
-  }
-  .bpm-wrap {
-    overflow-x: auto; padding-bottom: 4px;
-    position: relative; /* keeps the absolutely positioned sr-only header inside the scroller (else the page scrolls sideways on phones) */
-  }
-  .bpm { width: 100%; border-collapse: collapse; font: 14px ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
-  .bpm th, .bpm td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); white-space: nowrap; }
-  .bpm th { font-size: 12px; font-weight: 600; color: #4a5160; text-transform: uppercase; letter-spacing: .04em; }
-  .bpm .num { text-align: right; }
+  .bpm-group + .bpm-group { margin-top: 1.4rem; }
+  .bpm h3 { margin: 0; font: 600 15px ui-sans-serif, system-ui, sans-serif; color: #111418; }
+  .bpm-desc { margin: .15rem 0 .4rem; max-width: 80ch; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .bpm-wrap { overflow-x: auto; padding-bottom: 4px; position: relative; }
+  .bpm table { width: 100%; border-collapse: collapse; font: 13.5px/1.4 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .bpm th, .bpm td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); vertical-align: top; }
+  .bpm thead th { font-size: 12px; font-weight: 600; color: #4a5160; white-space: nowrap; }
+  .bpm .num { text-align: right; white-space: nowrap; }
+  .bpm th.mode { font-weight: 500; min-width: 11rem; }
+  .bpm th.mode a { color: #111418; text-decoration: none; border-bottom: 1px dotted #6b7180; }
+  .bpm th.mode a:hover, .bpm th.mode a:focus-visible { color: #1f3a93; }
+  .bpm .fm { display: block; font-size: 11.5px; font-weight: 400; color: #6b7180; }
+  .bpm td.best { min-width: 13rem; }
   .bpm td.j { font-weight: 600; }
-  .bpm td.mode a { color: #111418; text-decoration: none; border-bottom: 1px dotted #6b7180; font-weight: 500; }
-  .bpm td.mode a:hover, .bpm td.mode a:focus-visible { color: #1f3a93; }
-  .bpm td.tool a, .bpm td.free a { color: #1f3a93; }
-  .bpm-legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: .6rem 0 0; font: 12px ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
-  .bpm .dot, .bpm-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
-  .bpm .fj { color: #6b7180; margin-left: .45rem; }
-  .bpm td.tab { text-align: right; font-size: 13px; }
+  .bpm td a { color: #1f3a93; }
+  .bpm .fj { color: #6b7180; }
+  .bpm td.tab { text-align: right; font-size: 13px; white-space: nowrap; }
   .bpm td.tab a { color: #4a5160; }
-  .bpm td.tab a:hover { color: #1f3a93; }
 </style>

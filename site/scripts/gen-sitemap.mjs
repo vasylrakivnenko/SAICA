@@ -1,12 +1,13 @@
 // Post-build: write dist/sitemap.xml from the built pages (every dist/**/index.html, canonical URL with a trailing
 // slash), skipping pages marked noindex, and drop files that must never ship (Python bytecode caches).
-//   node scripts/gen-sitemap.mjs        (run by `npm run build` after `astro build`)
+//   node scripts/gen-sitemap.mjs              (run by `npm run build` after `astro build`)
+//   node scripts/gen-sitemap.mjs <out dir>    (for a build made with `astro build --outDir <out dir>`)
 import { readdirSync, readFileSync, writeFileSync, statSync, rmSync, existsSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SITE = 'https://saica.ai';
-const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
+const DIST = process.argv[2] ? resolve(process.argv[2]) : fileURLToPath(new URL('../dist/', import.meta.url));
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {

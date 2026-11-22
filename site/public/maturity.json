@@ -1,791 +1,914 @@
 {
+  "as_of": "2026-11-22",
+  "scale": {
+    "bands": {
+      "A": "score 7.0 or more",
+      "B": "score 5.5 to 6.9",
+      "C": "score 4.7 to 5.4",
+      "D": "score 4.0 to 4.6",
+      "E": "score 2.5 to 3.9",
+      "F": "score below 2.5, or deprecated, abandoned or archived"
+    },
+    "description": "Activity band A to F: a bin of a score that adds GitHub stars (log scale), a push to the upstream repository in the 12 months before `as_of`, the number of declared integration surfaces and, where the catalogue records them, citing papers and benchmark evaluations. It measures popularity and activity. It is not a level of evidence: no band means a paper cites the tool or that it was measured.",
+    "name": "activity band"
+  },
   "tools": {
     "agent-governance-toolkit": {
-      "computed_tier": "2B",
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
       "facets": {
         "documented_in": 0.0,
         "evaluated_on": 0.0,
         "integration_surfaces": 1.0,
         "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.23
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.23,
-      "tier": "2B"
-    },
-    "agenta": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.44
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.44,
-      "tier": "2B"
-    },
-    "agno": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.84
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.34,
-      "tier": "2B"
-    },
-    "ai-infra-guard": {
-      "computed_tier": "3",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.42
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 3.92,
-      "tier": "3"
-    },
-    "arize-phoenix": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.59
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.59,
-      "tier": "2B"
-    },
-    "autogen": {
-      "computed_tier": "1A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 3.0,
-        "recent_commit": 2.0,
-        "stars": 1.9
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 7.4,
-      "tier": "1A"
-    },
-    "bandit": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.51
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.51,
-      "tier": "2B"
-    },
-    "bifrost": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.45
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.45,
-      "tier": "2B"
-    },
-    "browser-use": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.98
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.98,
-      "tier": "2A"
-    },
-    "context-hub": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.65
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.65,
-      "tier": "2B"
-    },
-    "context7": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.89
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.89,
-      "tier": "2A"
-    },
-    "copilotkit": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.79
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.29,
-      "tier": "2B"
-    },
-    "daytona": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.94
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.94,
-      "tier": "2A"
-    },
-    "deepeval": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.67
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.67,
-      "tier": "2B"
-    },
-    "dependabot": {
-      "computed_tier": "3",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.5
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.0,
-      "tier": "3"
-    },
-    "e2b": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.63
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.63,
-      "tier": "2B"
-    },
-    "eslint": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.76
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.26,
-      "tier": "2A"
-    },
-    "flowise": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.89
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.89,
-      "tier": "2A"
-    },
-    "garak": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.55
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.55,
-      "tier": "2B"
-    },
-    "guardrails-ai": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.53
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.03,
-      "tier": "2B"
-    },
-    "langgraph": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.79
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.29,
-      "tier": "2B"
-    },
-    "letta": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.74
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.74,
-      "tier": "2A"
-    },
-    "litellm": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.86
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.86,
-      "tier": "2A"
-    },
-    "llm-guard": {
-      "computed_tier": "3",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.38
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 3.88,
-      "tier": "3"
-    },
-    "mastra": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.75
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.25,
-      "tier": "2B"
-    },
-    "mcp-toolbox": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.67
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.17,
-      "tier": "2B"
-    },
-    "mlflow": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.76
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.26,
-      "tier": "2A"
-    },
-    "modal": {
-      "computed_tier": "3",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 0.0
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 3.0,
-      "tier": "3"
-    },
-    "mypy": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.7
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.2,
-      "tier": "2A"
-    },
-    "nemo-guardrails": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.51
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.01,
-      "tier": "2B"
-    },
-    "nono": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.33
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.33,
-      "tier": "2B"
-    },
-    "opik": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.71
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.71,
-      "tier": "2A"
-    },
-    "playwright-mcp": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.8
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.3,
-      "tier": "2B"
-    },
-    "pr-agent": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.62
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.62,
-      "tier": "2B"
-    },
-    "promptfoo": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.72
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.22,
-      "tier": "2A"
-    },
-    "pydantic-ai": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.69
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.19,
-      "tier": "2B"
-    },
-    "pyright": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.66
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.16,
-      "tier": "2A"
-    },
-    "pyrit": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.43
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.43,
-      "tier": "2B"
-    },
-    "pytest": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.63
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.13,
-      "tier": "2A"
-    },
-    "renovate": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.73
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.73,
-      "tier": "2A"
-    },
-    "ruff": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.79
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.29,
-      "tier": "2A"
-    },
-    "semgrep": {
-      "computed_tier": "2A",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.67
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 5.17,
-      "tier": "2A"
-    },
-    "sentrux": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.32
-      },
-      "is_override": false,
-      "notes": [
-        "capped from 2A to 2B by maturity_status='experimental'"
-      ],
-      "override": null,
-      "score": 4.82,
-      "tier": "2B"
-    },
-    "smolagents": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 0.5,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.77
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.27,
-      "tier": "2B"
-    },
-    "snyk": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.5
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 4.5,
-      "tier": "2B"
-    },
-    "socket": {
-      "computed_tier": "1B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.5,
-        "paper_citations": 3.0,
-        "recent_commit": 2.0,
-        "stars": 0.0
-      },
-      "is_override": false,
-      "notes": [],
-      "override": null,
-      "score": 6.5,
-      "tier": "1B"
-    },
-    "superagent": {
-      "computed_tier": "2B",
-      "facets": {
-        "documented_in": 0.0,
-        "evaluated_on": 0.0,
-        "integration_surfaces": 1.0,
-        "paper_citations": 0.0,
-        "recent_commit": 2.0,
+        "recent_push": 2.0,
         "stars": 1.53
       },
       "is_override": false,
       "notes": [],
       "override": null,
       "score": 4.53,
-      "tier": "2B"
+      "tier": "D"
     },
-    "trulens": {
-      "computed_tier": "3",
+    "agenta": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.48
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.48,
+      "tier": "D"
+    },
+    "agno": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
       "facets": {
         "documented_in": 0.0,
         "evaluated_on": 0.0,
         "integration_surfaces": 0.5,
         "paper_citations": 0.0,
-        "recent_commit": 2.0,
+        "recent_push": 2.0,
+        "stars": 1.85
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.35,
+      "tier": "D"
+    },
+    "ai-infra-guard": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.55
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.05,
+      "tier": "D"
+    },
+    "arize-phoenix": {
+      "band": "B",
+      "computed_band": "B",
+      "computed_tier": "B",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.64
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 6.64,
+      "tier": "B"
+    },
+    "autogen": {
+      "band": "F",
+      "computed_band": "F",
+      "computed_tier": "F",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 3.0,
+        "recent_push": 2.0,
+        "stars": 1.92
+      },
+      "is_override": false,
+      "notes": [
+        "capped from A to F by maturity_status='deprecated'"
+      ],
+      "override": null,
+      "score": 7.42,
+      "tier": "F"
+    },
+    "bandit": {
+      "band": "B",
+      "computed_band": "B",
+      "computed_tier": "B",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.57
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 6.57,
+      "tier": "B"
+    },
+    "bifrost": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.6
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.6,
+      "tier": "D"
+    },
+    "browser-use": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 2.0
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 5.0,
+      "tier": "C"
+    },
+    "context-hub": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.66
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.66,
+      "tier": "D"
+    },
+    "context7": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.93
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.93,
+      "tier": "C"
+    },
+    "copilotkit": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.84
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.34,
+      "tier": "D"
+    },
+    "daytona": {
+      "band": "F",
+      "computed_band": "F",
+      "computed_tier": "F",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.94
+      },
+      "is_override": false,
+      "notes": [
+        "capped from C to F by maturity_status='deprecated'"
+      ],
+      "override": null,
+      "score": 4.94,
+      "tier": "F"
+    },
+    "deepeval": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.72
+      },
+      "is_override": false,
+      "notes": [
+        "capped from B to D by maturity_status='experimental'"
+      ],
+      "override": null,
+      "score": 6.72,
+      "tier": "D"
+    },
+    "dependabot": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.51
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.01,
+      "tier": "D"
+    },
+    "e2b": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.67
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.67,
+      "tier": "D"
+    },
+    "eslint": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.78
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 5.28,
+      "tier": "C"
+    },
+    "flowise": {
+      "band": "F",
+      "computed_band": "F",
+      "computed_tier": "F",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.9
+      },
+      "is_override": false,
+      "notes": [
+        "capped from C to F by maturity_status='deprecated'"
+      ],
+      "override": null,
+      "score": 4.9,
+      "tier": "F"
+    },
+    "garak": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.6
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.6,
+      "tier": "D"
+    },
+    "guardrails-ai": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.55
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.05,
+      "tier": "D"
+    },
+    "langgraph": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.86
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.36,
+      "tier": "D"
+    },
+    "letta": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.76
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.76,
+      "tier": "C"
+    },
+    "litellm": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.92
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.92,
+      "tier": "C"
+    },
+    "llm-guard": {
+      "band": "F",
+      "computed_band": "F",
+      "computed_tier": "F",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.4
+      },
+      "is_override": false,
+      "notes": [
+        "capped from E to F by maturity_status='deprecated'"
+      ],
+      "override": null,
+      "score": 3.9,
+      "tier": "F"
+    },
+    "mastra": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.79
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.29,
+      "tier": "D"
+    },
+    "mcp-toolbox": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.69
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.19,
+      "tier": "D"
+    },
+    "mlflow": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.78
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 5.28,
+      "tier": "C"
+    },
+    "modal": {
+      "band": "E",
+      "computed_band": "E",
+      "computed_tier": "E",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 0.0
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 3.0,
+      "tier": "E"
+    },
+    "mypy": {
+      "band": "A",
+      "computed_band": "A",
+      "computed_tier": "A",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.73
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 7.23,
+      "tier": "A"
+    },
+    "nemo-guardrails": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.55
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.05,
+      "tier": "D"
+    },
+    "nono": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.48
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.48,
+      "tier": "D"
+    },
+    "opik": {
+      "band": "B",
+      "computed_band": "B",
+      "computed_tier": "B",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.75
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 6.75,
+      "tier": "B"
+    },
+    "playwright-mcp": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.84
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.34,
+      "tier": "D"
+    },
+    "pr-agent": {
+      "band": "B",
+      "computed_band": "B",
+      "computed_tier": "B",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.69
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 6.69,
+      "tier": "B"
+    },
+    "promptfoo": {
+      "band": "A",
+      "computed_band": "A",
+      "computed_tier": "A",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.78
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 7.28,
+      "tier": "A"
+    },
+    "pydantic-ai": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.73
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.23,
+      "tier": "D"
+    },
+    "pyright": {
+      "band": "A",
+      "computed_band": "A",
+      "computed_tier": "A",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.68
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 7.18,
+      "tier": "A"
+    },
+    "pyrit": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.48
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.48,
+      "tier": "D"
+    },
+    "pytest": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.67
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 5.17,
+      "tier": "C"
+    },
+    "renovate": {
+      "band": "C",
+      "computed_band": "C",
+      "computed_tier": "C",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.75
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.75,
+      "tier": "C"
+    },
+    "ruff": {
+      "band": "A",
+      "computed_band": "A",
+      "computed_tier": "A",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.88
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 7.38,
+      "tier": "A"
+    },
+    "semgrep": {
+      "band": "A",
+      "computed_band": "A",
+      "computed_tier": "A",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.7
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 7.2,
+      "tier": "A"
+    },
+    "sentrux": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
         "stars": 1.41
       },
       "is_override": false,
-      "notes": [],
+      "notes": [
+        "capped from C to D by maturity_status='experimental'"
+      ],
       "override": null,
-      "score": 3.91,
-      "tier": "3"
+      "score": 4.91,
+      "tier": "D"
     },
-    "uqlm": {
-      "computed_tier": "3",
+    "smolagents": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
       "facets": {
         "documented_in": 0.0,
         "evaluated_on": 0.0,
         "integration_surfaces": 0.5,
         "paper_citations": 0.0,
-        "recent_commit": 2.0,
-        "stars": 1.22
+        "recent_push": 2.0,
+        "stars": 1.79
       },
       "is_override": false,
       "notes": [],
       "override": null,
-      "score": 3.72,
-      "tier": "3"
+      "score": 4.29,
+      "tier": "D"
+    },
+    "snyk": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.5
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.5,
+      "tier": "D"
+    },
+    "socket": {
+      "band": "E",
+      "computed_band": "E",
+      "computed_tier": "E",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 0.0
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 3.5,
+      "tier": "E"
+    },
+    "superagent": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 1.0,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.54
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 4.54,
+      "tier": "D"
+    },
+    "trulens": {
+      "band": "E",
+      "computed_band": "E",
+      "computed_tier": "E",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 0.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.43
+      },
+      "is_override": false,
+      "notes": [],
+      "override": null,
+      "score": 3.93,
+      "tier": "E"
+    },
+    "uqlm": {
+      "band": "D",
+      "computed_band": "D",
+      "computed_tier": "D",
+      "facets": {
+        "documented_in": 0.0,
+        "evaluated_on": 2.0,
+        "integration_surfaces": 0.5,
+        "paper_citations": 0.0,
+        "recent_push": 2.0,
+        "stars": 1.23
+      },
+      "is_override": false,
+      "notes": [
+        "capped from B to D by maturity_status='experimental'"
+      ],
+      "override": null,
+      "score": 5.73,
+      "tier": "D"
     }
   },
-  "version": 1
+  "version": 2
 }

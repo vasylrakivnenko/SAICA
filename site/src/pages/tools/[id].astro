@@ -2,35 +2,21 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import InlineCode from '../../components/InlineCode.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
-import { graph, facetLabel, paperLabel } from '../../lib/data.ts';
-import { abs, breadcrumbs, fmUrl, leaderboardUrl, toolUrl } from '../../lib/seo.ts';
-import { benchGenerated, fmName, fmPhrase, measuredFor, money, pct, toolDescription, toolTitle } from '../../lib/catalog.ts';
+import { graph, facetLabel, paperLabel, IMPLEMENTATION_NOTE } from '../../lib/data.ts';
+import { abs, breadcrumbs, fmUrl, toolUrl } from '../../lib/seo.ts';
+import {
+  BAND_AS_OF,
+  BAND_COLORS,
+  BAND_DESCRIPTION,
+  activityBand,
+  measuredFor,
+  toolDescription,
+  toolTitle,
+} from '../../lib/catalog.ts';
 import type { Tool } from '../../lib/types.ts';
-import maturityData from '../../../public/maturity.json';
-
-// Auto-computed maturity tier (Stage 9 of the v2 ingestion pipeline).
-// Source of truth: pipeline/maturity/score.py. Regenerate via:
-//   python -m validator.generate_maturity
-type MaturityRow = {
-  tier: '1A'|'1B'|'2A'|'2B'|'3'|'4';
-  computed_tier: '1A'|'1B'|'2A'|'2B'|'3'|'4';
-  score: number;
-  facets: Record<string, number>;
-  notes: string[];
-  is_override: boolean;
-  override: { tier: string; justification: string; by?: string; at?: string } | null;
-};
-const maturityTools = (maturityData as { tools: Record<string, MaturityRow> }).tools;
-
-const TIER_COLORS: Record<string, string> = {
-  '1A': 'bg-emerald-600 text-white',
-  '1B': 'bg-emerald-500 text-white',
-  '2A': 'bg-amber-400 text-stone-900',
-  '2B': 'bg-amber-300 text-stone-900',
-  '3':  'bg-orange-400 text-stone-900',
-  '4':  'bg-stone-400 text-white',
-};
-
+import RunCard from '../../components/bench/RunCard.astro';
+import { CITE_AS, GENERATED, METHOD, groupOf, modeLinks, rankedRows, rowTags } from '../../components/home/bench.ts';
+import { andList, interval, money, pct, signedPct } from '../../lib/format.ts';
 export function getStaticPaths() {
   // Re-import inside getStaticPaths for type safety.
   // (Astro inlines the import-time `graph` across top-level and this fn.)
@@ -42,7 +28,8 @@ export function getStaticPaths() {
 
 interface Props { tool: Tool }
 const { tool } = Astro.props;
-const maturity = maturityTools[tool.id];
+// Activity band (formerly "maturity tier"): popularity and activity, not evidence. See lib/catalog.ts.
+const maturity = activityBand(tool.id);
 
 const composesWith = tool.composes_with.map((id) => graph.tools[id]).filter(Boolean);
 const feedsInto = tool.feeds_into.map((id) => graph.tools[id]).filter(Boolean);
@@ -52,7 +39,9 @@ const documentedIn = tool.documented_in.map((id) => graph.papers[id]).filter(Boo
 const evaluatedOn = tool.evaluated_on.map((id) => graph.papers[id]).filter(Boolean);
 const desc = toolDescription(tool.id);
 const measured = measuredFor(tool.id);
-const measuredModes = [...new Set(measured.map((r) => r.modeId))];
+// Failure-mode tags of the catalog with no measured row for this tool: the claim is untested here.
+const measuredFm = new Set(measured.map((r) => r.m.id).map((id) => fmUrl(id)));
+const untested = tool.addresses_failure_modes.filter((fm) => !measuredFm.has(fmUrl(fm)));
 const jsonld = [
   {
     '@context': 'https://schema.org',
@@ -96,18 +85,27 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
   </div>
   {tool.tagline && <p class="mt-2 text-lg text-ink-muted">{tool.tagline}</p>}
 
+  {tool.archived && (
+    <p class="mt-3 max-w-3xl rounded border border-ink/20 bg-paper-alt px-3 py-2 text-sm leading-6" role="note">
+      <strong>Upstream archived.</strong> The repository of {tool.name} is read-only: it gets no further changes.
+      {tool.editorial_notes && <> {tool.editorial_notes.replace(/\s+/g, ' ').trim()}</>}
+    </p>
+  )}
+
   <div class="mt-4 flex flex-wrap gap-2">
     <span class="chip-accent">{facetLabel('control_paradigm', tool.control_paradigm)}</span>
     <span class="chip-accent">{facetLabel('temporal_phase', tool.temporal_phase)}</span>
     <span class="chip-accent">{facetLabel('autonomy_level', tool.autonomy_level)}</span>
+    {tool.implementation && <span class="chip-accent">{facetLabel('implementation', tool.implementation)}</span>}
     <span class="chip">{facetLabel('maturity_status', tool.maturity_status)}</span>
+    {tool.archived && <span class="chip" data-archived>Upstream archived</span>}
     {maturity && (
       <span
-        class={`inline-flex items-center rounded px-2 py-0.5 font-sans text-xs font-bold ${TIER_COLORS[maturity.tier] ?? 'bg-stone-300'}`}
-        title={`Maturity tier (auto-computed score=${maturity.score})${maturity.is_override ? ' — curator override' : ''}`}
+        class={`inline-flex items-center rounded px-2 py-0.5 font-sans text-xs font-bold ${BAND_COLORS[maturity.band] ?? 'bg-stone-300'}`}
+        title={`Activity band (stars, recent push, integration surfaces; score ${maturity.score})${maturity.isOverride ? ' — curator override' : ''}`}
       >
-        Tier {maturity.tier}
-        {maturity.is_override && <span class="ml-1 rounded bg-white/30 px-1 text-[10px] uppercase">override</span>}
+        Activity band {maturity.band}
+        {maturity.isOverride && <span class="ml-1 rounded bg-white/30 px-1 text-[10px] uppercase">override</span>}
       </span>
     )}
     {tool.locus_of_control.map((l) => (
@@ -116,16 +114,17 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
   </div>
 
   {maturity && (
-    <details class="mt-3 max-w-3xl rounded border border-ink/10 bg-paper-soft p-3 text-sm">
+    <details class="mt-3 max-w-3xl rounded border border-ink/10 bg-paper-alt p-3 text-sm">
       <summary class="cursor-pointer font-semibold">
-        Maturity tier details
+        Activity band details
       </summary>
       <div class="mt-2 space-y-2 leading-6">
+        <p>{BAND_DESCRIPTION}{BAND_AS_OF && <> Recency is judged as of {BAND_AS_OF}.</>}</p>
         <p>
-          Computed tier: <strong>{maturity.computed_tier}</strong>
+          Computed band: <strong>{maturity.computedBand}</strong>
           (raw score <code>{maturity.score}</code>).
-          Effective tier: <strong>{maturity.tier}</strong>
-          {maturity.is_override && <span> — curator override</span>}.
+          Shown band: <strong>{maturity.band}</strong>
+          {maturity.isOverride && <span> — curator override</span>}.
         </p>
         <p class="text-xs text-ink-faint">
           Facets:
@@ -153,50 +152,60 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
 
   {measured.length > 0 && (
     <section class="mt-8" aria-labelledby="measured">
-      <h2 id="measured" class="!mt-0">Measured on SAICA-Bench</h2>
+      <h2 id="measured" class="!mt-0">Measured on SAICA-Bench in this configuration</h2>
       <p class="max-w-3xl leading-7">
-        How well {tool.name} catches AI coding agent failures, measured on labelled sets of faulty and clean
-        samples (<a href="/benchmark/">how we test</a>). J = TPR &minus; FPR: the share of faulty samples it flags
-        minus the share of clean ones it wrongly flags, so 0 is no better than chance. Results as of {benchGenerated}.
+        Each row is one run of {tool.name}, set up by us as its run card says, on one labelled set of faulty and
+        clean samples (<a href="/benchmark/">how we test</a>). It says what that configuration flagged on that set,
+        not how good {tool.name} is in general: another model, another input or the tool's own defaults could
+        score differently. {METHOD.metric}
       </p>
       <div class="mt-3 overflow-x-auto rounded border border-ink/10">
         <table class="w-full font-sans text-sm">
           <thead class="bg-paper-alt text-xs uppercase tracking-wide text-ink-faint">
             <tr>
-              <th scope="col" class="px-3 py-2 text-left">Failure mode</th>
-              <th scope="col" class="px-3 py-2 text-left">Configuration</th>
-              <th scope="col" class="px-3 py-2 text-right">J</th>
+              <th scope="col" class="px-3 py-2 text-left">Set</th>
+              <th scope="col" class="px-3 py-2 text-left">Configuration and run card</th>
+              <th scope="col" class="px-3 py-2 text-right">J (95% interval)</th>
               <th scope="col" class="px-3 py-2 text-right">TPR</th>
               <th scope="col" class="px-3 py-2 text-right">FPR</th>
+              <th scope="col" class="px-3 py-2 text-right">No verdict</th>
               <th scope="col" class="px-3 py-2 text-right">Cost per 1,000 reviews</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-ink/10 bg-white">
-            {measured.map((r) => (
-              <tr>
-                <td class="px-3 py-2 align-top">
-                  <a href={fmUrl(r.fmId)}>{fmName(r.fmId)}</a>
-                  <div class="text-xs text-ink-faint">{fmPhrase(r.fmId)}</div>
+            {measured.map(({ m, row: r }) => (
+              <tr data-measured={`${m.id}/${r.key}`}>
+                <td class="px-3 py-2 align-top min-w-[11rem]">
+                  <a href={fmUrl(m.id)}>{m.title}</a>
+                  {m.title !== m.name && <div class="text-xs text-ink-faint">failure mode: {m.name}</div>}
+                  <div class="text-xs text-ink-faint">{groupOf(m)?.label}</div>
+                  <div class="text-xs text-ink-faint"><a href={modeLinks(m).tab} class="text-ink-faint">all rows of this set →</a></div>
                 </td>
-                <td class="px-3 py-2 align-top">
-                  {r.config}
-                  <div class="text-xs text-ink-faint">{r.typeLabel}</div>
+                <td class="px-3 py-2 align-top min-w-[16rem]">
+                  {r.tool}
+                  <div class="text-xs text-ink-faint">{rowTags(r).join(' · ')}</div>
+                  <div class="text-xs text-ink-muted">
+                    {r.ranked
+                      ? `Rank ${r.rank} of ${rankedRows(m).length} ranked rows` + (m.below_floor ? `; no reviewer reaches J ${pct(m.floor, 0)} on this set` : '')
+                      : `Not ranked: ${r.unranked_reason ?? r.scope}`}.
+                  </div>
+                  <RunCard row={r} m={m} open />
                 </td>
-                <td class="px-3 py-2 text-right align-top font-semibold tabular-nums">{pct(r.j)}</td>
-                <td class="px-3 py-2 text-right align-top tabular-nums">{pct(r.tpr)}</td>
-                <td class="px-3 py-2 text-right align-top tabular-nums">{pct(r.fpr)}</td>
-                <td class="px-3 py-2 text-right align-top tabular-nums">{money(r.cost1k, r.estimated)}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums whitespace-nowrap">
+                  <span class="font-semibold">{signedPct(r.j)}</span>
+                  <div class="text-xs text-ink-faint">{interval(r.j_ci, 1, true)}</div>
+                </td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{pct(r.catch)}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{pct(r.fa)}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{r.unreadable}{r.incomplete && <div class="text-xs text-ink-faint">incomplete</div>}</td>
+                <td class="px-3 py-2 text-right align-top tabular-nums">{money(r.cost1k, r.cost_estimated)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p class="mt-2 font-sans text-sm text-ink-muted">
-        {measured.some((r) => r.estimated) && <>~ estimated from a subset of the samples. </>}
-        Compare with every tool and model we measured:
-        {measuredModes.map((m, i) => (
-          <>{i > 0 && ', '}<a href={leaderboardUrl(m)}>{fmName(m)} leaderboard</a></>
-        ))}.
+      <p class="mt-2 font-sans text-sm text-ink-muted max-w-3xl">
+        {METHOD.unreadable.split('. ')[0]}. “~” marks an estimated cost. {CITE_AS}, built {GENERATED}.
       </p>
     </section>
   )}
@@ -223,6 +232,13 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
       {tool.addresses_failure_modes.length > 0 && (
         <>
           <h2>Addresses failure modes</h2>
+          <p class="text-sm text-ink-muted">
+            These tags are the catalog's claim about what {tool.name} is built to catch or prevent. A tag is not a
+            test result.
+            {measured.length > 0
+              ? <> The rows under <a href="#measured">Measured on SAICA-Bench</a> are the evidence, for the sets and the configuration we ran.{untested.length > 0 && <> Not measured here: {andList(untested.map((fm) => graph.failureModes[fm]?.name ?? fm))}.</>}</>
+              : <> SAICA-Bench has not measured {tool.name}, so none of these tags is tested here.</>}
+          </p>
           <ul class="mt-2 list-disc pl-5">
             {tool.addresses_failure_modes.map((fm) => {
               const node = graph.failureModes[fm];
@@ -236,6 +252,22 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
                   {node?.tagline && <span class="text-ink-muted"> — {node.tagline}</span>}
                 </li>
               );
+            })}
+          </ul>
+        </>
+      )}
+
+      {tool.records_failure_modes.length > 0 && (
+        <>
+          <h2>Records evidence of</h2>
+          <p class="text-sm text-ink-muted">
+            {tool.name} can record evidence of these failures (traces, or checks you configure yourself), but it does
+            not detect or prevent them on its own. They are not counted as failure modes it addresses.
+          </p>
+          <ul class="mt-2 list-disc pl-5">
+            {tool.records_failure_modes.map((fm) => {
+              const node = graph.failureModes[fm];
+              return <li>{node ? <a href={fmUrl(fm)}>{node.name}</a> : <span>{fm}</span>}</li>;
             })}
           </ul>
         </>
@@ -333,10 +365,27 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
         <dd><code>{tool.id}</code></dd>
         <dt>First released</dt>
         <dd>{tool.first_released}</dd>
-        {tool.last_updated && (
+        {(tool.upstream_pushed_at ?? tool.last_updated) && (
           <>
-            <dt>Last updated</dt>
-            <dd>{tool.last_updated}</dd>
+            <dt>Last upstream push</dt>
+            <dd>{tool.upstream_pushed_at ?? tool.last_updated}</dd>
+          </>
+        )}
+        {tool.last_reviewed && (
+          <>
+            <dt>Record checked on</dt>
+            <dd>{tool.last_reviewed}</dd>
+          </>
+        )}
+        {tool.implementation && (
+          <>
+            <dt>Implementation</dt>
+            <dd>
+              {facetLabel('implementation', tool.implementation)}
+              {IMPLEMENTATION_NOTE[tool.implementation] && (
+                <span class="text-ink-faint"> ({IMPLEMENTATION_NOTE[tool.implementation]})</span>
+              )}
+            </dd>
           </>
         )}
         <dt>Maturity</dt>

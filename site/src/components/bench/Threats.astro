@@ -1,0 +1,45 @@
+---
+// Threats to validity of the benchmark (results.threats): what could make a score mean something else than it
+// seems to, which modes it applies to, and whether its effect was measured, estimated or not assessed. The
+// table is the file's; the anchor #threats is linked from every mode card and results block.
+import { MODES, THREATS, modeById } from '../home/bench';
+import { andList } from '../../lib/format';
+
+const modesOf = (ids: string[]) =>
+  ids.length >= MODES.length ? `all ${MODES.length} modes` : andList(ids.map((id) => modeById(id)?.name ?? id));
+---
+
+<div class="th">
+  <div class="th-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Threat</th>
+          <th scope="col">Applies to</th>
+          <th scope="col">Status</th>
+          <th scope="col">What is known</th>
+        </tr>
+      </thead>
+      <tbody>
+        {THREATS.map((t) => (
+          <tr id={`threat-${t.id}`}>
+            <th scope="row">{t.threat}</th>
+            <td class="modes">{modesOf(t.modes)}</td>
+            <td class="status">{t.status}</td>
+            <td>{t.note}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .th-wrap { overflow-x: auto; padding-bottom: 4px; }
+  .th table { width: 100%; border-collapse: collapse; font: 13.5px/1.45 ui-sans-serif, system-ui, sans-serif; }
+  .th th, .th td { padding: .5rem .6rem; border-bottom: 1px solid rgb(17 20 24 / .08); text-align: left; vertical-align: top; }
+  .th thead th { font-size: 12px; font-weight: 600; color: #4a5160; }
+  .th tbody th { font-weight: 600; min-width: 13rem; max-width: 18rem; }
+  .th td.modes { min-width: 9rem; max-width: 14rem; color: #4a5160; }
+  .th td.status { min-width: 7rem; font-weight: 500; }
+</style>

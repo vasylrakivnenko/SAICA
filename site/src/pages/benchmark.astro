@@ -1,19 +1,26 @@
 ---
-// SAICA-Bench overview: one block per failure mode (what it tests, data, counts, caveats).
-// SEO: each card links to its failure-mode page; the page carries the benchmark's schema.org Dataset (Google Dataset Search).
+// SAICA-Bench methodology: the setting and the metric in the file's own sentences, the threats-to-validity table,
+// and one card per measured set (what it scores, where its bad samples come from, unit, tuning disclosure, setup,
+// caveats), grouped by provenance. Everything comes from /bench/results.json via components/home/bench.ts.
+// SEO: each card links to its failure-mode page; the page carries the benchmark's schema.org Dataset.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BenchSchema from '../components/BenchSchema.astro';
-import results from '../../public/bench/results.json';
-import { SUMMARIES, STAR_MODES, TOTAL_SAMPLES, SOURCES, GENERATED, AUTHOR, andList } from '../components/home/bench';
+import ModeFacts from '../components/bench/ModeFacts.astro';
+import Threats from '../components/bench/Threats.astro';
+import {
+  AUTHOR, CITE_AS, COUNTS, GENERATED, GENERATED_LONG, GROUPS, KIND_LABEL, METHOD, MODES, SOURCES, STAR_MODES, THREATS, TOTAL_SAMPLES,
+  modeLinks, rankedRows, unrankedRows,
+} from '../components/home/bench';
 import { abs, fmUrl, breadcrumbs } from '../lib/seo';
-const modes = results.modes;
-const best = Object.fromEntries(SUMMARIES.map((s) => [s.m.id, s.best.j]));
-const names = SUMMARIES.map((s) => s.m.name.toLowerCase());
+import { andList, int } from '../lib/format';
+
+const names = MODES.map((m) => m.name.toLowerCase());
+const kinds = andList(['model', 'catalog_tool', 'uncatalogued_tool'].map((k) => (KIND_LABEL[k] ?? k).toLowerCase()));
 
 const title = 'SAICA-Bench Methodology: Coding Agent Failure Datasets and Scoring';
 const description =
-  `How SAICA-Bench tests supervision tools and LLMs on ${SUMMARIES.length} failure modes of AI coding agents: ` +
-  `${TOTAL_SAMPLES.toLocaleString('en-US')} labelled samples, scored by J = TPR − FPR and cost.`;
+  `How SAICA-Bench tests supervision tools and LLMs on ${COUNTS.modes} failure modes of AI coding agents: ` +
+  `${int(TOTAL_SAMPLES)} labelled samples, ${COUNTS.constructed} sets with planted failures and ${COUNTS.agent_output} with real agent output, scored by J = TPR − FPR.`;
 
 const dataset = {
   '@context': 'https://schema.org',
@@ -21,12 +28,12 @@ const dataset = {
   name: 'SAICA-Bench: detection of AI coding agent failures',
   alternateName: 'SAICA-Bench',
   description:
-    `SAICA-Bench measures how well supervision tools and language models catch the typical failures of AI coding agents. ` +
-    `It has ${TOTAL_SAMPLES.toLocaleString('en-US')} labelled samples (patches, functions and agent sessions, each bad or clean) across ` +
-    `${SUMMARIES.length} failure modes: ${andList(names)}. Free programs, AI code reviewers, evaluation frameworks and plain ` +
-    `language models review the same samples without seeing the labels; each tool is reported with its true positive rate, ` +
-    `false positive rate, Youden's J (TPR − FPR) and cost per 1,000 reviews.`,
+    `SAICA-Bench measures what supervision tools and language models flag when shown the work of AI coding agents. ` +
+    `It has ${int(TOTAL_SAMPLES)} labelled samples (patches, functions and agent sessions, each bad or clean) across ` +
+    `${COUNTS.modes} failure modes: ${andList(names)}. ${METHOD.setting} Each row is reported with its true positive rate, ` +
+    `false positive rate, Youden's J (TPR − FPR) with a 95% interval, and cost per 1,000 reviews.`,
   url: abs('/benchmark/'),
+  version: CITE_AS,
   license: 'https://creativecommons.org/licenses/by/4.0/',
   isAccessibleForFree: true,
   creator: AUTHOR,
@@ -35,19 +42,18 @@ const dataset = {
     ...new Map(
       [
         'AI coding agents', 'coding agent failure modes', 'AI code review benchmark', 'LLM-as-judge', 'code hallucination',
-        'reward hacking', 'slopsquatting', 'supervision tools', "Youden's J", ...SUMMARIES.map((s) => s.m.name),
+        'test manipulation', 'slopsquatting', 'supervision tools', "Youden's J", ...MODES.map((m) => m.name),
       ].map((k) => [k.toLowerCase(), k]),
     ).values(),
   ],
   variableMeasured: [
-    { '@type': 'PropertyValue', name: 'TPR', alternateName: 'True positive rate', description: 'Share of bad samples (containing the failure) that the tool flags.' },
-    { '@type': 'PropertyValue', name: 'FPR', alternateName: 'False positive rate', description: 'Share of clean samples that the tool flags.' },
-    { '@type': 'PropertyValue', name: 'J', alternateName: "Youden's J", description: 'J = TPR − FPR. 0% is chance, 100% flags every bad sample and no clean one.' },
-    { '@type': 'PropertyValue', name: 'Cost per 1,000 reviews', unitText: 'USD', description: 'API price, GPU time for self-hosted models, $0 for free programs.' },
+    { '@type': 'PropertyValue', name: 'TPR', alternateName: 'True positive rate', description: 'Share of bad samples (containing the failure) that the reviewer flags, among answers with a verdict.' },
+    { '@type': 'PropertyValue', name: 'FPR', alternateName: 'False positive rate', description: 'Share of clean samples that the reviewer flags, among answers with a verdict.' },
+    { '@type': 'PropertyValue', name: 'J', alternateName: "Youden's J", description: METHOD.metric },
+    { '@type': 'PropertyValue', name: 'Cost per 1,000 reviews', unitText: 'USD', description: METHOD.cost },
   ],
-  measurementTechnique:
-    'Each tool reviews every sample of a failure mode once, without seeing its label (same prompt or configuration for every sample, temperature 0 for models); its verdicts are compared with labels from public datasets confirmed by execution or expert review, or from matched pairs that differ only in the failure.',
-  isBasedOn: SOURCES.filter((s) => s.modes.length).map((s) => ({ '@type': 'Dataset', name: s.name, url: s.url })),
+  measurementTechnique: `${METHOD.setting} ${METHOD.unreadable} ${METHOD.intervals}`,
+  isBasedOn: SOURCES.map((s) => ({ '@type': 'Dataset', name: s.name, url: s.url })),
   distribution: [{ '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: abs('/bench/results.json') }],
 };
 const jsonld = [dataset, breadcrumbs([['SAICA-Bench', '/'], ['Benchmark', '/benchmark/']])];
@@ -57,33 +63,68 @@ const jsonld = [dataset, breadcrumbs([['SAICA-Bench', '/'], ['Benchmark', '/benc
   <h1>SAICA-Bench</h1>
 
   <h2 class="mt-6">Overview</h2>
-  <p class="mt-2 max-w-4xl">
-    SAICA-Bench measures how well supervision tools and LLMs catch the typical failures of AI coding agents. Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or expert review, or from matched pairs we build in which the two versions differ only in the failure. Every tool reviews the same samples without seeing the labels: free programs such as type checkers and linters, hybrid tools that wrap a model (PR-Agent, promptfoo, DeepEval), and plain language models asked directly with one fixed prompt per mode. Each verdict is compared with the label: the true positive rate (TPR) is the share of bad samples a tool flags, the false positive rate (FPR) the share of clean samples it flags, and the headline score is <strong>J = TPR − FPR</strong>, reported with the cost per 1,000 reviews.
-  </p>
+  <div class="max-w-4xl">
+    <p class="mt-2">
+      SAICA-Bench measures what reviewers flag when they are shown the work of AI coding agents. Each sample is a
+      task plus what an agent or a model produced for it (a patch, a function or a whole session), labelled bad if it
+      contains the failure and clean if it does not. Reviewers never see the label. Three kinds of reviewer are
+      ranked: {kinds}. Baseline rules and shortcut baselines are shown next to them for reference.
+    </p>
+    <p class="mt-3"><strong>The setting.</strong> {METHOD.setting}</p>
+    <p class="mt-3"><strong>The score.</strong> {METHOD.metric} {METHOD.unreadable}</p>
+    <p class="mt-3"><strong>Who is called best.</strong> {METHOD.best} {METHOD.paired}</p>
+    <p class="mt-3 text-sm text-ink-muted">{METHOD.intervals} {METHOD.tiers} {METHOD.cost} {METHOD.cheap}</p>
+    <p class="mt-3 text-sm text-ink-muted">{CITE_AS}, built {GENERATED_LONG}. Raw numbers: <a href="/bench/results.json">results.json</a>.</p>
+  </div>
   <BenchSchema />
 
-  <h2 class="mt-10">Failure modes</h2>
+  <h2 class="mt-10" id="threats">Threats to validity</h2>
+  <p class="mt-2 max-w-4xl text-ink-muted">
+    {THREATS.length} things that could make a score mean something else than it seems to. For each: the sets it
+    applies to, and whether its effect was measured, estimated or not assessed.
+  </p>
+  <div class="mt-3 max-w-5xl"><Threats /></div>
 
-  <div class="mt-4 grid gap-5 max-w-4xl">
-    {modes.map((m) => (
-      <section class="card p-5 border border-ink/10 rounded-lg bg-white" id={m.id}>
-        <div class="font-sans text-xs uppercase tracking-wide text-ink-faint">{m.n_pos} {m.pos_label} · {m.n_neg} clean · {m.rows.length} entries · best J {Math.round(best[m.id] * 100)}%</div>
-        <h2 class="mt-1 mb-1">{m.name}</h2>
-        <p class="text-ink-muted">{m.summary}</p>
-        <p class="mt-2 font-mono text-xs text-ink-faint">Data: {m.dataset}</p>
-        <details class="mt-3">
-          <summary class="font-sans text-sm cursor-pointer">Setup and caveats</summary>
-          <ul class="mt-2 list-disc pl-5 text-sm leading-6">
-            {m.setup.map((s) => <li>{s}</li>)}
-            {m.caveats.map((s) => <li>{s}</li>)}
-          </ul>
-        </details>
-        <p class="mt-3 font-sans text-sm"><a href={`/#${m.id}`}>Leaderboard →</a> · <a href={fmUrl(m.id)}>What {m.name.toLowerCase()} is →</a></p>
-      </section>
-    ))}
-  </div>
+  <h2 class="mt-10">The sets, by where the bad samples come from</h2>
+  <p class="mt-2 max-w-4xl text-ink-muted">
+    {COUNTS.constructed} of the {COUNTS.modes} sets have bad samples that were planted on purpose and {COUNTS.natural}
+    use naturally produced output, {COUNTS.agent_output} of them real agent output. Scores are not comparable across
+    these groups.
+  </p>
+
+  {GROUPS.map((g) => (
+    <section class="mt-6" data-group={g.id}>
+      <h3 class="!mb-0">{g.label}</h3>
+      <p class="text-sm text-ink-muted max-w-4xl">{g.description}</p>
+      <div class="mt-3 grid gap-5 max-w-4xl">
+        {g.list.map((m) => (
+          <section class="card p-5 border border-ink/10 rounded-lg bg-white" id={m.id}>
+            <div class="font-sans text-xs uppercase tracking-wide text-ink-faint">
+              {int(m.n_pos)} {m.pos_label} · {int(m.n_neg)} clean · {rankedRows(m).length} ranked rows · {unrankedRows(m).length} reference rows
+            </div>
+            <h4 class="mt-1 mb-1 text-xl font-semibold font-sans">{m.title}</h4>
+            {m.title !== m.name && <p class="font-sans text-sm text-ink-faint">Failure mode: {m.name}</p>}
+            <p class="text-ink-muted">{m.summary}</p>
+            <div class="mt-3"><ModeFacts m={m} /></div>
+            <p class="mt-3 font-mono text-xs text-ink-faint">Data: {m.dataset}. Version: {m.dataset_version}</p>
+            <p class="mt-1 font-sans text-xs text-ink-faint">
+              Sources: {m.sources.map((s, i) => <>{i > 0 && '; '}<a href={s.url} rel="noopener">{s.name}</a>{s.public_since && ` (public since ${s.public_since})`}{s.note && `, ${s.note}`}</>)}.
+            </p>
+            <details class="mt-3">
+              <summary class="font-sans text-sm cursor-pointer">Setup and caveats</summary>
+              <ul class="mt-2 list-disc pl-5 text-sm leading-6">
+                {m.setup.map((s) => <li>{s}</li>)}
+                {m.caveats.map((s) => <li>{s}</li>)}
+              </ul>
+            </details>
+            <p class="mt-3 font-sans text-sm"><a href={modeLinks(m).tab}>All rows on the leaderboard →</a> · <a href={fmUrl(m.id)}>What {m.name.toLowerCase()} is, with the full table →</a> · <a href="#threats">Threats to validity →</a></p>
+          </section>
+        ))}
+      </div>
+    </section>
+  ))}
 
   <p class="mt-8 text-sm text-ink-muted max-w-4xl">
-    Not benchmarked yet: {STAR_MODES.map((m, i) => <>{i > 0 && (i === STAR_MODES.length - 1 ? ' and ' : ', ')}<a href={fmUrl(m.id)}>{m.name}</a></>)}, for which no dataset with confirmed labels exists; the leaderboard lists their catalog tools by GitHub stars instead. Several sets are synthetic or hand-built pairs; each mode's setup and caveats say how its samples were made. A summary of what the results show is in the <a href="/findings/">findings report</a>.
+    Not benchmarked yet: {STAR_MODES.map((m, i) => <>{i > 0 && (i === STAR_MODES.length - 1 ? ' and ' : ', ')}<a href={fmUrl(m.id)}>{m.name}</a></>)}, for which no dataset with confirmed labels exists; the leaderboard lists their catalog tools by GitHub stars instead. A summary of what the results show is in the <a href="/findings/">findings report</a>.
   </p>
 </BaseLayout>

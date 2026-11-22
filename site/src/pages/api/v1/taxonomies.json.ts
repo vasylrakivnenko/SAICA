@@ -1,8 +1,6 @@
 import type { APIRoute } from 'astro';
 import { graph } from '../../../lib/data.ts';
+import { jsonResponse, taxonomyOut } from '../../../lib/api.ts';
 
-export const GET: APIRoute = () =>
-  new Response(
-    JSON.stringify(Object.values(graph.taxonomies), null, 2),
-    { headers: { 'content-type': 'application/json; charset=utf-8' } },
-  );
+// Taxonomies, each with the mappings from SAICA failure modes into its categories.
+export const GET: APIRoute = () => jsonResponse(Object.values(graph.taxonomies).map(taxonomyOut));

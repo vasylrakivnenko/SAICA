@@ -2,8 +2,37 @@
 // /explore — Interactive 2D projection of KG embeddings.
 // Loads /embeddings.json at runtime and renders with raw SVG (no chart lib).
 // Consistent with /graph: tool blue, failure_mode rose, taxonomy violet, paper slate.
+//
+// The map file (public/embeddings.json) is generated separately from data/ and can lag behind it. At build
+// time the page compares the two: a row whose node is gone is hidden (its link would be dead), nodes that
+// are not on the map yet are named, and the counts shown are counted from the rows, not read from the
+// file's "count" header.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import embeddings from "../../public/embeddings.json";
+import { graph } from "../lib/data.ts";
+import { andList } from "../lib/catalog.ts";
 import { breadcrumbs } from "../lib/seo";
+
+const KINDS: Array<{ type: string; one: string; many: string; nodes: Record<string, { id: string }> }> = [
+  { type: "failure_mode", one: "failure mode", many: "failure modes", nodes: graph.failureModes },
+  { type: "tool", one: "tool", many: "tools", nodes: graph.tools },
+  { type: "taxonomy", one: "taxonomy", many: "taxonomies", nodes: graph.taxonomies },
+  { type: "paper", one: "paper", many: "papers", nodes: graph.papers },
+];
+const rows = (embeddings.combined ?? []) as Array<{ id: string; type: string }>;
+const exists = (r: { id: string; type: string }) => Boolean(KINDS.find((k) => k.type === r.type)?.nodes[r.id]);
+// Rows for nodes that are no longer in the catalog: the script below leaves them out.
+const stale = rows.filter((r) => !exists(r)).map((r) => `${r.type}:${r.id}`);
+const onMap = new Set(rows.filter(exists).map((r) => `${r.type}:${r.id}`));
+const perKind = KINDS.map((k) => {
+  const ids = Object.keys(k.nodes);
+  const missing = ids.filter((id) => !onMap.has(`${k.type}:${id}`)).sort();
+  return { ...k, total: ids.length, placed: ids.length - missing.length, missing };
+});
+const total = perKind.reduce((n, k) => n + k.total, 0);
+const notPlaced = perKind.filter((k) => k.missing.length > 0);
+const count = (n: number, k: { one: string; many: string }) => `${n} ${n === 1 ? k.one : k.many}`;
+
 const title = "Semantic map of AI coding agent failures, tools and papers";
 const description =
   "A 2D map of the AI coding agent failure modes, supervision tools, taxonomies and papers in the SAICA catalog, placed by how similar their descriptions are.";
@@ -29,9 +58,20 @@ const jsonld = breadcrumbs([
       necessarily facet labels. Hover to identify, click to open. With a keyboard, Tab into the map, move between
       dots with the arrow keys and press Enter to open one.
     </p>
+    <p class="mt-2 text-sm text-ink-muted max-w-3xl" id="ex-coverage">
+      On the map: {onMap.size} of the catalog's {total} nodes ({andList(perKind.map((k) => `${k.placed} of ${count(k.total, k)}`))}).
+      {notPlaced.length > 0 && (
+        <>
+          The map is recomputed less often than the catalog changes. Not placed yet:
+          {notPlaced.map((k, i) => (
+            <>{i > 0 && '; '}{count(k.missing.length, k)} ({k.missing.map((id, j) => <>{j > 0 && ', '}<code>{id}</code></>)})</>
+          ))}.
+        </>
+      )}
+    </p>
   </section>
 
-  <div class="grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)] gap-4" id="explore-root">
+  <div class="grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)] gap-4" id="explore-root" data-stale={JSON.stringify(stale)}>
     <aside class="ui text-sm">
       <div class="mb-4">
         <div class="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-1">Projection</div>
@@ -145,11 +185,18 @@ const jsonld = breadcrumbs([
   );
   const svgNS = "http://www.w3.org/2000/svg";
   let payload: Payload | null = null;
+  // Rows whose node is no longer in the catalog (worked out at build time): never drawn, so no dot links to a
+  // page that does not exist.
+  let stale = new Set<string>();
+  try {
+    stale = new Set(JSON.parse(document.getElementById("explore-root")?.dataset.stale ?? "[]") as string[]);
+  } catch { /* malformed attribute: draw everything */ }
 
   function visibleRows(): Row[] {
     if (!payload) return [];
     const mode = projSelect?.value ?? "combined";
-    const base = mode === "combined" ? payload.combined : (payload.by_type[mode] ?? []);
+    const all = mode === "combined" ? payload.combined : (payload.by_type[mode] ?? []);
+    const base = stale.size ? all.filter((r) => !stale.has(`${r.type}:${r.id}`)) : all;
     const activeTypes = new Set(
       typeBoxes.filter((b) => b.checked).map((b) => b.dataset.type as string)
     );
@@ -327,8 +374,9 @@ const jsonld = breadcrumbs([
     } catch (err) {
       if (fallback) {
         fallback.classList.remove("hidden");
-        fallback.textContent = `Failed to load /embeddings.json (${err}). ` +
-          "Run: .venv/bin/python -m pipeline.cli.embed";
+        fallback.textContent = "The map data could not be loaded. Please try again later; the same nodes are " +
+          "listed on the Failure modes, Tools and Papers pages.";
+        console.error("explore: failed to load /embeddings.json", err);
       }
       return;
     }

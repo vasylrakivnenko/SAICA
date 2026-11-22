@@ -60,8 +60,23 @@ export interface Tool {
   tagline?: string;
   description: string;
   first_released: string;
+  /**
+   * Legacy field. It holds the upstream push date as copied in April 2026 on most nodes and the date of a curator's edit on others. Prefer upstream_pushed_at and last_reviewed.
+   */
   last_updated?: string;
+  /**
+   * Date of the last push to the upstream repository (GitHub `pushed_at`), as seen on last_reviewed.
+   */
+  upstream_pushed_at?: string;
+  /**
+   * Date this entry was last checked against its upstream (repository state, licence, stars), by a person or a script.
+   */
+  last_reviewed?: string;
   maturity_status: MaturityStatus;
+  /**
+   * True when the upstream repository is archived (read-only).
+   */
+  archived?: boolean;
   /**
    * Organization node id.
    */
@@ -195,15 +210,15 @@ export interface Tool {
     schema_version?: string;
   };
   /**
-   * Curator override for the auto-computed maturity tier (Stage 9 of the v2 ingestion pipeline). When present, downstream consumers use ``override.tier`` instead of ``compute_maturity(tool).tier``. Required to carry a justification — overrides are auditable, not invisible.
+   * Curator override of the computed activity band (A to F; see pipeline/maturity/score.py). When present, consumers show ``override.tier`` instead of the computed band. It must carry a justification, so an override can be audited.
    */
   maturity_override?: {
     /**
-     * One of the six tiers: 1A, 1B, 2A, 2B, 3, 4.
+     * One of the six activity bands: A, B, C, D, E, F.
      */
     tier: string;
     /**
-     * Why the auto-tier is wrong. Required so future readers (or new curators) can reproduce or revisit the decision.
+     * Why the computed band is wrong. Required so future readers (or new curators) can reproduce or revisit the decision.
      */
     justification: string;
     /**
@@ -289,6 +304,14 @@ export interface Paper {
    * Free tags to help editorial grouping (e.g. 'failure-mode-taxonomy', 'MCP-benchmark').
    */
   relevance_tags?: string[];
+  /**
+   * How this record was produced: hand-curated (typed by a person or an agent), s2-derived / elicit-derived (written by a script from a Semantic Scholar or Elicit search dump; year, venue and tldr are that service's), arxiv-api / crossref-api (the whole record was written from that API). When arxiv_version is set, title and authors come from arXiv whatever this field says.
+   */
+  provenance?: 'hand-curated' | 's2-derived' | 'elicit-derived' | 'arxiv-api' | 'crossref-api';
+  /**
+   * arXiv version whose title and author list this record reproduces (e.g. 'v3'). Requires arxiv_id.
+   */
+  arxiv_version?: string;
   notes?: string;
 }
 
@@ -333,6 +356,10 @@ export interface Taxonomy {
        */
       parent_id?: string;
     }[];
+  /**
+   * Date on which every category id and label in this file was checked against the source (url / paper_id), by a person or an agent; say who and how in notes. Leave empty until that has happened: a taxonomy whose notes still say its labels are unverified cannot be mapped by a crosswalk.
+   */
+  verified_against_source?: string;
   notes?: string;
   inclusion_rationale?: string;
 }
@@ -348,8 +375,22 @@ export interface Crosswalk {
    */
   taxonomy: string;
   authored_by?: string[];
+  /**
+   * People who read every mapping against the source. Leave empty until that has happened.
+   */
   reviewed_by?: string[];
+  /**
+   * llm_drafted_unreviewed: drafted by an LLM or an agent, not yet read against the source by a person. human_reviewed: read against the source by the people in reviewed_by.
+   */
+  review_state?: 'llm_drafted_unreviewed' | 'human_reviewed';
+  /**
+   * Date of the last review by the people in reviewed_by.
+   */
   last_reviewed?: string;
+  /**
+   * Date the external ids and labels used in this file were last compared with the primary source, by a person or an agent. This is not a review of the mappings themselves.
+   */
+  source_checked_on?: string;
   /**
    * @minItems 1
    */
@@ -365,6 +406,19 @@ export interface Crosswalk {
       confidence: CrosswalkConfidence;
       note?: string;
     }[];
+  /**
+   * Categories of the external taxonomy that have no mapping on this axis, each with the reason.
+   */
+  unmapped?: {
+    /**
+     * external_id of the category in the external taxonomy.
+     */
+    category: string;
+    /**
+     * Why the category has no mapping on this axis.
+     */
+    reason: string;
+  }[];
 }
 
 /**
@@ -375,6 +429,10 @@ export interface Incident {
   title: string;
   tagline?: string;
   description: string;
+  /**
+   * What this record is: event (one dated real-world occurrence), study (a measurement reported by a paper or a vendor), hypothetical (a scenario its own source calls hypothetical), pattern (a recurring behaviour with no single dated occurrence). Only `event` is an incident in the plain sense.
+   */
+  kind?: 'event' | 'study' | 'hypothetical' | 'pattern';
   incident_date: string;
   harm_class: 'user_reported' | 'data_loss' | 'security_breach' | 'financial_loss' | 'reputational';
   reproducibility: 'confirmed' | 'plausible' | 'anecdotal';
@@ -427,19 +485,4 @@ export interface Recipe {
    */
   language?: string;
   notes?: string;
-}
-
-export interface Graph {
-  tools: Record<string, Tool>;
-  failureModes: Record<string, FailureMode>;
-  taxonomies: Record<string, Taxonomy>;
-  papers: Record<string, Paper>;
-  crosswalks: Record<string, Crosswalk>;
-  incidents: Record<string, Incident>;
-  recipes: Record<string, Recipe>;
-  // Derived indexes:
-  toolsByFailureMode: Record<string, string[]>;
-  failureModesByTaxonomyCategory: Record<string, Record<string, string[]>>;
-  kgVersion: string;
-  kgLastUpdated: string; // ISO
 }

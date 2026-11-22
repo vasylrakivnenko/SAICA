@@ -1,0 +1,167 @@
+---
+// The results of one benchmarked failure mode as static HTML, used on the leaderboard (/) and on the mode's page.
+// Two blocks, as results.json sets them apart: the ranked reviewers, best first, and the rows that are shown for
+// reference and never ranked (tools outside their design scope, baseline rules, shortcut baselines), each with
+// the file's reason. Every row has: J with its 95% interval, TPR and FPR with theirs, the count of answers with
+// no verdict, false alarms per 100 clean changes, precision at the file's prevalences, cost per 1,000 reviews,
+// and a run card. Nothing is typed in: numbers, names, labels and the sentences under the table are the file's.
+//
+// Rows carry data-* attributes so the leaderboard's script can sort and filter them without rendering again.
+import RunCard from './RunCard.astro';
+import {
+  METHOD, PREVALENCES, TYPE_VAR,
+  rankedRows, unrankedRows, rowHref, rowTags,
+  type Mode, type Row,
+} from '../home/bench';
+import { int, interval, money, num, pct, signedPct } from '../../lib/format';
+
+interface Props {
+  m: Mode;
+  /** Show the GitHub stars column (the leaderboard can hide it). */
+  stars?: boolean;
+}
+const { m, stars = false } = Astro.props;
+const ranked = rankedRows(m);
+const unranked = unrankedRows(m);
+const ppvKey = (p: number) => String(p);
+const barW = (j: number) => `${Math.round(Math.max(0, j) * 44)}px`;
+const unread = (r: Row) =>
+  r.unreadable === 0 ? '0' : `${int(r.unreadable)} of ${int(r.n_pos + r.n_neg)}${r.incomplete ? ' (incomplete)' : ''}`;
+const top = new Set(m.below_floor ? [] : m.top_group);
+---
+
+<div class="rt">
+  <p class="rt-setting">{METHOD.setting}</p>
+  <div class="rt-wrap">
+    <table class="rt-table" data-rt="ranked" data-mode={m.id}>
+      <caption class="sr-only">{m.title}: ranked reviewers, best first</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="num">#</th>
+          <th scope="col">Reviewer</th>
+          <th scope="col" class="num"><button type="button" class="rt-sort" data-k="j" aria-pressed="true">J</button><span class="sub">95% interval</span></th>
+          <th scope="col" class="num"><button type="button" class="rt-sort" data-k="tpr">TPR</button><span class="sub">bad samples flagged</span></th>
+          <th scope="col" class="num"><button type="button" class="rt-sort" data-k="fpr">FPR</button><span class="sub">clean samples flagged</span></th>
+          <th scope="col" class="num">No verdict<span class="sub">answers left out</span></th>
+          <th scope="col" class="num">False alarms<span class="sub">per 100 clean changes</span></th>
+          {PREVALENCES.map((p) => <th scope="col" class="num">Precision<span class="sub">if {pct(p, 0)} of changes are bad</span></th>)}
+          <th scope="col" class="num"><button type="button" class="rt-sort" data-k="cost">Cost</button><span class="sub">per 1,000 reviews</span></th>
+          {stars && <th scope="col" class="num rt-stars">Stars</th>}
+        </tr>
+      </thead>
+      <tbody>
+        {ranked.map((r) => {
+          const href = rowHref(r);
+          return (
+            <tr data-key={r.key} data-type={r.type} data-kind={r.kind} data-j={r.j} data-tpr={r.catch} data-fpr={r.fa} data-cost={r.cost1k} class={top.has(r.key) ? 'rt-top' : ''}>
+              <td class="num rt-rank">{r.rank}</td>
+              <td class="rt-name">
+                <i class="rt-dot" style={`background:var(${TYPE_VAR[r.type] ?? '--t-base'})`} aria-hidden="true"></i>
+                {href ? <a href={href}>{r.tool}</a> : <span>{r.tool}</span>}
+                <div class="rt-tags">{rowTags(r).join(' · ')}{top.has(r.key) && (m.winner ? ' · best reviewer' : ' · in the top group')}</div>
+                <RunCard row={r} m={m} />
+              </td>
+              <td class="num rt-j"><span class="rt-bar" style={`width:${barW(r.j)}`} aria-hidden="true"></span>{signedPct(r.j)}<span class="sub">{interval(r.j_ci, 1, true)}</span></td>
+              <td class="num">{pct(r.catch)}<span class="sub">{interval(r.catch_ci)}</span></td>
+              <td class="num">{pct(r.fa)}<span class="sub">{interval(r.fa_ci)}</span></td>
+              <td class="num">{unread(r)}</td>
+              <td class="num">{num(r.fa_per_100)}</td>
+              {PREVALENCES.map((p) => <td class="num">{r.ppv?.[ppvKey(p)] == null ? 'n/a' : pct(r.ppv[ppvKey(p)], 0)}</td>)}
+              <td class="num">{money(r.cost1k, r.cost_estimated)}<span class="sub">{r.cost_basis}</span></td>
+              {stars && <td class="num rt-stars">{r.stars ? (r.repository_url ? <a href={r.repository_url} rel="noopener">{int(r.stars)}</a> : int(r.stars)) : '—'}</td>}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  {unranked.length > 0 && (
+    <>
+      <h4 class="rt-h">Shown for reference, not ranked</h4>
+      <p class="rt-note">
+        These rows are never counted as best. A shortcut baseline shows what a rule with no understanding of the
+        failure scores on this set; read the reviewers' scores against it.
+      </p>
+      <div class="rt-wrap">
+        <table class="rt-table" data-rt="unranked" data-mode={m.id}>
+          <caption class="sr-only">{m.title}: rows shown for reference and not ranked</caption>
+          <thead>
+            <tr>
+              <th scope="col">Row and why it is not ranked</th>
+              <th scope="col" class="num">J<span class="sub">95% interval</span></th>
+              <th scope="col" class="num">TPR</th>
+              <th scope="col" class="num">FPR</th>
+              <th scope="col" class="num">No verdict</th>
+              <th scope="col" class="num">Cost<span class="sub">per 1,000 reviews</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {unranked.map((r) => {
+              const href = rowHref(r);
+              return (
+                <tr data-key={r.key} data-type={r.type} data-kind={r.kind} data-unranked>
+                  <td class="rt-name">
+                    <i class="rt-dot" style={`background:var(${TYPE_VAR[r.type] ?? '--t-rule'})`} aria-hidden="true"></i>
+                    {href ? <a href={href}>{r.tool}</a> : <span>{r.tool}</span>}
+                    <div class="rt-tags">{rowTags(r).join(' · ')}</div>
+                    {r.unranked_reason && <div class="rt-why">Not ranked: {r.unranked_reason}.</div>}
+                    {r.description && <div class="rt-why">{r.description}</div>}
+                    {r.run_card && <RunCard row={r} m={m} />}
+                  </td>
+                  <td class="num rt-j">{signedPct(r.j)}<span class="sub">{interval(r.j_ci, 1, true)}</span></td>
+                  <td class="num">{pct(r.catch)}</td>
+                  <td class="num">{pct(r.fa)}</td>
+                  <td class="num">{unread(r)}</td>
+                  <td class="num">{money(r.cost1k, r.cost_estimated)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+
+  <details class="rt-read">
+    <summary>How to read these numbers</summary>
+    <ul>
+      <li>{METHOD.metric}</li>
+      <li>{METHOD.unreadable}</li>
+      <li>{METHOD.intervals}</li>
+      <li>{METHOD.best}</li>
+      <li>{METHOD.cost} {METHOD.cheap}</li>
+      <li>Precision is the share of flagged changes that are really bad, if the stated share of all changes were bad. It is computed from the row's TPR and FPR; the set's own share of bad samples is {pct(m.prevalence, 0)}.</li>
+    </ul>
+  </details>
+</div>
+
+<style>
+  .rt { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; margin-top: .8rem; }
+  .rt-setting { margin: 0 0 .5rem; max-width: 80ch; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .rt-wrap { overflow-x: auto; padding-bottom: 4px; }
+  .rt-table { width: 100%; border-collapse: collapse; font: 13.5px/1.35 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .rt-table th, .rt-table td { text-align: left; padding: .45rem .55rem; border-bottom: 1px solid rgb(17 20 24 / .08); vertical-align: top; white-space: nowrap; }
+  .rt-table th { font-size: 12px; font-weight: 600; color: #4a5160; vertical-align: bottom; }
+  .rt-table .num { text-align: right; }
+  .rt-table .sub { display: block; font-size: 11px; font-weight: 400; color: #6b7180; white-space: nowrap; }
+  .rt-table th .sub { white-space: normal; min-width: 5.5rem; }
+  .rt-table td.rt-name { white-space: normal; min-width: 15rem; max-width: 30rem; }
+  .rt-table td.rt-j { font-weight: 600; }
+  .rt-table td.rt-j .sub { font-weight: 400; }
+  .rt-table td.rt-rank { color: #6b7180; }
+  .rt-table tr.rt-top td.rt-rank { color: #1f3a93; font-weight: 600; }
+  .rt-table td a { color: #1f3a93; }
+  .rt-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+  .rt-bar { display: inline-block; height: 6px; border-radius: 3px; background: #1f3a93; opacity: .7; vertical-align: middle; margin-right: 6px; }
+  .rt-tags { font-size: 11.5px; color: #6b7180; margin-top: 1px; }
+  .rt-why { font-size: 12px; color: #4a5160; margin-top: 2px; max-width: 34rem; }
+  .rt-sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; border-bottom: 1px dotted #6b7180; }
+  .rt-sort[aria-pressed="true"]::after { content: " ↓"; }
+  .rt-h { margin: 1.4rem 0 .2rem; font: 600 14px ui-sans-serif, system-ui, sans-serif; color: #111418; }
+  .rt-note { margin: 0 0 .4rem; max-width: 80ch; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .rt-read { margin-top: .7rem; max-width: 80ch; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #4a5160; }
+  .rt-read summary { cursor: pointer; color: #1f3a93; width: max-content; }
+  .rt-read ul { margin: .4rem 0 0; padding-left: 1.1rem; list-style: disc; }
+  .rt-read li { margin: .25rem 0; }
+</style>

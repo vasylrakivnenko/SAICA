@@ -1,35 +1,12 @@
 // KGGraph.ts — Cytoscape.js-powered knowledge-graph visualization for SAICA-KG.
-// Runtime: fetches /api/v1/snapshot.json and renders into #cy.
+// Runtime: fetches /api/v1/graph.json (the slice of the graph this page draws; lib/graph-data.ts) and renders into #cy.
 import cytoscape from "cytoscape";
 import type { Core, ElementDefinition, LayoutOptions, NodeSingular, EventObjectNode, Stylesheet } from "cytoscape";
 import { fmUrl, toolUrl } from "../lib/seo";
+import { escapeHtml } from "../lib/format";
+import type { GraphData, GraphPaper } from "../lib/graph-data";
 
 // ---------- Types ----------
-interface Tool {
-  id: string; name: string;
-  control_paradigm?: string; temporal_phase?: string; autonomy_level?: string;
-  addresses_failure_modes?: string[]; composes_with?: string[]; feeds_into?: string[];
-  supersedes?: string[]; cited_in?: string[]; documented_in?: string[];
-  stars?: number | null; stars_updated_at?: string | null;
-}
-interface Crosswalk { taxonomy: string; external_id: string; confidence?: string; }
-interface FailureMode {
-  id: string; name: string; description?: string;
-  aliases?: string[];
-  prior_work?: string[]; crosswalks?: Crosswalk[];
-}
-interface Paper { id: string; title?: string; authors?: string | string[]; year?: number | string; venue?: string; }
-interface Taxonomy { id: string; name: string; owner?: string; categories?: { external_id: string; label: string }[]; }
-interface Snapshot {
-  kg_version?: string; kg_last_updated?: string; counts?: Record<string, number>; disclaimer?: string;
-  nodes: {
-    tools?: Record<string, Tool>;
-    failure_modes?: Record<string, FailureMode>;
-    papers?: Record<string, Paper>;
-    taxonomies?: Record<string, Taxonomy>;
-    crosswalks?: unknown;
-  };
-}
 type NodeType = "tool" | "failure_mode" | "taxonomy" | "paper";
 type EdgeType = "addresses" | "composes_with" | "feeds_into" | "supersedes" | "crosswalks" | "prior_work" | "cited_in";
 
@@ -51,7 +28,7 @@ const EDGE_STYLE: Record<EdgeType, { color: string; line?: "solid" | "dashed" | 
 };
 
 let cy: Core | null = null;
-let snapshotRef: Snapshot | null = null;
+let snapshotRef: GraphData | null = null;
 
 export async function mountKGGraph(opts: {
   container: HTMLElement; sidebar: HTMLElement; filters: HTMLElement;
@@ -68,11 +45,11 @@ export async function mountKGGraph(opts: {
 }): Promise<void> {
   const { container, sidebar, filters, layoutSelect, resetBtn, search, focusNodeId } = opts;
 
-  let snapshot: Snapshot;
+  let snapshot: GraphData;
   try {
-    const res = await fetch("/api/v1/snapshot.json", { cache: "no-cache" });
+    const res = await fetch("/api/v1/graph.json");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    snapshot = (await res.json()) as Snapshot;
+    snapshot = (await res.json()) as GraphData;
   } catch (err) {
     container.innerHTML = `<div style="padding:24px;font-size:14px;color:#991b1b;background:#fef2f2;border-radius:6px">
       Could not load knowledge graph data: ${escapeHtml(String(err))}.
@@ -91,7 +68,7 @@ export async function mountKGGraph(opts: {
       "line-color": s.color, "target-arrow-color": s.color,
     };
     if (s.line) style["line-style"] = s.line;
-    if (et === "crosswalks") style.label = "data(confidence)";
+    if (et === "crosswalks") style.label = "data(label)";
     return { selector: `edge[etype = "${et}"]`, style };
   });
 
@@ -263,6 +240,17 @@ export async function mountKGGraph(opts: {
   });
   filters.addEventListener("change", () => { applyFilters(filters, search.value); applyFocus(); kb.filtersChanged(); });
   search.addEventListener("input", () => { applyFilters(filters, search.value); applyFocus(); });
+
+  // Apply the filter boxes as they stand at load (Papers and the two paper edge types start unticked), so the
+  // canvas, the node list and the keyboard order agree from the first paint. A node asked for with ?node= is
+  // made visible first.
+  if (focusNodeId) {
+    const type = cy.getElementById(focusNodeId).data("type") as string | undefined;
+    const box = type ? filters.querySelector<HTMLInputElement>(`input[name="type-${type}"]`) : null;
+    if (box && !box.checked) box.checked = true;
+  }
+  applyFilters(filters, search.value);
+  kb.filtersChanged();
 
   if (focusNodeId) {
     const n = cy.getElementById(focusNodeId);
@@ -628,19 +616,13 @@ function setupKeyboard(o: {
 }
 
 // ---------- Element construction ----------
-function buildElements(s: Snapshot): { elements: ElementDefinition[]; nodeCount: number } {
+function buildElements(s: GraphData): { elements: ElementDefinition[]; nodeCount: number } {
   const elements: ElementDefinition[] = [];
   const tools = s.nodes.tools ?? {};
   const fms = s.nodes.failure_modes ?? {};
   const taxos = s.nodes.taxonomies ?? {};
+  // graph.json carries only the papers a tool or a failure mode points to, so every one of them is drawn.
   const papers = s.nodes.papers ?? {};
-
-  const usedPaperIds = new Set<string>();
-  for (const t of Object.values(tools)) {
-    for (const p of t.cited_in ?? []) usedPaperIds.add(p);
-    for (const p of t.documented_in ?? []) usedPaperIds.add(p);
-  }
-  for (const fm of Object.values(fms)) for (const p of fm.prior_work ?? []) usedPaperIds.add(p);
 
   for (const t of Object.values(tools)) {
     const stars = typeof t.stars === "number" ? t.stars : null;
@@ -660,10 +642,7 @@ function buildElements(s: Snapshot): { elements: ElementDefinition[]; nodeCount:
     aliases: fm.aliases ?? [],
   }});
   for (const tx of Object.values(taxos)) elements.push({ data: { id: tx.id, type: "taxonomy", label: tx.name || tx.id } });
-  for (const pid of usedPaperIds) {
-    const p = papers[pid];
-    if (p) elements.push({ data: { id: p.id, type: "paper", label: shortPaperLabel(p) } });
-  }
+  for (const p of Object.values(papers)) elements.push({ data: { id: p.id, type: "paper", label: shortPaperLabel(p) } });
 
   const seen = new Set<string>();
   const addEdge = (source: string, target: string, etype: EdgeType, extra: Record<string, unknown> = {}) => {
@@ -681,12 +660,15 @@ function buildElements(s: Snapshot): { elements: ElementDefinition[]; nodeCount:
     for (const pid of t.cited_in ?? []) if (papers[pid]) addEdge(t.id, pid, "cited_in");
   }
   for (const fm of Object.values(fms)) {
-    for (const cw of fm.crosswalks ?? []) {
-      if (taxos[cw.taxonomy]) addEdge(fm.id, cw.taxonomy, "crosswalks", {
-        confidence: cw.confidence ?? "", external_id: cw.external_id,
-      });
-    }
     for (const pid of fm.prior_work ?? []) if (papers[pid]) addEdge(fm.id, pid, "prior_work");
+  }
+  // One link per (failure mode, taxonomy) pair, labelled with its strongest mapping and how many more there are.
+  for (const cw of s.crosswalks ?? []) {
+    if (!fms[cw.failure_mode] || !taxos[cw.taxonomy]) continue;
+    addEdge(cw.failure_mode, cw.taxonomy, "crosswalks", {
+      confidence: cw.confidence, mappings: cw.mappings,
+      label: cw.mappings > 1 ? `${cw.confidence} +${cw.mappings - 1}` : cw.confidence,
+    });
   }
 
   return { elements, nodeCount: elements.filter((e) => !(e.data as any).source).length };
@@ -778,11 +760,11 @@ function renderSidebar(sidebar: HTMLElement, n: NodeSingular): void {
   } else if (snap && type === "failure_mode") {
     const fm = snap.nodes.failure_modes?.[id];
     if (fm) body = `<p>${escapeHtml(fm.description ?? "")}</p>
-      <p style="color:#6b7280;font-size:12px">Crosswalks: ${(fm.crosswalks ?? []).length}</p>`;
+      <p style="color:#6b7280;font-size:12px">${escapeHtml(crosswalkSummary(snap, id))}</p>`;
   } else if (snap && type === "taxonomy") {
     const tx = snap.nodes.taxonomies?.[id];
     if (tx) body = `<p>Owner: ${escapeHtml(tx.owner ?? "—")}</p>
-      <p style="color:#6b7280;font-size:12px">${(tx.categories ?? []).length} categories</p>`;
+      <p style="color:#6b7280;font-size:12px">${tx.categories ?? 0} categories</p>`;
   } else if (snap && type === "paper") {
     const p = snap.nodes.papers?.[id];
     if (p) body = `<p>${escapeHtml(p.title ?? "")}</p>
@@ -814,15 +796,23 @@ function toolSizeFromStars(stars: number | null | undefined): number {
   return Math.max(18, Math.min(36, raw));
 }
 
-function shortPaperLabel(p: Paper): string {
+// "Crosswalks: 9 mappings in 5 taxonomies (strongest: 2 exact, 3 partial)" for a failure mode's details card.
+function crosswalkSummary(s: GraphData, fmId: string): string {
+  const pairs = (s.crosswalks ?? []).filter((c) => c.failure_mode === fmId);
+  if (pairs.length === 0) return "Crosswalks: none";
+  const total = pairs.reduce((n, c) => n + c.mappings, 0);
+  const strongest: Record<string, number> = {};
+  for (const c of pairs) strongest[c.confidence] = (strongest[c.confidence] ?? 0) + 1;
+  const parts = Object.entries(strongest).map(([conf, n]) => `${n} ${conf}`);
+  return `Crosswalks: ${total} mapping${total === 1 ? "" : "s"} in ${pairs.length} `
+    + `taxonom${pairs.length === 1 ? "y" : "ies"} (strongest per taxonomy: ${parts.join(", ")})`;
+}
+
+function shortPaperLabel(p: GraphPaper): string {
   const a = formatAuthors(p.authors).split(",")[0] || p.id;
   return `${a}${p.year ? ` ${p.year}` : ""}`;
 }
-function formatAuthors(a: Paper["authors"]): string {
+function formatAuthors(a: GraphPaper["authors"] | string | undefined): string {
   if (!a) return "";
   return Array.isArray(a) ? a.join(", ") : String(a);
-}
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }

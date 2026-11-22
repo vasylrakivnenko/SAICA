@@ -4,7 +4,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { graph } from '../lib/data.ts';
 import { abs, breadcrumbs, fmSlug, fmUrl } from '../lib/seo.ts';
-import { copyFor, html, measured, pct0, sameAsName, text } from '../components/fm/fm.ts';
+import { copyFor, html, measured, sameAsName, text } from '../components/fm/fm.ts';
+import { KIND_LABEL, METHOD, MODES, TYPE_LABEL } from '../components/home/bench.ts';
+import { andList } from '../lib/format.ts';
 
 interface Term {
   id: string;
@@ -25,9 +27,7 @@ const modes: Term[] = Object.values(graph.failureModes)
   .map((fm) => {
     const c = copyFor(fm.id);
     const m = measured(fm.id);
-    const score = m
-      ? ` Best measured detector on SAICA-Bench: ${m.best.short}, J ${pct0(m.best.j)}.`
-      : ' Not benchmarked yet.';
+    const score = m ? ` On SAICA-Bench: ${m.ranking}` : ' Not benchmarked yet.';
     return {
       id: fmSlug(fm.id),
       name: sameAsName(c.term, fm.name) ? fm.name : `${fm.name} (${c.term.replace(/^[A-Z]/, (x) => x.toLowerCase())})`,
@@ -106,63 +106,103 @@ const synonyms: Term[] = [
   },
 ];
 
+// Names for the tool-type entries, counted from the rows of the results file (catalog names, not typed in).
+const rows = MODES.flatMap((m) => m.rows);
+const catalogName = (r: { kg_id?: string; short: string }) => (r.kg_id && graph.tools[r.kg_id]?.name) || r.short;
+const namesOf = (pick: (r: (typeof rows)[number]) => boolean) => andList([...new Set(rows.filter(pick).map(catalogName))]);
+const programs = namesOf((r) => r.kind === 'catalog_tool' && r.type === 'deterministic');
+const wrappers = namesOf((r) => Boolean(r.judge));
+const judges = andList([...new Set(rows.map((r) => r.judge).filter((j): j is string => Boolean(j)))]);
+
 const metrics: Term[] = [
   {
     id: 'j',
     name: 'J (J = TPR − FPR)',
-    def: 'The headline score on SAICA-Bench: the share of bad samples a tool flags minus the share of clean samples it flags. 0% is no better than chance (flagging everything scores 100% − 100% = 0%) and 100% flags every bad sample and no clean one; it does not depend on the mix of bad and clean samples. In statistics it is known as Youden’s J.',
+    def: `The score SAICA-Bench sorts by inside one failure mode. ${METHOD.metric} In statistics it is known as Youden’s J. J is not compared across modes: each set was built differently.`,
     more: { href: '/benchmark/', label: 'How SAICA-Bench is scored' },
   },
   {
     id: 'tpr',
     name: 'TPR (true positive rate)',
-    def: 'The share of bad samples a tool flags, also called recall or catch rate. A tool that flags everything has a TPR of 100% and is useless, which is why J subtracts the FPR.',
+    def: 'The share of bad samples a reviewer flags, also called recall or catch rate. A reviewer that flags everything has a TPR of 100% and is useless, which is why J subtracts the FPR.',
   },
   {
     id: 'fpr',
     name: 'FPR (false positive rate)',
-    def: 'The share of clean samples a tool flags: its false-alarm rate. On a mode where most changes are clean, the FPR decides how much reviewer time a tool wastes.',
+    def: 'The share of clean samples a reviewer flags: its false-alarm rate. The tables also print it as false alarms per 100 clean changes. Where most changes are clean, the FPR decides how much reviewer time a check wastes.',
+  },
+  {
+    id: 'precision-at-prevalence',
+    name: 'Precision at a prevalence',
+    def: 'Of the changes a reviewer flags, the share that are really bad, if a stated share of all changes were bad. It is computed from the TPR and FPR. The sets hold far more bad samples than real work does, so a reviewer with a high J can still raise more false alarms than true ones when failures are rare.',
   },
   {
     id: 'confidence-interval',
-    name: '95% confidence interval',
-    def: 'The range that the true TPR or FPR lies in with 95% confidence, given how many samples were scored. Small sets give wide ranges: with 50 pairs, about ±10 points.',
+    name: '95% interval',
+    def: METHOD.intervals,
+  },
+  {
+    id: 'unreadable-answer',
+    name: 'Answer with no verdict (unreadable)',
+    def: METHOD.unreadable,
+  },
+  {
+    id: 'best-reviewer',
+    name: 'Best reviewer, top group, best catalog tool',
+    def: `${METHOD.best} ${METHOD.paired}`,
+    more: { href: '/', label: 'Leaderboard' },
+  },
+  {
+    id: 'mode-primed',
+    name: 'Mode-primed setting',
+    def: METHOD.setting,
+    more: { href: '/benchmark/#threats', label: 'Threats to validity' },
+  },
+  {
+    id: 'tiers',
+    name: 'Tiers',
+    def: METHOD.tiers,
+  },
+  {
+    id: 'shortcut-baseline',
+    name: `${KIND_LABEL.shortcut_baseline ?? 'Shortcut baseline'}`,
+    def: 'A rule that needs no understanding of the failure, for example one that reads only the task or the format of a patch. It is published as a row next to the reviewers to show how much of a score a set gives away for free. It is never ranked and never counted as best.',
   },
   {
     id: 'cost-per-1000-reviews',
     name: 'Cost per 1,000 reviews',
-    def: 'What a tool costs to review 1,000 samples of a mode, averaged over our run: the provider’s reported price (for Azure, list price × tokens), GPU time at $0.89 an hour for self-hosted models, and $0 for free programs. A “~” marks a cost scaled up from a partial run.',
+    def: `${METHOD.cost} ${METHOD.cheap} A “~” marks an estimated cost.`,
   },
   {
     id: 'sample',
     name: 'Sample (bad or clean)',
-    def: 'One item to review: a task plus what an agent produced for it, such as a patch, a function or a whole session. It is labelled bad if it contains the failure and clean if it does not; tools never see the label.',
+    def: 'One item to review: a task plus what an agent or a model produced for it, such as a patch, a function or a whole session. It is labelled bad if it contains the failure and clean if it does not; reviewers never see the label.',
     more: { href: '/benchmark/', label: 'Datasets and labels' },
   },
   {
     id: 'paired-samples',
     name: 'Paired samples (matched pairs)',
-    def: 'A bad and a clean sample built to differ only in the failure, for example the same patch with and without a hand-rolled copy of `shlex.split`. Pairing stops a tool from scoring on size, style or file count instead of the failure itself.',
+    def: 'A bad and a clean sample built from the same task, for example the same patch with and without a hand-rolled copy of `shlex.split`. Only some sets are built this way; each mode’s card on the benchmark page says how its samples were made.',
   },
   {
     id: 'free-program',
-    name: 'Free program',
-    def: 'A deterministic tool that needs no language model, such as a type checker, linter or security scanner (pyright, mypy, ruff, semgrep, bandit). It costs nothing to run and gives the same answer every time.',
+    name: `${TYPE_LABEL.deterministic ?? 'Free program'}`,
+    def: `A deterministic tool that needs no language model, such as a type checker, linter or security scanner. It costs nothing to run and gives the same answer every time.${programs ? ` Run on SAICA-Bench: ${programs}.` : ''}`,
   },
   {
     id: 'hybrid-tool',
-    name: 'Hybrid tool',
-    def: 'A packaged supervision tool that wraps a language model in its own review logic or judge template, such as PR-Agent, promptfoo, giskard, DeepEval, uqlm, Arize Phoenix or Opik. On SAICA-Bench they run on deepseek-v4-flash, which is also tested on its own, so the effect of the wrapper can be read off directly.',
+    name: 'Packaged tool that wraps a model',
+    def: `A supervision tool that puts a language model inside its own review logic or judge template.${wrappers ? ` Run on SAICA-Bench: ${wrappers}, each with ${judges} as its model, which is also tested on its own.` : ''} Each row’s run card says whether the tool ran its own check or the rule text we wrote.`,
   },
   {
     id: 'llm-reviewer',
-    name: 'LLM reviewer (asked directly)',
-    def: 'A language model given the sample and one fixed prompt per mode that names the failure to look for. Because it is told exactly what to look for, its score is an upper bound for that model, not a product.',
+    name: `${KIND_LABEL.model ?? 'Model asked directly'}`,
+    def: `A language model given the sample and one fixed prompt per mode that names the failure to look for. ${METHOD.setting}`,
   },
   {
     id: 'simple-rule',
-    name: 'Simple rule',
-    def: 'A few lines of logic written for the benchmark as a baseline, for example flagging a patch that edits a test file or adds a package whose name looks like a typo of a popular one. Rules are not packaged tools.',
+    name: `${KIND_LABEL.baseline_rule ?? 'Baseline rule'}`,
+    def: 'A few lines of logic written for the benchmark, for example flagging a patch that edits a test file. Baseline rules are shown for reference; they are not packaged tools and are never counted as best.',
   },
   {
     id: 'supervision-tool',

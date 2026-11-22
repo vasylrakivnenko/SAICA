@@ -1,6 +1,14 @@
 ---
+// ARCHIVED (2026-11-21): the page is noindex, opens with a dated banner and is not linked from the
+// navigation. It describes the candidate-ingestion pipeline as designed in April 2026; that pipeline ran once
+// and is not in use (REWIEW_NOV_21.md G5, J2, J3).
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ArchivedBanner from '../components/ArchivedBanner.astro';
 import { graph } from '../lib/data.ts';
+
+// Tools whose provenance says they came through this pipeline, counted from data/tools.
+const allTools = Object.values(graph.tools);
+const viaPipeline = allTools.filter((t) => String(t.provenance?.source ?? '').startsWith('pipeline')).length;
 
 type Step = {
   title: string;
@@ -42,7 +50,7 @@ const steps: Step[] = [
     title: 'Cohere Rerank v4.0 Pro',
     subtitle: 'semantic relevance filter',
     detail:
-      'Re-ranks a pool of pending candidates against a SAICA-KG domain query. Low-relevance rows are auto-rejected before any expensive LLM call burns budget.',
+      'Re-ranks a pool of pending candidates against a SAICA-KG domain query and writes a relevance score to each candidate. It rejects nothing by itself.',
     tone: 'process',
   },
   {
@@ -54,9 +62,9 @@ const steps: Step[] = [
   },
   {
     title: 'Human-review graduation CLI',
-    subtitle: 'pipeline/graduate.py <candidate_id>',
+    subtitle: 'python -m pipeline.cli.graduate tool <id>',
     detail:
-      'Pops an accepted candidate from Postgres, writes a YAML stub into data/ with # REVIEW REQUIRED tags on every low-confidence field, and opens it for manual completion. No LLM output is ever committed without human review.',
+      'Pops an accepted candidate from Postgres, writes a YAML stub into data/ with # REVIEW REQUIRED tags on every low-confidence field, and opens it for manual completion. The design asked for a human to review every field before a commit. In the one real run (April 2026) candidates were approved in batches within seconds, so the fields were not reviewed one by one.',
     tone: 'review',
   },
   {
@@ -79,14 +87,29 @@ const TONE_BORDERS: Record<NonNullable<Step['tone']>, string> = {
 
 <BaseLayout
   noindex
-  title="Pipeline"
-  description="How supervision tools enter SAICA-KG: discovery, Postgres staging, NLP preprocess, Cohere rerank, Azure Kimi extraction, and human-review graduation."
+  title="Ingestion pipeline (archived, April 2026)"
+  description="Archived design note from April 2026: how supervision tools were meant to enter SAICA-KG through discovery, staging, extraction and review. The pipeline is not in use."
 >
   <h1>Ingestion pipeline</h1>
-  <p class="mt-3 text-lg text-ink-muted max-w-3xl">
-    How a supervision tool goes from a noisy search result to a canonical YAML
+  <p class="mt-3 mb-6 text-lg text-ink-muted max-w-3xl">
+    How a supervision tool was meant to go from a noisy search result to a canonical YAML
     node in <code>data/tools/</code>.
   </p>
+
+  <ArchivedBanner label="Archived design note, not maintained" asOf="23 April 2026">
+    <p>
+      This page describes the candidate-ingestion pipeline as it was designed in April 2026. The pipeline ran
+      for one night and has been dormant since 23 April 2026: {viaPipeline} of the {allTools.length} tools in the
+      catalog came through it. The catalog is now kept directly in the YAML files under <code>data/</code>,
+      without this pipeline. Read the steps below as a design record, not as how the catalog is maintained today.
+    </p>
+    <p class="mt-2">
+      Three statements of the original page did not match the code or what happened, and are corrected below
+      (project review, 21 November 2026). Tool files were drafted by an LLM or an agent and then edited; fields
+      were not reviewed one by one, and in the one real run candidates were approved in batches within seconds.
+      The review threshold in the code is 0.85, not 0.7. The reranker only writes a score; it rejects nothing.
+    </p>
+  </ArchivedBanner>
 
   <section class="mt-6 max-w-3xl leading-7">
     <p>
@@ -96,10 +119,11 @@ const TONE_BORDERS: Record<NonNullable<Step['tone']>, string> = {
       commitments) stays intact while automation handles the noise upstream.
     </p>
     <p class="mt-3">
-      <strong>No LLM output is ever committed without human review.</strong> The
-      graduation gate is load-bearing; fields with confidence &lt; 0.7 are
-      tagged <code># REVIEW REQUIRED</code> in the YAML stub and a human fills
-      them in.
+      <strong>The design asked for human review before every commit.</strong> Fields
+      with confidence below 0.85 were to be tagged <code># REVIEW REQUIRED</code> in the
+      YAML stub for a person to fill in. In the one real run this did not hold:
+      candidates were approved in batches within seconds, so fields were not
+      reviewed one by one.
     </p>
   </section>
 
@@ -135,9 +159,9 @@ const TONE_BORDERS: Record<NonNullable<Step['tone']>, string> = {
       <li>Postgres does NOT serve end-users. The website + JSON API read from YAML.</li>
       <li>Postgres is NOT replicated for v0.1 &mdash; local dev only. Managed DB is a v0.2 deployment concern.</li>
       <li>
-        LLM outputs are NEVER committed without human review. The schema
-        <code>REVIEW REQUIRED</code> tripwire on low-confidence facets is
-        load-bearing.
+        The design asked that no LLM output be committed without human review, with a
+        <code>REVIEW REQUIRED</code> marker on low-confidence fields. That did not hold in
+        the one real run (see the note at the top).
       </li>
     </ul>
   </section>
@@ -170,6 +194,6 @@ const TONE_BORDERS: Record<NonNullable<Step['tone']>, string> = {
   </section>
 
   <p class="mt-10 text-xs text-ink-faint font-sans">
-    Pipeline diagram reflects SAICA-KG v{graph.kgVersion}.
+    Diagram as designed in April 2026; it does not describe the current catalog (SAICA-KG v{graph.kgVersion}).
   </p>
 </BaseLayout>

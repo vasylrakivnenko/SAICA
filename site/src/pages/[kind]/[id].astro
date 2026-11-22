@@ -1,0 +1,44 @@
+---
+// "Removed" notices. A node taken out of the knowledge graph is listed in data/TOMBSTONES.yml with the reason;
+// its old page URL (/incidents/<id>/, /tools/<id>/, ...) keeps answering with this notice instead of a 404.
+// The pages are noindex, so they stay out of search results and out of the sitemap. Live nodes are built by
+// the section's own [id].astro, which takes priority over this route.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { tombstones, type Tombstone } from '../../lib/data.ts';
+import { SECTIONS, nodeSlug } from '../../lib/seo.ts';
+
+// (getStaticPaths runs outside the rest of this frontmatter, so it can only use imports.)
+export function getStaticPaths() {
+  return tombstones
+    .filter((t) => SECTIONS[t.kind])
+    .map((t) => ({ params: { kind: SECTIONS[t.kind].dir, id: nodeSlug(t.kind, t.id) }, props: { t } }));
+}
+
+interface Props { t: Tombstone }
+const { t } = Astro.props;
+const section = SECTIONS[t.kind];
+const successorUrl = t.successor ? `/${section.dir}/${nodeSlug(t.kind, t.successor)}/` : null;
+---
+
+<BaseLayout title={`Removed ${section.one}: ${t.id}`} description={`This ${section.one} was removed from the SAICA catalog${t.removed_on ? ` on ${t.removed_on}` : ''}.`} noindex>
+  <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
+    <a href={`/${section.dir}/`} class="no-underline hover:underline">{section.label}</a>
+  </p>
+  <h1 class="mt-1">This {section.one} was removed</h1>
+  <div class="mt-4 max-w-3xl">
+    <p class="leading-7">
+      The record <code>{t.id}</code> is no longer part of the SAICA catalog{t.removed_on && <> (removed on {t.removed_on})</>}.
+      This page stays so that old links explain what happened instead of failing.
+    </p>
+    {t.reason && (
+      <>
+        <h2>Why it was removed</h2>
+        <p class="leading-7">{t.reason}</p>
+      </>
+    )}
+    {successorUrl && (
+      <p class="mt-4 leading-7">It was replaced by <a href={successorUrl}><code>{t.successor}</code></a>.</p>
+    )}
+    <p class="mt-6 font-sans text-sm"><a href={`/${section.dir}/`}>All {section.label.toLowerCase()} →</a></p>
+  </div>
+</BaseLayout>

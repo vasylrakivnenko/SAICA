@@ -4,14 +4,48 @@
 //      clusters are visible at a glance rather than drowned in a dot cloud.
 //   2. A Sankey-style alluvial diagram across text (K=26) → bipartite (K=7) →
 //      SAICA (K=11), making the fan-in / fan-out pattern legible.
-// Data: /taxonomy_study.json.
+// Data: /taxonomy_study.json, a frozen file from 2026-04-23 (commit 8b5516f).
+//
+// ARCHIVED (2026-11-21): the page is noindex and opens with a dated banner. Its one positive result is circular
+// (the "tool-based" matrix and the "SAICA match" labels are both read from the same crosswalk:
+// pipeline/taxonomy_cluster/cluster.py build_tool_matrix, compare.py saica_labels_for_rows) and its inputs have
+// changed since. Do not re-run it to refresh the numbers before the design changes (REWIEW_NOV_21.md J1, G4).
 import BaseLayout from "../layouts/BaseLayout.astro";
-const title = "Cluster Study";
+import ArchivedBanner from "../components/ArchivedBanner.astro";
+import study from "../../public/taxonomy_study.json";
+import { graph } from "../lib/data.ts";
+import { andList } from "../lib/catalog.ts";
+
+// What has changed in the graph since the study: a category counts as changed when its id is gone or its
+// label is different today. Computed at build time, so the banner stays true as data/ moves on.
+const points = study.points as Array<{ id: string; label: string; source_tax_id: string; saica_match: string }>;
+const changedPoint = (p: (typeof points)[number]) => {
+  const now = graph.taxonomies[p.source_tax_id]?.categories.find((c) => c.external_id === p.id);
+  return !now || now.label.trim() !== p.label.trim();
+};
+const changed = points.filter(changedPoint);
+const allChanged = Object.entries(study.taxonomies as Record<string, { name: string }>)
+  .filter(([id]) => {
+    const own = points.filter((p) => p.source_tax_id === id);
+    return own.length > 0 && own.every(changedPoint);
+  })
+  .map(([, t]) => t.name);
+const categoriesNow = Object.values(graph.taxonomies).reduce((n, t) => n + t.categories.length, 0);
+// Input categories whose labels no source had published: every MAST and DAPLab entry of the April files
+// (research/review_20261121/mast_fix.md; data/TOMBSTONES.yml and the 2026-11-21 rebuild of the DAPLab taxonomy).
+const unsourced = points.filter((p) => p.source_tax_id === "mast" || p.source_tax_id === "daplab-9-patterns").length;
+const unmapped = points.filter((p) => p.saica_match === "__unmapped__").length;
+const modesUsed = new Set(points.map((p) => p.saica_match).filter((m) => m !== "__unmapped__")).size;
+const toolsNow = Object.values(graph.tools);
+const tagsNow = toolsNow.reduce((n, t) => n + t.addresses_failure_modes.length, 0);
+// The catalog the study ran on, counted from git at commit 8b5516f (2026-04-23): data/tools/*.yml files and
+// the entries of their addresses_failure_modes lists.
+const THEN = { tools: 104, tags: 274 };
 const STATS: [string, string, string][] = [
   ["ts-k-text", "26", "K<sub>text</sub> (HDBSCAN)"],
   ["ts-k-bipartite", "7", "K<sub>bipartite</sub> (tool-based)"],
   ["ts-k-manual", "11", "K<sub>manual</sub> (SAICA)"],
-  ["ts-ari-bip", "0.52", "ARI<sub>bipartite vs SAICA</sub>"],
+  ["ts-ari-bip", "0.52", "ARI<sub>bipartite vs SAICA</sub> (circular, see note)"],
 ];
 const COLORINGS: [string, string, boolean][] = [
   ["bipartite", "bipartite cluster (K=7)", true],
@@ -19,26 +53,53 @@ const COLORINGS: [string, string, boolean][] = [
   ["text", "text cluster (K=26)", false],
   ["taxonomy", "source taxonomy", false],
 ];
+// Descriptions of the pictures only. Two earlier takeaways said the result "confirms" that tool reachability
+// "recovers SAICA's manual partition"; they were removed because that agreement is circular (see the banner).
 const TAKEAWAYS: [string, string][] = [
   ["Text clustering fragments",
-    "26 clusters, most with only 2–4 members; a huge noise bucket (~48 categories) absorbs whatever the prose-similarity signal could not commit to."],
-  ["Bipartite clustering concentrates",
-    "just 7 clusters, each tall, carving the corpus into tool-response families."],
+    "26 clusters, most with only 2–4 members; a large noise bucket (48 categories) holds what the text similarity could not place."],
+  ["Tool-based clustering concentrates",
+    "7 clusters, most of them large. This follows from how the matrix is built: categories mapped to the same failure modes get the same row."],
   ["Fan-in, left → middle",
-    "every bipartite bar is fed by many text slivers — text K=26 is too fine for the supervision structure."],
-  ["Tight mapping, middle → right",
-    "each bipartite bar lines up with 1–2 SAICA modes (ARI 0.52, NMI 0.74), confirming that \"what can stop it\" recovers SAICA's manual partition."],
-  ["Text → SAICA is scattered",
-    "the prose alone is not enough; supervision-tool reachability is the signal that matches the expert taxonomy."],
+    "every tool-based bar is fed by many text slivers: the text clusters are much finer than the tool-based ones."],
 ];
 ---
 
-<BaseLayout title="AI Agent Failure Taxonomies Compared: Cluster Study" description="How the categories of 6 published AI agent failure taxonomies cluster: a UMAP map of all categories and an alluvial view from text clusters to the 11 SAICA coding-agent failure modes.">
+<BaseLayout title="Taxonomy cluster study (archived, April 2026)" description="Archived study from April 2026: how the categories of 6 AI agent failure taxonomies clustered on an earlier version of the SAICA knowledge graph. Not maintained." noindex>
   <section class="mb-6 max-w-3xl">
     <p class="font-sans text-xs uppercase tracking-widest text-ink-faint">
-      Research Study
+      Archived study
     </p>
     <h1 class="mt-2">Taxonomy cluster study</h1>
+  </section>
+
+  <ArchivedBanner label="Archived study, not maintained" asOf="23 April 2026">
+    <p>
+      This page shows a study run on the knowledge graph as it was on 23 April 2026. It is kept as a record.
+      Please do not cite its numbers.
+    </p>
+    <p class="mt-2">
+      <strong>Its main result is circular.</strong> The “tool-based” clustering links a category to a tool only
+      through SAICA's own crosswalk: a tool reaches a category when one of the tool's failure-mode tags is mapped
+      to that category. The “SAICA match” it is compared with is read from the same crosswalk. So the agreement
+      between the two (ARI 0.52, NMI 0.74) compares the crosswalk with itself. It does not show that the 11
+      failure modes are the right way to divide failures. The project review of 21 November 2026 shuffled the
+      tools' tags at random and got about the same agreement (ARI 0.51 on average over 50 runs).
+      {unmapped} of the {points.length} categories had no mapping at all and count as agreeing with each other,
+      and only {modesUsed} of the 11 modes appear in the comparison. The one independent test on this page,
+      clustering the category texts, agrees weakly with the 11 modes (ARI 0.08).
+    </p>
+    <p class="mt-2">
+      <strong>Its data is out of date.</strong> {changed.length} of the {points.length} categories have since been
+      removed or renamed in the graph{allChanged.length > 0 && <> (among them every entry of {andList(allChanged)})</>},
+      after the labels were checked against the published sources; the graph now holds {categoriesNow} categories.
+      {unsourced} of the {points.length} input categories (the MAST and DAPLab entries) carried labels that no
+      source had published. The study used {THEN.tools} tools with {THEN.tags} failure-mode tags; after the tag audit of 20 November 2026
+      the catalog has {toolsNow.length} tools with {tagsNow} tags.
+    </p>
+  </ArchivedBanner>
+
+  <section class="mb-6 max-w-3xl">
     <p class="mt-4 leading-7">
       If we let embeddings and HDBSCAN choose how many failure classes there
       are across the 121 categories ingested from OWASP, MAST, DAPLab,
@@ -51,8 +112,9 @@ const TAKEAWAYS: [string, string][] = [
       <strong>Response clustering</strong> over the
       (category &times; tool) bipartite reachability matrix landed on
       <strong>K<sub>bipartite</sub> = 7</strong>, <em>coarser</em> than SAICA's
-      11 and substantially more aligned with it
-      (<strong>ARI 0.52, NMI 0.74</strong>).
+      11, with ARI 0.52 and NMI 0.74 against SAICA's labels. That agreement is
+      built in: the matrix and the labels are both made from the same
+      crosswalk (see the note above).
     </p>
   </section>
 
@@ -143,7 +205,7 @@ const TAKEAWAYS: [string, string][] = [
 
   <section class="mt-12">
     <h2>Alluvial — how categories flow between partitions</h2>
-    <div class="border border-ink/10 rounded bg-white p-3 overflow-x-auto">
+    <div class="relative border border-ink/10 rounded bg-white p-3 overflow-x-auto">
       <svg id="ts-sankey" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet"
            style="width: 100%; min-width: 720px; height: 420px; display: block;"></svg>
       <div id="ts-sankey-tip"
@@ -156,8 +218,9 @@ const TAKEAWAYS: [string, string][] = [
       SAICA modes (11). Ribbon thickness = number of categories that belong
       to both the left and right bar; ribbons inherit their source bar's
       color. Read it left-to-right: many text slivers fan into a handful of
-      bipartite blocks (concentration), and those blocks map tightly onto
-      SAICA's modes (alignment). Hover any bar to light up the ribbons that
+      bipartite blocks. Those blocks line up with SAICA's modes because both
+      columns are derived from the same crosswalk, so that part of the picture
+      is not evidence for the 11 modes. Hover any bar to light up the ribbons that
       touch it; hover a ribbon to see its size.
     </p>
   </section>
@@ -193,7 +256,7 @@ const TAKEAWAYS: [string, string][] = [
   <section class="mt-10 max-w-3xl">
     <h2>Further reading</h2>
     <ul class="text-sm space-y-1">
-      <li>Full narrative report: <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/research/TAXONOMY_CLUSTER_STUDY.md" rel="noopener"><code>research/TAXONOMY_CLUSTER_STUDY.md</code></a></li>
+      <li>Exploratory note on this study, with the shuffle test and the other findings of the review: <a href="https://github.com/vasylrakivnenko/SAICA/blob/main/research/TAXONOMY_CLUSTER_STUDY.md" rel="noopener"><code>research/TAXONOMY_CLUSTER_STUDY.md</code></a></li>
       <li>Raw artifacts: <a href="https://github.com/vasylrakivnenko/SAICA/tree/main/research/taxonomy_clustering" rel="noopener"><code>research/taxonomy_clustering/</code></a></li>
       <li>Machine-readable input: <a href="/taxonomy_study.json"><code>/taxonomy_study.json</code></a></li>
     </ul>
@@ -204,6 +267,7 @@ const TAKEAWAYS: [string, string][] = [
   import {
     layoutSankey, renderClusterRegion, renderSankeyInto, mkSvg,
   } from "../lib/cluster-viz";
+  import { escapeHtml } from "../lib/format";
 
   interface Point {
     id: string; key: string; source_tax_id: string; label: string;
@@ -435,11 +499,6 @@ const TAKEAWAYS: [string, string][] = [
     }).join("");
   }
 
-  function escapeHtml(s: string): string {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
-
   function onMove(e: MouseEvent): void {
     const target = e.target as Element | null;
     if (!target || target.tagName !== "circle" || !tooltip || !svg || !payload) {
@@ -593,8 +652,8 @@ const TAKEAWAYS: [string, string][] = [
     } catch (err) {
       if (fallback) {
         fallback.classList.remove("hidden");
-        fallback.textContent = `Failed to load /taxonomy_study.json (${err}). `
-          + "Run: .venv/bin/python -m pipeline.taxonomy_cluster.export_site_data";
+        fallback.textContent = "The study data could not be loaded. Please try again later.";
+        console.error("taxonomy-study: failed to load /taxonomy_study.json", err);
       }
       return;
     }

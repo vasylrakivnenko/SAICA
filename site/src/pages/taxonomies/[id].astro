@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
-import { graph } from '../../lib/data.ts';
+import { crosswalkReviews, crosswalksInto, graph, unmappedIn } from '../../lib/data.ts';
+import { reviewNote } from '../../lib/catalog.ts';
 import { breadcrumbs, clip, fmUrl } from '../../lib/seo.ts';
 import type { Taxonomy } from '../../lib/types.ts';
 
@@ -15,7 +16,17 @@ export function getStaticPaths() {
 interface Props { taxonomy: Taxonomy }
 const { taxonomy } = Astro.props;
 
-const byCategory = graph.failureModesByTaxonomyCategory[taxonomy.id] ?? {};
+// Mappings from SAICA failure modes into this taxonomy's categories (data/crosswalks via lib/data.ts), strongest first.
+const byCategory = crosswalksInto(taxonomy.id);
+const mappingCount = Object.values(byCategory).reduce((n, list) => n + list.length, 0);
+// Who drafted and who checked the mappings, and why some categories have none (fields of the crosswalk file).
+const reviews = crosswalkReviews(taxonomy.id);
+const review = [...new Set(reviews.map((r) => reviewNote(r.state)).filter(Boolean))];
+// Mapped categories first; the ones the crosswalk leaves without a mapping are listed under them, with the reason.
+const mappedCats = taxonomy.categories.filter((c) => (byCategory[c.external_id] ?? []).length > 0);
+const unmappedCats = taxonomy.categories.filter((c) => (byCategory[c.external_id] ?? []).length === 0);
+const checkedOn = reviews.map((r) => r.sourceCheckedOn).filter(Boolean).sort().pop();
+const unmapped = unmappedIn(taxonomy.id);
 const paper = taxonomy.paper_id ? graph.papers[taxonomy.paper_id] : undefined;
 const desc = clip(taxonomy.scope ?? `${taxonomy.name}, an external failure taxonomy, mapped to SAICA's coding-agent failure modes.`, 155);
 // A taxonomy published in a paper can share the paper's title; keep the two <title>s distinct.
@@ -64,37 +75,62 @@ const jsonld = breadcrumbs([
 
   <h2>Categories &amp; crosswalks</h2>
   <p class="text-sm text-ink-muted">
-    Each row lists one external category and any SAICA-KG FailureModes that cross-walk
-    into it.
+    Each row is one category of this taxonomy with the SAICA failure modes mapped to it and how close each mapping
+    is: “exact” means the same failure, “partial” an overlap, “related” a neighbouring category. {mappingCount}
+    {mappingCount === 1 ? 'mapping covers' : 'mappings cover'} {mappedCats.length} of the {taxonomy.categories.length}
+    categories{unmappedCats.length > 0 && <>; the {unmappedCats.length === 1 ? 'one' : unmappedCats.length} with no mapping {unmappedCats.length === 1 ? 'is' : 'are'} listed <a href="#unmapped">under them</a></>}.
+    {checkedOn && <> The category ids and labels were last compared with the source on {checkedOn}.</>}
   </p>
+  {review.map((note) => <p class="mt-2 text-sm font-sans" data-review-note><strong>{note}</strong></p>)}
   <ul class="mt-3 space-y-3">
-    {taxonomy.categories.map((cat) => {
-      const fmIds = byCategory[cat.external_id] ?? [];
-      return (
-        <li class="card">
-          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <code class="font-sans text-sm font-semibold">{cat.external_id}</code>
-            <span class="font-sans font-semibold">{cat.label}</span>
-          </div>
-          {cat.description && <p class="mt-2 text-sm leading-6">{cat.description}</p>}
-          {fmIds.length > 0 && (
-            <div class="mt-3 text-sm">
-              <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">SAICA-KG crosswalks:</span>
-              <ul class="mt-1 flex flex-wrap gap-1.5">
-                {fmIds.map((fmId) => (
-                  <li>
-                    <a class="chip-accent" href={fmUrl(fmId)}>
-                      {graph.failureModes[fmId]?.name ?? fmId}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      );
-    })}
+    {mappedCats.map((cat) => (
+      <li class="card">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <code class="font-sans text-sm font-semibold">{cat.external_id}</code>
+          <span class="font-sans font-semibold">{cat.label}</span>
+        </div>
+        {cat.description && <p class="mt-2 text-sm leading-6">{cat.description}</p>}
+        <div class="mt-3 text-sm">
+          <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">SAICA-KG crosswalks:</span>
+          <ul class="mt-1 flex flex-wrap gap-1.5">
+            {(byCategory[cat.external_id] ?? []).map((e) => (
+              <li>
+                <a class={e.confidence === 'exact' ? 'chip-accent' : 'chip'} href={fmUrl(e.saica_value)}>
+                  {graph.failureModes[e.saica_value]?.name ?? e.saica_value}
+                  <span class="opacity-75">· {e.confidence}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </li>
+    ))}
   </ul>
+
+  {unmappedCats.length > 0 && (
+    <>
+      <h2 id="unmapped">Categories with no SAICA failure mode</h2>
+      <p class="text-sm text-ink-muted">
+        {unmappedCats.length === 1 ? 'This category has' : `These ${unmappedCats.length} categories have`} no mapping.
+        The reason is the one the crosswalk file states; where it states none, that is said.
+      </p>
+      <ul class="mt-3 space-y-3">
+        {unmappedCats.map((cat) => (
+          <li class="card" data-unmapped={cat.external_id}>
+            <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <code class="font-sans text-sm font-semibold">{cat.external_id}</code>
+              <span class="font-sans font-semibold">{cat.label}</span>
+            </div>
+            {cat.description && <p class="mt-2 text-sm leading-6">{cat.description}</p>}
+            <p class="mt-3 text-sm leading-6 text-ink-muted">
+              <span class="font-sans text-xs uppercase tracking-wide text-ink-faint">Why it is not mapped:</span>{' '}
+              {unmapped[cat.external_id] || 'The crosswalk file gives no reason.'}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
 
   {taxonomy.notes && (
     <>

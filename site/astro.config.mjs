@@ -1,6 +1,11 @@
 import { defineConfig } from 'astro/config';
 import { fileURLToPath } from 'node:url';
 
+// SAICA_RESULTS_JSON=<file> builds the pages from another results file instead of public/bench/results.json.
+// Used only by scripts/check-results-mutation.mjs, which builds from a changed copy into a temp dir to prove
+// that no benchmark value is typed into a page. Leave it unset for a real build.
+const RESULTS_OVERRIDE = process.env.SAICA_RESULTS_JSON;
+
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
@@ -10,6 +15,9 @@ export default defineConfig({
   site: 'https://saica.ai',
   trailingSlash: 'ignore',
   vite: {
+    resolve: {
+      alias: RESULTS_OVERRIDE ? [{ find: /^.*\/public\/bench\/results\.json$/, replacement: RESULTS_OVERRIDE }] : [],
+    },
     server: {
       // Dev only: forward the dynamic endpoints to the Python backend, but
       // let Astro serve its own /api/v1 catalog routes.

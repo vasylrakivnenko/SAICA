@@ -1,23 +1,36 @@
-// Single data-layer module: loads YAML at build time into an in-memory graph,
-// coerces Date objects to ISO strings, builds derived indexes.
-//
+// Single data-layer module: loads the YAML knowledge graph (../data) at build time into an in-memory graph.
 // All site pages and JSON endpoints import `graph` from here.
+//
+// What the loader guarantees, and checks while it runs:
+// - Every key of a YAML file survives into the loaded node with its value unchanged. The loader only turns
+//   dates into YYYY-MM-DD strings, fills the optional lists named in FILLED (types.ts) with [] and applies the
+//   few scalar defaults written in the hydrate* functions below. A field added to the schema therefore reaches
+//   the pages and /api/v1 with no change here; `assertSurvives` throws if a key is ever lost or rewritten.
+// - Crosswalk mappings come from data/crosswalks/ only, as one normalised list: `crosswalkEdges`. The inline
+//   `crosswalks:` blocks that some failure-mode files carry repeat those files and are not loaded (the one
+//   deliberate exception to the rule above; an inline mapping the crosswalk files lack is reported).
+// - Version and date come from data/MANIFEST.json, not from a literal or the build clock. Node counts are
+//   counted from the loaded files and compared with the manifest (`manifestDrift`).
 
 import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
+import { FILLED } from './types.ts';
 import type {
   Tool,
   FailureMode,
   Taxonomy,
   Paper,
   Crosswalk,
+  CrosswalkConfidence,
+  CrosswalkEdge,
   Incident,
+  NodeKind,
   Recipe,
   Graph,
 } from './types.ts';
 
-const DATA_VERSION = '2026.04';
+type Raw = Record<string, any>;
 
 // Resolve in astro.config.mjs before bundling changes this module's location.
 const DATA_DIR = import.meta.env.KG_DATA_DIR as string;
@@ -25,20 +38,18 @@ if (!DATA_DIR || !fs.existsSync(DATA_DIR)) {
   throw new Error('Catalog data directory is missing; check astro.config.mjs.');
 }
 
-function readYamlDir(subdir: string): Record<string, any>[] {
+function readYamlDir(subdir: NodeKind): Raw[] {
   const dir = path.join(DATA_DIR, subdir);
   if (!fs.existsSync(dir)) return [];
+  // Sorted, so the order of nodes (and of every list built from them) does not depend on the file system.
   const files = fs
     .readdirSync(dir)
-    .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
-  const out: Record<string, any>[] = [];
+    .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
+    .sort();
+  const out: Raw[] = [];
   for (const file of files) {
-    const full = path.join(dir, file);
-    const raw = fs.readFileSync(full, 'utf8');
-    const doc = yaml.load(raw) as Record<string, any> | null;
-    if (doc && typeof doc === 'object') {
-      out.push(coerceDates(doc));
-    }
+    const doc = yaml.load(fs.readFileSync(path.join(dir, file), 'utf8')) as Raw | null;
+    if (doc && typeof doc === 'object') out.push(coerceDates(doc));
   }
   return out;
 }
@@ -47,167 +58,102 @@ function readYamlDir(subdir: string): Record<string, any>[] {
 function coerceDates(value: any): any {
   if (value instanceof Date) {
     // js-yaml parses `YYYY-MM-DD` into a Date at UTC midnight; emit YYYY-MM-DD.
-    const iso = value.toISOString();
-    return iso.slice(0, 10);
+    return value.toISOString().slice(0, 10);
   }
   if (Array.isArray(value)) return value.map(coerceDates);
   if (value && typeof value === 'object') {
-    const out: Record<string, any> = {};
+    const out: Raw = {};
     for (const [k, v] of Object.entries(value)) out[k] = coerceDates(v);
     return out;
   }
   return value;
 }
 
-function hydrateTool(raw: Record<string, any>): Tool {
-  return {
-    id: String(raw.id),
+/** Raw YAML -> loaded node: keep every key, make `id` a string, fill the kind's lists, apply `scalars`. */
+function load<T>(kind: NodeKind, raw: Raw, scalars: Raw = {}): T {
+  const node: Raw = { ...raw, id: String(raw.id), ...scalars };
+  for (const key of FILLED[kind]) {
+    if (raw[key] != null && !Array.isArray(raw[key])) {
+      throw new Error(`data.ts: ${kind}/${raw.id}: field "${key}" must be a list`);
+    }
+    node[key] = raw[key] ?? [];
+  }
+  assertSurvives(kind, raw, node, new Set<string>(['id', ...Object.keys(scalars), ...FILLED[kind]]));
+  return node as T;
+}
+
+/** The build-time check behind "every YAML key survives": each key of the file must be on the loaded node,
+ *  with the very same value, unless it is a field the loader normalises and the file's value was missing or
+ *  of another type (a default or a coercion). */
+function assertSurvives(kind: string, raw: Raw, node: Raw, normalised: Set<string>): void {
+  for (const key of Object.keys(raw)) {
+    if (!(key in node)) {
+      throw new Error(`data.ts: ${kind}/${raw.id}: field "${key}" was dropped by the loader`);
+    }
+    if (node[key] === raw[key]) continue;
+    const before = raw[key];
+    const after = node[key];
+    const coerced =
+      normalised.has(key) &&
+      (before == null || typeof before !== typeof after || Array.isArray(before) !== Array.isArray(after));
+    if (!coerced) throw new Error(`data.ts: ${kind}/${raw.id}: field "${key}" was changed by the loader`);
+  }
+}
+
+const hydrateTool = (raw: Raw): Tool =>
+  load<Tool>('tools', raw, {
     name: String(raw.name ?? raw.id),
-    tagline: raw.tagline,
     description: String(raw.description ?? ''),
     first_released: String(raw.first_released ?? ''),
-    last_updated: raw.last_updated,
-    maturity_status: raw.maturity_status ?? 'experimental',
-    published_by: raw.published_by,
-    repository_url: raw.repository_url,
-    documentation_url: raw.documentation_url,
     license: String(raw.license ?? ''),
-    control_paradigm: raw.control_paradigm,
-    temporal_phase: raw.temporal_phase,
-    autonomy_level: raw.autonomy_level,
-    addresses_failure_modes: Array.isArray(raw.addresses_failure_modes)
-      ? raw.addresses_failure_modes
-      : [],
-    locus_of_control: Array.isArray(raw.locus_of_control) ? raw.locus_of_control : [],
-    implements_techniques: Array.isArray(raw.implements_techniques)
-      ? raw.implements_techniques
-      : [],
-    integration_surfaces: Array.isArray(raw.integration_surfaces)
-      ? raw.integration_surfaces
-      : [],
-    composes_with: Array.isArray(raw.composes_with) ? raw.composes_with : [],
-    feeds_into: Array.isArray(raw.feeds_into) ? raw.feeds_into : [],
-    supersedes: Array.isArray(raw.supersedes) ? raw.supersedes : [],
-    runtime_requires: Array.isArray(raw.runtime_requires) ? raw.runtime_requires : [],
-    supervises_targets: Array.isArray(raw.supervises_targets)
-      ? raw.supervises_targets
-      : [],
-    cited_in: Array.isArray(raw.cited_in) ? raw.cited_in : [],
-    documented_in: Array.isArray(raw.documented_in) ? raw.documented_in : [],
-    evaluated_on: Array.isArray(raw.evaluated_on) ? raw.evaluated_on : [],
-    security_notes: raw.security_notes,
-    signed_manifest: raw.signed_manifest,
+    maturity_status: raw.maturity_status ?? 'experimental',
     openssf_scorecard_score: raw.openssf_scorecard_score ?? null,
-    stars: typeof raw.stars === 'number' ? raw.stars : undefined,
-    stars_updated_at: raw.stars_updated_at,
-    contributors: Array.isArray(raw.contributors) ? raw.contributors : [],
-    editorial_notes: raw.editorial_notes,
-    inclusion_rationale: raw.inclusion_rationale,
-  };
+  });
+
+/** Inline crosswalk entries found in failure-mode files; only used to report what data/crosswalks/ lacks. */
+interface InlineCrosswalk {
+  fm: string;
+  taxonomy: string;
+  external_id: string;
 }
 
-function hydrateFailureMode(raw: Record<string, any>): FailureMode {
-  return {
-    id: String(raw.id),
+function hydrateFailureMode(raw: Raw, inline: InlineCrosswalk[]): FailureMode {
+  // Not loaded on purpose (see the header): mappings are read from data/crosswalks/ only.
+  const { crosswalks: duplicate, ...rest } = raw;
+  for (const cw of Array.isArray(duplicate) ? duplicate : []) {
+    inline.push({ fm: String(raw.id), taxonomy: String(cw?.taxonomy), external_id: String(cw?.external_id) });
+  }
+  return load<FailureMode>('failure_modes', rest, {
     name: String(raw.name ?? raw.id),
-    tagline: raw.tagline,
     description: String(raw.description ?? ''),
-    aliases: Array.isArray(raw.aliases) ? raw.aliases : [],
-    related_modes: Array.isArray(raw.related_modes) ? raw.related_modes : [],
-    prior_work: Array.isArray(raw.prior_work) ? raw.prior_work : [],
-    detection_signals: Array.isArray(raw.detection_signals) ? raw.detection_signals : [],
-    canonical_definition_source: raw.canonical_definition_source,
-    crosswalks: Array.isArray(raw.crosswalks) ? raw.crosswalks : [],
-  };
+  });
 }
 
-function hydrateTaxonomy(raw: Record<string, any>): Taxonomy {
-  return {
-    id: String(raw.id),
+const hydrateTaxonomy = (raw: Raw): Taxonomy =>
+  load<Taxonomy>('taxonomies', raw, {
     name: String(raw.name ?? raw.id),
     owner: String(raw.owner ?? ''),
     version: String(raw.version ?? ''),
-    first_published: raw.first_published,
-    last_updated: raw.last_updated,
-    url: raw.url,
-    license: raw.license,
-    paper_id: raw.paper_id,
-    scope: raw.scope,
-    categories: Array.isArray(raw.categories) ? raw.categories : [],
-    notes: raw.notes,
-    inclusion_rationale: raw.inclusion_rationale,
-  };
-}
+  });
 
-function hydratePaper(raw: Record<string, any>): Paper {
-  return {
-    id: String(raw.id),
-    authors: Array.isArray(raw.authors) ? raw.authors : [],
-    year: Number(raw.year),
-    title: String(raw.title ?? ''),
-    venue: raw.venue,
-    url: raw.url,
-    doi: raw.doi,
-    arxiv_id: raw.arxiv_id,
-    semantic_scholar_id: raw.semantic_scholar_id,
-    abstract: raw.abstract,
-    tldr: raw.tldr,
-    citation_count: typeof raw.citation_count === 'number' ? raw.citation_count : undefined,
-    relevance_tags: Array.isArray(raw.relevance_tags) ? raw.relevance_tags : [],
-    notes: raw.notes,
-  };
-}
+const hydratePaper = (raw: Raw): Paper =>
+  load<Paper>('papers', raw, { year: Number(raw.year), title: String(raw.title ?? '') });
 
-function hydrateCrosswalk(raw: Record<string, any>): Crosswalk {
-  return {
-    id: String(raw.id),
-    saica_axis: raw.saica_axis,
-    taxonomy: String(raw.taxonomy ?? ''),
-    authored_by: Array.isArray(raw.authored_by) ? raw.authored_by : [],
-    reviewed_by: Array.isArray(raw.reviewed_by) ? raw.reviewed_by : [],
-    last_reviewed: raw.last_reviewed,
-    mappings: Array.isArray(raw.mappings) ? raw.mappings : [],
-  };
-}
+const hydrateCrosswalk = (raw: Raw): Crosswalk =>
+  load<Crosswalk>('crosswalks', raw, { taxonomy: String(raw.taxonomy ?? '') });
 
-function hydrateIncident(raw: Record<string, any>): Incident {
-  return {
-    id: String(raw.id),
+const hydrateIncident = (raw: Raw): Incident =>
+  load<Incident>('incidents', raw, {
     title: String(raw.title ?? raw.id),
-    tagline: raw.tagline,
     description: String(raw.description ?? ''),
     incident_date: String(raw.incident_date ?? ''),
-    harm_class: raw.harm_class,
-    reproducibility: raw.reproducibility,
-    exhibited_failure_modes: Array.isArray(raw.exhibited_failure_modes)
-      ? raw.exhibited_failure_modes
-      : [],
-    affected_systems: Array.isArray(raw.affected_systems) ? raw.affected_systems : [],
-    source_urls: Array.isArray(raw.source_urls) ? raw.source_urls : [],
-    documented_by: Array.isArray(raw.documented_by) ? raw.documented_by : [],
-    mitigated_by: Array.isArray(raw.mitigated_by) ? raw.mitigated_by : [],
-    notes: raw.notes,
-  };
-}
+  });
 
-function hydrateRecipe(raw: Record<string, any>): Recipe {
-  const stackRaw = Array.isArray(raw.stack) ? raw.stack.map(String) : [];
-  // Recipe.stack is typed as [string, string, ...string[]] (minItems:2).
-  // Validation guarantees length >= 2 at ingest time, so this cast is safe.
-  return {
-    id: String(raw.id),
+const hydrateRecipe = (raw: Raw): Recipe =>
+  load<Recipe>('recipes', raw, {
     name: String(raw.name ?? raw.id),
-    tagline: raw.tagline,
     description: String(raw.description ?? ''),
-    targets_failure_modes: Array.isArray(raw.targets_failure_modes)
-      ? raw.targets_failure_modes
-      : [],
-    stack: stackRaw as [string, string, ...string[]],
-    evidence_tier: raw.evidence_tier,
-    language: raw.language,
-    notes: raw.notes,
-  };
-}
+  });
 
 function keyBy<T extends { id: string }>(items: T[]): Record<string, T> {
   const out: Record<string, T> = {};
@@ -215,66 +161,143 @@ function keyBy<T extends { id: string }>(items: T[]): Record<string, T> {
   return out;
 }
 
-function buildGraph(): Graph {
+// ---------- crosswalks ----------
+
+/** Strength of a mapping, strongest first. Used wherever mappings are ordered or one is picked for a pair. */
+export const CONFIDENCE_RANK: Record<CrosswalkConfidence, number> = {
+  exact: 0,
+  partial: 1,
+  broader: 2,
+  narrower: 3,
+  related: 4,
+};
+export const confidenceRank = (c: string): number => CONFIDENCE_RANK[c as CrosswalkConfidence] ?? 9;
+
+const byCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/** data/crosswalks/*.yml as one flat list: one edge per (axis, SAICA value, taxonomy, category), with the
+ *  taxonomy's name and the category's label joined in. A pair listed twice keeps its stronger mapping. */
+function buildCrosswalkEdges(crosswalks: Crosswalk[], taxonomies: Record<string, Taxonomy>): CrosswalkEdge[] {
+  const byKey = new Map<string, CrosswalkEdge>();
+  for (const cw of crosswalks) {
+    const tax = taxonomies[cw.taxonomy];
+    for (const m of cw.mappings) {
+      const cat = tax?.categories.find((c) => c.external_id === m.external_id);
+      const note = typeof m.note === 'string' ? m.note.replace(/\s+/g, ' ').trim() : '';
+      const edge: CrosswalkEdge = {
+        crosswalk: cw.id,
+        axis: cw.saica_axis,
+        saica_value: String(m.saica_value),
+        taxonomy: cw.taxonomy,
+        taxonomy_name: tax?.name ?? cw.taxonomy,
+        external_id: String(m.external_id),
+        external_label: cat?.label ?? String(m.external_id),
+        confidence: m.confidence,
+        ...(note ? { note } : {}),
+      };
+      const key = [edge.axis, edge.saica_value, edge.taxonomy, edge.external_id].join('\u0000');
+      const prev = byKey.get(key);
+      if (!prev) byKey.set(key, edge);
+      else if (confidenceRank(edge.confidence) < confidenceRank(prev.confidence)) {
+        byKey.set(key, edge.note || !prev.note ? edge : { ...edge, note: prev.note });
+      } else if (!prev.note && edge.note) prev.note = edge.note;
+    }
+  }
+  return [...byKey.values()].sort(
+    (a, b) =>
+      byCodeUnit(a.saica_value, b.saica_value) ||
+      confidenceRank(a.confidence) - confidenceRank(b.confidence) ||
+      byCodeUnit(a.taxonomy, b.taxonomy) ||
+      byCodeUnit(a.external_id, b.external_id),
+  );
+}
+
+// ---------- manifest ----------
+
+interface Manifest {
+  generated_at: string;
+  kg_version: string;
+  counts?: Record<string, number>;
+  ids?: Record<string, string[] | Record<string, unknown>>;
+}
+
+function readManifest(): Manifest {
+  const file = path.join(DATA_DIR, 'MANIFEST.json');
+  const hint = 'run `python -m validator.generate_manifest`';
+  let doc: Manifest;
+  try {
+    doc = JSON.parse(fs.readFileSync(file, 'utf8')) as Manifest;
+  } catch (err) {
+    throw new Error(`data/MANIFEST.json is missing or is not valid JSON (${String(err)}); ${hint}.`);
+  }
+  if (typeof doc?.kg_version !== 'string' || typeof doc?.generated_at !== 'string') {
+    throw new Error(`data/MANIFEST.json has no kg_version / generated_at; ${hint}.`);
+  }
+  return doc;
+}
+
+// ---------- removed nodes ----------
+
+/** A node removed from the knowledge graph, as listed in data/TOMBSTONES.yml. */
+export interface Tombstone {
+  id: string;
+  /** tool | failure_mode | paper | taxonomy | crosswalk | incident | recipe */
+  kind: string;
+  removed_on: string;
+  reason: string;
+  successor: string | null;
+}
+
+function readTombstones(): Tombstone[] {
+  const file = path.join(DATA_DIR, 'TOMBSTONES.yml');
+  if (!fs.existsSync(file)) return [];
+  const doc = coerceDates(yaml.load(fs.readFileSync(file, 'utf8')) ?? {});
+  const rows: Raw[] = Array.isArray(doc.tombstones) ? doc.tombstones : [];
+  return rows
+    .filter((t) => t && t.id != null && t.kind != null)
+    .map((t) => ({
+      id: String(t.id),
+      kind: String(t.kind),
+      removed_on: String(t.removed_on ?? ''),
+      reason: String(t.reason ?? '').replace(/\s+/g, ' ').trim(),
+      successor: t.successor == null ? null : String(t.successor),
+    }));
+}
+
+// ---------- graph ----------
+
+function buildGraph(): { graph: Graph; edges: CrosswalkEdge[]; drift: string[] } {
+  const inline: InlineCrosswalk[] = [];
   const tools = readYamlDir('tools').map(hydrateTool);
-  const failureModes = readYamlDir('failure_modes').map(hydrateFailureMode);
+  const failureModes = readYamlDir('failure_modes').map((raw) => hydrateFailureMode(raw, inline));
   const taxonomies = readYamlDir('taxonomies').map(hydrateTaxonomy);
   const papers = readYamlDir('papers').map(hydratePaper);
   const crosswalks = readYamlDir('crosswalks').map(hydrateCrosswalk);
   const incidents = readYamlDir('incidents').map(hydrateIncident);
   const recipes = readYamlDir('recipes').map(hydrateRecipe);
 
-  // Derived index: failure_mode_id -> tool_ids[]
+  // Derived index: failure_mode_id -> tool_ids[] (sorted, for stable output).
   const toolsByFailureMode: Record<string, string[]> = {};
   for (const fm of failureModes) toolsByFailureMode[fm.id] = [];
   for (const tool of tools) {
-    for (const fmId of tool.addresses_failure_modes) {
-      if (!toolsByFailureMode[fmId]) toolsByFailureMode[fmId] = [];
-      toolsByFailureMode[fmId].push(tool.id);
+    for (const fmId of tool.addresses_failure_modes) (toolsByFailureMode[fmId] ??= []).push(tool.id);
+  }
+  for (const fmId of Object.keys(toolsByFailureMode)) toolsByFailureMode[fmId].sort();
+
+  const edges = buildCrosswalkEdges(crosswalks, keyBy(taxonomies));
+  const known = new Set(
+    edges.filter((e) => e.axis === 'failure_mode').map((e) => `${e.saica_value}/${e.taxonomy}/${e.external_id}`),
+  );
+  for (const cw of inline) {
+    if (!known.has(`${cw.fm}/${cw.taxonomy}/${cw.external_id}`)) {
+      console.warn(
+        `[data] failure_modes/${cw.fm}: inline crosswalk ${cw.taxonomy}/${cw.external_id} is not in data/crosswalks/ and is not shown`,
+      );
     }
   }
 
-  // Derived index: taxonomy_id -> external_id -> failure_mode_ids[]
-  // Aggregates both per-FailureMode inline crosswalks and standalone Crosswalk nodes.
-  const failureModesByTaxonomyCategory: Record<string, Record<string, string[]>> = {};
-  for (const tax of taxonomies) {
-    failureModesByTaxonomyCategory[tax.id] = {};
-    for (const cat of tax.categories) {
-      failureModesByTaxonomyCategory[tax.id][cat.external_id] = [];
-    }
-  }
-  for (const fm of failureModes) {
-    for (const cw of fm.crosswalks) {
-      const t = cw.taxonomy;
-      const e = cw.external_id;
-      if (!failureModesByTaxonomyCategory[t]) failureModesByTaxonomyCategory[t] = {};
-      if (!failureModesByTaxonomyCategory[t][e]) failureModesByTaxonomyCategory[t][e] = [];
-      if (!failureModesByTaxonomyCategory[t][e].includes(fm.id)) {
-        failureModesByTaxonomyCategory[t][e].push(fm.id);
-      }
-    }
-  }
-  for (const cw of crosswalks) {
-    if (cw.saica_axis !== 'failure_mode') continue;
-    for (const m of cw.mappings) {
-      const t = cw.taxonomy;
-      const e = m.external_id;
-      if (!failureModesByTaxonomyCategory[t]) failureModesByTaxonomyCategory[t] = {};
-      if (!failureModesByTaxonomyCategory[t][e]) failureModesByTaxonomyCategory[t][e] = [];
-      if (!failureModesByTaxonomyCategory[t][e].includes(m.saica_value)) {
-        failureModesByTaxonomyCategory[t][e].push(m.saica_value);
-      }
-    }
-  }
-
-  // Sort each tool list for stable output.
-  for (const fmId of Object.keys(toolsByFailureMode)) {
-    toolsByFailureMode[fmId].sort();
-  }
-
-  const kgLastUpdated = new Date().toISOString();
-
-  return {
+  const manifest = readManifest();
+  const graph: Graph = {
     tools: keyBy(tools),
     failureModes: keyBy(failureModes),
     taxonomies: keyBy(taxonomies),
@@ -283,17 +306,120 @@ function buildGraph(): Graph {
     incidents: keyBy(incidents),
     recipes: keyBy(recipes),
     toolsByFailureMode,
-    failureModesByTaxonomyCategory,
-    kgVersion: DATA_VERSION,
-    kgLastUpdated,
+    kgVersion: manifest.kg_version,
+    kgLastUpdated: manifest.generated_at,
   };
+
+  // The manifest stamps the version and date published in /api/v1/snapshot.json, so say when it is behind data/.
+  const drift: string[] = [];
+  const kinds: Array<[NodeKind, Record<string, unknown>]> = [
+    ['tools', graph.tools],
+    ['failure_modes', graph.failureModes],
+    ['papers', graph.papers],
+    ['taxonomies', graph.taxonomies],
+    ['crosswalks', graph.crosswalks],
+    ['incidents', graph.incidents],
+    ['recipes', graph.recipes],
+  ];
+  for (const [kind, nodes] of kinds) {
+    const listed = manifest.ids?.[kind];
+    const want = new Set(Array.isArray(listed) ? listed : Object.keys(listed ?? {}));
+    const have = new Set(Object.keys(nodes));
+    const added = [...have].filter((id) => !want.has(id));
+    const gone = [...want].filter((id) => !have.has(id));
+    if (added.length) drift.push(`${kind}: in data/ but not in the manifest: ${added.join(', ')}`);
+    if (gone.length) drift.push(`${kind}: in the manifest but not in data/: ${gone.join(', ')}`);
+  }
+  if (drift.length) {
+    console.warn(
+      `[data] data/MANIFEST.json (${manifest.generated_at}) is behind data/; kg_version and kg_last_updated may be stale. ` +
+        `Run \`python -m validator.generate_manifest\`.\n  ${drift.join('\n  ')}`,
+    );
+  }
+
+  return { graph, edges, drift };
 }
 
-// Eagerly loaded graph. Astro runs this once at build-time.
-export const graph: Graph = buildGraph();
+// Eagerly loaded. Astro runs this once at build time.
+const built = buildGraph();
+export const graph: Graph = built.graph;
 
+/** Every crosswalk mapping in data/crosswalks/, normalised and deduplicated: the only place the site reads
+ *  crosswalks from. Sorted by SAICA value, then strongest mapping first. */
+export const crosswalkEdges: CrosswalkEdge[] = built.edges;
+
+/** Mappings of one failure mode into other taxonomies, strongest first. */
+export const crosswalksOf = (failureModeId: string): CrosswalkEdge[] =>
+  crosswalkEdges.filter((e) => e.axis === 'failure_mode' && e.saica_value === failureModeId);
+
+/** Mappings from failure modes into one taxonomy, grouped by the taxonomy's category id, strongest first. */
+export function crosswalksInto(taxonomyId: string): Record<string, CrosswalkEdge[]> {
+  const out: Record<string, CrosswalkEdge[]> = {};
+  for (const e of crosswalkEdges) {
+    if (e.axis !== 'failure_mode' || e.taxonomy !== taxonomyId) continue;
+    (out[e.external_id] ??= []).push(e);
+  }
+  for (const list of Object.values(out)) {
+    list.sort(
+      (a, b) =>
+        confidenceRank(a.confidence) - confidenceRank(b.confidence) || byCodeUnit(a.saica_value, b.saica_value),
+    );
+  }
+  return out;
+}
+
+/** Nodes removed from data/ whose id is not in use again: their old page URL gets a "removed" notice
+ *  (pages/[kind]/[id].astro) instead of a 404. */
+export const tombstones: Tombstone[] = readTombstones().filter((t) => {
+  const live: Record<string, Record<string, unknown>> = {
+    tool: graph.tools,
+    failure_mode: graph.failureModes,
+    paper: graph.papers,
+    taxonomy: graph.taxonomies,
+    crosswalk: graph.crosswalks,
+    incident: graph.incidents,
+    recipe: graph.recipes,
+  };
+  return !live[t.kind]?.[t.id];
+});
+
+/** How the mappings into one taxonomy were produced and checked (fields of its crosswalk files). */
+export interface CrosswalkReview {
+  crosswalk: string;
+  /** `llm_drafted_unreviewed`, `human_reviewed`, or undefined when the file does not say. */
+  state?: string;
+  reviewedBy: string[];
+  /** Date the external ids and labels were last compared with the source (not a review of the mappings). */
+  sourceCheckedOn?: string;
+}
+export const crosswalkReviews = (taxonomyId: string): CrosswalkReview[] =>
+  Object.values(graph.crosswalks)
+    .filter((c) => c.saica_axis === 'failure_mode' && c.taxonomy === taxonomyId)
+    .map((c) => ({
+      crosswalk: c.id,
+      state: c.review_state,
+      reviewedBy: c.reviewed_by,
+      sourceCheckedOn: c.source_checked_on,
+    }));
+
+/** Categories of a taxonomy that its crosswalk leaves without a mapping on purpose: category id -> reason. */
+export function unmappedIn(taxonomyId: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const c of Object.values(graph.crosswalks)) {
+    if (c.saica_axis !== 'failure_mode' || c.taxonomy !== taxonomyId) continue;
+    for (const u of c.unmapped) out[String(u.category)] = String(u.reason ?? '').replace(/\s+/g, ' ').trim();
+  }
+  return out;
+}
+
+/** Where data/MANIFEST.json disagrees with the files in data/ (empty when the manifest is current). */
+export const manifestDrift: string[] = built.drift;
+
+/** Published as `disclaimer` in /api/v1/snapshot.json. */
 export const DISCLAIMER =
-  'SAICA-KG is navigational, not evaluative. Ranked sets reflect aggregate criteria; no single tool is endorsed.';
+  'SAICA-KG is a catalog: definitions, tools, incidents, papers and crosswalks. A failure-mode tag on a tool ' +
+  'says what the tool is built to catch or prevent; it is a claim, not a test result. Measured results are in ' +
+  'https://saica.ai/bench/results.json.';
 
 export function rawYamlUrl(kind: string, id: string): string {
   // kind: "tools" | "failure_modes" | "papers" | "taxonomies" | "crosswalks"
@@ -301,31 +427,22 @@ export function rawYamlUrl(kind: string, id: string): string {
   return `https://github.com/vasylrakivnenko/SAICA/blob/main/data/${kind}/${id}.yml`;
 }
 
+/** Node counts of the loaded graph. Crosswalks are reported both ways: files (nodes) and mappings in them. */
 export function counts(): {
   tools: number;
   failure_modes: number;
   papers: number;
   taxonomies: number;
-  crosswalks: number;
+  crosswalks: { nodes: number; mappings: number };
   incidents: number;
   recipes: number;
 } {
-  // Crosswalks count: number of inline crosswalk edges across all FailureModes
-  // plus individual mappings within Crosswalk nodes.
-  let inlineCount = 0;
-  for (const fm of Object.values(graph.failureModes)) {
-    inlineCount += fm.crosswalks.length;
-  }
-  let bulkCount = 0;
-  for (const cw of Object.values(graph.crosswalks)) {
-    bulkCount += cw.mappings.length;
-  }
   return {
     tools: Object.keys(graph.tools).length,
     failure_modes: Object.keys(graph.failureModes).length,
     papers: Object.keys(graph.papers).length,
     taxonomies: Object.keys(graph.taxonomies).length,
-    crosswalks: inlineCount + bulkCount,
+    crosswalks: { nodes: Object.keys(graph.crosswalks).length, mappings: crosswalkEdges.length },
     incidents: Object.keys(graph.incidents).length,
     recipes: Object.keys(graph.recipes).length,
   };
@@ -363,6 +480,21 @@ export const FACET_LABELS = {
     deprecated: 'Deprecated',
     abandoned: 'Abandoned',
   } as Record<string, string>,
+  // How the supervising check itself is carried out (schema: Tool.implementation).
+  implementation: {
+    deterministic: 'Program',
+    llm_based: 'AI-based',
+    hybrid: 'Hybrid',
+    prompt_artifact: 'Prompt artifact',
+  } as Record<string, string>,
+};
+
+/** One line per implementation type, for tool pages (wording follows schema/tool.schema.json). */
+export const IMPLEMENTATION_NOTE: Record<string, string> = {
+  deterministic: 'a program; the check makes no model calls',
+  llm_based: 'a model makes the decision',
+  hybrid: 'a program at the core, with model-based checks shipped alongside',
+  prompt_artifact: 'not a program: skills, rules or docs the agent reads',
 };
 
 export function facetLabel(facet: keyof typeof FACET_LABELS, value: string): string {
@@ -371,14 +503,6 @@ export function facetLabel(facet: keyof typeof FACET_LABELS, value: string): str
 
 export function failureModeLabel(id: string): string {
   return graph.failureModes[id]?.name ?? id;
-}
-
-export function toolLabel(id: string): string {
-  return graph.tools[id]?.name ?? id;
-}
-
-export function taxonomyLabel(id: string): string {
-  return graph.taxonomies[id]?.name ?? id;
 }
 
 export function paperLabel(id: string): string {
