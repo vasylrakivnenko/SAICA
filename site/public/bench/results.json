@@ -1,10 +1,10 @@
 {
- "version": "3.0.0",
+ "version": "3.1.0",
  "generated": "2026-11-28",
- "generated_at": "2026-11-28T00:01:59Z",
- "commit": "e1286dd36150751a6be9bc6421d1a1e7100c15d3",
+ "generated_at": "2026-11-28T05:39:37Z",
+ "commit": "c3f0e303cec83e98cd9ab97c15015f93cf1fc7b2",
  "inputs_match_commit": false,
- "cite_as": "SAICA-Bench results v3.0.0",
+ "cite_as": "SAICA-Bench results v3.1.0",
  "changelog": "bench/CHANGELOG_RESULTS.md",
  "partial": false,
  "missing_modes": {},
@@ -27308,7 +27308,8 @@
     "Reviewers see the issue, the patch and, when the re-implemented function is the repository's own, the module that defines it (both patches of a pair see the same files). Same prompt for every model; temperature 0 (gpt-6-luna: its default). Run 2026-11-20. The pairs were written by Claude (the coding assistant building this benchmark), not by any reviewed model.",
     "The four Claude models (run 2026-11-22) were called through Claude Code in headless mode on a subscription, not through an API: one process per sample with every tool switched off and an empty working folder, the same prompt as the other models plus a one-line system prompt and Claude Code's environment note, default sampling (Claude Code has no temperature setting) and thinking on (it cannot be switched off for these models). Effort level: medium. The Haiku, Sonnet and Opus runs and the first 899 security answers of Fable set no level and so used Claude Code's default, which is medium for each of these models (checked 2026-11-22 with the same flags and the same Claude Code version); every later call names medium and records it with the answer.",
     "The Cohere models (run 2026-11-24) were called through Cohere's OpenAI-compatible chat API with temperature 0. command-r-08-2024 does not reason; its output is capped at 4,096 tokens, the model's limit. north-mini-code-1.0 thinks by default: the thinking-off row switches thinking off (reasoning_effort \"none\") and ran on every mode; the thinking-on row leaves it on, ran only on dependency blindness (the smallest set) with a free, rate-limited trial key, and has an output budget of 32,768 tokens, which some answers used up while thinking.",
-    "codestral-2508 (run 2026-11-25) was called through Mistral's chat API with temperature 0, on dependency blindness only: the free plan allows 2 requests a minute. The calls were free; the cost shown is Mistral's public list price ($0.30 / $0.90 per 1M input / output tokens)."
+    "codestral-2508 (run 2026-11-25) was called through Mistral's chat API with temperature 0, on dependency blindness only: the free plan allows 2 requests a minute. The calls were free; the cost shown is Mistral's public list price ($0.30 / $0.90 per 1M input / output tokens).",
+    "gpt-5.4-mini (deployment gpt-5.4-mini-2026-03-17, run 2026-11-28) was called through Azure AI Foundry with reasoning_effort \"medium\" and its default temperature (it accepts no other), on dependency blindness only. The cost shown is OpenAI's public list price ($0.75 / $4.50 per 1M input / output tokens, $0.075 cached input)."
    ],
    "caveats": [
     "Hand-built: every re-implementation was written on purpose. Natural dependency blindness is often larger (whole helpers rebuilt) or subtler.",
@@ -28004,7 +28005,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 9,
+     "rank": 10,
      "vs_best": {
       "n": 100,
       "diff": 0.26,
@@ -28091,7 +28092,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 12,
+     "rank": 13,
      "vs_best": {
       "n": 100,
       "diff": 0.82,
@@ -28178,7 +28179,7 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 11,
+     "rank": 12,
      "vs_best": {
       "n": 100,
       "diff": 0.8,
@@ -28270,7 +28271,7 @@
        "truncated": 5
       }
      },
-     "rank": 8,
+     "rank": 9,
      "vs_best": {
       "n": 95,
       "diff": 0.213209,
@@ -28357,12 +28358,98 @@
       "failed_runs": 0,
       "failed_share": 0.0
      },
-     "rank": 10,
+     "rank": 11,
      "vs_best": {
       "n": 100,
       "diff": 0.54,
       "lo": 0.4,
       "hi": 0.68,
+      "separable": true,
+      "unit": "pair"
+     },
+     "in_top_group": false
+    },
+    {
+     "key": "zero_shot_gpt54mini",
+     "tool": "gpt-5.4-mini",
+     "short": "gpt-5.4-mini",
+     "type": "baseline_model",
+     "kind": "model",
+     "thinking": "medium",
+     "thinking_note": null,
+     "check": null,
+     "catalog": null,
+     "j": 0.74,
+     "j_ci": [
+      0.62,
+      0.86
+     ],
+     "j_ci_method": "cluster_bootstrap",
+     "j_ci_unit": "pair",
+     "catch": 0.76,
+     "catch_ci": [
+      0.625871,
+      0.857027
+     ],
+     "fa": 0.02,
+     "fa_ci": [
+      0.003539,
+      0.104957
+     ],
+     "tp": 38,
+     "fp": 1,
+     "n_pos": 50,
+     "n_neg": 50,
+     "n_pos_readable": 50,
+     "n_neg_readable": 50,
+     "unreadable": 0,
+     "unreadable_pos": 0,
+     "unreadable_neg": 0,
+     "unreadable_causes": {},
+     "incomplete": false,
+     "j_strict": 0.74,
+     "j_bounds": [
+      0.74,
+      0.74
+     ],
+     "subset_n": null,
+     "cost": 0.309333,
+     "cost1k": 3.09333,
+     "cost_basis": "list",
+     "cost_estimated": false,
+     "spend": 0.309333,
+     "cost_note": "list price x tokens (the provider reports no per-call charge) (Azure AI Foundry)",
+     "fa_per_100": 2.0,
+     "ppv": {
+      "0.01": 0.277372,
+      "0.05": 0.666667,
+      "0.2": 0.904762
+     },
+     "cheap": true,
+     "scope": "in design scope",
+     "ranked": true,
+     "detail": {
+      "j_excludes_zero": true,
+      "readable_repeats": 0,
+      "readable_conflicts": 0
+     },
+     "run_card": {
+      "model": "gpt-5.4-mini",
+      "provider": "Azure AI Foundry",
+      "input": "issue text; patch (unified diff); source of the repository module(s) the patch could have reused (optional)",
+      "flag_rule": "flagged when the answer carries \"dependency_blindness\": true",
+      "max_tokens": 16384,
+      "first_run_date": "2026-11-28",
+      "runs": 100,
+      "failed_runs": 0,
+      "failed_share": 0.0
+     },
+     "rank": 8,
+     "vs_best": {
+      "n": 100,
+      "diff": 0.16,
+      "lo": 0.04,
+      "hi": 0.28,
       "separable": true,
       "unit": "pair"
      },
@@ -28453,7 +28540,7 @@
        "provider_error": 3
       }
      },
-     "rank": 13,
+     "rank": 14,
      "vs_best": {
       "n": 94,
       "diff": 0.978723,
@@ -28758,7 +28845,7 @@
    "best_catalog_tool": null,
    "catalog_top_group": [],
    "best_free_program": null,
-   "spend": 14.311225,
+   "spend": 14.620558,
    "strata": {
     "helper_file_shown": {
      "description": "Pairs that re-implement a helper of the repository. The reviewer is shown the module that defines the helper, so the hard part of real review (knowing that the helper exists) is given.",
@@ -28774,6 +28861,19 @@
        "ci_method": "cluster_bootstrap",
        "tp": 29,
        "fp": 2,
+       "n_pos": 30,
+       "n_neg": 30,
+       "unreadable": 0
+      },
+      "zero_shot_gpt54mini": {
+       "tpr": 0.8,
+       "fpr": 0.0,
+       "j": 0.8,
+       "j_lo": 0.6333,
+       "j_hi": 0.9333,
+       "ci_method": "cluster_bootstrap",
+       "tp": 24,
+       "fp": 0,
        "n_pos": 30,
        "n_neg": 30,
        "unreadable": 0
@@ -28977,6 +29077,19 @@
        "j_hi": 1.0,
        "ci_method": "cluster_bootstrap",
        "tp": 19,
+       "fp": 1,
+       "n_pos": 20,
+       "n_neg": 20,
+       "unreadable": 0
+      },
+      "zero_shot_gpt54mini": {
+       "tpr": 0.7,
+       "fpr": 0.05,
+       "j": 0.65,
+       "j_lo": 0.45,
+       "j_hi": 0.85,
+       "ci_method": "cluster_bootstrap",
+       "tp": 14,
        "fp": 1,
        "n_pos": 20,
        "n_neg": 20,
@@ -32043,7 +32156,7 @@
    "Each zero-shot model was told which failure to look for and was tested on samples that have that failure or none. Its score is a single-prompt, mode-primed estimate, not a product. In use nobody knows which failure a change has, so the prompt of every mode would run on every change and their false alarms add up; the any-flag estimate next to the grid shows by how much. No run with all prompts on the same changes has been made.",
    "Samples are grouped in 6 of 9 modes (Fabrication: 163 files; Security vulnerability: 166 tasks; Logic error: 379 tasks; Obsolescence: 69 API pairs; Supply chain: 148 pairs; Dependency blindness: 50 pairs). Intervals there resample whole groups (100,000 draws). A reviewer is named best only when its paired difference from the runner-up, on the samples both answered, has a 95% interval that excludes 0; otherwise the rows that cannot be told apart are listed as a top group. The best row is still a pick on the test set, so its J is a little optimistic.",
    "Contamination was not assessed. Every set draws on public material (problem sets, GitHub issues and their fixes, CVE fixes, library release notes, package lists), so a model may have seen a task or its answer. Sources: Delulu (Microsoft) (public since 2026-03); Patronus TRACE (public since 2026-01); SusVibes (LeiLiLab) (public since 2025-12); Collu-Bench (lt-asset) (public since 2024-10); SWE-rebench-OpenHands-Trajectories (Nebius) (public since 2025-09); Wang et al. deprecated-API map (ICSE'25) (public since 2024-06); OpenSSF malicious-packages (public since 2023-03). The reviewers' training cut-off dates are not recorded here.",
-   "Rates are on answers that carry a verdict. 43 of 173 rows have unreadable answers (the count is beside each row, per label); 11 of them have fewer than 95% readable answers in one class and are marked incomplete.",
+   "Rates are on answers that carry a verdict. 43 of 174 rows have unreadable answers (the count is beside each row, per label); 11 of them have fewer than 95% readable answers in one class and are marked incomplete.",
    "Same prompt for every model within a mode, temperature 0 (gpt-6-luna: its default), one run each; run-to-run variation was not measured. Prompts and tool settings were fixed before scoring. mypy, ruff and the baseline rules are shown in the best of the configurations we ran in each mode, which is a pick on the test set; pyright and mypy on Obsolescence ran with the latest libraries installed.",
    "Baseline rules and shortcut baselines are shown for reference. They are never counted as best and never enter a finding. Rows outside a tool's design scope are listed apart and are not ranked.",
    "A row's cost covers every call made to get its scored answers: the current answer of each sample plus earlier attempts that failed or were cut off and had to be re-run. Smoke tests, runs on earlier versions of a set and accidental duplicate answers are not included. Cost per 1,000 reviews is that cost divided by the reviews made, for one mode-specific question per review. Checking a change for every failure costs the sum over the modes.",
@@ -32484,8 +32597,8 @@
    "natural": 3,
    "agent_output": 2,
    "single_winner": 3,
-   "rows": 173,
-   "ranked_rows": 138,
+   "rows": 174,
+   "ranked_rows": 139,
    "samples": 7339
   }
  },
@@ -32921,18 +33034,18 @@
  "inputs": [
   {
    "path": "bench/dependency_blindness/published/extras.json",
-   "sha256": "2a8619333e9ef294619bef4e9ac4401b790e73ad79dd65dc35bb5e53bb5283c6",
-   "bytes": 19776
+   "sha256": "95b47011f29ab411303941cdb106bd32044a7c7547d42fe17e778b9c37fff196",
+   "bytes": 20278
   },
   {
    "path": "bench/dependency_blindness/published/scores.json",
-   "sha256": "3c6aa4b3f688336c5bc564c4edf507464dde1e745e3f9695d086ee2e5bf3d3f4",
-   "bytes": 16010
+   "sha256": "bf5f776765ae9c40dfe0100441a7d5d02768d8adf888f9fff0476783ce4972af",
+   "bytes": 17030
   },
   {
    "path": "bench/dependency_blindness/published/verdicts.csv",
-   "sha256": "830c6ab608952b2ab5bd77e7da62e3f22d063c5814c03f84c6463b73173b10d4",
-   "bytes": 6656
+   "sha256": "9b43fe2833bf126c827604a13eaca8a3b9ae71f9a35d3904282a495dcd994948",
+   "bytes": 6876
   },
   {
    "path": "bench/fabrication/published/extras.json",
@@ -32996,13 +33109,13 @@
   },
   {
    "path": "bench/kitbuilder/pairs.json",
-   "sha256": "183dadd5c023e62cbd084d7b751a9efa987337eb509c714c95e6e53ab5fa67f7",
-   "bytes": 76471
+   "sha256": "38e6a4c8331e02b852b64cb6f7620e6ae67b9a194fb55854fcd9f3d73b3c3d60",
+   "bytes": 76550
   },
   {
    "path": "bench/kitbuilder/recipes.json",
-   "sha256": "f9e2b15b21212af2c97d2170a0fcb83243cef2d1336d661516c795ec7f28452c",
-   "bytes": 246641
+   "sha256": "305d35d2d8a1e48b2bf91d2a8b23a16332eb0348b3c28cbc622917749e429de4",
+   "bytes": 248539
   },
   {
    "path": "bench/kitbuilder/star_modes.json",

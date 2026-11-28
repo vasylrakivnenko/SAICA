@@ -1,5 +1,5 @@
 {
- "version": "3.0.0",
+ "version": "3.1.0",
  "generated": "2026-11-28",
  "generator": "bench/kitbuilder/build_kit.py (do not edit by hand)",
  "floor": 0.25,
@@ -15011,6 +15011,118 @@
      "kit_check": null
     },
     {
+     "key": "zero_shot_gpt54mini",
+     "tool": "gpt-5.4-mini",
+     "short": "gpt-5.4-mini",
+     "type": "baseline_model",
+     "kind": "model",
+     "thinking": "medium",
+     "thinking_note": null,
+     "check": null,
+     "category": "llm",
+     "ranked": true,
+     "j": 0.74,
+     "j_ci": [
+      0.62,
+      0.86
+     ],
+     "tpr": 0.76,
+     "fpr": 0.02,
+     "tpr_ci": [
+      0.625871,
+      0.857027
+     ],
+     "fpr_ci": [
+      0.003539,
+      0.104957
+     ],
+     "n_pos": 50,
+     "n_neg": 50,
+     "unreadable": 0,
+     "incomplete": false,
+     "subset_n": null,
+     "fa_per_100": 2.0,
+     "ppv": {
+      "0.01": 0.277372,
+      "0.05": 0.666667,
+      "0.2": 0.904762
+     },
+     "cost1k": 3.09333,
+     "cost_basis": "list",
+     "estimated": false,
+     "provider": "azure",
+     "local_only": false,
+     "stars": null,
+     "repository_url": null,
+     "recommendable": true,
+     "why_not": null,
+     "recipe": {
+      "kind": "llm",
+      "model": "gpt-5.4-mini",
+      "prompt_file": "prompts/dependency_blindness.md",
+      "api_key_env": "AZURE_API_KEY",
+      "max_tokens": 16384,
+      "reasoning": "reasoning_effort = \"medium\"; no temperature sent (Azure accepts only its default)",
+      "config": {
+       "prompt": "bench/dependency_blindness/run_tools.py:PROMPT",
+       "placeholders": [
+        "issue",
+        "context",
+        "patch"
+       ],
+       "messages": "one user message (filled template), no system message",
+       "output_budget_param": "max_completion_tokens",
+       "answer_json": "{\"dependency_blindness\": true or false, \"evidence\": \"<what was reimplemented and what it should have used, or empty>\"}",
+       "verdict_field": "dependency_blindness",
+       "extra_body": {
+        "reasoning_effort": "medium"
+       }
+      },
+      "flag_rule": "Flagged when the parsed JSON answer has dependency_blindness = true; an answer with no verdict is unreadable and left out of the rates.",
+      "needs": [
+       "issue text",
+       "patch (unified diff)",
+       "source of the repository module(s) the patch could have reused (optional)"
+      ],
+      "packaged": false,
+      "notes": "Failed calls and answers cut by the token budget were run again (bench/retry_failed.py; retry budget 32768 output tokens where the provider allows it). Answers that still have no verdict are counted as unreadable on the row, never as 'not flagged'. Inputs: issue truncated to 15,000 characters, each context file to 15,000."
+     },
+     "kit_check": {
+      "runs": true,
+      "as_measured": false,
+      "label": "part of the benchmark input is not available at commit time",
+      "unit": {
+       "benchmark": "the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder)",
+       "commit": "the task file and the commit's diff; no repository file unless you name one with --context-file",
+       "status": "partial"
+      },
+      "env": {
+       "base": "AZURE_AI_BASE_URL",
+       "key": "AZURE_AI_API_KEY",
+       "hint": "your Azure AI Foundry endpoint, with the same model deployed under the same name"
+      },
+      "files": [
+       "saica_llm_review.py",
+       "prompts/dependency_blindness.md"
+      ],
+      "setup": [
+       "gpt-5.4-mini: LLM reviewer. Download {kit}/prompts/dependency_blindness.md to .saica/prompts/dependency_blindness.md unchanged. It runs through .saica/saica_llm_review.py with model `gpt-5.4-mini`, temperature not sent, max tokens 32768. Credentials come only from the environment variables AZURE_AI_BASE_URL (your Azure AI Foundry endpoint, with the same model deployed under the same name) and AZURE_AI_API_KEY; ask me to set them, never write a key into a file.",
+       "Benchmark J 74% (95% interval 62% to 86%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
+      ],
+      "entry": {
+       "id": "dependency-blindness-gpt-5-4-mini",
+       "failure_modes": [
+        "dependency_blindness"
+       ],
+       "runs_per_commit": true,
+       "command": "python3 .saica/saica_llm_review.py --prompt .saica/prompts/dependency_blindness.md --model gpt-5.4-mini --api-base-env AZURE_AI_BASE_URL --api-key-env AZURE_AI_API_KEY --api-style azure --max-tokens 32768 --extra-body '{\"reasoning_effort\":\"medium\"}' --timeout 540",
+       "blocking": false,
+       "timeout_s": 600,
+       "note": "Benchmark J 74% (95% interval 62% to 86%; 50 bad + 50 clean samples) on the issue, the patch and, for part of the samples, the repository file that defines the helper the patch should have used (picked by the dataset builder). At commit time this check sees the task file and the commit's diff; no repository file unless you name one with --context-file. So: part of the benchmark input is not available at commit time."
+      }
+     }
+    },
+    {
      "key": "zero_shot_north_code_thinking_on",
      "tool": "north-mini-code-1.0",
      "short": "north-mini-code-1.0 (thinking-on)",
@@ -17250,6 +17362,25 @@
       "fpr": 0.083871,
       "cost1k": 0.221471,
       "config": "gpt-oss-120b",
+      "estimated": false
+     }
+    },
+    "stars": null,
+    "repository_url": null
+   },
+   {
+    "id": "zero_shot_gpt54mini",
+    "name": "gpt-5.4-mini",
+    "category": "llm",
+    "provider": "azure",
+    "local_only": false,
+    "cells": {
+     "dependency_blindness": {
+      "j": 0.74,
+      "tpr": 0.76,
+      "fpr": 0.02,
+      "cost1k": 3.09333,
+      "config": "gpt-5.4-mini",
       "estimated": false
      }
     },
