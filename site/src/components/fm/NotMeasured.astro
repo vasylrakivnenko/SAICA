@@ -3,6 +3,7 @@
 // address it by GitHub stars (results.json star_modes), clearly labelled as not measured.
 import { toolUrl, leaderboardUrl } from '../../lib/seo.ts';
 import { int, type StarMode } from './fm.ts';
+import { starsShort } from '../../lib/data';
 
 interface Props {
   s: StarMode | null;
@@ -12,7 +13,7 @@ interface Props {
 }
 const { s, subject, fmId } = Astro.props;
 const MECH: Record<string, string> = { detects: 'Detects', prevents: 'Prevents', records: 'Records' };
-const IMPL: Record<string, string> = { deterministic: 'Free program', hybrid: 'Hybrid', llm_based: 'AI-based' };
+const IMPL: Record<string, string> = { deterministic: 'Free tool', hybrid: 'Hybrid', llm_based: 'LLM-based tool' };
 const lower = subject;
 ---
 
@@ -37,7 +38,6 @@ const lower = subject;
           <thead>
             <tr class="border-b border-ink/20 text-left text-xs uppercase tracking-wide text-ink-faint">
               <th scope="col" class="py-2 pr-2 font-semibold">Tool</th>
-              <th scope="col" class="py-2 px-2 font-semibold text-right">Stars</th>
               <th scope="col" class="py-2 px-2 font-semibold">What it does</th>
               <th scope="col" class="py-2 pl-2 font-semibold">How (not measured)</th>
             </tr>
@@ -45,8 +45,10 @@ const lower = subject;
           <tbody>
             {s.tools.map((t) => (
               <tr class="border-b border-ink/10 align-top">
-                <td class="py-1.5 pr-2 whitespace-nowrap">{t.inKg ? <a href={toolUrl(t.id)}>{t.name}</a> : t.name}</td>
-                <td class="py-1.5 px-2 text-right tabular-nums text-ink-muted">{t.stars == null ? '—' : int(t.stars)}</td>
+                <td class="py-1.5 pr-2 whitespace-nowrap">
+                  {t.inKg ? <a href={toolUrl(t.id)}>{t.name}</a> : t.name}
+                  {t.stars != null && t.stars > 0 && <span class="ml-1.5 text-xs text-ink-faint" title={`${int(t.stars)} GitHub stars`}>{starsShort(t.stars)}</span>}
+                </td>
                 <td class="py-1.5 px-2 whitespace-nowrap text-ink-muted">
                   {MECH[t.mechanism] ?? t.mechanism}{t.implementation && IMPL[t.implementation] ? ` · ${IMPL[t.implementation]}` : ''}
                 </td>

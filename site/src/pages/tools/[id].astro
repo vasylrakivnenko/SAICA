@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import InlineCode from '../../components/InlineCode.astro';
 import RawYamlLink from '../../components/RawYamlLink.astro';
-import { graph, facetLabel, paperLabel, IMPLEMENTATION_NOTE } from '../../lib/data.ts';
+import { graph, facetLabel, implementationKey, starsShort, paperLabel, IMPLEMENTATION_NOTE } from '../../lib/data.ts';
 import { abs, breadcrumbs, fmUrl, toolUrl } from '../../lib/seo.ts';
 import {
   BAND_AS_OF,
@@ -79,7 +79,7 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
         title={tool.stars_updated_at ? `GitHub stars (refreshed ${tool.stars_updated_at})` : 'GitHub stars'}
         class="font-sans text-base text-ink-muted no-underline hover:underline"
       >
-        <span aria-hidden="true">★</span> <span>{starsLabel}</span>
+        {starsShort(tool.stars as number)}
       </a>
     )}
   </div>
@@ -96,7 +96,7 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
     <span class="chip-accent">{facetLabel('control_paradigm', tool.control_paradigm)}</span>
     <span class="chip-accent">{facetLabel('temporal_phase', tool.temporal_phase)}</span>
     <span class="chip-accent">{facetLabel('autonomy_level', tool.autonomy_level)}</span>
-    {tool.implementation && <span class="chip-accent">{facetLabel('implementation', tool.implementation)}</span>}
+    {tool.implementation && <span class="chip-accent">{facetLabel('implementation', implementationKey(tool))}</span>}
     <span class="chip">{facetLabel('maturity_status', tool.maturity_status)}</span>
     {tool.archived && <span class="chip" data-archived>Upstream archived</span>}
     {maturity && (
@@ -373,7 +373,7 @@ const urlParts = (u: string) => u.replace(/^https?:\/\//, '').split('/').map((se
           <>
             <dt>Implementation</dt>
             <dd>
-              {facetLabel('implementation', tool.implementation)}
+              {facetLabel('implementation', implementationKey(tool))}
               {IMPLEMENTATION_NOTE[tool.implementation] && (
                 <span class="text-ink-faint"> ({IMPLEMENTATION_NOTE[tool.implementation]})</span>
               )}

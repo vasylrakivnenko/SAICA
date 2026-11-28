@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { graph, facetLabel, FACET_LABELS } from '../../lib/data.ts';
+import { graph, facetLabel, implementationKey, starsShort, FACET_LABELS } from '../../lib/data.ts';
 import { breadcrumbs, clip, toolUrl } from '../../lib/seo.ts';
 import { BAND_COLORS, activityBand, measuredFor } from '../../lib/catalog.ts';
 import BestPerMode from '../../components/home/BestPerMode.astro';
@@ -23,7 +23,7 @@ const cpValues = Object.keys(FACET_LABELS.control_paradigm);
 const tpValues = Object.keys(FACET_LABELS.temporal_phase);
 const alValues = Object.keys(FACET_LABELS.autonomy_level);
 // Only the implementation types that occur in the catalog, in the schema's order.
-const implValues = Object.keys(FACET_LABELS.implementation).filter((v) => tools.some((t) => t.implementation === v));
+const implValues = Object.keys(FACET_LABELS.implementation).filter((v) => tools.some((t) => implementationKey(t) === v));
 
 const measuredIds = new Set(tools.filter((t) => measuredFor(t.id).length > 0).map((t) => t.id));
 const description = clip(
@@ -37,7 +37,7 @@ const jsonld = breadcrumbs([
 
 function formatStars(n: number | undefined): string {
   if (typeof n !== 'number') return '';
-  return n.toLocaleString('en-US');
+  return starsShort(n);
 }
 ---
 
@@ -166,7 +166,7 @@ function formatStars(n: number | undefined): string {
         data-cp={t.control_paradigm}
         data-tp={t.temporal_phase}
         data-al={t.autonomy_level}
-        data-impl={t.implementation ?? ''}
+        data-impl={implementationKey(t)}
         data-fm={t.addresses_failure_modes.join(' ')}
         data-name={t.name.toLowerCase()}
         data-stars={typeof t.stars === 'number' ? String(t.stars) : ''}
@@ -179,7 +179,7 @@ function formatStars(n: number | undefined): string {
           <span class="text-xs font-sans text-ink-faint flex items-center gap-2">
             {typeof t.stars === 'number' && (
               <span title={t.stars_updated_at ? `GitHub stars (refreshed ${t.stars_updated_at})` : 'GitHub stars'}>
-                <span aria-hidden="true">★</span> {formatStars(t.stars)}
+                {formatStars(t.stars)}
               </span>
             )}
             {activityBand(t.id) && (
@@ -202,7 +202,7 @@ function formatStars(n: number | undefined): string {
           <span class="chip-accent">{facetLabel('control_paradigm', t.control_paradigm)}</span>
           <span class="chip-accent">{facetLabel('temporal_phase', t.temporal_phase)}</span>
           <span class="chip-accent">{facetLabel('autonomy_level', t.autonomy_level)}</span>
-          {t.implementation && <span class="chip-accent">{facetLabel('implementation', t.implementation)}</span>}
+          {t.implementation && <span class="chip-accent">{facetLabel('implementation', implementationKey(t))}</span>}
         </div>
         <div class="mt-2 flex flex-wrap gap-1.5">
           {t.addresses_failure_modes.map((fm) => (

@@ -3,7 +3,7 @@
 // bench/build_report.py from each failure mode's results. An Overview tab (results.overview: reviewer x mode
 // grid, quality-vs-cost chart, findings) and one tab per mode. The best-tool-per-mode table lives on /tools/.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { OVERVIEW as OV, MODES, CLASSIC as SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, AUTHOR, FILE_ORDER, pct, money, toolPage } from '../components/home/bench';
+import { OVERVIEW as OV, MODES, CLASSIC as SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, THINKING_LABEL as OV_THINKING_LABEL, AUTHOR, FILE_ORDER, pct, money, toolPage } from '../components/home/bench';
 import { SITE_NAME, abs, fmUrl } from '../lib/seo';
 
 // SEO: the Overview tab (grid, legend, findings, caveats) is rendered here at build time,
@@ -36,6 +36,8 @@ for (const r of OV.rows)
 
 // Static copy of the Overview grid: same markup and inline styles as renderOverview() in the script.
 const short = (t: string) => t.replace(', zero-shot', '').split(' (')[0].split(':')[0];
+const THINKING_LABEL: Record<string, string> = OV_THINKING_LABEL;
+const thinkCell = (t?: string | null) => t ?? '—';
 const fill = (j: number) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
 const col = (t: string) => `var(${TYPE_VAR[t]})`;
 const cellTip = (name: string, c: { tool: string; j: number; fa: number; cost1k: number }) =>
@@ -49,13 +51,16 @@ const tieTip = (b: { tool: string; j: number; winner: boolean; top_group: string
 const byId = new Map(SUMMARIES.map((s) => [s.m.id, s]));
 const results = {
   type_label: TYPE_LABEL,
+  thinking_label: THINKING_LABEL,
   overview: OV,
   star_modes: STAR_MODES,
   modes: FILE_ORDER.map((id) => byId.get(id)!).map((s) => ({
     id: s.m.id, name: s.m.name, n: s.m.n, n_pos: s.m.n_pos, n_neg: s.m.n_neg, pos_label: s.m.pos_label, dataset: s.m.dataset,
     shortcut: s.shortcut ? { short: s.shortcut.short, j: s.shortcut.j } : null,
     rows: s.listed.map((r) => ({
-      key: r.key, tool: r.tool, type: r.type, j: r.j, j_ci: r.j_ci, catch: r.catch, catch_ci: r.catch_ci, fa: r.fa, fa_ci: r.fa_ci,
+      key: r.key, tool: r.tool, type: r.type, thinking: r.thinking ?? null, thinking_note: r.thinking_note ?? null,
+      // chart label: the row name, or its short form when another listed row has the same name (North Mini Code, thinking-off / -on)
+      label: s.listed.some((o) => o !== r && o.tool === r.tool) ? r.short : r.tool, j: r.j, j_ci: r.j_ci, catch: r.catch, catch_ci: r.catch_ci, fa: r.fa, fa_ci: r.fa_ci,
       cost: r.cost, cost1k: r.cost1k, cost_note: r.cost_note, cost_estimated: r.cost_estimated, kg_id: r.kg_id,
       repository_url: r.repository_url, stars: r.stars, stars_updated_at: r.stars_updated_at,
       incomplete: r.incomplete, unreadable: r.unreadable, n_read: r.n_pos + r.n_neg,
@@ -67,18 +72,20 @@ const results = {
 <BaseLayout title={title} rawTitle description={description} jsonld={jsonld}>
   <div class="lb">
     <h1>Leaderboard</h1>
-    <p class="tagline">Can Language Models catch coding agents' failures?</p>
+    <p class="subtitle">Supervising AI Coding Agents Benchmark</p>
+    <p class="tagline">Can Language Models reliably detect failures made by AI coding agents?</p>
     <p class="byline">Vasyl Rakivnenko, Stanford University</p>
     <p class="lead">How often each supervision tool flags a failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).</p>
 
     <div class="tabs" role="tablist" id="lb-tabs"></div>
 
     <section id="lb-ov">
-      <p class="fine ov-intro">J for each reviewer that ran on several failure modes. The bottom row names the highest-scoring reviewer in each mode; “tie of 4” means the top 4 cannot be told apart. Hover a cell for the exact tool, its false positive rate and cost; click a mode to open its tab.</p>
-      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Reviewer</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the tool ran (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i>{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={tieTip(b)}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}{!b.winner && <span class="nm tie">{`tie of ${b.top_group.length}`}</span>}</td>; })}<td></td></tr></tbody></table></div>
+      <p class="fine ov-intro">J for each language model, evaluated zero-shot on the failure modes. The bottom row names the highest-scoring reviewer in each mode, tools included; “tie of 4” means the top 4 cannot be told apart. Hover a cell for its false positive rate and cost; click a mode to open its tab.</p>
+      <p class="fine ov-scope">Tools are not listed here. Linters, type checkers and review bots each target one or a few failure modes, so their averages would not be comparable with the models’. Their results are in the tab of each mode they cover.</p>
+      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Model</th><th class="think" data-tip="Whether the model thinks before it answers, and at what effort level">Thinking</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the model ran on (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i>{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td><td class="think" data-tip={r.thinking_note || (r.thinking ? THINKING_LABEL[r.thinking] : '')}>{thinkCell(r.thinking)}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td><td></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={tieTip(b)}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}{!b.winner && <span class="nm tie">{`tie of ${b.top_group.length}`}</span>}</td>; })}<td></td></tr></tbody></table></div>
       <div class="legend" id="lb-ov-legend">{ovTypes.map((t) => <span><i style={`background:${col(t)}`}></i>{TYPE_LABEL[t]}</span>)}<span>Darker cell = higher J · “·” = not run</span></div>
       <h2>Average quality vs average cost</h2>
-      <p class="fine">Each point is one reviewer’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the tool ran on only 3 of them.</p>
+      <p class="fine">Each point is one model’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the model ran on only 3 of them.</p>
       <div class="ov-modes" id="lb-ov-modes" role="group" aria-label="Failure modes included in the averages"></div>
       <div class="chart" id="lb-ov-chart"></div>
       <h2>What the grid says</h2>
@@ -96,7 +103,6 @@ const results = {
     <div id="lb-mode" hidden>
     <div class="controls">
       <div class="types" id="lb-types" role="group" aria-label="Filter by type"></div>
-      <label><input type="checkbox" id="lb-stars" checked /> Show GitHub stars</label>
       <span class="mode-note" id="lb-note"></span>
     </div>
 
@@ -107,11 +113,11 @@ const results = {
             <th class="num">#</th>
             <th>Tool</th>
             <th>Type</th>
+            <th data-tip="Whether a model thinks before it answers, and at what effort level (models only)">Thinking</th>
             <th class="num"><button class="sort" data-k="j" type="button" data-tip="J = TPR − FPR. 0% = no better than chance, 100% = flags every bad sample and no clean one">J</button></th>
             <th class="num"><button class="sort" data-k="catch" type="button" data-tip="True positive rate (recall)">TPR</button></th>
             <th class="num"><button class="sort" data-k="fa" type="button" data-tip="False positive rate">FPR</button></th>
             <th class="num"><button class="sort" data-k="cost" type="button" data-tip="Cost per 1,000 reviews, averaged over our run">Cost</button></th>
-            <th class="num col-stars"><button class="sort" data-k="stars" type="button">★ Stars</button></th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -119,9 +125,10 @@ const results = {
     </div>
     <p class="fine">
       <b>Cost / 1k reviews</b>: what the tool costs to review 1,000 items of this mode (code changes, functions or agent sessions), averaged
-      over our run. API models: price reported by the API (Azure and Fireworks: list price × tokens). Self-hosted: GPU time at $0.89/h while
-      requests ran. Free programs: $0. Hover a cost for the run total, a rate for its 95% confidence interval. Stars are a popularity
-      reference only, not part of the score.
+      over our run. API models: the price the API reports, or the provider's list price × tokens where it reports none (Azure,
+      Fireworks, Cohere, Groq, Mistral; Groq and Mistral ran on free plans but show list price). Self-hosted: GPU time at $0.89/h while
+      requests ran. North Mini Code, which has no published price: A100 80 GB time at $1.62/h per call. Free tools: $0. Hover a cost for the run total, a rate for its 95% confidence interval. GitHub stars after a tool's name
+      are a popularity reference only, not part of the score.
     </p>
     <p class="fine" id="lb-ref"></p>
 
@@ -136,7 +143,7 @@ const results = {
 </BaseLayout>
 
 <script is:inline define:vars={{ results, FM_URL, TOOL_URL, OV_KG }}>
-const DATA = results.modes, TYPE_LABEL = results.type_label, OV = results.overview, STAR = results.star_modes || [];
+const DATA = results.modes, TYPE_LABEL = results.type_label, THINKING_LABEL = results.thinking_label || {}, OV = results.overview, STAR = results.star_modes || [];
 const TYPE_VAR = {deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule'};
 const isBaseline = (r) => r.type === 'baseline_model' || r.type === 'baseline_rule';
 const pct = (x) => (x * 100).toFixed(1) + '%';
@@ -149,13 +156,16 @@ const svgEl = (tag, attrs = {}) => { const e = document.createElementNS('http://
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
 // Tool name -> its page on this site when the catalog has one, else its GitHub repo; GitHub stays one click away in the stars cell.
 const toolLink = (kgId, repo, text) => kgId && TOOL_URL[kgId] ? el('a', { href: TOOL_URL[kgId], text }) : repo ? el('a', { href: repo, rel: 'noopener', text }) : text;
-const starsCell = (n, repo) => { if (!n) return '—'; const t = n.toLocaleString('en-US'); return repo ? el('a', { href: repo, rel: 'noopener', class: 'gh', text: t }) : t; };
+// GitHub stars as a tag after a tool's name, e.g. "12k ★ Stars" (same format on every page: site/src/lib/data.ts starsShort)
+const starsShort = (n) => (n >= 10000 ? Math.round(n / 1000) + 'k' : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n)) + ' ★ Stars';
+const starsTag = (n, repo, asOf) => { if (!n) return null; const a = { class: 'stars', text: starsShort(n), 'data-tip': `${n.toLocaleString('en-US')} GitHub stars` + (asOf ? `, as of ${asOf}` : '') };
+  return repo ? el('a', { ...a, href: repo, rel: 'noopener' }) : el('span', a); };
+const thinkCell = (t, note) => el('td', { class: 'think', 'data-tip': note || (t ? THINKING_LABEL[t] || '' : ''), text: t || '—' });
 const fmLink = (m, sep) => FM_URL[m.id] ? [sep, el('a', { href: FM_URL[m.id], text: `About ${m.name.toLowerCase()} →` })] : [];
 const ALL_TYPES = Object.keys(TYPE_LABEL).filter((t) => DATA.some((m) => m.rows.some((r) => r.type === t)));
-const state = { mode: OV ? 'overview' : DATA[0].id, key: 'j', types: new Set(ALL_TYPES), stars: true };
+const state = { mode: OV ? 'overview' : DATA[0].id, key: 'j', types: new Set(ALL_TYPES) };
 const store = (k, v) => { try { localStorage.setItem('saica-lb-' + k, JSON.stringify(v)); } catch (e) {} };
 const load = (k, d) => { try { const v = localStorage.getItem('saica-lb-' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
-state.stars = load('stars', true);
 const savedTypes = load('types', null); if (Array.isArray(savedTypes) && savedTypes.length) state.types = new Set(savedTypes.filter((t) => ALL_TYPES.includes(t)));
 
 function rowsFor(m) { return m.rows.filter((r) => state.types.has(r.type)); }
@@ -200,15 +210,14 @@ function renderTable(m) {
   const tb = document.querySelector('#lb-table tbody');
   tb.replaceChildren(...rows.map((r, i) => el('tr', { class: isBaseline(r) ? 'baseline' : '' },
     el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', {}, toolLink(r.kg_id, r.repository_url, r.tool)),
+    el('td', { class: 'tname' }, toolLink(r.kg_id, r.repository_url, r.tool), starsTag(r.stars, r.repository_url, r.stars_updated_at)),
     el('td', {}, el('span', { class: 'pill', style: `color:${col(r.type)}`, text: TYPE_LABEL[r.type] })),
+    thinkCell(r.thinking, r.thinking_note),
     el('td', { class: 'num j', 'data-tip': `95% interval ${pct(r.j_ci[0])} to ${pct(r.j_ci[1])}` + (r.incomplete ? `. † ${r.unreadable} of ${r.n_read} answers had no readable verdict and are left out` : '') }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j) + (r.incomplete ? ' †' : '')),
     el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.catch_ci[0] * 100)}–${Math.round(r.catch_ci[1] * 100)}%`, text: pct(r.catch) }),
     el('td', { class: 'num', 'data-tip': `95% CI ${Math.round(r.fa_ci[0] * 100)}–${Math.round(r.fa_ci[1] * 100)}%`, text: pct(r.fa) }),
-    el('td', { class: 'num', 'data-tip': `${money(r.cost)} for this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_estimated ? '~' : '') + money(r.cost1k) }),
-    el('td', { class: 'num col-stars', 'data-tip': r.stars_updated_at ? `as of ${r.stars_updated_at}` : '' }, starsCell(r.stars, r.repository_url)))));
+    el('td', { class: 'num', 'data-tip': `${money(r.cost)} for this run` + (r.cost_note ? `. ${r.cost_note}` : ''), text: (r.cost_estimated ? '~' : '') + money(r.cost1k) }))));
   document.querySelectorAll('#lb-table .sort').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.k === state.key)));
-  document.getElementById('lb-table').classList.toggle('no-stars', !state.stars);
   document.getElementById('lb-note').replaceChildren(`${m.n_pos} ${m.pos_label} vs ${m.n_neg} clean · ${m.dataset}`, ...fmLink(m, ' · '));
   const ref = [];
   if (m.shortcut) ref.push(`For reference: a rule that understands nothing about the failure (${m.shortcut.short.replace(/^./, (c) => c.toLowerCase())}) scores J ${pct(m.shortcut.j)} on this dataset.`);
@@ -245,12 +254,12 @@ function renderChart(m) {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `J ${pct(r.j)} · TPR ${pct(r.catch)} · FPR ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost1k)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)})`);
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), r.thinking ? ` · thinking ${r.thinking}` : '', el('br'), `J ${pct(r.j)} · TPR ${pct(r.catch)} · FPR ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost1k)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)})`);
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
     svg.append(c);
-    items.push({ x, y, r: onF ? 6 : 4.5, must: onF, text: !narrow || onF ? r.tool.replace(', zero-shot', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)') : '' });
+    items.push({ x, y, r: onF ? 6 : 4.5, must: onF, text: !narrow || onF ? r.label.replace(', zero-shot', '').replace(/ \(deepseek\)$/, '').replace(' on one RTX 4090', ' (4090)') : '' });
   }
   placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
@@ -262,17 +271,18 @@ function renderChart(m) {
 function renderOverview() {
   const short = (t) => t.replace(', zero-shot', '').split(' (')[0].split(':')[0];
   const fill = (j) => `color-mix(in srgb, #1f3a93 ${Math.round(Math.max(0, j) * 85)}%, transparent)`;
-  const head = el('thead', {}, el('tr', {}, el('th', { text: 'Reviewer' }),
+  const head = el('thead', {}, el('tr', {}, el('th', { text: 'Model' }), el('th', { class: 'think', 'data-tip': 'Whether the model thinks before it answers, and at what effort level', text: 'Thinking' }),
     OV.modes.map((m) => el('th', { class: 'mcol' }, el('button', { type: 'button', class: 'mlink', text: m.name, 'data-id': m.id }))),
-    el('th', { class: 'num', 'data-tip': 'Mean J over the modes the tool ran (number of modes in brackets)' }, 'Average')));
+    el('th', { class: 'num', 'data-tip': 'Mean J over the modes the model ran on (number of modes in brackets)' }, 'Average')));
   const body = OV.rows.map((r) => el('tr', {},
     el('td', { class: 'rname' }, el('i', { class: 'dot', style: `background:${col(r.type)}` }), OV_KG[r.tool] ? el('a', { href: TOOL_URL[OV_KG[r.tool]], text: r.tool }) : r.tool),
+    thinkCell(r.thinking, r.thinking_note),
     OV.modes.map((m) => { const c = r.cells[m.id];
       if (!c) return el('td', { class: 'na', 'data-tip': 'not run on this mode', text: '·' });
       return el('td', { class: 'cell' + (c.j < 0.05 ? ' low' : ''), style: `background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`,
         'data-tip': `${m.name} · ${c.tool}: J ${pct(c.j)}, FPR ${pct(c.fa)}, ` + (c.cost1k === 0 ? 'free' : `${money(c.cost1k)} per 1,000 reviews`), text: Math.round(c.j * 100) + '%' }); }),
     el('td', { class: 'num avg' }, `${Math.round(r.avg * 100)}%`, el('span', { class: 'nm', text: ` (${r.n_modes})` }))));
-  const best = el('tr', { class: 'best' }, el('td', {}, el('b', { text: 'Best in this mode' })),
+  const best = el('tr', { class: 'best' }, el('td', {}, el('b', { text: 'Best in this mode' })), el('td', {}),
     OV.modes.map((m) => { const b = OV.best[m.id];
       return el('td', { class: 'cell', 'data-tip': `${b.tool}: J ${pct(b.j)}` + (b.winner ? '' : `. Cannot be told apart from: ${b.top_group.slice(1).join(', ')}`) }, el('b', { text: Math.round(b.j * 100) + '%' }), el('br'), b.short || short(b.tool), b.winner ? null : el('span', { class: 'nm tie', text: `tie of ${b.top_group.length}` })); }),
     el('td', {}));
@@ -332,7 +342,7 @@ function renderOvChart() {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 7 : 5.5, tabindex: 0, style: `fill:${shade(r.j)};stroke:${BLUE};stroke-width:${onF ? 2.5 : 1.25};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), `Average J ${pct(r.j)} over ${r.n} of the ${sel.length} checked mode${sel.length === 1 ? '' : 's'}`, el('br'),
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), r.thinking ? ` · thinking ${r.thinking}` : '', el('br'), `Average J ${pct(r.j)} over ${r.n} of the ${sel.length} checked mode${sel.length === 1 ? '' : 's'}`, el('br'),
         r.c === 0 ? 'Free: $0' : `Average cost: ${money(r.c)} per 1,000 reviews`, el('br'), onF ? 'On the frontier' : '');
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
@@ -350,16 +360,14 @@ function renderStar(m) {
   document.getElementById('lb-star-intro').replaceChildren(`Not benchmarked yet: no public dataset with confirmed labels exists for ${m.name.toLowerCase()}, so these are the SAICA catalog's tools tagged for it, ranked by GitHub stars. Stars measure popularity, not how well a tool catches the failure. ${m.description || ''}`, ...fmLink(m, ' '));
   const head = el('thead', {}, el('tr', {}, el('th', { class: 'num', text: '#' }), el('th', { text: 'Tool' }), el('th', { text: 'How it addresses this' }),
     el('th', { 'data-tip': 'Detects = flags it after the fact; Prevents = stops it during a run; Records only = keeps traces you could inspect', text: 'Mechanism' }),
-    el('th', { 'data-tip': 'Can it check a finished change or saved session, rather than only working inside a run or an agent built with it?', text: 'On a finished change' }),
-    el('th', { class: 'num', text: '★ Stars' })));
+    el('th', { 'data-tip': 'Can it check a finished change or saved session, rather than only working inside a run or an agent built with it?', text: 'On a finished change' })));
   const tools = [...m.tools].sort((a, b) => (b.stars || 0) - (a.stars || 0));
   const body = el('tbody', {}, tools.map((t, i) => el('tr', { class: t.mechanism === 'records' ? 'baseline' : '' },
     el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', {}, toolLink(t.id, t.repository_url, t.name)),
+    el('td', { class: 'tname' }, toolLink(t.id, t.repository_url, t.name), starsTag(t.stars, t.repository_url, t.stars_updated_at)),
     el('td', { class: 'how', text: t.how || '' }),
     el('td', {}, el('span', { class: 'pill', style: 'color:#1f3a93', text: MECH[t.mechanism] || t.mechanism })),
-    el('td', { text: fin(t.runs_on_finished_change) }),
-    el('td', { class: 'num', 'data-tip': t.stars_updated_at ? `as of ${t.stars_updated_at}` : '' }, starsCell(t.stars, t.repository_url)))));
+    el('td', { text: fin(t.runs_on_finished_change) }))));
   document.getElementById('lb-star-table').replaceChildren(head, body);
   document.getElementById('lb-star-note').textContent = m.note || '';
 }
@@ -393,7 +401,6 @@ const tabDefs = (OV ? [{ id: 'overview', name: 'Overview' }] : []).concat(DATA, 
 tabDefs.forEach((m) => { const b = el('button', { role: 'tab', type: 'button', 'data-id': m.id, text: m.name }); b.addEventListener('click', () => go(m.id)); tabs.append(b); });
 if (OV) { renderOverview(); renderOvModes(); }
 document.querySelectorAll('#lb-table .sort').forEach((b) => b.addEventListener('click', () => { state.key = b.dataset.k; render(); }));
-const cs = document.getElementById('lb-stars'); cs.checked = state.stars;
 const typesBox = document.getElementById('lb-types');
 const allBtn = el('button', { type: 'button', class: 'chip', text: 'All types' });
 allBtn.addEventListener('click', () => { state.types = new Set(ALL_TYPES); syncTypes(); });
@@ -403,7 +410,6 @@ ALL_TYPES.forEach((t) => { const b = el('button', { type: 'button', class: 'chip
   typesBox.append(b); });
 function syncTypes() { typesBox.querySelectorAll('.chip[data-t]').forEach((b) => b.setAttribute('aria-pressed', String(state.types.has(b.dataset.t) && state.types.size < ALL_TYPES.length)));
   allBtn.setAttribute('aria-pressed', String(state.types.size === ALL_TYPES.length)); store('types', [...state.types]); render(); }
-cs.addEventListener('change', () => { state.stars = cs.checked; store('stars', cs.checked); render(); });
 const validTab = (id) => DATA.some((d) => d.id === id) || STAR.some((d) => d.id === id) || (OV && id === 'overview');
 const h = location.hash.slice(1); if (validTab(h)) state.mode = h;
 window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (!validTab(id) || id === state.mode) return;
@@ -416,7 +422,8 @@ syncTypes();
   .lb { --t-free: #1f3a93; --t-ai: #8a3f9e; --t-hybrid: #b7791f; --t-skill: #3b7d4f; --t-base: #5f6676; --t-rule: #9a9fab; --frontier: #b5532a; }
   .lb h1 { margin: 0; }
   .lb h2 { font-size: 1.15rem; margin-top: 2.2rem; }
-  .lb .tagline { margin: .45rem 0 0; font: 500 18px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418; }
+  .lb .subtitle { margin: .3rem 0 0; font: 600 20px/1.3 ui-sans-serif, system-ui, sans-serif; color: #111418; }
+  .lb .tagline { margin: .35rem 0 0; font: 500 18px/1.4 ui-sans-serif, system-ui, sans-serif; color: #111418; }
   .lb .byline { margin: .2rem 0 0; font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; color: #6b7180; }
   .lb .lead { margin: 1rem 0 0; color: #4a5160; max-width: none; font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; text-align: left; }
   .lb .lead b { color: #111418; font-weight: 600; }
@@ -446,7 +453,10 @@ syncTypes();
   .lb .pill { font-size: 12px; font-weight: 500; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; }
   .lb .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
   .lb .sort[aria-pressed="true"]::after { content: " ↓"; }
-  .lb table.no-stars .col-stars { display: none; }
+  .lb td.tname { white-space: normal; min-width: 13rem; }
+  .lb td.tname .stars { margin-left: .45rem; font-size: 11.5px; color: #8a919c; white-space: nowrap; text-decoration: none; }
+  .lb td.tname a.stars:hover, .lb td.tname a.stars:focus-visible { color: #1f3a93; text-decoration: underline; }
+  .lb td.think { color: #5b6370; font-size: 13px; white-space: nowrap; }
   .lb .sort[data-tip], .lb td[data-tip] { position: relative; }
   .lb td[data-tip]:not([data-tip=""]) { cursor: help; }
   .lb .sort[data-tip]:hover::before, .lb .sort[data-tip]:focus-visible::before, .lb td[data-tip]:not([data-tip=""]):hover::before {
@@ -471,9 +481,11 @@ syncTypes();
   .lb .legend i.fl { width: 18px; height: 0; border-top: 2px dashed var(--frontier); border-radius: 0; }
   .lb .more { margin-top: 2rem; font: 14px ui-sans-serif, system-ui, sans-serif; }
   .lb .ov-intro { margin: 0 0 .8rem; }
+  .lb .ov-scope { margin: -.35rem 0 .9rem; padding-left: .6rem; border-left: 2px solid #d5d9e0; }
   .lb #lb-star-table td.how { white-space: normal; min-width: 260px; max-width: 460px; color: #4a5160; font-size: 13px; line-height: 1.4; }
   .lb table.ov th { white-space: normal; vertical-align: bottom; text-transform: none; letter-spacing: 0; font-size: 12.5px; line-height: 1.25; min-width: 66px; }
   .lb table.ov th.mcol { text-align: center; }
+  .lb table.ov th.think, .lb table.ov td.think { min-width: 0; padding-left: .2rem; padding-right: .45rem; }
   .lb table.ov .mlink { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; border-bottom: 1px dotted #6b7180; text-align: center; }
   .lb table.ov .mlink:hover, .lb table.ov .mlink:focus-visible { color: #1f3a93; }
   .lb table.ov th:first-child, .lb table.ov td:first-child { position: sticky; left: 0; background: #fff; z-index: 2; min-width: 150px; }
@@ -485,8 +497,6 @@ syncTypes();
   .lb table.ov .nm.tie { display: block; font-weight: 400; font-size: 11.5px; }
   .lb table.ov td.rname a { color: inherit; text-decoration: none; }
   .lb table.ov td.rname a:hover, .lb table.ov td.rname a:focus-visible { color: #1f3a93; text-decoration: underline; }
-  .lb td a.gh { color: inherit; }
-  .lb td a.gh:hover { color: #1f3a93; }
   .lb table.ov .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
   .lb table.ov tr.best td { border-top: 2px solid rgb(17 20 24 / .12); font-size: 12.5px; vertical-align: top; }
   .lb table.ov tr.best td.cell { font-weight: 500; white-space: normal; line-height: 1.3; }

@@ -354,7 +354,7 @@ def score_row(**over) -> dict:
 
 def test_row_cost_is_the_only_source_of_a_cost():
     c = build_report.row_cost(
-        "m", "plain_llm_x", "baseline_model", score_row(), 20, 20, "hyperbolic"
+        "m", "zero_shot_x", "baseline_model", score_row(), 20, 20, "hyperbolic"
     )
     assert (c["cost"], c["cost1k"], c["spend"], c["cost_estimated"]) == (
         2.0,
@@ -416,7 +416,7 @@ def test_row_cost_is_the_only_source_of_a_cost():
     )
     gpu = build_report.row_cost(
         "m",
-        "plain_llm_gptoss",
+        "zero_shot_gptoss",
         "baseline_model",
         score_row(
             cost_basis="gpu",
@@ -439,7 +439,7 @@ def test_row_cost_is_the_only_source_of_a_cost():
     ):  # a paid row without a cost stops the build
         build_report.row_cost(
             "m",
-            "plain_llm_x",
+            "zero_shot_x",
             "baseline_model",
             score_row(cost=None, cost_basis="unpriced"),
             20,
@@ -530,9 +530,9 @@ def test_a_missing_row_or_cost_stops_the_build(tmp_path):
     bench = shadow(tmp_path)
     f = bench / "scope_creep" / "published" / "scores.json"
     scores = json.loads(f.read_text())
-    del scores["plain_llm_mimo"]
+    del scores["zero_shot_mimo"]
     f.write_text(json.dumps(scores))
-    with pytest.raises(build_report.MissingInput, match="plain_llm_mimo"):
+    with pytest.raises(build_report.MissingInput, match="zero_shot_mimo"):
         build_report.build_mode(
             build_report.report_modes.scope_creep, build_report.Published(bench)
         )
@@ -567,7 +567,7 @@ def test_results_diff_runs_on_two_versions():
         "Findings before (v1.0.0" in text
         and f"Findings after (v{new['version']}" in text
     )
-    assert "| plain_llm_mimo |" in text and " 0 dropped." in text
+    assert "| zero_shot_mimo |" in text and " 0 dropped." in text
 
 
 def test_allow_missing_marks_the_output_partial(tmp_path):

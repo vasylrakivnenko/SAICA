@@ -71,8 +71,8 @@ const siteUrl = (Astro.site?.origin ?? 'https://saica.ai').replace(/\/$/, '');
 <script is:inline define:vars={{ kit, siteUrl }}>
 (() => {
 const MODES = kit.modes;
-const CAT = { program: 'Free program', rule: 'Benchmark rule', hybrid: 'Hybrid tool', llm: 'LLM reviewer', skill: 'Skill', other: 'Other' };
-const TYPES = [['any', 'Best of any type'], ['program', 'Free programs only'], ['hybrid', 'Hybrid tools only'], ['llm', 'LLM reviewers only']];
+const CAT = { program: 'Free tool', rule: 'Baseline rule', hybrid: 'LLM-based tool', llm: 'LLM, zero-shot', skill: 'Prompt', other: 'Other' };
+const TYPES = [['any', 'Best of any type'], ['program', 'Free tools only'], ['hybrid', 'LLM-based tools only'], ['llm', 'Zero-shot LLMs only']];
 const LABELS = kit.labels || {};
 const pct = (x) => Math.round(x * 100) + '%';
 const money = (c) => (c === 0 ? 'free' : '$' + c.toFixed(2));
@@ -152,7 +152,8 @@ document.getElementById('kb-pairs-note').textContent = anyPair
 // ---------- table ----------
 const nm = (r) => r.short || r.tool;
 const PILL = { program: ['free', 'kb-pill-free'], hybrid: ['hybrid', 'kb-pill-hybrid'], llm: ['LLM', 'kb-pill-llm'] };
-const kstars = (n) => (n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n || 0));
+// same format as site/src/lib/data.ts starsShort ("12k ★ Stars")
+const kstars = (n) => (n >= 10000 ? Math.round(n / 1000) + 'k' : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n || 0)) + ' ★ Stars';
 const interval = (r) => (r.j_ci && r.j_ci[0] != null ? `${pct(r.j_ci[0])} to ${pct(r.j_ci[1])}` : 'no interval');
 const samples = (r) => (r.n_pos != null ? `${r.n_pos} + ${r.n_neg}` : '');
 function toolCell(r) {
@@ -192,14 +193,14 @@ function render() {
         el('td', { class: 'num', text: pct(x.tpr) }), el('td', { class: 'num', text: pct(x.fpr) }),
         el('td', { class: 'num', text: (parts.some((r) => r.estimated) ? '~' : '') + money(k) })));
     } else if (c.kind === 'stars') {
-      const top = (c.tools.length ? c.tools : c.records).slice(0, 2).map((t) => `${t.name} ★${kstars(t.stars)}`).join(', ');
+      const top = (c.tools.length ? c.tools : c.records).slice(0, 2).map((t) => `${t.name} ${kstars(t.stars)}`).join(', ');
       gaps.push([link, 'not benchmarked', top ? `most-starred: ${top}` : '']);
     } else if (c.kind === 'unreliable') {
       gaps.push([link, m.tier_label || 'no check above the floor', `highest measured: ${best(c.top)}`]);
     } else if (c.kind === 'weak') {
       gaps.push([link, `best fit is below J ${pct(kit.floor)} (${best(c.best)})`, `best overall: ${best(c.top)}`]);
     } else {
-      const KIND = { program: 'free program', hybrid: 'hybrid tool', llm: 'LLM reviewer' };
+      const KIND = { program: 'free tool', hybrid: 'LLM-based tool', llm: 'zero-shot LLM' };
       const anyOfKind = state.type !== 'any' && m.rows.some((r) => r.recommendable && r.ranked !== false && r.category === state.type);
       const why = state.type !== 'any' && !anyOfKind ? `no ${KIND[state.type]} measured` : 'nothing measured fits these limits';
       gaps.push([link, why, `best overall: ${best(c.top)}`]);

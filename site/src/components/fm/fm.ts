@@ -476,7 +476,7 @@ export function faqFor(fm: FailureMode): QA[] {
 export { benchId };
 
 // ---------- classic layout of the failure-mode pages ----------
-// Three cards (best overall, best free option, best hybrid tool), one table of all results and a tier label per
+// Three cards (best overall, best free option, best LLM-based tool), one table of all results and a tier label per
 // mode, as on the pages before results v2. Numbers and names come from the results file through bench.ts.
 
 export { FLOOR, pct, int };
@@ -488,10 +488,10 @@ export const money = (c: number) => (c === 0 ? 'free' : usd(c));
 
 export type Cat = 'program' | 'hybrid' | 'llm' | 'rule';
 export const CAT_LABEL: Record<Cat, string> = {
-  program: 'Free program',
-  hybrid: 'Hybrid tool',
-  llm: 'LLM reviewer',
-  rule: 'Simple rule',
+  program: 'Free tool',
+  hybrid: 'LLM-based tool',
+  llm: 'LLM, zero-shot',
+  rule: 'Baseline rule',
 };
 const TYPE_CAT: Record<string, Cat> = {
   deterministic: 'program',
@@ -501,7 +501,7 @@ const TYPE_CAT: Record<string, Cat> = {
   baseline_model: 'llm',
   baseline_rule: 'rule',
 };
-/** "free program", "LLM reviewer": the category label for use mid-sentence. */
+/** "free tool", "LLM-based tool": the category label for use mid-sentence. */
 export const catLower = (c: Cat) => CAT_LABEL[c].replace(/^([A-Z])(?=[a-z])/, (x) => x.toLowerCase());
 
 export interface MRow {
@@ -526,6 +526,13 @@ export interface MRow {
   unreadable: number;
   kgId: string | null;
   costNote: string;
+  /** Model rows: thinking setting ("medium", "on", "off", "none"); null for tools and rules. */
+  thinking: string | null;
+  thinkingNote: string | null;
+  /** GitHub stars and repository of a catalog tool, shown as a tag after its name. */
+  stars: number | null;
+  starsAt: string | null;
+  repo: string | null;
 }
 
 export interface Measured {
@@ -572,6 +579,11 @@ function toRow(r: Row): MRow {
     unreadable: r.unreadable ?? 0,
     kgId: r.kg_id ?? null,
     costNote: r.cost_note ?? '',
+    thinking: r.thinking ?? null,
+    thinkingNote: r.thinking_note ?? null,
+    stars: typeof r.stars === 'number' ? r.stars : null,
+    starsAt: r.stars_updated_at ?? null,
+    repo: r.repository_url ?? null,
   };
 }
 
@@ -596,7 +608,7 @@ function toMeasured(s: ClassicSummary): Measured {
     best: toRow(s.best),
     winner: Boolean(m.winner),
     tied: m.top_group?.length ?? 1,
-    // a free program inside its design scope, else the best simple rule we wrote for the benchmark
+    // a free tool inside its design scope, else the best baseline rule we wrote for the benchmark
     bestFree: s.free ? toRow(s.free) : (rows.find((r) => r.cat === 'rule') ?? null),
     bestHybrid: top((r) => r.cat === 'hybrid'),
     bestLlm: top((r) => r.cat === 'llm'),

@@ -482,10 +482,11 @@ export const FACET_LABELS = {
   } as Record<string, string>,
   // How the supervising check itself is carried out (schema: Tool.implementation).
   implementation: {
-    deterministic: 'Program',
-    llm_based: 'AI-based',
+    deterministic: 'Free tool',
+    deterministic_paid: 'Paid tool', // a deterministic tool with a proprietary licence (see implementationKey)
+    llm_based: 'LLM-based tool',
     hybrid: 'Hybrid',
-    prompt_artifact: 'Prompt artifact',
+    prompt_artifact: 'Prompt',
   } as Record<string, string>,
 };
 
@@ -496,6 +497,13 @@ export const IMPLEMENTATION_NOTE: Record<string, string> = {
   hybrid: 'a program at the core, with model-based checks shipped alongside',
   prompt_artifact: 'not a program: skills, rules or docs the agent reads',
 };
+
+/** Implementation facet value for display: deterministic tools under a proprietary licence are shown as paid. */
+export function implementationKey(t: { implementation?: string | null; license?: string | null }): string {
+  return t.implementation === 'deterministic' && (t.license ?? '').toLowerCase() === 'proprietary'
+    ? 'deterministic_paid'
+    : (t.implementation ?? '');
+}
 
 export function facetLabel(facet: keyof typeof FACET_LABELS, value: string): string {
   return FACET_LABELS[facet]?.[value] ?? value;
@@ -510,4 +518,11 @@ export function paperLabel(id: string): string {
   if (!p) return id;
   const firstAuthor = p.authors[0] ?? 'Anon.';
   return `${firstAuthor} (${p.year}) — ${p.title}`;
+}
+
+/** GitHub stars as the short tag shown after a tool's name on every page: "870 ★ Stars", "1.2k ★ Stars", "57k ★ Stars".
+ * The leaderboard's inline script (pages/index.astro) repeats this formula; keep the two the same. */
+export function starsShort(n: number): string {
+  const k = n >= 10000 ? `${Math.round(n / 1000)}k` : n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k` : String(n);
+  return `${k} ★ Stars`;
 }

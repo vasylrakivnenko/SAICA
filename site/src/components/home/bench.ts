@@ -47,6 +47,10 @@ export interface Row {
   type: string;
   /** model | catalog_tool | uncatalogued_tool | baseline_rule | shortcut_baseline (labels: kind_label). */
   kind: string;
+  /** Model rows: "medium" | "low" | "on" | "off" | "none" (meanings: thinking_label); null for every other row. */
+  thinking?: string | null;
+  /** How a model row's default thinking level was established (measured or documented); shown as its tooltip. */
+  thinking_note?: string | null;
   /** "own check" | "our rubric" | null. */
   check: string | null;
   /** "in the catalog" | "benchmarked, not in the catalog" | null. */
@@ -253,6 +257,7 @@ interface Results {
   cheap_cost1k: number;
   type_label: Record<string, string>;
   kind_label: Record<string, string>;
+  thinking_label?: Record<string, string>;
   method: Record<string, string> & { units?: unknown };
   threats: Threat[];
   modes: Mode[];
@@ -293,6 +298,8 @@ export const TIERS = R.tiers;
 export const PREVALENCES: number[] = R.prevalences;
 export const TYPE_LABEL: Record<string, string> = R.type_label;
 export const KIND_LABEL: Record<string, string> = R.kind_label;
+/** What each value of a model row's "thinking" means (shown as a tooltip on the Thinking column). */
+export const THINKING_LABEL: Record<string, string> = R.thinking_label ?? {};
 /** Ready sentences about the method: setting, metric, unreadable, intervals, paired, best, tiers, cost, cheap. */
 export const METHOD = R.method as Record<string, string>;
 export const THREATS: Threat[] = R.threats ?? [];
@@ -421,7 +428,7 @@ export const RAN = {
   ),
   catalogTools: distinct(allRows.filter((r) => r.kind === 'catalog_tool').map((r) => r.kg_id ?? r.short)),
   baselines: distinct(allRows.filter(isBaseline).map((r) => r.key)),
-  /** Simple rules written for the benchmark (shortcut baselines not counted). */
+  /** Baseline rules written for the benchmark (shortcut baselines not counted). */
   rules: distinct(allRows.filter((r) => r.kind === 'baseline_rule').map((r) => r.key)),
 };
 export const TOTAL_SAMPLES: number = COUNTS.samples ?? R.modes.reduce((a, m) => a + samplesOf(m), 0);
@@ -455,7 +462,7 @@ export interface ModeSummary {
   rows: Row[];
   /** The best ranked row (mode.best_reviewer). Name it only through bestLabel(): it may be one of a tied group. */
   best: RowRef;
-  /** Best free catalog program that ran its own check inside its design scope, or null. */
+  /** Best free catalog tool that ran its own check inside its design scope, or null. */
   free: RowRef | null;
   samples: number;
 }
@@ -485,7 +492,7 @@ export { andList, int, interval, money, num, pct, plural, signedPct } from '../.
 
 const OVR = R.overview as unknown as {
   modes: Array<{ id: string; name: string }>;
-  rows: Array<OverviewRow & { tool: string; type: string; kind: string | null; avg: number; n_modes: number; all_modes?: boolean }>;
+  rows: Array<OverviewRow & { tool: string; type: string; kind: string | null; thinking?: string | null; thinking_note?: string | null; avg: number; n_modes: number; all_modes?: boolean }>;
   best: Record<string, { j: number; tool: string; short: string; type: string; key: string; winner: boolean; below_floor: boolean; top_group: string[] }>;
   wrapper_comparisons?: Array<{ verdict: string; judge_model?: string }>;
 };
@@ -494,12 +501,12 @@ const OVR = R.overview as unknown as {
 export const cost1k = (r: { cost1k: number }, _m?: Mode): number => r.cost1k;
 export const costLabel = (r: { cost1k: number; cost_estimated?: boolean }, _m?: Mode): string => money(r.cost1k, Boolean(r.cost_estimated));
 export const isFree = (r: { cost1k: number }): boolean => r.cost1k === 0;
-/** A supervision tool (not a plain zero-shot model, not a rule). */
+/** A supervision tool (not a zero-shot LLM, not a rule). */
 export const isTool = (r: { kind: string }): boolean => r.kind === 'catalog_tool' || r.kind === 'uncatalogued_tool';
 export const toolHref = rowHref;
 export const shortName = (_m: Mode, r: { short?: string; tool: string }): string =>
   r.short ?? r.tool.replace(', zero-shot', '').split(' (')[0].split(':')[0];
-/** Rows a mode's table lists: every reviewer and simple rule, highest J first. Shortcut baselines are not listed;
+/** Rows a mode's table lists: every reviewer and baseline rule, highest J first. Shortcut baselines are not listed;
  *  the table names the top one in a line below it. */
 export const listedRows = (m: Mode): Row[] => m.rows.filter((r) => r.kind !== 'shortcut_baseline').sort((a, b) => b.j - a.j);
 /** Rows with fewer than 95% readable answers in one class (marked with a dagger where they are shown). */
@@ -508,7 +515,7 @@ export const INCOMPLETE_ROWS: number = R.modes.reduce((a, m) => a + m.rows.filte
 export interface ClassicSummary extends Omit<ModeSummary, 'best' | 'free'> {
   /** The highest-J ranked row (one of a tied group unless m.winner is set). */
   best: Row;
-  /** Best free catalog program inside its design scope, or null. */
+  /** Best free catalog tool inside its design scope, or null. */
   free: Row | null;
   /** Every listed row, highest J first. */
   listed: Row[];
@@ -575,12 +582,12 @@ function classicFindings(): Array<[string, string]> {
         : ` Reviewers at J ${pct(FLOOR, 0)} or more: ${andList(real.map((s, k) => `${over[k]} of ${ranked[k]} on ${s.m.name}`))}. The other sets have planted or model-written failures.`,
     ]);
   }
-  // 4. free programs
+  // 4. free tools
   const free = CLASSIC.filter((s) => s.free && s.free.j >= 0.5);
   if (free.length)
     out.push([
-      `Free programs pay off where the failure is a checkable fact: ${free.map((s) => `${s.free!.short} on ${s.m.name} (${jr(s.free!.j)})`).join('; ')}.`,
-      ' In the other modes no free program we ran inside its design scope reaches J 50%.',
+      `Free tools pay off where the failure is a checkable fact: ${free.map((s) => `${s.free!.short} on ${s.m.name} (${jr(s.free!.j)})`).join('; ')}.`,
+      ' In the other modes no free tool we ran inside its design scope reaches J 50%.',
     ]);
   // 5. packaged tools against the same model used zero-shot
   const wc = OVR.wrapper_comparisons ?? [];
@@ -617,7 +624,7 @@ function classicCaveats(): string[] {
     );
   }
   out.push(
-    'Same prompt style for every model, temperature 0 (gpt-6-luna: its default), one run each. “Tied” means the 95% interval of the difference from the leader includes 0. Simple rules are shown for reference and are never named best.',
+    'Same prompt style for every model, temperature 0 (gpt-6-luna: its default), one run each. “Tied” means the 95% interval of the difference from the leader includes 0. Baseline rules are shown for reference and are never named best.',
   );
   return out;
 }
@@ -626,14 +633,16 @@ const bestJ = (id: string): number => OVR.best[id]?.j ?? -1;
 /** The Overview tab: reviewer x mode grid, modes from the best caught to the least. */
 export const OVERVIEW = {
   modes: [...OVR.modes].sort((a, b) => bestJ(b.id) - bestJ(a.id)).map(({ id, name }) => ({ id, name })),
-  // only what the grid and the chart print; the average is the mean of the row's cells
-  rows: OVR.rows.filter((r) => r.kind !== 'shortcut_baseline').map((r) => {
+  // only what the grid and the chart print; the average is the mean of the row's cells; rows by average, highest first
+  // language models only (type baseline_model, label "LLM, zero-shot"). Tools cover one or a few modes, so their
+  // averages are not comparable with the models'; they stay in the per-mode tabs. Baseline rules are not reviewers.
+  rows: OVR.rows.filter((r) => r.type === 'baseline_model').map((r) => {
     const cells = Object.fromEntries(
       Object.entries(r.cells).map(([id, c]) => [id, { j: c.j, tool: c.tool, short: c.short, fa: c.fa, cost1k: c.cost1k }]),
     );
     const js = Object.values(cells).map((c) => c.j);
-    return { tool: r.tool, type: r.type, cells, avg: js.reduce((a, b) => a + b, 0) / js.length, n_modes: js.length };
-  }),
+    return { tool: r.tool, type: r.type, thinking: r.thinking ?? null, thinking_note: r.thinking_note ?? null, cells, avg: js.reduce((a, b) => a + b, 0) / js.length, n_modes: js.length };
+  }).sort((a, b) => b.avg - a.avg),
   best: Object.fromEntries(
     Object.entries(OVR.best).map(([id, b]) => [id, { j: b.j, tool: b.tool, short: b.short, type: b.type, winner: b.winner, top_group: b.top_group }]),
   ),

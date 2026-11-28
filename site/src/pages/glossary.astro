@@ -186,7 +186,7 @@ const metrics: Term[] = [
   },
   {
     id: 'free-program',
-    name: `${TYPE_LABEL.deterministic ?? 'Free program'}`,
+    name: `${TYPE_LABEL.deterministic ?? 'Free tool'}`,
     def: `A deterministic tool that needs no language model, such as a type checker, linter or security scanner. It costs nothing to run and gives the same answer every time.${programs ? ` Run on SAICA-Bench: ${programs}.` : ''}`,
   },
   {
@@ -196,7 +196,7 @@ const metrics: Term[] = [
   },
   {
     id: 'llm-reviewer',
-    name: `${KIND_LABEL.model ?? 'Zero-shot model'}`,
+    name: `${KIND_LABEL.model ?? 'LLM, zero-shot'}`,
     def: `A language model given the sample and one fixed prompt per mode that names the failure to look for. ${METHOD.setting}`,
   },
   {

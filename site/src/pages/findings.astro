@@ -23,12 +23,12 @@ const description =
   (hardNames.length ? ` ${andList(hardNames).replace(/^./, (c) => c.toUpperCase())} remain unsolved.` : '');
 
 const KIND: Record<string, string> = {
-  baseline_model: 'a zero-shot model', baseline_rule: 'a simple rule', deterministic: 'a free program',
-  llm_based: 'an AI-based tool', hybrid: 'a hybrid tool', prompt_artifact: 'a skill',
+  baseline_model: 'a zero-shot model', baseline_rule: 'a baseline rule', deterministic: 'a free tool',
+  llm_based: 'an LLM-based tool', hybrid: 'a hybrid tool', prompt_artifact: 'a prompt',
 };
 const same = (a: Row | null, b: Row | null) => !!a && !!b && a.key === b.key;
 const toolList = (s: ModeSummary) => s.tools.map((r) => `${shortName(s.m, r)} (J ${pct(r.j)})`);
-/** Name for running text: simple rules get an article ("a stub rule"). */
+/** Name for running text: baseline rules get an article ("a stub rule"). */
 const said = (s: ModeSummary, r: Row) => { const x = shortName(s.m, r); return r.type === 'baseline_rule' && !/^an? /.test(x) ? 'a ' + x : x; };
 
 const jsonld = [
@@ -64,13 +64,13 @@ const jsonld = [
       vulnerabilities into working code, or report a task as done when it isn't. SAICA-Bench asks whether the tools
       used to supervise them catch those failures. We ran {COUNTS.models} language models, {COUNTS.tools} supervision
       tools (type checkers, linters, security scanners, AI code reviewers and evaluation frameworks) and {COUNTS.rules}
-      simple rules on {n(TOTAL_SAMPLES)} labelled samples across {SUMMARIES.length} failure modes, and scored every
+      baseline rules on {n(TOTAL_SAMPLES)} labelled samples across {SUMMARIES.length} failure modes, and scored every
       verdict against the labels.
     </p>
     <p class="fd-p">
       <strong>The short answer: on planted and model-written failures mostly yes, and cheaply; on real agent output not yet.</strong> In {solved.length} of
       {SUMMARIES.length} modes the best reviewer reaches J {solvedMin}% or more, for at most
-      {'$' + solvedMaxCost.toFixed(2)} per 1,000 reviews. Free programs are competitive where the failure is a
+      {'$' + solvedMaxCost.toFixed(2)} per 1,000 reviews. Free tools are competitive where the failure is a
       checkable fact. In {andList(HARD.map((s) => s.m.name.toLowerCase()))}, nothing we ran reaches J {pct(FLOOR, 0)}.
     </p>
     <p class="fd-p fd-fine">
@@ -183,7 +183,7 @@ const jsonld = [
       if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or
       expert review, or from matched pairs that differ only in the failure. Every tool reviews the samples of a mode
       without seeing the labels; every model gets the same fixed prompt, temperature 0 and one run. Cost is what the run
-      cost per 1,000 reviews: API price, GPU time for self-hosted models, $0 for free programs.
+      cost per 1,000 reviews: API price, GPU time for self-hosted models, $0 for free tools.
     </p>
     <p class="fd-p">
       Source datasets: {SOURCES.map((src, i) => <>{i > 0 && (i === SOURCES.length - 1 ? ' and ' : ', ')}<a href={src.url} rel="noopener">{src.name}</a></>)}.

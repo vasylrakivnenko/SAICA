@@ -8,6 +8,8 @@ import results from '../../public/bench/results.json';
 import { CLASSIC as SUMMARIES, STAR_MODES, TOTAL_SAMPLES, SOURCES, GENERATED, AUTHOR, andList } from '../components/home/bench';
 import { abs, fmUrl, breadcrumbs } from '../lib/seo';
 const modes = results.modes;
+// Setup sentences every mode carries (how the Claude and Cohere models were called): shown once, not in each card.
+const sharedSetup = (modes[0]?.setup ?? []).filter((s: string) => modes.every((m) => m.setup.includes(s)));
 const best = Object.fromEntries(SUMMARIES.map((s) => [s.m.id, s.best.j]));
 const names = SUMMARIES.map((s) => s.m.name.toLowerCase());
 
@@ -24,8 +26,8 @@ const dataset = {
   description:
     `SAICA-Bench measures how well supervision tools and language models catch the typical failures of AI coding agents. ` +
     `It has ${TOTAL_SAMPLES.toLocaleString('en-US')} labelled samples (patches, functions and agent sessions, each bad or clean) across ` +
-    `${SUMMARIES.length} failure modes: ${andList(names)}. Free programs, AI code reviewers, evaluation frameworks and plain ` +
-    `language models review the same samples without seeing the labels; each tool is reported with its true positive rate, ` +
+    `${SUMMARIES.length} failure modes: ${andList(names)}. Free tools, AI code reviewers, evaluation frameworks and zero-shot ` +
+    `LLMs review the same samples without seeing the labels; each tool is reported with its true positive rate, ` +
     `false positive rate, Youden's J (TPR − FPR) and cost per 1,000 reviews.`,
   url: abs('/benchmark/'),
   license: 'https://creativecommons.org/licenses/by/4.0/',
@@ -44,7 +46,7 @@ const dataset = {
     { '@type': 'PropertyValue', name: 'TPR', alternateName: 'True positive rate', description: 'Share of bad samples (containing the failure) that the tool flags.' },
     { '@type': 'PropertyValue', name: 'FPR', alternateName: 'False positive rate', description: 'Share of clean samples that the tool flags.' },
     { '@type': 'PropertyValue', name: 'J', alternateName: "Youden's J", description: 'J = TPR − FPR. 0% is chance, 100% flags every bad sample and no clean one.' },
-    { '@type': 'PropertyValue', name: 'Cost per 1,000 reviews', unitText: 'USD', description: 'API price, GPU time for self-hosted models, $0 for free programs.' },
+    { '@type': 'PropertyValue', name: 'Cost per 1,000 reviews', unitText: 'USD', description: 'API price, GPU time for self-hosted models, $0 for free tools.' },
   ],
   measurementTechnique:
     'Each tool reviews every sample of a failure mode once, without seeing its label (same prompt or configuration for every sample, temperature 0 for models); its verdicts are compared with labels from public datasets confirmed by execution or expert review, or from matched pairs that differ only in the failure.',
@@ -59,9 +61,16 @@ const jsonld = [dataset, breadcrumbs([['SAICA-Bench', '/'], ['Benchmark', '/benc
 
   <h2 class="mt-6">Overview</h2>
   <p class="mt-2 max-w-4xl">
-    SAICA-Bench measures how well supervision tools and LLMs catch the typical failures of AI coding agents. Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or expert review, or from matched pairs we build in which the two versions differ only in the failure. Every tool reviews the same samples without seeing the labels: free programs such as type checkers and linters, hybrid tools that wrap a model (PR-Agent, promptfoo, DeepEval), and plain zero-shot language models with one fixed prompt per mode. Each verdict is compared with the label: the true positive rate (TPR) is the share of bad samples a tool flags, the false positive rate (FPR) the share of clean samples it flags, and the headline score is <strong>J = TPR − FPR</strong>, reported with the cost per 1,000 reviews.
+    SAICA-Bench measures how well supervision tools and LLMs catch the typical failures of AI coding agents. Each sample is a task plus what an agent produced for it (a patch, a function or a whole session), labelled bad if it contains the failure and clean if it does not. Labels come from public datasets confirmed by execution or expert review, or from matched pairs we build in which the two versions differ only in the failure. Every tool reviews the same samples without seeing the labels: free tools such as type checkers and linters, LLM-based tools that wrap a model (PR-Agent, promptfoo, DeepEval), and zero-shot LLMs with one fixed prompt per mode. Each verdict is compared with the label: the true positive rate (TPR) is the share of bad samples a tool flags, the false positive rate (FPR) the share of clean samples it flags, and the headline score is <strong>J = TPR − FPR</strong>, reported with the cost per 1,000 reviews.
   </p>
   <BenchSchema />
+
+  {sharedSetup.length > 0 && (
+    <>
+      <h2 class="mt-10">Setup common to all modes</h2>
+      <ul class="mt-2 max-w-4xl list-disc pl-5 text-sm leading-6">{sharedSetup.map((s) => <li>{s}</li>)}</ul>
+    </>
+  )}
 
   <h2 class="mt-10">Failure modes</h2>
 
@@ -75,7 +84,7 @@ const jsonld = [dataset, breadcrumbs([['SAICA-Bench', '/'], ['Benchmark', '/benc
         <details class="mt-3">
           <summary class="font-sans text-sm cursor-pointer">Setup and caveats</summary>
           <ul class="mt-2 list-disc pl-5 text-sm leading-6">
-            {m.setup.map((s) => <li>{s}</li>)}
+            {m.setup.filter((s) => !sharedSetup.includes(s)).map((s) => <li>{s}</li>)}
             {m.caveats.map((s) => <li>{s}</li>)}
           </ul>
         </details>

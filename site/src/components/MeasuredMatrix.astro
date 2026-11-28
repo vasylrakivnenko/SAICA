@@ -33,7 +33,7 @@ const matrix = kit.matrix;
 <script is:inline define:vars={{ matrix }}>
 (() => {
 const BLUE = '#1f3a93';
-const CAT = { program: 'Free program', hybrid: 'Hybrid tool', llm: 'LLM reviewer' };
+const CAT = { program: 'Free tool', hybrid: 'LLM-based tool', llm: 'LLM, zero-shot' };
 const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) { if (k === 'text') e.textContent = v; else if (k === 'class') e.className = v; else e.setAttribute(k, v); }
   kids.flat(Infinity).forEach((k) => k != null && e.append(k)); return e; };
