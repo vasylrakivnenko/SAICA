@@ -480,7 +480,7 @@ button reads it), or:
   author       = {Rakivnenko, Vasyl},
   year         = {2026},
   howpublished = {\url{https://saica.ai}},
-  note         = {SAICA-Bench results v2.0.0. Code and data: \url{https://github.com/vasylrakivnenko/SAICA}}
+  note         = {SAICA-Bench results v3.0.0. Code and data: \url{https://github.com/vasylrakivnenko/SAICA}}
 }
 ```
 

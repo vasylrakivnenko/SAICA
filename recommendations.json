@@ -299,7 +299,7 @@
       "semgrep",
       "uqlm"
     ],
-    "results_generated": "2026-11-22",
+    "results_generated": "2026-11-28",
     "source": "site/public/bench/results.json",
     "unmapped_modes": []
   },

@@ -288,6 +288,6 @@ Stable across projects. Distilled from this repo's own `CLAUDE.md` plus general 
 ## Provenance
 
 - Generated from KG version 2026.11 (manifest of 2026-11-22) by `validator/generate_skills.py`.
-- Measured J values: SAICA-Bench results of 2026-11-22; a tool is not listed for a mode where it measured below J 25%.
+- Measured J values: SAICA-Bench results of 2026-11-28; a tool is not listed for a mode where it measured below J 25%.
 - Priorities: `data/failure_mode_priorities.yml` v1.
 - Re-run after `data/*` changes.

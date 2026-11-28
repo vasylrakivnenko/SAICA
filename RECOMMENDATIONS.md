@@ -7,7 +7,7 @@
 > For picks built from measured results only, use https://saica.ai/tool-coverage/.
 
 Pre-computed. Regenerate with `python -m validator.generate_recommendations`.
-Generated from KG version 2026.11 (manifest of 2026-11-22); benchmark results of 2026-11-22.
+Generated from KG version 2026.11 (manifest of 2026-11-22); benchmark results of 2026-11-28.
 
 ---
 
@@ -177,7 +177,7 @@ The three stacks:
 
 Per failure mode: tools with a measured J at or above the floor come first, highest J first. Then tools with a tag only, in the recommender's order: prevention and detection before correction and recovery, then tools whose rationale text names the mode, then stars.
 
-Measured results: `site/public/bench/results.json`, generated 2026-11-22; 11 catalogue tools have at least one measured row; floor J 25%.
+Measured results: `site/public/bench/results.json`, generated 2026-11-28; 11 catalogue tools have at least one measured row; floor J 25%.
 
 Weight per failure mode (likelihood × impact, descending):
 

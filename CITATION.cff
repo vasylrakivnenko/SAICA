@@ -21,8 +21,8 @@ abstract: >-
   taxonomies behind the benchmark. Code: Apache-2.0; annotations and
   results: CC-BY-4.0 (see LICENSE-DATA).
 type: software
-version: "2.0.0"
-date-released: "2026-11-22"
+version: "3.0.0"
+date-released: "2026-11-28"
 authors:
   - given-names: Vasyl
     family-names: Rakivnenko
