@@ -3,6 +3,7 @@
 // best overall / best free option / best LLM-based tool, the full results table (sorted by J), dataset, setup, caveats.
 import { toolUrl, leaderboardUrl } from '../../lib/seo.ts';
 import { starsShort } from '../../lib/data';
+import { logoSvg } from '../../lib/providers';
 import { THINKING_LABEL } from '../home/bench';
 import { CAT_LABEL, FLOOR, WELL, int, money, pct, pct0, proseName, type Measured, type MRow } from './fm.ts';
 
@@ -104,6 +105,7 @@ const barW = (j: number) => `${Math.round(Math.max(0, j) * 56)}px`;
           <tr class="border-b border-ink/10 align-top">
             <td class="py-1.5 pr-2 text-right text-ink-faint">{i + 1}</td>
             <td class="py-1.5 px-2">
+              {r.cat === 'llm' && <Fragment set:html={logoSvg(r.tool, 'plogo mr-1.5 inline-block align-[-2px] w-3.5 h-3.5 text-ink')} />}
               {r.kgId ? <a href={toolUrl(r.kgId)}>{r.tool}</a> : <span>{r.tool}</span>}
               {r.subset && <span class="text-ink-faint" title={`Rates on ${int(r.subset)} of ${int(m.n)} samples`}> †</span>}
               {r.stars != null && r.stars > 0 && (

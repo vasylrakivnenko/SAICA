@@ -3,8 +3,9 @@
 // bench/build_report.py from each failure mode's results. An Overview tab (results.overview: reviewer x mode
 // grid, quality-vs-cost chart, findings) and one tab per mode. The best-tool-per-mode table lives on /tools/.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { OVERVIEW as OV, MODES, CLASSIC as SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, THINKING_LABEL as OV_THINKING_LABEL, AUTHOR, FILE_ORDER, pct, money, toolPage } from '../components/home/bench';
+import { OVERVIEW as OV, MODES, CLASSIC as SUMMARIES, STAR_MODES, TYPE_LABEL, TYPE_VAR, THINKING_LABEL as OV_THINKING_LABEL, AUTHOR, FILE_ORDER, VERSION, GENERATED, GENERATED_LONG, pct, money, toolPage } from '../components/home/bench';
 import { SITE_NAME, abs, fmUrl } from '../lib/seo';
+import { logoSvg } from '../lib/providers';
 
 // SEO: the Overview tab (grid, legend, findings, caveats) is rendered here at build time,
 // so the page has its results in static HTML; the inline script below re-renders them identically and adds the rest.
@@ -43,6 +44,26 @@ const col = (t: string) => `var(${TYPE_VAR[t]})`;
 const cellTip = (name: string, c: { tool: string; j: number; fa: number; cost1k: number }) =>
   `${name} · ${c.tool}: J ${pct(c.j)}, FPR ${pct(c.fa)}, ` + (c.cost1k === 0 ? 'free' : `${money(c.cost1k)} per 1,000 reviews`);
 const ovTypes = [...new Set(OV.rows.map((r) => r.type))];
+
+// Model maker's logo before each language model's name (site/src/lib/providers.ts); the script gets the markup by name.
+const PLOGO: Record<string, string> = {};
+for (const n of [...OV.rows.map((r) => r.tool), ...MODES.flatMap((m) => m.rows.filter((r) => r.type === 'baseline_model').map((r) => r.tool))]) {
+  const s = logoSvg(n);
+  if (s) PLOGO[n] = s;
+}
+
+// One-sentence summary above the grid, from the data (models that ran on every mode, so the averages compare):
+// the three highest averages, and the models on the average-cost frontier (nothing cheaper has a higher average J).
+const nModes = OV.modes.length;
+const full = OV.rows.filter((r) => r.n_modes === nModes).map((r) => ({ ...r, c: Object.values(r.cells).reduce((a, x) => a + x.cost1k, 0) / nModes }));
+const top3 = full.slice(0, 3); // OV.rows is sorted by average, highest first
+// frontier models at or above the median average (the green area's rule), so a cheap model that rarely catches anything is not called good value
+const medAvg = (() => { const v = full.map((r) => r.avg).sort((a, b) => a - b), n = v.length; return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2; })();
+const ovFront = full.filter((r) => r.avg >= medAvg && !full.some((o) => o !== r && o.c <= r.c && o.avg > r.avg)).sort((a, b) => a.c - b.c);
+const SUMMARY = full.length >= 3 ? {
+  top: top3.map((r) => `${r.tool} (${Math.round(r.avg * 100)}%)`),
+  front: ovFront.map((r) => `${r.tool} ${Math.round(r.avg * 100)}% at ${money(r.c)}`),
+} : null;
 const tieTip = (b: { tool: string; j: number; winner: boolean; top_group: string[] }) =>
   `${b.tool}: J ${pct(b.j)}` + (b.winner ? '' : `. Cannot be told apart from: ${b.top_group.slice(1).join(', ')}`);
 
@@ -75,19 +96,22 @@ const results = {
     <p class="subtitle">Supervising AI Coding Agents Benchmark</p>
     <p class="tagline">Can Language Models reliably detect failures made by AI coding agents?</p>
     <p class="byline">Vasyl Rakivnenko, Stanford University</p>
+    <p class="stamp"><span class="badge">Results v{VERSION}</span> updated <time datetime={GENERATED}>{GENERATED_LONG}</time> · <a href="/bench/results.json" download>all results (JSON)</a></p>
     <p class="lead">How often each supervision tool flags a failure of an AI coding agent (<b>true positive rate</b>, TPR) and how often it flags clean work (<b>false positive rate</b>, FPR). Each entry reports <b>J = TPR − FPR</b> (0% = chance, 100% = perfect).</p>
 
     <div class="tabs" role="tablist" id="lb-tabs"></div>
 
     <section id="lb-ov">
       <p class="fine ov-intro">J for each language model, evaluated zero-shot on the failure modes. The bottom row names the highest-scoring reviewer in each mode, tools included; “tie of 4” means the top 4 cannot be told apart. Hover a cell for its false positive rate and cost; click a mode to open its tab.</p>
+      {SUMMARY && <p class="ov-sum"><b>Highest average J</b> over all {nModes} modes: {SUMMARY.top[0]} and {SUMMARY.top[1]}, followed by {SUMMARY.top[2]}. <b>Best value</b> (above the median, and nothing cheaper scores higher; cost per 1,000 reviews): {SUMMARY.front.join(' · ')}.</p>}
       <p class="fine ov-scope">Tools are not listed here. Linters, type checkers and review bots each target one or a few failure modes, so their averages would not be comparable with the models’. Their results are in the tab of each mode they cover.</p>
-      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Model</th><th class="think" data-tip="Whether the model thinks before it answers, and at what effort level">Thinking</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the model ran on (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i>{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td><td class="think" data-tip={r.thinking_note || (r.thinking ? THINKING_LABEL[r.thinking] : '')}>{thinkCell(r.thinking)}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td><td></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={tieTip(b)}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}{!b.winner && <span class="nm tie">{`tie of ${b.top_group.length}`}</span>}</td>; })}<td></td></tr></tbody></table></div>
+      <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Model</th><th class="think" data-tip="Whether the model thinks before it answers, and at what effort level">Thinking</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the model ran on (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i><Fragment set:html={PLOGO[r.tool] || ''} />{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td><td class="think" data-tip={r.thinking_note || (r.thinking ? THINKING_LABEL[r.thinking] : '')}>{thinkCell(r.thinking)}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td><td></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={tieTip(b)}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}{!b.winner && <span class="nm tie">{`tie of ${b.top_group.length}`}</span>}</td>; })}<td></td></tr></tbody></table></div>
       <div class="legend" id="lb-ov-legend">{ovTypes.map((t) => <span><i style={`background:${col(t)}`}></i>{TYPE_LABEL[t]}</span>)}<span>Darker cell = higher J · “·” = not run</span></div>
       <h2>Average quality vs average cost</h2>
-      <p class="fine">Each point is one model’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the model ran on only 3 of them.</p>
+      <p class="fine">Each point is one model’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the model ran on only 3 of them. The green area holds the models above the median average J and below the median average cost of those shown.</p>
       <div class="ov-modes" id="lb-ov-modes" role="group" aria-label="Failure modes included in the averages"></div>
       <div class="chart" id="lb-ov-chart"></div>
+      <div class="legend" id="lb-ov-chart-legend"></div>
       <h2>What the grid says</h2>
       <ul class="findings" id="lb-ov-findings">{OV.findings.map(([lead, rest]) => <li><b>{lead}</b>{rest}</li>)}</ul>
       <h2>Read before citing</h2>
@@ -133,7 +157,7 @@ const results = {
     <p class="fine" id="lb-ref"></p>
 
     <h2>Quality vs cost</h2>
-    <p class="fine">Up is better, left is cheaper. The dashed line is the Pareto frontier: nothing cheaper scores higher.</p>
+    <p class="fine">Up is better, left is cheaper. The dashed line is the Pareto frontier: nothing cheaper scores higher. The green area holds the reviewers above the median J and below the median cost of those shown.</p>
     <div class="chart" id="lb-chart"></div>
     <div class="legend" id="lb-legend"></div>
     </div>
@@ -142,7 +166,7 @@ const results = {
   </div>
 </BaseLayout>
 
-<script is:inline define:vars={{ results, FM_URL, TOOL_URL, OV_KG }}>
+<script is:inline define:vars={{ results, FM_URL, TOOL_URL, OV_KG, PLOGO, VERSION, GENERATED }}>
 const DATA = results.modes, TYPE_LABEL = results.type_label, THINKING_LABEL = results.thinking_label || {}, OV = results.overview, STAR = results.star_modes || [];
 const TYPE_VAR = {deterministic: '--t-free', llm_based: '--t-ai', hybrid: '--t-hybrid', prompt_artifact: '--t-skill', baseline_model: '--t-base', baseline_rule: '--t-rule'};
 const isBaseline = (r) => r.type === 'baseline_model' || r.type === 'baseline_rule';
@@ -160,6 +184,48 @@ const toolLink = (kgId, repo, text) => kgId && TOOL_URL[kgId] ? el('a', { href: 
 const starsShort = (n) => (n >= 10000 ? Math.round(n / 1000) + 'k' : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n)) + ' ★ Stars';
 const starsTag = (n, repo, asOf) => { if (!n) return null; const a = { class: 'stars', text: starsShort(n), 'data-tip': `${n.toLocaleString('en-US')} GitHub stars` + (asOf ? `, as of ${asOf}` : '') };
   return repo ? el('a', { ...a, href: repo, rel: 'noopener' }) : el('span', a); };
+// Model maker's logo (inline SVG built at build time from site/src/lib/providers.ts), before a language model's name
+const logo = (name) => { if (!PLOGO[name]) return null; const s = el('span', { class: 'plogo-w' }); s.innerHTML = PLOGO[name]; return s; };
+// Most attractive area of a quality-vs-cost chart: J at or above the median of the points shown and cost at or below
+// their median (left of the median cost, above the median J), as on artificialanalysis.ai. Needs 4 points or more.
+const median = (a) => { const v = [...a].sort((x, y) => x - y), n = v.length; return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2; };
+function bestArea(svg, js, costs, xOfCost, ys, M, freeW) {
+  if (js.length < 4) return;
+  const mc = median(costs), xr = mc === 0 ? M.l + freeW : Math.max(M.l + freeW, xOfCost(mc)), yb = ys(median(js));
+  svg.append(svgEl('rect', { class: 'best-area', x: M.l, y: M.t, width: Math.max(0, xr - M.l), height: Math.max(0, yb - M.t) }));
+}
+// "Download PNG": the chart as drawn (computed styles copied inline), with its title, legend and the results version.
+const PNG_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-dasharray', 'opacity', 'font-family', 'font-size', 'font-weight'];
+function exportPng(svg, title, legend, file) {
+  const vb = svg.viewBox.baseVal, clone = svg.cloneNode(true), src = svg.querySelectorAll('*'), dst = clone.querySelectorAll('*');
+  src.forEach((n, i) => { const cs = getComputedStyle(n); dst[i].setAttribute('style', PNG_PROPS.map((k) => `${k}:${cs.getPropertyValue(k)}`).join(';')); });
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); clone.setAttribute('width', vb.width); clone.setAttribute('height', vb.height);
+  const img = new Image(), url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }));
+  img.onload = () => {
+    const S = 2, pad = 20, font = 'ui-sans-serif, system-ui, sans-serif', W = vb.width + 2 * pad;
+    const ctx0 = document.createElement('canvas').getContext('2d'); ctx0.font = `12.5px ${font}`;
+    // legend items laid out in lines that fit the width
+    const items = legend ? [...legend.querySelectorAll('span')].map((sp) => ({ sp, text: sp.textContent.trim(), w: 22 + ctx0.measureText(sp.textContent.trim()).width + 16 })).filter((it) => it.text) : [];
+    const lines = [[]]; let lw = 0; items.forEach((it) => { if (lw + it.w > W - 2 * pad && lines[lines.length - 1].length) { lines.push([]); lw = 0; } lines[lines.length - 1].push(it); lw += it.w; });
+    const top = 40, legH = items.length ? lines.length * 20 + 8 : 0, H = top + vb.height + legH + 34;
+    const cv = document.createElement('canvas'); cv.width = W * S; cv.height = H * S; const ctx = cv.getContext('2d'); ctx.scale(S, S);
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#111418'; ctx.font = `600 16px ${font}`; ctx.fillText(title, pad, 26);
+    ctx.drawImage(img, pad, top, vb.width, vb.height);
+    let y = top + vb.height + 18; ctx.font = `12.5px ${font}`;
+    lines.forEach((ln) => { let x = pad; ln.forEach(({ sp, text, w }) => { const i = sp.querySelector('i'), cs = i && getComputedStyle(i);
+      if (cs && cs.borderTopStyle === 'dashed') { ctx.strokeStyle = cs.borderTopColor; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 18, y - 4); ctx.stroke(); ctx.setLineDash([]); }
+      else if (cs) { ctx.fillStyle = cs.backgroundColor; ctx.strokeStyle = cs.borderTopColor; if (parseFloat(cs.borderRadius) > 3) { ctx.beginPath(); ctx.arc(x + 6, y - 4, 5, 0, 7); ctx.fill(); } else { ctx.fillRect(x, y - 10, 16, 12); if (parseFloat(cs.borderTopWidth) > 0) ctx.strokeRect(x, y - 10, 16, 12); } }
+      ctx.fillStyle = '#4a5160'; ctx.fillText(text, x + 22, y); x += w; }); y += 20; });
+    ctx.fillStyle = '#8a919c'; ctx.font = `11.5px ${font}`; ctx.textAlign = 'right';
+    ctx.fillText(`saica.ai · SAICA-Bench results v${VERSION} (${GENERATED})`, W - pad, H - 12);
+    URL.revokeObjectURL(url);
+    cv.toBlob((b) => { const a = el('a', { href: URL.createObjectURL(b), download: file }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }, 'image/png');
+  };
+  img.src = url;
+}
+const dlButton = (box, title, legend, file) => { const b = el('button', { type: 'button', class: 'dl', text: '⤓ Download PNG', 'aria-label': `Download the chart as a PNG image` });
+  b.addEventListener('click', () => { const svg = box.querySelector('svg'); if (svg) exportPng(svg, title, legend, file); }); return b; };
 const thinkCell = (t, note) => el('td', { class: 'think', 'data-tip': note || (t ? THINKING_LABEL[t] || '' : ''), text: t || '—' });
 const fmLink = (m, sep) => FM_URL[m.id] ? [sep, el('a', { href: FM_URL[m.id], text: `About ${m.name.toLowerCase()} →` })] : [];
 const ALL_TYPES = Object.keys(TYPE_LABEL).filter((t) => DATA.some((m) => m.rows.some((r) => r.type === t)));
@@ -210,7 +276,7 @@ function renderTable(m) {
   const tb = document.querySelector('#lb-table tbody');
   tb.replaceChildren(...rows.map((r, i) => el('tr', { class: isBaseline(r) ? 'baseline' : '' },
     el('td', { class: 'num rank', text: String(i + 1) }),
-    el('td', { class: 'tname' }, toolLink(r.kg_id, r.repository_url, r.tool), starsTag(r.stars, r.repository_url, r.stars_updated_at)),
+    el('td', { class: 'tname' }, r.type === 'baseline_model' ? logo(r.tool) : null, toolLink(r.kg_id, r.repository_url, r.tool), starsTag(r.stars, r.repository_url, r.stars_updated_at)),
     el('td', {}, el('span', { class: 'pill', style: `color:${col(r.type)}`, text: TYPE_LABEL[r.type] })),
     thinkCell(r.thinking, r.thinking_note),
     el('td', { class: 'num j', 'data-tip': `95% interval ${pct(r.j_ci[0])} to ${pct(r.j_ci[1])}` + (r.incomplete ? `. † ${r.unreadable} of ${r.n_read} answers had no readable verdict and are left out` : '') }, el('span', { class: 'bar', style: `width:${Math.max(2, r.j * 56)}px` }), pct(r.j) + (r.incomplete ? ' †' : '')),
@@ -240,6 +306,7 @@ function renderChart(m) {
   const ys = (j) => M.t + (1 - (j - jmin) / (1 - jmin)) * (H - M.t - M.b);
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${m.name}: J versus cost per 1,000 reviews` });
   svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
+  bestArea(svg, rows.map((r) => r.j), rows.map(per1k), (v) => x0 + L(Math.max(v, xmin)) * (x1 - x0), ys, M, freeW);
   for (let j = Math.ceil(jmin * 10) / 10; j <= 1.0001; j += 0.1) { const y = ys(j);
     svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
     const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
@@ -254,7 +321,7 @@ function renderChart(m) {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 6 : 4.5, tabindex: 0, style: `fill:${col(r.type)};stroke:${onF ? 'var(--frontier)' : '#fff'};stroke-width:${onF ? 2 : 1.5};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), r.thinking ? ` · thinking ${r.thinking}` : '', el('br'), `J ${pct(r.j)} · TPR ${pct(r.catch)} · FPR ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost1k)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)})`);
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', {}, logo(r.tool), r.tool), r.thinking ? ` · thinking ${r.thinking}` : '', el('br'), `J ${pct(r.j)} · TPR ${pct(r.catch)} · FPR ${pct(r.fa)}`, el('br'), r.cost === 0 ? 'Free: $0' : `Cost: ${money(r.cost1k)} per 1,000 reviews`, el('br'), r.cost === 0 ? '' : `(our run: ${money(r.cost)})`);
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
     c.addEventListener('mouseleave', () => (tip.hidden = true)); c.addEventListener('blur', () => (tip.hidden = true));
@@ -264,8 +331,10 @@ function renderChart(m) {
   placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
   const types = [...new Set(rows.map((r) => r.type))];
-  document.getElementById('lb-legend').replaceChildren(...types.map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
-    el('span', {}, el('i', { class: 'fl' }), 'Pareto frontier'));
+  const lg = document.getElementById('lb-legend');
+  lg.replaceChildren(...types.map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
+    el('span', {}, el('i', { class: 'fl' }), 'Pareto frontier'), rows.length >= 4 ? el('span', {}, el('i', { class: 'qa' }), 'Above the median J, below the median cost') : null,
+    dlButton(box, `${m.name}: quality vs cost`, lg, `saica-bench-${m.id}-quality-vs-cost.png`));
 }
 
 function renderOverview() {
@@ -275,7 +344,7 @@ function renderOverview() {
     OV.modes.map((m) => el('th', { class: 'mcol' }, el('button', { type: 'button', class: 'mlink', text: m.name, 'data-id': m.id }))),
     el('th', { class: 'num', 'data-tip': 'Mean J over the modes the model ran on (number of modes in brackets)' }, 'Average')));
   const body = OV.rows.map((r) => el('tr', {},
-    el('td', { class: 'rname' }, el('i', { class: 'dot', style: `background:${col(r.type)}` }), OV_KG[r.tool] ? el('a', { href: TOOL_URL[OV_KG[r.tool]], text: r.tool }) : r.tool),
+    el('td', { class: 'rname' }, el('i', { class: 'dot', style: `background:${col(r.type)}` }), logo(r.tool), OV_KG[r.tool] ? el('a', { href: TOOL_URL[OV_KG[r.tool]], text: r.tool }) : r.tool),
     thinkCell(r.thinking, r.thinking_note),
     OV.modes.map((m) => { const c = r.cells[m.id];
       if (!c) return el('td', { class: 'na', 'data-tip': 'not run on this mode', text: '·' });
@@ -309,7 +378,7 @@ function renderOvChart() {
   const BLUE = '#1f3a93';
   const box = document.getElementById('lb-ov-chart'); box.replaceChildren();
   const sel = OV.modes.map((m) => m.id).filter((id) => ovSel.has(id));
-  if (!sel.length) { box.append(el('p', { class: 'fine', text: 'Check at least one failure mode to draw the chart.' })); return; }
+  if (!sel.length) { box.append(el('p', { class: 'fine', text: 'Check at least one failure mode to draw the chart.' })); document.getElementById('lb-ov-chart-legend').replaceChildren(); return; }
   const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
   const rows = OV.rows.map((r) => { const cs = sel.map((id) => r.cells[id]).filter(Boolean);
     return cs.length ? { ...r, j: mean(cs.map((c) => c.j)), c: mean(cs.map((c) => c.cost1k)), n: cs.length } : null; }).filter(Boolean);
@@ -326,6 +395,7 @@ function renderOvChart() {
   const shade = (j) => `color-mix(in srgb, ${BLUE} ${Math.round(Math.max(0, j) * 85)}%, #fff)`;
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Average J versus average cost per 1,000 reviews for each reviewer, with the Pareto frontier' });
   svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
+  bestArea(svg, rows.map((r) => r.j), rows.map((r) => r.c), (v) => x0 + L(Math.max(v, xmin)) * (x1 - x0), ys, M, freeW);
   for (let j = Math.ceil(jlo * 10) / 10; j <= jhi + 0.0001; j += 0.1) { const y = ys(j);
     svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
     const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
@@ -342,7 +412,7 @@ function renderOvChart() {
   for (const r of [...rows].sort((a, b) => b.j - a.j)) {
     const x = xs(r), y = ys(r.j), onF = front.includes(r);
     const c = svgEl('circle', { cx: x, cy: y, r: onF ? 7 : 5.5, tabindex: 0, style: `fill:${shade(r.j)};stroke:${BLUE};stroke-width:${onF ? 2.5 : 1.25};cursor:pointer` });
-    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', { text: r.tool }), r.thinking ? ` · thinking ${r.thinking}` : '', el('br'), `Average J ${pct(r.j)} over ${r.n} of the ${sel.length} checked mode${sel.length === 1 ? '' : 's'}`, el('br'),
+    const show = () => { tip.hidden = false; tip.replaceChildren(el('b', {}, logo(r.tool), r.tool), r.thinking ? ` · thinking ${r.thinking}` : '', el('br'), `Average J ${pct(r.j)} over ${r.n} of the ${sel.length} checked mode${sel.length === 1 ? '' : 's'}`, el('br'),
         r.c === 0 ? 'Free: $0' : `Average cost: ${money(r.c)} per 1,000 reviews`, el('br'), onF ? 'On the frontier' : '');
       const s = box.clientWidth / W; let left = x * s + 12; if (left + 230 > box.clientWidth) left = x * s - 242; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, y * s - 10) + 'px'; };
     c.addEventListener('mouseenter', show); c.addEventListener('focus', show);
@@ -352,6 +422,9 @@ function renderOvChart() {
   }
   placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
+  const lg = document.getElementById('lb-ov-chart-legend');
+  lg.replaceChildren(el('span', {}, el('i', { class: 'fl', style: `border-top-color:${BLUE}` }), 'Pareto frontier'), rows.length >= 4 ? el('span', {}, el('i', { class: 'qa' }), 'Above the median J, below the median cost') : null,
+    dlButton(box, `Average quality vs average cost (${sel.length} of ${OV.modes.length} failure modes)`, lg, 'saica-bench-overview-quality-vs-cost.png'));
 }
 
 function renderStar(m) {
@@ -472,12 +545,23 @@ syncTypes();
   .lb .chart .grid { stroke: rgb(17 20 24 / .08); }
   .lb .chart .axis { stroke: rgb(17 20 24 / .3); }
   .lb .chart .band { fill: #e4ebf7; }
+  .lb .chart .best-area { fill: #2f9e44; fill-opacity: .1; }
   .lb .chart .front { stroke: var(--frontier); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
   .lb .tip { position: absolute; pointer-events: none; background: #fff; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 6px 9px; font: 12.5px ui-sans-serif, system-ui, sans-serif; box-shadow: 0 6px 18px rgb(0 0 0 / .12); max-width: 230px; }
   .lb .tip b { display: block; }
   .lb .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font: 12.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; margin-top: .4rem; }
   .lb .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .lb .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .lb .legend i.qa { width: 16px; height: 12px; border-radius: 2px; background: rgb(47 158 68 / .14); border: 1px solid rgb(47 158 68 / .35); }
+  .lb .legend .dl { margin-left: auto; background: none; border: 1px solid rgb(17 20 24 / .15); border-radius: 6px; padding: 2px 9px; font: 12.5px ui-sans-serif, system-ui, sans-serif; color: #4a5160; cursor: pointer; }
+  .lb .legend .dl:hover, .lb .legend .dl:focus-visible { color: #1f3a93; border-color: #1f3a93; }
+  .lb .plogo-w { display: inline-flex; vertical-align: -2px; margin-right: 6px; color: #2b3038; }
+  .lb .plogo-w svg, .lb .plogo { width: 14px; height: 14px; flex: none; }
+  .lb td.rname > .plogo { vertical-align: -2px; margin-right: 6px; color: #2b3038; }
+  .lb .tip b .plogo-w { vertical-align: -2px; }
+  .lb .stamp { margin: .45rem 0 0; font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; color: #6b7180; }
+  .lb .stamp .badge { display: inline-block; font-weight: 600; color: #1f3a93; background: #e4ebf7; border-radius: 999px; padding: 1px 9px; margin-right: .35rem; }
+  .lb .ov-sum { font: 14.5px/1.55 ui-sans-serif, system-ui, sans-serif; color: #2b3038; margin: 0 0 .8rem; max-width: 92ch; }
   .lb .legend i.fl { width: 18px; height: 0; border-top: 2px dashed var(--frontier); border-radius: 0; }
   .lb .more { margin-top: 2rem; font: 14px ui-sans-serif, system-ui, sans-serif; }
   .lb .ov-intro { margin: 0 0 .8rem; }
