@@ -57,7 +57,7 @@ for (const n of [...OV.rows.map((r) => r.tool), ...MODES.flatMap((m) => m.rows.f
 const nModes = OV.modes.length;
 const full = OV.rows.filter((r) => r.n_modes === nModes).map((r) => ({ ...r, c: Object.values(r.cells).reduce((a, x) => a + x.cost1k, 0) / nModes }));
 const top3 = full.slice(0, 3); // OV.rows is sorted by average, highest first
-// frontier models at or above the median average (the green area's rule), so a cheap model that rarely catches anything is not called good value
+// frontier models at or above the median average, so a cheap model that rarely catches anything is not called good value
 const medAvg = (() => { const v = full.map((r) => r.avg).sort((a, b) => a - b), n = v.length; return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2; })();
 const ovFront = full.filter((r) => r.avg >= medAvg && !full.some((o) => o !== r && o.c <= r.c && o.avg > r.avg)).sort((a, b) => a.c - b.c);
 const SUMMARY = full.length >= 3 ? {
@@ -108,7 +108,7 @@ const results = {
       <div class="tbl-wrap"><table class="ov" id="lb-ov-table"><thead><tr><th>Model</th><th class="think" data-tip="Whether the model thinks before it answers, and at what effort level">Thinking</th>{OV.modes.map((m) => <th class="mcol"><button type="button" class="mlink" data-id={m.id}>{m.name}</button></th>)}<th class="num" data-tip="Mean J over the modes the model ran on (number of modes in brackets)">Average</th></tr></thead><tbody>{OV.rows.map((r) => <tr><td class="rname"><i class="dot" style={`background:${col(r.type)}`}></i><Fragment set:html={PLOGO[r.tool] || ''} />{OV_KG[r.tool] ? <a href={TOOL_URL[OV_KG[r.tool]]}>{r.tool}</a> : r.tool}</td><td class="think" data-tip={r.thinking_note || (r.thinking ? THINKING_LABEL[r.thinking] : '')}>{thinkCell(r.thinking)}</td>{OV.modes.map((m) => { const c = r.cells[m.id]; return c ? <td class={'cell' + (c.j < 0.05 ? ' low' : '')} style={`background:${fill(c.j)};${c.j > 0.55 ? 'color:#fff' : ''}`} data-tip={cellTip(m.name, c)}>{Math.round(c.j * 100) + '%'}</td> : <td class="na" data-tip="not run on this mode">·</td>; })}<td class="num avg">{Math.round(r.avg * 100) + '%'}<span class="nm">{` (${r.n_modes})`}</span></td></tr>)}<tr class="best"><td><b>Best in this mode</b></td><td></td>{OV.modes.map((m) => { const b = OV.best[m.id]; return <td class="cell" data-tip={tieTip(b)}><b>{Math.round(b.j * 100) + '%'}</b><br />{b.short || short(b.tool)}{!b.winner && <span class="nm tie">{`tie of ${b.top_group.length}`}</span>}</td>; })}<td></td></tr></tbody></table></div>
       <div class="legend" id="lb-ov-legend">{ovTypes.map((t) => <span><i style={`background:${col(t)}`}></i>{TYPE_LABEL[t]}</span>)}<span>Darker cell = higher J · “·” = not run</span></div>
       <h2>Average quality vs average cost</h2>
-      <p class="fine">Each point is one model’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the model ran on only 3 of them. The green area holds the models above the median average J and below the median average cost of those shown.</p>
+      <p class="fine">Each point is one model’s average J and cost over the checked modes (darker = higher J); the dashed line marks the best J at each price. “(3 of 7)” means the model ran on only 3 of them. The green area is the most attractive quadrant: the upper-left quarter of the chart, higher and cheaper.</p>
       <div class="ov-modes" id="lb-ov-modes" role="group" aria-label="Failure modes included in the averages"></div>
       <div class="chart" id="lb-ov-chart"></div>
       <div class="legend" id="lb-ov-chart-legend"></div>
@@ -157,7 +157,7 @@ const results = {
     <p class="fine" id="lb-ref"></p>
 
     <h2>Quality vs cost</h2>
-    <p class="fine">Up is better, left is cheaper. The dashed line is the Pareto frontier: nothing cheaper scores higher. The green area holds the reviewers above the median J and below the median cost of those shown.</p>
+    <p class="fine">Up is better, left is cheaper. The dashed line is the Pareto frontier: nothing cheaper scores higher. The green area is the most attractive quadrant: the upper-left quarter of the chart, higher and cheaper.</p>
     <div class="chart" id="lb-chart"></div>
     <div class="legend" id="lb-legend"></div>
     </div>
@@ -186,12 +186,9 @@ const starsTag = (n, repo, asOf) => { if (!n) return null; const a = { class: 's
   return repo ? el('a', { ...a, href: repo, rel: 'noopener' }) : el('span', a); };
 // Model maker's logo (inline SVG built at build time from site/src/lib/providers.ts), before a language model's name
 const logo = (name) => { if (!PLOGO[name]) return null; const s = el('span', { class: 'plogo-w' }); s.innerHTML = PLOGO[name]; return s; };
-// Most attractive area of a quality-vs-cost chart: J at or above the median of the points shown and cost at or below
-// their median (left of the median cost, above the median J), as on artificialanalysis.ai. Needs 4 points or more.
-const median = (a) => { const v = [...a].sort((x, y) => x - y), n = v.length; return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2; };
-function bestArea(svg, js, costs, xOfCost, ys, M, freeW) {
-  if (js.length < 4) return;
-  const mc = median(costs), xr = mc === 0 ? M.l + freeW : Math.max(M.l + freeW, xOfCost(mc)), yb = ys(median(js));
+// Most attractive quadrant of a quality-vs-cost chart, as on artificialanalysis.ai: the upper-left quarter of the plot
+// (left of the middle of the cost axis, above the middle of the J axis). A visual guide, not a statistical cut.
+function bestArea(svg, M, xr, yb) {
   svg.append(svgEl('rect', { class: 'best-area', x: M.l, y: M.t, width: Math.max(0, xr - M.l), height: Math.max(0, yb - M.t) }));
 }
 // "Download PNG": the chart as drawn (computed styles copied inline), with its title, legend and the results version.
@@ -306,7 +303,7 @@ function renderChart(m) {
   const ys = (j) => M.t + (1 - (j - jmin) / (1 - jmin)) * (H - M.t - M.b);
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${m.name}: J versus cost per 1,000 reviews` });
   svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
-  bestArea(svg, rows.map((r) => r.j), rows.map(per1k), (v) => x0 + L(Math.max(v, xmin)) * (x1 - x0), ys, M, freeW);
+  bestArea(svg, M, (M.l + x1) / 2, (M.t + H - M.b) / 2);
   for (let j = Math.ceil(jmin * 10) / 10; j <= 1.0001; j += 0.1) { const y = ys(j);
     svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
     const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
@@ -333,7 +330,7 @@ function renderChart(m) {
   const types = [...new Set(rows.map((r) => r.type))];
   const lg = document.getElementById('lb-legend');
   lg.replaceChildren(...types.map((t) => el('span', {}, el('i', { style: `background:${col(t)}` }), TYPE_LABEL[t])),
-    el('span', {}, el('i', { class: 'fl' }), 'Pareto frontier'), rows.length >= 4 ? el('span', {}, el('i', { class: 'qa' }), 'Above the median J, below the median cost') : null,
+    el('span', {}, el('i', { class: 'fl' }), 'Pareto frontier'), el('span', {}, el('i', { class: 'qa' }), 'Most attractive quadrant'),
     dlButton(box, `${m.name}: quality vs cost`, lg, `saica-bench-${m.id}-quality-vs-cost.png`));
 }
 
@@ -395,7 +392,7 @@ function renderOvChart() {
   const shade = (j) => `color-mix(in srgb, ${BLUE} ${Math.round(Math.max(0, j) * 85)}%, #fff)`;
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Average J versus average cost per 1,000 reviews for each reviewer, with the Pareto frontier' });
   svg.append(svgEl('rect', { class: 'band', x: M.l, y: M.t, width: freeW, height: H - M.t - M.b, rx: 4 }));
-  bestArea(svg, rows.map((r) => r.j), rows.map((r) => r.c), (v) => x0 + L(Math.max(v, xmin)) * (x1 - x0), ys, M, freeW);
+  bestArea(svg, M, (M.l + x1) / 2, (M.t + H - M.b) / 2);
   for (let j = Math.ceil(jlo * 10) / 10; j <= jhi + 0.0001; j += 0.1) { const y = ys(j);
     svg.append(svgEl('line', { class: 'grid', x1: M.l, x2: x1, y1: y, y2: y }));
     const t = svgEl('text', { x: M.l - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = Math.round(j * 100) + '%'; svg.append(t); }
@@ -423,7 +420,7 @@ function renderOvChart() {
   placeLabels(svg, items, frontierSegs(front.map((r) => [xs(r), ys(r.j)])), M.l, W, H - M.b); // M.l: keep labels off the tick labels
   box.append(svg, tip);
   const lg = document.getElementById('lb-ov-chart-legend');
-  lg.replaceChildren(el('span', {}, el('i', { class: 'fl', style: `border-top-color:${BLUE}` }), 'Pareto frontier'), rows.length >= 4 ? el('span', {}, el('i', { class: 'qa' }), 'Above the median J, below the median cost') : null,
+  lg.replaceChildren(el('span', {}, el('i', { class: 'fl', style: `border-top-color:${BLUE}` }), 'Pareto frontier'), el('span', {}, el('i', { class: 'qa' }), 'Most attractive quadrant'),
     dlButton(box, `Average quality vs average cost (${sel.length} of ${OV.modes.length} failure modes)`, lg, 'saica-bench-overview-quality-vs-cost.png'));
 }
 
